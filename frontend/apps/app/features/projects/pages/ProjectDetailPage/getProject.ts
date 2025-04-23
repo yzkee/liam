@@ -11,17 +11,19 @@ export async function getProject(projectId: string) {
         created_at,
         organization_id,
         updated_at,
-        project_repository_mappings(
-          github_repositories(
+        migrations(
+          id,
+          title,
+          migration_pull_request_mappings(
+            pull_request_id,
             github_pull_requests(
               id,
-              pull_number,
-              migrations(
-                id,
-                title
-              )
+              pull_number
             )
           )
+        ),
+        project_repository_mappings(
+          github_repositories(*)
         )
       `)
       .eq('id', projectId)
@@ -32,22 +34,18 @@ export async function getProject(projectId: string) {
       return null
     }
 
-    // Extract migrations from the nested structure
-    const migrations = project.project_repository_mappings.flatMap((mapping) =>
-      mapping.github_repositories.github_pull_requests
-        .filter((pr) => pr.migrations !== null)
-        .map((pr) => {
-          // Handle case where migration might be an array due to Supabase's return format
-          const migration = Array.isArray(pr.migrations)
-            ? pr.migrations[0]
-            : pr.migrations
-          return {
-            id: migration.id,
-            title: migration.title,
-            pullNumber: pr.pull_number,
-          }
-        }),
-    )
+    // Extract migrations from the new schema structure
+    const migrations = project.migrations.map((migration) => {
+      // Get the first pull request mapping if available
+      const mapping = migration.migration_pull_request_mappings?.[0]
+      const pullRequest = mapping?.github_pull_requests
+
+      return {
+        id: migration.id,
+        title: migration.title,
+        pullNumber: pullRequest?.pull_number || null,
+      }
+    })
 
     return {
       id: project.id,

@@ -1,7 +1,11 @@
 import { isTableNode } from '@/features/erd/utils'
+import { useCustomReactflow } from '@/features/reactflow/hooks'
 import { useVersion } from '@/providers'
+import { updateShowAllNodeMode, useUserEditingStore } from '@/stores'
 import {
   BookText,
+  Eye,
+  EyeClosed,
   GithubLogo,
   LiamLogoMark,
   Megaphone,
@@ -25,6 +29,8 @@ import { TableNameMenuButton } from './TableNameMenuButton'
 
 export const LeftPane = () => {
   const { version } = useVersion()
+  const { activeNodeIds, isShowAllNodes } = useUserEditingStore()
+  const { updateNode } = useCustomReactflow()
 
   const menuItemLinks = useMemo(
     (): MenuItemLinkProps[] => [
@@ -85,6 +91,24 @@ export const LeftPane = () => {
   const allCount = tableNodes.length
   const visibleCount = tableNodes.filter((node) => !node.hidden).length
 
+  const showOrHideAllNodes = () => {
+    updateShowAllNodeMode(!isShowAllNodes)
+    tableNodes.map((node) => {
+      updateNode(node.data.table.name, { hidden: isShowAllNodes })
+    })
+  }
+
+  const showSelectedTables = () => {
+    updateShowAllNodeMode(!isShowAllNodes)
+    tableNodes.map((node) => {
+      if (activeNodeIds.has(node.data.table.name)) {
+        updateNode(node.data.table.name, { hidden: false })
+      } else {
+        updateNode(node.data.table.name, { hidden: true })
+      }
+    })
+  }
+
   return (
     <Sidebar>
       <SidebarContent>
@@ -96,11 +120,26 @@ export const LeftPane = () => {
               <span className={styles.tableCountDivider}>/</span>
               {allCount}
             </span>
+            <span
+              onClick={showOrHideAllNodes}
+              onKeyDown={showOrHideAllNodes}
+              className={styles.textCursor}
+            >
+              {isShowAllNodes ? (
+                <EyeClosed className={styles.icon} />
+              ) : (
+                <Eye className={styles.icon} />
+              )}
+            </span>
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {tableNodes.map((node) => (
-                <TableNameMenuButton key={node.id} node={node} />
+                <TableNameMenuButton
+                  key={node.id}
+                  node={node}
+                  showSelectedTables={showSelectedTables}
+                />
               ))}
             </SidebarMenu>
 

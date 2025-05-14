@@ -2,20 +2,35 @@ import { useTableSelection } from '@/features/erd/hooks'
 import type { TableNodeType } from '@/features/erd/types'
 import { selectTableLogEvent } from '@/features/gtm/utils'
 import { useVersion } from '@/providers'
-import { SidebarMenuButton, SidebarMenuItem, Table2 } from '@liam-hq/ui'
+import { updateActiveNodeIds, useUserEditingStore } from '@/stores'
+import { Eye, SidebarMenuButton, SidebarMenuItem, Table2 } from '@liam-hq/ui'
 import clsx from 'clsx'
-import { type FC, useEffect, useRef, useState } from 'react'
+import { ContextMenu } from 'radix-ui'
+import {
+  type FC,
+  type KeyboardEvent,
+  type MouseEvent,
+  type MouseEventHandler,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import styles from './TableNameMenuButton.module.css'
 import { VisibilityButton } from './VisibilityButton'
 
 type Props = {
   node: TableNodeType
+  showSelectedTables: MouseEventHandler<HTMLDivElement>
 }
 
-export const TableNameMenuButton: FC<Props> = ({ node }) => {
+export const TableNameMenuButton: FC<Props> = ({
+  node,
+  showSelectedTables,
+}) => {
   const name = node.data.table.name
 
   const { selectTable } = useTableSelection()
+  const { activeNodeIds } = useUserEditingStore()
   const textRef = useRef<HTMLSpanElement>(null)
   const [isTruncated, setIsTruncated] = useState<boolean>(false)
 
@@ -50,28 +65,34 @@ export const TableNameMenuButton: FC<Props> = ({ node }) => {
   // TODO: Move handleClickMenuButton outside of TableNameMenuButton
   // after logging is complete
   const { version } = useVersion()
-  const handleClickMenuButton = (tableId: string) => () => {
-    selectTable({
-      tableId,
-      displayArea: 'main',
-    })
+  const handleClickMenuButton =
+    (tableId: string) => (event: MouseEvent | KeyboardEvent) => {
+      event.preventDefault()
 
-    selectTableLogEvent({
-      ref: 'leftPane',
-      tableId,
-      platform: version.displayedOn,
-      gitHash: version.gitHash,
-      ver: version.version,
-      appEnv: version.envName,
-    })
-  }
+      const isMultiSelect = event.ctrlKey || event.metaKey
+      updateActiveNodeIds(tableId, isMultiSelect)
+
+      selectTable({
+        tableId,
+        displayArea: 'main',
+      })
+
+      selectTableLogEvent({
+        ref: 'leftPane',
+        tableId,
+        platform: version.displayedOn,
+        gitHash: version.gitHash,
+        ver: version.version,
+        appEnv: version.envName,
+      })
+    }
 
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
         className={clsx(
           styles.button,
-          node.data.isActiveHighlighted && styles.active,
+          activeNodeIds.has(name) && styles.active,
         )}
         asChild
         tooltip={name}
@@ -85,13 +106,31 @@ export const TableNameMenuButton: FC<Props> = ({ node }) => {
           onKeyDown={handleClickMenuButton(name)}
           aria-label={`Menu button for ${name}`}
         >
-          <Table2 size="10px" />
+          <ContextMenu.Root>
+            <ContextMenu.Trigger className={clsx(styles.contextMenuTrigger)}>
+              <Table2 size="10px" />
 
-          <span ref={textRef} className={styles.tableName}>
-            {name}
-          </span>
+              <span ref={textRef} className={styles.tableName}>
+                {name}
+              </span>
 
-          <VisibilityButton tableName={name} hidden={node.hidden} />
+              <VisibilityButton tableName={name} hidden={node.hidden} />
+            </ContextMenu.Trigger>
+            <ContextMenu.Portal>
+              <ContextMenu.Content className={clsx(styles.contextMenuCotent)}>
+                <ContextMenu.Item
+                  className={clsx(styles.contextMenuItem)}
+                  onClick={(event: MouseEvent<HTMLDivElement>) => {
+                    event.stopPropagation()
+                    showSelectedTables(event)
+                  }}
+                >
+                  <Eye className={styles.icon} />
+                  <span>Show Only Selected Layers</span>
+                </ContextMenu.Item>
+              </ContextMenu.Content>
+            </ContextMenu.Portal>
+          </ContextMenu.Root>
         </div>
       </SidebarMenuButton>
     </SidebarMenuItem>

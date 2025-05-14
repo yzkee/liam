@@ -9,8 +9,22 @@ export const updateActiveTableName = (tableName: string | undefined) => {
   userEditingStore.active.tableName = tableName
 }
 
+export const updateActiveNodeIds = (nodeId: string, isMultiSelect: boolean) => {
+  if (userEditingStore.activeNodeIds.has(nodeId)) {
+    userEditingStore.activeNodeIds.delete(nodeId)
+  } else {
+    if (isMultiSelect) userEditingStore.activeNodeIds.add(nodeId)
+    else userEditingStore.activeNodeIds = new Set([nodeId])
+  }
+}
+
 export const updateShowMode = (showMode: ShowMode) => {
   userEditingStore.showMode = showMode
+}
+
+export const updateShowAllNodeMode = (showAllMode: boolean) => {
+  userEditingStore.isShowAllNodes = showAllMode
+  userEditingStore.activeNodeIds = new Set([])
 }
 
 export const toggleHiddenNodeId = (nodeId: string) => {

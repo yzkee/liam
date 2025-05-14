@@ -13,6 +13,7 @@ import * as v from 'valibot'
 import styles from './Panel.module.css'
 import { SchemaEditor } from './SchemaEditor'
 import { TablesList } from './TablesList'
+import { AFTER } from './after'
 
 type ErrorObject = {
   name: string
@@ -66,7 +67,7 @@ export const Panel: FC<Props> = ({
           </TabsList>
           <TabsContent value="schema" className={styles.tabsContent}>
             <div className={styles.editorSection}>
-              <SchemaEditor initialDoc={JSON.stringify(schema, null, 2)} />
+              <SchemaEditor initialDoc={JSON.stringify(AFTER, null, 2)} />
             </div>
           </TabsContent>
           <TabsContent value="tables" className={styles.tabsContent}>

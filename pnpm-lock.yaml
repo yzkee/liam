@@ -66,6 +66,9 @@ importers:
       '@codemirror/lint':
         specifier: 6.8.5
         version: 6.8.5
+      '@codemirror/merge':
+        specifier: 6.10.0
+        version: 6.10.0
       '@codemirror/state':
         specifier: 6.5.2
         version: 6.5.2
@@ -245,8 +248,8 @@ importers:
         specifier: 15.3.1
         version: 15.3.1(next@15.3.1(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@rive-app/react-canvas':
-        specifier: 4.18.9
-        version: 4.18.9(react@18.3.1)
+        specifier: 4.19.0
+        version: 4.19.0(react@18.3.1)
       '@sentry/nextjs':
         specifier: '9'
         version: 9.15.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(next@15.3.1(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(webpack@5.99.8)
@@ -1630,6 +1633,9 @@ packages:
 
   '@codemirror/lint@6.8.5':
     resolution: {integrity: sha512-s3n3KisH7dx3vsoeGMxsbRAgKe4O1vbrnKBClm99PU0fWxmxsx5rR2PfqQgIt+2MMJBHbiJ5rfIdLYfB9NNvsA==}
+
+  '@codemirror/merge@6.10.0':
+    resolution: {integrity: sha512-Omn0gU6MM5cKQGqgKoIhFjUqCNWH/nukCMLXzu/1jOdtiHsxAu3GdENBf1QYkoIC3FSgkF7X/ClOqYeUATQ4Sw==}
 
   '@codemirror/search@6.5.10':
     resolution: {integrity: sha512-RMdPdmsrUf53pb2VwflKGHEe1XVM07hI7vV2ntgw1dmqhimpatSJKva4VA9h4TLUDOD4EIF02201oZurpnEFsg==}
@@ -3699,8 +3705,8 @@ packages:
   '@rive-app/canvas@2.27.1':
     resolution: {integrity: sha512-TnRZdwS/y6RvoTwaZJVlG91NP+m97WcXgSY08wY8R8m8iyVQtpvkRN9oNKwlh46YHPAqGTafaqOzxc7H7ijZDw==}
 
-  '@rive-app/react-canvas@4.18.9':
-    resolution: {integrity: sha512-5tzuGTsc+TdUR5zBDyBzLHI60+bNFtHPDS5vXzjBo08bLuqjKLBUJRsu5YCFybsi63BbVQpiHi8Rorsx0+AcJw==}
+  '@rive-app/react-canvas@4.19.0':
+    resolution: {integrity: sha512-jyho5d2nYpjAEkh7a/fEUUzzSR3BlIowXt/Iv+AXGGdC4Y/Kzz0DgnLpdlBtOGedTERZjUYBLXHpnJRMY/LPAQ==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0
 
@@ -11419,6 +11425,14 @@ snapshots:
       '@codemirror/view': 6.36.6
       crelt: 1.0.6
 
+  '@codemirror/merge@6.10.0':
+    dependencies:
+      '@codemirror/language': 6.11.0
+      '@codemirror/state': 6.5.2
+      '@codemirror/view': 6.36.6
+      '@lezer/highlight': 1.2.1
+      style-mod: 4.1.2
+
   '@codemirror/search@6.5.10':
     dependencies:
       '@codemirror/state': 6.5.2
@@ -13533,7 +13547,7 @@ snapshots:
 
   '@rive-app/canvas@2.27.1': {}
 
-  '@rive-app/react-canvas@4.18.9(react@18.3.1)':
+  '@rive-app/react-canvas@4.19.0(react@18.3.1)':
     dependencies:
       '@rive-app/canvas': 2.27.1
       react: 18.3.1

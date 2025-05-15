@@ -4,6 +4,10 @@ import type { ComponentProps, ReactNode } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import remarkGfm from 'remark-gfm'
+import {
+  type MessageOption,
+  MessageOptionButtons,
+} from '../MessageOptionButtons'
 import { AgentMessage } from './AgentMessage'
 
 // Define the component props type
@@ -510,5 +514,78 @@ export const AskWithMarkdown: Story = {
       </ReactMarkdown>
     ),
     time: '12:15',
+  },
+}
+
+// Sample options for MessageOptionButtons
+const sampleOptions: MessageOption[] = [
+  { id: 'option1', text: 'Option 1' },
+  { id: 'option2', text: 'Option 2' },
+  { id: 'option3', text: 'Option 3' },
+]
+
+export const BuildWithOptions: Story = {
+  args: {
+    agent: 'build',
+    state: 'default',
+    message: 'Please select from the following options:',
+    time: '12:30',
+    agentName: 'Build Agent',
+    children: (
+      <MessageOptionButtons options={sampleOptions} agentType="build" />
+    ),
+  },
+}
+
+export const AskWithOptions: Story = {
+  args: {
+    agent: 'ask',
+    state: 'default',
+    message: 'Please select from the following options:',
+    time: '12:30',
+    agentName: 'Ask Agent',
+    children: <MessageOptionButtons options={sampleOptions} agentType="ask" />,
+  },
+}
+
+export const BuildWithMultiSelectOptions: Story = {
+  args: {
+    agent: 'build',
+    state: 'default',
+    message: 'Please select multiple options that apply:',
+    time: '12:35',
+    agentName: 'Build Agent',
+    children: (
+      <MessageOptionButtons
+        options={[
+          { id: 'option1', text: 'Option 1: Database design' },
+          { id: 'option2', text: 'Option 2: API implementation' },
+          { id: 'option3', text: 'Option 3: UI components' },
+        ]}
+        agentType="build"
+        multiSelect={true}
+      />
+    ),
+  },
+}
+
+export const AskWithMultiSelectOptions: Story = {
+  args: {
+    agent: 'ask',
+    state: 'default',
+    message: 'Please select multiple options that apply:',
+    time: '12:35',
+    agentName: 'Ask Agent',
+    children: (
+      <MessageOptionButtons
+        options={[
+          { id: 'option1', text: 'Option 1: Performance optimization' },
+          { id: 'option2', text: 'Option 2: Security measures' },
+          { id: 'option3', text: 'Option 3: Accessibility improvements' },
+        ]}
+        agentType="ask"
+        multiSelect={true}
+      />
+    ),
   },
 }

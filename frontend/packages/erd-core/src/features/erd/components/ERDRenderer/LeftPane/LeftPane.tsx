@@ -20,7 +20,7 @@ import {
   SidebarMenuItem,
 } from '@liam-hq/ui'
 import { useNodes } from '@xyflow/react'
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { CopyLinkButton } from './CopyLinkButton'
 import styles from './LeftPane.module.css'
 import { MenuItemLink, type Props as MenuItemLinkProps } from './MenuItemLink'
@@ -29,7 +29,7 @@ import { TableNameMenuButton } from './TableNameMenuButton'
 
 export const LeftPane = () => {
   const { version } = useVersion()
-  const { activeNodeIds, isShowAllNodes } = useUserEditingStore()
+  const { selectedNodeIds, isShowAllNodes } = useUserEditingStore()
   const { updateNode } = useCustomReactflow()
 
   const menuItemLinks = useMemo(
@@ -91,23 +91,23 @@ export const LeftPane = () => {
   const allCount = tableNodes.length
   const visibleCount = tableNodes.filter((node) => !node.hidden).length
 
-  const showOrHideAllNodes = () => {
+  const showOrHideAllNodes = useCallback(() => {
     updateShowAllNodeMode(!isShowAllNodes)
-    tableNodes.map((node) => {
+    for (const node of tableNodes) {
       updateNode(node.data.table.name, { hidden: isShowAllNodes })
-    })
-  }
+    }
+  }, [isShowAllNodes, tableNodes, updateNode])
 
-  const showSelectedTables = () => {
-    updateShowAllNodeMode(!isShowAllNodes)
-    tableNodes.map((node) => {
-      if (activeNodeIds.has(node.data.table.name)) {
-        updateNode(node.data.table.name, { hidden: false })
-      } else {
-        updateNode(node.data.table.name, { hidden: true })
+  const showSelectedTables = useCallback(() => {
+    if (selectedNodeIds.size > 0) {
+      updateShowAllNodeMode(false)
+      for (const node of tableNodes) {
+        updateNode(node.data.table.name, {
+          hidden: !selectedNodeIds.has(node.data.table.name),
+        })
       }
-    })
-  }
+    }
+  }, [tableNodes, selectedNodeIds, updateNode])
 
   return (
     <Sidebar>
@@ -138,6 +138,7 @@ export const LeftPane = () => {
                 <TableNameMenuButton
                   key={node.id}
                   node={node}
+                  nodes={tableNodes}
                   showSelectedTables={showSelectedTables}
                 />
               ))}

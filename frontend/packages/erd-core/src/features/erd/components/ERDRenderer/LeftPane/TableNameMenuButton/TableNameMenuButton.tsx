@@ -2,7 +2,7 @@ import { useTableSelection } from '@/features/erd/hooks'
 import type { TableNodeType } from '@/features/erd/types'
 import { selectTableLogEvent } from '@/features/gtm/utils'
 import { useVersion } from '@/providers'
-import { updateActiveNodeIds, useUserEditingStore } from '@/stores'
+import { updateSelectedNodeIds, useUserEditingStore } from '@/stores'
 import { Eye, SidebarMenuButton, SidebarMenuItem, Table2 } from '@liam-hq/ui'
 import clsx from 'clsx'
 import { ContextMenu } from 'radix-ui'
@@ -20,17 +20,19 @@ import { VisibilityButton } from './VisibilityButton'
 
 type Props = {
   node: TableNodeType
+  nodes: TableNodeType[]
   showSelectedTables: MouseEventHandler<HTMLDivElement>
 }
 
 export const TableNameMenuButton: FC<Props> = ({
   node,
+  nodes,
   showSelectedTables,
 }) => {
   const name = node.data.table.name
 
   const { selectTable } = useTableSelection()
-  const { activeNodeIds } = useUserEditingStore()
+  const { selectedNodeIds } = useUserEditingStore()
   const textRef = useRef<HTMLSpanElement>(null)
   const [isTruncated, setIsTruncated] = useState<boolean>(false)
 
@@ -69,14 +71,18 @@ export const TableNameMenuButton: FC<Props> = ({
     (tableId: string) => (event: MouseEvent | KeyboardEvent) => {
       event.preventDefault()
 
-      const isMultiSelect = event.ctrlKey || event.metaKey
-      updateActiveNodeIds(tableId, isMultiSelect)
+      const isMultiSelect =
+        event.ctrlKey || event.metaKey
+          ? 'ctrl'
+          : event.shiftKey
+            ? 'shift'
+            : 'single'
+      updateSelectedNodeIds(tableId, isMultiSelect, nodes)
 
       selectTable({
         tableId,
         displayArea: 'main',
       })
-
       selectTableLogEvent({
         ref: 'leftPane',
         tableId,
@@ -92,7 +98,7 @@ export const TableNameMenuButton: FC<Props> = ({
       <SidebarMenuButton
         className={clsx(
           styles.button,
-          activeNodeIds.has(name) && styles.active,
+          selectedNodeIds.has(name) && styles.active,
         )}
         asChild
         tooltip={name}
@@ -117,7 +123,7 @@ export const TableNameMenuButton: FC<Props> = ({
               <VisibilityButton tableName={name} hidden={node.hidden} />
             </ContextMenu.Trigger>
             <ContextMenu.Portal>
-              <ContextMenu.Content className={clsx(styles.contextMenuCotent)}>
+              <ContextMenu.Content className={clsx(styles.contextMenuContent)}>
                 <ContextMenu.Item
                   className={clsx(styles.contextMenuItem)}
                   onClick={(event: MouseEvent<HTMLDivElement>) => {

@@ -1,4 +1,11 @@
-import type { Comment, Table, TableName } from '../schema/index.js'
+import type {
+  Column,
+  Comment,
+  Constraint,
+  Index,
+  Table,
+  TableName,
+} from '../schema/index.js'
 
 export type ChangeStatus = 'added' | 'removed' | 'modified' | 'unchanged'
 
@@ -22,7 +29,25 @@ export type TableCommentDiffItem = BaseSchemaDiffItem & {
   data: Comment
 }
 
+export type ColumnDiffItem = BaseSchemaDiffItem & {
+  kind: 'column'
+  data: Column
+}
+
+export type IndexDiffItem = BaseSchemaDiffItem & {
+  kind: 'index'
+  data: Index
+}
+
+export type ConstraintDiffItem = BaseSchemaDiffItem & {
+  kind: 'constraint'
+  data: Constraint
+}
+
 export type SchemaDiffItem =
   | TableDiffItem
   | TableNameDiffItem
   | TableCommentDiffItem
+  | ColumnDiffItem
+  | IndexDiffItem
+  | ConstraintDiffItem

@@ -9,7 +9,7 @@
     "@turbo/gen": "2.5.3",
     "@types/node": "22.15.3",
     "concurrently": "9.1.2",
-    "knip": "5.50.5",
+    "knip": "5.52.0",
     "syncpack": "13.0.4",
     "turbo": "2.5.3",
     "typescript": "5.8.3",

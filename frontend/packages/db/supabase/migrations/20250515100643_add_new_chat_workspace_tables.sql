@@ -9,7 +9,8 @@ CREATE TABLE IF NOT EXISTS "public"."design_sessions" (
     "parent_design_session_id" "uuid",
     "name" "text" NOT NULL,
     "git_sha" "text",
-    "schema_snapshot" "jsonb",
+    "initial_schema_snapshot" "jsonb",
+    "schema_file_path" "text",
     "created_at" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 

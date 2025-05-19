@@ -1,5 +1,5 @@
 import * as ContextMenuPrimitive from '@radix-ui/react-context-menu'
-import { type FC, type ReactNode, type MouseEvent } from 'react'
+import type { FC, MouseEvent, ReactNode } from 'react'
 import styles from './ContextMenu.module.css'
 
 type ContextMenuProps = {

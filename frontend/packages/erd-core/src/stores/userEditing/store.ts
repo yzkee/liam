@@ -13,7 +13,6 @@ type UserEditingStore = {
   selectedNodeIds: Set<string>
   isPopstateInProgress: boolean
   isTableGroupEditMode: boolean
-  isShowAllNodes: boolean
 }
 
 export const userEditingStore = proxy<UserEditingStore>({
@@ -25,7 +24,6 @@ export const userEditingStore = proxy<UserEditingStore>({
   selectedNodeIds: proxySet<string>(),
   isPopstateInProgress: false,
   isTableGroupEditMode: false,
-  isShowAllNodes: true,
 })
 
 const pushStateIfNeeded = (url: URL, isPopstateInProgress: boolean) => {

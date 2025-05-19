@@ -52,11 +52,6 @@ export const updateShowMode = (showMode: ShowMode) => {
   userEditingStore.showMode = showMode
 }
 
-export const updateShowAllNodeMode = (showAllMode: boolean) => {
-  userEditingStore.isShowAllNodes = showAllMode
-  userEditingStore.selectedNodeIds = new Set([])
-}
-
 export const toggleHiddenNodeId = (nodeId: string) => {
   if (userEditingStore.hiddenNodeIds.has(nodeId)) {
     userEditingStore.hiddenNodeIds.delete(nodeId)

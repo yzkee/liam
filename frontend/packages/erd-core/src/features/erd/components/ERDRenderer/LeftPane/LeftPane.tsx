@@ -1,12 +1,13 @@
 import { isTableNode } from '@/features/erd/utils'
 import { useCustomReactflow } from '@/features/reactflow/hooks'
 import { useVersion } from '@/providers'
-import { updateShowAllNodeMode, useUserEditingStore } from '@/stores'
+import { useUserEditingStore } from '@/stores'
 import {
   BookText,
   Eye,
   EyeClosed,
   GithubLogo,
+  IconButton,
   LiamLogoMark,
   Megaphone,
   MessagesSquare,
@@ -21,6 +22,7 @@ import {
 } from '@liam-hq/ui'
 import { useNodes } from '@xyflow/react'
 import { useCallback, useMemo } from 'react'
+import { updateNodesHiddenState } from '../../ERDContent/utils'
 import { CopyLinkButton } from './CopyLinkButton'
 import styles from './LeftPane.module.css'
 import { MenuItemLink, type Props as MenuItemLinkProps } from './MenuItemLink'
@@ -29,8 +31,8 @@ import { TableNameMenuButton } from './TableNameMenuButton'
 
 export const LeftPane = () => {
   const { version } = useVersion()
-  const { selectedNodeIds, isShowAllNodes } = useUserEditingStore()
-  const { updateNode } = useCustomReactflow()
+  const { selectedNodeIds } = useUserEditingStore()
+  const { setNodes } = useCustomReactflow()
 
   const menuItemLinks = useMemo(
     (): MenuItemLinkProps[] => [
@@ -92,22 +94,27 @@ export const LeftPane = () => {
   const visibleCount = tableNodes.filter((node) => !node.hidden).length
 
   const showOrHideAllNodes = useCallback(() => {
-    updateShowAllNodeMode(!isShowAllNodes)
-    for (const node of tableNodes) {
-      updateNode(node.data.table.name, { hidden: isShowAllNodes })
-    }
-  }, [isShowAllNodes, tableNodes, updateNode])
+    const shouldHide = visibleCount === allCount
+    const updatedNodes = updateNodesHiddenState({
+      nodes,
+      hiddenNodeIds: shouldHide ? nodes.map((node) => node.id) : [],
+      shouldHideGroupNodeId: true,
+    })
+    setNodes(updatedNodes)
+  }, [nodes, visibleCount, allCount, setNodes])
 
   const showSelectedTables = useCallback(() => {
     if (selectedNodeIds.size > 0) {
-      updateShowAllNodeMode(false)
-      for (const node of tableNodes) {
-        updateNode(node.data.table.name, {
-          hidden: !selectedNodeIds.has(node.data.table.name),
-        })
-      }
+      const updatedNodes = updateNodesHiddenState({
+        nodes,
+        hiddenNodeIds: nodes
+          .filter((node) => !selectedNodeIds.has(node.id))
+          .map((node) => node.id),
+        shouldHideGroupNodeId: true,
+      })
+      setNodes(updatedNodes)
     }
-  }, [tableNodes, selectedNodeIds, updateNode])
+  }, [nodes, selectedNodeIds, setNodes])
 
   return (
     <Sidebar>
@@ -120,17 +127,17 @@ export const LeftPane = () => {
               <span className={styles.tableCountDivider}>/</span>
               {allCount}
             </span>
-            <span
+            <IconButton
+              icon={visibleCount === allCount ? <EyeClosed /> : <Eye />}
+              tooltipContent={
+                visibleCount === allCount
+                  ? 'Hide All Tables'
+                  : 'Show All Tables'
+              }
               onClick={showOrHideAllNodes}
               onKeyDown={showOrHideAllNodes}
               className={styles.textCursor}
-            >
-              {isShowAllNodes ? (
-                <EyeClosed className={styles.icon} />
-              ) : (
-                <Eye className={styles.icon} />
-              )}
-            </span>
+            />
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -154,9 +161,9 @@ export const LeftPane = () => {
               ))}
               <SidebarMenuItem className={styles.versionWrapper}>
                 <div className={styles.version}>
-                  <span
-                    className={styles.versionText}
-                  >{`${version.version} + ${version.gitHash.slice(0, 7)} (${version.date})`}</span>
+                  <span className={styles.versionText}>{`${
+                    version.version
+                  } + ${version.gitHash.slice(0, 7)} (${version.date})`}</span>
                 </div>
               </SidebarMenuItem>
             </SidebarMenu>

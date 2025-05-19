@@ -4,11 +4,11 @@ import { selectTableLogEvent } from '@/features/gtm/utils'
 import { useVersion } from '@/providers'
 import { updateSelectedNodeIds, useUserEditingStore } from '@/stores'
 import {
+  ContextMenu,
   Eye,
   SidebarMenuButton,
   SidebarMenuItem,
   Table2,
-  ContextMenu,
 } from '@liam-hq/ui'
 import clsx from 'clsx'
 import {
@@ -34,6 +34,7 @@ export const TableNameMenuButton: FC<Props> = ({
   nodes,
   showSelectedTables,
 }) => {
+  const nodeId = node.id
   const name = node.data.table.name
   const { selectTable } = useTableSelection()
   const { selectedNodeIds } = useUserEditingStore()
@@ -73,10 +74,10 @@ export const TableNameMenuButton: FC<Props> = ({
         event.ctrlKey || event.metaKey
           ? 'ctrl'
           : event.shiftKey
-          ? 'shift'
-          : 'single'
+            ? 'shift'
+            : 'single'
 
-      updateSelectedNodeIds(name, isMultiSelect, nodes)
+      updateSelectedNodeIds(nodeId, isMultiSelect, nodes)
       selectTable({
         tableId: name,
         displayArea: 'main',
@@ -91,7 +92,7 @@ export const TableNameMenuButton: FC<Props> = ({
         appEnv: version.envName,
       })
     },
-    [name, nodes, selectTable, version]
+    [nodeId, name, nodes, selectTable, version],
   )
 
   const handleKeyDown = useCallback(
@@ -100,7 +101,7 @@ export const TableNameMenuButton: FC<Props> = ({
         handleTableSelection(event)
       }
     },
-    [handleTableSelection]
+    [handleTableSelection],
   )
 
   const handleContextMenuClick = useCallback(
@@ -108,7 +109,7 @@ export const TableNameMenuButton: FC<Props> = ({
       event.stopPropagation()
       showSelectedTables(event)
     },
-    [showSelectedTables]
+    [showSelectedTables],
   )
 
   return (
@@ -116,7 +117,7 @@ export const TableNameMenuButton: FC<Props> = ({
       <SidebarMenuButton
         className={clsx(
           styles.button,
-          selectedNodeIds.has(name) && styles.active
+          selectedNodeIds.has(nodeId) && styles.active,
         )}
         asChild
         tooltip={name}
@@ -141,10 +142,10 @@ export const TableNameMenuButton: FC<Props> = ({
               </>
             }
             ContextMenuElement={
-              <div>
+              <>
                 <Eye className={styles.icon} />
                 <span>Show Only Selected Layers</span>
-              </div>
+              </>
             }
             onClick={handleContextMenuClick}
           />

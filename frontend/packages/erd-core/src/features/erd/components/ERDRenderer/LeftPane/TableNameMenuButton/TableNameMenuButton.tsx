@@ -3,14 +3,19 @@ import type { TableNodeType } from '@/features/erd/types'
 import { selectTableLogEvent } from '@/features/gtm/utils'
 import { useVersion } from '@/providers'
 import { updateSelectedNodeIds, useUserEditingStore } from '@/stores'
-import { Eye, SidebarMenuButton, SidebarMenuItem, Table2 } from '@liam-hq/ui'
+import {
+  Eye,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  Table2,
+  ContextMenu,
+} from '@liam-hq/ui'
 import clsx from 'clsx'
-import { ContextMenu } from 'radix-ui'
 import {
   type FC,
   type KeyboardEvent,
   type MouseEvent,
-  type MouseEventHandler,
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -21,7 +26,7 @@ import { VisibilityButton } from './VisibilityButton'
 type Props = {
   node: TableNodeType
   nodes: TableNodeType[]
-  showSelectedTables: MouseEventHandler<HTMLDivElement>
+  showSelectedTables: (event: MouseEvent<HTMLDivElement>) => void
 }
 
 export const TableNameMenuButton: FC<Props> = ({
@@ -30,75 +35,88 @@ export const TableNameMenuButton: FC<Props> = ({
   showSelectedTables,
 }) => {
   const name = node.data.table.name
-
   const { selectTable } = useTableSelection()
   const { selectedNodeIds } = useUserEditingStore()
+  const { version } = useVersion()
   const textRef = useRef<HTMLSpanElement>(null)
-  const [isTruncated, setIsTruncated] = useState<boolean>(false)
+  const [isTruncated, setIsTruncated] = useState(false)
+
+  const checkTruncation = useCallback(() => {
+    if (!textRef.current) return
+    const element = textRef.current
+    setIsTruncated(element.scrollWidth > element.clientWidth)
+  }, [])
 
   useEffect(() => {
-    const checkTruncation = () => {
-      if (textRef.current) {
-        const element = textRef.current
-        const isTruncated = element.scrollWidth > element.clientWidth
-        setIsTruncated(isTruncated)
-      }
-    }
-
-    // Initial check after a small delay to ensure DOM is rendered
     const timeoutId = setTimeout(checkTruncation, 0)
-
-    // Check on window resize and when sidebar width changes
-    window.addEventListener('resize', checkTruncation)
-
-    // Add a mutation observer to watch for width changes
     const observer = new ResizeObserver(checkTruncation)
+
     if (textRef.current) {
       observer.observe(textRef.current)
     }
+
+    window.addEventListener('resize', checkTruncation)
 
     return () => {
       clearTimeout(timeoutId)
       window.removeEventListener('resize', checkTruncation)
       observer.disconnect()
     }
-  }, [])
+  }, [checkTruncation])
 
-  // TODO: Move handleClickMenuButton outside of TableNameMenuButton
-  // after logging is complete
-  const { version } = useVersion()
-  const handleClickMenuButton =
-    (tableId: string) => (event: MouseEvent | KeyboardEvent) => {
+  const handleTableSelection = useCallback(
+    (event: MouseEvent | KeyboardEvent) => {
       event.preventDefault()
+      event.stopPropagation()
 
       const isMultiSelect =
         event.ctrlKey || event.metaKey
           ? 'ctrl'
           : event.shiftKey
-            ? 'shift'
-            : 'single'
-      updateSelectedNodeIds(tableId, isMultiSelect, nodes)
+          ? 'shift'
+          : 'single'
 
+      updateSelectedNodeIds(name, isMultiSelect, nodes)
       selectTable({
-        tableId,
+        tableId: name,
         displayArea: 'main',
       })
+
       selectTableLogEvent({
         ref: 'leftPane',
-        tableId,
+        tableId: name,
         platform: version.displayedOn,
         gitHash: version.gitHash,
         ver: version.version,
         appEnv: version.envName,
       })
-    }
+    },
+    [name, nodes, selectTable, version]
+  )
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        handleTableSelection(event)
+      }
+    },
+    [handleTableSelection]
+  )
+
+  const handleContextMenuClick = useCallback(
+    (event: MouseEvent<HTMLDivElement>) => {
+      event.stopPropagation()
+      showSelectedTables(event)
+    },
+    [showSelectedTables]
+  )
 
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
         className={clsx(
           styles.button,
-          selectedNodeIds.has(name) && styles.active,
+          selectedNodeIds.has(name) && styles.active
         )}
         asChild
         tooltip={name}
@@ -108,35 +126,28 @@ export const TableNameMenuButton: FC<Props> = ({
           // biome-ignore lint/a11y/useSemanticElements: Implemented with div button to be button in button
           role="button"
           tabIndex={0}
-          onClick={handleClickMenuButton(name)}
-          onKeyDown={handleClickMenuButton(name)}
+          onClick={handleTableSelection}
+          onKeyDown={handleKeyDown}
           aria-label={`Menu button for ${name}`}
         >
-          <ContextMenu.Root>
-            <ContextMenu.Trigger className={clsx(styles.contextMenuTrigger)}>
-              <Table2 size="10px" />
-
-              <span ref={textRef} className={styles.tableName}>
-                {name}
-              </span>
-
-              <VisibilityButton tableName={name} hidden={node.hidden} />
-            </ContextMenu.Trigger>
-            <ContextMenu.Portal>
-              <ContextMenu.Content className={clsx(styles.contextMenuContent)}>
-                <ContextMenu.Item
-                  className={clsx(styles.contextMenuItem)}
-                  onClick={(event: MouseEvent<HTMLDivElement>) => {
-                    event.stopPropagation()
-                    showSelectedTables(event)
-                  }}
-                >
-                  <Eye className={styles.icon} />
-                  <span>Show Only Selected Layers</span>
-                </ContextMenu.Item>
-              </ContextMenu.Content>
-            </ContextMenu.Portal>
-          </ContextMenu.Root>
+          <ContextMenu
+            TriggerElement={
+              <>
+                <Table2 size="10px" />
+                <span ref={textRef} className={styles.tableName}>
+                  {name}
+                </span>
+                <VisibilityButton tableName={name} hidden={node.hidden} />
+              </>
+            }
+            ContextMenuElement={
+              <div>
+                <Eye className={styles.icon} />
+                <span>Show Only Selected Layers</span>
+              </div>
+            }
+            onClick={handleContextMenuClick}
+          />
         </div>
       </SidebarMenuButton>
     </SidebarMenuItem>

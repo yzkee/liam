@@ -29,9 +29,9 @@ export const TableNode: FC<Props> = ({ data }) => {
   useEffect(() => {
     const checkTruncation = () => {
       if (textRef.current) {
-        const element = textRef.current;
-        const isTruncated = element.scrollWidth > element.clientWidth;
-        setIsTruncated(isTruncated);
+        const element = textRef.current
+        const isTruncated = element.scrollWidth > element.clientWidth
+        setIsTruncated(isTruncated)
       }
     }
 
@@ -52,7 +52,7 @@ export const TableNode: FC<Props> = ({ data }) => {
       window.removeEventListener('resize', checkTruncation)
       observer.disconnect()
     }
-  }, [showMode])
+  }, [])
 
   return (
     <TooltipProvider>
@@ -78,11 +78,7 @@ export const TableNode: FC<Props> = ({ data }) => {
         </TooltipTrigger>
 
         <TooltipPortal>
-          <TooltipContent
-            side={'top'}
-            sideOffset={4}
-            hidden={!isTruncated}
-          >
+          <TooltipContent side={'top'} sideOffset={4} hidden={!isTruncated}>
             {name}
           </TooltipContent>
         </TooltipPortal>

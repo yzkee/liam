@@ -1,4 +1,5 @@
 import { mastra } from '@/lib/mastra'
+import { classifyQuestion } from '@/lib/mastra/agents'
 import type { Schema, TableGroup } from '@liam-hq/db-structure'
 import * as Sentry from '@sentry/nextjs'
 import { NextResponse } from 'next/server'
@@ -142,11 +143,17 @@ export async function POST(request: Request) {
   // Convert schema to text
   const schemaText = convertSchemaToText(schemaData)
 
+  // Determine which agent to use based on the question type
+  const questionType = classifyQuestion(message)
+  const agentName =
+    questionType === 'build'
+      ? 'databaseSchemaBuildAgent'
+      : 'databaseSchemaAskAgent'
   try {
     // Get the agent from Mastra
-    const agent = mastra.getAgent('databaseSchemaAgent')
+    const agent = mastra.getAgent(agentName)
     if (!agent) {
-      throw new Error('databaseSchemaAgent not found in Mastra instance')
+      throw new Error(`${agentName} not found in Mastra instance`)
     }
 
     // Create a response using the agent

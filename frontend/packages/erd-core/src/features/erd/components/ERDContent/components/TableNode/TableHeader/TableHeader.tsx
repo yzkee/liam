@@ -28,9 +28,7 @@ export const TableHeader: FC<Props> = ({ data, textRef }) => {
     >
       <Table2 width={16} className={styles.tableIcon} />
 
-      <span ref={textRef} className={styles.name}>
-        {name}
-      </span>
+      <span ref={textRef}> {name} </span>
 
       {showMode === 'TABLE_NAME' && (
         <>

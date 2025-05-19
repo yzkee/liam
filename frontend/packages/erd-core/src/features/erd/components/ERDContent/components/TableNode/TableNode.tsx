@@ -31,8 +31,6 @@ export const TableNode: FC<Props> = ({ data }) => {
       if (textRef.current) {
         const element = textRef.current;
         const isTruncated = element.scrollWidth > element.clientWidth;
-        console.log("scroll width: ", element.scrollWidth);
-        console.log("client Width: ", element.clientWidth);
         setIsTruncated(isTruncated);
       }
     }

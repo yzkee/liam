@@ -726,7 +726,8 @@ CREATE TABLE IF NOT EXISTS "public"."documents" (
     "metadata" "jsonb",
     "embedding" "public"."vector"(1536),
     "created_at" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    "updated_at" timestamp(3) with time zone NOT NULL
+    "updated_at" timestamp(3) with time zone NOT NULL,
+    "organization_id" "uuid" NOT NULL
 );
 
 
@@ -1278,6 +1279,11 @@ ALTER TABLE ONLY "public"."doc_file_paths"
 
 
 
+ALTER TABLE ONLY "public"."documents"
+    ADD CONSTRAINT "documents_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE CASCADE;
+
+
+
 ALTER TABLE ONLY "public"."doc_file_paths"
     ADD CONSTRAINT "github_doc_file_path_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "public"."projects"("id") ON UPDATE CASCADE ON DELETE RESTRICT;
 
@@ -1483,6 +1489,16 @@ ALTER TABLE ONLY "public"."schema_file_paths"
 
 
 
+CREATE POLICY "authenticated_users_can_delete_org_documents" ON "public"."documents" FOR DELETE TO "authenticated" USING (("organization_id" IN ( SELECT "organization_members"."organization_id"
+   FROM "public"."organization_members"
+  WHERE ("organization_members"."user_id" = "auth"."uid"()))));
+
+
+
+COMMENT ON POLICY "authenticated_users_can_delete_org_documents" ON "public"."documents" IS 'Authenticated users can only delete documents in organizations they are members of';
+
+
+
 CREATE POLICY "authenticated_users_can_delete_org_invitations" ON "public"."invitations" FOR DELETE TO "authenticated" USING (("organization_id" IN ( SELECT "organization_members"."organization_id"
    FROM "public"."organization_members"
   WHERE ("organization_members"."user_id" = "auth"."uid"()))));
@@ -1524,6 +1540,16 @@ CREATE POLICY "authenticated_users_can_insert_org_doc_file_paths" ON "public"."d
 
 
 COMMENT ON POLICY "authenticated_users_can_insert_org_doc_file_paths" ON "public"."doc_file_paths" IS 'Authenticated users can insert doc file paths for their organization';
+
+
+
+CREATE POLICY "authenticated_users_can_insert_org_documents" ON "public"."documents" FOR INSERT TO "authenticated" WITH CHECK (("organization_id" IN ( SELECT "organization_members"."organization_id"
+   FROM "public"."organization_members"
+  WHERE ("organization_members"."user_id" = "auth"."uid"()))));
+
+
+
+COMMENT ON POLICY "authenticated_users_can_insert_org_documents" ON "public"."documents" IS 'Authenticated users can only add documents to organizations they are members of';
 
 
 
@@ -1626,6 +1652,16 @@ CREATE POLICY "authenticated_users_can_select_org_doc_file_paths" ON "public"."d
 
 
 COMMENT ON POLICY "authenticated_users_can_select_org_doc_file_paths" ON "public"."doc_file_paths" IS 'Authenticated users can select doc file paths for their organization';
+
+
+
+CREATE POLICY "authenticated_users_can_select_org_documents" ON "public"."documents" FOR SELECT TO "authenticated" USING (("organization_id" IN ( SELECT "organization_members"."organization_id"
+   FROM "public"."organization_members"
+  WHERE ("organization_members"."user_id" = "auth"."uid"()))));
+
+
+
+COMMENT ON POLICY "authenticated_users_can_select_org_documents" ON "public"."documents" IS 'Authenticated users can only view documents in organizations they are members of';
 
 
 
@@ -1797,6 +1833,16 @@ COMMENT ON POLICY "authenticated_users_can_select_org_schema_file_paths" ON "pub
 
 
 
+CREATE POLICY "authenticated_users_can_update_org_documents" ON "public"."documents" FOR UPDATE TO "authenticated" USING (("organization_id" IN ( SELECT "organization_members"."organization_id"
+   FROM "public"."organization_members"
+  WHERE ("organization_members"."user_id" = "auth"."uid"()))));
+
+
+
+COMMENT ON POLICY "authenticated_users_can_update_org_documents" ON "public"."documents" IS 'Authenticated users can only update documents in organizations they are members of';
+
+
+
 CREATE POLICY "authenticated_users_can_update_org_invitations" ON "public"."invitations" FOR UPDATE TO "authenticated" USING (("organization_id" IN ( SELECT "organization_members"."organization_id"
    FROM "public"."organization_members"
   WHERE ("organization_members"."user_id" = "auth"."uid"())))) WITH CHECK (("organization_id" IN ( SELECT "organization_members"."organization_id"
@@ -1864,6 +1910,9 @@ COMMENT ON POLICY "authenticated_users_can_update_org_schema_file_paths" ON "pub
 
 
 ALTER TABLE "public"."doc_file_paths" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."documents" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."github_pull_request_comments" ENABLE ROW LEVEL SECURITY;
@@ -2004,6 +2053,10 @@ CREATE POLICY "service_role_can_insert_all_review_suggestion_snippets" ON "publi
 
 
 CREATE POLICY "service_role_can_select_all_doc_file_paths" ON "public"."doc_file_paths" FOR SELECT TO "service_role" USING (true);
+
+
+
+CREATE POLICY "service_role_can_select_all_documents" ON "public"."documents" FOR SELECT TO "service_role" USING (true);
 
 
 

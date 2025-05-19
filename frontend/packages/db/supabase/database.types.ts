@@ -86,6 +86,7 @@ export type Database = {
           embedding: string | null
           id: string
           metadata: Json | null
+          organization_id: string
           updated_at: string
         }
         Insert: {
@@ -94,6 +95,7 @@ export type Database = {
           embedding?: string | null
           id?: string
           metadata?: Json | null
+          organization_id: string
           updated_at: string
         }
         Update: {
@@ -102,9 +104,18 @@ export type Database = {
           embedding?: string | null
           id?: string
           metadata?: Json | null
+          organization_id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'documents_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+        ]
       }
       github_pull_request_comments: {
         Row: {

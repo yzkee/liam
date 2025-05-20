@@ -23,7 +23,7 @@ export const TableNode: FC<Props> = ({ data }) => {
 
   const textRef = useRef<HTMLSpanElement>(null)
 
-  //Add the truncated state to detect the truncated talbe name
+  //Add the truncated state to detect the truncated table name
   const [isTruncated, setIsTruncated] = useState<boolean>(false)
 
   useEffect(() => {

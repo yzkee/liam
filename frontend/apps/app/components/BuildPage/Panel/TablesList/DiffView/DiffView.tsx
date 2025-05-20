@@ -18,7 +18,7 @@ export const DiffView: FC<Props> = ({ before, after }) => {
   const allTables = allTableIds.map(
     (id) => before.tables[id] || after.tables[id],
   )
-  const diff = buildSchemaDiff(before, after)
+  const diffItems = buildSchemaDiff(before, after)
 
   return (
     <div className={styles.tableList}>
@@ -29,10 +29,18 @@ export const DiffView: FC<Props> = ({ before, after }) => {
         return (
           <div key={table.name} className={styles.beforeAndAfter}>
             {beforeTable && (
-              <TableItem table={beforeTable} diff={diff} type="before" />
+              <TableItem
+                table={beforeTable}
+                diffItems={diffItems}
+                type="before"
+              />
             )}
             {afterTable && (
-              <TableItem table={afterTable} diff={diff} type="after" />
+              <TableItem
+                table={afterTable}
+                diffItems={diffItems}
+                type="after"
+              />
             )}
           </div>
         )

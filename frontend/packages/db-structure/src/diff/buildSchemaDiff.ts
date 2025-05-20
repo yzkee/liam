@@ -8,11 +8,17 @@ import { buildColumnNameDiffItem } from './columns/buildColumnNameDiffItem.js'
 import { buildColumnNotNullDiffItem } from './columns/buildColumnNotNullDiffItem.js'
 import { buildColumnPrimaryDiffItem } from './columns/buildColumnPrimaryDiffItem.js'
 import { buildColumnUniqueDiffItem } from './columns/buildColumnUniqueDiffItem.js'
+import { buildIndexColumnsDiffItem } from './indexes/buildIndexColumnsDiffItem.js'
+import { buildIndexDiffItem } from './indexes/buildIndexDiffItem.js'
+import { buildIndexNameDiffItem } from './indexes/buildIndexNameDiffItem.js'
+import { buildIndexTypeDiffItem } from './indexes/buildIndexTypeDiffItem.js'
+import { buildIndexUniqueDiffItem } from './indexes/buildIndexUniqueDiffItem.js'
 import { buildTableCommentDiffItem } from './tables/buildTableCommentDiffItem.js'
 import { buildTableDiffItem } from './tables/buildTableDiffItem.js'
 import { buildTableNameDiffItem } from './tables/buildTableNameDiffItem.js'
 import type {
   ColumnRelatedDiffItem,
+  IndexRelatedDiffItem,
   SchemaDiffItem,
   TableRelatedDiffItem,
 } from './types.js'
@@ -153,6 +159,73 @@ function buildColumnRelatedDiffItems(
   return items
 }
 
+function buildIndexRelatedDiffItems(
+  tableId: string,
+  indexId: string,
+  before: Schema,
+  after: Schema,
+  operations: ReturnType<typeof compare>,
+): IndexRelatedDiffItem[] {
+  const items: IndexRelatedDiffItem[] = []
+
+  const indexDiffItem = buildIndexDiffItem(
+    tableId,
+    indexId,
+    before,
+    after,
+    operations,
+  )
+  if (indexDiffItem) {
+    items.push(indexDiffItem)
+  }
+
+  const indexNameDiffItem = buildIndexNameDiffItem(
+    tableId,
+    indexId,
+    before,
+    after,
+    operations,
+  )
+  if (indexNameDiffItem) {
+    items.push(indexNameDiffItem)
+  }
+
+  const indexUniqueDiffItem = buildIndexUniqueDiffItem(
+    tableId,
+    indexId,
+    before,
+    after,
+    operations,
+  )
+  if (indexUniqueDiffItem) {
+    items.push(indexUniqueDiffItem)
+  }
+
+  const indexColumnsDiffItem = buildIndexColumnsDiffItem(
+    tableId,
+    indexId,
+    before,
+    after,
+    operations,
+  )
+  if (indexColumnsDiffItem) {
+    items.push(indexColumnsDiffItem)
+  }
+
+  const indexTypeDiffItem = buildIndexTypeDiffItem(
+    tableId,
+    indexId,
+    before,
+    after,
+    operations,
+  )
+  if (indexTypeDiffItem) {
+    items.push(indexTypeDiffItem)
+  }
+
+  return items
+}
+
 export function buildSchemaDiff(
   before: Schema,
   after: Schema,
@@ -182,6 +255,18 @@ export function buildSchemaDiff(
         operations,
       )
       items.push(...columnDiffItems)
+    }
+
+    for (const index of Object.values(table.indexes)) {
+      const indexId = index.name
+      const indexDiffItems = buildIndexRelatedDiffItems(
+        tableId,
+        indexId,
+        before,
+        after,
+        operations,
+      )
+      items.push(...indexDiffItems)
     }
   }
 

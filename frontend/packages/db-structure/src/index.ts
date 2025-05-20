@@ -35,4 +35,5 @@ export type {
   SchemaDiffItem,
   TableRelatedDiffItem,
   ColumnRelatedDiffItem,
+  IndexRelatedDiffItem,
 } from './diff/index.js'

@@ -10,4 +10,9 @@ export const PATH_PATTERNS = {
   COLUMN_CHECK: /^\/tables\/([^/]+)\/columns\/([^/]+)\/check$/,
   COLUMN_UNIQUE: /^\/tables\/([^/]+)\/columns\/([^/]+)\/unique$/,
   COLUMN_NOT_NULL: /^\/tables\/([^/]+)\/columns\/([^/]+)\/notNull$/,
+  INDEX_BASE: /^\/tables\/([^/]+)\/indexes\/([^/]+)$/,
+  INDEX_NAME: /^\/tables\/([^/]+)\/indexes\/([^/]+)\/name$/,
+  INDEX_UNIQUE: /^\/tables\/([^/]+)\/indexes\/([^/]+)\/unique$/,
+  INDEX_COLUMNS: /^\/tables\/([^/]+)\/indexes\/([^/]+)\/columns$/,
+  INDEX_TYPE: /^\/tables\/([^/]+)\/indexes\/([^/]+)\/type$/,
 } as const

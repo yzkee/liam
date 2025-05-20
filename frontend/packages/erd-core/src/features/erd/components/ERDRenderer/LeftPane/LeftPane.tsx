@@ -106,6 +106,7 @@ export const LeftPane = () => {
       shouldHideGroupNodeId: true,
     })
     setNodes(updatedNodes)
+    replaceHiddenNodeIds(shouldHide ? nodes.map((node) => node.id) : [])
   }, [nodes, visibleCount, allCount, setNodes])
 
   const showSelectedTables = useCallback(() => {

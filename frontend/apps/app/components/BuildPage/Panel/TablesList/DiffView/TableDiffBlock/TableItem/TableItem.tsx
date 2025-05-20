@@ -1,9 +1,15 @@
+import {
+  CollapsibleContent,
+  CollapsibleRoot,
+  CollapsibleTrigger,
+} from '@/components'
 import type {
   SchemaDiffItem,
   Table,
   TableRelatedDiffItem,
 } from '@liam-hq/db-structure'
 import clsx from 'clsx'
+import { ChevronDown, ChevronUp } from 'lucide-react'
 import type { FC } from 'react'
 import { match } from 'ts-pattern'
 import { ColumnItem } from './ColumnItem'
@@ -32,9 +38,21 @@ type Props = {
   table: Table
   diffItems: SchemaDiffItem[]
   type: 'before' | 'after'
+  isOpenColumns: boolean
+  isOpenIndex: boolean
+  onOpenChangeColumns: (open: boolean) => void
+  onOpenChangeIndex: (open: boolean) => void
 }
 
-export const TableItem: FC<Props> = ({ table, diffItems, type }) => {
+export const TableItem: FC<Props> = ({
+  table,
+  diffItems,
+  type,
+  isOpenColumns,
+  isOpenIndex,
+  onOpenChangeColumns,
+  onOpenChangeIndex,
+}) => {
   const tableStatusStyle = getChangeStatusStyle(
     table.name,
     diffItems,
@@ -70,17 +88,31 @@ export const TableItem: FC<Props> = ({ table, diffItems, type }) => {
 
       <hr className={styles.divider} />
 
-      <div className={styles.columnSection}>
-        {Object.values(table.columns).map((column) => (
-          <ColumnItem
-            key={column.name}
-            tableId={table.name}
-            column={column}
-            diffItems={diffItems}
-            type={type}
-          />
-        ))}
-      </div>
+      <CollapsibleRoot
+        className={styles.columnSection}
+        open={isOpenColumns}
+        onOpenChange={onOpenChangeColumns}
+      >
+        <CollapsibleTrigger className={styles.columnTrigger}>
+          <h2>Columns</h2>
+          {isOpenColumns ? (
+            <ChevronUp className={styles.columnTriggerIcon} />
+          ) : (
+            <ChevronDown className={styles.columnTriggerIcon} />
+          )}
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          {Object.values(table.columns).map((column) => (
+            <ColumnItem
+              key={column.name}
+              tableId={table.name}
+              column={column}
+              diffItems={diffItems}
+              type={type}
+            />
+          ))}
+        </CollapsibleContent>
+      </CollapsibleRoot>
     </section>
   )
 }

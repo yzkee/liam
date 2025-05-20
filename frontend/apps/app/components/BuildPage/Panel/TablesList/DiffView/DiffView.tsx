@@ -1,7 +1,7 @@
 import { type Schema, buildSchemaDiff } from '@liam-hq/db-structure'
 import type { FC } from 'react'
 import styles from './DiffView.module.css'
-import { TableItem } from './TableItem'
+import { TableDiffBlock } from './TableDiffBlock'
 
 type Props = {
   before: Schema
@@ -27,22 +27,12 @@ export const DiffView: FC<Props> = ({ before, after }) => {
         const afterTable = after.tables[table.name]
 
         return (
-          <div key={table.name} className={styles.beforeAndAfter}>
-            {beforeTable && (
-              <TableItem
-                table={beforeTable}
-                diffItems={diffItems}
-                type="before"
-              />
-            )}
-            {afterTable && (
-              <TableItem
-                table={afterTable}
-                diffItems={diffItems}
-                type="after"
-              />
-            )}
-          </div>
+          <TableDiffBlock
+            key={table.name}
+            beforeTable={beforeTable}
+            afterTable={afterTable}
+            diffItems={diffItems}
+          />
         )
       })}
     </div>

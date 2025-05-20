@@ -1,6 +1,6 @@
 'use client'
 
-import type { TableGroupData } from '@/app/api/chat/route'
+import type { TableGroupData } from '@/app/lib/schema/convertSchemaToText'
 import type { Schema } from '@liam-hq/db-structure'
 import type { FC } from 'react'
 import { useEffect, useRef, useState } from 'react'
@@ -11,9 +11,10 @@ import styles from './Chat.module.css'
 interface Props {
   schemaData: Schema
   tableGroups?: Record<string, TableGroupData>
+  projectId: string
 }
 
-export const Chat: FC<Props> = ({ schemaData, tableGroups }) => {
+export const Chat: FC<Props> = ({ schemaData, tableGroups, projectId }) => {
   const [messages, setMessages] = useState<
     (ChatMessageProps & { id: string })[]
   >([
@@ -76,6 +77,7 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups }) => {
           schemaData,
           tableGroups,
           history,
+          projectId,
         }),
       })
 

@@ -67,10 +67,26 @@ COMMENT ON POLICY "authenticated_users_can_delete_org_documents"
   ON "public"."documents"
   IS 'Authenticated users can only delete documents in organizations they are members of';
 
--- Service role can access all documents (for background jobs, etc.)
+-- Service role policies for all operations (for background jobs, etc.)
 CREATE POLICY "service_role_can_select_all_documents"
   ON "public"."documents"
   FOR SELECT TO "service_role"
+  USING (true);
+
+CREATE POLICY "service_role_can_insert_all_documents"
+  ON "public"."documents"
+  FOR INSERT TO "service_role"
+  WITH CHECK (true);
+
+CREATE POLICY "service_role_can_update_all_documents"
+  ON "public"."documents"
+  FOR UPDATE TO "service_role"
+  USING (true)
+  WITH CHECK (true);
+
+CREATE POLICY "service_role_can_delete_all_documents"
+  ON "public"."documents"
+  FOR DELETE TO "service_role"
   USING (true);
 
 COMMIT;

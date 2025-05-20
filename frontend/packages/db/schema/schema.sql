@@ -1972,6 +1972,10 @@ ALTER TABLE "public"."review_suggestion_snippets" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."schema_file_paths" ENABLE ROW LEVEL SECURITY;
 
 
+CREATE POLICY "service_role_can_delete_all_documents" ON "public"."documents" FOR DELETE TO "service_role" USING (true);
+
+
+
 CREATE POLICY "service_role_can_delete_all_invitations" ON "public"."invitations" FOR DELETE TO "service_role" USING (true);
 
 
@@ -1989,6 +1993,10 @@ CREATE POLICY "service_role_can_delete_all_projects" ON "public"."projects" FOR 
 
 
 COMMENT ON POLICY "service_role_can_delete_all_projects" ON "public"."projects" IS 'Service role can delete any project (for jobs)';
+
+
+
+CREATE POLICY "service_role_can_insert_all_documents" ON "public"."documents" FOR INSERT TO "service_role" WITH CHECK (true);
 
 
 
@@ -2113,6 +2121,10 @@ CREATE POLICY "service_role_can_select_all_review_feedback_knowledge_suggestio" 
 
 
 CREATE POLICY "service_role_can_select_all_schema_file_paths" ON "public"."schema_file_paths" FOR SELECT TO "service_role" USING (true);
+
+
+
+CREATE POLICY "service_role_can_update_all_documents" ON "public"."documents" FOR UPDATE TO "service_role" USING (true) WITH CHECK (true);
 
 
 

@@ -34,6 +34,113 @@ export type Database = {
   }
   public: {
     Tables: {
+      building_schemas: {
+        Row: {
+          created_at: string
+          design_session_id: string
+          id: string
+          organization_id: string
+          schema: Json
+        }
+        Insert: {
+          created_at?: string
+          design_session_id: string
+          id?: string
+          organization_id: string
+          schema: Json
+        }
+        Update: {
+          created_at?: string
+          design_session_id?: string
+          id?: string
+          organization_id?: string
+          schema?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'building_schemas_design_session_id_fkey'
+            columns: ['design_session_id']
+            isOneToOne: false
+            referencedRelation: 'design_sessions'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'building_schemas_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      design_sessions: {
+        Row: {
+          created_at: string
+          created_by_user_id: string
+          git_sha: string | null
+          id: string
+          initial_schema_snapshot: Json | null
+          name: string
+          organization_id: string
+          parent_design_session_id: string | null
+          project_id: string
+          schema_file_path: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by_user_id: string
+          git_sha?: string | null
+          id?: string
+          initial_schema_snapshot?: Json | null
+          name: string
+          organization_id: string
+          parent_design_session_id?: string | null
+          project_id: string
+          schema_file_path?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by_user_id?: string
+          git_sha?: string | null
+          id?: string
+          initial_schema_snapshot?: Json | null
+          name?: string
+          organization_id?: string
+          parent_design_session_id?: string | null
+          project_id?: string
+          schema_file_path?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'design_sessions_created_by_user_id_fkey'
+            columns: ['created_by_user_id']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'design_sessions_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'design_sessions_parent_design_session_id_fkey'
+            columns: ['parent_design_session_id']
+            isOneToOne: false
+            referencedRelation: 'design_sessions'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'design_sessions_project_id_fkey'
+            columns: ['project_id']
+            isOneToOne: false
+            referencedRelation: 'projects'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       doc_file_paths: {
         Row: {
           created_at: string
@@ -360,6 +467,61 @@ export type Database = {
             columns: ['organization_id']
             isOneToOne: false
             referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          content: string
+          created_at: string
+          design_session_id: string
+          id: string
+          organization_id: string
+          role: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          design_session_id: string
+          id?: string
+          organization_id: string
+          role: string
+          updated_at: string
+          user_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          design_session_id?: string
+          id?: string
+          organization_id?: string
+          role?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'messages_design_session_id_fkey'
+            columns: ['design_session_id']
+            isOneToOne: false
+            referencedRelation: 'design_sessions'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'messages_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'messages_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'users'
             referencedColumns: ['id']
           },
         ]

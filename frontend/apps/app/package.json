@@ -12,6 +12,9 @@
     "@codemirror/merge": "6.10.0",
     "@codemirror/state": "6.5.2",
     "@codemirror/view": "6.36.7",
+    "@langchain/community": "0.3.43",
+    "@langchain/core": "0.3.49",
+    "@langchain/openai": "0.5.7",
     "@lezer/highlight": "1.2.1",
     "@liam-hq/db": "workspace:*",
     "@liam-hq/db-structure": "workspace:*",
@@ -65,6 +68,7 @@
     "esbuild": "0.25.3",
     "eslint": "9.25.1",
     "storybook": "8.6.12",
+    "tsx": "4.19.4",
     "typed-css-modules": "0.9.1",
     "typescript": "5.8.3",
     "vitest": "3.1.2"
@@ -85,6 +89,7 @@
     "lint:tsc": "tsc --noEmit",
     "postinstall": "cp ../../packages/db-structure/node_modules/@ruby/prism/src/prism.wasm prism.wasm",
     "start": "next start",
+    "sync-vector-store": "tsx scripts/syncVectorStore.ts",
     "test": "vitest --watch=false",
     "test:vitest": "pnpm vitest"
   }

@@ -1,8 +1,12 @@
 import type {
   Column,
+  ColumnCheck,
+  ColumnDefault,
+  ColumnName,
+  ColumnNotNull,
+  ColumnPrimary,
+  ColumnUnique,
   Comment,
-  Constraint,
-  Index,
   Table,
   TableName,
 } from '../schema/index.js'
@@ -32,22 +36,64 @@ export type TableCommentDiffItem = BaseSchemaDiffItem & {
 export type ColumnDiffItem = BaseSchemaDiffItem & {
   kind: 'column'
   data: Column
+  columnId: string
 }
 
-export type IndexDiffItem = BaseSchemaDiffItem & {
-  kind: 'index'
-  data: Index
+export type ColumnNameDiffItem = BaseSchemaDiffItem & {
+  kind: 'column-name'
+  data: ColumnName
+  columnId: string
 }
 
-export type ConstraintDiffItem = BaseSchemaDiffItem & {
-  kind: 'constraint'
-  data: Constraint
+export type ColumnCommentDiffItem = BaseSchemaDiffItem & {
+  kind: 'column-comment'
+  data: Comment
+  columnId: string
 }
 
-export type SchemaDiffItem =
+export type ColumnPrimaryDiffItem = BaseSchemaDiffItem & {
+  kind: 'column-primary'
+  data: ColumnPrimary
+  columnId: string
+}
+
+export type ColumnDefaultDiffItem = BaseSchemaDiffItem & {
+  kind: 'column-default'
+  data: ColumnDefault
+  columnId: string
+}
+
+export type ColumnCheckDiffItem = BaseSchemaDiffItem & {
+  kind: 'column-check'
+  data: ColumnCheck
+  columnId: string
+}
+
+export type ColumnUniqueDiffItem = BaseSchemaDiffItem & {
+  kind: 'column-unique'
+  data: ColumnUnique
+  columnId: string
+}
+
+export type ColumnNotNullDiffItem = BaseSchemaDiffItem & {
+  kind: 'column-not-null'
+  data: ColumnNotNull
+  columnId: string
+}
+
+export type TableRelatedDiffItem =
   | TableDiffItem
   | TableNameDiffItem
   | TableCommentDiffItem
+
+export type ColumnRelatedDiffItem =
   | ColumnDiffItem
-  | IndexDiffItem
-  | ConstraintDiffItem
+  | ColumnNameDiffItem
+  | ColumnCommentDiffItem
+  | ColumnPrimaryDiffItem
+  | ColumnDefaultDiffItem
+  | ColumnCheckDiffItem
+  | ColumnUniqueDiffItem
+  | ColumnNotNullDiffItem
+
+export type SchemaDiffItem = TableRelatedDiffItem | ColumnRelatedDiffItem

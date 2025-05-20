@@ -23,5 +23,5 @@
       0deg,
       var(--primary-accent-overlay-hover) 0%,
       var(--primary-accent-overlay-hover) 100%
-    ), var(--pane-background-active-hover);
+    ), var(--pane-background-active);
 }

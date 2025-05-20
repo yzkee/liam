@@ -10,6 +10,10 @@ export const updateActiveTableName = (tableName: string | undefined) => {
   userEditingStore.active.tableName = tableName
 }
 
+export const resetSelectedNodeIds = () => {
+  userEditingStore.selectedNodeIds.clear()
+}
+
 export const updateSelectedNodeIds = (
   nodeId: string,
   isMultiSelect: 'ctrl' | 'shift' | 'single',

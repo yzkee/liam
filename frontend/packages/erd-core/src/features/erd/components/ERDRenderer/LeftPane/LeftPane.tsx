@@ -1,7 +1,11 @@
 import { isTableNode } from '@/features/erd/utils'
 import { useCustomReactflow } from '@/features/reactflow/hooks'
 import { useVersion } from '@/providers'
-import { useUserEditingStore } from '@/stores'
+import {
+  replaceHiddenNodeIds,
+  resetSelectedNodeIds,
+  useUserEditingStore,
+} from '@/stores'
 import {
   BookText,
   Eye,
@@ -94,6 +98,7 @@ export const LeftPane = () => {
   const visibleCount = tableNodes.filter((node) => !node.hidden).length
 
   const showOrHideAllNodes = useCallback(() => {
+    resetSelectedNodeIds()
     const shouldHide = visibleCount === allCount
     const updatedNodes = updateNodesHiddenState({
       nodes,
@@ -105,14 +110,16 @@ export const LeftPane = () => {
 
   const showSelectedTables = useCallback(() => {
     if (selectedNodeIds.size > 0) {
+      const hiddenNodeIds = nodes
+        .filter((node) => !selectedNodeIds.has(node.id))
+        .map((node) => node.id)
       const updatedNodes = updateNodesHiddenState({
         nodes,
-        hiddenNodeIds: nodes
-          .filter((node) => !selectedNodeIds.has(node.id))
-          .map((node) => node.id),
+        hiddenNodeIds: hiddenNodeIds,
         shouldHideGroupNodeId: true,
       })
       setNodes(updatedNodes)
+      replaceHiddenNodeIds(hiddenNodeIds)
     }
   }, [nodes, selectedNodeIds, setNodes])
 

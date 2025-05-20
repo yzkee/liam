@@ -188,6 +188,7 @@
   --primary-hover: #4af19c;
   --primary-color: #1ded83;
   --primary-accent-overlay: rgba(29, 237, 131, 0.1);
+  --primary-accent-overlay-hover: rgba(29, 237, 131, 0.2);
   --primary-on-white-shape: #36c271;
   --primary-on-white-text: #008543;
   --primary-overlay-0: rgba(29, 237, 131, 0);

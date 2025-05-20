@@ -24,20 +24,20 @@
   border-color: var(--pane-border);
 }
 
-.columnSection {
+.root {
   display: grid;
   grid-auto-rows: auto;
   gap: var(--spacing-6);
 }
 
-.columnTrigger {
+.trigger {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
 }
 
-.columnTriggerIcon {
+.triggerIcon {
   width: 1rem;
   height: 1rem;
 }

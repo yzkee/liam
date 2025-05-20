@@ -14,6 +14,7 @@ import type { FC } from 'react'
 import { match } from 'ts-pattern'
 import { ColumnItem } from './ColumnItem'
 import diffStyles from './Diff.module.css'
+import { IndexItem } from './IndexItem'
 import styles from './TableItem.module.css'
 
 function getChangeStatusStyle(
@@ -89,16 +90,16 @@ export const TableItem: FC<Props> = ({
       <hr className={styles.divider} />
 
       <CollapsibleRoot
-        className={styles.columnSection}
+        className={styles.root}
         open={isOpenColumns}
         onOpenChange={onOpenChangeColumns}
       >
-        <CollapsibleTrigger className={styles.columnTrigger}>
+        <CollapsibleTrigger className={styles.trigger}>
           <h2>Columns</h2>
           {isOpenColumns ? (
-            <ChevronUp className={styles.columnTriggerIcon} />
+            <ChevronUp className={styles.triggerIcon} />
           ) : (
-            <ChevronDown className={styles.columnTriggerIcon} />
+            <ChevronDown className={styles.triggerIcon} />
           )}
         </CollapsibleTrigger>
         <CollapsibleContent>
@@ -107,6 +108,34 @@ export const TableItem: FC<Props> = ({
               key={column.name}
               tableId={table.name}
               column={column}
+              diffItems={diffItems}
+              type={type}
+            />
+          ))}
+        </CollapsibleContent>
+      </CollapsibleRoot>
+
+      <hr className={styles.divider} />
+
+      <CollapsibleRoot
+        className={styles.root}
+        open={isOpenIndex}
+        onOpenChange={onOpenChangeIndex}
+      >
+        <CollapsibleTrigger className={styles.trigger}>
+          <h2>Index</h2>
+          {isOpenIndex ? (
+            <ChevronUp className={styles.triggerIcon} />
+          ) : (
+            <ChevronDown className={styles.triggerIcon} />
+          )}
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          {Object.values(table.indexes).map((index) => (
+            <IndexItem
+              key={index.name}
+              tableId={table.name}
+              index={index}
               diffItems={diffItems}
               type={type}
             />

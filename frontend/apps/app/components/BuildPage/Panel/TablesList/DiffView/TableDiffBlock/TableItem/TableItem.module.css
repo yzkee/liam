@@ -20,10 +20,24 @@
   grid-area: after;
 }
 
-.added {
-  background-color: var(--color-green-alpha-20);
+.divider {
+  border-color: var(--pane-border);
 }
 
-.removed {
-  background-color: var(--color-red-alpha-20);
+.root {
+  display: grid;
+  grid-auto-rows: auto;
+  gap: var(--spacing-6);
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.triggerIcon {
+  width: 1rem;
+  height: 1rem;
 }

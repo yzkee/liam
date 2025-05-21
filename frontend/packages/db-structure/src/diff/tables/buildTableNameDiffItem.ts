@@ -22,7 +22,7 @@ export function buildTableNameDiffItem(
       ? before.tables[tableId]?.name
       : after.tables[tableId]?.name
 
-  if (!data) return null
+  if (data === undefined) return null
 
   return {
     kind: 'table-name',

@@ -22,7 +22,7 @@ export function buildTableCommentDiffItem(
       ? before.tables[tableId]?.comment
       : after.tables[tableId]?.comment
 
-  if (!data) return null
+  if (data === undefined) return null
 
   return {
     kind: 'table-comment',

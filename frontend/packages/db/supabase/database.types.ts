@@ -105,7 +105,7 @@ export type Database = {
           {
             foreignKeyName: 'building_schemas_design_session_id_fkey'
             columns: ['design_session_id']
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: 'design_sessions'
             referencedColumns: ['id']
           },

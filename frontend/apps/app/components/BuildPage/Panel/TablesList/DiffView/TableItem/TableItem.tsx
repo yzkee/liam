@@ -1,13 +1,19 @@
-import type { SchemaDiffItem, Table } from '@liam-hq/db-structure'
+import type {
+  SchemaDiffItem,
+  Table,
+  TableRelatedDiffItem,
+} from '@liam-hq/db-structure'
 import clsx from 'clsx'
 import type { FC } from 'react'
 import { match } from 'ts-pattern'
+import { ColumnItem } from './ColumnItem'
+import diffStyles from './Diff.module.css'
 import styles from './TableItem.module.css'
 
 function getChangeStatusStyle(
   tableId: string,
   diffItems: SchemaDiffItem[],
-  kind: SchemaDiffItem['kind'],
+  kind: TableRelatedDiffItem['kind'],
   type: 'before' | 'after',
 ) {
   const status =
@@ -15,30 +21,35 @@ function getChangeStatusStyle(
       ?.status ?? 'unchanged'
 
   return match([status, type])
-    .with(['added', 'after'], () => styles.added)
-    .with(['modified', 'after'], () => styles.added)
-    .with(['removed', 'before'], () => styles.removed)
-    .with(['modified', 'before'], () => styles.removed)
+    .with(['added', 'after'], () => diffStyles.added)
+    .with(['modified', 'after'], () => diffStyles.added)
+    .with(['removed', 'before'], () => diffStyles.removed)
+    .with(['modified', 'before'], () => diffStyles.removed)
     .otherwise(() => '')
 }
 
 type Props = {
   table: Table
-  diff: SchemaDiffItem[]
+  diffItems: SchemaDiffItem[]
   type: 'before' | 'after'
 }
 
-export const TableItem: FC<Props> = ({ table, diff, type }) => {
-  const tableStatusStyle = getChangeStatusStyle(table.name, diff, 'table', type)
+export const TableItem: FC<Props> = ({ table, diffItems, type }) => {
+  const tableStatusStyle = getChangeStatusStyle(
+    table.name,
+    diffItems,
+    'table',
+    type,
+  )
   const tableNameStatusStyle = getChangeStatusStyle(
     table.name,
-    diff,
+    diffItems,
     'table-name',
     type,
   )
   const tableCommentStatusStyle = getChangeStatusStyle(
     table.name,
-    diff,
+    diffItems,
     'table-comment',
     type,
   )
@@ -57,11 +68,18 @@ export const TableItem: FC<Props> = ({ table, diff, type }) => {
         <p className={tableCommentStatusStyle}>{table.comment}</p>
       </div>
 
-      <div>
-        <h2>Columns</h2>
-        {Object.values(table.columns).map((column) => {
-          return <div key={column.name}>{column.name}</div>
-        })}
+      <hr className={styles.divider} />
+
+      <div className={styles.columnSection}>
+        {Object.values(table.columns).map((column) => (
+          <ColumnItem
+            key={column.name}
+            tableId={table.name}
+            column={column}
+            diffItems={diffItems}
+            type={type}
+          />
+        ))}
       </div>
     </section>
   )

@@ -1,31 +1,36 @@
 import type { Operation } from 'fast-json-patch'
 import type { Schema } from '../../schema/index.js'
 import { PATH_PATTERNS } from '../constants.js'
-import type { TableDiffItem } from '../types.js'
+import type { ColumnPrimaryDiffItem } from '../types.js'
 import { getChangeStatus } from '../utils/getChangeStatus.js'
 
-export function buildTableDiffItem(
+export function buildColumnPrimaryDiffItem(
   tableId: string,
+  columnId: string,
   before: Schema,
   after: Schema,
   operations: Operation[],
-): TableDiffItem | null {
+): ColumnPrimaryDiffItem | null {
   const status = getChangeStatus({
     tableId,
+    columnId,
     operations,
-    pathRegExp: PATH_PATTERNS.TABLE_BASE,
+    pathRegExp: PATH_PATTERNS.COLUMN_PRIMARY,
   })
   if (status === 'unchanged') return null
 
   const data =
-    status === 'removed' ? before.tables[tableId] : after.tables[tableId]
+    status === 'removed'
+      ? before.tables[tableId]?.columns[columnId]?.primary
+      : after.tables[tableId]?.columns[columnId]?.primary
 
   if (data === undefined) return null
 
   return {
-    kind: 'table',
+    kind: 'column-primary',
     status,
     data,
     tableId,
+    columnId,
   }
 }

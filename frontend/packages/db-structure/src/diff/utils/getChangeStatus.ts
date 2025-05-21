@@ -6,17 +6,24 @@ type PathPatternValue = (typeof PATH_PATTERNS)[keyof typeof PATH_PATTERNS]
 
 type Params = {
   tableId: string
+  columnId?: string
   operations: Operation[]
   pathRegExp: PathPatternValue
 }
 
 export function getChangeStatus({
   tableId,
+  columnId,
   operations,
   pathRegExp,
 }: Params): ChangeStatus {
   const filteredOperations = operations.filter(({ path }) => {
     const match = path.match(pathRegExp)
+
+    if (match?.[1] && match?.[2] && columnId) {
+      return match[1] === tableId && match[2] === columnId
+    }
+
     return match && match[1] === tableId
   })
 

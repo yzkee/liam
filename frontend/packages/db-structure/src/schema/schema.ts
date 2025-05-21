@@ -4,6 +4,24 @@ import * as v from 'valibot'
 export const tableGroupNameSchema = v.string()
 
 export const columnNameSchema = v.string()
+export type ColumnName = v.InferOutput<typeof columnNameSchema>
+
+const columnPrimarySchema = v.boolean()
+export type ColumnPrimary = v.InferOutput<typeof columnPrimarySchema>
+
+const columnDefaultSchema = v.nullable(
+  v.union([v.string(), v.number(), v.boolean()]),
+)
+export type ColumnDefault = v.InferOutput<typeof columnDefaultSchema>
+
+const columnCheckSchema = v.nullable(v.string())
+export type ColumnCheck = v.InferOutput<typeof columnCheckSchema>
+
+const columnUniqueSchema = v.boolean()
+export type ColumnUnique = v.InferOutput<typeof columnUniqueSchema>
+
+const columnNotNullSchema = v.boolean()
+export type ColumnNotNull = v.InferOutput<typeof columnNotNullSchema>
 
 export const tableNameSchema = v.string()
 export type TableName = v.InferOutput<typeof tableNameSchema>
@@ -20,11 +38,11 @@ const constraintNameSchema = v.string()
 export const columnSchema = v.object({
   name: columnNameSchema,
   type: v.string(),
-  default: v.nullable(v.union([v.string(), v.number(), v.boolean()])),
-  check: v.nullable(v.string()),
-  primary: v.boolean(),
-  unique: v.boolean(),
-  notNull: v.boolean(),
+  default: columnDefaultSchema,
+  check: columnCheckSchema,
+  primary: columnPrimarySchema,
+  unique: columnUniqueSchema,
+  notNull: columnNotNullSchema,
   comment: commentSchema,
 })
 

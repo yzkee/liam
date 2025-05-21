@@ -4,4 +4,5 @@ export type {
   SchemaDiffItem,
   TableRelatedDiffItem,
   ColumnRelatedDiffItem,
+  IndexRelatedDiffItem,
 } from './types.js'

@@ -1,6 +1,7 @@
 export * from './Avatar'
 export * from './Button'
 export * from './Callout'
+export * from './Collapsible'
 export * from './CookieConsent'
 export * from './Drawer'
 export * from './DropdownMenu'

@@ -29,8 +29,6 @@ export type TableName = v.InferOutput<typeof tableNameSchema>
 const commentSchema = v.nullable(v.string())
 export type Comment = v.InferOutput<typeof commentSchema>
 
-const indexNameSchema = v.string()
-
 const relationshipNameSchema = v.string()
 
 const constraintNameSchema = v.string()
@@ -50,11 +48,23 @@ const columnsSchema = v.record(columnNameSchema, columnSchema)
 export type Columns = v.InferOutput<typeof columnsSchema>
 export type Column = v.InferOutput<typeof columnSchema>
 
+const indexNameSchema = v.string()
+export type IndexName = v.InferOutput<typeof indexNameSchema>
+
+const indexUniqueSchema = v.boolean()
+export type IndexUnique = v.InferOutput<typeof indexUniqueSchema>
+
+const indexColumnsSchema = v.array(v.string())
+export type IndexColumns = v.InferOutput<typeof indexColumnsSchema>
+
+const indexTypeSchema = v.string()
+export type IndexType = v.InferOutput<typeof indexTypeSchema>
+
 const indexSchema = v.object({
-  name: v.string(),
-  unique: v.boolean(),
-  columns: v.array(v.string()),
-  type: v.string(),
+  name: indexNameSchema,
+  unique: indexUniqueSchema,
+  columns: indexColumnsSchema,
+  type: indexTypeSchema,
 })
 export type Index = v.InferOutput<typeof indexSchema>
 

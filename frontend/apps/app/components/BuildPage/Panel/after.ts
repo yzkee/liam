@@ -84,6 +84,7 @@ export const AFTER = {
           comment: 'Timestamp of the last review',
         },
       },
+      indexes: {},
     },
     doc_file_paths: {
       name: 'doc_file_paths',

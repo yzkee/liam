@@ -7,6 +7,11 @@ import type {
   ColumnPrimary,
   ColumnUnique,
   Comment,
+  Index,
+  IndexColumns,
+  IndexName,
+  IndexType,
+  IndexUnique,
   Table,
   TableName,
 } from '../schema/index.js'
@@ -81,6 +86,36 @@ export type ColumnNotNullDiffItem = BaseSchemaDiffItem & {
   columnId: string
 }
 
+export type IndexDiffItem = BaseSchemaDiffItem & {
+  kind: 'index'
+  data: Index
+  indexId: string
+}
+
+export type IndexNameDiffItem = BaseSchemaDiffItem & {
+  kind: 'index-name'
+  data: IndexName
+  indexId: string
+}
+
+export type IndexUniqueDiffItem = BaseSchemaDiffItem & {
+  kind: 'index-unique'
+  data: IndexUnique
+  indexId: string
+}
+
+export type IndexColumnsDiffItem = BaseSchemaDiffItem & {
+  kind: 'index-columns'
+  data: IndexColumns
+  indexId: string
+}
+
+export type IndexTypeDiffItem = BaseSchemaDiffItem & {
+  kind: 'index-type'
+  data: IndexType
+  indexId: string
+}
+
 export type TableRelatedDiffItem =
   | TableDiffItem
   | TableNameDiffItem
@@ -96,4 +131,14 @@ export type ColumnRelatedDiffItem =
   | ColumnUniqueDiffItem
   | ColumnNotNullDiffItem
 
-export type SchemaDiffItem = TableRelatedDiffItem | ColumnRelatedDiffItem
+export type IndexRelatedDiffItem =
+  | IndexDiffItem
+  | IndexNameDiffItem
+  | IndexUniqueDiffItem
+  | IndexColumnsDiffItem
+  | IndexTypeDiffItem
+
+export type SchemaDiffItem =
+  | TableRelatedDiffItem
+  | ColumnRelatedDiffItem
+  | IndexRelatedDiffItem

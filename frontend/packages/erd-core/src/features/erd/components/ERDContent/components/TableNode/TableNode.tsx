@@ -16,32 +16,6 @@ import styles from './TableNode.module.css'
 
 type Props = NodeProps<TableNodeType>
 
-/**
- * Copies relevant computed styles from a source element to a target element.
- */
-const copyTextStyles = (source: CSSStyleDeclaration, target: HTMLElement) => {
-  const styleProps = [
-    'font',
-    'fontSize',
-    'fontFamily',
-    'fontWeight',
-    'letterSpacing',
-    'wordSpacing',
-    'fontStyle',
-    'fontVariant',
-    'fontStretch',
-    'textTransform',
-    'textRendering',
-    'padding',
-    'margin',
-    'whiteSpace',
-  ] as const
-
-  styleProps.forEach((prop) => {
-    target.style[prop] = source[prop]
-  })
-}
-
 export const TableNode: FC<Props> = ({ data }) => {
   const { showMode: _showMode } = useUserEditingStore()
   const showMode = data.showMode ?? _showMode
@@ -52,27 +26,26 @@ export const TableNode: FC<Props> = ({ data }) => {
 
   useEffect(() => {
     const checkTruncation = () => {
-      if (!textRef.current || !name) return
+      if (!textRef.current) return
+
       const element = textRef.current
+
       const style = window.getComputedStyle(element)
 
-      // Create a hidden span for measurement
-      const tempSpan = document.createElement('span')
-      tempSpan.textContent = name
-      tempSpan.style.visibility = 'hidden'
-      tempSpan.style.position = 'absolute'
-      tempSpan.style.pointerEvents = 'none'
-      tempSpan.style.whiteSpace = 'nowrap'
-      copyTextStyles(style, tempSpan)
+      // Create a canvas to measure text width
+      const canvas = document.createElement('canvas')
+      const context = canvas.getContext('2d')
+      if (!context) return
 
-      document.body.appendChild(tempSpan)
-      try {
-        const textWidth = tempSpan.offsetWidth
-        const availableWidth = element.clientWidth
-        setIsTruncated(textWidth > availableWidth)
-      } finally {
-        document.body.removeChild(tempSpan)
-      }
+      // Set the font to match the element
+      context.font = style.font
+
+      // Measure the text width
+      const textMetrics = context.measureText(name)
+      const textWidth = textMetrics.width
+
+      // Check if text is truncated
+      setIsTruncated(textWidth > element.clientWidth + 0.015)
     }
 
     // Initial check after a small delay to ensure DOM is rendered

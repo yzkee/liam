@@ -46,8 +46,8 @@ importers:
         specifier: 5.8.3
         version: 5.8.3
       vercel:
-        specifier: 41.7.0
-        version: 41.7.0(rollup@4.40.2)
+        specifier: 41.7.2
+        version: 41.7.2(rollup@4.40.2)
 
   frontend/apps/app:
     dependencies:
@@ -5503,8 +5503,8 @@ packages:
   '@vercel/hydrogen@1.2.0':
     resolution: {integrity: sha512-kdZp8cTVLoNmnu24wtoQPu9ZO+uB00zvDMTOXlQmNdq/V3k0mQa/Q5k2B8nliBQ3BMiBasoXxMKv59+F8rYvDw==}
 
-  '@vercel/next@4.7.9':
-    resolution: {integrity: sha512-zwm4IKrtWaBlPKU6isGwRg/+i/Do+QVdnXTRKaDeYnMAI703cysqOr1VE1rWBSJCzmUUOJkeJdXidBaMpGgRaw==}
+  '@vercel/next@4.7.10':
+    resolution: {integrity: sha512-IC3z3TbFpvaeZirPjk0E6eyB1XQqzEc2kLlN5kF9PPFHgcBL4ktEgnJanCg3RzOnRf2jc169MryD4DIErZ9OuA==}
 
   '@vercel/nft@0.27.10':
     resolution: {integrity: sha512-zbaF9Wp/NsZtKLE4uVmL3FyfFwlpDyuymQM1kPbeT0mVOHKDQQNjnnfslB3REg3oZprmNFJuh3pkHBk2qAaizg==}
@@ -11040,8 +11040,8 @@ packages:
       react: ^16.8 || ^17.0 || ^18.0 || ^19.0.0 || ^19.0.0-rc
       react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0.0 || ^19.0.0-rc
 
-  vercel@41.7.0:
-    resolution: {integrity: sha512-71yoAOnzGzIBNTmsX3rfPKD03dSLA1cIu09rwulJDqARctfmJj8t+AmOC5jtpczOj7Z5HGgZMaLIrXrv220lcQ==}
+  vercel@41.7.2:
+    resolution: {integrity: sha512-XL62xOTXSU2AucAWWNrNaY98M6UQyzPCKMeaTTbAdk42bgcmiL/3GKyKJs0T+li0aFp7w4QPZyB/9+Ll0qRzEw==}
     engines: {node: '>= 18'}
     hasBin: true
 
@@ -17310,7 +17310,7 @@ snapshots:
       '@vercel/static-config': 3.0.0
       ts-morph: 12.0.0
 
-  '@vercel/next@4.7.9(rollup@4.40.2)':
+  '@vercel/next@4.7.10(rollup@4.40.2)':
     dependencies:
       '@vercel/nft': 0.27.10(rollup@4.40.2)
     transitivePeerDependencies:
@@ -23736,13 +23736,13 @@ snapshots:
       - '@types/react'
       - '@types/react-dom'
 
-  vercel@41.7.0(rollup@4.40.2):
+  vercel@41.7.2(rollup@4.40.2):
     dependencies:
       '@vercel/build-utils': 10.5.1
       '@vercel/fun': 1.1.5
       '@vercel/go': 3.2.1
       '@vercel/hydrogen': 1.2.0
-      '@vercel/next': 4.7.9(rollup@4.40.2)
+      '@vercel/next': 4.7.10(rollup@4.40.2)
       '@vercel/node': 5.1.15(rollup@4.40.2)
       '@vercel/python': 4.7.2
       '@vercel/redwood': 2.3.0(rollup@4.40.2)

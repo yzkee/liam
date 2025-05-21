@@ -16,22 +16,62 @@ import styles from './TableNode.module.css'
 
 type Props = NodeProps<TableNodeType>
 
+/**
+ * Copies relevant computed styles from a source element to a target element.
+ */
+const copyTextStyles = (source: CSSStyleDeclaration, target: HTMLElement) => {
+  const styleProps = [
+    'font',
+    'fontSize',
+    'fontFamily',
+    'fontWeight',
+    'letterSpacing',
+    'wordSpacing',
+    'fontStyle',
+    'fontVariant',
+    'fontStretch',
+    'textTransform',
+    'textRendering',
+    'padding',
+    'margin',
+    'whiteSpace',
+  ] as const
+
+  styleProps.forEach((prop) => {
+    target.style[prop] = source[prop]
+  })
+}
+
 export const TableNode: FC<Props> = ({ data }) => {
   const { showMode: _showMode } = useUserEditingStore()
   const showMode = data.showMode ?? _showMode
   const name = data?.table?.name
 
   const textRef = useRef<HTMLSpanElement>(null)
-
-  //Add the truncated state to detect the truncated table name
   const [isTruncated, setIsTruncated] = useState<boolean>(false)
 
   useEffect(() => {
     const checkTruncation = () => {
-      if (textRef.current) {
-        const element = textRef.current
-        const isTruncated = element.scrollWidth > element.clientWidth
-        setIsTruncated(isTruncated)
+      if (!textRef.current || !name) return
+      const element = textRef.current
+      const style = window.getComputedStyle(element)
+
+      // Create a hidden span for measurement
+      const tempSpan = document.createElement('span')
+      tempSpan.textContent = name
+      tempSpan.style.visibility = 'hidden'
+      tempSpan.style.position = 'absolute'
+      tempSpan.style.pointerEvents = 'none'
+      tempSpan.style.whiteSpace = 'nowrap'
+      copyTextStyles(style, tempSpan)
+
+      document.body.appendChild(tempSpan)
+      try {
+        const textWidth = tempSpan.offsetWidth
+        const availableWidth = element.clientWidth
+        setIsTruncated(textWidth > availableWidth)
+      } finally {
+        document.body.removeChild(tempSpan)
       }
     }
 
@@ -52,7 +92,7 @@ export const TableNode: FC<Props> = ({ data }) => {
       window.removeEventListener('resize', checkTruncation)
       observer.disconnect()
     }
-  }, [])
+  }, [name])
 
   return (
     <TooltipProvider>

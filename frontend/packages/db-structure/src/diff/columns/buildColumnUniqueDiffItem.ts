@@ -24,7 +24,7 @@ export function buildColumnUniqueDiffItem(
       ? before.tables[tableId]?.columns[columnId]?.unique
       : after.tables[tableId]?.columns[columnId]?.unique
 
-  if (!data) return null
+  if (data === undefined) return null
 
   return {
     kind: 'column-unique',

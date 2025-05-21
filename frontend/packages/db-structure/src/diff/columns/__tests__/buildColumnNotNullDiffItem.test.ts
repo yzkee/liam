@@ -190,7 +190,7 @@ describe('buildColumnNotNullDiffItem', () => {
     expect(result).toBeNull()
   })
 
-  it('should return null when notNull value is false', () => {
+  it('should return ColumnNotNullDiffItem with false when notNull value is false', () => {
     const beforeSchema = createMockSchema(true, false)
     const afterSchema = createMockSchema(true, false)
 
@@ -212,7 +212,13 @@ describe('buildColumnNotNullDiffItem', () => {
       operations: mockOperations,
       pathRegExp: PATH_PATTERNS.COLUMN_NOT_NULL,
     })
-    expect(result).toBeNull()
+    expect(result).toEqual({
+      kind: 'column-not-null',
+      status: 'modified',
+      data: false,
+      tableId: mockTableId,
+      columnId: mockColumnId,
+    })
   })
 
   it('should return null when table does not exist', () => {

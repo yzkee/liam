@@ -190,7 +190,7 @@ describe('buildColumnNameDiffItem', () => {
     expect(result).toBeNull()
   })
 
-  it('should return null when column name is empty', () => {
+  it('should return column ColumnNameDiffItem with empty name when column name is empty', () => {
     const beforeSchema = createMockSchema(true, '')
     const afterSchema = createMockSchema(true, '')
 
@@ -212,7 +212,13 @@ describe('buildColumnNameDiffItem', () => {
       operations: mockOperations,
       pathRegExp: PATH_PATTERNS.COLUMN_NAME,
     })
-    expect(result).toBeNull()
+    expect(result).toEqual({
+      kind: 'column-name',
+      columnId: 'column1',
+      data: '',
+      status: 'modified',
+      tableId: 'table1',
+    })
   })
 
   it('should return null when table does not exist', () => {

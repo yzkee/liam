@@ -24,7 +24,7 @@ export function buildColumnPrimaryDiffItem(
       ? before.tables[tableId]?.columns[columnId]?.primary
       : after.tables[tableId]?.columns[columnId]?.primary
 
-  if (!data) return null
+  if (data === undefined) return null
 
   return {
     kind: 'column-primary',

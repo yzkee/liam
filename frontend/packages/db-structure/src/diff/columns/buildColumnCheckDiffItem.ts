@@ -24,7 +24,7 @@ export function buildColumnCheckDiffItem(
       ? before.tables[tableId]?.columns[columnId]?.check
       : after.tables[tableId]?.columns[columnId]?.check
 
-  if (!data) return null
+  if (data === undefined) return null
 
   return {
     kind: 'column-check',

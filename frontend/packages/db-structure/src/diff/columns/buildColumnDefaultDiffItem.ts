@@ -24,7 +24,7 @@ export function buildColumnDefaultDiffItem(
       ? before.tables[tableId]?.columns[columnId]?.default
       : after.tables[tableId]?.columns[columnId]?.default
 
-  if (!data) return null
+  if (data === undefined) return null
 
   return {
     kind: 'column-default',

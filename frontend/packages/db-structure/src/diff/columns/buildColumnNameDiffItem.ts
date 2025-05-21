@@ -24,7 +24,7 @@ export function buildColumnNameDiffItem(
       ? before.tables[tableId]?.columns[columnId]?.name
       : after.tables[tableId]?.columns[columnId]?.name
 
-  if (!data) return null
+  if (data === undefined) return null
 
   return {
     kind: 'column-name',

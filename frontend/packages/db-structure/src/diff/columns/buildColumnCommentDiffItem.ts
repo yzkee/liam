@@ -24,7 +24,7 @@ export function buildColumnCommentDiffItem(
       ? before.tables[tableId]?.columns[columnId]?.comment
       : after.tables[tableId]?.columns[columnId]?.comment
 
-  if (!data) return null
+  if (data === undefined) return null
 
   return {
     kind: 'column-comment',

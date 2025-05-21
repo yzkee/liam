@@ -24,7 +24,7 @@ export function buildColumnNotNullDiffItem(
       ? before.tables[tableId]?.columns[columnId]?.notNull
       : after.tables[tableId]?.columns[columnId]?.notNull
 
-  if (!data) return null
+  if (data === undefined) return null
 
   return {
     kind: 'column-not-null',

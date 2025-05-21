@@ -1305,6 +1305,16 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      update_building_schema: {
+        Args: {
+          p_schema_id: string
+          p_schema_schema: Json
+          p_schema_version_patch: Json
+          p_schema_version_reverse_patch: Json
+          p_latest_schema_version_number: number
+        }
+        Returns: Json
+      }
       vector_avg: {
         Args: { '': number[] }
         Returns: string

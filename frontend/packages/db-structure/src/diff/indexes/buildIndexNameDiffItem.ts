@@ -24,7 +24,7 @@ export function buildIndexNameDiffItem(
       ? before.tables[tableId]?.indexes[indexId]?.name
       : after.tables[tableId]?.indexes[indexId]?.name
 
-  if (!data) return null
+  if (data === undefined) return null
 
   return {
     kind: 'index-name',

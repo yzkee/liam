@@ -24,7 +24,7 @@ export function buildIndexColumnsDiffItem(
       ? before.tables[tableId]?.indexes[indexId]?.columns
       : after.tables[tableId]?.indexes[indexId]?.columns
 
-  if (!data) return null
+  if (data === undefined) return null
 
   return {
     kind: 'index-columns',

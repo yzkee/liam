@@ -24,7 +24,7 @@ export function buildIndexUniqueDiffItem(
       ? before.tables[tableId]?.indexes[indexId]?.unique
       : after.tables[tableId]?.indexes[indexId]?.unique
 
-  if (!data) return null
+  if (data === undefined) return null
 
   return {
     kind: 'index-unique',

@@ -24,7 +24,7 @@ export function buildIndexTypeDiffItem(
       ? before.tables[tableId]?.indexes[indexId]?.type
       : after.tables[tableId]?.indexes[indexId]?.type
 
-  if (!data) return null
+  if (data === undefined) return null
 
   return {
     kind: 'index-type',

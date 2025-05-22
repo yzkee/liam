@@ -1,7 +1,13 @@
 'use client'
 
-import { Button, Check, ChevronDown, ChevronUp, IconButton } from '@liam-hq/ui'
-import { Spinner } from '@liam-hq/ui/src/components/Spinner'
+import {
+  Button,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  IconButton,
+  Spinner,
+} from '@liam-hq/ui'
 import type { FC, ReactNode } from 'react'
 import { useState } from 'react'
 import styles from './ProcessIndicator.module.css'

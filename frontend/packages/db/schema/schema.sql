@@ -1138,6 +1138,11 @@ ALTER TABLE ONLY "public"."building_schema_versions"
 
 
 ALTER TABLE ONLY "public"."building_schemas"
+    ADD CONSTRAINT "building_schemas_design_session_id_key" UNIQUE ("design_session_id");
+
+
+
+ALTER TABLE ONLY "public"."building_schemas"
     ADD CONSTRAINT "building_schemas_pkey" PRIMARY KEY ("id");
 
 

@@ -1,5 +1,5 @@
 import type {
-  CheckConstarintDetail,
+  CheckConstraintDetail,
   Column,
   ColumnCheck,
   ColumnDefault,
@@ -164,7 +164,7 @@ export type ConstraintDeleteConstraintDiffItem = BaseSchemaDiffItem & {
 
 export type ConstraintDetailDiffItem = BaseSchemaDiffItem & {
   kind: 'constraint-detail'
-  data: CheckConstarintDetail
+  data: CheckConstraintDetail
   constraintId: string
 }
 

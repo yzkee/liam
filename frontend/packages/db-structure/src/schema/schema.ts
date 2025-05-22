@@ -113,7 +113,7 @@ const uniqueConstraintSchema = v.object({
 export type UniqueConstraint = v.InferOutput<typeof uniqueConstraintSchema>
 
 const checkConstraintDetailSchema = v.string()
-export type CheckConstarintDetail = v.InferOutput<
+export type CheckConstraintDetail = v.InferOutput<
   typeof checkConstraintDetailSchema
 >
 

@@ -31,7 +31,7 @@ export type {
   ForeignKeyConstraint,
   UniqueConstraint,
   CheckConstraint,
-  CheckConstarintDetail,
+  CheckConstraintDetail,
   ForeignKeyConstraintReferenceOption,
   Cardinality,
   TableGroup,

@@ -1,5 +1,5 @@
 // Type for highlighted label parts
-export type HighlightedLabelParts = {
+type HighlightedLabelParts = {
   before: string
   match: string
   after: string

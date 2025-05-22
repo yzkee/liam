@@ -724,8 +724,8 @@ importers:
         specifier: 0.3.54
         version: 0.3.54(openai@4.97.0(ws@8.18.2)(zod@3.24.4))
       '@langchain/openai':
-        specifier: 0.5.7
-        version: 0.5.7(@langchain/core@0.3.54(openai@4.97.0(ws@8.18.2)(zod@3.24.4)))(ws@8.18.2)
+        specifier: 0.5.10
+        version: 0.5.10(@langchain/core@0.3.54(openai@4.97.0(ws@8.18.2)(zod@3.24.4)))(ws@8.18.2)
       '@liam-hq/db':
         specifier: workspace:*
         version: link:../db
@@ -2595,8 +2595,8 @@ packages:
     resolution: {integrity: sha512-GqUwao7X9LTxgTDY9jtQ81XStvNuJn8sfJL7JqaVb0Ebfu00bn9R+xC80KmcljO/1EApWUYsRzDzhRj0EtwHxA==}
     engines: {node: '>=18'}
 
-  '@langchain/openai@0.5.7':
-    resolution: {integrity: sha512-2azobl6XqPJIwe1MC4G33/77sOuvWtsbv2Wa8K6qsEEmIsznOXBXrOcKrp+1PTxRKy3UkIV2JV9mQas+ewPU0Q==}
+  '@langchain/openai@0.5.10':
+    resolution: {integrity: sha512-hBQIWjcVxGS7tgVvgBBmrZ5jSaJ8nu9g6V64/Tx6KGjkW7VdGmUvqCO+koiQCOZVL7PBJkHWAvDsbghPYXiZEA==}
     engines: {node: '>=18'}
     peerDependencies:
       '@langchain/core': '>=0.3.48 <0.4.0'
@@ -13546,7 +13546,7 @@ snapshots:
     transitivePeerDependencies:
       - openai
 
-  '@langchain/openai@0.5.7(@langchain/core@0.3.54(openai@4.97.0(ws@8.18.2)(zod@3.24.4)))(ws@8.18.2)':
+  '@langchain/openai@0.5.10(@langchain/core@0.3.54(openai@4.97.0(ws@8.18.2)(zod@3.24.4)))(ws@8.18.2)':
     dependencies:
       '@langchain/core': 0.3.54(openai@4.97.0(ws@8.18.2)(zod@3.24.4))
       js-tiktoken: 1.0.20
@@ -20395,7 +20395,7 @@ snapshots:
   langchain@0.3.24(@langchain/core@0.3.54(openai@4.97.0(ws@8.18.2)(zod@3.24.4)))(cheerio@1.0.0)(handlebars@4.7.8)(openai@4.97.0(ws@8.18.2)(zod@3.24.4))(ws@8.18.2):
     dependencies:
       '@langchain/core': 0.3.54(openai@4.97.0(ws@8.18.2)(zod@3.24.4))
-      '@langchain/openai': 0.5.7(@langchain/core@0.3.54(openai@4.97.0(ws@8.18.2)(zod@3.24.4)))(ws@8.18.2)
+      '@langchain/openai': 0.5.10(@langchain/core@0.3.54(openai@4.97.0(ws@8.18.2)(zod@3.24.4)))(ws@8.18.2)
       '@langchain/textsplitters': 0.1.0(@langchain/core@0.3.54(openai@4.97.0(ws@8.18.2)(zod@3.24.4)))
       js-tiktoken: 1.0.20
       js-yaml: 4.1.0

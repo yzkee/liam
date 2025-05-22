@@ -13,6 +13,7 @@
   "dependencies": {
     "@prisma/internals": "6.7.0",
     "@ruby/prism": "1.4.0",
+    "fast-json-patch": "3.1.1",
     "neverthrow": "8.2.0",
     "pg-query-emscripten": "5.1.0",
     "valibot": "1.0.0",
@@ -23,12 +24,12 @@
     "@liam-hq/configs": "workspace:*",
     "@pgsql/types": "15.0.2",
     "@prisma/generator-helper": "6.7.0",
-    "@types/node": "22.15.3",
+    "@types/node": "22.15.15",
     "eslint": "9.25.1",
     "json-refs": "3.0.15",
     "json-schema-to-zod": "2.6.1",
     "typescript": "5.8.3",
-    "vitest": "3.1.2"
+    "vitest": "3.1.3"
   },
   "scripts": {
     "build": "tsc && pnpm run cp:prism",

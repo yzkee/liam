@@ -7,7 +7,7 @@
     "@liam-hq/configs": "workspace:*",
     "@playwright/test": "1.52.0",
     "@types/node": "22.15.16",
-    "eslint": "9.25.1",
+    "eslint": "9.26.0",
     "typescript": "5.8.3"
   },
   "scripts": {

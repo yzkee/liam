@@ -34,6 +34,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      building_schema_versions: {
+        Row: {
+          building_schema_id: string
+          created_at: string
+          id: string
+          number: number
+          organization_id: string
+          patch: Json
+          reverse_patch: Json
+        }
+        Insert: {
+          building_schema_id: string
+          created_at?: string
+          id?: string
+          number: number
+          organization_id: string
+          patch: Json
+          reverse_patch: Json
+        }
+        Update: {
+          building_schema_id?: string
+          created_at?: string
+          id?: string
+          number?: number
+          organization_id?: string
+          patch?: Json
+          reverse_patch?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'building_schema_versions_building_schema_id_fkey'
+            columns: ['building_schema_id']
+            isOneToOne: false
+            referencedRelation: 'building_schemas'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'building_schema_versions_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       building_schemas: {
         Row: {
           created_at: string

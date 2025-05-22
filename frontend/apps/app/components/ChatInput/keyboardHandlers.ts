@@ -74,7 +74,7 @@ export const handleMentionSelect = (
   item: MentionCandidate,
   message: string,
   mentionCaret: number,
-  trigger: string = '@',
+  trigger = '@',
 ): string => {
   const caret = mentionCaret
   const before = message.slice(0, caret)

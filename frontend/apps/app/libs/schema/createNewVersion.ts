@@ -3,6 +3,17 @@ import { type Operation, compare } from 'fast-json-patch'
 import * as v from 'valibot'
 import { applyPatchOperations, operationsSchema } from '.'
 
+const updateBuildingSchemaResultSchema = v.union([
+  v.object({
+    success: v.literal(true),
+    versionNumber: v.number(),
+  }),
+  v.object({
+    success: v.literal(false),
+    error: v.nullable(v.string()),
+  }),
+])
+
 interface CreateVersionParams {
   buildingSchemaId: string
   latestVersionNumber: number
@@ -11,7 +22,7 @@ interface CreateVersionParams {
 
 interface VersionResponse {
   success: boolean
-  error?: string
+  error?: string | null
 }
 
 export async function createNewVersion({
@@ -102,25 +113,39 @@ export async function createNewVersion({
     }
   }
 
-  // Calculate the next version number
-  const nextVersionNumber = actualLatestVersionNumber + 1
+  const { data, error: rpcError } = await supabase.rpc(
+    'update_building_schema',
+    {
+      p_schema_id: buildingSchemaId,
+      p_schema_schema: newContent,
+      p_schema_version_patch: JSON.parse(JSON.stringify(patch)),
+      p_schema_version_reverse_patch: JSON.parse(JSON.stringify(reversePatch)),
+      p_latest_schema_version_number: actualLatestVersionNumber,
+    },
+  )
 
-  const { error: insertError } = await supabase
-    .from('building_schema_versions')
-    .insert({
-      organization_id: buildingSchema.organization_id, // TODO: Replace with actual organization ID
-      building_schema_id: buildingSchemaId,
-      number: nextVersionNumber,
-      patch: JSON.parse(JSON.stringify(patch)),
-      reverse_patch: JSON.parse(JSON.stringify(reversePatch)),
-      created_at: new Date().toISOString(),
-    })
-    .select()
-    .single()
+  const parsedResult = v.safeParse(updateBuildingSchemaResultSchema, data)
 
-  if (insertError) {
-    throw new Error(`Failed to insert new version: ${insertError.message}`)
+  if (rpcError) {
+    return {
+      success: false,
+      error: rpcError.message,
+    }
   }
 
-  return { success: true }
+  if (parsedResult.success) {
+    if (parsedResult.output.success) {
+      return {
+        success: true,
+      }
+    }
+    return {
+      success: false,
+      error: parsedResult.output.error,
+    }
+  }
+  return {
+    success: false,
+    error: 'Invalid response from server',
+  }
 }

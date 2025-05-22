@@ -74,15 +74,16 @@ export const handleMentionSelect = (
   item: MentionCandidate,
   message: string,
   mentionCaret: number,
+  trigger: string = '@',
 ): string => {
   const caret = mentionCaret
   const before = message.slice(0, caret)
-  const match = /@([\w-]*)$/.exec(before)
+  const match = new RegExp(`\\${trigger}([\\w-]*)$`).exec(before)
   if (!match) return message
 
   const start = caret - match[0].length
   const after = message.slice(caret)
 
   // Use the same processing for all types (label already contains all necessary information)
-  return `${message.slice(0, start)}@${item.label} ${after}`
+  return `${message.slice(0, start)}${trigger}${item.label} ${after}`
 }

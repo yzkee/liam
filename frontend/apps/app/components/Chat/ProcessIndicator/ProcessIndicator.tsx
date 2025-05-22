@@ -16,10 +16,6 @@ export type ProcessStatus = 'processing' | 'complete'
 
 export interface ProcessIndicatorProps {
   /**
-   * The status of the process
-   */
-  status: ProcessStatus
-  /**
    * The title of the process
    */
   title: string
@@ -29,8 +25,14 @@ export interface ProcessIndicatorProps {
   subtitle?: string
   /**
    * The progress percentage (0-100)
+   * When it reaches 100, status will automatically become 'complete'
    */
   progress?: number
+  /**
+   * Optional override for the status
+   * If not provided, status will be 'complete' when progress is 100, otherwise 'processing'
+   */
+  status?: ProcessStatus
   /**
    * The label for the primary action button
    */
@@ -57,10 +59,10 @@ export interface ProcessIndicatorProps {
  * A component that displays the status of a process with collapsible functionality
  */
 export const ProcessIndicator: FC<ProcessIndicatorProps> = ({
-  status,
   title,
   subtitle,
   progress = 0,
+  status,
   primaryActionLabel,
   onPrimaryAction,
   secondaryActionLabel,
@@ -78,19 +80,27 @@ export const ProcessIndicator: FC<ProcessIndicatorProps> = ({
   // Limit progress to 0-100 range
   const normalizedProgress = Math.min(100, Math.max(0, progress))
 
+  // Determine effective status - complete when progress is 100%, otherwise use provided status or default to processing
+  const effectiveStatus: ProcessStatus =
+    normalizedProgress >= 100 ? 'complete' : status || 'processing'
+
   // Icon based on status
   const statusIcon: ReactNode =
-    status === 'processing' ? <Spinner size="16" /> : <Check size={16} />
+    effectiveStatus === 'processing' ? (
+      <Spinner size="16" />
+    ) : (
+      <Check size={16} />
+    )
 
   return (
     <div
       className={`${styles.container} ${!isExpanded ? styles.collapsed : ''}`}
-      aria-live={status === 'processing' ? 'polite' : 'off'}
+      aria-live={effectiveStatus === 'processing' ? 'polite' : 'off'}
     >
       <div className={styles.header}>
         <div
           className={`${styles.iconContainer} ${
-            status === 'processing'
+            effectiveStatus === 'processing'
               ? styles.processingIcon
               : styles.completeIcon
           }`}
@@ -118,7 +128,7 @@ export const ProcessIndicator: FC<ProcessIndicatorProps> = ({
               <div
                 className={styles.progressFill}
                 style={{
-                  width: `${status === 'complete' ? 100 : normalizedProgress}%`,
+                  width: `${effectiveStatus === 'complete' ? 100 : normalizedProgress}%`,
                 }}
               />
             </div>
@@ -126,12 +136,12 @@ export const ProcessIndicator: FC<ProcessIndicatorProps> = ({
 
           <div className={styles.actionsRow}>
             <div className={styles.progressText}>
-              {status === 'complete' ? 100 : normalizedProgress}%
+              {effectiveStatus === 'complete' ? 100 : normalizedProgress}%
             </div>
 
             {(primaryActionLabel || secondaryActionLabel) && (
               <div className={styles.actions}>
-                {secondaryActionLabel && status === 'processing' && (
+                {secondaryActionLabel && effectiveStatus === 'processing' && (
                   <Button
                     variant="ghost-secondary"
                     size="xs"

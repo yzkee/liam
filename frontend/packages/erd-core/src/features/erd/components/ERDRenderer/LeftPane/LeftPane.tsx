@@ -9,15 +9,13 @@ import {
 import {
   BookText,
   Eye,
-  EyeClosed,
+  EyeOff,
   GithubLogo,
-  IconButton,
   LiamLogoMark,
   Megaphone,
   MessagesSquare,
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -30,7 +28,6 @@ import { updateNodesHiddenState } from '../../ERDContent/utils'
 import { CopyLinkButton } from './CopyLinkButton'
 import styles from './LeftPane.module.css'
 import { MenuItemLink, type Props as MenuItemLinkProps } from './MenuItemLink'
-import { TableCounter } from './TableCounter'
 import { TableNameMenuButton } from './TableNameMenuButton'
 
 export const LeftPane = () => {
@@ -130,22 +127,32 @@ export const LeftPane = () => {
         <SidebarGroup>
           <SidebarGroupLabel className={styles.groupLabel} asChild>
             <span>Tables</span>
-            <span className={styles.tableCount}>
-              {visibleCount}
-              <span className={styles.tableCountDivider}>/</span>
-              {allCount}
+            <span className={styles.tablesHeaderRow}>
+              <button
+                type="button"
+                className={styles.showAllButton}
+                aria-label={
+                  visibleCount === allCount
+                    ? 'Hide All Tables'
+                    : 'Show All Tables'
+                }
+                tabIndex={0}
+                onClick={showOrHideAllNodes}
+                onKeyDown={showOrHideAllNodes}
+              >
+                {visibleCount === allCount ? (
+                  <EyeOff className={styles.icon} />
+                ) : (
+                  <Eye className={styles.icon} />
+                )}
+                <span className={styles.showAllText}>
+                  {visibleCount === allCount ? 'Hide All' : 'Show All'}
+                </span>
+              </button>
+              <span className={styles.visibleCount}>
+                ({visibleCount}/{allCount} visible)
+              </span>
             </span>
-            <IconButton
-              icon={visibleCount === allCount ? <EyeClosed /> : <Eye />}
-              tooltipContent={
-                visibleCount === allCount
-                  ? 'Hide All Tables'
-                  : 'Show All Tables'
-              }
-              onClick={showOrHideAllNodes}
-              onKeyDown={showOrHideAllNodes}
-              className={styles.textCursor}
-            />
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -178,12 +185,6 @@ export const LeftPane = () => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-
-      <SidebarFooter className={styles.footer}>
-        <div className={styles.tableCounterWrapper}>
-          <TableCounter allCount={allCount} visibleCount={visibleCount} />
-        </div>
-      </SidebarFooter>
     </Sidebar>
   )
 }

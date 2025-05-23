@@ -16,7 +16,7 @@ interface Props {
 
 export const Chat: FC<Props> = ({ schemaData, tableGroups }) => {
   const [messages, setMessages] = useState<
-    (ChatMessageProps & { id: string })[]
+    (ChatMessageProps & { id: string; agentType?: Mode })[]
   >([
     {
       id: 'welcome',
@@ -25,9 +25,11 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups }) => {
       isUser: false,
       timestamp: new Date(),
       isGenerating: false, // Explicitly set to false for consistency
+      agentType: 'ask', // Default to ask for welcome message
     },
   ])
   const [isLoading, setIsLoading] = useState(false)
+  const [currentMode, setCurrentMode] = useState<Mode>('ask')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Scroll to bottom when component mounts
@@ -36,6 +38,8 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups }) => {
   }, [])
 
   const handleSendMessage = async (content: string, mode: Mode) => {
+    // Update the current mode
+    setCurrentMode(mode)
     // Add user message
     const userMessage = {
       id: `user-${Date.now()}`,
@@ -43,6 +47,7 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups }) => {
       isUser: true,
       timestamp: new Date(),
       isGenerating: false, // Explicitly set to false for consistency
+      agentType: mode, // Store the current mode with the user message as well
     }
     setMessages((prev) => [...prev, userMessage])
     setIsLoading(true)
@@ -57,6 +62,7 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups }) => {
         isUser: false,
         // No timestamp during streaming
         isGenerating: true, // Mark as generating
+        agentType: mode, // Store the current mode with the message
       },
     ])
 
@@ -146,6 +152,7 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups }) => {
             content: 'Sorry, an error occurred. Please try again.',
             timestamp: new Date(),
             isGenerating: false, // Remove generating state on error
+            agentType: mode, // Ensure the agent type is set for error messages
           }
           return updatedMessages
         }
@@ -159,6 +166,7 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups }) => {
             isUser: false,
             timestamp: new Date(),
             isGenerating: false, // Ensure error message is not in generating state
+            agentType: mode, // Use the current mode for error messages
           },
         ]
       })
@@ -177,6 +185,7 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups }) => {
             isUser={message.isUser}
             timestamp={message.timestamp}
             isGenerating={message.isGenerating}
+            agentType={message.agentType || currentMode}
           />
         ))}
         {isLoading && (
@@ -188,7 +197,11 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups }) => {
         )}
         <div ref={messagesEndRef} />
       </div>
-      <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
+      <ChatInput
+        onSendMessage={handleSendMessage}
+        isLoading={isLoading}
+        initialMode={currentMode}
+      />
     </div>
   )
 }

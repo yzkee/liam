@@ -14,6 +14,7 @@ interface ChatInputProps {
   isLoading: boolean
   error?: boolean
   initialMessage?: string
+  initialMode?: Mode
 }
 
 export const ChatInput: FC<ChatInputProps> = ({
@@ -22,9 +23,10 @@ export const ChatInput: FC<ChatInputProps> = ({
   isLoading,
   error = false,
   initialMessage = '',
+  initialMode = 'ask',
 }) => {
   const [message, setMessage] = useState(initialMessage)
-  const [mode, setMode] = useState<Mode>('ask')
+  const [mode, setMode] = useState<Mode>(initialMode)
   const hasContent = message.trim().length > 0
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -38,6 +40,11 @@ export const ChatInput: FC<ChatInputProps> = ({
       textarea.style.height = `${textarea.scrollHeight}px`
     }
   }, [])
+
+  // Update mode when initialMode changes
+  useEffect(() => {
+    setMode(initialMode)
+  }, [initialMode])
 
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setMessage(e.target.value)

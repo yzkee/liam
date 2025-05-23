@@ -426,6 +426,23 @@ $$;
 ALTER FUNCTION "public"."prevent_delete_last_organization_member"() OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."set_building_schema_versions_organization_id"() RETURNS "trigger"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$
+begin
+  new.organization_id := (
+    select "organization_id" 
+    from "public"."building_schemas"
+    where "id" = new.building_schema_id
+  );
+  return new;
+end;
+$$;
+
+
+ALTER FUNCTION "public"."set_building_schema_versions_organization_id"() OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."set_building_schemas_organization_id"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$
@@ -752,9 +769,92 @@ $$;
 
 ALTER FUNCTION "public"."sync_existing_users"() OWNER TO "postgres";
 
+
+CREATE OR REPLACE FUNCTION "public"."update_building_schema"("p_schema_id" "uuid", "p_schema_schema" "jsonb", "p_schema_version_patch" "jsonb", "p_schema_version_reverse_patch" "jsonb", "p_latest_schema_version_number" integer) RETURNS "jsonb"
+    LANGUAGE "plpgsql"
+    AS $$
+declare
+  v_result jsonb;
+  v_organization_id uuid;
+  v_next_version_number integer;
+begin
+  -- Start transaction
+  begin
+    -- 1. Select organization_id from building_schemas
+    select organization_id into v_organization_id
+    from building_schemas
+    where id = p_schema_id;
+    
+    if not found then
+      v_result := jsonb_build_object(
+        'success', false,
+        'error', 'Building schema not found'
+      );
+      return v_result;
+    end if;
+
+    -- Calculate the next version number
+    v_next_version_number := p_latest_schema_version_number + 1;
+    
+    -- 2. Insert into building_schema_versions
+    insert into building_schema_versions (
+      organization_id,
+      building_schema_id,
+      number,
+      patch,
+      reverse_patch,
+      created_at
+    ) values (
+      v_organization_id,
+      p_schema_id,
+      v_next_version_number,
+      p_schema_version_patch,
+      p_schema_version_reverse_patch,
+      now()
+    );
+    
+    -- 3. Update building_schemas with the new schema
+    update building_schemas
+    set schema = p_schema_schema
+    where id = p_schema_id;
+    
+    -- Commit transaction
+    v_result := jsonb_build_object(
+      'success', true,
+      'versionNumber', v_next_version_number
+    );
+    return v_result;
+  exception when others then
+    -- Handle any errors
+    v_result := jsonb_build_object(
+      'success', false,
+      'error', sqlerrm
+    );
+    return v_result;
+  end;
+end;
+$$;
+
+
+ALTER FUNCTION "public"."update_building_schema"("p_schema_id" "uuid", "p_schema_schema" "jsonb", "p_schema_version_patch" "jsonb", "p_schema_version_reverse_patch" "jsonb", "p_latest_schema_version_number" integer) OWNER TO "postgres";
+
 SET default_tablespace = '';
 
 SET default_table_access_method = "heap";
+
+
+CREATE TABLE IF NOT EXISTS "public"."building_schema_versions" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "organization_id" "uuid" NOT NULL,
+    "building_schema_id" "uuid" NOT NULL,
+    "number" integer NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "patch" "jsonb" NOT NULL,
+    "reverse_patch" "jsonb" NOT NULL
+);
+
+
+ALTER TABLE "public"."building_schema_versions" OWNER TO "postgres";
 
 
 CREATE TABLE IF NOT EXISTS "public"."building_schemas" (
@@ -1101,6 +1201,16 @@ CREATE TABLE IF NOT EXISTS "public"."users" (
 ALTER TABLE "public"."users" OWNER TO "postgres";
 
 
+ALTER TABLE ONLY "public"."building_schema_versions"
+    ADD CONSTRAINT "building_schema_versions_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."building_schemas"
+    ADD CONSTRAINT "building_schemas_design_session_id_key" UNIQUE ("design_session_id");
+
+
+
 ALTER TABLE ONLY "public"."building_schemas"
     ADD CONSTRAINT "building_schemas_pkey" PRIMARY KEY ("id");
 
@@ -1256,6 +1366,14 @@ ALTER TABLE ONLY "public"."users"
 
 
 
+CREATE INDEX "building_schema_versions_building_schema_id_idx" ON "public"."building_schema_versions" USING "btree" ("building_schema_id");
+
+
+
+CREATE INDEX "building_schema_versions_number_idx" ON "public"."building_schema_versions" USING "btree" ("number");
+
+
+
 CREATE UNIQUE INDEX "doc_file_path_path_project_id_key" ON "public"."doc_file_paths" USING "btree" ("path", "project_id");
 
 
@@ -1321,6 +1439,10 @@ CREATE OR REPLACE TRIGGER "check_last_organization_member" BEFORE DELETE ON "pub
 
 
 COMMENT ON TRIGGER "check_last_organization_member" ON "public"."organization_members" IS 'Prevents deletion of the last member of an organization to ensure organizations always have at least one member';
+
+
+
+CREATE OR REPLACE TRIGGER "set_building_schema_versions_organization_id_trigger" BEFORE INSERT OR UPDATE ON "public"."building_schema_versions" FOR EACH ROW EXECUTE FUNCTION "public"."set_building_schema_versions_organization_id"();
 
 
 
@@ -1393,6 +1515,16 @@ CREATE OR REPLACE TRIGGER "set_review_suggestion_snippets_organization_id_trigge
 
 
 CREATE OR REPLACE TRIGGER "set_schema_file_paths_organization_id_trigger" BEFORE INSERT OR UPDATE ON "public"."schema_file_paths" FOR EACH ROW EXECUTE FUNCTION "public"."set_schema_file_paths_organization_id"();
+
+
+
+ALTER TABLE ONLY "public"."building_schema_versions"
+    ADD CONSTRAINT "building_schema_versions_building_schema_id_fkey" FOREIGN KEY ("building_schema_id") REFERENCES "public"."building_schemas"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."building_schema_versions"
+    ADD CONSTRAINT "building_schema_versions_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE CASCADE;
 
 
 
@@ -1656,6 +1788,12 @@ ALTER TABLE ONLY "public"."schema_file_paths"
 
 
 
+CREATE POLICY "authenticated_users_can_delete_org_building_schema_versions" ON "public"."building_schema_versions" FOR DELETE TO "authenticated" USING (("organization_id" IN ( SELECT "organization_members"."organization_id"
+   FROM "public"."organization_members"
+  WHERE ("organization_members"."user_id" = "auth"."uid"()))));
+
+
+
 CREATE POLICY "authenticated_users_can_delete_org_building_schemas" ON "public"."building_schemas" FOR DELETE TO "authenticated" USING (("organization_id" IN ( SELECT "organization_members"."organization_id"
    FROM "public"."organization_members"
   WHERE ("organization_members"."user_id" = "auth"."uid"()))));
@@ -1717,6 +1855,12 @@ CREATE POLICY "authenticated_users_can_delete_org_projects" ON "public"."project
 
 
 COMMENT ON POLICY "authenticated_users_can_delete_org_projects" ON "public"."projects" IS 'Authenticated users can only delete projects in organizations they are members of';
+
+
+
+CREATE POLICY "authenticated_users_can_insert_org_building_schema_versions" ON "public"."building_schema_versions" FOR INSERT TO "authenticated" WITH CHECK (("organization_id" IN ( SELECT "organization_members"."organization_id"
+   FROM "public"."organization_members"
+  WHERE ("organization_members"."user_id" = "auth"."uid"()))));
 
 
 
@@ -1859,6 +2003,12 @@ CREATE POLICY "authenticated_users_can_insert_projects" ON "public"."projects" F
 
 
 COMMENT ON POLICY "authenticated_users_can_insert_projects" ON "public"."projects" IS 'Authenticated users can create any project';
+
+
+
+CREATE POLICY "authenticated_users_can_select_org_building_schema_versions" ON "public"."building_schema_versions" FOR SELECT TO "authenticated" USING (("organization_id" IN ( SELECT "organization_members"."organization_id"
+   FROM "public"."organization_members"
+  WHERE ("organization_members"."user_id" = "auth"."uid"()))));
 
 
 
@@ -2080,6 +2230,14 @@ COMMENT ON POLICY "authenticated_users_can_select_org_schema_file_paths" ON "pub
 
 
 
+CREATE POLICY "authenticated_users_can_update_org_building_schema_versions" ON "public"."building_schema_versions" FOR UPDATE TO "authenticated" USING (("organization_id" IN ( SELECT "organization_members"."organization_id"
+   FROM "public"."organization_members"
+  WHERE ("organization_members"."user_id" = "auth"."uid"())))) WITH CHECK (("organization_id" IN ( SELECT "organization_members"."organization_id"
+   FROM "public"."organization_members"
+  WHERE ("organization_members"."user_id" = "auth"."uid"()))));
+
+
+
 CREATE POLICY "authenticated_users_can_update_org_building_schemas" ON "public"."building_schemas" FOR UPDATE TO "authenticated" USING (("organization_id" IN ( SELECT "organization_members"."organization_id"
    FROM "public"."organization_members"
   WHERE ("organization_members"."user_id" = "auth"."uid"())))) WITH CHECK (("organization_id" IN ( SELECT "organization_members"."organization_id"
@@ -2190,6 +2348,9 @@ CREATE POLICY "authenticated_users_can_update_org_schema_file_paths" ON "public"
 
 COMMENT ON POLICY "authenticated_users_can_update_org_schema_file_paths" ON "public"."schema_file_paths" IS 'Authenticated users can only update schema file paths in organizations they are members of';
 
+
+
+ALTER TABLE "public"."building_schema_versions" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."building_schemas" ENABLE ROW LEVEL SECURITY;
@@ -3304,6 +3465,12 @@ GRANT ALL ON FUNCTION "public"."prevent_delete_last_organization_member"() TO "s
 
 
 
+GRANT ALL ON FUNCTION "public"."set_building_schema_versions_organization_id"() TO "anon";
+GRANT ALL ON FUNCTION "public"."set_building_schema_versions_organization_id"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."set_building_schema_versions_organization_id"() TO "service_role";
+
+
+
 GRANT ALL ON FUNCTION "public"."set_building_schemas_organization_id"() TO "anon";
 GRANT ALL ON FUNCTION "public"."set_building_schemas_organization_id"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_building_schemas_organization_id"() TO "service_role";
@@ -3495,6 +3662,11 @@ GRANT ALL ON FUNCTION "public"."sync_existing_users"() TO "service_role";
 
 
 
+GRANT ALL ON FUNCTION "public"."update_building_schema"("p_schema_id" "uuid", "p_schema_schema" "jsonb", "p_schema_version_patch" "jsonb", "p_schema_version_reverse_patch" "jsonb", "p_latest_schema_version_number" integer) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."update_building_schema"("p_schema_id" "uuid", "p_schema_schema" "jsonb", "p_schema_version_patch" "jsonb", "p_schema_version_reverse_patch" "jsonb", "p_latest_schema_version_number" integer) TO "service_role";
+
+
+
 GRANT ALL ON FUNCTION "public"."vector_accum"(double precision[], "public"."vector") TO "postgres";
 GRANT ALL ON FUNCTION "public"."vector_accum"(double precision[], "public"."vector") TO "anon";
 GRANT ALL ON FUNCTION "public"."vector_accum"(double precision[], "public"."vector") TO "authenticated";
@@ -3675,6 +3847,12 @@ GRANT ALL ON FUNCTION "public"."sum"("public"."vector") TO "service_role";
 
 
 
+
+
+
+GRANT ALL ON TABLE "public"."building_schema_versions" TO "anon";
+GRANT ALL ON TABLE "public"."building_schema_versions" TO "authenticated";
+GRANT ALL ON TABLE "public"."building_schema_versions" TO "service_role";
 
 
 

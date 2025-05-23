@@ -30,4 +30,10 @@ export {
 export type { ProcessError } from './parser.js'
 
 export { buildSchemaDiff } from './diff/index.js'
-export type { ChangeStatus, SchemaDiffItem } from './diff/index.js'
+export type {
+  ChangeStatus,
+  SchemaDiffItem,
+  TableRelatedDiffItem,
+  ColumnRelatedDiffItem,
+  IndexRelatedDiffItem,
+} from './diff/index.js'

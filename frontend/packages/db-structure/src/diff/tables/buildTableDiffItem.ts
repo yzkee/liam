@@ -20,7 +20,7 @@ export function buildTableDiffItem(
   const data =
     status === 'removed' ? before.tables[tableId] : after.tables[tableId]
 
-  if (!data) return null
+  if (data === undefined) return null
 
   return {
     kind: 'table',

@@ -2,7 +2,7 @@ import type React from 'react'
 import { useRef, useState } from 'react'
 import styles from './ModeToggleSwitch.module.css'
 
-type Mode = 'ask' | 'build'
+export type Mode = 'ask' | 'build'
 
 interface ModeToggleSwitchProps {
   value?: Mode

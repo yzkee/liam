@@ -115,7 +115,7 @@ const convertSchemaToText = (schema: Schema): string => {
 }
 
 export async function POST(request: Request) {
-  const { message, schemaData, history } = await request.json()
+  const { message, schemaData, history, mode } = await request.json()
 
   if (!message || typeof message !== 'string' || !message.trim()) {
     return NextResponse.json({ error: 'Message is required' }, { status: 400 })
@@ -142,8 +142,9 @@ export async function POST(request: Request) {
   // Convert schema to text
   const schemaText = convertSchemaToText(schemaData)
 
-  // Use databaseSchemaAskAgent as the default agent
-  const agentName = 'databaseSchemaAskAgent'
+  // Determine which agent to use based on the mode
+  const agentName =
+    mode === 'build' ? 'databaseSchemaBuildAgent' : 'databaseSchemaAskAgent'
   try {
     // Get the agent from Mastra
     const agent = mastra.getAgent(agentName)

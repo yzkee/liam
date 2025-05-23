@@ -3,12 +3,13 @@ import clsx from 'clsx'
 import type { ChangeEvent, FC, FormEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { ModeToggleSwitch } from '../ModeToggleSwitch/ModeToggleSwitch'
+import type { Mode } from '../ModeToggleSwitch/ModeToggleSwitch'
 import { CancelButton } from './CancelButton'
 import styles from './ChatInput.module.css'
 import { SendButton } from './SendButton'
 
 interface ChatInputProps {
-  onSendMessage: (message: string) => void
+  onSendMessage: (message: string, mode: Mode) => void
   onCancel?: () => void // New prop for cancellation
   isLoading: boolean
   error?: boolean
@@ -23,6 +24,7 @@ export const ChatInput: FC<ChatInputProps> = ({
   initialMessage = '',
 }) => {
   const [message, setMessage] = useState(initialMessage)
+  const [mode, setMode] = useState<Mode>('ask')
   const hasContent = message.trim().length > 0
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -56,7 +58,7 @@ export const ChatInput: FC<ChatInputProps> = ({
       onCancel?.()
     } else if (hasContent) {
       // If not loading and has content, send message
-      onSendMessage(message)
+      onSendMessage(message, mode)
       setMessage('')
 
       // Reset textarea height after sending
@@ -107,7 +109,11 @@ export const ChatInput: FC<ChatInputProps> = ({
           />
         )}
       </form>
-      <ModeToggleSwitch className={styles.modeToggle} />
+      <ModeToggleSwitch
+        className={styles.modeToggle}
+        value={mode}
+        onChange={setMode}
+      />
     </div>
   )
 }

@@ -6,6 +6,7 @@ import type { FC } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { ChatInput } from '../ChatInput'
 import { ChatMessage, type ChatMessageProps } from '../ChatMessage'
+import type { Mode } from '../ModeToggleSwitch/ModeToggleSwitch'
 import styles from './Chat.module.css'
 
 interface Props {
@@ -34,7 +35,7 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [])
 
-  const handleSendMessage = async (content: string) => {
+  const handleSendMessage = async (content: string, mode: Mode) => {
     // Add user message
     const userMessage = {
       id: `user-${Date.now()}`,
@@ -76,6 +77,7 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups }) => {
           schemaData,
           tableGroups,
           history,
+          mode,
         }),
       })
 

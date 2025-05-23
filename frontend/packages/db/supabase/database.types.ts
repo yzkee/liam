@@ -34,6 +34,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      building_schema_versions: {
+        Row: {
+          building_schema_id: string
+          created_at: string
+          id: string
+          number: number
+          organization_id: string
+          patch: Json
+          reverse_patch: Json
+        }
+        Insert: {
+          building_schema_id: string
+          created_at?: string
+          id?: string
+          number: number
+          organization_id: string
+          patch: Json
+          reverse_patch: Json
+        }
+        Update: {
+          building_schema_id?: string
+          created_at?: string
+          id?: string
+          number?: number
+          organization_id?: string
+          patch?: Json
+          reverse_patch?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'building_schema_versions_building_schema_id_fkey'
+            columns: ['building_schema_id']
+            isOneToOne: false
+            referencedRelation: 'building_schemas'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'building_schema_versions_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       building_schemas: {
         Row: {
           created_at: string
@@ -60,7 +105,7 @@ export type Database = {
           {
             foreignKeyName: 'building_schemas_design_session_id_fkey'
             columns: ['design_session_id']
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: 'design_sessions'
             referencedColumns: ['id']
           },
@@ -1259,6 +1304,16 @@ export type Database = {
       sync_existing_users: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      update_building_schema: {
+        Args: {
+          p_schema_id: string
+          p_schema_schema: Json
+          p_schema_version_patch: Json
+          p_schema_version_reverse_patch: Json
+          p_latest_schema_version_number: number
+        }
+        Returns: Json
       }
       vector_avg: {
         Args: { '': number[] }

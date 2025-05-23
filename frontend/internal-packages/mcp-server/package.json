@@ -7,12 +7,12 @@
   "main": "src/index.ts",
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.11.0",
-    "zod": "3.24.3"
+    "zod": "3.24.4"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@liam-hq/configs": "workspace:*",
-    "@types/node": "22.15.14",
+    "@types/node": "22.15.16",
     "concurrently": "9.1.2",
     "tsx": "4.19.4",
     "typescript": "5.8.3"

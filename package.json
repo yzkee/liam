@@ -7,7 +7,7 @@
     "@changesets/get-github-info": "0.6.0",
     "@changesets/types": "6.1.0",
     "@turbo/gen": "2.5.3",
-    "@types/node": "22.15.16",
+    "@types/node": "22.15.17",
     "concurrently": "9.1.2",
     "knip": "5.55.1",
     "syncpack": "13.0.4",

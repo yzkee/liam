@@ -74,15 +74,16 @@ class SupabaseVectorStore extends LangchainSupabaseVectorStore {
    */
   async addDocuments(documents: Document[]): Promise<string[]> {
     // Add updated_at field to each document if not already present
+    // Type assertion is required because LangChain's Document class defines metadata as Record<string, any>,
+    // which prevents TypeScript from inferring specific properties like organization_id
     const docsWithUpdatedAt = documents.map((doc) => {
       const now = new Date().toISOString()
-
       return {
         ...doc,
         metadata: {
-          ...doc.metadata,
+          ...(doc.metadata as SchemaMetadata),
           updated_at: now,
-        },
+        } as SchemaMetadata,
       }
     })
 
@@ -110,6 +111,11 @@ class SupabaseVectorStore extends LangchainSupabaseVectorStore {
         metadata.updated_at = new Date().toISOString()
       }
 
+      // Create a typed metadata variable to ensure type safety for database insertion
+      // This is necessary because LangChain's Document.metadata is typed as Record<string, any>,
+      // which loses specific type information for properties like organization_id and updated_at
+      const typedMetadata = metadata as SchemaMetadata
+
       // Insert into Supabase
       const { data, error } = await client
         .from(tableName)
@@ -117,10 +123,8 @@ class SupabaseVectorStore extends LangchainSupabaseVectorStore {
           content: text,
           metadata,
           embedding: vector,
-          updated_at: metadata.updated_at,
-          organization_id: (
-            metadata as Record<string, unknown>
-          ).organization_id?.toString(),
+          updated_at: typedMetadata.updated_at,
+          organization_id: typedMetadata.organization_id,
         })
         .select('id')
 

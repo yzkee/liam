@@ -1,5 +1,4 @@
 import { mastra } from '@/lib/mastra'
-import { classifyQuestion } from '@/lib/mastra/agents'
 import type { Schema, TableGroup } from '@liam-hq/db-structure'
 import * as Sentry from '@sentry/nextjs'
 import { NextResponse } from 'next/server'
@@ -116,7 +115,7 @@ const convertSchemaToText = (schema: Schema): string => {
 }
 
 export async function POST(request: Request) {
-  const { message, schemaData, history } = await request.json()
+  const { message, schemaData, history, mode } = await request.json()
 
   if (!message || typeof message !== 'string' || !message.trim()) {
     return NextResponse.json({ error: 'Message is required' }, { status: 400 })
@@ -143,12 +142,9 @@ export async function POST(request: Request) {
   // Convert schema to text
   const schemaText = convertSchemaToText(schemaData)
 
-  // Determine which agent to use based on the question type
-  const questionType = classifyQuestion(message)
+  // Determine which agent to use based on the mode
   const agentName =
-    questionType === 'build'
-      ? 'databaseSchemaBuildAgent'
-      : 'databaseSchemaAskAgent'
+    mode === 'build' ? 'databaseSchemaBuildAgent' : 'databaseSchemaAskAgent'
   try {
     // Get the agent from Mastra
     const agent = mastra.getAgent(agentName)

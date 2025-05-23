@@ -6,7 +6,7 @@ import * as Sentry from '@sentry/nextjs'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
-  const { message, schemaData, history, projectId } = await request.json()
+  const { message, schemaData, history, mode, projectId } = await request.json()
 
   if (!message || typeof message !== 'string' || !message.trim()) {
     return NextResponse.json({ error: 'Message is required' }, { status: 400 })
@@ -19,6 +19,9 @@ export async function POST(request: Request) {
     )
   }
 
+  // Determine which agent to use based on the mode
+  const agentName =
+    mode === 'build' ? 'databaseSchemaBuildAgent' : 'databaseSchemaAskAgent'
   try {
     // Check if schema has been updated
     const schemaUpdated = await isSchemaUpdated(schemaData)
@@ -51,9 +54,9 @@ export async function POST(request: Request) {
     const schemaText = convertSchemaToText(schemaData)
 
     // Get the agent from Mastra
-    const agent = mastra.getAgent('databaseSchemaAgent')
+    const agent = mastra.getAgent(agentName)
     if (!agent) {
-      throw new Error('databaseSchemaAgent not found in Mastra instance')
+      throw new Error(`${agentName} not found in Mastra instance`)
     }
 
     // Create a response using the agent

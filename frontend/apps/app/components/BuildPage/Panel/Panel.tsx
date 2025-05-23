@@ -38,8 +38,8 @@ export const Panel: FC<Props> = ({
   const { tableGroups, addTableGroup } = useTableGroups(initialTableGroups)
 
   useEffect(() => {
-    initSchemaStore(schema)
-  }, [schema])
+    initSchemaStore(AFTER as unknown as Schema)
+  }, [])
 
   const versionData = {
     version: '0.1.0',

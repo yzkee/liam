@@ -9,7 +9,7 @@
   "main": "src/index.ts",
   "dependencies": {
     "@liam-hq/ui": "workspace:*",
-    "@radix-ui/react-toolbar": "1.1.7",
+    "@radix-ui/react-toolbar": "1.1.9",
     "@xyflow/react": "12.3.5",
     "clsx": "2.1.1",
     "elkjs": "0.10.0",
@@ -23,7 +23,7 @@
     "@liam-hq/configs": "workspace:*",
     "@liam-hq/db-structure": "workspace:*",
     "@types/react": "18",
-    "eslint": "9.25.1",
+    "eslint": "9.26.0",
     "typed-css-modules": "0.9.1",
     "typescript": "5.8.3",
     "vitest": "3.1.3"

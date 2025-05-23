@@ -5,6 +5,12 @@ export {
   tableGroupsSchema,
 } from './schema.js'
 export type {
+  ColumnName,
+  ColumnPrimary,
+  ColumnDefault,
+  ColumnCheck,
+  ColumnUnique,
+  ColumnNotNull,
   Column,
   Columns,
   Schema,
@@ -12,6 +18,10 @@ export type {
   Tables,
   Relationship,
   Relationships,
+  IndexName,
+  IndexUnique,
+  IndexColumns,
+  IndexType,
   Index,
   Indexes,
   Constraint,

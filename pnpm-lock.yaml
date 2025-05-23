@@ -241,9 +241,6 @@ importers:
       storybook:
         specifier: 8.6.12
         version: 8.6.12(prettier@3.5.3)
-      tsx:
-        specifier: 4.19.4
-        version: 4.19.4
       typed-css-modules:
         specifier: 0.9.1
         version: 0.9.1

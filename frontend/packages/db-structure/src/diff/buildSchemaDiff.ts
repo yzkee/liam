@@ -8,14 +8,14 @@ import { buildColumnNameDiffItem } from './columns/buildColumnNameDiffItem.js'
 import { buildColumnNotNullDiffItem } from './columns/buildColumnNotNullDiffItem.js'
 import { buildColumnPrimaryDiffItem } from './columns/buildColumnPrimaryDiffItem.js'
 import { buildColumnUniqueDiffItem } from './columns/buildColumnUniqueDiffItem.js'
-import { buildConstaintDeleteConstraintDiffItem } from './constraints/buildConstaintDeleteConstraintDiffItem.js'
-import { buildConstaintDetailDiffItem } from './constraints/buildConstaintDetailDiffItem.js'
-import { buildConstaintNameDiffItem } from './constraints/buildConstaintNameDiffItem.js'
-import { buildConstaintTargetColumnNameDiffItem } from './constraints/buildConstaintTargetColumnNameDiffItem.js'
-import { buildConstaintTargetTableNameDiffItem } from './constraints/buildConstaintTargetTableNameDiffItem.js'
-import { buildConstaintUpdateConstraintDiffItem } from './constraints/buildConstaintUpdateConstraintDiffItem.js'
 import { buildConstraintColumnNameDiffItem } from './constraints/buildConstraintColumnNameDiffItem.js'
+import { buildConstraintDeleteConstraintDiffItem } from './constraints/buildConstraintDeleteConstraintDiffItem.js'
+import { buildConstraintDetailDiffItem } from './constraints/buildConstraintDetailDiffItem.js'
 import { buildConstraintDiffItem } from './constraints/buildConstraintDiffItem.js'
+import { buildConstraintNameDiffItem } from './constraints/buildConstraintNameDiffItem.js'
+import { buildConstraintTargetColumnNameDiffItem } from './constraints/buildConstraintTargetColumnNameDiffItem.js'
+import { buildConstraintTargetTableNameDiffItem } from './constraints/buildConstraintTargetTableNameDiffItem.js'
+import { buildConstraintUpdateConstraintDiffItem } from './constraints/buildConstraintUpdateConstraintDiffItem.js'
 import { buildIndexColumnsDiffItem } from './indexes/buildIndexColumnsDiffItem.js'
 import { buildIndexDiffItem } from './indexes/buildIndexDiffItem.js'
 import { buildIndexNameDiffItem } from './indexes/buildIndexNameDiffItem.js'
@@ -255,7 +255,7 @@ function buildConstraintRelatedDiffItems(
     items.push(constraintDiffItem)
   }
 
-  const constraintNameDiffItem = buildConstaintNameDiffItem(
+  const constraintNameDiffItem = buildConstraintNameDiffItem(
     tableId,
     constraintId,
     before,
@@ -278,7 +278,7 @@ function buildConstraintRelatedDiffItems(
   }
 
   const constraintTargetTableNameDiffItem =
-    buildConstaintTargetTableNameDiffItem(
+    buildConstraintTargetTableNameDiffItem(
       tableId,
       constraintId,
       before,
@@ -290,7 +290,7 @@ function buildConstraintRelatedDiffItems(
   }
 
   const constraintTargetColumnNameDiffItem =
-    buildConstaintTargetColumnNameDiffItem(
+    buildConstraintTargetColumnNameDiffItem(
       tableId,
       constraintId,
       before,
@@ -302,7 +302,7 @@ function buildConstraintRelatedDiffItems(
   }
 
   const constraintUpdateConstraintDiffItem =
-    buildConstaintUpdateConstraintDiffItem(
+    buildConstraintUpdateConstraintDiffItem(
       tableId,
       constraintId,
       before,
@@ -314,7 +314,7 @@ function buildConstraintRelatedDiffItems(
   }
 
   const constraintDeleteConstraintDiffItem =
-    buildConstaintDeleteConstraintDiffItem(
+    buildConstraintDeleteConstraintDiffItem(
       tableId,
       constraintId,
       before,
@@ -325,7 +325,7 @@ function buildConstraintRelatedDiffItems(
     items.push(constraintDeleteConstraintDiffItem)
   }
 
-  const constraintDetailDiffItem = buildConstaintDetailDiffItem(
+  const constraintDetailDiffItem = buildConstraintDetailDiffItem(
     tableId,
     constraintId,
     before,

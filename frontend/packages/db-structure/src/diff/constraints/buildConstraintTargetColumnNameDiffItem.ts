@@ -2,21 +2,21 @@ import type { Operation } from 'fast-json-patch'
 import { P, match } from 'ts-pattern'
 import type { Schema } from '../../schema/index.js'
 import { PATH_PATTERNS } from '../constants.js'
-import type { ConstraintTargetTableNameDiffItem } from '../types.js'
+import type { ConstraintTargetColumnNameDiffItem } from '../types.js'
 import { getChangeStatus } from '../utils/getChangeStatus.js'
 
-export function buildConstaintTargetTableNameDiffItem(
+export function buildConstraintTargetColumnNameDiffItem(
   tableId: string,
   constraintId: string,
   before: Schema,
   after: Schema,
   operations: Operation[],
-): ConstraintTargetTableNameDiffItem | null {
+): ConstraintTargetColumnNameDiffItem | null {
   const status = getChangeStatus({
     tableId,
     constraintId,
     operations,
-    pathRegExp: PATH_PATTERNS.CONSTRAINT_TARGET_TABLE_NAME,
+    pathRegExp: PATH_PATTERNS.CONSTRAINT_TARGET_COLUMN_NAME,
   })
 
   const constraint =
@@ -26,7 +26,7 @@ export function buildConstaintTargetTableNameDiffItem(
 
   const data = match(constraint)
     .with({ type: 'UNIQUE' }, () => undefined)
-    .with({ type: 'FOREIGN KEY' }, ({ targetTableName }) => targetTableName)
+    .with({ type: 'FOREIGN KEY' }, ({ targetColumnName }) => targetColumnName)
     .with({ type: 'PRIMARY KEY' }, () => undefined)
     .with({ type: 'CHECK' }, () => undefined)
     .with(P.nullish, () => undefined)
@@ -35,7 +35,7 @@ export function buildConstaintTargetTableNameDiffItem(
   if (data === undefined) return null
 
   return {
-    kind: 'constraint-target-table-name',
+    kind: 'constraint-target-column-name',
     status,
     data,
     tableId,

@@ -5,7 +5,7 @@ import { PATH_PATTERNS } from '../constants.js'
 import type { ConstraintUpdateConstraintDiffItem } from '../types.js'
 import { getChangeStatus } from '../utils/getChangeStatus.js'
 
-export function buildConstaintUpdateConstraintDiffItem(
+export function buildConstraintUpdateConstraintDiffItem(
   tableId: string,
   constraintId: string,
   before: Schema,

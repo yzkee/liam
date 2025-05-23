@@ -133,7 +133,13 @@ export const ColumnItem: FC<Props> = ({ tableId, column, diffItems, type }) => {
         </div>
         <div className={clsx(styles.dlItem, columnDefaultStyle)}>
           <dt>Default</dt>
-          <dd>{column.default}</dd>
+          <dd>
+            {typeof column.default === 'boolean'
+              ? column.default
+                ? 'true'
+                : 'false'
+              : column.default}
+          </dd>
         </div>
         <div className={clsx(styles.dlItem, columnCheckStyle)}>
           <dt>Check</dt>

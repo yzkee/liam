@@ -15,7 +15,7 @@ import { buildConstaintTargetColumnNameDiffItem } from './constraints/buildConst
 import { buildConstaintTargetTableNameDiffItem } from './constraints/buildConstaintTargetTableNameDiffItem.js'
 import { buildConstaintUpdateConstraintDiffItem } from './constraints/buildConstaintUpdateConstraintDiffItem.js'
 import { buildConstraintColumnNameDiffItem } from './constraints/buildConstraintColumnNameDiffItem.js'
-import { buildConstaintDiffItem } from './constraints/buildConstraintDiffItem.js'
+import { buildConstraintDiffItem } from './constraints/buildConstraintDiffItem.js'
 import { buildIndexColumnsDiffItem } from './indexes/buildIndexColumnsDiffItem.js'
 import { buildIndexDiffItem } from './indexes/buildIndexDiffItem.js'
 import { buildIndexNameDiffItem } from './indexes/buildIndexNameDiffItem.js'
@@ -244,7 +244,7 @@ function buildConstraintRelatedDiffItems(
 ): ConstraintRelatedDiffItem[] {
   const items: ConstraintRelatedDiffItem[] = []
 
-  const constraintDiffItem = buildConstaintDiffItem(
+  const constraintDiffItem = buildConstraintDiffItem(
     tableId,
     constraintId,
     before,

@@ -32,6 +32,7 @@ export type Comment = v.InferOutput<typeof commentSchema>
 const relationshipNameSchema = v.string()
 
 const constraintNameSchema = v.string()
+export type ConstraintName = v.InferOutput<typeof constraintNameSchema>
 
 export const columnSchema = v.object({
   name: columnNameSchema,
@@ -111,10 +112,15 @@ const uniqueConstraintSchema = v.object({
 })
 export type UniqueConstraint = v.InferOutput<typeof uniqueConstraintSchema>
 
+const checkConstraintDetailSchema = v.string()
+export type CheckConstraintDetail = v.InferOutput<
+  typeof checkConstraintDetailSchema
+>
+
 const checkConstraintSchema = v.object({
   type: v.literal('CHECK'),
   name: constraintNameSchema,
-  detail: v.string(),
+  detail: checkConstraintDetailSchema,
 })
 export type CheckConstraint = v.InferOutput<typeof checkConstraintSchema>
 

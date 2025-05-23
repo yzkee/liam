@@ -36,4 +36,5 @@ export type {
   TableRelatedDiffItem,
   ColumnRelatedDiffItem,
   IndexRelatedDiffItem,
+  ConstraintRelatedDiffItem,
 } from './diff/index.js'

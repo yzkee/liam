@@ -85,6 +85,7 @@ export const AFTER = {
         },
       },
       indexes: {},
+      constraints: {},
     },
     doc_file_paths: {
       name: 'doc_file_paths',
@@ -186,15 +187,6 @@ export const AFTER = {
         },
       },
       constraints: {
-        doc_file_paths_organization_id_fkey: {
-          type: 'FOREIGN KEY',
-          name: 'doc_file_paths_organization_id_fkey',
-          columnName: 'organization_id',
-          targetTableName: 'organizations',
-          targetColumnName: 'id',
-          updateConstraint: 'CASCADE',
-          deleteConstraint: 'RESTRICT',
-        },
         github_doc_file_path_project_id_fkey: {
           type: 'FOREIGN KEY',
           name: 'github_doc_file_path_project_id_fkey',

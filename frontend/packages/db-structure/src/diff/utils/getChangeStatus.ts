@@ -8,6 +8,7 @@ type Params = {
   tableId: string
   columnId?: string
   indexId?: string
+  constraintId?: string
   operations: Operation[]
   pathRegExp: PathPatternValue
 }
@@ -16,6 +17,7 @@ export function getChangeStatus({
   tableId,
   columnId,
   indexId,
+  constraintId,
   operations,
   pathRegExp,
 }: Params): ChangeStatus {
@@ -28,6 +30,10 @@ export function getChangeStatus({
 
     if (indexId) {
       return match?.[1] === tableId && match?.[2] === indexId
+    }
+
+    if (constraintId) {
+      return match?.[1] === tableId && match?.[2] === constraintId
     }
 
     return match && match[1] === tableId

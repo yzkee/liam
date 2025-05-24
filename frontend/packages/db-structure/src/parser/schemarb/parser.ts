@@ -397,7 +397,7 @@ function extractConstraintName(node: KeywordHashNode): string | null {
 /**
  * Extract check constraint details
  */
-function extractCheckConstraint(
+function extractCheckConstraintWithTableName(
   argNodes: Node[],
 ): Result<
   { tableName: string; constraint: CheckConstraint },
@@ -674,7 +674,7 @@ class SchemaFinder extends Visitor {
   handleAddCheckConstraint(node: CallNode): void {
     const argNodes = node.arguments_?.compactChildNodes() || []
 
-    const constraintResult = extractCheckConstraint(argNodes)
+    const constraintResult = extractCheckConstraintWithTableName(argNodes)
     if (constraintResult.isErr()) {
       this.errors.push(constraintResult.error)
       return

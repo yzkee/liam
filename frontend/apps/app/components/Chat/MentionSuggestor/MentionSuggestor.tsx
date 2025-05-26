@@ -8,9 +8,6 @@ import { getQuery, renderHighlightedLabel } from './utils'
 
 const DEFAULT_NO_ITEMS_MESSAGE = 'No items found'
 
-// Re-export MentionCandidate type for backward compatibility
-export type { MentionCandidate } from './types'
-
 export const MentionSuggestor: FC<MentionSuggestorProps> = ({
   trigger,
   input,

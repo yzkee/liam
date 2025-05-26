@@ -1,5 +1,10 @@
 'use client'
-import * as Popover from '@radix-ui/react-popover'
+import {
+  PopoverAnchor,
+  PopoverContent,
+  PopoverPortal,
+  PopoverRoot,
+} from '@liam-hq/ui'
 import clsx from 'clsx'
 import type * as React from 'react'
 import type { ChangeEvent, FC, FormEvent } from 'react'
@@ -144,7 +149,7 @@ export const ChatInput: FC<ChatInputProps> = ({
       >
         <div className={styles.inputWrapper} style={{ position: 'relative' }}>
           {/* Use memoized props to avoid unnecessary renders */}
-          <Popover.Root
+          <PopoverRoot
             open={mentionVisible}
             onOpenChange={(open) => {
               // Only update if the value actually changes
@@ -153,7 +158,7 @@ export const ChatInput: FC<ChatInputProps> = ({
               }
             }}
           >
-            <Popover.Anchor asChild>
+            <PopoverAnchor asChild>
               <textarea
                 ref={textareaRef}
                 value={message}
@@ -182,9 +187,9 @@ export const ChatInput: FC<ChatInputProps> = ({
                     : undefined
                 }
               />
-            </Popover.Anchor>
-            <Popover.Portal>
-              <Popover.Content
+            </PopoverAnchor>
+            <PopoverPortal>
+              <PopoverContent
                 side="top"
                 align="start"
                 sideOffset={4}
@@ -210,9 +215,9 @@ export const ChatInput: FC<ChatInputProps> = ({
                     }
                   }}
                 />
-              </Popover.Content>
-            </Popover.Portal>
-          </Popover.Root>
+              </PopoverContent>
+            </PopoverPortal>
+          </PopoverRoot>
         </div>
         {isLoading ? (
           <CancelButton

@@ -1,0 +1,9 @@
+.content {
+  /* Basic popover content styles */
+  background: var(--global-background);
+  border: 1px solid var(--global-border);
+  border-radius: var(--border-radius-2);
+  box-shadow: var(--shadow-2);
+  padding: var(--spacing-3);
+  z-index: 50;
+}

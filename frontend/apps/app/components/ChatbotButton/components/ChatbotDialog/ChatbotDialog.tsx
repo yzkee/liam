@@ -1,5 +1,6 @@
 'use client'
 
+import type { TableGroupData } from '@/app/lib/schema/convertSchemaToText'
 import { ChatInput } from '@/components/ChatInput'
 import { ChatMessage, type ChatMessageProps } from '@/components/ChatMessage'
 import type { Schema } from '@liam-hq/db-structure'
@@ -12,7 +13,6 @@ import {
 } from '@liam-hq/ui'
 import type { FC } from 'react'
 import { useEffect, useRef, useState } from 'react'
-import type { TableGroupData } from '../../../../app/api/chat/route'
 import styles from './ChatbotDialog.module.css'
 
 interface ChatbotDialogProps {
@@ -20,6 +20,7 @@ interface ChatbotDialogProps {
   onClose: () => void
   schemaData: Schema
   tableGroups?: Record<string, TableGroupData>
+  projectId: string
 }
 
 export const ChatbotDialog: FC<ChatbotDialogProps> = ({
@@ -27,6 +28,7 @@ export const ChatbotDialog: FC<ChatbotDialogProps> = ({
   onClose,
   schemaData,
   tableGroups,
+  projectId,
 }) => {
   const [messages, setMessages] = useState<
     (ChatMessageProps & { id: string })[]
@@ -87,6 +89,7 @@ export const ChatbotDialog: FC<ChatbotDialogProps> = ({
           schemaData,
           tableGroups,
           history,
+          projectId,
         }),
       })
 

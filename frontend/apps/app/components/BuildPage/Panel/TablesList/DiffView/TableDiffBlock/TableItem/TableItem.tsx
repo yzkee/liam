@@ -13,6 +13,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react'
 import type { FC } from 'react'
 import { match } from 'ts-pattern'
 import { ColumnItem } from './ColumnItem'
+import { ConstraintList } from './ConstraintList'
 import diffStyles from './Diff.module.css'
 import { IndexItem } from './IndexItem'
 import styles from './TableItem.module.css'
@@ -41,8 +42,10 @@ type Props = {
   type: 'before' | 'after'
   isOpenColumns: boolean
   isOpenIndex: boolean
+  isOpenConstraint: boolean
   onOpenChangeColumns: (open: boolean) => void
   onOpenChangeIndex: (open: boolean) => void
+  onOpenChangeConstraint: (open: boolean) => void
 }
 
 export const TableItem: FC<Props> = ({
@@ -51,8 +54,10 @@ export const TableItem: FC<Props> = ({
   type,
   isOpenColumns,
   isOpenIndex,
+  isOpenConstraint,
   onOpenChangeColumns,
   onOpenChangeIndex,
+  onOpenChangeConstraint,
 }) => {
   const tableStatusStyle = getChangeStatusStyle(
     table.name,
@@ -142,6 +147,17 @@ export const TableItem: FC<Props> = ({
           ))}
         </CollapsibleContent>
       </CollapsibleRoot>
+
+      <hr className={styles.divider} />
+
+      <ConstraintList
+        constraints={table.constraints}
+        tableId={table.name}
+        type={type}
+        diffItems={diffItems}
+        open={isOpenConstraint}
+        onOpenChange={onOpenChangeConstraint}
+      />
     </section>
   )
 }

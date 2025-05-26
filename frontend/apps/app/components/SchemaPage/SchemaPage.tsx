@@ -181,6 +181,7 @@ export const SchemaPage: FC<Props> = async ({
       <ChatbotButton
         schemaData={contentProps.schema}
         tableGroups={contentProps.tableGroups}
+        projectId={projectId}
       />
     </TabsRoot>
   )

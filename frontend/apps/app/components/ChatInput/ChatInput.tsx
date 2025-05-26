@@ -15,6 +15,7 @@ import type {
   MentionSuggestionItem,
 } from '../Chat/MentionSuggestor/types'
 import { ModeToggleSwitch } from '../ModeToggleSwitch/ModeToggleSwitch'
+import type { Mode } from '../ModeToggleSwitch/ModeToggleSwitch'
 import { CancelButton } from './CancelButton'
 import styles from './ChatInput.module.css'
 import { SendButton } from './SendButton'
@@ -29,12 +30,13 @@ import type { Schema } from './types'
 
 // ChatInput component props
 interface ChatInputProps {
-  onSendMessage: (message: string) => void
-  onCancel?: () => void
+  onSendMessage: (message: string, mode: Mode) => void
+  onCancel?: () => void // New prop for cancellation
   isLoading: boolean
   error?: boolean
   initialMessage?: string
   schema: Schema
+  initialMode?: Mode
 }
 
 export const ChatInput: FC<ChatInputProps> = ({
@@ -44,8 +46,10 @@ export const ChatInput: FC<ChatInputProps> = ({
   error = false,
   initialMessage = '',
   schema,
+  initialMode = 'ask',
 }) => {
   const [message, setMessage] = useState(initialMessage)
+  const [mode, setMode] = useState<Mode>(initialMode)
   const hasContent = message.trim().length > 0
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -73,6 +77,11 @@ export const ChatInput: FC<ChatInputProps> = ({
   const mentionCandidates = getAllMentionCandidates(schema)
 
   // Handle textarea changes
+  // Update mode when initialMode changes
+  useEffect(() => {
+    setMode(initialMode)
+  }, [initialMode])
+
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value
     setMessage(value)
@@ -123,7 +132,8 @@ export const ChatInput: FC<ChatInputProps> = ({
     if (isLoading) {
       onCancel?.()
     } else if (hasContent) {
-      onSendMessage(message)
+      // If not loading and has content, send message
+      onSendMessage(message, mode)
       setMessage('')
       setTimeout(() => {
         const textarea = textareaRef.current
@@ -246,7 +256,11 @@ export const ChatInput: FC<ChatInputProps> = ({
           />
         )}
       </form>
-      <ModeToggleSwitch className={styles.modeToggle} />
+      <ModeToggleSwitch
+        className={styles.modeToggle}
+        value={mode}
+        onChange={setMode}
+      />
     </div>
   )
 }

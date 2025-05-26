@@ -13,9 +13,9 @@
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@liam-hq/configs": "workspace:*",
-    "eslint": "9.25.1",
-    "supabase": "2.22.13",
-    "type-fest": "4.40.1",
+    "eslint": "9.26.0",
+    "supabase": "2.22.15",
+    "type-fest": "4.41.0",
     "typescript": "5.8.3"
   },
   "scripts": {

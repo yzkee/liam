@@ -16,6 +16,7 @@ export const TableDiffBlock: FC<Props> = ({
 }) => {
   const [isOpenColumns, setIsOpenColumns] = useState(true)
   const [isOpenIndex, setIsOpenIndex] = useState(true)
+  const [isOpenConstraint, setIsOpenConstraint] = useState(true)
 
   return (
     <div className={styles.beforeAndAfter}>
@@ -26,8 +27,10 @@ export const TableDiffBlock: FC<Props> = ({
           type="before"
           isOpenColumns={isOpenColumns}
           isOpenIndex={isOpenIndex}
+          isOpenConstraint={isOpenConstraint}
           onOpenChangeColumns={setIsOpenColumns}
           onOpenChangeIndex={setIsOpenIndex}
+          onOpenChangeConstraint={setIsOpenConstraint}
         />
       )}
       {afterTable && (
@@ -37,8 +40,10 @@ export const TableDiffBlock: FC<Props> = ({
           type="after"
           isOpenColumns={isOpenColumns}
           isOpenIndex={isOpenIndex}
+          isOpenConstraint={isOpenConstraint}
           onOpenChangeColumns={setIsOpenColumns}
           onOpenChangeIndex={setIsOpenIndex}
+          onOpenChangeConstraint={setIsOpenConstraint}
         />
       )}
     </div>

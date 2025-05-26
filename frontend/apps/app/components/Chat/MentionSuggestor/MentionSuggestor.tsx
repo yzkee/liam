@@ -133,8 +133,9 @@ export const MentionSuggestor: FC<MentionSuggestorProps> = ({
         </div>
       ) : (
         filtered.map((item, i) => (
-          <div
+          <button
             key={item.id}
+            type="button"
             className={styles.suggestorItem}
             aria-selected={highlightedIndex === i}
             onMouseDown={(e: MouseEvent) => {
@@ -161,7 +162,7 @@ export const MentionSuggestor: FC<MentionSuggestorProps> = ({
                 )
               })()}
             </span>
-          </div>
+          </button>
         ))
       )}
     </div>

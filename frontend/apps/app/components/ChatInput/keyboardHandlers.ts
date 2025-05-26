@@ -7,10 +7,7 @@ export const handleRegularTextInput = (
   e: React.KeyboardEvent<HTMLTextAreaElement>,
 ): boolean => {
   // Allow normal character input (especially after @ for mentions)
-  if (/^[a-zA-Z0-9-_]$/.test(e.key)) {
-    return true
-  }
-  return false
+  return /^[a-zA-Z0-9-_]$/.test(e.key)
 }
 
 // Handle keyboard events when mention suggestions are visible

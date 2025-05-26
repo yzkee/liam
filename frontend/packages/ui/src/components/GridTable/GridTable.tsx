@@ -5,36 +5,48 @@ import styles from './GridTable.module.css'
 
 type GridTableRootProps = ComponentProps<'dl'>
 export const GridTableRoot = forwardRef<HTMLDListElement, GridTableRootProps>(
-  (props, ref) => <dl ref={ref} className={styles.root} {...props} />,
+  ({ className, ...props }, ref) => (
+    <dl ref={ref} className={clsx(styles.root, className)} {...props} />
+  ),
 )
 
 type GridTableHeaderProps = ComponentProps<'dt'>
 export const GridTableHeader = forwardRef<HTMLElement, GridTableHeaderProps>(
-  (props, ref) => (
+  ({ className, ...props }, ref) => (
     <div className={styles.dlItem}>
-      <dt ref={ref} className={styles.dtHeader} {...props} />
+      <dt ref={ref} className={clsx(styles.dtHeader, className)} {...props} />
     </div>
   ),
 )
 
 type GridTableItemProps = ComponentProps<'div'>
 export const GridTableItem = forwardRef<HTMLDivElement, GridTableItemProps>(
-  (props, ref) => <div ref={ref} className={styles.dlItem} {...props} />,
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={clsx(styles.dlItem, className)} {...props} />
+  ),
 )
 
 type GridTableDtProps = ComponentProps<'dt'>
 export const GridTableDt = forwardRef<HTMLElement, GridTableDtProps>(
-  (props, ref) => <dt ref={ref} className={styles.dt} {...props} />,
+  ({ className, ...props }, ref) => (
+    <dt ref={ref} className={clsx(styles.dt, className)} {...props} />
+  ),
 )
 
 type GridTableDdProps = ComponentProps<'dd'>
 export const GridTableDd = forwardRef<HTMLElement, GridTableDdProps>(
-  (props, ref) => <dd ref={ref} className={styles.dd} {...props} />,
+  ({ className, ...props }, ref) => (
+    <dd ref={ref} className={clsx(styles.dd, className)} {...props} />
+  ),
 )
 
 type GridTableRowProps = ComponentProps<'dt'>
 export const GridTableRow = forwardRef<HTMLElement, GridTableRowProps>(
-  (props, ref) => (
-    <dt ref={ref} className={clsx(styles.dt, styles.row)} {...props} />
+  ({ className, ...props }, ref) => (
+    <dt
+      ref={ref}
+      className={clsx(styles.dt, styles.row, className)}
+      {...props}
+    />
   ),
 )

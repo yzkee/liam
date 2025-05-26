@@ -5,4 +5,5 @@ export type {
   TableRelatedDiffItem,
   ColumnRelatedDiffItem,
   IndexRelatedDiffItem,
+  ConstraintRelatedDiffItem,
 } from './types.js'

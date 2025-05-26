@@ -1,4 +1,5 @@
 import type {
+  CheckConstraintDetail,
   Column,
   ColumnCheck,
   ColumnDefault,
@@ -7,6 +8,9 @@ import type {
   ColumnPrimary,
   ColumnUnique,
   Comment,
+  Constraint,
+  ConstraintName,
+  ForeignKeyConstraintReferenceOption,
   Index,
   IndexColumns,
   IndexName,
@@ -116,6 +120,54 @@ export type IndexTypeDiffItem = BaseSchemaDiffItem & {
   indexId: string
 }
 
+export type ConstraintDiffItem = BaseSchemaDiffItem & {
+  kind: 'constraint'
+  data: Constraint
+  constraintId: string
+}
+
+export type ConstraintNameDiffItem = BaseSchemaDiffItem & {
+  kind: 'constraint-name'
+  data: ConstraintName
+  constraintId: string
+}
+
+export type ConstraintColumnNameDiffItem = BaseSchemaDiffItem & {
+  kind: 'constraint-column-name'
+  data: ColumnName
+  constraintId: string
+}
+
+export type ConstraintTargetTableNameDiffItem = BaseSchemaDiffItem & {
+  kind: 'constraint-target-table-name'
+  data: TableName
+  constraintId: string
+}
+
+export type ConstraintTargetColumnNameDiffItem = BaseSchemaDiffItem & {
+  kind: 'constraint-target-column-name'
+  data: ColumnName
+  constraintId: string
+}
+
+export type ConstraintUpdateConstraintDiffItem = BaseSchemaDiffItem & {
+  kind: 'constraint-update-constraint'
+  data: ForeignKeyConstraintReferenceOption
+  constraintId: string
+}
+
+export type ConstraintDeleteConstraintDiffItem = BaseSchemaDiffItem & {
+  kind: 'constraint-delete-constraint'
+  data: ForeignKeyConstraintReferenceOption
+  constraintId: string
+}
+
+export type ConstraintDetailDiffItem = BaseSchemaDiffItem & {
+  kind: 'constraint-detail'
+  data: CheckConstraintDetail
+  constraintId: string
+}
+
 export type TableRelatedDiffItem =
   | TableDiffItem
   | TableNameDiffItem
@@ -138,7 +190,18 @@ export type IndexRelatedDiffItem =
   | IndexColumnsDiffItem
   | IndexTypeDiffItem
 
+export type ConstraintRelatedDiffItem =
+  | ConstraintDiffItem
+  | ConstraintNameDiffItem
+  | ConstraintColumnNameDiffItem
+  | ConstraintTargetTableNameDiffItem
+  | ConstraintTargetColumnNameDiffItem
+  | ConstraintUpdateConstraintDiffItem
+  | ConstraintDeleteConstraintDiffItem
+  | ConstraintDetailDiffItem
+
 export type SchemaDiffItem =
   | TableRelatedDiffItem
   | ColumnRelatedDiffItem
   | IndexRelatedDiffItem
+  | ConstraintRelatedDiffItem

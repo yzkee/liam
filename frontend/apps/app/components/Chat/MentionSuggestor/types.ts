@@ -1,6 +1,11 @@
 import type * as React from 'react'
 import type { ReactNode } from 'react'
 
+export type InputProps = {
+  id?: string
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
+}
+
 export type MentionSuggestionItem = {
   id: string
   label: string
@@ -20,9 +25,6 @@ export interface MentionSuggestorProps {
   visible: boolean
   className?: string
   filter?: (query: string, candidate: MentionSuggestionItem) => boolean
-  onInputProps?: (inputProps: {
-    id?: string
-    onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
-  }) => void
+  onInputProps?: (inputProps: InputProps) => void
   maxItems?: number // Maximum number of items to display
 }

@@ -10,7 +10,10 @@ import type * as React from 'react'
 import type { ChangeEvent, FC, FormEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { MentionSuggestor } from '../Chat/MentionSuggestor'
-import type { MentionSuggestionItem } from '../Chat/MentionSuggestor/types'
+import type {
+  InputProps,
+  MentionSuggestionItem,
+} from '../Chat/MentionSuggestor/types'
 import { ModeToggleSwitch } from '../ModeToggleSwitch/ModeToggleSwitch'
 import { CancelButton } from './CancelButton'
 import styles from './ChatInput.module.css'
@@ -23,12 +26,6 @@ import {
 } from './keyboardHandlers'
 import { getAllMentionCandidates } from './mentionUtils'
 import type { Schema } from './types'
-
-// Input props for mention suggestor
-type InputProps = {
-  id?: string
-  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
-}
 
 // ChatInput component props
 interface ChatInputProps {

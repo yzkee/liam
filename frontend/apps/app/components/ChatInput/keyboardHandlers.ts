@@ -1,11 +1,6 @@
 import type * as React from 'react'
 import type { FormEvent } from 'react'
-
-// Input props for mention suggestor
-type InputProps = {
-  id?: string
-  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
-}
+import type { InputProps } from '../Chat/MentionSuggestor/types'
 
 // Handle regular text input keys
 export const handleRegularTextInput = (

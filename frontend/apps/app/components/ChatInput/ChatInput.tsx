@@ -22,7 +22,23 @@ import {
   handleRegularTextInput as isRegularTextInput,
 } from './keyboardHandlers'
 import { getAllMentionCandidates } from './mentionUtils'
-import type { ChatInputProps, InputProps } from './types'
+import type { Schema } from './types'
+
+// Input props for mention suggestor
+type InputProps = {
+  id?: string
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
+}
+
+// ChatInput component props
+interface ChatInputProps {
+  onSendMessage: (message: string) => void
+  onCancel?: () => void
+  isLoading: boolean
+  error?: boolean
+  initialMessage?: string
+  schema: Schema
+}
 
 export const ChatInput: FC<ChatInputProps> = ({
   onSendMessage,

@@ -1,7 +1,7 @@
 import type * as React from 'react'
 import type { ReactNode } from 'react'
 
-export type MentionCandidate = {
+export type MentionSuggestionItem = {
   id: string
   label: string
   type?: string // e.g. 'table', 'user', 'command', etc.
@@ -14,13 +14,13 @@ export interface MentionSuggestorProps {
   trigger: string // e.g. '@'
   input: string
   caret: number
-  candidates: MentionCandidate[]
+  candidates: MentionSuggestionItem[]
   noItemsMessage?: string | ReactNode // default: "No items found"
-  onSelect: (candidate: MentionCandidate, byKeyboard?: boolean) => void
+  onSelect: (candidate: MentionSuggestionItem, byKeyboard?: boolean) => void
   onClose?: () => void
   visible: boolean
   className?: string
-  filter?: (query: string, candidate: MentionCandidate) => boolean
+  filter?: (query: string, candidate: MentionSuggestionItem) => boolean
   onInputProps?: (inputProps: {
     id?: string
     onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void

@@ -1,6 +1,5 @@
 import type * as React from 'react'
 import type { FormEvent } from 'react'
-import type { MentionCandidate } from '../Chat/MentionSuggestor/types'
 
 // Input props for mention suggestor
 type InputProps = {
@@ -76,7 +75,7 @@ export const handleNormalKeyboardEvents = (
 
 // Handle mention suggestion selection
 export const handleMentionSelect = (
-  item: MentionCandidate,
+  item: { label: string },
   message: string,
   mentionCaret: number,
   trigger = '@',

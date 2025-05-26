@@ -9,9 +9,9 @@ import {
 } from '@liam-hq/ui'
 import type { FC } from 'react'
 import { match } from 'ts-pattern'
-import type { MentionCandidate } from './types'
+import type { MentionSuggestionItem } from './types'
 
-export const MentionIcon: FC<{ item: MentionCandidate }> = ({ item }) => {
+export const MentionIcon: FC<{ item: MentionSuggestionItem }> = ({ item }) => {
   // Handle undefined item or type
   if (!item || !item.type) return null
 

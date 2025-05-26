@@ -10,7 +10,7 @@ import type * as React from 'react'
 import type { ChangeEvent, FC, FormEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { MentionSuggestor } from '../Chat/MentionSuggestor'
-import type { MentionCandidate } from '../Chat/MentionSuggestor/types'
+import type { MentionSuggestionItem } from '../Chat/MentionSuggestor/types'
 import { ModeToggleSwitch } from '../ModeToggleSwitch/ModeToggleSwitch'
 import { CancelButton } from './CancelButton'
 import styles from './ChatInput.module.css'
@@ -99,7 +99,7 @@ export const ChatInput: FC<ChatInputProps> = ({
 
   // Handle mention suggestion selection
   const handleMentionSelect = (
-    item: MentionCandidate,
+    item: MentionSuggestionItem,
     byKeyboard?: boolean,
   ) => {
     setMessage((prev) => getMentionText(item, prev, mentionCaret))

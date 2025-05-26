@@ -1,22 +1,15 @@
 /* Base container styles */
 .suggestor {
-  background: var(--global-background, #141616);
-  border-radius: var(--border-radius-md);
-  margin: 0;
-  padding: var(--spacing-1);
   min-width: 200px;
   max-width: 400px;
   max-height: 260px;
   overflow-y: auto;
-  box-shadow: 0 4px 20px 0 var(--shadow-context-menu-shadow);
   font-family: var(--main-font, Inter, sans-serif);
   font-size: var(--font-size-3, 13px);
   list-style: none;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-half);
-  border: var(--border-width-base) solid
-    var(--global-border, rgba(255, 255, 255, 0.05));
 }
 
 /* Basic list item styles */

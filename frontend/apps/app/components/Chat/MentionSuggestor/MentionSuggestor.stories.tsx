@@ -53,13 +53,11 @@ const extendedCandidates: MentionSuggestionItem[] = [
     id: 'comments',
     label: 'comments',
     type: 'table',
-    description: 'Comments table',
   },
   {
     id: 'comment_id',
     label: 'comments.id',
     type: 'column',
-    description: 'Comment ID',
     columnType: 'primary',
   },
 ]

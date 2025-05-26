@@ -7,7 +7,6 @@ export type MentionSuggestionItem = {
   type?: string // e.g. 'table', 'user', 'command', etc.
   icon?: ReactNode
   columnType?: 'primary' | 'foreign' | 'notNull' | 'nullable'
-  [key: string]: unknown
 }
 
 export interface MentionSuggestorProps {

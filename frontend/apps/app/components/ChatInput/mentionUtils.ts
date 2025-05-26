@@ -77,21 +77,12 @@ const getColumnCandidates = (
 
     return Object.values(t.columns).map((c) => {
       // Extract column type determination logic to a separate function
-      const { isSource, targetCardinality, columnType } = getColumnProperties(
-        t,
-        c,
-        relationships,
-      )
+      const { columnType } = getColumnProperties(t, c, relationships)
 
       return {
         id: `column:${t.name}.${c.name}`,
         label: `${t.name}.${c.name}`,
         type: 'column',
-        primary: c.primary,
-        foreign: c.primary ? false : isSource || !!targetCardinality,
-        notNull: c.notNull,
-        isSource,
-        targetCardinality,
         columnType,
       }
     })

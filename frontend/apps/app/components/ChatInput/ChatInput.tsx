@@ -1,4 +1,5 @@
 'use client'
+import type { Schema } from '@liam-hq/db-structure'
 import {
   PopoverAnchor,
   PopoverContent,
@@ -26,7 +27,6 @@ import {
   handleRegularTextInput as isRegularTextInput,
 } from './keyboardHandlers'
 import { getAllMentionCandidates } from './mentionUtils'
-import type { Schema } from './types'
 
 // ChatInput component props
 interface ChatInputProps {

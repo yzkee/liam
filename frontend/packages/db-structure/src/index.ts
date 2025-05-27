@@ -9,6 +9,7 @@ export {
   type Relationships,
   type Cardinality,
   type TableGroup,
+  type TableGroups,
   type Constraint,
   type Constraints,
   type PrimaryKeyConstraint,

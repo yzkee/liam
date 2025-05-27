@@ -178,6 +178,7 @@ export const tableGroupsSchema = v.record(
   tableGroupNameSchema,
   tableGroupSchema,
 )
+export type TableGroups = v.InferOutput<typeof tableGroupsSchema>
 
 // Schema definition for the entire database structure
 export const schemaSchema = v.object({

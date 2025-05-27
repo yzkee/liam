@@ -1,6 +1,6 @@
 import type * as React from 'react'
 import type { FormEvent } from 'react'
-import type { InputProps } from '../Chat/MentionSuggestor/types'
+import type { InputProps } from './components/MentionSuggestor/types'
 
 // Handle regular text input keys
 export const handleRegularTextInput = (

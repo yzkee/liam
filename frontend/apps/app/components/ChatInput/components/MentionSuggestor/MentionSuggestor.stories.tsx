@@ -5,7 +5,7 @@ import { MentionSuggestor } from './MentionSuggestor'
 import type { MentionItem } from './types'
 
 const meta: Meta<typeof MentionSuggestor> = {
-  title: 'Components/Chat/MentionSuggestor',
+  title: 'Components/ChatInput/MentionSuggestor',
   component: MentionSuggestor,
 }
 export default meta

@@ -10,13 +10,15 @@ import clsx from 'clsx'
 import type * as React from 'react'
 import type { ChangeEvent, FC, FormEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
-import { MentionSuggestor } from '../Chat/MentionSuggestor'
-import type { InputProps, MentionItem } from '../Chat/MentionSuggestor/types'
-import { ModeToggleSwitch } from '../ModeToggleSwitch/ModeToggleSwitch'
-import type { Mode } from '../ModeToggleSwitch/ModeToggleSwitch'
-import { CancelButton } from './CancelButton'
 import styles from './ChatInput.module.css'
-import { SendButton } from './SendButton'
+import { CancelButton } from './components/CancelButton'
+import {
+  type InputProps,
+  type MentionItem,
+  MentionSuggestor,
+} from './components/MentionSuggestor'
+import { type Mode, ModeToggleSwitch } from './components/ModeToggleSwitch'
+import { SendButton } from './components/SendButton'
 import {
   handleMentionSelect as getMentionText,
   handleMentionKeyboardEvents as handleMentionKeyboard,
@@ -25,7 +27,6 @@ import {
 } from './keyboardHandlers'
 import { getAllMentionCandidates } from './mentionUtils'
 
-// ChatInput component props
 interface ChatInputProps {
   onSendMessage: (message: string, mode: Mode) => void
   onCancel?: () => void // New prop for cancellation

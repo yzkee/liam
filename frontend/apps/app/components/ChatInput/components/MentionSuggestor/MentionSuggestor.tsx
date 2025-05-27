@@ -1,14 +1,29 @@
 'use client'
-import type { FC, KeyboardEvent, MouseEvent } from 'react'
+import type { FC, KeyboardEvent, MouseEvent, ReactNode } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { MentionIcon } from './MentionIcon'
 import styles from './MentionSuggestor.module.css'
-import type { MentionSuggestorProps } from './types'
+import type { InputProps, MentionItem } from './types'
 import { getQuery, renderHighlightedLabel } from './utils'
 
 const DEFAULT_NO_ITEMS_MESSAGE = 'No items found'
 
-export const MentionSuggestor: FC<MentionSuggestorProps> = ({
+interface Props {
+  trigger: string // e.g. '@'
+  input: string
+  caret: number
+  candidates: MentionItem[]
+  noItemsMessage?: string | ReactNode // default: "No items found"
+  onSelect: (candidate: MentionItem, byKeyboard?: boolean) => void
+  onClose?: () => void
+  visible: boolean
+  className?: string
+  filter?: (query: string, candidate: MentionItem) => boolean
+  onInputProps?: (inputProps: InputProps) => void
+  maxItems?: number // Maximum number of items to display
+}
+
+export const MentionSuggestor: FC<Props> = ({
   trigger,
   input,
   caret,

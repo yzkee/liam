@@ -11,10 +11,7 @@ import type * as React from 'react'
 import type { ChangeEvent, FC, FormEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { MentionSuggestor } from '../Chat/MentionSuggestor'
-import type {
-  InputProps,
-  MentionSuggestionItem,
-} from '../Chat/MentionSuggestor/types'
+import type { InputProps, MentionItem } from '../Chat/MentionSuggestor/types'
 import { ModeToggleSwitch } from '../ModeToggleSwitch/ModeToggleSwitch'
 import type { Mode } from '../ModeToggleSwitch/ModeToggleSwitch'
 import { CancelButton } from './CancelButton'
@@ -104,10 +101,7 @@ export const ChatInput: FC<ChatInputProps> = ({
   }
 
   // Handle mention suggestion selection
-  const handleMentionSelect = (
-    item: MentionSuggestionItem,
-    byKeyboard?: boolean,
-  ) => {
+  const handleMentionSelect = (item: MentionItem, byKeyboard?: boolean) => {
     setMessage((prev) => getMentionText(item, prev, mentionCaret))
     setMentionVisible(false)
     if (byKeyboard) {

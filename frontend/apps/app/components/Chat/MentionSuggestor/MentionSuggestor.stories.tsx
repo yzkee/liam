@@ -2,7 +2,7 @@ import type { Meta } from '@storybook/react'
 import type { KeyboardEvent } from 'react'
 import { useRef, useState } from 'react'
 import { MentionSuggestor } from './MentionSuggestor'
-import type { MentionSuggestionItem } from './types'
+import type { MentionItem } from './types'
 
 const meta: Meta<typeof MentionSuggestor> = {
   title: 'Components/Chat/MentionSuggestor',
@@ -13,7 +13,7 @@ export default meta
 /**
  * Sample schema candidates for demonstration
  */
-const schemaCandidates: MentionSuggestionItem[] = [
+const schemaCandidates: MentionItem[] = [
   {
     id: 'group1',
     label: 'UserGroup',
@@ -47,7 +47,7 @@ const schemaCandidates: MentionSuggestionItem[] = [
 /**
  * Extended candidates for testing pagination and filtering
  */
-const extendedCandidates: MentionSuggestionItem[] = [
+const extendedCandidates: MentionItem[] = [
   ...schemaCandidates,
   {
     id: 'comments',

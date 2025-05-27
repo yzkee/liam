@@ -6,7 +6,7 @@ export type InputProps = {
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
 }
 
-export type MentionSuggestionItem = {
+export type MentionItem = {
   id: string
   label: string
   type?: 'group' | 'table' | 'column' | 'relation'
@@ -18,13 +18,13 @@ export interface MentionSuggestorProps {
   trigger: string // e.g. '@'
   input: string
   caret: number
-  candidates: MentionSuggestionItem[]
+  candidates: MentionItem[]
   noItemsMessage?: string | ReactNode // default: "No items found"
-  onSelect: (candidate: MentionSuggestionItem, byKeyboard?: boolean) => void
+  onSelect: (candidate: MentionItem, byKeyboard?: boolean) => void
   onClose?: () => void
   visible: boolean
   className?: string
-  filter?: (query: string, candidate: MentionSuggestionItem) => boolean
+  filter?: (query: string, candidate: MentionItem) => boolean
   onInputProps?: (inputProps: InputProps) => void
   maxItems?: number // Maximum number of items to display
 }

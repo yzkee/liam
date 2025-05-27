@@ -9,10 +9,10 @@ import {
 import { Table } from 'lucide-react'
 import type { FC } from 'react'
 import { match } from 'ts-pattern'
-import type { MentionSuggestionItem } from './types'
+import type { MentionItem } from './types'
 
 type Props = {
-  item: MentionSuggestionItem
+  item: MentionItem
 }
 
 export const MentionIcon: FC<Props> = ({ item }) => {

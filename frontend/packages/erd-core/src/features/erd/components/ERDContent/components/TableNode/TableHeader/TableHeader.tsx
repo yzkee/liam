@@ -3,15 +3,14 @@ import { useUserEditingStore } from '@/stores'
 import { Table2 } from '@liam-hq/ui'
 import { Handle, Position } from '@xyflow/react'
 import clsx from 'clsx'
-import type { FC, RefObject } from 'react'
+import type { FC } from 'react'
 import styles from './TableHeader.module.css'
 
 type Props = {
   data: TableNodeData
-  textRef: RefObject<HTMLSpanElement>
 }
 
-export const TableHeader: FC<Props> = ({ data, textRef }) => {
+export const TableHeader: FC<Props> = ({ data }) => {
   const name = data.table.name
   const { showMode: _showMode } = useUserEditingStore()
   const showMode = data.showMode ?? _showMode
@@ -28,9 +27,7 @@ export const TableHeader: FC<Props> = ({ data, textRef }) => {
     >
       <Table2 width={16} className={styles.tableIcon} />
 
-      <span className={styles.name} ref={textRef}>
-        {name}
-      </span>
+      <span className={styles.name}>{name}</span>
 
       {showMode === 'TABLE_NAME' && (
         <>

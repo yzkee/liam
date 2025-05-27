@@ -263,8 +263,8 @@ importers:
         specifier: 15.3.2
         version: 15.3.2(next@15.3.2(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@rive-app/react-canvas':
-        specifier: 4.19.1
-        version: 4.19.1(react@18.3.1)
+        specifier: 4.20.0
+        version: 4.20.0(react@18.3.1)
       '@sentry/nextjs':
         specifier: '9'
         version: 9.22.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@2.0.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.200.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(next@15.3.2(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(webpack@5.99.8)
@@ -4679,8 +4679,8 @@ packages:
   '@rive-app/canvas@2.27.2':
     resolution: {integrity: sha512-g9z6x6ZdnkCDHG6irgzotSh4rz2dYCik1NAiUUcmUnepPehfN76sUfVexYoUvxi8+zSgFDPb4spKpMRbTFYO5g==}
 
-  '@rive-app/react-canvas@4.19.1':
-    resolution: {integrity: sha512-WP4A6G5V38pQRjUvbVgzTGUa8hj0ghmMUvzouZhoe8Fm8R4aRF3QlGhwiub4ZU0C846O/DowdgV40g8SfeUotA==}
+  '@rive-app/react-canvas@4.20.0':
+    resolution: {integrity: sha512-Il7LtK2pmkWmmDpCJp5BufaYU4otCKZiZV3nkJkgUxpQYTneUJ+3Xf9Y1b8+0Xl8riklT7lZCmq2BS2rTt8U8A==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0
 
@@ -16355,7 +16355,7 @@ snapshots:
 
   '@rive-app/canvas@2.27.2': {}
 
-  '@rive-app/react-canvas@4.19.1(react@18.3.1)':
+  '@rive-app/react-canvas@4.20.0(react@18.3.1)':
     dependencies:
       '@rive-app/canvas': 2.27.2
       react: 18.3.1

@@ -70,5 +70,12 @@ export async function BuildPage({ projectId, branchOrCommit }: Props) {
     throw new Error('Schema could not be parsed')
   }
 
-  return <Panel schema={schema} errors={errors || []} tableGroups={{}} />
+  return (
+    <Panel
+      schema={schema}
+      errors={errors || []}
+      tableGroups={{}}
+      projectId={projectId}
+    />
+  )
 }

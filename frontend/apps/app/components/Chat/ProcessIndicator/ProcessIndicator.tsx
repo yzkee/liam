@@ -14,6 +14,19 @@ import styles from './ProcessIndicator.module.css'
 
 export type ProcessStatus = 'processing' | 'complete'
 
+// Get status icon based on current status
+const getStatusIcon = (status: ProcessStatus): ReactNode => {
+  return status === 'processing' ? <Spinner size="16" /> : <Check size={16} />
+}
+
+// Get progress fill width
+const getProgressFillWidth = (
+  status: ProcessStatus,
+  progress: number,
+): string => {
+  return `${status === 'complete' ? 100 : progress}%`
+}
+
 export interface ProcessIndicatorProps {
   /**
    * The title of the process
@@ -84,14 +97,6 @@ export const ProcessIndicator: FC<ProcessIndicatorProps> = ({
   const effectiveStatus: ProcessStatus =
     normalizedProgress >= 100 ? 'complete' : status || 'processing'
 
-  // Icon based on status
-  const statusIcon: ReactNode =
-    effectiveStatus === 'processing' ? (
-      <Spinner size="16" />
-    ) : (
-      <Check size={16} />
-    )
-
   return (
     <div
       className={`${styles.container} ${!isExpanded ? styles.collapsed : ''}`}
@@ -105,7 +110,7 @@ export const ProcessIndicator: FC<ProcessIndicatorProps> = ({
               : styles.completeIcon
           }`}
         >
-          {statusIcon}
+          {getStatusIcon(effectiveStatus)}
         </div>
         <div className={styles.titleContainer}>
           <div className={styles.title}>{title}</div>
@@ -128,7 +133,10 @@ export const ProcessIndicator: FC<ProcessIndicatorProps> = ({
               <div
                 className={styles.progressFill}
                 style={{
-                  width: `${effectiveStatus === 'complete' ? 100 : normalizedProgress}%`,
+                  width: getProgressFillWidth(
+                    effectiveStatus,
+                    normalizedProgress,
+                  ),
                 }}
               />
             </div>

@@ -5,7 +5,7 @@ import { useUserEditingStore } from '@/stores'
 import { Minus, Plus } from '@liam-hq/ui'
 import { useStore } from '@xyflow/react'
 import { type FC, useCallback } from 'react'
-import { ToolBarIconButton } from '../ToolbarIconButton'
+import { ToolbarIconButton } from '../ToolbarIconButton'
 import styles from './ZoomControls.module.css'
 
 export const ZoomControls: FC = () => {
@@ -42,7 +42,7 @@ export const ZoomControls: FC = () => {
 
   return (
     <div className={styles.wrapper}>
-      <ToolBarIconButton
+      <ToolbarIconButton
         onClick={handleClickZoomOut}
         tooltipContent="Zoom Out"
         label="Zoom out"
@@ -51,7 +51,7 @@ export const ZoomControls: FC = () => {
       <span className={styles.zoomLevelText} aria-label="Zoom level">
         {Math.floor(zoomLevel * 100)}%
       </span>
-      <ToolBarIconButton
+      <ToolbarIconButton
         onClick={handleClickZoomIn}
         tooltipContent="Zoom In"
         label="Zoom in"

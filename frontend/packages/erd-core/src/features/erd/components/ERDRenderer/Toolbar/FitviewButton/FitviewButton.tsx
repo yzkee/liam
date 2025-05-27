@@ -9,7 +9,7 @@ import {
   type ReactNode,
   useCallback,
 } from 'react'
-import { ToolBarIconButton } from '../ToolbarIconButton'
+import { ToolbarIconButton } from '../ToolbarIconButton'
 
 interface FitviewButtonProps {
   children?: ReactNode
@@ -37,7 +37,7 @@ export const FitviewButton: FC<FitviewButtonProps> = ({
   }, [fitView, showMode, version])
 
   return (
-    <ToolBarIconButton
+    <ToolbarIconButton
       onClick={handleClick}
       size={size}
       tooltipContent="Zoom to Fit"
@@ -45,6 +45,6 @@ export const FitviewButton: FC<FitviewButtonProps> = ({
       icon={<Scan />}
     >
       {children}
-    </ToolBarIconButton>
+    </ToolbarIconButton>
   )
 }

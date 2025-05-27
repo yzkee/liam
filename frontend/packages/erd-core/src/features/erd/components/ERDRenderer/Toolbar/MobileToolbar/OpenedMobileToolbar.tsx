@@ -10,7 +10,7 @@ import { type FC, useCallback } from 'react'
 import { FitviewButton } from '../FitviewButton'
 import { GroupButton } from '../GroupButton'
 import { TidyUpButton } from '../TidyUpButton'
-import { ToolBarIconButton } from '../ToolbarIconButton'
+import { ToolbarIconButton } from '../ToolbarIconButton'
 import styles from './OpenedMobileToolbar.module.css'
 
 type Props = {
@@ -71,7 +71,7 @@ export const OpenedMobileToolbar: FC<Props> = ({
       </div>
       <hr className={styles.divider} />
       <div className={styles.buttonGroup}>
-        <ToolBarIconButton
+        <ToolbarIconButton
           onClick={handleClickZoomIn}
           size="sm"
           tooltipContent="Zoom In"
@@ -79,8 +79,8 @@ export const OpenedMobileToolbar: FC<Props> = ({
           icon={<Plus />}
         >
           Zoom in
-        </ToolBarIconButton>
-        <ToolBarIconButton
+        </ToolbarIconButton>
+        <ToolbarIconButton
           onClick={handleClickZoomOut}
           size="sm"
           tooltipContent="Zoom Out"
@@ -88,7 +88,7 @@ export const OpenedMobileToolbar: FC<Props> = ({
           icon={<Minus />}
         >
           Zoom out
-        </ToolBarIconButton>
+        </ToolbarIconButton>
 
         <FitviewButton size="sm">Zoom to Fit</FitviewButton>
         <TidyUpButton size="sm">Tidy up</TidyUpButton>

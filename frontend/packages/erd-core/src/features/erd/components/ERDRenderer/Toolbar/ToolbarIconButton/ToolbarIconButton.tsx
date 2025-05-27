@@ -1,9 +1,9 @@
 import { IconButton } from '@liam-hq/ui'
 import { ToolbarButton } from '@radix-ui/react-toolbar'
 import type { ComponentProps, FC, MouseEventHandler, ReactNode } from 'react'
-import styles from './ToolBarIconButton.module.css'
+import styles from './ToolbarIconButton.module.css'
 
-interface ToolBarIconButtonProps {
+interface ToolbarIconButtonProps {
   children?: ReactNode
   size?: ComponentProps<typeof IconButton>['size']
   tooltipContent: string
@@ -12,7 +12,7 @@ interface ToolBarIconButtonProps {
   onClick?: MouseEventHandler
 }
 
-export const ToolBarIconButton: FC<ToolBarIconButtonProps> = ({
+export const ToolbarIconButton: FC<ToolbarIconButtonProps> = ({
   children = '',
   size = 'md',
   tooltipContent,

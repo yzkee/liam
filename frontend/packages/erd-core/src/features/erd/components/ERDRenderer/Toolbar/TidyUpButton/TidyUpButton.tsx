@@ -11,7 +11,7 @@ import {
   type ReactNode,
   useCallback,
 } from 'react'
-import { ToolBarIconButton } from '../ToolbarIconButton'
+import { ToolbarIconButton } from '../ToolbarIconButton'
 
 interface TidyUpButtonProps {
   children?: ReactNode
@@ -43,7 +43,7 @@ export const TidyUpButton: FC<TidyUpButtonProps> = ({
   }, [showMode, getNodes, getEdges, setNodes, fitView, version])
 
   return (
-    <ToolBarIconButton
+    <ToolbarIconButton
       onClick={handleClick}
       size={size}
       tooltipContent="Tidy up"
@@ -51,6 +51,6 @@ export const TidyUpButton: FC<TidyUpButtonProps> = ({
       icon={<TidyUpIcon />}
     >
       {children}
-    </ToolBarIconButton>
+    </ToolbarIconButton>
   )
 }

@@ -2,10 +2,10 @@ import { toolbarActionLogEvent } from '@/features/gtm/utils'
 import { useCustomReactflow } from '@/features/reactflow/hooks'
 import { useVersion } from '@/providers'
 import { useUserEditingStore } from '@/stores'
-import { IconButton, Minus, Plus } from '@liam-hq/ui'
-import { ToolbarButton } from '@radix-ui/react-toolbar'
+import { Minus, Plus } from '@liam-hq/ui'
 import { useStore } from '@xyflow/react'
 import { type FC, useCallback } from 'react'
+import { ToolbarIconButton } from '../ToolbarIconButton'
 import styles from './ZoomControls.module.css'
 
 export const ZoomControls: FC = () => {
@@ -42,25 +42,21 @@ export const ZoomControls: FC = () => {
 
   return (
     <div className={styles.wrapper}>
-      <ToolbarButton asChild className={styles.menuButton}>
-        <IconButton
-          icon={<Minus />}
-          tooltipContent="Zoom Out"
-          aria-label="Zoom out"
-          onClick={handleClickZoomOut}
-        />
-      </ToolbarButton>
+      <ToolbarIconButton
+        onClick={handleClickZoomOut}
+        tooltipContent="Zoom Out"
+        label="Zoom out"
+        icon={<Minus />}
+      />
       <span className={styles.zoomLevelText} aria-label="Zoom level">
         {Math.floor(zoomLevel * 100)}%
       </span>
-      <ToolbarButton asChild className={styles.menuButton}>
-        <IconButton
-          icon={<Plus />}
-          tooltipContent="Zoom In"
-          aria-label="Zoom in"
-          onClick={handleClickZoomIn}
-        />
-      </ToolbarButton>
+      <ToolbarIconButton
+        onClick={handleClickZoomIn}
+        tooltipContent="Zoom In"
+        label="Zoom in"
+        icon={<Plus />}
+      />
     </div>
   )
 }

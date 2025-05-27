@@ -345,6 +345,22 @@ importers:
         specifier: workspace:*
         version: link:../../packages/cli
 
+  frontend/internal-packages/figma-to-css-variables:
+    dependencies:
+      dotenv:
+        specifier: 16.5.0
+        version: 16.5.0
+      style-dictionary:
+        specifier: 4.4.0
+        version: 4.4.0
+    devDependencies:
+      '@biomejs/biome':
+        specifier: 1.9.4
+        version: 1.9.4
+      '@liam-hq/configs':
+        specifier: workspace:*
+        version: link:../../packages/configs
+
   frontend/internal-packages/mcp-server:
     dependencies:
       '@modelcontextprotocol/sdk':
@@ -540,8 +556,8 @@ importers:
         specifier: 9.26.0
         version: 9.26.0(jiti@2.4.2)
       supabase:
-        specifier: 2.22.15
-        version: 2.22.15
+        specifier: 2.22.16
+        version: 2.22.16
       type-fest:
         specifier: 4.41.0
         version: 4.41.0
@@ -682,22 +698,6 @@ importers:
       vitest:
         specifier: 3.1.3
         version: 3.1.3(@edge-runtime/vm@3.2.0)(@types/debug@4.1.12)(@types/node@22.15.17)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
-
-  frontend/internal-packages/figma-to-css-variables:
-    dependencies:
-      dotenv:
-        specifier: 16.5.0
-        version: 16.5.0
-      style-dictionary:
-        specifier: 4.4.0
-        version: 4.4.0
-    devDependencies:
-      '@biomejs/biome':
-        specifier: 1.9.4
-        version: 1.9.4
-      '@liam-hq/configs':
-        specifier: workspace:*
-        version: link:../../packages/configs
 
   frontend/packages/github:
     dependencies:
@@ -11030,8 +11030,8 @@ packages:
       babel-plugin-macros:
         optional: true
 
-  supabase@2.22.15:
-    resolution: {integrity: sha512-HCiDic1pMnU0thLQht8Cstceuojrf0GrM8a2RMStI7aX/zTegJ/7RuvDFNRqox9+NJ1XwKBBQ0ttCBSCqDYCoQ==}
+  supabase@2.22.16:
+    resolution: {integrity: sha512-IugFMq6ClcRQ3V3hob9O5cgoews0RdF2Lifb0x3Q0YPhQI3q5Is8BSzgyusLxYhXnO9eiedMdM3f3Hnho73HyQ==}
     engines: {npm: '>=8'}
     hasBin: true
 
@@ -24186,7 +24186,7 @@ snapshots:
     optionalDependencies:
       '@babel/core': 7.27.1
 
-  supabase@2.22.15:
+  supabase@2.22.16:
     dependencies:
       bin-links: 5.0.0
       https-proxy-agent: 7.0.6

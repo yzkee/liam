@@ -3,8 +3,7 @@ import { toolbarActionLogEvent } from '@/features/gtm/utils'
 import { useCustomReactflow } from '@/features/reactflow/hooks'
 import { useVersion } from '@/providers'
 import { useUserEditingStore } from '@/stores'
-import { IconButton, TidyUpIcon } from '@liam-hq/ui'
-import { ToolbarButton } from '@radix-ui/react-toolbar'
+import { type IconButton, TidyUpIcon } from '@liam-hq/ui'
 import { useReactFlow } from '@xyflow/react'
 import {
   type ComponentProps,
@@ -12,7 +11,7 @@ import {
   type ReactNode,
   useCallback,
 } from 'react'
-import styles from './TidyUpButton.module.css'
+import { ToolbarIconButton } from '../ToolbarIconButton'
 
 interface TidyUpButtonProps {
   children?: ReactNode
@@ -44,16 +43,14 @@ export const TidyUpButton: FC<TidyUpButtonProps> = ({
   }, [showMode, getNodes, getEdges, setNodes, fitView, version])
 
   return (
-    <ToolbarButton asChild className={styles.menuButton}>
-      <IconButton
-        icon={<TidyUpIcon />}
-        tooltipContent="Tidy up"
-        onClick={handleClick}
-        size={size}
-        aria-label="Tidy up"
-      >
-        {children}
-      </IconButton>
-    </ToolbarButton>
+    <ToolbarIconButton
+      onClick={handleClick}
+      size={size}
+      tooltipContent="Tidy up"
+      label="Tidy up"
+      icon={<TidyUpIcon />}
+    >
+      {children}
+    </ToolbarIconButton>
   )
 }

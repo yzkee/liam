@@ -19,6 +19,7 @@
     "@liam-hq/db",
     "@liam-hq/jobs",
     "@liam-hq/prompt-test",
+    "@liam-hq/storybook",
     "node-gtts"
   ]
 }

@@ -1,4 +1,5 @@
 import type { TableNodeType } from '@/features/erd/types'
+import { useIsTouchDevice } from '@/hooks'
 import { useUserEditingStore } from '@/stores'
 import {
   TooltipContent,
@@ -24,7 +25,14 @@ export const TableNode: FC<Props> = ({ data }) => {
   const textRef = useRef<HTMLSpanElement>(null)
   const [isTruncated, setIsTruncated] = useState<boolean>(false)
 
+  const isTouchDevice = useIsTouchDevice()
+
   useEffect(() => {
+    if (isTouchDevice) {
+      setIsTruncated(false)
+      return
+    }
+
     const checkTruncation = () => {
       if (!textRef.current) return
 
@@ -65,7 +73,7 @@ export const TableNode: FC<Props> = ({ data }) => {
       window.removeEventListener('resize', checkTruncation)
       observer.disconnect()
     }
-  }, [name])
+  }, [isTouchDevice, name])
 
   return (
     <TooltipProvider>

@@ -1,5 +1,4 @@
 import type { TableNodeType } from '@/features/erd/types'
-import { useIsTouchDevice } from '@/hooks'
 import { useUserEditingStore } from '@/stores'
 import {
   TooltipContent,
@@ -25,55 +24,28 @@ export const TableNode: FC<Props> = ({ data }) => {
   const textRef = useRef<HTMLSpanElement>(null)
   const [isTruncated, setIsTruncated] = useState<boolean>(false)
 
-  const isTouchDevice = useIsTouchDevice()
-
   useEffect(() => {
-    if (isTouchDevice) {
-      setIsTruncated(false)
-      return
-    }
+    if (!textRef.current) return
 
-    const checkTruncation = () => {
-      if (!textRef.current) return
+    const element = textRef.current
 
-      const element = textRef.current
+    const style = window.getComputedStyle(element)
 
-      const style = window.getComputedStyle(element)
+    // Create a canvas to measure text width
+    const canvas = document.createElement('canvas')
+    const context = canvas.getContext('2d')
+    if (!context) return
 
-      // Create a canvas to measure text width
-      const canvas = document.createElement('canvas')
-      const context = canvas.getContext('2d')
-      if (!context) return
+    // Set the font to match the element
+    context.font = style.font
 
-      // Set the font to match the element
-      context.font = style.font
+    // Measure the text width
+    const textMetrics = context.measureText(name)
+    const textWidth = textMetrics.width
 
-      // Measure the text width
-      const textMetrics = context.measureText(name)
-      const textWidth = textMetrics.width
-
-      // Check if text is truncated
-      setIsTruncated(textWidth > element.clientWidth + 0.015)
-    }
-
-    // Initial check after a small delay to ensure DOM is rendered
-    const timeoutId = setTimeout(checkTruncation, 0)
-
-    // Check on window resize and when sidebar width changes
-    window.addEventListener('resize', checkTruncation)
-
-    // Add a mutation observer to watch for width changes
-    const observer = new ResizeObserver(checkTruncation)
-    if (textRef.current) {
-      observer.observe(textRef.current)
-    }
-
-    return () => {
-      clearTimeout(timeoutId)
-      window.removeEventListener('resize', checkTruncation)
-      observer.disconnect()
-    }
-  }, [isTouchDevice, name])
+    // Check if text is truncated
+    setIsTruncated(textWidth > element.clientWidth + 0.015)
+  }, [name])
 
   return (
     <TooltipProvider>

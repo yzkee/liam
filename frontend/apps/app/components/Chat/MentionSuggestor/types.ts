@@ -9,7 +9,7 @@ export type InputProps = {
 export type MentionSuggestionItem = {
   id: string
   label: string
-  type?: string // e.g. 'table', 'user', 'command', etc.
+  type?: 'group' | 'table' | 'column' | 'relation'
   icon?: ReactNode
   columnType?: 'primary' | 'foreign' | 'notNull' | 'nullable'
 }

@@ -96,6 +96,10 @@
   min-width: 0;
 }
 
+.tablesHeaderRow:hover {
+  background: var(--pane-background-active, #2e3031);
+}
+
 .showAllButton {
   display: flex;
   align-items: center;

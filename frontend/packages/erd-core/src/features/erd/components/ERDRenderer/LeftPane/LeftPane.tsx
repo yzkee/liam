@@ -138,7 +138,6 @@ export const LeftPane = () => {
                 }
                 tabIndex={0}
                 onClick={showOrHideAllNodes}
-                onKeyDown={showOrHideAllNodes}
               >
                 {visibleCount === allCount ? (
                   <EyeOff className={styles.icon} />
@@ -148,10 +147,10 @@ export const LeftPane = () => {
                 <span className={styles.showAllText}>
                   {visibleCount === allCount ? 'Hide All' : 'Show All'}
                 </span>
+                <span className={styles.visibleCount}>
+                  ({visibleCount}/{allCount} visible)
+                </span>
               </button>
-              <span className={styles.visibleCount}>
-                ({visibleCount}/{allCount} visible)
-              </span>
             </span>
           </SidebarGroupLabel>
           <SidebarGroupContent>

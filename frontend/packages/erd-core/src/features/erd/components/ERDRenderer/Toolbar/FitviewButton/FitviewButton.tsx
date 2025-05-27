@@ -2,15 +2,14 @@ import { toolbarActionLogEvent } from '@/features/gtm/utils'
 import { useCustomReactflow } from '@/features/reactflow/hooks'
 import { useVersion } from '@/providers'
 import { useUserEditingStore } from '@/stores'
-import { IconButton, Scan } from '@liam-hq/ui'
-import { ToolbarButton } from '@radix-ui/react-toolbar'
+import { type IconButton, Scan } from '@liam-hq/ui'
 import {
   type ComponentProps,
   type FC,
   type ReactNode,
   useCallback,
 } from 'react'
-import styles from './Fitview.module.css'
+import { ToolBarIconButton } from '../ToolbarIconButton'
 
 interface FitviewButtonProps {
   children?: ReactNode
@@ -38,15 +37,14 @@ export const FitviewButton: FC<FitviewButtonProps> = ({
   }, [fitView, showMode, version])
 
   return (
-    <ToolbarButton asChild onClick={handleClick} className={styles.menuButton}>
-      <IconButton
-        size={size}
-        icon={<Scan />}
-        tooltipContent="Zoom to Fit"
-        aria-label="Zoom to fit"
-      >
-        {children}
-      </IconButton>
-    </ToolbarButton>
+    <ToolBarIconButton
+      onClick={handleClick}
+      size={size}
+      tooltipContent="Zoom to Fit"
+      label="Zoom to fit"
+      icon={<Scan />}
+    >
+      {children}
+    </ToolBarIconButton>
   )
 }

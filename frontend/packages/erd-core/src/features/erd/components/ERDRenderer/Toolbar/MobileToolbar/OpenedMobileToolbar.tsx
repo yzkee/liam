@@ -4,13 +4,13 @@ import { useVersion } from '@/providers'
 import type { ShowMode } from '@/schemas/showMode'
 import { useUserEditingStore } from '@/stores'
 import { ChevronDown } from '@liam-hq/ui'
-import { IconButton, Minus, Plus } from '@liam-hq/ui'
-import { ToolbarButton } from '@radix-ui/react-toolbar'
+import { Minus, Plus } from '@liam-hq/ui'
 import { useStore } from '@xyflow/react'
 import { type FC, useCallback } from 'react'
 import { FitviewButton } from '../FitviewButton'
 import { GroupButton } from '../GroupButton'
 import { TidyUpButton } from '../TidyUpButton'
+import { ToolbarIconButton } from '../ToolbarIconButton'
 import styles from './OpenedMobileToolbar.module.css'
 
 type Props = {
@@ -71,34 +71,24 @@ export const OpenedMobileToolbar: FC<Props> = ({
       </div>
       <hr className={styles.divider} />
       <div className={styles.buttonGroup}>
-        <ToolbarButton
-          asChild
+        <ToolbarIconButton
           onClick={handleClickZoomIn}
-          className={styles.menuButton}
+          size="sm"
+          tooltipContent="Zoom In"
+          label="Zoom in"
+          icon={<Plus />}
         >
-          <IconButton
-            size="sm"
-            icon={<Plus />}
-            tooltipContent="Zoom In"
-            aria-label="Zoom in"
-          >
-            Zoom in
-          </IconButton>
-        </ToolbarButton>
-        <ToolbarButton
-          asChild
+          Zoom in
+        </ToolbarIconButton>
+        <ToolbarIconButton
           onClick={handleClickZoomOut}
-          className={styles.menuButton}
+          size="sm"
+          tooltipContent="Zoom Out"
+          label="Zoom out"
+          icon={<Minus />}
         >
-          <IconButton
-            size="sm"
-            icon={<Minus />}
-            tooltipContent="Zoom Out"
-            aria-label="Zoom out"
-          >
-            Zoom out
-          </IconButton>
-        </ToolbarButton>
+          Zoom out
+        </ToolbarIconButton>
 
         <FitviewButton size="sm">Zoom to Fit</FitviewButton>
         <TidyUpButton size="sm">Tidy up</TidyUpButton>

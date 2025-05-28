@@ -345,8 +345,13 @@ const processBatch = async (
         continue
       }
 
-      // Ensure text is always a string
-      const documentContent = typeof text === 'string' ? text : String(text)
+      // Ensure text is always a valid string
+      const documentContent = (() => {
+        if (text === null || text === undefined) {
+          return ''
+        }
+        return typeof text === 'string' ? text : String(text)
+      })()
 
       try {
         await insertDocumentToSupabase(

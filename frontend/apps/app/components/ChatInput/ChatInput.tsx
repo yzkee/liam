@@ -1,4 +1,5 @@
 'use client'
+
 import type { Schema } from '@liam-hq/db-structure'
 import {
   PopoverAnchor,
@@ -7,92 +8,68 @@ import {
   PopoverRoot,
 } from '@liam-hq/ui'
 import clsx from 'clsx'
-import type * as React from 'react'
-import type { ChangeEvent, FC, FormEvent } from 'react'
-import { useEffect, useRef, useState } from 'react'
+import type { ChangeEvent, FC, FormEvent, KeyboardEvent } from 'react'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import styles from './ChatInput.module.css'
 import { CancelButton } from './components/CancelButton'
 import {
-  type InputProps,
   type MentionItem,
   MentionSuggestor,
+  type MentionSuggestorHandle,
 } from './components/MentionSuggestor'
 import { type Mode, ModeToggleSwitch } from './components/ModeToggleSwitch'
 import { SendButton } from './components/SendButton'
-import {
-  handleMentionSelect as getMentionText,
-  handleMentionKeyboardEvents as handleMentionKeyboard,
-  handleNormalKeyboardEvents as handleNormalKeyboard,
-  handleRegularTextInput as isRegularTextInput,
-} from './keyboardHandlers'
-import { getAllMentionCandidates } from './mentionUtils'
+import { handleNormalKey } from './utils/handleNormalKey'
+import { insertMentionAtCursor } from './utils/insertMention'
+import { isRegularKey } from './utils/isRegularKey'
 
-interface ChatInputProps {
-  onSendMessage: (message: string, mode: Mode) => void
-  onCancel?: () => void // New prop for cancellation
+type Props = {
   isLoading: boolean
   error?: boolean
   initialMessage?: string
   schema: Schema
   initialMode?: Mode
+  onSendMessage: (message: string, mode: Mode) => void
+  onCancel?: () => void
 }
 
-export const ChatInput: FC<ChatInputProps> = ({
-  onSendMessage,
-  onCancel,
+export const ChatInput: FC<Props> = ({
   isLoading,
   error = false,
   initialMessage = '',
   schema,
   initialMode = 'ask',
+  onSendMessage,
+  onCancel,
 }) => {
-  const [message, setMessage] = useState(initialMessage)
-  const [mode, setMode] = useState<Mode>(initialMode)
-  const hasContent = message.trim().length > 0
+  const mentionSuggestorRef = useRef<MentionSuggestorHandle>(null)
+  const mentionSuggestorId = useId()
+
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  // --- States for suggestion ---
-  const [mentionCaret, setMentionCaret] = useState(0)
-  const [mentionVisible, setMentionVisible] = useState(false)
-
-  // State to track IME composition status
+  const [message, setMessage] = useState(initialMessage)
+  const [cursorPos, setCursorPos] = useState(0)
+  const [mode, setMode] = useState<Mode>(initialMode)
+  const [isMentionSuggestorOpen, setIsMentionSuggestorOpen] = useState(false)
   const [isImeComposing, setIsImeComposing] = useState(false)
 
-  // Input props for mention suggestor
-  // Use useRef instead of useState to avoid unnecessary re-renders
-  const inputPropsRef = useRef<InputProps>({})
-
-  // Adjust height on initial render
-  useEffect(() => {
-    const textarea = textareaRef.current
-    if (textarea) {
-      textarea.style.height = 'auto'
-      textarea.style.height = `${textarea.scrollHeight}px`
-    }
-  }, [])
-
-  // Get all mention candidates from the schema
-  const mentionCandidates = getAllMentionCandidates(schema)
-
-  // Handle textarea changes
-  // Update mode when initialMode changes
-  useEffect(() => {
-    setMode(initialMode)
-  }, [initialMode])
+  const hasContent = message.trim().length > 0
 
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value
     setMessage(value)
 
     // Detect mention trigger
-    const caret = e.target.selectionStart
-    setMentionCaret(caret)
-    const before = value.slice(0, caret)
+    const cursorPos = e.target.selectionStart
+    setCursorPos(cursorPos)
+
+    const before = value.slice(0, cursorPos)
     const atMatch = /@([\w-]*)$/.exec(before)
+
     if (atMatch) {
-      setMentionVisible(true)
+      setIsMentionSuggestorOpen(true)
     } else {
-      setMentionVisible(false)
+      setIsMentionSuggestorOpen(false)
     }
 
     // Adjust height after content changes
@@ -103,8 +80,9 @@ export const ChatInput: FC<ChatInputProps> = ({
 
   // Handle mention suggestion selection
   const handleMentionSelect = (item: MentionItem, byKeyboard?: boolean) => {
-    setMessage((prev) => getMentionText(item, prev, mentionCaret))
-    setMentionVisible(false)
+    setMessage((prev) => insertMentionAtCursor(prev, cursorPos, item))
+    setIsMentionSuggestorOpen(false)
+
     if (byKeyboard) {
       setTimeout(() => {
         textareaRef.current?.focus()
@@ -139,20 +117,36 @@ export const ChatInput: FC<ChatInputProps> = ({
     }
   }
 
-  // Main keyboard event handler with reduced complexity
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     // First check for regular text input which is always allowed
-    if (isRegularTextInput(e)) {
+    if (isRegularKey(e.key)) {
       return
     }
 
     // Then handle events based on whether mention suggestions are visible
-    if (mentionVisible) {
-      handleMentionKeyboard(e, inputPropsRef)
+    if (isMentionSuggestorOpen) {
+      mentionSuggestorRef.current?.handleKeyDown(e)
     } else {
-      handleNormalKeyboard(e, isImeComposing, hasContent, handleSubmit)
+      handleNormalKey(e, {
+        isImeComposing,
+        hasContent,
+        onSubmit: () => handleSubmit(e as unknown as FormEvent),
+      })
     }
   }
+
+  const handleClose = useCallback(() => {
+    setIsMentionSuggestorOpen(false)
+  }, [])
+
+  // Adjust height on initial render
+  useEffect(() => {
+    const textarea = textareaRef.current
+    if (textarea) {
+      textarea.style.height = 'auto'
+      textarea.style.height = `${textarea.scrollHeight}px`
+    }
+  }, [])
 
   return (
     <div className={styles.container}>
@@ -168,42 +162,27 @@ export const ChatInput: FC<ChatInputProps> = ({
         <div className={styles.inputWrapper} style={{ position: 'relative' }}>
           {/* Use memoized props to avoid unnecessary renders */}
           <PopoverRoot
-            open={mentionVisible}
-            onOpenChange={(open) => {
-              // Only update if the value actually changes
-              if (open !== mentionVisible) {
-                setMentionVisible(open)
-              }
-            }}
+            open={isMentionSuggestorOpen}
+            onOpenChange={setIsMentionSuggestorOpen}
           >
             <PopoverAnchor asChild>
               <textarea
                 ref={textareaRef}
                 value={message}
-                onChange={handleChange}
                 placeholder="Ask anything, @ to mention schema tables"
                 disabled={isLoading}
                 className={styles.input}
                 rows={1}
                 data-error={error ? 'true' : undefined}
-                // Apply keyboard event handlers for mention suggestions
-                onKeyDown={handleKeyDown}
-                // IME composition event handlers
-                onCompositionStart={handleCompositionStart}
-                onCompositionEnd={handleCompositionEnd}
-                // Apply ARIA attributes for accessibility
+                role="combobox"
+                aria-controls={mentionSuggestorId}
+                aria-expanded={isMentionSuggestorOpen}
                 aria-autocomplete="list"
                 aria-haspopup="listbox"
-                aria-expanded={mentionVisible}
-                aria-controls={
-                  mentionVisible ? 'chatinput-suggest-list' : undefined
-                }
-                // Apply ID from mention input props if available
-                id={
-                  mentionVisible && inputPropsRef.current
-                    ? inputPropsRef.current.id || undefined
-                    : undefined
-                }
+                onChange={handleChange}
+                onKeyDown={handleKeyDown}
+                onCompositionStart={handleCompositionStart}
+                onCompositionEnd={handleCompositionEnd}
               />
             </PopoverAnchor>
             <PopoverPortal>
@@ -215,23 +194,14 @@ export const ChatInput: FC<ChatInputProps> = ({
                 onOpenAutoFocus={(e) => e.preventDefault()}
               >
                 <MentionSuggestor
-                  trigger="@"
+                  ref={mentionSuggestorRef}
+                  enabled={isMentionSuggestorOpen}
+                  id={mentionSuggestorId}
+                  schema={schema}
                   input={message}
-                  caret={mentionCaret}
-                  candidates={mentionCandidates}
-                  visible={mentionVisible}
-                  noItemsMessage="No commands found"
+                  cursorPos={cursorPos}
                   onSelect={handleMentionSelect}
-                  onClose={() => {
-                    setMentionVisible(false)
-                  }}
-                  onInputProps={(inputProps) => {
-                    // Directly receive inputProps
-                    inputPropsRef.current = {
-                      id: inputProps.id,
-                      onKeyDown: inputProps.onKeyDown,
-                    }
-                  }}
+                  onClose={handleClose}
                 />
               </PopoverContent>
             </PopoverPortal>

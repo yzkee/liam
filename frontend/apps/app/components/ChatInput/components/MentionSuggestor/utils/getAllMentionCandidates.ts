@@ -6,7 +6,7 @@ import type {
   TableGroups,
   Tables,
 } from '@liam-hq/db-structure'
-import type { MentionItem } from './components/MentionSuggestor/types'
+import type { MentionItem } from '../../../types'
 
 // Function to generate table group candidates
 const getTableGroupCandidates = (tableGroups?: TableGroups): MentionItem[] => {

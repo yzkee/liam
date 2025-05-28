@@ -2,7 +2,6 @@ import type { Meta } from '@storybook/react'
 import type { KeyboardEvent } from 'react'
 import { useRef, useState } from 'react'
 import { MentionSuggestor } from './MentionSuggestor'
-import type { MentionItem } from './types'
 
 const meta: Meta<typeof MentionSuggestor> = {
   title: 'Components/ChatInput/MentionSuggestor',
@@ -10,57 +9,95 @@ const meta: Meta<typeof MentionSuggestor> = {
 }
 export default meta
 
-/**
- * Sample schema candidates for demonstration
- */
-const schemaCandidates: MentionItem[] = [
-  {
-    id: 'group1',
-    label: 'UserGroup',
-    type: 'group',
+const schema = {
+  tables: {
+    users: {
+      name: 'users',
+      columns: {
+        id: {
+          name: 'id',
+          type: 'integer',
+          default: null,
+          check: null,
+          comment: null,
+          primary: false,
+          unique: false,
+          notNull: false,
+        },
+        user_id: {
+          name: 'user_id',
+          type: 'integer',
+          default: null,
+          check: null,
+          comment: null,
+          primary: false,
+          unique: false,
+          notNull: false,
+        },
+      },
+      comment: null,
+      constraints: {},
+      indexes: {},
+    },
+    posts: {
+      name: 'posts',
+      columns: {
+        id: {
+          name: 'id',
+          type: 'integer',
+          default: null,
+          check: null,
+          comment: null,
+          primary: false,
+          unique: false,
+          notNull: false,
+        },
+        post_id: {
+          name: 'post_id',
+          type: 'integer',
+          default: null,
+          check: null,
+          comment: null,
+          primary: false,
+          unique: false,
+          notNull: false,
+        },
+        content: {
+          name: 'content',
+          type: 'text',
+          default: null,
+          check: null,
+          comment: null,
+          primary: false,
+          unique: false,
+          notNull: false,
+        },
+      },
+      comment: null,
+      constraints: {},
+      indexes: {},
+    },
   },
-  {
-    id: 'users',
-    label: 'users',
-    type: 'table',
+  relationships: {
+    rel1: {
+      name: 'rel1',
+      primaryTableName: 'users',
+      primaryColumnName: 'id',
+      foreignTableName: 'posts',
+      foreignColumnName: 'user_id',
+      cardinality: 'ONE_TO_MANY' as const,
+      updateConstraint: 'NO_ACTION' as const,
+      deleteConstraint: 'NO_ACTION' as const,
+    },
   },
-  {
-    id: 'user_id',
-    label: 'users.id',
-    type: 'column',
-    columnType: 'primary',
+  tableGroups: {
+    group1: {
+      name: 'group1',
+      tables: ['users', 'posts'],
+      comment: null,
+    },
   },
-  { id: 'posts', label: 'posts', type: 'table' },
-  {
-    id: 'post_id',
-    label: 'posts.id',
-    type: 'column',
-    columnType: 'primary',
-  },
-  {
-    id: 'rel1',
-    label: 'user_posts',
-    type: 'relation',
-  },
-]
-
-/**
- * Extended candidates for testing pagination and filtering
- */
-const extendedCandidates: MentionItem[] = [
-  ...schemaCandidates,
-  {
-    id: 'comments',
-    label: 'comments',
-    type: 'table',
-  },
-  {
-    id: 'comment_id',
-    label: 'comments.id',
-    type: 'column',
-    columnType: 'primary',
-  },
-]
+}
 
 /**
  * Helper function to handle keyboard events for the MentionSuggestor
@@ -69,13 +106,13 @@ const extendedCandidates: MentionItem[] = [
 const handleSuggestionKeyDown = (
   e: KeyboardEvent<HTMLTextAreaElement>,
   input: string,
-  caret: number,
+  cursorPos: number,
   trigger = '@',
 ) => {
   const regex = new RegExp(`\\${trigger}[\\w-]*$`)
 
   // Only handle special keys when suggestions are visible
-  if (regex.test(input.slice(0, caret))) {
+  if (regex.test(input.slice(0, cursorPos))) {
     if (
       e.key === 'ArrowDown' ||
       e.key === 'ArrowUp' ||
@@ -110,7 +147,7 @@ const handleSuggestionKeyDown = (
 export const SchemaMention = {
   render: () => {
     const [input, setInput] = useState('Type @ to mention schema...')
-    const [caret, setCaret] = useState(0)
+    const [cursorPos, setcursorPos] = useState(0)
     const [selected, setSelected] = useState<string | null>(null)
     const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -121,24 +158,24 @@ export const SchemaMention = {
           value={input}
           onChange={(e) => {
             setInput(e.target.value)
-            setCaret(e.target.selectionStart)
+            setcursorPos(e.target.selectionStart)
           }}
           onClick={(e) =>
-            setCaret((e.target as HTMLTextAreaElement).selectionStart)
+            setcursorPos((e.target as HTMLTextAreaElement).selectionStart)
           }
           onKeyDown={(e) => {
-            setCaret((e.target as HTMLTextAreaElement).selectionStart)
-            handleSuggestionKeyDown(e, input, caret)
+            setcursorPos((e.target as HTMLTextAreaElement).selectionStart)
+            handleSuggestionKeyDown(e, input, cursorPos)
           }}
           rows={3}
           style={{ width: '100%', fontSize: 16, marginBottom: 8 }}
         />
         <MentionSuggestor
-          trigger="@"
+          id="mention-suggestor"
+          schema={schema}
           input={input}
-          caret={caret}
-          candidates={schemaCandidates}
-          visible={/@[\w-]*$/.test(input.slice(0, caret))}
+          cursorPos={cursorPos}
+          enabled={/@[\w-]*$/.test(input.slice(0, cursorPos))}
           onSelect={(item) => {
             setSelected(item.label)
             textareaRef.current?.focus()
@@ -164,7 +201,7 @@ export const SchemaMention = {
 export const LimitedItems = {
   render: () => {
     const [input, setInput] = useState('Type @ to filter...')
-    const [caret, setCaret] = useState(0)
+    const [cursorPos, setcursorPos] = useState(0)
     const [selected, setSelected] = useState<string | null>(null)
     const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -175,26 +212,25 @@ export const LimitedItems = {
           value={input}
           onChange={(e) => {
             setInput(e.target.value)
-            setCaret(e.target.selectionStart)
+            setcursorPos(e.target.selectionStart)
           }}
           onClick={(e) =>
-            setCaret((e.target as HTMLTextAreaElement).selectionStart)
+            setcursorPos((e.target as HTMLTextAreaElement).selectionStart)
           }
           onKeyDown={(e) => {
-            setCaret((e.target as HTMLTextAreaElement).selectionStart)
-            handleSuggestionKeyDown(e, input, caret)
+            setcursorPos((e.target as HTMLTextAreaElement).selectionStart)
+            handleSuggestionKeyDown(e, input, cursorPos)
           }}
           rows={3}
           style={{ width: '100%', fontSize: 16, marginBottom: 8 }}
         />
         <MentionSuggestor
-          trigger="@"
+          id="mention-suggestor"
+          schema={schema}
           input={input}
-          caret={caret}
-          candidates={extendedCandidates}
-          visible={/@[\w-]*$/.test(input.slice(0, caret))}
-          maxItems={3}
-          noItemsMessage="No results found"
+          cursorPos={cursorPos}
+          enabled={/@[\w-]*$/.test(input.slice(0, cursorPos))}
+          maxMatches={2}
           onSelect={(item) => {
             setSelected(item.label)
             textareaRef.current?.focus()

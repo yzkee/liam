@@ -28,7 +28,7 @@ const dummySchema = {
 
 const meta = {
   component: ChatInput,
-  title: 'Components/Chat/ChatInput',
+  title: 'Components/ChatInput',
 } satisfies Meta<typeof ChatInput>
 
 export default meta

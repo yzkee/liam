@@ -10,7 +10,7 @@ import {
 } from '@liam-hq/ui'
 import type { NodeProps } from '@xyflow/react'
 import clsx from 'clsx'
-import { type FC, useCallback, useState } from 'react'
+import { type FC, useCallback, useMemo, useState } from 'react'
 import { TableColumnList } from './TableColumnList'
 import { TableHeader } from './TableHeader'
 import styles from './TableNode.module.css'
@@ -31,7 +31,7 @@ export const TableNode: FC<Props> = ({ data }) => {
 
   const measureTextWidth = useCallback(
     (element: HTMLSpanElement | null) => {
-      if (!element || !sharedContext || isTouchDevice) return
+      if (!element || !sharedContext) return
 
       const style = window.getComputedStyle(element)
       sharedContext.font = style.font
@@ -41,7 +41,18 @@ export const TableNode: FC<Props> = ({ data }) => {
 
       setIsTruncated(textWidth > element.clientWidth + 0.015)
     },
-    [name, isTouchDevice],
+    [name],
+  )
+
+  // Memoize the text ref callback to prevent unnecessary re-renders
+  const textRefCallback = useMemo(
+    () => (element: HTMLSpanElement | null) => {
+      if (isTouchDevice) return
+      if (element) {
+        measureTextWidth(element)
+      }
+    },
+    [isTouchDevice, measureTextWidth],
   )
 
   return (
@@ -59,7 +70,7 @@ export const TableNode: FC<Props> = ({ data }) => {
               'table-node-highlighted'
             }
           >
-            <TableHeader data={data} textRef={measureTextWidth} />
+            <TableHeader data={data} textRef={textRefCallback} />
             {showMode === 'ALL_FIELDS' && <TableColumnList data={data} />}
             {showMode === 'KEY_ONLY' && (
               <TableColumnList data={data} filter="KEY_ONLY" />

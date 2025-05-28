@@ -1,5 +1,14 @@
 # @liam-hq/cli
 
+## 0.5.6
+
+### Patch Changes
+
+- [#1590](https://github.com/liam-hq/liam/pull/1590) - update the primsa parser to support the @@map / Thanks [@khiroshi-win](https://github.com/khiroshi-win)!
+- [#1705](https://github.com/liam-hq/liam/pull/1705) - add the active hover background color to when table name activated in left pane / Thanks [@khiroshi-win](https://github.com/khiroshi-win)!
+- [#1760](https://github.com/liam-hq/liam/pull/1760) - ✨ Support `check_constraint` syntax in `create_table` of Schema.rb parser / Thanks [@tnyo43](https://github.com/tnyo43)!
+- [#1778](https://github.com/liam-hq/liam/pull/1778) - Improved Toolbar Button Styling and Consistency / Thanks [@k35o](https://github.com/k35o)!
+
 ## 0.5.5
 
 ### Patch Changes

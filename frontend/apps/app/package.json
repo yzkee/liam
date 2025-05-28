@@ -22,7 +22,7 @@
     "@liam-hq/github": "workspace:*",
     "@liam-hq/jobs": "workspace:*",
     "@liam-hq/ui": "workspace:*",
-    "@mastra/core": "0.9.3",
+    "@mastra/core": "0.9.4",
     "@next/third-parties": "15.3.2",
     "@octokit/auth-app": "7.2.1",
     "@octokit/rest": "21.1.1",

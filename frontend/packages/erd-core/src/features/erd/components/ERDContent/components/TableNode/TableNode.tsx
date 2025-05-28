@@ -10,7 +10,7 @@ import {
 } from '@liam-hq/ui'
 import type { NodeProps } from '@xyflow/react'
 import clsx from 'clsx'
-import { type FC, useCallback, useEffect, useRef, useState } from 'react'
+import { type FC, useCallback, useState } from 'react'
 import { TableColumnList } from './TableColumnList'
 import { TableHeader } from './TableHeader'
 import styles from './TableNode.module.css'
@@ -26,53 +26,23 @@ export const TableNode: FC<Props> = ({ data }) => {
   const showMode = data.showMode ?? _showMode
   const name = data?.table?.name
 
-  const textRef = useRef<HTMLSpanElement>(null)
   const [isTruncated, setIsTruncated] = useState<boolean>(false)
   const isTouchDevice = useIsTouchDevice()
-  const rafRef = useRef<number>()
 
-  const measureTextWidth = useCallback(() => {
-    if (!textRef.current || !sharedContext) return
+  const measureTextWidth = useCallback(
+    (element: HTMLSpanElement | null) => {
+      if (!element || !sharedContext || isTouchDevice) return
 
-    const element = textRef.current
-    const style = window.getComputedStyle(element)
+      const style = window.getComputedStyle(element)
+      sharedContext.font = style.font
 
-    // Set the font to match the element
-    sharedContext.font = style.font
+      const textMetrics = sharedContext.measureText(name)
+      const textWidth = textMetrics.width
 
-    // Measure the text width
-    const textMetrics = sharedContext.measureText(name)
-    const textWidth = textMetrics.width
-
-    // Check if text is truncated
-    setIsTruncated(textWidth > element.clientWidth + 0.015)
-  }, [name])
-
-  // Use ResizeObserver to detect size changes
-  useEffect(() => {
-    if (isTouchDevice || !textRef.current) return
-
-    const resizeObserver = new ResizeObserver(() => {
-      // Cancel any pending measurement
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current)
-      }
-      // Schedule new measurement
-      rafRef.current = requestAnimationFrame(measureTextWidth)
-    })
-
-    resizeObserver.observe(textRef.current)
-
-    // Initial measurement
-    rafRef.current = requestAnimationFrame(measureTextWidth)
-
-    return () => {
-      resizeObserver.disconnect()
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current)
-      }
-    }
-  }, [isTouchDevice, measureTextWidth])
+      setIsTruncated(textWidth > element.clientWidth + 0.015)
+    },
+    [name, isTouchDevice],
+  )
 
   return (
     <TooltipProvider>
@@ -89,7 +59,7 @@ export const TableNode: FC<Props> = ({ data }) => {
               'table-node-highlighted'
             }
           >
-            <TableHeader data={data} textRef={textRef} />
+            <TableHeader data={data} textRef={measureTextWidth} />
             {showMode === 'ALL_FIELDS' && <TableColumnList data={data} />}
             {showMode === 'KEY_ONLY' && (
               <TableColumnList data={data} filter="KEY_ONLY" />

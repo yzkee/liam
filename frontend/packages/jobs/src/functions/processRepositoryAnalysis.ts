@@ -291,30 +291,24 @@ const insertDocumentToSupabase = async (
   metadata: RepositoryDocumentMetadata,
   vector: number[],
 ): Promise<boolean> => {
-  try {
-    // @ts-ignore - Type inconsistencies with Supabase schema definitions
-    const { error } = await supabase.from('documents').insert([
-      {
-        content: documentContent,
-        metadata,
-        embedding: vector,
-        updated_at: metadata.updated_at,
-        organization_id: metadata.organization_id || '',
-      },
-    ])
+  // @ts-ignore - Type inconsistencies with Supabase schema definitions
+  const { error } = await supabase.from('documents').insert([
+    {
+      content: documentContent,
+      metadata,
+      embedding: vector,
+      updated_at: metadata.updated_at,
+      organization_id: metadata.organization_id || '',
+    },
+  ])
 
-    if (error) {
-      throw new Error(
-        `Error inserting document: ${error.message} ${error.code} ${error.details}`,
-      )
-    }
-
-    return true
-  } catch (error) {
-    const errorMessage = getErrorMessage(error, 'Document insertion failed')
+  if (error) {
+    const errorMessage = `Document insertion failed: ${error.message} ${error.code} ${error.details}`
     logger.error(errorMessage)
     throw new Error(errorMessage)
   }
+
+  return true
 }
 
 /**

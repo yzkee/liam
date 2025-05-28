@@ -10,16 +10,12 @@ import {
 } from '@liam-hq/ui'
 import type { NodeProps } from '@xyflow/react'
 import clsx from 'clsx'
-import { type FC, useCallback, useMemo, useState } from 'react'
+import { type FC, useEffect, useRef, useState } from 'react'
 import { TableColumnList } from './TableColumnList'
 import { TableHeader } from './TableHeader'
 import styles from './TableNode.module.css'
 
 type Props = NodeProps<TableNodeType>
-
-// Create a single shared canvas for all instances
-const sharedCanvas = document.createElement('canvas')
-const sharedContext = sharedCanvas.getContext('2d')
 
 export const TableNode: FC<Props> = ({ data }) => {
   const { showMode: _showMode } = useUserEditingStore()
@@ -28,32 +24,38 @@ export const TableNode: FC<Props> = ({ data }) => {
 
   const [isTruncated, setIsTruncated] = useState<boolean>(false)
   const isTouchDevice = useIsTouchDevice()
+  const textRef = useRef<HTMLSpanElement | null>(null)
 
-  const measureTextWidth = useCallback(
-    (element: HTMLSpanElement | null) => {
-      if (!element || !sharedContext) return
+  useEffect(() => {
+    const element = textRef.current
+    if (!element || isTouchDevice) return
 
-      const style = window.getComputedStyle(element)
-      sharedContext.font = style.font
+    const measureText = () => {
+      // Create a range to measure the text
+      const range = document.createRange()
+      range.selectNodeContents(element)
 
-      const textMetrics = sharedContext.measureText(name)
-      const textWidth = textMetrics.width
+      // Get the text width using getBoundingClientRect
+      const textWidth = range.getBoundingClientRect().width
+      const containerWidth = element.getBoundingClientRect().width
 
-      setIsTruncated(textWidth > element.clientWidth + 0.015)
-    },
-    [name],
-  )
+      // Add a small threshold (0.015px) to account for subpixel rendering
+      setIsTruncated(textWidth > containerWidth + 0.016)
+    }
 
-  // Memoize the text ref callback to prevent unnecessary re-renders
-  const textRefCallback = useMemo(
-    () => (element: HTMLSpanElement | null) => {
-      if (isTouchDevice) return
-      if (element) {
-        measureTextWidth(element)
-      }
-    },
-    [isTouchDevice, measureTextWidth],
-  )
+    measureText()
+
+    // Set up ResizeObserver to detect size changes
+    const resizeObserver = new ResizeObserver(() => {
+      measureText()
+    })
+
+    resizeObserver.observe(element)
+
+    return () => {
+      resizeObserver.disconnect()
+    }
+  }, [isTouchDevice])
 
   return (
     <TooltipProvider>
@@ -70,7 +72,7 @@ export const TableNode: FC<Props> = ({ data }) => {
               'table-node-highlighted'
             }
           >
-            <TableHeader data={data} textRef={textRefCallback} />
+            <TableHeader data={data} textRef={textRef} />
             {showMode === 'ALL_FIELDS' && <TableColumnList data={data} />}
             {showMode === 'KEY_ONLY' && (
               <TableColumnList data={data} filter="KEY_ONLY" />

@@ -84,6 +84,7 @@ export const AFTER = {
           comment: 'Timestamp of the last review',
         },
       },
+      comment: null,
       indexes: {},
       constraints: {},
     },

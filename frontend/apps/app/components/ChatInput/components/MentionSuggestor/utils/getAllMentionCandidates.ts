@@ -1,10 +1,15 @@
-import type { MentionSuggestionItem } from '../Chat/MentionSuggestor/types'
-import type { Column, Relationship, Schema, Table, TableGroup } from './types'
+import type {
+  Column,
+  Relationships,
+  Schema,
+  Table,
+  TableGroups,
+  Tables,
+} from '@liam-hq/db-structure'
+import type { MentionItem } from '../../../types'
 
 // Function to generate table group candidates
-const getTableGroupCandidates = (
-  tableGroups?: Record<string, TableGroup>,
-): MentionSuggestionItem[] => {
+const getTableGroupCandidates = (tableGroups?: TableGroups): MentionItem[] => {
   if (!tableGroups) return []
   return Object.values(tableGroups).map((g) => ({
     id: `group:${g.name}`,
@@ -14,9 +19,7 @@ const getTableGroupCandidates = (
 }
 
 // Function to generate table candidates
-const getTableCandidates = (
-  tables?: Record<string, Table>,
-): MentionSuggestionItem[] => {
+const getTableCandidates = (tables?: Tables): MentionItem[] => {
   if (!tables) return []
   return Object.values(tables).map((t) => ({
     id: `table:${t.name}`,
@@ -29,7 +32,7 @@ const getTableCandidates = (
 const getColumnProperties = (
   table: Table,
   column: Column,
-  relationships?: Record<string, Relationship>,
+  relationships?: Relationships,
 ): {
   isSource: boolean | undefined
   targetCardinality: string | undefined
@@ -68,8 +71,8 @@ const getColumnProperties = (
 // Function to generate column candidates
 const getColumnCandidates = (
   tables?: Record<string, Table>,
-  relationships?: Record<string, Relationship>,
-): MentionSuggestionItem[] => {
+  relationships?: Relationships,
+): MentionItem[] => {
   if (!tables) return []
 
   return Object.values(tables).flatMap((t) => {
@@ -91,8 +94,8 @@ const getColumnCandidates = (
 
 // Function to generate relationship candidates
 const getRelationshipCandidates = (
-  relationships?: Record<string, Relationship>,
-): MentionSuggestionItem[] => {
+  relationships?: Relationships,
+): MentionItem[] => {
   if (!relationships) return []
   return Object.values(relationships).map((r) => ({
     id: `relation:${r.name}`,
@@ -102,9 +105,7 @@ const getRelationshipCandidates = (
 }
 
 // Function to combine all candidates
-export const getAllMentionCandidates = (
-  schema: Schema,
-): MentionSuggestionItem[] => {
+export const getAllMentionCandidates = (schema: Schema): MentionItem[] => {
   return [
     ...getTableGroupCandidates(schema?.tableGroups),
     ...getTableCandidates(schema?.tables),

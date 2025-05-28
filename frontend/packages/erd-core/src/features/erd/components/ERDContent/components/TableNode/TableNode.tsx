@@ -10,7 +10,7 @@ import {
 } from '@liam-hq/ui'
 import type { NodeProps } from '@xyflow/react'
 import clsx from 'clsx'
-import { type FC, useEffect, useRef, useState } from 'react'
+import { type FC, useCallback, useEffect, useRef, useState } from 'react'
 import { TableColumnList } from './TableColumnList'
 import { TableHeader } from './TableHeader'
 import styles from './TableNode.module.css'
@@ -27,12 +27,10 @@ export const TableNode: FC<Props> = ({ data }) => {
 
   const isTouchDevice = useIsTouchDevice()
 
-  useEffect(() => {
-    if (isTouchDevice) return
+  const measureTextWidth = useCallback(() => {
     if (!textRef.current) return
 
     const element = textRef.current
-
     const style = window.getComputedStyle(element)
 
     // Create a canvas to measure text width
@@ -49,7 +47,16 @@ export const TableNode: FC<Props> = ({ data }) => {
 
     // Check if text is truncated
     setIsTruncated(textWidth > element.clientWidth + 0.015)
-  }, [isTouchDevice, name])
+
+    // Cleanup canvas
+    canvas.width = 0
+    canvas.height = 0
+  }, [name])
+
+  useEffect(() => {
+    if (isTouchDevice) return
+    measureTextWidth()
+  }, [isTouchDevice, measureTextWidth])
 
   return (
     <TooltipProvider>

@@ -4,9 +4,9 @@ import {
   Group,
   KeyRound,
   Link,
+  Table2,
   Waypoints,
 } from '@liam-hq/ui'
-import { Table } from 'lucide-react'
 import type { FC } from 'react'
 import { match } from 'ts-pattern'
 import type { MentionItem } from '../../../types'
@@ -20,7 +20,7 @@ export const MentionIcon: FC<Props> = ({ item }) => {
   if (!item || !item.type) return null
 
   return match(item.type)
-    .with('table', () => <Table size={16} />)
+    .with('table', () => <Table2 size={16} />)
     .with('group', () => <Group size={16} />)
     .with('relation', () => <Waypoints size={16} />)
     .with('column', () => {

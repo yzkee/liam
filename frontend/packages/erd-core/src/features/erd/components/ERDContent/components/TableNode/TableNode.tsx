@@ -31,9 +31,16 @@ export const TableNode: FC<Props> = ({ data }) => {
     if (!element || isTouchDevice) return
 
     const measureText = () => {
-      if (!element) return
-      const isTruncated = element.scrollWidth > element.clientWidth
-      setIsTruncated(isTruncated)
+      // Create a range to measure the text
+      const range = document.createRange()
+      range.selectNodeContents(element)
+
+      // Get the text width using getBoundingClientRect
+      const textWidth = range.getBoundingClientRect().width
+      const containerWidth = element.getBoundingClientRect().width
+
+      // Add a small threshold (0.015px) to account for subpixel rendering
+      setIsTruncated(textWidth > containerWidth + 0.016)
     }
 
     measureText()

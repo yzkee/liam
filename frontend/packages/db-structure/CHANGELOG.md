@@ -1,5 +1,15 @@
 # @liam-hq/db-structure
 
+## 0.1.0
+
+### Minor Changes
+
+- [#1590](https://github.com/liam-hq/liam/pull/1590) - update the primsa parser to support the @@map / Thanks [@khiroshi-win](https://github.com/khiroshi-win)!
+
+### Patch Changes
+
+- [#1760](https://github.com/liam-hq/liam/pull/1760) - ✨ Support `check_constraint` syntax in `create_table` of Schema.rb parser / Thanks [@tnyo43](https://github.com/tnyo43)!
+
 ## 0.0.20
 
 ### Patch Changes

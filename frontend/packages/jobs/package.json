@@ -14,7 +14,7 @@
     "@liam-hq/github": "workspace:*",
     "@octokit/auth-app": "7.2.1",
     "@octokit/rest": "21.1.1",
-    "@sentry/node": "9.17.0",
+    "@sentry/node": "9.18.0",
     "@trigger.dev/build": "3.3.17",
     "@trigger.dev/sdk": "3.3.17",
     "@valibot/to-json-schema": "1.0.0",

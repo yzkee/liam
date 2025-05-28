@@ -17,60 +17,60 @@ import styles from './TableNode.module.css'
 
 type Props = NodeProps<TableNodeType>
 
+// Create a single shared canvas for all instances
+const sharedCanvas = document.createElement('canvas')
+const sharedContext = sharedCanvas.getContext('2d')
+
 export const TableNode: FC<Props> = ({ data }) => {
   const { showMode: _showMode } = useUserEditingStore()
   const showMode = data.showMode ?? _showMode
   const name = data?.table?.name
 
   const textRef = useRef<HTMLSpanElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const [isTruncated, setIsTruncated] = useState<boolean>(false)
-
   const isTouchDevice = useIsTouchDevice()
-
-  // Initialize canvas once
-  useEffect(() => {
-    if (!canvasRef.current) {
-      canvasRef.current = document.createElement('canvas')
-    }
-    return () => {
-      if (canvasRef.current) {
-        canvasRef.current.width = 0
-        canvasRef.current.height = 0
-        canvasRef.current = null
-      }
-    }
-  }, [])
+  const rafRef = useRef<number>()
 
   const measureTextWidth = useCallback(() => {
-    if (!textRef.current || !canvasRef.current) return
+    if (!textRef.current || !sharedContext) return
 
     const element = textRef.current
     const style = window.getComputedStyle(element)
-    const context = canvasRef.current.getContext('2d')
-    if (!context) return
 
     // Set the font to match the element
-    context.font = style.font
+    sharedContext.font = style.font
 
     // Measure the text width
-    const textMetrics = context.measureText(name)
+    const textMetrics = sharedContext.measureText(name)
     const textWidth = textMetrics.width
 
     // Check if text is truncated
     setIsTruncated(textWidth > element.clientWidth + 0.015)
   }, [name])
 
-  // Debounced measurement
+  // Use ResizeObserver to detect size changes
   useEffect(() => {
-    if (isTouchDevice) return
+    if (isTouchDevice || !textRef.current) return
 
-    const timeoutId = setTimeout(() => {
-      measureTextWidth()
-    }, 100) // 100ms debounce
+    const resizeObserver = new ResizeObserver(() => {
+      // Cancel any pending measurement
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current)
+      }
+      // Schedule new measurement
+      rafRef.current = requestAnimationFrame(measureTextWidth)
+    })
+
+    resizeObserver.observe(textRef.current)
+
+    // Initial measurement
+    rafRef.current = requestAnimationFrame(measureTextWidth)
 
     return () => {
-      clearTimeout(timeoutId)
+      resizeObserver.disconnect()
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current)
+      }
     }
   }, [isTouchDevice, measureTextWidth])
 

@@ -23,19 +23,31 @@ export const TableNode: FC<Props> = ({ data }) => {
   const name = data?.table?.name
 
   const textRef = useRef<HTMLSpanElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const [isTruncated, setIsTruncated] = useState<boolean>(false)
 
   const isTouchDevice = useIsTouchDevice()
 
+  // Initialize canvas once
+  useEffect(() => {
+    if (!canvasRef.current) {
+      canvasRef.current = document.createElement('canvas')
+    }
+    return () => {
+      if (canvasRef.current) {
+        canvasRef.current.width = 0
+        canvasRef.current.height = 0
+        canvasRef.current = null
+      }
+    }
+  }, [])
+
   const measureTextWidth = useCallback(() => {
-    if (!textRef.current) return
+    if (!textRef.current || !canvasRef.current) return
 
     const element = textRef.current
     const style = window.getComputedStyle(element)
-
-    // Create a canvas to measure text width
-    const canvas = document.createElement('canvas')
-    const context = canvas.getContext('2d')
+    const context = canvasRef.current.getContext('2d')
     if (!context) return
 
     // Set the font to match the element
@@ -47,15 +59,19 @@ export const TableNode: FC<Props> = ({ data }) => {
 
     // Check if text is truncated
     setIsTruncated(textWidth > element.clientWidth + 0.015)
-
-    // Cleanup canvas
-    canvas.width = 0
-    canvas.height = 0
   }, [name])
 
+  // Debounced measurement
   useEffect(() => {
     if (isTouchDevice) return
-    measureTextWidth()
+
+    const timeoutId = setTimeout(() => {
+      measureTextWidth()
+    }, 100) // 100ms debounce
+
+    return () => {
+      clearTimeout(timeoutId)
+    }
   }, [isTouchDevice, measureTextWidth])
 
   return (

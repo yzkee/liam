@@ -193,7 +193,11 @@ export const ChatbotDialog: FC<ChatbotDialogProps> = ({
             ))}
             <div ref={messagesEndRef} />
           </div>
-          <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
+          <ChatInput
+            onSendMessage={handleSendMessage}
+            isLoading={isLoading}
+            schema={schemaData}
+          />
         </ModalContent>
       </ModalPortal>
     </ModalRoot>

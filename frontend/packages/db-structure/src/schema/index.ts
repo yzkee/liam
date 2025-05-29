@@ -41,6 +41,9 @@ export type {
   ForeignKeyConstraintReferenceOption,
   Cardinality,
   TableGroup,
+  TableGroups,
+  Comment,
+  TableName,
 } from './schema.js'
 export {
   aColumn,

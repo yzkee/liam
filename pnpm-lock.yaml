@@ -78,6 +78,9 @@ importers:
       '@codemirror/view':
         specifier: 6.36.7
         version: 6.36.7
+      '@electric-sql/pglite':
+        specifier: ^0.3.2
+        version: 0.3.2
       '@langchain/community':
         specifier: 0.3.43
         version: 0.3.43(@aws-crypto/sha256-js@5.2.0)(@aws-sdk/credential-provider-node@3.806.0)(@browserbasehq/sdk@2.6.0)(@browserbasehq/stagehand@1.14.0(@playwright/test@1.52.0)(deepmerge@4.3.1)(dotenv@16.5.0)(openai@4.97.0(ws@8.18.2)(zod@3.23.8))(zod@3.23.8))(@ibm-cloud/watsonx-ai@1.6.5)(@langchain/core@0.3.55(openai@4.97.0(ws@8.18.2)(zod@3.23.8)))(@libsql/client@0.14.0)(@smithy/util-utf8@2.3.0)(@supabase/supabase-js@2.49.4)(axios@1.9.0)(cheerio@1.0.0)(cohere-ai@7.17.1)(fast-xml-parser@4.4.1)(handlebars@4.7.8)(html-to-text@9.0.5)(ibm-cloud-sdk-core@5.3.2)(ignore@5.3.2)(jsonwebtoken@9.0.2)(lodash@4.17.21)(openai@4.97.0(ws@8.18.2)(zod@3.23.8))(playwright@1.52.0)(ws@8.18.2)
@@ -1974,6 +1977,9 @@ packages:
 
   '@electric-sql/client@1.0.0-beta.1':
     resolution: {integrity: sha512-Ei9jN3pDoGzc+a/bGqnB5ajb52IvSv7/n2btuyzUlcOHIR2kM9fqtYTJXPwZYKLkGZlHWlpHgWyRtrinkP2nHg==}
+
+  '@electric-sql/pglite@0.3.2':
+    resolution: {integrity: sha512-zfWWa+V2ViDCY/cmUfRqeWY1yLto+EpxjXnZzenB1TyxsTiXaTWeZFIZw6mac52BsuQm0RjCnisjBtdBaXOI6w==}
 
   '@emnapi/runtime@1.4.3':
     resolution: {integrity: sha512-pBPWdu6MLKROBX05wSNKcNb++m5Er+KQ9QkB+WVM+pW2Kx9hoSrVTnu3BdkI5eBLZoKu/J6mW/B6i6bJB2ytXQ==}
@@ -13668,6 +13674,8 @@ snapshots:
   '@electric-sql/client@1.0.0-beta.1':
     optionalDependencies:
       '@rollup/rollup-darwin-arm64': 4.40.2
+
+  '@electric-sql/pglite@0.3.2': {}
 
   '@emnapi/runtime@1.4.3':
     dependencies:

@@ -10,6 +10,12 @@ interface SqlResult {
   result: { error?: string } | Record<string, unknown>
   success: boolean
   id: string
+  // 将来的な拡張のためのフィールド
+  metadata?: {
+    executionTime?: number // 実行時間（ミリ秒）
+    affectedRows?: number // 影響を受けた行数
+    timestamp?: string // 実行タイムスタンプ
+  }
 }
 
 // DDLセクション用の状態
@@ -41,15 +47,22 @@ const applyDDL = async (ddlText: string, db: PGlite): Promise<SqlResult[]> => {
 
   // 各SQL文を順次実行
   for (const sql of statements) {
+    const startTime = performance.now()
     try {
       const result = await db.query(sql)
+      const executionTime = Math.round(performance.now() - startTime)
       results.push({
         sql,
         result,
         success: true,
         id: crypto.randomUUID(),
+        metadata: {
+          executionTime,
+          timestamp: new Date().toLocaleString(),
+        },
       })
     } catch (error) {
+      const executionTime = Math.round(performance.now() - startTime)
       const errorMessage =
         error instanceof Error ? error.message : String(error)
       results.push({
@@ -57,6 +70,10 @@ const applyDDL = async (ddlText: string, db: PGlite): Promise<SqlResult[]> => {
         result: { error: errorMessage },
         success: false,
         id: crypto.randomUUID(),
+        metadata: {
+          executionTime,
+          timestamp: new Date().toLocaleString(),
+        },
       })
     }
   }
@@ -79,15 +96,30 @@ const applyDML = async (dmlText: string, db: PGlite): Promise<SqlResult[]> => {
 
   // 各SQL文を順次実行
   for (const sql of statements) {
+    const startTime = performance.now()
     try {
       const result = await db.query(sql)
+      const executionTime = Math.round(performance.now() - startTime)
+
+      // 影響を受けた行数を取得（可能な場合）
+      let affectedRows: number | undefined = undefined
+      if (result && typeof result === 'object' && 'rowCount' in result) {
+        affectedRows = result.rowCount as number
+      }
+
       results.push({
         sql,
         result,
         success: true,
         id: crypto.randomUUID(),
+        metadata: {
+          executionTime,
+          affectedRows,
+          timestamp: new Date().toLocaleString(),
+        },
       })
     } catch (error) {
+      const executionTime = Math.round(performance.now() - startTime)
       const errorMessage =
         error instanceof Error ? error.message : String(error)
       results.push({
@@ -95,6 +127,10 @@ const applyDML = async (dmlText: string, db: PGlite): Promise<SqlResult[]> => {
         result: { error: errorMessage },
         success: false,
         id: crypto.randomUUID(),
+        metadata: {
+          executionTime,
+          timestamp: new Date().toLocaleString(),
+        },
       })
     }
   }
@@ -102,17 +138,62 @@ const applyDML = async (dmlText: string, db: PGlite): Promise<SqlResult[]> => {
   return results
 }
 
-// 結果表示コンポーネント
-const ResultDisplay = ({ result }: { result: SqlResult }) => (
-  <div className={styles.resultContainer}>
-    <div className={styles.sqlCommand}>{result.sql}</div>
-    <pre
-      className={`${styles.resultPre} ${result.success ? '' : styles.error}`}
-    >
-      {JSON.stringify(result.result, null, 2)}
-    </pre>
-  </div>
-)
+// 結果表示コンポーネント（アコーディオン形式）
+const QueryResultBox = ({ result }: { result: SqlResult }) => {
+  const [isExpanded, setIsExpanded] = useState(false)
+
+  return (
+    <div className={styles.queryResultBox}>
+      {/* ステータスヘッダー - 常に表示 */}
+      <button
+        type="button"
+        className={`${styles.resultHeader} ${result.success ? styles.successHeader : styles.errorHeader}`}
+        onClick={() => setIsExpanded(!isExpanded)}
+        aria-expanded={isExpanded}
+        aria-label={`${result.success ? '成功' : '失敗'}したクエリの詳細を${isExpanded ? '閉じる' : '開く'}`}
+      >
+        <div className={styles.statusIndicator}>
+          {result.success ? '✅' : '❌'}
+        </div>
+        <div className={styles.sqlPreview}>
+          {result.sql.length > 50
+            ? `${result.sql.substring(0, 50)}...`
+            : result.sql}
+        </div>
+        <div className={styles.statusMessage}>
+          {result.success ? '成功しました' : '失敗しました'}
+        </div>
+        <div className={styles.expandIcon}>{isExpanded ? '▼' : '▶'}</div>
+      </button>
+
+      {/* 詳細情報 - 展開時のみ表示 */}
+      {isExpanded && (
+        <div className={styles.resultDetails}>
+          <div className={styles.sqlCommand}>{result.sql}</div>
+          <pre
+            className={`${styles.resultPre} ${result.success ? '' : styles.error}`}
+          >
+            {JSON.stringify(result.result, null, 2)}
+          </pre>
+          {/* 将来的な拡張のためのメタデータ表示エリア */}
+          {result.metadata && (
+            <div className={styles.metadataContainer}>
+              {result.metadata.executionTime !== undefined && (
+                <div>実行時間: {result.metadata.executionTime}ms</div>
+              )}
+              {result.metadata.affectedRows !== undefined && (
+                <div>影響を受けた行数: {result.metadata.affectedRows}</div>
+              )}
+              {result.metadata.timestamp && (
+                <div>実行日時: {result.metadata.timestamp}</div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
 
 export function PGlitePlayground() {
   // グローバルDB（DDL用）
@@ -286,7 +367,7 @@ CREATE TABLE posts (id SERIAL PRIMARY KEY, title TEXT, user_id INTEGER REFERENCE
         {/* DDL実行結果 */}
         <div>
           {ddlState.results.map((result) => (
-            <ResultDisplay key={result.id} result={result} />
+            <QueryResultBox key={result.id} result={result} />
           ))}
         </div>
       </div>
@@ -351,7 +432,7 @@ SELECT * FROM users;"
             {/* DML実行結果 */}
             <div>
               {section.results.map((result) => (
-                <ResultDisplay key={result.id} result={result} />
+                <QueryResultBox key={result.id} result={result} />
               ))}
             </div>
           </div>

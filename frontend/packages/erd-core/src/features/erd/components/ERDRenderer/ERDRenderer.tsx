@@ -100,15 +100,17 @@ export const ERDRenderer: FC<Props> = ({
         if (panelGroupElement) {
           const totalWidth = panelGroupElement.getBoundingClientRect().width
           const leftPanelWidth = (sizes[0] / 100) * totalWidth
+          const desiredPixelWidth = isMobile ? 150 : 280
 
-          if (leftPanelWidth <= 280) {
+          if (leftPanelWidth <= desiredPixelWidth) {
+            handleChangeOpen(false)
             leftPanelRef.current?.collapse()
           }
         }
       }
       document.cookie = `${PANEL_LAYOUT_COOKIE_NAME}=${JSON.stringify(sizes)}; path=/; max-age=${COOKIE_MAX_AGE}`
     },
-    [leftPanelRef, open],
+    [leftPanelRef, open, handleChangeOpen],
   )
 
   const isMobile = useIsTouchDevice()
@@ -119,9 +121,8 @@ export const ERDRenderer: FC<Props> = ({
       const panelGroupElement = document.querySelector(`.${styles.mainWrapper}`)
       if (panelGroupElement) {
         const totalWidth = panelGroupElement.getBoundingClientRect().width
-        const desiredPixelWidth = 280 // We want the left panel to be 250px
+        const desiredPixelWidth = isMobile ? 150 : 280
         const percentage = (desiredPixelWidth / totalWidth) * 100
-        // Ensure the percentage is within reasonable bounds (15-30%)
         setPanelSizes([percentage, 100 - percentage])
       }
     }
@@ -130,7 +131,7 @@ export const ERDRenderer: FC<Props> = ({
     calculatePanelSize()
     window.addEventListener('resize', calculatePanelSize)
     return () => window.removeEventListener('resize', calculatePanelSize)
-  }, [])
+  }, [isMobile])
 
   return (
     <SidebarProvider
@@ -150,9 +151,9 @@ export const ERDRenderer: FC<Props> = ({
           >
             <ResizablePanel
               collapsible
-              defaultSize={open ? (panelSizes[0] ?? 0) : 0}
-              minSize={isMobile ? 40 : (panelSizes[0] ?? 0)}
-              maxSize={isMobile ? 80 : (panelSizes[0] ?? 0) + 10}
+              defaultSize={open ? panelSizes[0] : 0}
+              minSize={panelSizes[0]}
+              maxSize={Number(panelSizes[0]) + 15}
               ref={leftPanelRef}
               isResizing={isResizing}
             >

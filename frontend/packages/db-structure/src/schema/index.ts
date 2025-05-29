@@ -42,8 +42,6 @@ export type {
   Cardinality,
   TableGroup,
   TableGroups,
-  Comment,
-  TableName,
 } from './schema.js'
 export {
   aColumn,

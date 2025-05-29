@@ -1,5 +1,5 @@
-import { PGlitePage } from '@/components'
+import { PGlitePlayground } from '@/components'
 
 export default function Page() {
-  return <PGlitePage />
+  return <PGlitePlayground />
 }

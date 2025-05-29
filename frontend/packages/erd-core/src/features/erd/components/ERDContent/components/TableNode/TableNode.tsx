@@ -1,5 +1,4 @@
 import type { TableNodeType } from '@/features/erd/types'
-import { useIsTouchDevice } from '@/hooks'
 import { useUserEditingStore } from '@/stores'
 import {
   TooltipContent,
@@ -23,39 +22,66 @@ export const TableNode: FC<Props> = ({ data }) => {
   const name = data?.table?.name
 
   const [isTruncated, setIsTruncated] = useState<boolean>(false)
-  const isTouchDevice = useIsTouchDevice()
   const textRef = useRef<HTMLSpanElement | null>(null)
 
   useEffect(() => {
-    const element = textRef.current
-    if (!element || isTouchDevice) return
-
-    const measureText = () => {
-      // Create a range to measure the text
-      const range = document.createRange()
-      range.selectNodeContents(element)
-
-      // Get the text width using getBoundingClientRect
-      const textWidth = range.getBoundingClientRect().width
-      const containerWidth = element.getBoundingClientRect().width
-
-      // Add a small threshold (0.015px) to account for subpixel rendering
-      setIsTruncated(textWidth > containerWidth + 0.016)
+    const checkTruncation = () => {
+      if (textRef.current) {
+        const element = textRef.current
+        const isTruncated = element.scrollWidth > element.clientWidth
+        setIsTruncated(isTruncated)
+      }
     }
 
-    measureText()
+    // Initial check after a small delay to ensure DOM is rendered
+    const timeoutId = setTimeout(checkTruncation, 0)
 
-    // Set up ResizeObserver to detect size changes
-    const resizeObserver = new ResizeObserver(() => {
-      measureText()
-    })
+    // Check on window resize and when sidebar width changes
+    window.addEventListener('resize', checkTruncation)
 
-    resizeObserver.observe(element)
+    // Add a mutation observer to watch for width changes
+    const observer = new ResizeObserver(checkTruncation)
+    if (textRef.current) {
+      observer.observe(textRef.current)
+    }
 
     return () => {
-      resizeObserver.disconnect()
+      clearTimeout(timeoutId)
+      window.removeEventListener('resize', checkTruncation)
+      observer.disconnect()
     }
-  }, [isTouchDevice])
+  }, [])
+
+  // useEffect(() => {
+  //   const element = textRef.current
+  //   if (!element || isTouchDevice) return
+
+  //   const measureText = () => {
+  //     // Create a range to measure the text
+  //     const range = document.createRange()
+  //     range.selectNodeContents(element)
+
+  //     // Get the text width using getBoundingClientRect
+  //     const textWidth = range.getBoundingClientRect().width
+  //     const containerWidth = element.getBoundingClientRect().width
+
+  //     // Add a small threshold (0.016px) to account for subpixel rendering
+  //     setIsTruncated(textWidth > containerWidth + 0.016)
+  //   }
+
+  //   measureText()
+
+  //   // Set up ResizeObserver to detect size changes
+  //   const resizeObserver = new ResizeObserver(() => {
+  //     measureText()
+  //   })
+
+  //   resizeObserver.observe(element)
+
+  //   return () => {
+  //     resizeObserver.disconnect()
+  //   }
+  // }, [isTouchDevice])
 
   return (
     <TooltipProvider>

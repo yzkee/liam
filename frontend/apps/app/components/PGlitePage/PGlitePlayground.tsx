@@ -149,20 +149,19 @@ export function PGlitePlayground() {
       </div>
 
       {/* DDL入力セクション（グローバル） */}
-      <div style={{ marginBottom: '2rem' }}>
-        <h2>DDL入力エリア（グローバル）</h2>
-        <p>
+      <div className={styles.playgroundSection}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>DDL入力エリア（グローバル）</h2>
+        </div>
+        <p className={styles.description}>
           DDLを入力して実行すると、すべてのDMLフォームに反映されます。
-          複数のSQL文を一度に実行できます。各SQL文は<code>;</code>
+          複数のSQL文を一度に実行できます。各SQL文は
+          <code className={styles.codeHighlight}>;</code>
           （セミコロン）で区切ってください。
         </p>
         <textarea
           rows={5}
-          style={{
-            width: '100%',
-            fontFamily: 'var(--code-font)',
-            padding: '0.5rem',
-          }}
+          className={styles.sqlTextarea}
           placeholder="CREATE TABLE users (id SERIAL PRIMARY KEY, name TEXT);
 CREATE TABLE posts (id SERIAL PRIMARY KEY, title TEXT, user_id INTEGER REFERENCES users(id));"
           value={ddlState.ddlInput}
@@ -171,51 +170,40 @@ CREATE TABLE posts (id SERIAL PRIMARY KEY, title TEXT, user_id INTEGER REFERENCE
         <button
           type="button"
           onClick={executeDDL}
-          style={{ marginTop: '0.5rem' }}
+          className={`${styles.actionButton} ${styles.primaryButton}`}
         >
           DDLを実行
         </button>
 
         {/* DDL実行結果 */}
-        <div>
+        <div className={styles.buttonGroup}>
           {ddlState.results.map((result) => (
             <QueryResultBox key={result.id} result={result} />
           ))}
         </div>
       </div>
 
-      <hr style={{ margin: '2rem 0' }} />
+      <div className={styles.divider} />
 
       {/* DMLセクション（複数） */}
-      <div>
-        <h2>DMLユースケースセクション</h2>
-        <p>
+      <div className={styles.playgroundSection}>
+        <div className={styles.sectionHeader}>
+          <h2 className={styles.sectionTitle}>DMLユースケースセクション</h2>
+        </div>
+        <p className={styles.description}>
           各DMLフォームは独立した環境で実行されます。
           他のフォームの実行結果に影響されることはありません。
         </p>
 
         {dmlSections.map((section) => (
-          <div
-            key={section.id}
-            style={{
-              marginBottom: '2rem',
-              padding: '1rem',
-              border: '1px solid var(--global-border)',
-              borderRadius: 'var(--border-radius-2)',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
-            >
-              <h3>DMLユースケース</h3>
+          <div key={section.id} className={styles.dmlSection}>
+            <div className={styles.dmlHeader}>
+              <h3 className={styles.dmlTitle}>DMLユースケース</h3>
               <button
                 type="button"
                 onClick={() => removeDMLSection(section.id)}
-                style={{ padding: '0.25rem 0.5rem' }}
+                className={`${styles.actionButton} ${styles.dangerButton}`}
+                aria-label="DMLセクションを削除"
               >
                 削除
               </button>
@@ -223,11 +211,7 @@ CREATE TABLE posts (id SERIAL PRIMARY KEY, title TEXT, user_id INTEGER REFERENCE
 
             <textarea
               rows={4}
-              style={{
-                width: '100%',
-                fontFamily: 'var(--code-font)',
-                padding: '0.5rem',
-              }}
+              className={styles.sqlTextarea}
               placeholder="INSERT INTO users (name) VALUES ('Taro'), ('Jiro');
 SELECT * FROM users;"
               value={section.dmlInput}
@@ -236,13 +220,13 @@ SELECT * FROM users;"
             <button
               type="button"
               onClick={() => executeDML(section.id)}
-              style={{ marginTop: '0.5rem' }}
+              className={`${styles.actionButton} ${styles.primaryButton}`}
             >
               実行
             </button>
 
             {/* DML実行結果 */}
-            <div>
+            <div className={styles.buttonGroup}>
               {section.results.map((result) => (
                 <QueryResultBox key={result.id} result={result} />
               ))}
@@ -254,7 +238,7 @@ SELECT * FROM users;"
         <button
           type="button"
           onClick={() => addDMLSection()}
-          style={{ marginBottom: '2rem' }}
+          className={`${styles.actionButton} ${styles.secondaryButton}`}
         >
           ＋ DMLフォームを追加
         </button>

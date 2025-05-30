@@ -8,7 +8,7 @@ import styles from './TableHeader.module.css'
 
 type Props = {
   data: TableNodeData
-  textRef: RefObject<HTMLSpanElement>
+  textRef?: RefObject<HTMLSpanElement> | null
 }
 
 export const TableHeader: FC<Props> = ({ data, textRef }) => {

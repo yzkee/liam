@@ -1,4 +1,5 @@
 import type { TableNodeType } from '@/features/erd/types'
+import { useIsTouchDevice } from '@/hooks'
 import { useUserEditingStore } from '@/stores'
 import {
   TooltipContent,
@@ -16,13 +17,8 @@ import styles from './TableNode.module.css'
 
 type Props = NodeProps<TableNodeType>
 
-// Check if the browser is mobile Safari
-const isMobileSafari = () => {
-  const ua = window.navigator.userAgent
-  return /iPhone|iPad|iPod/.test(ua) && /Safari/.test(ua) && !/Chrome/.test(ua)
-}
-
 export const TableNode: FC<Props> = ({ data }) => {
+  const isMobile = useIsTouchDevice()
   const { showMode: _showMode } = useUserEditingStore()
   const showMode = data.showMode ?? _showMode
   const name = data?.table?.name
@@ -31,12 +27,6 @@ export const TableNode: FC<Props> = ({ data }) => {
   const textRef = useRef<HTMLSpanElement | null>(null)
 
   useEffect(() => {
-    // Skip measurement on mobile Safari
-    if (isMobileSafari()) {
-      setIsTruncated(false)
-      return
-    }
-
     const element = textRef.current
     if (!element) return
 
@@ -82,7 +72,11 @@ export const TableNode: FC<Props> = ({ data }) => {
               'table-node-highlighted'
             }
           >
-            <TableHeader data={data} textRef={textRef} />
+            {isMobile ? (
+              <TableHeader data={data}/>
+            ) : (
+              <TableHeader data={data} textRef={textRef} />
+            )}
             {showMode === 'ALL_FIELDS' && <TableColumnList data={data} />}
             {showMode === 'KEY_ONLY' && (
               <TableColumnList data={data} filter="KEY_ONLY" />

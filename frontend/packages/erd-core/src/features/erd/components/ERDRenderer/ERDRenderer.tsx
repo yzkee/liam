@@ -15,7 +15,6 @@ import {
   type FC,
   createRef,
   useCallback,
-  useEffect,
   useState,
 } from 'react'
 import { AppBar } from './AppBar'
@@ -57,7 +56,6 @@ export const ERDRenderer: FC<Props> = ({
 }) => {
   const [open, setOpen] = useState(defaultSidebarOpen)
   const [isResizing, setIsResizing] = useState(false)
-  const [panelSizes, setPanelSizes] = useState(defaultPanelSizes)
 
   const { showMode } = useUserEditingStore()
   const { current } = useSchemaStore()
@@ -91,29 +89,14 @@ export const ERDRenderer: FC<Props> = ({
     [version, leftPanelRef],
   )
 
-  const setWidth = useCallback((sizes: number[]) => {
-    document.cookie = `${PANEL_LAYOUT_COOKIE_NAME}=${JSON.stringify(sizes)}; path=/; max-age=${COOKIE_MAX_AGE}`
-  }, [])
+  const setWidth = useCallback(
+    (sizes: number[]) => {
+      document.cookie = `${PANEL_LAYOUT_COOKIE_NAME}=${JSON.stringify(sizes)}; path=/; max-age=${COOKIE_MAX_AGE}`
+    },
+    [leftPanelRef, open],
+  )
 
   const isMobile = useIsTouchDevice()
-
-  // Calculate the correct panel size percentage based on desired pixel width
-  useEffect(() => {
-    const calculatePanelSize = () => {
-      const panelGroupElement = document.querySelector(`.${styles.mainWrapper}`)
-      if (panelGroupElement) {
-        const totalWidth = panelGroupElement.getBoundingClientRect().width
-        const desiredPixelWidth = isMobile ? 150 : 280
-        const percentage = (desiredPixelWidth / totalWidth) * 100
-        setPanelSizes([percentage, 100 - percentage])
-      }
-    }
-
-    // Calculate on mount and window resize
-    calculatePanelSize()
-    window.addEventListener('resize', calculatePanelSize)
-    return () => window.removeEventListener('resize', calculatePanelSize)
-  }, [isMobile])
 
   return (
     <SidebarProvider
@@ -133,13 +116,13 @@ export const ERDRenderer: FC<Props> = ({
           >
             <ResizablePanel
               collapsible
-              defaultSize={open ? panelSizes[0] : 0}
-              minSize={panelSizes[0]}
-              maxSize={Number(panelSizes[0]) + 15}
+              defaultSize={open ? defaultPanelSizes[0] : 0}
+              minSize={isMobile ? 40 : 15}
+              maxSize={isMobile ? 80 : 30}
               ref={leftPanelRef}
               isResizing={isResizing}
               onResize={(size: number) => {
-                if (open && size < Number(panelSizes[0])) {
+                if (open && size < 15) {
                   handleChangeOpen(false)
                 }
               }}
@@ -149,7 +132,7 @@ export const ERDRenderer: FC<Props> = ({
             <ResizableHandle onDragging={(e) => setIsResizing(e)} />
             <ResizablePanel
               collapsible
-              defaultSize={panelSizes[1]}
+              defaultSize={defaultPanelSizes[1]}
               isResizing={isResizing}
             >
               <main className={styles.main}>

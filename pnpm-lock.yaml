@@ -747,6 +747,12 @@ importers:
       '@liam-hq/github':
         specifier: workspace:*
         version: link:../github
+      '@octokit/auth-app':
+        specifier: 7.2.1
+        version: 7.2.1
+      '@octokit/rest':
+        specifier: 21.1.1
+        version: 21.1.1
       '@sentry/node':
         specifier: 9.19.0
         version: 9.19.0
@@ -21154,7 +21160,7 @@ snapshots:
       isstream: 0.1.2
       jsonwebtoken: 9.0.2
       mime-types: 2.1.35
-      retry-axios: 2.6.0(axios@1.9.0(debug@4.4.1))
+      retry-axios: 2.6.0(axios@1.9.0)
       tough-cookie: 4.1.4
     transitivePeerDependencies:
       - supports-color
@@ -23831,7 +23837,7 @@ snapshots:
       onetime: 7.0.0
       signal-exit: 4.1.0
 
-  retry-axios@2.6.0(axios@1.9.0(debug@4.4.1)):
+  retry-axios@2.6.0(axios@1.9.0):
     dependencies:
       axios: 1.9.0(debug@4.4.1)
 

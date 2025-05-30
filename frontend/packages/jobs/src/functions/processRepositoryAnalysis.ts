@@ -523,6 +523,23 @@ const processAndSaveDocuments = async (
 }
 
 /**
+ * FIXME: Duplicate data prevention needed
+ *
+ * Current implementation allows duplicate documents to be saved if this function
+ * runs multiple times for the same repository. This can happen due to:
+ * - Job failures and retries
+ * - Manual re-analysis of the same repository
+ * - System errors causing process interruption and restart
+ *
+ * Proposed solutions:
+ * 1. Add content hash to documents table for true duplicate detection
+ * 2. Implement upsert logic with unique constraints
+ * 3. Add pre-processing cleanup of existing documents
+ *
+ * Priority: Medium - Should be addressed before production scaling
+ */
+
+/**
  * Retrieve documents from repository and save to vector store
  */
 export const processRepositoryAnalysis = async (

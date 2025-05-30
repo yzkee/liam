@@ -27,7 +27,7 @@ export async function POST(request: Request) {
 
   if (!result.success) {
     return NextResponse.json(
-      { error: 'Failed to generate response' },
+      { error: 'Failed to generate response', details: result.error },
       { status: 500 },
     )
   }

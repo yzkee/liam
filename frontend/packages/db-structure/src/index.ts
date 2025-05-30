@@ -9,6 +9,7 @@ export {
   type Relationships,
   type Cardinality,
   type TableGroup,
+  type TableGroups,
   type Constraint,
   type Constraints,
   type PrimaryKeyConstraint,
@@ -29,9 +30,8 @@ export {
 
 export type { ProcessError } from './parser.js'
 
-export { buildSchemaDiff } from './diff/index.js'
+export { buildSchemaDiff, schemaDiffItemsSchema } from './diff/index.js'
 export type {
-  ChangeStatus,
   SchemaDiffItem,
   TableRelatedDiffItem,
   ColumnRelatedDiffItem,

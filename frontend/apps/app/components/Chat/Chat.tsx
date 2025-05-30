@@ -5,8 +5,8 @@ import type { Schema } from '@liam-hq/db-structure'
 import type { FC } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { ChatInput } from '../ChatInput'
+import type { Mode } from '../ChatInput/components/ModeToggleSwitch/ModeToggleSwitch'
 import { ChatMessage, type ChatMessageProps } from '../ChatMessage'
-import type { Mode } from '../ModeToggleSwitch/ModeToggleSwitch'
 import styles from './Chat.module.css'
 
 /**
@@ -224,6 +224,7 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups, projectId }) => {
       <ChatInput
         onSendMessage={handleSendMessage}
         isLoading={isLoading}
+        schema={schemaData}
         initialMode={currentMode}
       />
     </div>

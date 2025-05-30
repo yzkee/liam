@@ -73,7 +73,7 @@ export const TableNode: FC<Props> = ({ data }) => {
             }
           >
             {isMobile ? (
-              <TableHeader data={data}/>
+              <TableHeader data={data} />
             ) : (
               <TableHeader data={data} textRef={textRef} />
             )}

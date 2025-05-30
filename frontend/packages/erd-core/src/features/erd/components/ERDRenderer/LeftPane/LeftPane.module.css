@@ -132,7 +132,7 @@
   margin-left: var(--spacing-1);
 }
 
-@container (max-width: 220px) {
+@container (max-width: 235px) {
   .groupLabel .visibleCount {
     display: none;
   }

@@ -89,12 +89,9 @@ export const ERDRenderer: FC<Props> = ({
     [version, leftPanelRef],
   )
 
-  const setWidth = useCallback(
-    (sizes: number[]) => {
-      document.cookie = `${PANEL_LAYOUT_COOKIE_NAME}=${JSON.stringify(sizes)}; path=/; max-age=${COOKIE_MAX_AGE}`
-    },
-    [leftPanelRef, open],
-  )
+  const setWidth = useCallback((sizes: number[]) => {
+    document.cookie = `${PANEL_LAYOUT_COOKIE_NAME}=${JSON.stringify(sizes)}; path=/; max-age=${COOKIE_MAX_AGE}`
+  }, [])
 
   const isMobile = useIsTouchDevice()
 

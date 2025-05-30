@@ -91,27 +91,9 @@ export const ERDRenderer: FC<Props> = ({
     [version, leftPanelRef],
   )
 
-  const setWidth = useCallback(
-    (sizes: number[]) => {
-      if (open && sizes[0]) {
-        const panelGroupElement = document.querySelector(
-          `.${styles.mainWrapper}`,
-        )
-        if (panelGroupElement) {
-          const totalWidth = panelGroupElement.getBoundingClientRect().width
-          const leftPanelWidth = (sizes[0] / 100) * totalWidth
-          const desiredPixelWidth = isMobile ? 150 : 280
-
-          if (leftPanelWidth <= desiredPixelWidth) {
-            handleChangeOpen(false)
-            leftPanelRef.current?.collapse()
-          }
-        }
-      }
-      document.cookie = `${PANEL_LAYOUT_COOKIE_NAME}=${JSON.stringify(sizes)}; path=/; max-age=${COOKIE_MAX_AGE}`
-    },
-    [leftPanelRef, open, handleChangeOpen],
-  )
+  const setWidth = useCallback((sizes: number[]) => {
+    document.cookie = `${PANEL_LAYOUT_COOKIE_NAME}=${JSON.stringify(sizes)}; path=/; max-age=${COOKIE_MAX_AGE}`
+  }, [])
 
   const isMobile = useIsTouchDevice()
 
@@ -156,6 +138,11 @@ export const ERDRenderer: FC<Props> = ({
               maxSize={Number(panelSizes[0]) + 15}
               ref={leftPanelRef}
               isResizing={isResizing}
+              onResize={(size: number) => {
+                if (open && size < Number(panelSizes[0])) {
+                  handleChangeOpen(false)
+                }
+              }}
             >
               <LeftPane />
             </ResizablePanel>

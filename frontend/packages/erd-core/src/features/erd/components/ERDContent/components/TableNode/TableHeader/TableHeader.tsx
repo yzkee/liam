@@ -1,6 +1,5 @@
 import type { TableNodeData } from '@/features/erd/types'
 import { useCustomReactflow } from '@/features/reactflow/hooks'
-import { useIsTouchDevice } from '@/hooks'
 import { useUserEditingStore } from '@/stores'
 import { Table2 } from '@liam-hq/ui'
 import { Handle, Position } from '@xyflow/react'
@@ -21,25 +20,23 @@ export const TableHeader: FC<Props> = ({ data }) => {
   const isSource = data.sourceColumnName !== undefined
 
   const { updateNode } = useCustomReactflow()
-  const isTouchDevice = useIsTouchDevice()
 
   const handleHoverEvent = (event: MouseEvent<HTMLSpanElement>) => {
-    if (isTouchDevice) return
-
     // Get computed styles to check if text is truncated
     const element = event.currentTarget
-    // Create a range to measure the text
-    const range = document.createRange()
-    range.selectNodeContents(element)
+    // // Create a range to measure the text
+    // const range = document.createRange()
+    // range.selectNodeContents(element)
 
-    // Get the text width using getBoundingClientRect
-    const textWidth = range.getBoundingClientRect().width
-    const containerWidth = element.getBoundingClientRect().width
+    // // Get the text width using getBoundingClientRect
+    // const textWidth = range.getBoundingClientRect().width
+    // const containerWidth = element.getBoundingClientRect().width
+    // const isTruncated = textWidth > containerWidth + 0.016
 
     updateNode(name, {
       data: {
         ...data,
-        isTooltipVisible: textWidth > containerWidth + 0.016,
+        isTooltipVisible: element.scrollWidth > element.clientWidth,
       },
     })
   }

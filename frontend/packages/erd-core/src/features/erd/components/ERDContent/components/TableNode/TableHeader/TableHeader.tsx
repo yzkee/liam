@@ -3,12 +3,12 @@ import { useUserEditingStore } from '@/stores'
 import { Table2 } from '@liam-hq/ui'
 import { Handle, Position } from '@xyflow/react'
 import clsx from 'clsx'
-import type { FC, RefObject } from 'react'
+import type { FC } from 'react'
 import styles from './TableHeader.module.css'
 
 type Props = {
   data: TableNodeData
-  textRef?: RefObject<HTMLSpanElement> | null
+  textRef?: ((element: HTMLSpanElement | null) => void) | null
 }
 
 export const TableHeader: FC<Props> = ({ data, textRef }) => {

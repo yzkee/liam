@@ -47,18 +47,6 @@ export const ProjectLayout: FC<Props> = async ({
       <TabsContent value={PROJECT_TAB.SCHEMA} className={styles.tabContent}>
         {children}
       </TabsContent>
-      <TabsContent value={PROJECT_TAB.MIGRATIONS} className={styles.tabContent}>
-        {children}
-      </TabsContent>
-      <TabsContent value={PROJECT_TAB.DOCS} className={styles.tabContent}>
-        {children}
-      </TabsContent>
-      <TabsContent value={PROJECT_TAB.RULE} className={styles.tabContent}>
-        {children}
-      </TabsContent>
-      <TabsContent value={PROJECT_TAB.SETTINGS} className={styles.tabContent}>
-        {children}
-      </TabsContent>
     </TabsRoot>
   )
 }

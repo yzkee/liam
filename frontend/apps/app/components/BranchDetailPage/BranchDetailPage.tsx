@@ -42,27 +42,12 @@ async function getBranchDetails(projectId: string) {
     )
   }
 
-  const { data: docPaths, error: docPathsError } = await supabase
-    .from('doc_file_paths')
-    .select('path')
-    .eq('project_id', projectId)
-
-  if (docPathsError) {
-    console.error('Error fetching doc paths:', docPathsError)
-  }
-
   const transformedSchemaPath = schemaPath ? { path: schemaPath.path } : null
-
-  const transformedDocPaths =
-    docPaths?.map((docPath) => ({
-      path: docPath.path,
-    })) || []
 
   return {
     ...project,
     repository: project.project_repository_mappings[0].github_repositories,
     schemaPath: transformedSchemaPath,
-    docPaths: transformedDocPaths,
   }
 }
 
@@ -93,32 +78,6 @@ export const BranchDetailPage = async ({
           <h2 className={styles.sectionTitle}>Project Resources</h2>
           <div className={styles.resourceGrid}>
             <div className={styles.resourceSection}>
-              <h3 className={styles.resourceTitle}>Documentation</h3>
-              {project.docPaths?.map((docPath) => (
-                <Link
-                  key={docPath.path}
-                  href={urlgen(
-                    'projects/[projectId]/ref/[branchOrCommit]/docs/[docFilePath]',
-                    {
-                      projectId: String(projectId),
-                      branchOrCommit,
-                      docFilePath: docPath.path,
-                    },
-                  )}
-                  className={styles.resourceLink}
-                >
-                  View Documentation for {docPath.path}
-                  <span className={styles.linkArrow}>→</span>
-                </Link>
-              ))}
-              {(!project.docPaths || project.docPaths.length === 0) && (
-                <div className={styles.noPatterns}>
-                  No documentation paths configured for this project
-                </div>
-              )}
-            </div>
-
-            <div className={styles.resourceSection}>
               <h3 className={styles.resourceTitle}>ERD Diagrams</h3>
               {project.schemaPath && (
                 <Link
@@ -141,23 +100,6 @@ export const BranchDetailPage = async ({
                   No schema file path configured for this project
                 </div>
               )}
-            </div>
-
-            <div className={styles.resourceSection}>
-              <h3 className={styles.resourceTitle}>Knowledge Suggestions</h3>
-              <Link
-                href={urlgen(
-                  'projects/[projectId]/ref/[branchOrCommit]/knowledge-suggestions',
-                  {
-                    projectId: String(projectId),
-                    branchOrCommit,
-                  },
-                )}
-                className={styles.resourceLink}
-              >
-                View Knowledge Suggestions
-                <span className={styles.linkArrow}>→</span>
-              </Link>
             </div>
           </div>
         </div>

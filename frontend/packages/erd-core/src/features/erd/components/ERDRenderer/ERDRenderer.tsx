@@ -58,9 +58,9 @@ export const ERDRenderer: FC<Props> = ({
   const [isResizing, setIsResizing] = useState(false)
 
   const { showMode } = useUserEditingStore()
-  const schema = useSchemaStore()
+  const { current } = useSchemaStore()
   const { nodes, edges } = convertSchemaToNodes({
-    schema,
+    schema: current,
     showMode,
     tableGroups,
   })
@@ -114,10 +114,15 @@ export const ERDRenderer: FC<Props> = ({
             <ResizablePanel
               collapsible
               defaultSize={open ? defaultPanelSizes[0] : 0}
-              minSize={isMobile ? 40 : 10}
+              minSize={isMobile ? 40 : 15}
               maxSize={isMobile ? 80 : 30}
               ref={leftPanelRef}
               isResizing={isResizing}
+              onResize={(size: number) => {
+                if (open && size < 15) {
+                  handleChangeOpen(false)
+                }
+              }}
             >
               <LeftPane />
             </ResizablePanel>

@@ -4,7 +4,7 @@ import { SendButton } from './SendButton'
 
 const meta = {
   component: SendButton,
-  title: 'Components/Chat/ChatInput/SendButton',
+  title: 'Components/ChatInput/SendButton',
 } satisfies Meta<typeof SendButton>
 
 export default meta

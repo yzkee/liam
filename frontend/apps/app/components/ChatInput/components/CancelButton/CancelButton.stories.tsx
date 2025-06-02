@@ -3,7 +3,7 @@ import { CancelButton } from './CancelButton'
 
 const meta = {
   component: CancelButton,
-  title: 'Components/Chat/ChatInput/CancelButton',
+  title: 'Components/ChatInput/CancelButton',
 } satisfies Meta<typeof CancelButton>
 
 export default meta

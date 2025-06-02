@@ -1,5 +1,6 @@
 import type { TableNodeData } from '@/features/erd/types'
 import { useCustomReactflow } from '@/features/reactflow/hooks'
+import { useIsTouchDevice } from '@/hooks'
 import { useUserEditingStore } from '@/stores'
 import { Table2 } from '@liam-hq/ui'
 import { Handle, Position } from '@xyflow/react'
@@ -20,10 +21,13 @@ export const TableHeader: FC<Props> = ({ data }) => {
   const isSource = data.sourceColumnName !== undefined
 
   const { updateNode } = useCustomReactflow()
+  const isTouchDevice = useIsTouchDevice()
 
   const textRef = useRef<HTMLSpanElement>(null)
 
   const handleHoverEvent = () => {
+    if (isTouchDevice) return
+
     const element = textRef.current
     if (!element) return
 

@@ -11,6 +11,7 @@
   --z-index-drawer: 900;
   --z-index-header: 1000;
   --z-index-dropdown-menu: 1100;
+  --z-index-popover: 1500;
   --z-index-tooltip: 2000;
   --z-index-toast: 3000;
   --z-index-overlay: 3100;

@@ -2,7 +2,7 @@ import { type ComponentProps, useState } from 'react'
 import { ModeToggleSwitch } from './ModeToggleSwitch'
 
 export default {
-  title: 'Components/Chat/ModeToggleSwitch',
+  title: 'Components/ChatInput/ModeToggleSwitch',
   component: ModeToggleSwitch,
   tags: ['autodocs'],
 }

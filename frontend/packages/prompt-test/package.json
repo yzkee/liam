@@ -14,7 +14,7 @@
     "langfuse-langchain": "3.37.2",
     "tsx": "4.19.4",
     "typescript": "5.8.3",
-    "yaml": "2.7.1"
+    "yaml": "2.8.0"
   },
   "scripts": {
     "fmt": "concurrently \"pnpm:fmt:*\"",

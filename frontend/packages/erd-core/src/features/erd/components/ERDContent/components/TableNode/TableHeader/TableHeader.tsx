@@ -5,7 +5,7 @@ import { useUserEditingStore } from '@/stores'
 import { Table2 } from '@liam-hq/ui'
 import { Handle, Position } from '@xyflow/react'
 import clsx from 'clsx'
-import { type FC, useRef } from 'react'
+import type { FC, MouseEvent } from 'react'
 import styles from './TableHeader.module.css'
 
 type Props = {
@@ -23,14 +23,11 @@ export const TableHeader: FC<Props> = ({ data }) => {
   const { updateNode } = useCustomReactflow()
   const isTouchDevice = useIsTouchDevice()
 
-  const textRef = useRef<HTMLSpanElement>(null)
-
-  const handleHoverEvent = () => {
+  const handleHoverEvent = (event: MouseEvent<HTMLSpanElement>) => {
     if (isTouchDevice) return
 
-    const element = textRef.current
-    if (!element) return
-
+    // Get computed styles to check if text is truncated
+    const element = event.currentTarget
     // Create a range to measure the text
     const range = document.createRange()
     range.selectNodeContents(element)
@@ -39,7 +36,6 @@ export const TableHeader: FC<Props> = ({ data }) => {
     const textWidth = range.getBoundingClientRect().width
     const containerWidth = element.getBoundingClientRect().width
 
-    // Add a small threshold (0.016px) to account for subpixel rendering
     updateNode(name, {
       data: {
         ...data,
@@ -57,11 +53,7 @@ export const TableHeader: FC<Props> = ({ data }) => {
     >
       <Table2 width={16} className={styles.tableIcon} />
 
-      <span
-        className={styles.name}
-        onMouseEnter={handleHoverEvent}
-        ref={textRef}
-      >
+      <span className={styles.name} onMouseEnter={handleHoverEvent}>
         {name}
       </span>
 

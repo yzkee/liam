@@ -30,8 +30,8 @@
   min-width: 0;
 }
 
-/* Use media query for touch devices */
-@media (hover: none) and (pointer: coarse) {
+/* Use media query for touch devices and smaller viewports */
+@media (max-width: 768px) {
   .name {
     overflow: hidden;
     text-overflow: ellipsis;

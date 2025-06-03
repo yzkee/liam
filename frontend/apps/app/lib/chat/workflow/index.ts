@@ -56,8 +56,8 @@ const generateAnswer = async (
   state: ChatState,
 ): Promise<Partial<ChatState>> => {
   try {
-    // Use non-streaming mode for sync execution
-    const result = await answerGenerationNode(state, { streaming: false })
+    // Use synchronous execution (streaming is now handled by finalResponseNode)
+    const result = await answerGenerationNode(state)
     return {
       generatedAnswer: result.generatedAnswer,
       error: result.error,
@@ -70,12 +70,12 @@ const generateAnswer = async (
 }
 
 /**
- * Wrap finalResponseNode
+ * Wrap finalResponseNode for non-streaming execution
  */
 const formatFinalResponse = async (
   state: ChatState,
 ): Promise<Partial<ChatState>> => {
-  const result = await finalResponseNode(state)
+  const result = await finalResponseNode(state, { streaming: false })
   return result
 }
 
@@ -84,6 +84,7 @@ const formatFinalResponse = async (
  */
 interface WorkflowOptions {
   streaming?: boolean
+  recursionLimit?: number
 }
 
 /**
@@ -118,11 +119,12 @@ export function executeChatWorkflow(
       WorkflowState,
       unknown
     > {
-  const streaming = options?.streaming ?? true
+  const streaming = options?.streaming ?? false
+  const recursionLimit = options?.recursionLimit ?? 10
   if (streaming === false) {
-    return executeChatWorkflowSyncInternal(initialState)
+    return executeChatWorkflowSyncInternal(initialState, recursionLimit)
   }
-  return executeChatWorkflowStreamingInternal(initialState)
+  return executeChatWorkflowStreamingInternal(initialState, recursionLimit)
 }
 
 /**
@@ -131,6 +133,7 @@ export function executeChatWorkflow(
 // Non-streaming implementation using LangGraph
 const executeChatWorkflowSyncInternal = async (
   initialState: WorkflowState,
+  recursionLimit: number,
 ): Promise<WorkflowState> => {
   try {
     const graph = new StateGraph(ChatStateAnnotation)
@@ -163,7 +166,7 @@ const executeChatWorkflowSyncInternal = async (
         projectId: initialState.projectId,
       },
       {
-        recursionLimit: 10, // Increase limit to handle workflow properly
+        recursionLimit, // Use configurable recursion limit
       },
     )
 
@@ -189,91 +192,116 @@ const executeChatWorkflowSyncInternal = async (
       ...initialState,
       error: errorMessage,
     }
-    return await finalResponseNode(errorState)
+    return await finalResponseNode(errorState, { streaming: false })
   }
 }
 
-// Streaming implementation
+// Streaming implementation: LangGraph for validation + answerGeneration, streaming for finalResponse
 const executeChatWorkflowStreamingInternal = async function* (
   initialState: WorkflowState,
+  recursionLimit: number,
 ): AsyncGenerator<
   { type: 'text' | 'error'; content: string },
   WorkflowState,
   unknown
 > {
   try {
-    // Step 1: Validate input using validationNode
-    const validationResult = await validationNode({
-      mode: initialState.mode,
-      userInput: initialState.userInput,
-      history: initialState.history || [],
-      schemaData: initialState.schemaData,
-      projectId: initialState.projectId,
-    })
+    // Step 1 & 2: Use LangGraph for validation and answer generation (synchronously)
+    const graph = new StateGraph(ChatStateAnnotation)
 
-    if (validationResult.error) {
-      // Even with validation error, go through finalResponseNode to ensure proper response
+    graph
+      .addNode('validateInput', validateInput)
+      .addNode('generateAnswer', generateAnswer)
+      .addEdge(START, 'validateInput')
+      .addEdge('validateInput', 'generateAnswer')
+      .addEdge('generateAnswer', END)
+
+      // Conditional edges for error handling
+      .addConditionalEdges('validateInput', (state: ChatState) => {
+        if (state.error) return END
+        return 'generateAnswer'
+      })
+
+    const compiled = graph.compile()
+
+    // Run validation and answer generation through LangGraph
+    const result = await compiled.invoke(
+      {
+        mode: initialState.mode,
+        userInput: initialState.userInput,
+        history: initialState.history || [],
+        schemaData: initialState.schemaData,
+        projectId: initialState.projectId,
+      },
+      {
+        recursionLimit, // Use configurable recursion limit
+      },
+    )
+
+    // Check for errors from validation or answer generation
+    if (result.error) {
+      yield { type: 'error', content: result.error }
       const errorState = {
         ...initialState,
-        error: validationResult.error,
+        error: result.error,
       }
-      const finalResult = await finalResponseNode(errorState)
-      yield { type: 'error', content: validationResult.error }
+      const finalResult = await finalResponseNode(errorState, {
+        streaming: false,
+      })
       return finalResult
     }
 
-    // Step 2: Generate answer with streaming
-    const state: ChatState = {
-      mode: initialState.mode,
-      userInput: initialState.userInput,
-      history: initialState.history || [],
-      schemaData: initialState.schemaData,
-      projectId: initialState.projectId,
-      // Add validation result fields
-      schemaText: validationResult.schemaText,
-      formattedChatHistory: validationResult.formattedChatHistory,
-      agentName: validationResult.agentName,
+    // Step 3: Stream final response using finalResponseNode
+    const finalState: WorkflowState = {
+      mode: result.mode,
+      userInput: result.userInput,
+      history: result.history || [],
+      schemaData: result.schemaData,
+      projectId: result.projectId,
+      generatedAnswer: result.generatedAnswer,
+      // Include processed fields
+      schemaText: result.schemaText,
+      formattedChatHistory: result.formattedChatHistory,
+      agentName: result.agentName,
     }
 
-    const generator = answerGenerationNode({
-      mode: state.mode,
-      userInput: state.userInput,
-      history: state.history,
-      schemaData: state.schemaData,
-      projectId: state.projectId,
-      // Pass the processed data from validation
-      schemaText: state.schemaText,
-      formattedChatHistory: state.formattedChatHistory,
-      agentName: state.agentName,
-    })
-    let generatedAnswer = ''
+    const finalGenerator = finalResponseNode(finalState)
 
-    for await (const chunk of generator) {
-      if (chunk.type === 'text') {
-        generatedAnswer += chunk.content
+    for await (const chunk of finalGenerator) {
+      if (chunk.type === 'text' || chunk.type === 'error') {
         yield chunk
-      } else if (chunk.type === 'error') {
-        yield chunk
-        // Even with generation error, go through finalResponseNode to ensure proper response
-        const errorState = {
-          ...initialState,
-          error: chunk.content,
-        }
-        const finalResult = await finalResponseNode(errorState)
-        return finalResult
       }
     }
 
-    // Step 3: Format final response using finalResponseNode
-    const finalState = { ...state, generatedAnswer }
-    const finalResult = await finalResponseNode(finalState)
-
-    if (finalResult.error) {
-      yield { type: 'error', content: finalResult.error }
+    // Get the final result from the generator
+    const generatorResult = await finalGenerator.next()
+    // Type guard to check if value is WorkflowState
+    const value = generatorResult.value
+    const isWorkflowState = (val: unknown): val is WorkflowState => {
+      return (
+        val !== null &&
+        typeof val === 'object' &&
+        'userInput' in val &&
+        'history' in val
+      )
     }
 
-    return finalResult
+    return (
+      (isWorkflowState(value) ? value : null) || {
+        ...finalState,
+        finalResponse: finalState.generatedAnswer || 'No response generated',
+        history: [
+          ...finalState.history,
+          `User: ${finalState.userInput}`,
+          `Assistant: ${finalState.generatedAnswer || 'No response generated'}`,
+        ],
+      }
+    )
   } catch (error) {
+    console.error(
+      'LangGraph streaming execution failed, falling back to error state:',
+      error,
+    )
     const errorMessage =
       error instanceof Error ? error.message : 'Workflow execution failed'
     yield {
@@ -285,7 +313,9 @@ const executeChatWorkflowStreamingInternal = async function* (
       ...initialState,
       error: errorMessage,
     }
-    const finalResult = await finalResponseNode(errorState)
+    const finalResult = await finalResponseNode(errorState, {
+      streaming: false,
+    })
     return finalResult
   }
 }

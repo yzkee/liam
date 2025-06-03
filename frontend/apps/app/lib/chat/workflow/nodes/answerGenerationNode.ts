@@ -1,8 +1,14 @@
 import { mastra } from '@/lib/mastra'
 import type { AgentName, WorkflowState } from '../types'
 
+interface MastraAgent {
+  generate: (
+    prompt: Array<{ role: string; content: string }>,
+  ) => Promise<{ text: string }>
+}
+
 interface PreparedAnswerGeneration {
-  agent: ReturnType<typeof mastra.getAgent>
+  agent: MastraAgent
   agentName: AgentName
   schemaText: string
   formattedChatHistory: string
@@ -22,10 +28,25 @@ async function prepareAnswerGeneration(
   const schemaText = state.schemaText
 
   // Get the agent from Mastra
-  const agent = mastra.getAgent(agentName)
-  if (!agent) {
+  const potentialAgent = mastra.getAgent(agentName)
+
+  // Type guard for agent
+  if (!potentialAgent) {
     return { error: `${agentName} not found in Mastra instance` }
   }
+
+  // Type guard to ensure agent has required methods
+  if (
+    typeof potentialAgent !== 'object' ||
+    potentialAgent === null ||
+    !('generate' in potentialAgent) ||
+    typeof potentialAgent.generate !== 'function'
+  ) {
+    return { error: `${agentName} agent doesn't have required methods` }
+  }
+
+  // Safe to cast after type validation
+  const agent = potentialAgent as MastraAgent
 
   return {
     agent,
@@ -59,42 +80,10 @@ ${formattedChatHistory}
 }
 
 /**
- * Unified answer generation (supports both streaming and sync)
+ * Answer generation node - synchronous execution only
+ * Streaming is now handled by finalResponseNode
  */
-
-// Overloaded function signatures
-export function answerGenerationNode(
-  state: WorkflowState,
-  options: { streaming: false },
-): Promise<WorkflowState>
-export function answerGenerationNode(
-  state: WorkflowState,
-  options?: { streaming?: true },
-): AsyncGenerator<
-  { type: 'text' | 'error'; content: string },
-  WorkflowState,
-  unknown
->
-export function answerGenerationNode(
-  state: WorkflowState,
-  options: { streaming?: boolean } = { streaming: true },
-):
-  | Promise<WorkflowState>
-  | AsyncGenerator<
-      { type: 'text' | 'error'; content: string },
-      WorkflowState,
-      unknown
-    > {
-  const streaming = options.streaming ?? true
-
-  if (!streaming) {
-    return answerGenerationNodeSync(state)
-  }
-  return answerGenerationNodeStreaming(state)
-}
-
-// Non-streaming implementation
-async function answerGenerationNodeSync(
+export async function answerGenerationNode(
   state: WorkflowState,
 ): Promise<WorkflowState> {
   try {
@@ -109,10 +98,18 @@ async function answerGenerationNodeSync(
 
     const { agent, schemaText, formattedChatHistory } = prepared
 
-    // Use Mastra's generate method for non-streaming
+    // Use Mastra's generate method for synchronous execution
     const result = await agent.generate(
       createPrompt(schemaText, formattedChatHistory, state.userInput),
     )
+
+    // Type guard for result
+    if (!result || typeof result !== 'object' || !('text' in result)) {
+      return {
+        ...state,
+        error: 'Agent response missing expected text property',
+      }
+    }
 
     return {
       ...state,
@@ -122,55 +119,6 @@ async function answerGenerationNodeSync(
   } catch (error) {
     const errorMsg =
       error instanceof Error ? error.message : 'Failed to generate answer'
-    return {
-      ...state,
-      error: errorMsg,
-    }
-  }
-}
-
-// Streaming implementation
-async function* answerGenerationNodeStreaming(
-  state: WorkflowState,
-): AsyncGenerator<
-  { type: 'text' | 'error'; content: string },
-  WorkflowState,
-  unknown
-> {
-  try {
-    const prepared = await prepareAnswerGeneration(state)
-
-    if ('error' in prepared) {
-      yield { type: 'error' as const, content: prepared.error }
-      return {
-        ...state,
-        error: prepared.error,
-      }
-    }
-
-    const { agent, schemaText, formattedChatHistory } = prepared
-
-    // Use Mastra's streaming capabilities
-    const stream = await agent.stream(
-      createPrompt(schemaText, formattedChatHistory, state.userInput),
-    )
-
-    // Stream text chunks in real-time
-    let fullText = ''
-    for await (const chunk of stream.textStream) {
-      fullText += chunk
-      yield { type: 'text' as const, content: chunk }
-    }
-
-    return {
-      ...state,
-      generatedAnswer: fullText,
-      error: undefined,
-    }
-  } catch (error) {
-    const errorMsg =
-      error instanceof Error ? error.message : 'Failed to generate answer'
-    yield { type: 'error' as const, content: errorMsg }
     return {
       ...state,
       error: errorMsg,

@@ -30,10 +30,13 @@
   min-width: 0;
 }
 
-.nameTouchDevice {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+/* Use media query for touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 .handle {

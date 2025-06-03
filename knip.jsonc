@@ -35,9 +35,9 @@
     "@prisma/internals",
     "@trigger.dev/build",
     "@trigger.dev/sdk",
-    "langfuse",
-    "langfuse-langchain",
     "@langchain/core",
+    // zod is used in `src/parser/tbls/schema.generated.ts`,
+    // which is ignored by git but imported in parser.ts and tests
     "zod",
     "ts-pattern",
     "minimatch",
@@ -49,7 +49,6 @@
     "@types/gtag.js",
     "esbuild",
     "@types/mdx",
-    "postcss",
     "@types/glob",
     "@biomejs/biome",
     "@sentry/node",
@@ -59,6 +58,7 @@
     "@turbo/gen"
   ],
 
+
   // TODO: Review ignoreBinaries configuration later
-  "ignoreBinaries": ["playwright", "supabase:start", "supabase:gen"]
+  "ignoreBinaries": ["playwright"]
 }

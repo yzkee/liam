@@ -796,7 +796,7 @@ vars:
       }
     }
   fileChanges:
-  - filename: frontend/packages/db/prisma/schema.prisma
+  - filename: frontend/internal-packages/db/prisma/schema.prisma
     status: modified
     changes: 12
     patch: |-

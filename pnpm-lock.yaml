@@ -92,7 +92,7 @@ importers:
         version: 1.2.1
       '@liam-hq/db':
         specifier: workspace:*
-        version: link:../../packages/db
+        version: link:../../internal-packages/db
       '@liam-hq/db-structure':
         specifier: workspace:*
         version: link:../../packages/db-structure
@@ -333,6 +333,34 @@ importers:
         specifier: workspace:*
         version: link:../../packages/cli
 
+  frontend/internal-packages/db:
+    dependencies:
+      '@supabase/ssr':
+        specifier: 0.6.1
+        version: 0.6.1(@supabase/supabase-js@2.49.4)
+      '@supabase/supabase-js':
+        specifier: 2.49.4
+        version: 2.49.4
+    devDependencies:
+      '@biomejs/biome':
+        specifier: 1.9.4
+        version: 1.9.4
+      '@liam-hq/configs':
+        specifier: workspace:*
+        version: link:../../packages/configs
+      eslint:
+        specifier: 9.27.0
+        version: 9.27.0(jiti@2.4.2)
+      supabase:
+        specifier: 2.23.1
+        version: 2.23.1
+      type-fest:
+        specifier: 4.41.0
+        version: 4.41.0
+      typescript:
+        specifier: 5.8.3
+        version: 5.8.3
+
   frontend/internal-packages/figma-to-css-variables:
     dependencies:
       dotenv:
@@ -525,34 +553,6 @@ importers:
         specifier: 9.27.0
         version: 9.27.0(jiti@2.4.2)
 
-  frontend/packages/db:
-    dependencies:
-      '@supabase/ssr':
-        specifier: 0.6.1
-        version: 0.6.1(@supabase/supabase-js@2.49.4)
-      '@supabase/supabase-js':
-        specifier: 2.49.4
-        version: 2.49.4
-    devDependencies:
-      '@biomejs/biome':
-        specifier: 1.9.4
-        version: 1.9.4
-      '@liam-hq/configs':
-        specifier: workspace:*
-        version: link:../configs
-      eslint:
-        specifier: 9.27.0
-        version: 9.27.0(jiti@2.4.2)
-      supabase:
-        specifier: 2.23.1
-        version: 2.23.1
-      type-fest:
-        specifier: 4.41.0
-        version: 4.41.0
-      typescript:
-        specifier: 5.8.3
-        version: 5.8.3
-
   frontend/packages/db-structure:
     dependencies:
       '@prisma/internals':
@@ -731,7 +731,7 @@ importers:
         version: 0.5.10(@langchain/core@0.3.56(openai@4.103.0(ws@8.18.2)(zod@3.23.8)))(ws@8.18.2)
       '@liam-hq/db':
         specifier: workspace:*
-        version: link:../db
+        version: link:../../internal-packages/db
       '@liam-hq/db-structure':
         specifier: workspace:*
         version: link:../db-structure

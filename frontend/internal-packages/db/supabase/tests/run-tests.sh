@@ -22,10 +22,10 @@ fi
 
 # Set up the testing environment
 echo "Setting up the testing environment..."
-PGPASSWORD=postgres psql -U postgres -d postgres -h localhost -p 54322 -f "$PROJECT_ROOT/frontend/packages/db/supabase/setup-testing.sql"
+PGPASSWORD=postgres psql -U postgres -d postgres -h localhost -p 54322 -f "$PROJECT_ROOT/frontend/internal-packages/db/supabase/setup-testing.sql"
 
 # Change to the directory with the tests
-cd "$PROJECT_ROOT/frontend/packages/db/supabase"
+cd "$PROJECT_ROOT/frontend/internal-packages/db/supabase"
 
 # Run the tests
 echo "Running tests..."

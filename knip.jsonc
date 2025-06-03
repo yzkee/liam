@@ -55,9 +55,7 @@
     "@sentry/esbuild-plugin",
     "@liam-hq/cli",
     "@liam-hq/configs",
-    "@turbo/gen",
-    "langfuse",
-    "langfuse-vercel"
+    "@turbo/gen"
   ],
 
 

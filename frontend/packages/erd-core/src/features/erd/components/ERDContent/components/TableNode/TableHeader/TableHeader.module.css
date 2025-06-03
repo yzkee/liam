@@ -26,8 +26,14 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  /* flex: 1;
-  min-width: 0; */
+  flex: 1;
+  min-width: 0;
+}
+
+.nameTouchDevice {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .handle {

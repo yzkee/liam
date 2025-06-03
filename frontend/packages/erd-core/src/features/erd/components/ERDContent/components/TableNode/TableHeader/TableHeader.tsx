@@ -1,5 +1,6 @@
 import type { TableNodeData } from '@/features/erd/types'
 import { useCustomReactflow } from '@/features/reactflow/hooks'
+import { useIsTouchDevice } from '@/hooks'
 import { useUserEditingStore } from '@/stores'
 import { Table2 } from '@liam-hq/ui'
 import { Handle, Position } from '@xyflow/react'
@@ -16,6 +17,8 @@ export const TableHeader: FC<Props> = ({ data }) => {
   const { showMode: _showMode } = useUserEditingStore()
   const showMode = data.showMode ?? _showMode
 
+  const isTouchDevice = useIsTouchDevice()
+
   const isTarget = data.targetColumnCardinalities !== undefined
   const isSource = data.sourceColumnName !== undefined
 
@@ -31,7 +34,7 @@ export const TableHeader: FC<Props> = ({ data }) => {
     // Get the text width using getBoundingClientRect
     const textWidth = range.getBoundingClientRect().width
     const containerWidth = element.getBoundingClientRect().width
-    const isTruncated = textWidth > containerWidth + 0.016
+    const isTruncated = textWidth > containerWidth + 0.017
 
     updateNode(name, {
       data: {
@@ -50,7 +53,10 @@ export const TableHeader: FC<Props> = ({ data }) => {
     >
       <Table2 width={16} className={styles.tableIcon} />
 
-      <span className={styles.name} onMouseEnter={handleHoverEvent}>
+      <span
+        className={isTouchDevice ? styles.nameTouchDevice : styles.name}
+        onMouseEnter={handleHoverEvent}
+      >
         {name}
       </span>
 

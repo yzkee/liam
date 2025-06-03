@@ -1,4 +1,5 @@
-import { createOrganizationAuto } from '@/components/OrganizationNewPage/actions/createOrganizationAuto'
+import { createOrganizationAuto } from '@/components/OrganizationNewPage/actions/createOrganizations'
+import { setOrganizationIdCookie } from '@/features/organizations/services/setOrganizationIdCookie'
 import { createClient } from '@/libs/db/server'
 import { urlgen } from '@/libs/routes'
 import { redirect } from 'next/navigation'
@@ -10,6 +11,8 @@ async function handleUserWithoutOrganization(
 
   if (result.success) {
     const organizationId = result.organizationId
+
+    await setOrganizationIdCookie(organizationId)
 
     const { data: projects, error: projectsError } = await supabase
       .from('projects')

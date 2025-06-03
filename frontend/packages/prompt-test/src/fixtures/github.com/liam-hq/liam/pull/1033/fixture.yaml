@@ -1179,7 +1179,7 @@ vars:
     patch: |-
       @@ -0,0 +1 @@
       +alter table "public"."KnowledgeSuggestion" add column "branchName" text not null;
-  - filename: frontend/packages/github/src/api.server.ts
+  - filename: frontend/internal-packages/github/src/api.server.ts
     status: modified
     changes: 2
     patch: "@@ -181,7 +181,7 @@ export const updateFileContent = async (\n   sha:

@@ -1061,7 +1061,7 @@ vars:
        )
 
        if (!success) {
-  - filename: frontend/packages/db/prisma/migrations/20250328105323_add_branch_name_to_knowledge_suggestion/migration.sql
+  - filename: frontend/internal-packages/db/prisma/migrations/20250328105323_add_branch_name_to_knowledge_suggestion/migration.sql
     status: added
     changes: 8
     patch: |-
@@ -1074,7 +1074,7 @@ vars:
       +*/
       +-- AlterTable
       +ALTER TABLE "KnowledgeSuggestion" ADD COLUMN "branchName" TEXT NOT NULL;
-  - filename: frontend/packages/db/prisma/schema.prisma
+  - filename: frontend/internal-packages/db/prisma/schema.prisma
     status: modified
     changes: 1
     patch: |-
@@ -1086,7 +1086,7 @@ vars:
        projectId Int
        project Project @relation(fields: [projectId], references: [id])
        approvedAt DateTime? // Approval timestamp (null if not approved)
-  - filename: frontend/packages/db/schema/schema.sql
+  - filename: frontend/internal-packages/db/schema/schema.sql
     status: modified
     changes: 3
     patch: |-
@@ -1100,7 +1100,7 @@ vars:
        );
 
 
-  - filename: frontend/packages/db/supabase/database.types.ts
+  - filename: frontend/internal-packages/db/supabase/database.types.ts
     status: modified
     changes: 3
     patch: |-
@@ -1128,13 +1128,13 @@ vars:
        content?: string
        createdAt?: string
        fileSha?: string
-  - filename: frontend/packages/db/supabase/migrations/20250328105339_add_branch_name_to_knowledge_suggestion.sql
+  - filename: frontend/internal-packages/db/supabase/migrations/20250328105339_add_branch_name_to_knowledge_suggestion.sql
     status: added
     changes: 1
     patch: |-
       @@ -0,0 +1 @@
       +alter table "public"."KnowledgeSuggestion" add column "branchName" text not null;
-  - filename: frontend/packages/github/src/api.server.ts
+  - filename: frontend/internal-packages/github/src/api.server.ts
     status: modified
     changes: 2
     patch: |-

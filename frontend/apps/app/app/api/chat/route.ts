@@ -16,25 +16,45 @@ export async function POST(request: Request) {
     )
   }
 
-  // Process the chat message
-  const result = await processChatMessage({
-    message,
-    schemaData,
-    history,
-    mode,
-    projectId,
+  // Create a ReadableStream for streaming response
+  const stream = new ReadableStream({
+    async start(controller) {
+      const encoder = new TextEncoder()
+
+      try {
+        // Process the chat message with streaming
+        for await (const chunk of processChatMessage({
+          message,
+          schemaData,
+          history,
+          mode,
+          projectId,
+        })) {
+          if (chunk.type === 'text') {
+            // Encode and enqueue the text chunk
+            controller.enqueue(encoder.encode(chunk.content))
+          } else if (chunk.type === 'error') {
+            // Handle error by closing the stream
+            controller.error(new Error(chunk.content))
+            return
+          }
+        }
+
+        // Close the stream when done
+        controller.close()
+      } catch (error) {
+        // Handle any unexpected errors
+        controller.error(error)
+      }
+    },
   })
 
-  if (!result.success) {
-    return NextResponse.json(
-      { error: 'Failed to generate response', details: result.error },
-      { status: 500 },
-    )
-  }
-
-  return new Response(result.text, {
+  // Return streaming response
+  return new Response(stream, {
     headers: {
       'Content-Type': 'text/plain; charset=utf-8',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
     },
   })
 }

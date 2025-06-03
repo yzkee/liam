@@ -58,12 +58,6 @@
     "@turbo/gen"
   ],
 
-  // Suppress unresolved import errors for the generated schema, which is ignored
-  "ignoreUnresolved": [
-    "./schema.generated.js",
-    "./schema.generated"
-  ],
-
 
   // TODO: Review ignoreBinaries configuration later
   "ignoreBinaries": ["playwright"]

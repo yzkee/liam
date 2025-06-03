@@ -34,7 +34,7 @@ export const TableHeader: FC<Props> = ({ data }) => {
     // Get the text width using getBoundingClientRect
     const textWidth = range.getBoundingClientRect().width
     const containerWidth = element.getBoundingClientRect().width
-    const isTruncated = textWidth > containerWidth + 0.017
+    const isTruncated = textWidth > containerWidth + 0.018
 
     updateNode(name, {
       data: {

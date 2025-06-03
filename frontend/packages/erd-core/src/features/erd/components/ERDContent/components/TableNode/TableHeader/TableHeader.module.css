@@ -26,16 +26,15 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  flex: 1;
-  min-width: 0;
 }
 
-/* Use media query for touch devices and smaller viewports */
-@media (max-width: 768px) {
+@media (width > 767px) {
   .name {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    flex: 1;
+    min-width: 0;
   }
 }
 

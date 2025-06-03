@@ -1,7 +1,7 @@
 import { convertSchemaToText } from '@/app/lib/schema/convertSchemaToText'
 import { isSchemaUpdated } from '@/app/lib/vectorstore/supabaseVectorStore'
 import { syncSchemaVectorStore } from '@/app/lib/vectorstore/syncSchemaVectorStore'
-import { mastra } from '@/lib/mastra'
+import { createPromptVariables, langchain } from '@/lib/langchain'
 import type { Schema } from '@liam-hq/db-structure'
 
 interface ChatProcessorParams {
@@ -82,43 +82,27 @@ async function processChatMessageSync(
       }
     }
 
-    // Format chat history for prompt
-    const formattedChatHistory =
-      history && history.length > 0
-        ? history
-            .map((msg: [string, string]) => `${msg[0]}: ${msg[1]}`)
-            .join('\n')
-        : 'No previous conversation.'
-
     // Convert schema to text
     const schemaText = convertSchemaToText(schemaData)
 
-    // Get the agent from Mastra
-    const agent = mastra.getAgent(agentName)
+    // Get the agent from LangChain
+    const agent = langchain.getAgent(agentName)
     if (!agent) {
-      throw new Error(`${agentName} not found in Mastra instance`)
+      throw new Error(`${agentName} not found in LangChain instance`)
     }
 
-    // Create a response using the agent
-    const response = await agent.generate([
-      {
-        role: 'system',
-        content: `
-Complete Schema Information:
-${schemaText}
+    // Create prompt variables
+    const promptVariables = createPromptVariables(
+      schemaText,
+      message,
+      history || [],
+    )
 
-Previous conversation:
-${formattedChatHistory}
-`,
-      },
-      {
-        role: 'user',
-        content: message,
-      },
-    ])
+    // Create a response using the agent
+    const response = await agent.generate(promptVariables)
 
     return {
-      text: response.text,
+      text: response,
       success: true,
     }
   } catch (error) {
@@ -161,21 +145,13 @@ async function* processChatMessageStreaming(
       }
     }
 
-    // Format chat history for prompt
-    const formattedChatHistory =
-      history && history.length > 0
-        ? history
-            .map((msg: [string, string]) => `${msg[0]}: ${msg[1]}`)
-            .join('\n')
-        : 'No previous conversation.'
-
     // Convert schema to text
     const schemaText = convertSchemaToText(schemaData)
 
-    // Get the agent from Mastra
-    const agent = mastra.getAgent(agentName)
+    // Get the agent from LangChain
+    const agent = langchain.getAgent(agentName)
     if (!agent) {
-      const errorMsg = `${agentName} not found in Mastra instance`
+      const errorMsg = `${agentName} not found in LangChain instance`
       yield { type: 'error', content: errorMsg }
       return {
         text: '',
@@ -184,30 +160,19 @@ async function* processChatMessageStreaming(
       }
     }
 
-    // Create the prompt
-    const prompt = [
-      {
-        role: 'system' as const,
-        content: `
-Complete Schema Information:
-${schemaText}
-
-Previous conversation:
-${formattedChatHistory}
-`,
-      },
-      {
-        role: 'user' as const,
-        content: message,
-      },
-    ]
+    // Create prompt variables
+    const promptVariables = createPromptVariables(
+      schemaText,
+      message,
+      history || [],
+    )
 
     // Stream the response using the agent
-    const stream = await agent.stream(prompt)
+    const stream = agent.stream(promptVariables)
 
     // Process and yield each chunk
     let fullText = ''
-    for await (const chunk of stream.textStream) {
+    for await (const chunk of stream) {
       fullText += chunk
       yield { type: 'text', content: chunk }
     }

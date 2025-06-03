@@ -1,8 +1,8 @@
-import { mastra } from '@/lib/mastra'
+import { createPromptVariables, langchain } from '@/lib/langchain'
 import type { AgentName, WorkflowState } from '../types'
 
 interface PreparedAnswerGeneration {
-  agent: ReturnType<typeof mastra.getAgent>
+  agent: NonNullable<ReturnType<typeof langchain.getAgent>>
   agentName: AgentName
   schemaText: string
   formattedChatHistory: string
@@ -21,10 +21,10 @@ async function prepareAnswerGeneration(
   const formattedChatHistory = state.formattedChatHistory
   const schemaText = state.schemaText
 
-  // Get the agent from Mastra
-  const agent = mastra.getAgent(agentName)
+  // Get the agent from LangChain
+  const agent = langchain.getAgent(agentName)
   if (!agent) {
-    return { error: `${agentName} not found in Mastra instance` }
+    return { error: `${agentName} not found in LangChain instance` }
   }
 
   return {
@@ -35,27 +35,15 @@ async function prepareAnswerGeneration(
   }
 }
 
-function createPrompt(
-  schemaText: string,
-  formattedChatHistory: string,
-  userInput: string,
-) {
-  return [
-    {
-      role: 'system' as const,
-      content: `
-Complete Schema Information:
-${schemaText}
-
-Previous conversation:
-${formattedChatHistory}
-`,
-    },
-    {
-      role: 'user' as const,
-      content: userInput,
-    },
-  ]
+// Helper function to convert history format
+function convertHistoryFormat(history: string[]): [string, string][] {
+  const result: [string, string][] = []
+  for (let i = 0; i < history.length; i += 2) {
+    if (i + 1 < history.length) {
+      result.push([history[i], history[i + 1]])
+    }
+  }
+  return result
 }
 
 /**
@@ -107,16 +95,22 @@ async function answerGenerationNodeSync(
       }
     }
 
-    const { agent, schemaText, formattedChatHistory } = prepared
+    const { agent, schemaText } = prepared
 
-    // Use Mastra's generate method for non-streaming
-    const result = await agent.generate(
-      createPrompt(schemaText, formattedChatHistory, state.userInput),
+    // Convert history format and create prompt variables for LangChain
+    const historyFormatted = convertHistoryFormat(state.history)
+    const promptVariables = createPromptVariables(
+      schemaText,
+      state.userInput,
+      historyFormatted,
     )
+
+    // Use LangChain's generate method for non-streaming
+    const result = await agent.generate(promptVariables)
 
     return {
       ...state,
-      generatedAnswer: result.text,
+      generatedAnswer: result,
       error: undefined,
     }
   } catch (error) {
@@ -148,16 +142,22 @@ async function* answerGenerationNodeStreaming(
       }
     }
 
-    const { agent, schemaText, formattedChatHistory } = prepared
+    const { agent, schemaText } = prepared
 
-    // Use Mastra's streaming capabilities
-    const stream = await agent.stream(
-      createPrompt(schemaText, formattedChatHistory, state.userInput),
+    // Convert history format and create prompt variables for LangChain
+    const historyFormatted = convertHistoryFormat(state.history)
+    const promptVariables = createPromptVariables(
+      schemaText,
+      state.userInput,
+      historyFormatted,
     )
+
+    // Use LangChain's streaming capabilities
+    const stream = agent.stream(promptVariables)
 
     // Stream text chunks in real-time
     let fullText = ''
-    for await (const chunk of stream.textStream) {
+    for await (const chunk of stream) {
       fullText += chunk
       yield { type: 'text' as const, content: chunk }
     }

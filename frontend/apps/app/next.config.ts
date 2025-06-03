@@ -13,7 +13,7 @@ if (process.env.VERCEL_ENV === 'production') {
 
 const nextConfig: NextConfig = {
   // Server-only packages that should not be bundled on the client
-  serverExternalPackages: ['@mastra/*'],
+  serverExternalPackages: [],
 
   // NOTE: Exclude Prisma-related packages from the bundle
   // These packages are installed separately in the node_modules/@prisma directory

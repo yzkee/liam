@@ -464,11 +464,19 @@ CREATE OR REPLACE FUNCTION "public"."set_design_sessions_organization_id"() RETU
     LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$
 BEGIN
-  NEW.organization_id := (
-    SELECT "organization_id" 
-    FROM "public"."projects" 
-    WHERE "id" = NEW.project_id
-  );
+  -- If project_id is provided, get organization_id from projects table
+  IF NEW.project_id IS NOT NULL THEN
+    NEW.organization_id := (
+      SELECT organization_id
+      FROM public.projects
+      WHERE id = NEW.project_id
+    );
+  -- If project_id is NULL, organization_id must be explicitly provided
+  -- This will be handled at the application level to ensure security
+  ELSIF NEW.organization_id IS NULL THEN
+    RAISE EXCEPTION 'organization_id must be provided when project_id is NULL';
+  END IF;
+
   RETURN NEW;
 END;
 $$;
@@ -874,12 +882,13 @@ ALTER TABLE "public"."building_schemas" OWNER TO "postgres";
 
 CREATE TABLE IF NOT EXISTS "public"."design_sessions" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "project_id" "uuid" NOT NULL,
+    "project_id" "uuid",
     "organization_id" "uuid" NOT NULL,
     "created_by_user_id" "uuid" NOT NULL,
     "parent_design_session_id" "uuid",
     "name" "text" NOT NULL,
-    "created_at" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    "created_at" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT "design_sessions_project_or_org_check" CHECK ((("project_id" IS NOT NULL) OR ("organization_id" IS NOT NULL)))
 );
 
 

@@ -1,8 +1,6 @@
 import { createServerClient } from '@liam-hq/db'
 import { cookies } from 'next/headers'
 
-export type SupabaseClient = Awaited<ReturnType<typeof createClient>>
-
 /**
  * Create a Supabase client
  * @param options Options

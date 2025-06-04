@@ -2,35 +2,20 @@ import { createOrganizationAuto } from '@/components/OrganizationNewPage/actions
 import { setOrganizationIdCookie } from '@/features/organizations/services/setOrganizationIdCookie'
 import { createClient } from '@/libs/db/server'
 import { urlgen } from '@/libs/routes'
+import { captureException } from '@sentry/nextjs'
 import { redirect } from 'next/navigation'
 
-async function handleUserWithoutOrganization(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-) {
+async function handleUserWithoutOrganization() {
   const result = await createOrganizationAuto()
 
   if (result.success) {
     const organizationId = result.organizationId
-
     await setOrganizationIdCookie(organizationId)
-
-    const { data: projects, error: projectsError } = await supabase
-      .from('projects')
-      .select('id')
-      .eq('organization_id', organizationId)
-      .limit(1)
-
-    if (projectsError) {
-      console.error('Error fetching projects:', projectsError)
-    }
-
-    if (projects && projects.length > 0) {
-      redirect(urlgen('projects'))
-    }
-
     redirect(urlgen('projects/new'))
   } else {
-    console.error('Auto organization creation failed:', result.error)
+    captureException(
+      new Error(`Auto organization creation failed: ${result.error}`),
+    )
     redirect(urlgen('organizations/new'))
   }
 }
@@ -46,7 +31,9 @@ async function handleUserWithOrganization(
     .limit(1)
 
   if (projectsError) {
-    console.error('Error fetching projects:', projectsError)
+    captureException(
+      new Error(`Error fetching projects: ${projectsError.message}`),
+    )
   }
 
   if (projects && projects.length > 0) {
@@ -71,11 +58,13 @@ export default async function Page() {
     .limit(1)
 
   if (orgError) {
-    console.error('Error fetching organization members:', orgError)
+    captureException(
+      new Error(`Error fetching organization members: ${orgError}`),
+    )
   }
 
   if (!organizationMembers || organizationMembers.length === 0) {
-    await handleUserWithoutOrganization(supabase)
+    await handleUserWithoutOrganization()
   } else {
     const organizationId = organizationMembers[0].organization_id
     await handleUserWithOrganization(supabase, organizationId)

@@ -35,7 +35,7 @@
     "@prisma/internals",
     "@trigger.dev/build",
     "@trigger.dev/sdk",
-    "@langchain/core",
+
     // zod is used in `src/parser/tbls/schema.generated.ts`,
     // which is ignored by git but imported in parser.ts and tests
     "zod",

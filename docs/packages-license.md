@@ -3066,21 +3066,6 @@ LGPL-3.0-or-later permitted
 
 
 
-<a name="@mastra/core"></a>
-### @mastra/core v0.9.4
-#### 
-
-##### Paths
-* /home/runner/work/liam/liam
-
-Elastic-2.0 manually approved
-
->The license is Elastic-2.0. This is not an OSS license, so to be on the safe side, we'll approve it on a package-by-package basis.
-
-><cite> Liam @FunamaYukina 2025-05-13</cite>
-
-
-
 <a name="@mdx-js/mdx"></a>
 ### @mdx-js/mdx v3.1.0
 #### 

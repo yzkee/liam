@@ -1,3 +1,4 @@
+import type { AgentName } from '@/lib/langchain'
 import { Annotation, END, START, StateGraph } from '@langchain/langgraph'
 import type { Schema } from '@liam-hq/db-structure'
 import {
@@ -5,7 +6,7 @@ import {
   finalResponseNode,
   validationNode,
 } from './nodes'
-import type { AgentName, WorkflowState } from './types'
+import type { WorkflowState } from './types'
 
 /**
  * ChatState definition for LangGraph

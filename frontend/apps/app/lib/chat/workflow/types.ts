@@ -2,8 +2,10 @@ import type { Schema } from '@liam-hq/db-structure'
 
 export type AgentName = 'databaseSchemaAskAgent' | 'databaseSchemaBuildAgent'
 
+export type WorkflowMode = 'Ask' | 'Build'
+
 export type WorkflowState = {
-  mode?: 'Ask' | 'Build'
+  mode?: WorkflowMode
   userInput: string
   generatedAnswer?: string
   finalResponse?: string
@@ -16,4 +18,57 @@ export type WorkflowState = {
   schemaText?: string
   formattedChatHistory?: string
   agentName?: AgentName
+}
+
+/**
+ * Response chunk type for streaming
+ */
+export type ResponseChunk = {
+  type: 'text' | 'error' | 'custom'
+  content: string
+}
+
+/**
+ * Workflow execution options
+ */
+export interface WorkflowOptions {
+  streaming?: boolean
+  recursionLimit?: number
+}
+
+/**
+ * Result types for workflow steps
+ */
+type WorkflowStepSuccess = {
+  state: WorkflowState
+  error?: never
+}
+
+type WorkflowStepFailure = {
+  error: string
+  finalState: WorkflowState
+  state?: never
+}
+
+export type WorkflowStepResult = WorkflowStepSuccess | WorkflowStepFailure
+
+/**
+ * Type guard for workflow step failure
+ */
+export const isWorkflowStepFailure = (
+  result: WorkflowStepResult,
+): result is WorkflowStepFailure => {
+  return 'error' in result && typeof result.error === 'string'
+}
+
+/**
+ * Type guard for WorkflowState
+ */
+export const isWorkflowState = (val: unknown): val is WorkflowState => {
+  return (
+    val !== null &&
+    typeof val === 'object' &&
+    'userInput' in val &&
+    'history' in val
+  )
 }

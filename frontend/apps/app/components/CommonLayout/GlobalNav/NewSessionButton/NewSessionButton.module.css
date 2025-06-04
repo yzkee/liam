@@ -9,6 +9,6 @@
   border-color: var(--button-primary-background-hover);
 }
 
-.newSessionButton .iconContainer > svg {
+.newSessionButton .icon {
   color: var(--button-primary-foreground);
 }

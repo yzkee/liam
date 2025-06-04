@@ -23,7 +23,7 @@ export const NewSessionButton: FC<Props> = ({ isExpanded = false }) => {
       )}
     >
       <div className={itemStyles.iconContainer}>
-        <Plus />
+        <Plus className={styles.icon} />
       </div>
       <div
         className={clsx(

@@ -49,7 +49,12 @@ export const RecentsSection: FC<Props> = ({ isExpanded = false }) => {
         <div className={itemStyles.iconContainer}>
           <MessagesSquare />
         </div>
-        <div className={itemStyles.labelArea}>
+        <div
+          className={clsx(
+            itemStyles.labelArea,
+            isExpanded && itemStyles.expandLabelArea,
+          )}
+        >
           <span className={clsx(itemStyles.label, styles.recentsTitle)}>
             Recents
           </span>

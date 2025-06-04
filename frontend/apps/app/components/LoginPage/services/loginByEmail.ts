@@ -2,6 +2,7 @@
 import { redirect } from 'next/navigation'
 
 import { createClient } from '@/libs/db/server'
+import { ensureUserHasOrganization } from './ensureUserHasOrganization'
 
 export async function loginByEmail(formData: FormData) {
   const supabase = await createClient()
@@ -23,6 +24,8 @@ export async function loginByEmail(formData: FormData) {
   if (error) {
     redirect('/error')
   }
+
+  await ensureUserHasOrganization()
 
   redirect(returnTo)
 }

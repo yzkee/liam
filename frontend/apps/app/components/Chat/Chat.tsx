@@ -40,15 +40,15 @@ interface ChatEntry extends ChatMessageProps {
 interface Props {
   schemaData: Schema
   tableGroups?: Record<string, TableGroupData>
-  projectId: string
   designSessionId?: string
+  organizationId?: string
 }
 
 export const Chat: FC<Props> = ({
   schemaData,
   tableGroups,
-  projectId,
   designSessionId,
+  organizationId,
 }) => {
   const [messages, setMessages] = useState<ChatEntry[]>([
     {
@@ -162,8 +162,8 @@ export const Chat: FC<Props> = ({
           schemaData,
           tableGroups,
           history,
-          projectId,
           mode,
+          organizationId,
         }),
       })
 

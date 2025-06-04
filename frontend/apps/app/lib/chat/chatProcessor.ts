@@ -9,7 +9,7 @@ interface ChatProcessorParams {
   schemaData: Schema
   history?: [string, string][]
   mode: 'build' | 'ask'
-  projectId: string
+  organizationId?: string
 }
 
 interface ChatProcessorResult {
@@ -58,7 +58,7 @@ export function processChatMessage(
 async function processChatMessageSync(
   params: ChatProcessorParams,
 ): Promise<ChatProcessorResult> {
-  const { message, schemaData, history, mode, projectId } = params
+  const { message, schemaData, history, mode, organizationId } = params
 
   try {
     // Determine which agent to use based on the mode
@@ -68,10 +68,10 @@ async function processChatMessageSync(
     // Check if schema has been updated
     const schemaUpdated = await isSchemaUpdated(schemaData)
 
-    if (schemaUpdated) {
+    if (schemaUpdated && organizationId) {
       try {
         // Synchronize vector store
-        await syncSchemaVectorStore(schemaData, projectId)
+        await syncSchemaVectorStore(schemaData, organizationId)
         // Log success message
         process.stdout.write('Vector store synchronized successfully.\n')
       } catch (syncError) {
@@ -119,7 +119,7 @@ async function* processChatMessageStreaming(
   ChatProcessorResult,
   unknown
 > {
-  const { message, schemaData, history, mode, projectId } = params
+  const { message, schemaData, history, mode, organizationId } = params
 
   try {
     // Determine which agent to use based on the mode
@@ -129,10 +129,10 @@ async function* processChatMessageStreaming(
     // Check if schema has been updated
     const schemaUpdated = await isSchemaUpdated(schemaData)
 
-    if (schemaUpdated) {
+    if (schemaUpdated && organizationId) {
       try {
         // Synchronize vector store
-        await syncSchemaVectorStore(schemaData, projectId)
+        await syncSchemaVectorStore(schemaData, organizationId)
       } catch (syncError) {
         // Yield error but continue with chat processing
         yield {

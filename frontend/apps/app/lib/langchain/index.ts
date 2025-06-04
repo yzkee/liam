@@ -1,9 +1,18 @@
 import { DatabaseSchemaAskAgent, DatabaseSchemaBuildAgent } from './agents'
-import type { BasePromptVariables } from './utils/types'
+import type { AgentName, BasePromptVariables } from './utils/types'
 
-// Create agent instances
-const databaseSchemaAskAgent = new DatabaseSchemaAskAgent()
-const databaseSchemaBuildAgent = new DatabaseSchemaBuildAgent()
+// Create agent instances with error handling
+const createAgentSafely = <T>(AgentClass: new () => T): T | null => {
+  try {
+    return new AgentClass()
+  } catch (error) {
+    console.error('Failed to create agent:', error)
+    return null
+  }
+}
+
+const databaseSchemaAskAgent = createAgentSafely(DatabaseSchemaAskAgent)
+const databaseSchemaBuildAgent = createAgentSafely(DatabaseSchemaBuildAgent)
 
 // Agent registry for compatibility with existing code
 const agents = {
@@ -29,19 +38,16 @@ export const createPromptVariables = (
   }
 }
 
-// Main LangChain manager class for compatibility with Mastra API
-class LangChainManager {
-  getAgent(agentName: string) {
-    switch (agentName) {
-      case 'databaseSchemaAskAgent':
-        return agents.databaseSchemaAskAgent
-      case 'databaseSchemaBuildAgent':
-        return agents.databaseSchemaBuildAgent
-      default:
-        return null
-    }
-  }
-}
+// Re-export AgentName type for external use
+export type { AgentName } from './utils/types'
 
-// Export the manager instance
-export const langchain = new LangChainManager()
+// Direct agent getter function with error handling
+export const getAgent = (agentName: AgentName) => {
+  const agent = agents[agentName]
+
+  if (!agent) {
+    throw new Error(`${agentName} not found in LangChain instance`)
+  }
+
+  return agent
+}

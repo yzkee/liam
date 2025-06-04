@@ -139,7 +139,7 @@ begin
   )
   values (
     v_project_id,
-    'frontend/packages/db/schema/schema.sql', -- liam's schema file path
+    'frontend/internal-packages/db/schema/schema.sql', -- liam's schema file path
     'postgres', -- liam's schema file format
     current_timestamp,
     current_timestamp

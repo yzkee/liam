@@ -1,6 +1,8 @@
+import type { AgentName } from '@/lib/langchain'
 import type { Schema } from '@liam-hq/db-structure'
 
-export type AgentName = 'databaseSchemaAskAgent' | 'databaseSchemaBuildAgent'
+// Re-export AgentName for use within workflow modules
+export type { AgentName }
 
 export type WorkflowMode = 'Ask' | 'Build'
 

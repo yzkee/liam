@@ -24,25 +24,5 @@ export async function generateOrganizationNameFromUser(): Promise<
     username = 'User'
   }
 
-  const organizationName = `${username}'s Organization`
-
-  let counter = 1
-  let finalName = organizationName
-
-  while (true) {
-    const { data: existingOrg } = await supabase
-      .from('organizations')
-      .select('id')
-      .eq('name', finalName)
-      .limit(1)
-
-    if (!existingOrg || existingOrg.length === 0) {
-      break
-    }
-
-    counter++
-    finalName = `${organizationName} ${counter}`
-  }
-
-  return finalName
+  return `${username}'s Organization`
 }

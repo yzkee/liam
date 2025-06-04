@@ -1,5 +1,5 @@
-import * as v from 'valibot'
 import { schemaSchema } from '@liam-hq/db-structure'
+import * as v from 'valibot'
 import type { WorkflowState } from '../types'
 
 /**
@@ -11,7 +11,7 @@ const workflowModeSchema = v.optional(v.picklist(['Ask', 'Build']))
  * Valibot schema for AgentName
  */
 const agentNameSchema = v.optional(
-  v.picklist(['databaseSchemaAskAgent', 'databaseSchemaBuildAgent'])
+  v.picklist(['databaseSchemaAskAgent', 'databaseSchemaBuildAgent']),
 )
 
 /**
@@ -149,7 +149,7 @@ const parseOptionalString = (value: unknown): string | undefined => {
  * Helper function to safely parse string arrays
  */
 const parseStringArray = (value: unknown): string[] => {
-  if (Array.isArray(value) && value.every(item => typeof item === 'string')) {
+  if (Array.isArray(value) && value.every((item) => typeof item === 'string')) {
     return value
   }
   return []
@@ -167,7 +167,10 @@ const parseWorkflowMode = (value: unknown): WorkflowState['mode'] => {
  * Helper function to safely parse AgentName
  */
 const parseAgentName = (value: unknown): WorkflowState['agentName'] => {
-  if (value === 'databaseSchemaAskAgent' || value === 'databaseSchemaBuildAgent') {
+  if (
+    value === 'databaseSchemaAskAgent' ||
+    value === 'databaseSchemaBuildAgent'
+  ) {
     return value
   }
   return undefined
@@ -178,7 +181,7 @@ const parseAgentName = (value: unknown): WorkflowState['agentName'] => {
  */
 const parseSchema = (value: unknown): WorkflowState['schemaData'] => {
   if (!value || typeof value !== 'object') return undefined
-  
+
   try {
     const parseResult = v.safeParse(schemaSchema, value)
     return parseResult.success ? parseResult.output : undefined
@@ -196,15 +199,18 @@ export const fromLangGraphResult = (
   // First validate the basic structure
   const parseResult = v.safeParse(langGraphResultSchema, result)
   if (!parseResult.success) {
-    throw new Error(`Invalid LangGraph result structure: ${parseResult.issues.map(issue => issue.message).join(', ')}`)
+    throw new Error(
+      `Invalid LangGraph result structure: ${parseResult.issues.map((issue) => issue.message).join(', ')}`,
+    )
   }
 
   const validatedResult = parseResult.output
 
   // Extract userInput (required field)
-  const userInput = typeof validatedResult.userInput === 'string' 
-    ? validatedResult.userInput 
-    : ''
+  const userInput =
+    typeof validatedResult.userInput === 'string'
+      ? validatedResult.userInput
+      : ''
 
   // Build the WorkflowState with proper type validation
   const workflowState: WorkflowState = {
@@ -217,14 +223,18 @@ export const fromLangGraphResult = (
     projectId: parseOptionalString(validatedResult.projectId),
     error: parseOptionalString(validatedResult.error),
     schemaText: parseOptionalString(validatedResult.schemaText),
-    formattedChatHistory: parseOptionalString(validatedResult.formattedChatHistory),
+    formattedChatHistory: parseOptionalString(
+      validatedResult.formattedChatHistory,
+    ),
     agentName: parseAgentName(validatedResult.agentName),
   }
 
   // Final validation to ensure the result matches WorkflowState schema
   const finalParseResult = v.safeParse(workflowStateSchema, workflowState)
   if (!finalParseResult.success) {
-    throw new Error(`Failed to create valid WorkflowState: ${finalParseResult.issues.map(issue => issue.message).join(', ')}`)
+    throw new Error(
+      `Failed to create valid WorkflowState: ${finalParseResult.issues.map((issue) => issue.message).join(', ')}`,
+    )
   }
 
   return finalParseResult.output

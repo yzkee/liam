@@ -25,9 +25,7 @@ export const isResponseChunk = (value: unknown): value is ResponseChunk => {
   const typeProperty = value['type']
   const contentProperty = value['content']
 
-  return (
-    typeof typeProperty === 'string' && typeof contentProperty === 'string'
-  )
+  return typeof typeProperty === 'string' && typeof contentProperty === 'string'
 }
 
 /**

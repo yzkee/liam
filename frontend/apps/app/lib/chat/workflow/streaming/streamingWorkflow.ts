@@ -34,7 +34,7 @@ export const executeStreamingWorkflow = async function* (
 
     yield { type: 'custom', content: PROGRESS_MESSAGES.VALIDATION.SUCCESS }
 
-    // Step 2: Answer Generation
+    // Step 2: Answer Generation (preparation only)
     yield {
       type: 'custom',
       content: PROGRESS_MESSAGES.ANSWER_GENERATION.START,
@@ -50,12 +50,7 @@ export const executeStreamingWorkflow = async function* (
       return answerResult.finalState
     }
 
-    yield {
-      type: 'custom',
-      content: PROGRESS_MESSAGES.ANSWER_GENERATION.SUCCESS,
-    }
-
-    // Step 3: Final Response
+    // Step 3: Final Response (actual AI generation happens here)
     yield { type: 'custom', content: PROGRESS_MESSAGES.FINAL_RESPONSE.START }
 
     // Stream the final response
@@ -65,13 +60,14 @@ export const executeStreamingWorkflow = async function* (
     )
 
     let hasStreamedContent = false
+
     for await (const chunk of generator) {
       if (chunk.type === 'text' || chunk.type === 'error') {
-        // Mark completion of formatting when we start streaming actual content
+        // Mark answer generation as complete when we start getting actual content
         if (!hasStreamedContent) {
           yield {
             type: 'custom',
-            content: PROGRESS_MESSAGES.FINAL_RESPONSE.SUCCESS,
+            content: PROGRESS_MESSAGES.ANSWER_GENERATION.SUCCESS,
           }
           hasStreamedContent = true
         }
@@ -79,12 +75,10 @@ export const executeStreamingWorkflow = async function* (
       }
     }
 
-    // If no content was streamed, still mark as complete
-    if (!hasStreamedContent) {
-      yield {
-        type: 'custom',
-        content: PROGRESS_MESSAGES.FINAL_RESPONSE.SUCCESS,
-      }
+    // Mark formatting as complete only after all streaming is done
+    yield {
+      type: 'custom',
+      content: PROGRESS_MESSAGES.FINAL_RESPONSE.SUCCESS,
     }
 
     // Get final state from generator

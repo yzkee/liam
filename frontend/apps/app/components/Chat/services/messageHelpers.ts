@@ -17,12 +17,16 @@ export const createChatEntry = (
 export const isResponseChunk = (value: unknown): value is ResponseChunk => {
   if (typeof value !== 'object' || value === null) return false
 
-  const candidate = value as Record<string, unknown>
+  // Check if the required properties exist
+  if (!('type' in value) || !('content' in value)) return false
 
-  if (!('type' in candidate) || !('content' in candidate)) return false
+  // TypeScript now knows that value has 'type' and 'content' properties
+  // We can access them safely using bracket notation
+  const typeProperty = value['type']
+  const contentProperty = value['content']
 
   return (
-    typeof candidate.type === 'string' && typeof candidate.content === 'string'
+    typeof typeProperty === 'string' && typeof contentProperty === 'string'
   )
 }
 

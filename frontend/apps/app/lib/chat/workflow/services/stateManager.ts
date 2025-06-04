@@ -1,4 +1,52 @@
+import * as v from 'valibot'
+import { schemaSchema } from '@liam-hq/db-structure'
 import type { WorkflowState } from '../types'
+
+/**
+ * Valibot schema for WorkflowMode
+ */
+const workflowModeSchema = v.optional(v.picklist(['Ask', 'Build']))
+
+/**
+ * Valibot schema for AgentName
+ */
+const agentNameSchema = v.optional(
+  v.picklist(['databaseSchemaAskAgent', 'databaseSchemaBuildAgent'])
+)
+
+/**
+ * Valibot schema for WorkflowState
+ */
+const workflowStateSchema = v.object({
+  mode: workflowModeSchema,
+  userInput: v.string(),
+  generatedAnswer: v.optional(v.string()),
+  finalResponse: v.optional(v.string()),
+  history: v.array(v.string()),
+  schemaData: v.optional(schemaSchema),
+  projectId: v.optional(v.string()),
+  error: v.optional(v.string()),
+  schemaText: v.optional(v.string()),
+  formattedChatHistory: v.optional(v.string()),
+  agentName: agentNameSchema,
+})
+
+/**
+ * Schema for validating LangGraph result
+ */
+const langGraphResultSchema = v.object({
+  mode: v.optional(v.unknown()),
+  userInput: v.unknown(),
+  generatedAnswer: v.optional(v.unknown()),
+  finalResponse: v.optional(v.unknown()),
+  history: v.optional(v.unknown()),
+  schemaData: v.optional(v.unknown()),
+  projectId: v.optional(v.unknown()),
+  error: v.optional(v.unknown()),
+  schemaText: v.optional(v.unknown()),
+  formattedChatHistory: v.optional(v.unknown()),
+  agentName: v.optional(v.unknown()),
+})
 
 /**
  * Merge workflow states with proper fallbacks
@@ -90,22 +138,94 @@ export const toLangGraphState = (state: WorkflowState) => {
 }
 
 /**
- * Convert LangGraph result back to WorkflowState
+ * Helper function to safely parse string values
+ */
+const parseOptionalString = (value: unknown): string | undefined => {
+  if (typeof value === 'string') return value
+  return undefined
+}
+
+/**
+ * Helper function to safely parse string arrays
+ */
+const parseStringArray = (value: unknown): string[] => {
+  if (Array.isArray(value) && value.every(item => typeof item === 'string')) {
+    return value
+  }
+  return []
+}
+
+/**
+ * Helper function to safely parse WorkflowMode
+ */
+const parseWorkflowMode = (value: unknown): WorkflowState['mode'] => {
+  if (value === 'Ask' || value === 'Build') return value
+  return undefined
+}
+
+/**
+ * Helper function to safely parse AgentName
+ */
+const parseAgentName = (value: unknown): WorkflowState['agentName'] => {
+  if (value === 'databaseSchemaAskAgent' || value === 'databaseSchemaBuildAgent') {
+    return value
+  }
+  return undefined
+}
+
+/**
+ * Helper function to safely parse Schema
+ */
+const parseSchema = (value: unknown): WorkflowState['schemaData'] => {
+  if (!value || typeof value !== 'object') return undefined
+  
+  try {
+    const parseResult = v.safeParse(schemaSchema, value)
+    return parseResult.success ? parseResult.output : undefined
+  } catch {
+    return undefined
+  }
+}
+
+/**
+ * Convert LangGraph result back to WorkflowState without type casting
  */
 export const fromLangGraphResult = (
   result: Record<string, unknown>,
 ): WorkflowState => {
-  return {
-    mode: result.mode as WorkflowState['mode'],
-    userInput: result.userInput as string,
-    generatedAnswer: result.generatedAnswer as string | undefined,
-    finalResponse: result.finalResponse as string | undefined,
-    history: (result.history as string[]) || [],
-    schemaData: result.schemaData as WorkflowState['schemaData'],
-    projectId: result.projectId as string | undefined,
-    error: result.error as string | undefined,
-    schemaText: result.schemaText as string | undefined,
-    formattedChatHistory: result.formattedChatHistory as string | undefined,
-    agentName: result.agentName as WorkflowState['agentName'],
+  // First validate the basic structure
+  const parseResult = v.safeParse(langGraphResultSchema, result)
+  if (!parseResult.success) {
+    throw new Error(`Invalid LangGraph result structure: ${parseResult.issues.map(issue => issue.message).join(', ')}`)
   }
+
+  const validatedResult = parseResult.output
+
+  // Extract userInput (required field)
+  const userInput = typeof validatedResult.userInput === 'string' 
+    ? validatedResult.userInput 
+    : ''
+
+  // Build the WorkflowState with proper type validation
+  const workflowState: WorkflowState = {
+    mode: parseWorkflowMode(validatedResult.mode),
+    userInput,
+    generatedAnswer: parseOptionalString(validatedResult.generatedAnswer),
+    finalResponse: parseOptionalString(validatedResult.finalResponse),
+    history: parseStringArray(validatedResult.history),
+    schemaData: parseSchema(validatedResult.schemaData),
+    projectId: parseOptionalString(validatedResult.projectId),
+    error: parseOptionalString(validatedResult.error),
+    schemaText: parseOptionalString(validatedResult.schemaText),
+    formattedChatHistory: parseOptionalString(validatedResult.formattedChatHistory),
+    agentName: parseAgentName(validatedResult.agentName),
+  }
+
+  // Final validation to ensure the result matches WorkflowState schema
+  const finalParseResult = v.safeParse(workflowStateSchema, workflowState)
+  if (!finalParseResult.success) {
+    throw new Error(`Failed to create valid WorkflowState: ${finalParseResult.issues.map(issue => issue.message).join(', ')}`)
+  }
+
+  return finalParseResult.output
 }

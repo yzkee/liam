@@ -12,6 +12,8 @@
 .chatSection {
   width: 25rem;
   border-right: solid 1px var(--pane-border);
+  height: 100%;
+  overflow: hidden;
 }
 
 .tabsRoot {

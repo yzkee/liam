@@ -1,9 +1,18 @@
 import { DatabaseSchemaAskAgent, DatabaseSchemaBuildAgent } from './agents'
-import type { BasePromptVariables } from './utils/types'
+import type { AgentName, BasePromptVariables } from './utils/types'
 
-// Create agent instances
-const databaseSchemaAskAgent = new DatabaseSchemaAskAgent()
-const databaseSchemaBuildAgent = new DatabaseSchemaBuildAgent()
+// Create agent instances with error handling
+const createAgentSafely = <T>(AgentClass: new () => T): T | null => {
+  try {
+    return new AgentClass()
+  } catch (error) {
+    console.error('Failed to create agent:', error)
+    return null
+  }
+}
+
+const databaseSchemaAskAgent = createAgentSafely(DatabaseSchemaAskAgent)
+const databaseSchemaBuildAgent = createAgentSafely(DatabaseSchemaBuildAgent)
 
 // Agent registry for compatibility with existing code
 const agents = {
@@ -29,8 +38,8 @@ export const createPromptVariables = (
   }
 }
 
-// Define AgentName as a union of agent keys
-export type AgentName = keyof typeof agents
+// Re-export AgentName type for external use
+export type { AgentName } from './utils/types'
 
 // Direct agent getter function with error handling
 export const getAgent = (agentName: AgentName) => {

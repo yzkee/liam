@@ -28,7 +28,7 @@
   white-space: nowrap;
 }
 
-@media (width > 767px) {
+@media (min-width: 767px) {
   .name {
     overflow: hidden;
     text-overflow: ellipsis;

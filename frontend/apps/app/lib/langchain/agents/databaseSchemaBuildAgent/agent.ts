@@ -8,8 +8,7 @@ export class DatabaseSchemaBuildAgent implements ChatAgent {
 
   constructor() {
     this.model = new ChatOpenAI({
-      model: 'gpt-4o-mini-2024-07-18',
-      temperature: 0.7,
+      model: 'o3-mini',
       callbacks: [createLangfuseHandler()],
     })
   }

@@ -1,6 +1,6 @@
 import { createClient as _createClient } from '@liam-hq/db'
 
-export type SupabaseClient = ReturnType<typeof _createClient>
+type SupabaseClient = ReturnType<typeof _createClient>
 
 export function createClient(): SupabaseClient {
   const supabaseUrl = process.env['NEXT_PUBLIC_SUPABASE_URL']

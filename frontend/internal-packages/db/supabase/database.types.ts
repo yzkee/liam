@@ -135,7 +135,7 @@ export type Database = {
           name: string
           organization_id: string
           parent_design_session_id: string | null
-          project_id: string
+          project_id: string | null
         }
         Insert: {
           created_at?: string
@@ -144,7 +144,7 @@ export type Database = {
           name: string
           organization_id: string
           parent_design_session_id?: string | null
-          project_id: string
+          project_id?: string | null
         }
         Update: {
           created_at?: string
@@ -153,7 +153,7 @@ export type Database = {
           name?: string
           organization_id?: string
           parent_design_session_id?: string | null
-          project_id?: string
+          project_id?: string | null
         }
         Relationships: [
           {
@@ -1273,7 +1273,7 @@ export type Database = {
       }
       l2_normalize: {
         Args: { '': string } | { '': unknown } | { '': unknown }
-        Returns: unknown
+        Returns: string
       }
       match_documents: {
         Args: {

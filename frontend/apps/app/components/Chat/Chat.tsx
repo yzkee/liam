@@ -6,36 +6,23 @@ import type { FC } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { ChatInput } from '../ChatInput'
 import type { Mode } from '../ChatInput/components/ModeToggleSwitch/ModeToggleSwitch'
-import { ChatMessage, type ChatMessageProps } from '../ChatMessage'
+import { ChatMessage } from '../ChatMessage'
 import styles from './Chat.module.css'
+import { ERROR_MESSAGES, WELCOME_MESSAGE } from './constants/chatConstants'
 import {
   convertMessageToChatEntry,
   getCurrentUserId,
   loadMessages,
   saveMessage,
 } from './services'
-
-/**
- * Helper function to create a ChatEntry from an existing message and additional properties
- */
-const createChatEntry = (
-  baseMessage: ChatEntry,
-  additionalProps: Partial<ChatEntry>,
-): ChatEntry => {
-  return { ...baseMessage, ...additionalProps }
-}
-
-/**
- * Represents a chat message entry with additional metadata
- */
-interface ChatEntry extends ChatMessageProps {
-  /** Unique identifier for the message */
-  id: string
-  /** The type of agent that generated this message (ask or build) */
-  agentType?: Mode
-  /** Database message ID for persistence */
-  dbId?: string
-}
+import {
+  createChatEntry,
+  formatChatHistory,
+  generateMessageId,
+  isResponseChunk,
+  updateProgressMessages,
+} from './services/messageHelpers'
+import type { ChatEntry } from './types/chatTypes'
 
 interface Props {
   schemaData: Schema
@@ -50,20 +37,11 @@ export const Chat: FC<Props> = ({
   projectId,
   designSessionId,
 }) => {
-  const [messages, setMessages] = useState<ChatEntry[]>([
-    {
-      id: 'welcome',
-      content:
-        'Hello! Feel free to ask questions about your schema or consult about database design.',
-      isUser: false,
-      timestamp: new Date(),
-      isGenerating: false, // Explicitly set to false for consistency
-      agentType: 'ask', // Default to ask for welcome message
-    },
-  ])
+  const [messages, setMessages] = useState<ChatEntry[]>([WELCOME_MESSAGE])
   const [isLoading, setIsLoading] = useState(false)
   const [currentMode, setCurrentMode] = useState<Mode>('ask')
   const [isLoadingMessages, setIsLoadingMessages] = useState(true)
+  const [progressMessages, setProgressMessages] = useState<string[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Load existing messages on component mount
@@ -94,7 +72,7 @@ export const Chat: FC<Props> = ({
 
   // biome-ignore  lint/complexity/noExcessiveCognitiveComplexity: fix later
   const handleSendMessage = async (content: string, mode: Mode) => {
-    // Update the current mode
+    // Update the current mode and agent type
     setCurrentMode(mode)
 
     // Get current user ID for persistence
@@ -102,7 +80,7 @@ export const Chat: FC<Props> = ({
 
     // Add user message
     const userMessage: ChatEntry = {
-      id: `user-${Date.now()}`,
+      id: generateMessageId('user'),
       content,
       isUser: true,
       timestamp: new Date(),
@@ -134,7 +112,7 @@ export const Chat: FC<Props> = ({
     setIsLoading(true)
 
     // Create AI message placeholder for streaming (without timestamp)
-    const aiMessageId = `ai-${Date.now()}`
+    const aiMessageId = generateMessageId('ai')
     const aiMessage: ChatEntry = {
       id: aiMessageId,
       content: '',
@@ -147,9 +125,7 @@ export const Chat: FC<Props> = ({
 
     try {
       // Format chat history for API
-      const history = messages
-        .filter((msg) => msg.id !== 'welcome')
-        .map((msg) => [msg.isUser ? 'Human' : 'AI', msg.content])
+      const history = formatChatHistory(messages)
 
       // Call API with streaming response
       const response = await fetch('/api/chat', {
@@ -168,13 +144,13 @@ export const Chat: FC<Props> = ({
       })
 
       if (!response.ok) {
-        throw new Error('Failed to get response')
+        throw new Error(ERROR_MESSAGES.FETCH_FAILED)
       }
 
       // Process the streaming response
       const reader = response.body?.getReader()
       if (!reader) {
-        throw new Error('Response body is not readable')
+        throw new Error(ERROR_MESSAGES.RESPONSE_NOT_READABLE)
       }
 
       let accumulatedContent = ''
@@ -214,28 +190,86 @@ export const Chat: FC<Props> = ({
           break
         }
 
-        // Decode the chunk and append to accumulated content
+        // Decode the chunk and process JSON messages
         const chunk = new TextDecoder().decode(value)
-        accumulatedContent += chunk
+        const lines = chunk.split('\n').filter((line) => line.trim())
 
-        // Update the AI message with the accumulated content (without timestamp)
-        // Keep isGenerating: true during streaming
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === aiMessageId
-              ? createChatEntry(msg, {
-                  content: accumulatedContent,
-                  isGenerating: true,
-                })
-              : msg,
-          ),
-        )
+        for (const line of lines) {
+          try {
+            const parsed = JSON.parse(line)
+
+            // Validate the parsed data has the expected structure
+            if (!isResponseChunk(parsed)) {
+              console.error('Invalid response format:', parsed)
+              continue
+            }
+
+            if (parsed.type === 'text') {
+              // Append text content to accumulated content
+              accumulatedContent += parsed.content
+
+              // Update the AI message with the accumulated content (without timestamp)
+              // Keep isGenerating: true during streaming
+              setMessages((prev) => {
+                // Update immediately to improve streaming UX
+                const updatedMessages = [...prev]
+                const aiMsgIndex = updatedMessages.findIndex(
+                  (msg) => msg.id === aiMessageId,
+                )
+
+                if (aiMsgIndex >= 0) {
+                  updatedMessages[aiMsgIndex] = createChatEntry(
+                    updatedMessages[aiMsgIndex],
+                    {
+                      content: accumulatedContent,
+                      isGenerating: true,
+                    },
+                  )
+                }
+
+                return updatedMessages
+              })
+
+              // Force immediate update for smoother streaming experience
+              // Using a small timeout to allow React to batch updates
+              setTimeout(() => {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+              }, 10)
+            } else if (parsed.type === 'custom') {
+              // Update progress messages
+              setProgressMessages((prev) =>
+                updateProgressMessages(prev, parsed.content),
+              )
+            } else if (parsed.type === 'error') {
+              // Handle error message
+              console.error('Stream error:', parsed.content)
+              setProgressMessages([])
+              throw new Error(parsed.content)
+            }
+          } catch {
+            // If JSON parsing fails, treat as plain text (backward compatibility)
+            accumulatedContent += chunk
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === aiMessageId
+                  ? createChatEntry(msg, {
+                      content: accumulatedContent,
+                      isGenerating: true,
+                    })
+                  : msg,
+              ),
+            )
+          }
+        }
 
         // Scroll to bottom as content streams in
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
       }
     } catch (error) {
       console.error('Error sending message:', error)
+      // Clear progress messages and streaming state on error
+      setProgressMessages([])
+
       // Update error in the AI message or add a new error message
       setMessages((prev) => {
         // Check if we already added an AI message that we can update
@@ -247,7 +281,7 @@ export const Chat: FC<Props> = ({
           updatedMessages[aiMessageIndex] = createChatEntry(
             updatedMessages[aiMessageIndex],
             {
-              content: 'Sorry, an error occurred. Please try again.',
+              content: ERROR_MESSAGES.GENERAL,
               timestamp: new Date(),
               isGenerating: false, // Remove generating state on error
               agentType: mode, // Ensure the agent type is set for error messages
@@ -258,8 +292,8 @@ export const Chat: FC<Props> = ({
 
         // Create a new error message with timestamp
         const errorMessage: ChatEntry = {
-          id: `error-${Date.now()}`,
-          content: 'Sorry, an error occurred. Please try again.',
+          id: generateMessageId('error'),
+          content: ERROR_MESSAGES.GENERAL,
           isUser: false,
           timestamp: new Date(),
           isGenerating: false, // Ensure error message is not in generating state
@@ -284,16 +318,31 @@ export const Chat: FC<Props> = ({
             <div className={styles.loadingDot} />
           </div>
         ) : (
-          messages.map((message) => (
-            <ChatMessage
-              key={message.id}
-              content={message.content}
-              isUser={message.isUser}
-              timestamp={message.timestamp}
-              isGenerating={message.isGenerating}
-              agentType={message.agentType || currentMode}
-            />
-          ))
+          <>
+            {/* Display all messages */}
+            {messages.map((message, index) => {
+              // Check if this is the last AI message and has progress messages
+              const isLastAIMessage =
+                !message.isUser && index === messages.length - 1
+              const shouldShowProgress =
+                progressMessages.length > 0 && isLastAIMessage
+
+              return (
+                <ChatMessage
+                  key={message.id}
+                  content={message.content}
+                  isUser={message.isUser}
+                  timestamp={message.timestamp}
+                  isGenerating={message.isGenerating}
+                  agentType={message.agentType || currentMode}
+                  progressMessages={
+                    shouldShowProgress ? progressMessages : undefined
+                  }
+                  showProgress={shouldShowProgress}
+                />
+              )
+            })}
+          </>
         )}
         {isLoading && (
           <div className={styles.loadingIndicator}>

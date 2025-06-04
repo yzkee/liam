@@ -18,13 +18,6 @@ export const validationNode = async (
     }
   }
 
-  if (!state.projectId) {
-    return {
-      ...state,
-      error: 'Project ID is required for answer generation',
-    }
-  }
-
   // Determine which agent to use based on the mode
   const agentName =
     state.mode === 'Build'

@@ -1,9 +1,24 @@
 import type { WorkflowState } from '../types'
 
 // Helper function to split text into chunks for streaming
-function* splitIntoChunks(text: string, chunkSize = 1): Generator<string> {
-  for (let i = 0; i < text.length; i += chunkSize) {
-    yield text.slice(i, i + chunkSize)
+function* splitIntoChunks(text: string, chunkSize = 3): Generator<string> {
+  // Split by words to create more natural chunks
+  const words = text.split(/\b/)
+  let currentChunk = ''
+
+  for (const word of words) {
+    currentChunk += word
+
+    // Send chunk when it reaches appropriate size or contains sentence ending
+    if (currentChunk.length >= chunkSize || /[.!?]\s*$/.test(currentChunk)) {
+      yield currentChunk
+      currentChunk = ''
+    }
+  }
+
+  // Send any remaining text
+  if (currentChunk) {
+    yield currentChunk
   }
 }
 
@@ -16,7 +31,7 @@ export function finalResponseNode(
   state: WorkflowState,
   options?: { streaming?: true },
 ): AsyncGenerator<
-  { type: 'text' | 'error'; content: string },
+  { type: 'text' | 'error' | 'custom'; content: string },
   WorkflowState,
   unknown
 >
@@ -26,7 +41,7 @@ export function finalResponseNode(
 ):
   | Promise<WorkflowState>
   | AsyncGenerator<
-      { type: 'text' | 'error'; content: string },
+      { type: 'text' | 'error' | 'custom'; content: string },
       WorkflowState,
       unknown
     > {
@@ -98,7 +113,7 @@ const finalResponseNodeSync = async (
 const finalResponseNodeStreaming = async function* (
   state: WorkflowState,
 ): AsyncGenerator<
-  { type: 'text' | 'error'; content: string },
+  { type: 'text' | 'error' | 'custom'; content: string },
   WorkflowState,
   unknown
 > {

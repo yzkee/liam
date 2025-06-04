@@ -38,6 +38,18 @@ export interface ChatMessageProps {
    * @default false
    */
   isGenerating?: boolean
+  /**
+   * Optional children to render below the message content
+   */
+  children?: ReactNode
+  /**
+   * Progress messages to display above the main message
+   */
+  progressMessages?: string[]
+  /**
+   * Whether to show progress messages
+   */
+  showProgress?: boolean
 }
 
 export const ChatMessage: FC<ChatMessageProps> = ({
@@ -49,6 +61,9 @@ export const ChatMessage: FC<ChatMessageProps> = ({
   initial,
   agentType = 'build',
   isGenerating = false,
+  children,
+  progressMessages,
+  showProgress,
 }) => {
   // Only format and display timestamp if it exists
   const formattedTime = timestamp
@@ -108,8 +123,10 @@ export const ChatMessage: FC<ChatMessageProps> = ({
           state={isGenerating ? 'generating' : 'default'}
           message={markdownContent}
           time={formattedTime || ''}
+          progressMessages={progressMessages}
+          showProgress={showProgress}
         >
-          {/* We're not using children for now, but could be used for additional components */}
+          {children}
         </AgentMessage>
       )}
     </div>

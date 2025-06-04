@@ -3,8 +3,8 @@
 import { PGlite } from '@electric-sql/pglite'
 import { useEffect, useState } from 'react'
 import { DDLInputSection } from './DDLInputSection'
+import { DMLInputSection } from './DMLInputSection'
 import styles from './PGlitePage.module.css'
-import { QueryResultBox } from './QueryResultBox'
 import { applyDDL, applyDML } from './utils'
 import type { DDLState, DMLSection } from './utils/types'
 
@@ -168,44 +168,18 @@ export function PGlitePlayground() {
           他のフォームの実行結果に影響されることはありません。
         </p>
 
-        {dmlSections.map((section) => (
-          <div key={section.id} className={styles.dmlSection}>
-            <div className={styles.dmlHeader}>
-              <h3 className={styles.dmlTitle}>DMLユースケース</h3>
-              <button
-                type="button"
-                onClick={() => removeDMLSection(section.id)}
-                className={`${styles.actionButton} ${styles.dangerButton}`}
-                aria-label="DMLセクションを削除"
-              >
-                削除
-              </button>
-            </div>
-
-            <textarea
-              rows={4}
-              className={styles.sqlTextarea}
-              placeholder="INSERT INTO users (name) VALUES ('Taro'), ('Jiro');
-SELECT * FROM users;"
-              value={section.dmlInput}
-              onChange={(e) => updateDmlInput(section.id, e.target.value)}
+        {dmlSections.map((section) => {
+          // DMLInputSectionコンポーネントを使用
+          return (
+            <DMLInputSection
+              key={section.id}
+              section={section}
+              updateDmlInput={updateDmlInput}
+              executeDML={executeDML}
+              removeDMLSection={removeDMLSection}
             />
-            <button
-              type="button"
-              onClick={() => executeDML(section.id)}
-              className={`${styles.actionButton} ${styles.primaryButton}`}
-            >
-              実行
-            </button>
-
-            {/* DML実行結果 */}
-            <div className={styles.buttonGroup}>
-              {section.results.map((result) => (
-                <QueryResultBox key={result.id} result={result} />
-              ))}
-            </div>
-          </div>
-        ))}
+          )
+        })}
 
         {/* DMLフォーム追加ボタン */}
         <button

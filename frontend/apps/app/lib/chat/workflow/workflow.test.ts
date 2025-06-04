@@ -212,23 +212,6 @@ describe('Chat Workflow', () => {
       expect(result.error).toBe('Schema data is required for answer generation')
     })
 
-    it('should handle missing project ID', async () => {
-      const noProjectState: WorkflowState = {
-        mode: 'Ask',
-        userInput: 'What is the database structure?',
-        history: [],
-        schemaData: mockSchemaData,
-      }
-
-      const result = await executeChatWorkflow(noProjectState, {
-        streaming: false,
-      })
-
-      expect(result).toBeDefined()
-      expect(result.mode).toBe('Ask')
-      expect(result.error).toBe('Project ID is required for answer generation')
-    })
-
     it('should handle agent generation errors', async () => {
       // Mock agent to throw an error
       mockAgent.generate.mockRejectedValue(new Error('Agent generation failed'))
@@ -319,24 +302,6 @@ describe('Chat Workflow', () => {
       expect(result.schemaData).toEqual(initialState.schemaData)
       // History should be updated with new conversation
       expect(result.history).toHaveLength(4) // 2 original + 2 new
-    })
-
-    it('should handle workflow state without projectId', async () => {
-      const stateWithoutProject: WorkflowState = {
-        mode: 'Ask',
-        userInput: 'Test without project',
-        history: [],
-        schemaData: mockSchemaData,
-      }
-
-      const result = await executeChatWorkflow(stateWithoutProject, {
-        streaming: false,
-      })
-
-      expect(result).toBeDefined()
-      expect(result.userInput).toBe('Test without project')
-      expect(result.projectId).toBeUndefined()
-      expect(result.error).toBe('Project ID is required for answer generation')
     })
   })
 

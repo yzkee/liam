@@ -27,7 +27,7 @@
     "fmt:turbo": "turbo fmt",
     "gen:turbo": "turbo gen",
     "lint": "pnpm lint:turbo && pnpm lint:syncpack && pnpm lint:knip",
-    "lint:knip": "knip",
+    "lint:knip": "knip --treat-config-hints-as-errors",
     "lint:syncpack": "syncpack lint",
     "lint:turbo": "turbo lint",
     "prebuild": "pnpm create-env-files",

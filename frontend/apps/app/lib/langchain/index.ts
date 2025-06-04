@@ -29,19 +29,7 @@ export const createPromptVariables = (
   }
 }
 
-// Main LangChain manager class for compatibility with Mastra API
-class LangChainManager {
-  getAgent(agentName: string) {
-    switch (agentName) {
-      case 'databaseSchemaAskAgent':
-        return agents.databaseSchemaAskAgent
-      case 'databaseSchemaBuildAgent':
-        return agents.databaseSchemaBuildAgent
-      default:
-        return null
-    }
-  }
-}
-
-// Export the manager instance
-export const langchain = new LangChainManager()
+// Define AgentName as a union of agent keys
+export type AgentName = keyof typeof agents
+// Direct agent getter function - simpler than class-based approach
+export const getAgent = (agentName: AgentName) => agents[agentName]

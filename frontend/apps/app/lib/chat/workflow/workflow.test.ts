@@ -5,9 +5,7 @@ import type { WorkflowState } from './types'
 
 // Mock the LangChain module
 vi.mock('@/lib/langchain', () => ({
-  langchain: {
-    getAgent: vi.fn(),
-  },
+  getAgent: vi.fn(),
   createPromptVariables: vi.fn(
     (schemaText: string, userMessage: string, history: [string, string][]) => ({
       schema_text: schemaText,
@@ -39,7 +37,7 @@ describe('Chat Workflow', () => {
 
     // Get the mocked langchain module
     const langchainModule = await import('@/lib/langchain')
-    mockGetAgent = vi.mocked(langchainModule.langchain.getAgent)
+    mockGetAgent = vi.mocked(langchainModule.getAgent)
 
     // Mock schema data for testing
     mockSchemaData = {

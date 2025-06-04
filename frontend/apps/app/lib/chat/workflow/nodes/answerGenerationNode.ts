@@ -1,8 +1,12 @@
-import { createPromptVariables, langchain } from '@/lib/langchain'
-import type { AgentName, WorkflowState } from '../types'
+import {
+  type AgentName,
+  createPromptVariables,
+  getAgent,
+} from '@/lib/langchain'
+import type { WorkflowState } from '../types'
 
 interface PreparedAnswerGeneration {
-  agent: NonNullable<ReturnType<typeof langchain.getAgent>>
+  agent: NonNullable<ReturnType<typeof getAgent>>
   agentName: AgentName
   schemaText: string
   formattedChatHistory: string
@@ -22,12 +26,7 @@ async function prepareAnswerGeneration(
   const schemaText = state.schemaText
 
   // Get the agent from LangChain
-  const agent = langchain.getAgent(agentName)
-
-  // Type guard for agent
-  if (!agent) {
-    return { error: `${agentName} not found in LangChain instance` }
-  }
+  const agent = getAgent(agentName)
 
   return {
     agent,

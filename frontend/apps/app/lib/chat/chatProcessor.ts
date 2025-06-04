@@ -1,7 +1,7 @@
 import { convertSchemaToText } from '@/app/lib/schema/convertSchemaToText'
 import { isSchemaUpdated } from '@/app/lib/vectorstore/supabaseVectorStore'
 import { syncSchemaVectorStore } from '@/app/lib/vectorstore/syncSchemaVectorStore'
-import { createPromptVariables, langchain } from '@/lib/langchain'
+import { createPromptVariables, getAgent } from '@/lib/langchain'
 import type { Schema } from '@liam-hq/db-structure'
 
 interface ChatProcessorParams {
@@ -86,10 +86,7 @@ async function processChatMessageSync(
     const schemaText = convertSchemaToText(schemaData)
 
     // Get the agent from LangChain
-    const agent = langchain.getAgent(agentName)
-    if (!agent) {
-      throw new Error(`${agentName} not found in LangChain instance`)
-    }
+    const agent = getAgent(agentName)
 
     // Create prompt variables
     const promptVariables = createPromptVariables(
@@ -149,16 +146,7 @@ async function* processChatMessageStreaming(
     const schemaText = convertSchemaToText(schemaData)
 
     // Get the agent from LangChain
-    const agent = langchain.getAgent(agentName)
-    if (!agent) {
-      const errorMsg = `${agentName} not found in LangChain instance`
-      yield { type: 'error', content: errorMsg }
-      return {
-        text: '',
-        success: false,
-        error: errorMsg,
-      }
-    }
+    const agent = getAgent(agentName)
 
     // Create prompt variables
     const promptVariables = createPromptVariables(

@@ -1,6 +1,5 @@
+import type { AgentName } from '@/lib/langchain'
 import type { Schema } from '@liam-hq/db-structure'
-
-export type AgentName = 'databaseSchemaAskAgent' | 'databaseSchemaBuildAgent'
 
 export type WorkflowState = {
   mode?: 'Ask' | 'Build'

@@ -1,14 +1,12 @@
-import { mastra } from '@/lib/mastra'
-import type { AgentName, WorkflowState } from '../types'
-
-interface MastraAgent {
-  generate: (
-    prompt: Array<{ role: string; content: string }>,
-  ) => Promise<{ text: string }>
-}
+import {
+  type AgentName,
+  createPromptVariables,
+  getAgent,
+} from '@/lib/langchain'
+import type { WorkflowState } from '../types'
 
 interface PreparedAnswerGeneration {
-  agent: MastraAgent
+  agent: ReturnType<typeof getAgent>
   agentName: AgentName
   schemaText: string
   formattedChatHistory: string
@@ -27,26 +25,8 @@ async function prepareAnswerGeneration(
   const formattedChatHistory = state.formattedChatHistory
   const schemaText = state.schemaText
 
-  // Get the agent from Mastra
-  const potentialAgent = mastra.getAgent(agentName)
-
-  // Type guard for agent
-  if (!potentialAgent) {
-    return { error: `${agentName} not found in Mastra instance` }
-  }
-
-  // Type guard to ensure agent has required methods
-  if (
-    typeof potentialAgent !== 'object' ||
-    potentialAgent === null ||
-    !('generate' in potentialAgent) ||
-    typeof potentialAgent.generate !== 'function'
-  ) {
-    return { error: `${agentName} agent doesn't have required methods` }
-  }
-
-  // Safe to cast after type validation
-  const agent = potentialAgent as MastraAgent
+  // Get the agent from LangChain
+  const agent = getAgent(agentName)
 
   return {
     agent,
@@ -54,29 +34,6 @@ async function prepareAnswerGeneration(
     schemaText,
     formattedChatHistory,
   }
-}
-
-function createPrompt(
-  schemaText: string,
-  formattedChatHistory: string,
-  userInput: string,
-) {
-  return [
-    {
-      role: 'system' as const,
-      content: `
-Complete Schema Information:
-${schemaText}
-
-Previous conversation:
-${formattedChatHistory}
-`,
-    },
-    {
-      role: 'user' as const,
-      content: userInput,
-    },
-  ]
 }
 
 /**
@@ -98,22 +55,24 @@ export async function answerGenerationNode(
 
     const { agent, schemaText, formattedChatHistory } = prepared
 
-    // Use Mastra's generate method for synchronous execution
-    const result = await agent.generate(
-      createPrompt(schemaText, formattedChatHistory, state.userInput),
+    // Convert formatted chat history to array format if needed
+    const historyArray: [string, string][] = formattedChatHistory
+      ? [['Assistant', formattedChatHistory]]
+      : []
+
+    // Create prompt variables with correct format
+    const promptVariables = createPromptVariables(
+      schemaText,
+      state.userInput,
+      historyArray,
     )
 
-    // Type guard for result
-    if (!result || typeof result !== 'object' || !('text' in result)) {
-      return {
-        ...state,
-        error: 'Agent response missing expected text property',
-      }
-    }
+    // Use agent's generate method with prompt variables
+    const response = await agent.generate(promptVariables)
 
     return {
       ...state,
-      generatedAnswer: result.text,
+      generatedAnswer: response,
       error: undefined,
     }
   } catch (error) {

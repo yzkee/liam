@@ -3,11 +3,19 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { executeChatWorkflow } from './index'
 import type { WorkflowState } from './types'
 
-// Mock the Mastra module
-vi.mock('@/lib/mastra', () => ({
-  mastra: {
-    getAgent: vi.fn(),
-  },
+// Mock the LangChain module
+vi.mock('@/lib/langchain', () => ({
+  getAgent: vi.fn(),
+  createPromptVariables: vi.fn(
+    (schemaText: string, userMessage: string, history: [string, string][]) => ({
+      schema_text: schemaText,
+      user_message: userMessage,
+      chat_history:
+        history
+          .map(([role, content]: [string, string]) => `${role}: ${content}`)
+          .join('\n') || 'No previous conversation.',
+    }),
+  ),
 }))
 
 // Mock the schema converter
@@ -27,9 +35,9 @@ describe('Chat Workflow', () => {
     // Reset all mocks
     vi.clearAllMocks()
 
-    // Get the mocked mastra module
-    const mastraModule = await import('@/lib/mastra')
-    mockGetAgent = vi.mocked(mastraModule.mastra.getAgent)
+    // Get the mocked langchain module
+    const langchainModule = await import('@/lib/langchain')
+    mockGetAgent = vi.mocked(langchainModule.getAgent)
 
     // Mock schema data for testing
     mockSchemaData = {
@@ -79,17 +87,15 @@ describe('Chat Workflow', () => {
 
     // Mock agent
     mockAgent = {
-      generate: vi.fn().mockResolvedValue({
-        text: 'Mocked agent response',
-      }),
-      stream: vi.fn().mockResolvedValue({
-        textStream: (async function* () {
+      generate: vi.fn().mockResolvedValue('Mocked agent response'),
+      stream: vi.fn().mockReturnValue(
+        (async function* () {
           yield 'Mocked agent response'
         })(),
-      }),
+      ),
     }
 
-    // Setup mastra mock
+    // Setup langchain mock
     mockGetAgent.mockReturnValue(mockAgent)
   })
 
@@ -247,8 +253,12 @@ describe('Chat Workflow', () => {
     })
 
     it('should handle missing agent', async () => {
-      // Mock mastra to return null agent
-      mockGetAgent.mockReturnValue(null)
+      // Mock getAgent to throw error (simulating agent initialization failure)
+      mockGetAgent.mockImplementation(() => {
+        throw new Error(
+          'databaseSchemaAskAgent not found in LangChain instance',
+        )
+      })
 
       const errorState: WorkflowState = {
         mode: 'Ask',
@@ -264,10 +274,10 @@ describe('Chat Workflow', () => {
 
       // The workflow now provides a proper error response to the user
       expect(result.error).toBe(
-        'databaseSchemaAskAgent not found in Mastra instance',
+        'databaseSchemaAskAgent not found in LangChain instance',
       )
       expect(result.finalResponse).toBe(
-        'Sorry, an error occurred during processing: databaseSchemaAskAgent not found in Mastra instance',
+        'Sorry, an error occurred during processing: databaseSchemaAskAgent not found in LangChain instance',
       )
     })
 
@@ -390,11 +400,11 @@ describe('Chat Workflow', () => {
       const results = []
       for (const state of states) {
         // Reset mocks for each execution
-        mockAgent.stream.mockResolvedValue({
-          textStream: (async function* () {
+        mockAgent.stream.mockReturnValue(
+          (async function* () {
             yield 'Mocked agent response'
           })(),
-        })
+        )
         const result = await executeChatWorkflow(state, { streaming: false })
         results.push(result)
       }
@@ -421,11 +431,11 @@ describe('Chat Workflow', () => {
       const results = []
       for (const userInput of testCases) {
         // Reset mocks for each execution
-        mockAgent.stream.mockResolvedValue({
-          textStream: (async function* () {
+        mockAgent.stream.mockReturnValue(
+          (async function* () {
             yield 'Mocked agent response'
           })(),
-        })
+        )
         const result = await executeChatWorkflow(
           {
             mode: 'Ask',

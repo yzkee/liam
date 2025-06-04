@@ -1,19 +1,13 @@
 'use client'
 
 import { createClient } from '@/libs/db/client'
-import type { Tables } from '@liam-hq/db/supabase/database.types'
-import * as v from 'valibot'
 
-export type RecentSession = Tables<'design_sessions'>
-
-const recentSessionsSchema = v.array(
-  v.object({
-    id: v.string(),
-    name: v.string(),
-    created_at: v.string(),
-    project_id: v.nullable(v.string()),
-  }),
-)
+type RecentSession = {
+  id: string
+  name: string
+  created_at: string
+  project_id: string | null
+}
 
 export const fetchRecentSessions = async (
   limit = 5,
@@ -37,11 +31,5 @@ export const fetchRecentSessions = async (
     return []
   }
 
-  const result = v.safeParse(recentSessionsSchema, sessions)
-  if (!result.success) {
-    console.error('Invalid session data format:', result.issues)
-    return []
-  }
-
-  return result.output as RecentSession[]
+  return sessions
 }

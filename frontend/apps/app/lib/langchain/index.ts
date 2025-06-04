@@ -31,5 +31,14 @@ export const createPromptVariables = (
 
 // Define AgentName as a union of agent keys
 export type AgentName = keyof typeof agents
-// Direct agent getter function - simpler than class-based approach
-export const getAgent = (agentName: AgentName) => agents[agentName]
+
+// Direct agent getter function with error handling
+export const getAgent = (agentName: AgentName) => {
+  const agent = agents[agentName]
+
+  if (!agent) {
+    throw new Error(`${agentName} not found in LangChain instance`)
+  }
+
+  return agent
+}

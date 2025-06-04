@@ -253,8 +253,12 @@ describe('Chat Workflow', () => {
     })
 
     it('should handle missing agent', async () => {
-      // Mock langchain to return null agent
-      mockGetAgent.mockReturnValue(null)
+      // Mock getAgent to throw error (simulating agent initialization failure)
+      mockGetAgent.mockImplementation(() => {
+        throw new Error(
+          'databaseSchemaAskAgent not found in LangChain instance',
+        )
+      })
 
       const errorState: WorkflowState = {
         mode: 'Ask',

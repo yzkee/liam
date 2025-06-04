@@ -6,7 +6,7 @@ import {
 import type { WorkflowState } from '../types'
 
 interface PreparedAnswerGeneration {
-  agent: NonNullable<ReturnType<typeof getAgent>>
+  agent: ReturnType<typeof getAgent>
   agentName: AgentName
   schemaText: string
   formattedChatHistory: string

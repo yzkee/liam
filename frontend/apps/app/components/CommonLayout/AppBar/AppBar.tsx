@@ -1,5 +1,5 @@
 import { AvatarWithImage } from '@/components'
-import { NewThreadButton } from '@/components/Chat/NewThreadButton/NewThreadButton'
+import { NewSessionButton } from '@/components/Chat/NewSessionButton/NewSessionButton'
 import { ChevronRight } from '@/icons'
 import type { FC } from 'react'
 import styles from './AppBar.module.css'
@@ -39,7 +39,7 @@ export const AppBar: FC<Props> = async ({
         )}
         {currentProjectId && (
           <a href={newSessionUrl} className={styles.newSessionButton}>
-            <NewThreadButton size="sm" tooltipContent="New Session" />
+            <NewSessionButton size="sm" tooltipContent="New Session" />
           </a>
         )}
       </div>

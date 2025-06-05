@@ -1,6 +1,6 @@
 'use client'
 
-import { Button } from '@liam-hq/ui'
+import { ArrowRight, Button } from '@liam-hq/ui'
 import { useRouter } from 'next/navigation'
 import type { ChangeEvent, FC, FormEvent } from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -59,28 +59,9 @@ export const SessionsNewPage: FC = () => {
     return result.output.designSession
   }, [])
 
-  const sendInitialMessage = useCallback(
-    async (_sessionId: string, message: string) => {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message,
-          schemaData: { tables: {}, relationships: {}, tableGroups: {} },
-          history: [],
-          mode: 'build',
-          organizationId: null,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to send initial message')
-      }
-    },
-    [],
-  )
+  // TODO: Implement page navigation with initial message handling
+  // When navigating to the session page, the initial message should be sent
+  // to start the chat conversation automatically
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -91,8 +72,6 @@ export const SessionsNewPage: FC = () => {
 
     try {
       const session = await createSession()
-
-      await sendInitialMessage(session.id, instructions)
 
       router.push(`/app/design_sessions/${session.id}`)
     } catch (err) {
@@ -111,35 +90,43 @@ export const SessionsNewPage: FC = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <h1 className={styles.title}>What can I help you design?</h1>
-        <p className={styles.subtitle}>
-          Enter your database design instructions to get started
-        </p>
-      </div>
-      <div className={styles.content}>
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <textarea
-            ref={textareaRef}
-            value={instructions}
-            onChange={handleChange}
-            placeholder="Enter your database design instructions. For example: Design a database for an e-commerce site that manages users, products, and orders..."
-            disabled={isLoading}
-            className={styles.textarea}
-            rows={6}
-          />
-          {error && <div className={styles.error}>{error}</div>}
-          <Button
-            type="submit"
-            variant="solid-primary"
-            size="lg"
-            disabled={!hasContent || isLoading}
-            isLoading={isLoading}
-            className={styles.submitButton}
-          >
-            {isLoading ? 'Creating Session...' : 'Start Design Session'}
-          </Button>
-        </form>
+      <div className={styles.wrapper}>
+        <h1 className={styles.title}>What can I help you Database Design?</h1>
+        <div className={styles.formContainer}>
+          <form onSubmit={handleSubmit}>
+            <div className={styles.formContent}>
+              <div className={styles.formGroup}>
+                <div className={styles.inputWrapper}>
+                  <textarea
+                    id="instructions"
+                    ref={textareaRef}
+                    value={instructions}
+                    onChange={handleChange}
+                    placeholder="Enter your database design instructions. For example: Design a database for an e-commerce site that manages users, products, and orders..."
+                    disabled={isLoading}
+                    className={styles.textarea}
+                    rows={6}
+                    aria-label="Database design instructions"
+                  />
+                  {error && <p className={styles.error}>{error}</p>}
+                </div>
+              </div>
+            </div>
+            <div className={styles.divider} />
+            <div className={styles.buttonContainer}>
+              <Button
+                type="submit"
+                variant="solid-primary"
+                disabled={!hasContent || isLoading}
+                isLoading={isLoading}
+                className={styles.buttonCustom}
+                loadingIndicatorType="content"
+              >
+                <ArrowRight size={16} />
+              </Button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   )

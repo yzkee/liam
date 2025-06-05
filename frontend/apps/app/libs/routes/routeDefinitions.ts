@@ -26,6 +26,7 @@ export type RouteDefinitions = {
     branchOrCommit: string
     schemaFilePath: string
   }) => string
+  'design_sessions/[id]': (params: { id: string }) => string
 }
 
 export const routeDefinitions: RouteDefinitions = {
@@ -66,5 +67,8 @@ export const routeDefinitions: RouteDefinitions = {
   }) => {
     const encodedBranchOrCommit = encodeURIComponent(branchOrCommit)
     return `/app/projects/${projectId}/ref/${encodedBranchOrCommit}/schema`
+  },
+  'design_sessions/[id]': ({ id }) => {
+    return `/app/design_sessions/${id}`
   },
 } as const

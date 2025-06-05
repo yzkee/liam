@@ -1,5 +1,6 @@
 export * from './Avatar'
 export * from './Button'
+export * from './GridTable'
 export * from './Callout'
 export * from './Collapsible'
 export * from './CookieConsent'

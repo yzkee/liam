@@ -6,6 +6,7 @@
 
 .header {
   margin-bottom: var(--spacing-8);
+  text-align: center;
 }
 
 .title {
@@ -28,11 +29,44 @@
   padding: var(--spacing-6);
 }
 
-.loading {
-  color: var(--global-foreground-secondary);
-  font-size: var(--font-size-4);
-  text-align: center;
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.textarea {
+  width: 100%;
+  min-height: 120px;
   padding: var(--spacing-4);
+  border: 1px solid var(--global-border);
+  border-radius: var(--border-radius-1);
+  background: var(--global-background);
+  color: var(--global-foreground);
+  font-family: inherit;
+  font-size: var(--font-size-3);
+  line-height: 1.5;
+  resize: none;
+  overflow: hidden;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: var(--button-primary-background);
+}
+
+.textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.textarea::placeholder {
+  color: var(--global-foreground-secondary);
+}
+
+.submitButton {
+  align-self: flex-end;
+  min-width: 200px;
 }
 
 .error {
@@ -42,4 +76,11 @@
   padding: var(--spacing-3);
   border-radius: var(--border-radius-1);
   font-size: var(--font-size-3);
+}
+
+.loading {
+  color: var(--global-foreground-secondary);
+  font-size: var(--font-size-4);
+  text-align: center;
+  padding: var(--spacing-4);
 }

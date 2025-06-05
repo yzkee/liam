@@ -9,6 +9,7 @@ export type RouteDefinitions = {
   'settings/members': string
   'settings/billing': string
   'settings/projects': string
+  'design_sessions/new': string
   'invitations/tokens/[token]': (params: {
     token: string
   }) => string
@@ -37,6 +38,7 @@ export const routeDefinitions: RouteDefinitions = {
   'settings/members': '/app/settings/members',
   'settings/billing': '/app/settings/billing',
   'settings/projects': '/app/settings/projects',
+  'design_sessions/new': '/app/design_sessions/new',
   'invitations/tokens/[token]': ({ token }) => {
     return `/app/invitations/tokens/${token}`
   },

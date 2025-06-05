@@ -173,10 +173,6 @@ export const setupRealtimeSubscription = (
     .subscribe((status) => {
       if (status === 'SUBSCRIBED') {
       } else if (status === 'CHANNEL_ERROR') {
-        console.error(
-          'Realtime subscription error for session:',
-          designSessionId,
-        )
         onError?.(new Error('Realtime subscription failed'))
       }
     })

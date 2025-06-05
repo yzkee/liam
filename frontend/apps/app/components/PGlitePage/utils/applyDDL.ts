@@ -4,8 +4,8 @@ import type { PGlite } from '@electric-sql/pglite'
 import type { SqlResult } from './types'
 
 /**
- * DDL実行関数（グローバルに影響）
- * テキストを分割して各SQL文を実行し、結果を返す
+ * DDL Execution Function (Global Impact)
+ * Splits text into individual SQL statements, executes each one, and returns the results
  */
 export const applyDDL = async (
   ddlText: string,
@@ -13,13 +13,13 @@ export const applyDDL = async (
 ): Promise<SqlResult[]> => {
   const results: SqlResult[] = []
 
-  // ';' で区切って分割
+  // Split by ';' delimiter
   const statements = ddlText
     .split(';')
     .map((s) => s.trim())
     .filter(Boolean)
 
-  // 各SQL文を順次実行
+  // Execute each SQL statement sequentially
   for (const sql of statements) {
     const startTime = performance.now()
     try {

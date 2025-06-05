@@ -2,30 +2,30 @@
 
 import type { PGlite } from '@electric-sql/pglite'
 
-// 結果の型定義
+// Result type definition
 export interface SqlResult {
   sql: string
   result: { error?: string } | Record<string, unknown>
   success: boolean
   id: string
-  // 将来的な拡張のためのフィールド
+  // Fields for future extensions
   metadata?: {
-    executionTime?: number // 実行時間（ミリ秒）
-    affectedRows?: number // 影響を受けた行数
-    timestamp?: string // 実行タイムスタンプ
+    executionTime?: number // Execution time (milliseconds)
+    affectedRows?: number // Number of affected rows
+    timestamp?: string // Execution timestamp
   }
 }
 
-// DDLセクション用の状態
+// State for DDL section
 export interface DDLState {
   ddlInput: string
   results: SqlResult[]
 }
 
-// DMLセクション用の状態（各セクションが独立）
+// State for DML section (each section is independent)
 export interface DMLSection {
   id: string
   dmlInput: string
   results: SqlResult[]
-  db: PGlite | null // 各DMLセクションは独自のPGliteインスタンスを持つ
+  db: PGlite | null // Each DML section has its own PGlite instance
 }

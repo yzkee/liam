@@ -18,13 +18,13 @@ export function DDLInputSection({
   return (
     <div className={styles.playgroundSection}>
       <div className={styles.sectionHeader}>
-        <h2 className={styles.sectionTitle}>DDL入力エリア（グローバル）</h2>
+        <h2 className={styles.sectionTitle}>DDL Input Area (Global)</h2>
       </div>
       <p className={styles.description}>
-        DDLを入力して実行すると、すべてのDMLフォームに反映されます。
-        複数のSQL文を一度に実行できます。各SQL文は
-        <code className={styles.codeHighlight}>;</code>
-        （セミコロン）で区切ってください。
+        When you enter and execute DDL, it will be applied to all DML forms. You
+        can execute multiple SQL statements at once. Separate each SQL statement
+        with a<code className={styles.codeHighlight}>;</code>
+        (semicolon).
       </p>
       <textarea
         rows={5}
@@ -39,10 +39,10 @@ CREATE TABLE posts (id SERIAL PRIMARY KEY, title TEXT, user_id INTEGER REFERENCE
         onClick={executeDDL}
         className={`${styles.actionButton} ${styles.primaryButton}`}
       >
-        DDLを実行
+        Execute DDL
       </button>
 
-      {/* DDL実行結果 */}
+      {/* DDL Execution Results */}
       <div className={styles.buttonGroup}>
         {ddlState.results.map((result) => (
           <QueryResultBox key={result.id} result={result} />

@@ -9,32 +9,32 @@ import { applyDDL, applyDML } from './utils'
 import type { DDLState, DMLSection } from './utils/types'
 
 export function PGlitePlayground() {
-  // グローバルDB（DDL用）
+  // Global DB (for DDL)
   const [globalDb, setGlobalDb] = useState<PGlite | null>(null)
 
-  // DDLセクションの状態
+  // DDL section state
   const [ddlState, setDdlState] = useState<DDLState>({
     ddlInput: '',
     results: [],
   })
 
-  // DMLセクションの状態（複数）
+  // DML sections state (multiple)
   const [dmlSections, setDmlSections] = useState<DMLSection[]>([])
 
-  // 初期化
+  // Initialization
   useEffect(() => {
     const initializeDb = async () => {
       const db = new PGlite()
       setGlobalDb(db)
 
-      // 初期DMLセクションを1つ追加
+      // Add one initial DML section
       addDMLSection(db)
     }
 
     initializeDb()
   }, [])
 
-  // DDL入力の更新
+  // Update DDL input
   const updateDdlInput = (value: string) => {
     setDdlState((prev) => ({
       ...prev,
@@ -42,7 +42,7 @@ export function PGlitePlayground() {
     }))
   }
 
-  // DML入力の更新
+  // Update DML input
   const updateDmlInput = (sectionId: string, value: string) => {
     setDmlSections((prev) =>
       prev.map((section) =>
@@ -51,31 +51,31 @@ export function PGlitePlayground() {
     )
   }
 
-  // DDL実行
+  // Execute DDL
   const executeDDL = async () => {
     if (!globalDb || !ddlState.ddlInput.trim()) return
 
-    // DDLを実行して結果を保存
+    // Execute DDL and save results
     const results = await applyDDL(ddlState.ddlInput, globalDb)
     setDdlState((prev) => ({
       ...prev,
       results: [...prev.results, ...results],
     }))
 
-    // DDL実行後、全てのDMLセクションのDBを更新
+    // After DDL execution, update all DML section DBs
     updateAllDmlSections()
   }
 
-  // 全DMLセクションのDBを更新（DDL変更後）
+  // Update all DML section DBs (after DDL changes)
   const updateAllDmlSections = async () => {
     if (!globalDb) return
 
-    // 各DMLセクションに対して新しいDBインスタンスを作成し、DDLを適用
+    // Create new DB instances for each DML section and apply DDL
     const updatedSections = await Promise.all(
       dmlSections.map(async (section) => {
         const newDb = new PGlite()
 
-        // 現在のDDLを新しいDBインスタンスに適用
+        // Apply current DDL to the new DB instance
         if (ddlState.ddlInput) {
           await applyDDL(ddlState.ddlInput, newDb)
         }
@@ -90,11 +90,11 @@ export function PGlitePlayground() {
     setDmlSections(updatedSections)
   }
 
-  // DMLセクション追加
+  // Add DML section
   const addDMLSection = async (initialDb?: PGlite) => {
     const newDb = initialDb || new PGlite()
 
-    // 新しいDBインスタンスに現在のDDLを適用
+    // Apply current DDL to the new DB instance
     if (ddlState.ddlInput) {
       await applyDDL(ddlState.ddlInput, newDb)
     }
@@ -110,7 +110,7 @@ export function PGlitePlayground() {
     ])
   }
 
-  // DML実行（特定のセクションに対して）
+  // Execute DML (for a specific section)
   const executeDML = async (sectionId: string) => {
     const sectionIndex = dmlSections.findIndex((s) => s.id === sectionId)
     if (sectionIndex === -1) return
@@ -118,7 +118,7 @@ export function PGlitePlayground() {
     const section = dmlSections[sectionIndex]
     if (!section.db || !section.dmlInput.trim()) return
 
-    // DMLを実行して結果を保存
+    // Execute DML and save results
     const results = await applyDML(section.dmlInput, section.db)
 
     setDmlSections((prev) => {
@@ -126,13 +126,13 @@ export function PGlitePlayground() {
       newSections[sectionIndex] = {
         ...newSections[sectionIndex],
         results: [...newSections[sectionIndex].results, ...results],
-        dmlInput: '', // 入力をクリア
+        dmlInput: '', // Clear input
       }
       return newSections
     })
   }
 
-  // DMLセクション削除
+  // Remove DML section
   const removeDMLSection = (sectionId: string) => {
     setDmlSections((prev) => prev.filter((section) => section.id !== sectionId))
   }
@@ -145,11 +145,11 @@ export function PGlitePlayground() {
         className={`${styles.status} ${globalDb ? styles.success : styles.loading}`}
       >
         {globalDb
-          ? 'PGlite データベース接続済み'
-          : 'PGlite データベース接続中...'}
+          ? 'PGlite Database Connected'
+          : 'PGlite Database Connecting...'}
       </div>
 
-      {/* DDL入力セクション（グローバル） - コンポーネント化 */}
+      {/* DDL Input Section (Global) - Componentized */}
       <DDLInputSection
         ddlState={ddlState}
         updateDdlInput={updateDdlInput}
@@ -158,18 +158,18 @@ export function PGlitePlayground() {
 
       <div className={styles.divider} />
 
-      {/* DMLセクション（複数） */}
+      {/* DML Sections (Multiple) */}
       <div className={styles.playgroundSection}>
         <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>DMLユースケースセクション</h2>
+          <h2 className={styles.sectionTitle}>DML Use Case Section</h2>
         </div>
         <p className={styles.description}>
-          各DMLフォームは独立した環境で実行されます。
-          他のフォームの実行結果に影響されることはありません。
+          Each DML form runs in an isolated environment. Results are not
+          affected by other forms' executions.
         </p>
 
         {dmlSections.map((section) => {
-          // DMLInputSectionコンポーネントを使用
+          // Use DMLInputSection component
           return (
             <DMLInputSection
               key={section.id}
@@ -181,13 +181,13 @@ export function PGlitePlayground() {
           )
         })}
 
-        {/* DMLフォーム追加ボタン */}
+        {/* Add DML Form Button */}
         <button
           type="button"
           onClick={() => addDMLSection()}
           className={`${styles.actionButton} ${styles.secondaryButton}`}
         >
-          ＋ DMLフォームを追加
+          ＋ Add DML Form
         </button>
       </div>
     </div>

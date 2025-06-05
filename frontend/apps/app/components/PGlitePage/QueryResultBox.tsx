@@ -9,13 +9,13 @@ export const QueryResultBox = ({ result }: { result: SqlResult }) => {
 
   return (
     <div className={styles.queryResultBox}>
-      {/* ステータスヘッダー - 常に表示 */}
+      {/* Status header - always visible */}
       <button
         type="button"
         className={`${styles.resultHeader} ${result.success ? styles.successHeader : styles.errorHeader}`}
         onClick={() => setIsExpanded(!isExpanded)}
         aria-expanded={isExpanded}
-        aria-label={`${result.success ? '成功' : '失敗'}したクエリの詳細を${isExpanded ? '閉じる' : '開く'}`}
+        aria-label={`${result.success ? 'Successful' : 'Failed'} query details ${isExpanded ? 'close' : 'open'}`}
       >
         <div className={styles.statusIndicator}>
           {result.success ? '✅' : '❌'}
@@ -26,12 +26,12 @@ export const QueryResultBox = ({ result }: { result: SqlResult }) => {
             : result.sql}
         </div>
         <div className={styles.statusMessage}>
-          {result.success ? '成功しました' : '失敗しました'}
+          {result.success ? 'Success' : 'Failed'}
         </div>
         <div className={styles.expandIcon}>{isExpanded ? '▼' : '▶'}</div>
       </button>
 
-      {/* 詳細情報 - 展開時のみ表示 */}
+      {/* Detailed information - displayed only when expanded */}
       {isExpanded && (
         <div className={styles.resultDetails}>
           <div className={styles.sqlCommand}>{result.sql}</div>
@@ -40,17 +40,17 @@ export const QueryResultBox = ({ result }: { result: SqlResult }) => {
           >
             {JSON.stringify(result.result, null, 2)}
           </pre>
-          {/* 将来的な拡張のためのメタデータ表示エリア */}
+          {/* Metadata display area for future extensions */}
           {result.metadata && (
             <div className={styles.metadataContainer}>
               {result.metadata.executionTime !== undefined && (
-                <div>実行時間: {result.metadata.executionTime}ms</div>
+                <div>Execution time: {result.metadata.executionTime}ms</div>
               )}
               {result.metadata.affectedRows !== undefined && (
-                <div>影響を受けた行数: {result.metadata.affectedRows}</div>
+                <div>Affected rows: {result.metadata.affectedRows}</div>
               )}
               {result.metadata.timestamp && (
-                <div>実行日時: {result.metadata.timestamp}</div>
+                <div>Execution timestamp: {result.metadata.timestamp}</div>
               )}
             </div>
           )}

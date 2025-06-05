@@ -4,8 +4,8 @@ import type { PGlite } from '@electric-sql/pglite'
 import type { SqlResult } from './types'
 
 /**
- * DML実行関数（各ユースケース用）
- * テキストを分割して各SQL文を実行し、結果を返す
+ * DML Execution Function (For Each Use Case)
+ * Splits text into individual SQL statements, executes each one, and returns the results
  */
 export const applyDML = async (
   dmlText: string,
@@ -13,20 +13,20 @@ export const applyDML = async (
 ): Promise<SqlResult[]> => {
   const results: SqlResult[] = []
 
-  // ';' で区切って分割
+  // Split by ';' delimiter
   const statements = dmlText
     .split(';')
     .map((s) => s.trim())
     .filter(Boolean)
 
-  // 各SQL文を順次実行
+  // Execute each SQL statement sequentially
   for (const sql of statements) {
     const startTime = performance.now()
     try {
       const result = await db.query(sql)
       const executionTime = Math.round(performance.now() - startTime)
 
-      // 影響を受けた行数を取得（可能な場合）
+      // Get affected row count (if possible)
       let affectedRows: number | undefined = undefined
       if (result && typeof result === 'object' && 'rowCount' in result) {
         affectedRows = result.rowCount as number

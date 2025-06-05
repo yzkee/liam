@@ -20,14 +20,14 @@ export function DMLInputSection({
   return (
     <div className={styles.dmlSection}>
       <div className={styles.dmlHeader}>
-        <h3 className={styles.dmlTitle}>DMLユースケース</h3>
+        <h3 className={styles.dmlTitle}>DML Use Case</h3>
         <button
           type="button"
           onClick={() => removeDMLSection(section.id)}
           className={`${styles.actionButton} ${styles.dangerButton}`}
-          aria-label="DMLセクションを削除"
+          aria-label="Delete DML Section"
         >
-          削除
+          Delete
         </button>
       </div>
 
@@ -44,10 +44,10 @@ SELECT * FROM users;"
         onClick={() => executeDML(section.id)}
         className={`${styles.actionButton} ${styles.primaryButton}`}
       >
-        実行
+        Execute
       </button>
 
-      {/* DML実行結果 */}
+      {/* DML Execution Results */}
       <div className={styles.buttonGroup}>
         {section.results.map((result) => (
           <QueryResultBox key={result.id} result={result} />

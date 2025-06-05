@@ -2,7 +2,8 @@ import { processChatMessage } from '@/lib/chat/chatProcessor'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
-  const { message, schemaData, history, mode, projectId } = await request.json()
+  const { message, schemaData, history, mode, organizationId } =
+    await request.json()
 
   // Input validation
   if (!message || typeof message !== 'string' || !message.trim()) {
@@ -28,7 +29,7 @@ export async function POST(request: Request) {
           schemaData,
           history,
           mode,
-          projectId,
+          organizationId,
         })) {
           if (chunk.type === 'text') {
             // Encode and enqueue the text chunk as JSON

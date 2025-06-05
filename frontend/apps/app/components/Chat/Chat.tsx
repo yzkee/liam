@@ -29,15 +29,15 @@ import type { ChatEntry } from './types/chatTypes'
 interface Props {
   schemaData: Schema
   tableGroups?: Record<string, TableGroupData>
-  projectId: string
   designSessionId?: string
+  organizationId?: string
 }
 
 export const Chat: FC<Props> = ({
   schemaData,
   tableGroups,
-  projectId,
   designSessionId,
+  organizationId,
 }) => {
   const [messages, setMessages] = useState<ChatEntry[]>([WELCOME_MESSAGE])
   const [isLoading, setIsLoading] = useState(false)
@@ -235,8 +235,8 @@ export const Chat: FC<Props> = ({
           schemaData,
           tableGroups,
           history,
-          projectId,
           mode,
+          organizationId,
         }),
       })
 

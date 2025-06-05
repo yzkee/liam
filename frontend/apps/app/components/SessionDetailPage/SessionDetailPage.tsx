@@ -13,16 +13,14 @@ import { useEffect } from 'react'
 import * as v from 'valibot'
 import styles from './SessionDetailPage.module.css'
 type Props = {
-  projectId: string
   schema: Schema
-  designSessionId: string
+  designSession: {
+    id: string
+    organizationId: string
+  }
 }
 
-export const SessionDetailPage: FC<Props> = ({
-  projectId,
-  schema,
-  designSessionId,
-}) => {
+export const SessionDetailPage: FC<Props> = ({ schema, designSession }) => {
   // Update the schema store with the fetched schema
   useEffect(() => {
     if (schema) {
@@ -49,8 +47,8 @@ export const SessionDetailPage: FC<Props> = ({
         <div className={styles.chatSection}>
           <Chat
             schemaData={schema}
-            projectId={projectId}
-            designSessionId={designSessionId}
+            designSessionId={designSession.id}
+            organizationId={designSession.organizationId}
           />
         </div>
         <TabsRoot defaultValue="erd" className={styles.tabsRoot}>

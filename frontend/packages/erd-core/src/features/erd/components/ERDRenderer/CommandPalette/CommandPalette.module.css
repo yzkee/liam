@@ -11,7 +11,7 @@
   background-color: var(--pane-background);
   color: var(--global-foreground);
   border: 1px solid var(--global-border);
-  z-index: 10000;
+  z-index: var(--z-index-command-palette);
 }
 
 [cmdk-overlay]:has(+ .content) {
@@ -21,7 +21,7 @@
   height: 100vh;
   backdrop-filter: blur(8px);
   animation: overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
-  z-index: 10000;
+  z-index: var(--z-index-command-palette);
 }
 
 @keyframes overlayShow {

@@ -1,23 +1,45 @@
 import type { TableNodeData } from '@/features/erd/types'
+import { useCustomReactflow } from '@/features/reactflow/hooks'
 import { useUserEditingStore } from '@/stores'
 import { Table2 } from '@liam-hq/ui'
 import { Handle, Position } from '@xyflow/react'
 import clsx from 'clsx'
-import type { FC, RefObject } from 'react'
+import type { FC, MouseEvent } from 'react'
 import styles from './TableHeader.module.css'
 
 type Props = {
   data: TableNodeData
-  textRef: RefObject<HTMLSpanElement>
 }
 
-export const TableHeader: FC<Props> = ({ data, textRef }) => {
+export const TableHeader: FC<Props> = ({ data }) => {
   const name = data.table.name
   const { showMode: _showMode } = useUserEditingStore()
   const showMode = data.showMode ?? _showMode
 
   const isTarget = data.targetColumnCardinalities !== undefined
   const isSource = data.sourceColumnName !== undefined
+
+  const { updateNode } = useCustomReactflow()
+
+  const handleHoverEvent = (event: MouseEvent<HTMLSpanElement>) => {
+    // Get computed styles to check if text is truncated
+    const element = event.currentTarget
+    // Create a range to measure the text
+    const range = document.createRange()
+    range.selectNodeContents(element)
+
+    // Get the text width using getBoundingClientRect
+    const textWidth = range.getBoundingClientRect().width
+    const containerWidth = element.getBoundingClientRect().width
+    const isTruncated = textWidth > containerWidth + 0.018
+
+    updateNode(name, {
+      data: {
+        ...data,
+        isTooltipVisible: isTruncated,
+      },
+    })
+  }
 
   return (
     <div
@@ -28,7 +50,7 @@ export const TableHeader: FC<Props> = ({ data, textRef }) => {
     >
       <Table2 width={16} className={styles.tableIcon} />
 
-      <span className={styles.name} ref={textRef}>
+      <span className={styles.name} onMouseEnter={handleHoverEvent}>
         {name}
       </span>
 

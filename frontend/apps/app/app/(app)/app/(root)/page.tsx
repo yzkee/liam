@@ -21,7 +21,9 @@ export default async function Page() {
   }
 
   if (!organizationMembers || organizationMembers.length === 0) {
-    redirect(urlgen('organizations/new'))
+    throw new Error(
+      'User must belong to an organization. Organization should be created during login process.',
+    )
   }
 
   const organizationId = organizationMembers[0].organization_id

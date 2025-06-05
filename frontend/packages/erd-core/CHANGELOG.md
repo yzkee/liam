@@ -1,5 +1,21 @@
 # @liam-hq/erd-core
 
+## 0.3.0
+
+### Minor Changes
+
+- [#1678](https://github.com/liam-hq/liam/pull/1678) - add the show/hide all feature and multiple table show and hide feature. / Thanks [@khiroshi-win](https://github.com/khiroshi-win)!
+
+## 0.2.0
+
+### Minor Changes
+
+- [#1705](https://github.com/liam-hq/liam/pull/1705) - add the active hover background color to when table name activated in left pane / Thanks [@khiroshi-win](https://github.com/khiroshi-win)!
+
+### Patch Changes
+
+- [#1778](https://github.com/liam-hq/liam/pull/1778) - Improved Toolbar Button Styling and Consistency / Thanks [@k35o](https://github.com/k35o)!
+
 ## 0.1.8
 
 ### Patch Changes

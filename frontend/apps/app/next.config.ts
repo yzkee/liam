@@ -1,5 +1,4 @@
 import { execSync } from 'node:child_process'
-import { PrismaPlugin } from '@prisma/nextjs-monorepo-workaround-plugin'
 import { withSentryConfig } from '@sentry/nextjs'
 import type { NextConfig } from 'next'
 
@@ -13,9 +12,6 @@ if (process.env.VERCEL_ENV === 'production') {
 }
 
 const nextConfig: NextConfig = {
-  // Server-only packages that should not be bundled on the client
-  serverExternalPackages: ['@mastra/*'],
-
   // NOTE: Exclude Prisma-related packages from the bundle
   // These packages are installed separately in the node_modules/@prisma directory
   // Excluding them prevents `Error: Cannot find module 'fs'` errors in the build process
@@ -79,7 +75,7 @@ const nextConfig: NextConfig = {
     })
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    config.plugins = [...config.plugins, new PrismaPlugin()]
+    config.plugins = [...config.plugins]
 
     return config
   },

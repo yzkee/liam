@@ -12,14 +12,14 @@
   "ignore": [
     // - config files
     "frontend/turbo/generators/config.ts",
-    "frontend/packages/jobs/trigger.config.ts",
+    "frontend/internal-packages/jobs/trigger.config.ts",
     "frontend/apps/docs/source.config.ts",
     // - Generated files may contain unused exports
-    "frontend/packages/db/supabase/database.types.ts",
+    "frontend/internal-packages/db/supabase/database.types.ts",
     // - Script for workaround
     "frontend/apps/app/scripts/install-prisma-internals.mjs",
     // - Script file which is read from trigger.config.ts
-    "frontend/packages/jobs/src/trigger/jobs.ts",
+    "frontend/internal-packages/jobs/src/trigger/jobs.ts",
     // - Next.js special files
     "frontend/apps/docs/app/docs/sitemap.ts",
     "frontend/apps/app/next.config.ts",
@@ -32,13 +32,12 @@
     "@octokit/auth-app",
     "@octokit/rest",
     "@octokit/openapi-types",
-    "@prisma/client",
     "@prisma/internals",
     "@trigger.dev/build",
     "@trigger.dev/sdk",
-    "langfuse",
-    "langfuse-langchain",
-    "@langchain/core",
+
+    // zod is used in `src/parser/tbls/schema.generated.ts`,
+    // which is ignored by git but imported in parser.ts and tests
     "zod",
     "ts-pattern",
     "minimatch",
@@ -50,7 +49,6 @@
     "@types/gtag.js",
     "esbuild",
     "@types/mdx",
-    "postcss",
     "@types/glob",
     "@biomejs/biome",
     "@sentry/node",
@@ -60,6 +58,7 @@
     "@turbo/gen"
   ],
 
+
   // TODO: Review ignoreBinaries configuration later
-  "ignoreBinaries": ["playwright", "supabase:start", "supabase:gen"]
+  "ignoreBinaries": ["playwright"]
 }

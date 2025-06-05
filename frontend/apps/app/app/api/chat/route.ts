@@ -1,13 +1,11 @@
-import { convertSchemaToText } from '@/app/lib/schema/convertSchemaToText'
-import { isSchemaUpdated } from '@/app/lib/vectorstore/supabaseVectorStore'
-import { syncSchemaVectorStore } from '@/app/lib/vectorstore/syncSchemaVectorStore'
-import { mastra } from '@/lib/mastra'
-import * as Sentry from '@sentry/nextjs'
+import { processChatMessage } from '@/lib/chat/chatProcessor'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
-  const { message, schemaData, history, mode, projectId } = await request.json()
+  const { message, schemaData, history, mode, organizationId } =
+    await request.json()
 
+  // Input validation
   if (!message || typeof message !== 'string' || !message.trim()) {
     return NextResponse.json({ error: 'Message is required' }, { status: 400 })
   }
@@ -19,74 +17,61 @@ export async function POST(request: Request) {
     )
   }
 
-  // Determine which agent to use based on the mode
-  const agentName =
-    mode === 'build' ? 'databaseSchemaBuildAgent' : 'databaseSchemaAskAgent'
-  try {
-    // Check if schema has been updated
-    const schemaUpdated = await isSchemaUpdated(schemaData)
+  // Create a ReadableStream for streaming response
+  const stream = new ReadableStream({
+    async start(controller) {
+      const encoder = new TextEncoder()
 
-    if (schemaUpdated) {
       try {
-        // Synchronize vector store
-        await syncSchemaVectorStore(schemaData, projectId)
-        // Log success message
-        process.stdout.write('Vector store synchronized successfully.\n')
-      } catch (syncError) {
-        // Log error but continue with chat processing
-        process.stderr.write(
-          `Warning: Failed to synchronize vector store: ${syncError}\n`,
-        )
+        // Process the chat message with streaming
+        for await (const chunk of processChatMessage({
+          message,
+          schemaData,
+          history,
+          mode,
+          organizationId,
+        })) {
+          if (chunk.type === 'text') {
+            // Encode and enqueue the text chunk as JSON
+            controller.enqueue(
+              encoder.encode(
+                `${JSON.stringify({ type: 'text', content: chunk.content })}\n`,
+              ),
+            )
+          } else if (chunk.type === 'custom') {
+            // Encode and enqueue the custom progress message as JSON
+            controller.enqueue(
+              encoder.encode(
+                `${JSON.stringify({ type: 'custom', content: chunk.content })}\n`,
+              ),
+            )
+          } else if (chunk.type === 'error') {
+            // Handle error by sending error message and closing the stream
+            controller.enqueue(
+              encoder.encode(
+                `${JSON.stringify({ type: 'error', content: chunk.content })}\n`,
+              ),
+            )
+            controller.close()
+            return
+          }
+        }
+
+        // Close the stream when done
+        controller.close()
+      } catch (error) {
+        // Handle any unexpected errors
+        controller.error(error)
       }
-    }
-    // Format chat history for prompt
-    const formattedChatHistory =
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      history && history.length > 0
-        ? history
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            .map((msg: [string, string]) => `${msg[0]}: ${msg[1]}`)
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            .join('\n')
-        : 'No previous conversation.'
+    },
+  })
 
-    // Convert schema to text
-    const schemaText = convertSchemaToText(schemaData)
-
-    // Get the agent from Mastra
-    const agent = mastra.getAgent(agentName)
-    if (!agent) {
-      throw new Error(`${agentName} not found in Mastra instance`)
-    }
-
-    // Create a response using the agent
-    const response = await agent.generate([
-      {
-        role: 'system',
-        content: `
-Complete Schema Information:
-${schemaText}
-
-Previous conversation:
-${formattedChatHistory}
-`,
-      },
-      {
-        role: 'user',
-        content: message,
-      },
-    ])
-
-    return new Response(response.text, {
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-      },
-    })
-  } catch (error) {
-    Sentry.captureException(error)
-    return NextResponse.json(
-      { error: 'Failed to generate response' },
-      { status: 500 },
-    )
-  }
+  // Return streaming response
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/plain; charset=utf-8',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+    },
+  })
 }

@@ -4,7 +4,7 @@ import { PGlite } from '@electric-sql/pglite'
 import { useEffect, useState } from 'react'
 import { DDLInputSection } from './DDLInputSection'
 import { DMLInputSection } from './DMLInputSection'
-import styles from './PGlitePage.module.css'
+import styles from './PGlitePlayground.module.css'
 import { applyDDL, applyDML } from './utils'
 import type { DDLState, DMLSection } from './utils/types'
 

@@ -1,6 +1,6 @@
 'use client'
 
-import styles from './PGlitePage.module.css'
+import styles from './DDLInputSection.module.css'
 import { QueryResultBox } from './QueryResultBox'
 import type { DDLState } from './utils/types'
 

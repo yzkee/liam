@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import styles from './PGlitePage.module.css'
+import styles from './QueryResultBox.module.css'
 import type { SqlResult } from './utils/types'
 
 export const QueryResultBox = ({ result }: { result: SqlResult }) => {

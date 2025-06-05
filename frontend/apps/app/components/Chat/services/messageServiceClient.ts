@@ -18,6 +18,18 @@ const loadMessagesSchema = v.object({
   designSessionId: v.pipe(v.string(), v.uuid()),
 })
 
+// Schema for validating realtime message payload
+const realtimeMessageSchema = v.object({
+  id: v.string(),
+  design_session_id: v.pipe(v.string(), v.uuid()),
+  content: v.string(),
+  role: v.picklist(['user', 'assistant']),
+  user_id: v.nullable(v.string()),
+  created_at: v.string(),
+  updated_at: v.string(),
+  organization_id: v.pipe(v.string(), v.uuid()),
+})
+
 /**
  * Save a message to the database (client-side)
  */
@@ -123,4 +135,53 @@ export const convertMessageToChatEntry = (message: Message) => {
     isGenerating: false,
     agentType: message.role === 'assistant' ? ('ask' as const) : undefined,
   }
+}
+
+/**
+ * Set up realtime subscription for messages in a design session
+ */
+export const setupRealtimeSubscription = (
+  designSessionId: string,
+  onNewMessage: (message: Message) => void,
+  onError?: (error: Error) => void,
+) => {
+  const supabase = createClient()
+
+  const subscription = supabase
+    .channel(`messages:${designSessionId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'messages',
+        filter: `design_session_id=eq.${designSessionId}`,
+      },
+      (payload) => {
+        try {
+          // Use valibot for runtime type validation instead of type assertion
+          const validatedMessage = v.parse(realtimeMessageSchema, payload.new)
+          onNewMessage(validatedMessage)
+        } catch (error) {
+          console.error('Error processing realtime message:', error)
+          onError?.(
+            error instanceof Error
+              ? error
+              : new Error('Invalid message format or validation failed'),
+          )
+        }
+      },
+    )
+    .subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+      } else if (status === 'CHANNEL_ERROR') {
+        console.error(
+          'Realtime subscription error for session:',
+          designSessionId,
+        )
+        onError?.(new Error('Realtime subscription failed'))
+      }
+    })
+
+  return subscription
 }

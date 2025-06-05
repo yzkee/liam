@@ -6,10 +6,6 @@ import { useCallback, useEffect } from 'react'
 import * as v from 'valibot'
 import styles from './SessionsNewPage.module.css'
 
-type Props = {
-  projectId: string
-}
-
 const ApiSessionsCreateSchema = v.object({
   success: v.boolean(),
   designSession: v.object({
@@ -17,7 +13,7 @@ const ApiSessionsCreateSchema = v.object({
   }),
 })
 
-export const SessionsNewPage: FC<Props> = ({ projectId }) => {
+export const SessionsNewPage: FC = () => {
   const router = useRouter()
 
   const createSession = useCallback(async () => {
@@ -26,9 +22,7 @@ export const SessionsNewPage: FC<Props> = ({ projectId }) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        projectId,
-      }),
+      body: JSON.stringify({}),
     })
 
     if (!response.ok) {
@@ -43,14 +37,12 @@ export const SessionsNewPage: FC<Props> = ({ projectId }) => {
     }
 
     if (result.output.success) {
-      // Redirect to the session detail page
-      router.push(
-        `/app/projects/${projectId}/sessions/${result.output.designSession.id}`,
-      )
+      // Redirect to the project-independent session detail page
+      router.push(`/app/design_sessions/${result.output.designSession.id}`)
     } else {
       throw new Error('Session creation failed')
     }
-  }, [projectId, router])
+  }, [router])
 
   useEffect(() => {
     createSession()
@@ -60,9 +52,7 @@ export const SessionsNewPage: FC<Props> = ({ projectId }) => {
     <div className={styles.container}>
       <div className={styles.header}>
         <h1 className={styles.title}>Creating Session ...</h1>
-        <p className={styles.subtitle}>
-          Creating a new session for project: {projectId}
-        </p>
+        <p className={styles.subtitle}>Creating a new design session</p>
       </div>
     </div>
   )

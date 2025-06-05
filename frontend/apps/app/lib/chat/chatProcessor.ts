@@ -8,7 +8,7 @@ interface ChatProcessorParams {
   schemaData: Schema
   history?: [string, string][]
   mode: 'build' | 'ask'
-  projectId: string
+  organizationId?: string
 }
 
 interface ChatProcessorResult {
@@ -57,14 +57,14 @@ export function processChatMessage(
 async function processChatMessageSync(
   params: ChatProcessorParams,
 ): Promise<ChatProcessorResult> {
-  const { message, schemaData, history, mode, projectId } = params
+  const { message, schemaData, history, mode, organizationId } = params
 
   try {
     // Check if schema has been updated and sync vector store if needed
     try {
       const schemaUpdated = await isSchemaUpdated(schemaData)
-      if (schemaUpdated) {
-        await syncSchemaVectorStore(schemaData, projectId)
+      if (schemaUpdated && organizationId) {
+        await syncSchemaVectorStore(schemaData, organizationId)
       }
     } catch (error) {
       console.warn('Vector store sync failed:', error)
@@ -80,7 +80,6 @@ async function processChatMessageSync(
       userInput: message,
       history: formattedHistory,
       schemaData,
-      projectId,
     }
 
     // Execute workflow without streaming
@@ -117,14 +116,14 @@ async function* processChatMessageStreaming(
   ChatProcessorResult,
   unknown
 > {
-  const { message, schemaData, history, mode, projectId } = params
+  const { message, schemaData, history, mode, organizationId } = params
 
   try {
     // Check if schema has been updated and sync vector store if needed
     try {
       const schemaUpdated = await isSchemaUpdated(schemaData)
-      if (schemaUpdated) {
-        await syncSchemaVectorStore(schemaData, projectId)
+      if (schemaUpdated && organizationId) {
+        await syncSchemaVectorStore(schemaData, organizationId)
       }
     } catch (error) {
       console.warn('Vector store sync failed:', error)
@@ -140,7 +139,7 @@ async function* processChatMessageStreaming(
       userInput: message,
       history: formattedHistory,
       schemaData,
-      projectId,
+      organizationId,
     }
 
     // Execute workflow with streaming

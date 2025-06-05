@@ -2,8 +2,9 @@
 
 import type { TableGroupData } from '@/app/lib/schema/convertSchemaToText'
 import type { Schema } from '@liam-hq/db-structure'
+import type { Tables } from '@liam-hq/db/supabase/database.types'
 import type { FC } from 'react'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ChatInput } from '../ChatInput'
 import type { Mode } from '../ChatInput/components/ModeToggleSwitch/ModeToggleSwitch'
 import { ChatMessage } from '../ChatMessage'
@@ -14,6 +15,7 @@ import {
   getCurrentUserId,
   loadMessages,
   saveMessage,
+  setupRealtimeSubscription,
 } from './services'
 import {
   createChatEntry,
@@ -27,15 +29,15 @@ import type { ChatEntry } from './types/chatTypes'
 interface Props {
   schemaData: Schema
   tableGroups?: Record<string, TableGroupData>
-  projectId: string
   designSessionId?: string
+  organizationId?: string
 }
 
 export const Chat: FC<Props> = ({
   schemaData,
   tableGroups,
-  projectId,
   designSessionId,
+  organizationId,
 }) => {
   const [messages, setMessages] = useState<ChatEntry[]>([WELCOME_MESSAGE])
   const [isLoading, setIsLoading] = useState(false)
@@ -43,6 +45,19 @@ export const Chat: FC<Props> = ({
   const [isLoadingMessages, setIsLoadingMessages] = useState(true)
   const [progressMessages, setProgressMessages] = useState<string[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+
+  // TODO: Extract complex state management into custom hook - Create useRealtimeChat hook for better testability and reusability
+  // TODO: Add connection state management - Track realtime connection status and display to user
+
+  // Get current user ID on component mount
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const userId = await getCurrentUserId()
+      setCurrentUserId(userId)
+    }
+    fetchUserId()
+  }, [])
 
   // Load existing messages on component mount
   useEffect(() => {
@@ -65,11 +80,93 @@ export const Chat: FC<Props> = ({
     loadExistingMessages()
   }, [designSessionId])
 
+  // Handle new messages from realtime subscription
+  const handleNewMessage = useCallback(
+    (newMessage: Tables<'messages'>) => {
+      // Convert database message to ChatEntry format
+      const chatEntry = {
+        ...convertMessageToChatEntry(newMessage),
+        dbId: newMessage.id,
+      }
+
+      // TODO: Implement efficient duplicate checking - Use Set/Map for O(1) duplicate checking instead of O(n) array.some()
+
+      // Check if message already exists to prevent duplicates
+      setMessages((prev) => {
+        const messageExists = prev.some((msg) => msg.dbId === newMessage.id)
+        if (messageExists) {
+          return prev
+        }
+
+        // TODO: Improve optimistic update logic - Use temporary IDs or timestamps instead of content comparison for better reliability
+
+        // For user messages from current user, we already add them optimistically
+        // so we should update the existing message with the database ID instead of adding a new one
+        if (chatEntry.isUser && newMessage.user_id === currentUserId) {
+          const updated = prev.map((msg) => {
+            // Find the most recent user message without a dbId and update it
+            if (msg.isUser && !msg.dbId && msg.content === newMessage.content) {
+              return { ...msg, dbId: newMessage.id }
+            }
+            return msg
+          })
+
+          // Check if we actually updated an existing message
+          const wasUpdated = updated.some((msg, index) => msg !== prev[index])
+          if (wasUpdated) {
+            return updated
+          }
+
+          // If no existing message was updated, this might be from another tab
+          // so we should add it as a new message
+        }
+
+        // For AI messages or messages from other users, add them to the chat
+
+        // TODO: Implement smart auto-scroll - Consider user's scroll position and only auto-scroll when user is at bottom
+
+        // Add the new message and scroll to bottom
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+        }, 100)
+
+        return [...prev, chatEntry]
+      })
+    },
+    [currentUserId],
+  )
+
+  // TODO: Implement comprehensive error handling - Add user notifications, retry logic, and distinguish between fatal/temporary errors
+  const handleRealtimeError = useCallback((error: Error) => {
+    console.error('Realtime subscription error:', error)
+    // TODO: Add user notification system and automatic retry mechanism
+  }, [])
+
+  // TODO: Add network failure handling - Implement reconnection logic and offline message sync
+  // TODO: Add authentication/authorization validation - Verify user permissions for realtime subscription
+  // Set up realtime subscription for new messages only after currentUserId is available
+  useEffect(() => {
+    if (!designSessionId || currentUserId === null) {
+      return
+    }
+
+    const subscription = setupRealtimeSubscription(
+      designSessionId,
+      handleNewMessage,
+      handleRealtimeError,
+    )
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [designSessionId, currentUserId, handleNewMessage, handleRealtimeError])
+
   // Scroll to bottom when component mounts or messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [])
 
+  // TODO: Add rate limiting - Implement rate limiting for message sending to prevent spam
   // biome-ignore  lint/complexity/noExcessiveCognitiveComplexity: fix later
   const handleSendMessage = async (content: string, mode: Mode) => {
     // Update the current mode and agent type
@@ -138,8 +235,8 @@ export const Chat: FC<Props> = ({
           schemaData,
           tableGroups,
           history,
-          projectId,
           mode,
+          organizationId,
         }),
       })
 

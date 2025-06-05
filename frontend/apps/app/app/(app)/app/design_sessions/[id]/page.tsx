@@ -29,11 +29,7 @@ export default async function Page({ params }: PageProps) {
     throw new Error('Failed to fetch schema data')
   }
 
-  if (!schemaResult.data?.schema) {
-    throw new Error('Schema data not found')
-  }
-
-  const schemaParseResult = v.safeParse(schemaSchema, schemaResult.data.schema)
+  const schemaParseResult = v.safeParse(schemaSchema, schemaResult.data?.schema)
   if (!schemaParseResult.success) {
     throw new Error('Invalid schema data')
   }

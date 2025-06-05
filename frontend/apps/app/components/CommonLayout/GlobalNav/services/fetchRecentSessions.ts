@@ -2,7 +2,7 @@
 
 import { createClient } from '@/libs/db/client'
 
-type RecentSession = {
+export type RecentSession = {
   id: string
   name: string
   created_at: string

@@ -189,7 +189,7 @@
 
 .secondaryButton {
   background-color: var(--global-background-secondary);
-  color: var(--global-foreground);
+  color: #000;
   border: 1px solid var(--global-border);
 }
 

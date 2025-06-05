@@ -48,29 +48,6 @@ To set up a development environment, please follow these steps:
    **Required for basic local development:**
    - Supabase keys will be automatically configured when you start the database (see step 4)
 
-   **Optional environment variables (for specific features):**
-   
-   **GitHub Integration** (required only if you want to test GitHub App features):
-   - `GITHUB_APP_ID` - GitHub App ID for repository integration
-   - `GITHUB_CLIENT_ID` - GitHub OAuth client ID for authentication  
-   - `GITHUB_CLIENT_SECRET` - GitHub OAuth client secret
-   - `GITHUB_PRIVATE_KEY` - GitHub App private key
-   
-   **AI Features** (required only for AI-powered features):
-   - `OPENAI_API_KEY` - OpenAI API key for AI functionality
-   
-   **Background Jobs** (required only for async job processing):
-   - `TRIGGER_SECRET_KEY` - Trigger.dev secret key
-   
-   **Observability** (optional for development):
-   - `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY` - Langfuse observability
-   - `SENTRY_DSN`, `SENTRY_ORG`, `SENTRY_PROJECT` - Error tracking
-   
-   **Email** (optional for development):
-   - `RESEND_API_KEY`, `RESEND_EMAIL_FROM_ADDRESS` - Email service
-
-   **Note:** The application will work for basic local development without the optional environment variables. You may see some warnings in the console, but core functionality (authentication, database access, ER diagram viewing) will work correctly.
-
    **For maintainers (Vercel team members only):**
 
    If you are a maintainer with access to the Vercel project, you can use the Vercel CLI to pull environment variables:
@@ -114,6 +91,7 @@ To set up a development environment, please follow these steps:
    | @liam-hq/storybook | http://localhost:6006 |
 
    **Test login credentials:**
+   - Login path: http://localhost:3001/app/login
    - Email: `test@example.com`
    - Password: `liampassword1234`
 

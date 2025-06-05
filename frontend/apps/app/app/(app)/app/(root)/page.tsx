@@ -26,21 +26,5 @@ export default async function Page() {
     )
   }
 
-  const organizationId = organizationMembers[0].organization_id
-
-  const { data: projects, error: projectsError } = await supabase
-    .from('projects')
-    .select('id')
-    .eq('organization_id', organizationId)
-    .limit(1)
-
-  if (projectsError) {
-    console.error('Error fetching projects:', projectsError)
-  }
-
-  if (projects && projects.length > 0) {
-    redirect(urlgen('projects'))
-  }
-
-  redirect(urlgen('projects/new'))
+  redirect(urlgen('design_sessions/new'))
 }

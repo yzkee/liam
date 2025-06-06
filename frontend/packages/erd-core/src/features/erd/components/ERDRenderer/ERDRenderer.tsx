@@ -15,6 +15,7 @@ import {
   type FC,
   createRef,
   useCallback,
+  useMemo,
   useState,
 } from 'react'
 import { AppBar } from './AppBar'
@@ -24,7 +25,7 @@ import { toggleLogEvent } from '@/features/gtm/utils'
 import { useIsTouchDevice } from '@/hooks'
 import { useVersion } from '@/providers'
 import { useSchemaStore, useUserEditingStore } from '@/stores'
-import { convertSchemaToNodes } from '../../utils'
+import { convertSchemaToNodes, createHash } from '../../utils'
 import { ERDContent } from '../ERDContent'
 import { CardinalityMarkers } from './CardinalityMarkers'
 import { ErrorDisplay } from './ErrorDisplay'
@@ -59,6 +60,11 @@ export const ERDRenderer: FC<Props> = ({
 
   const { showMode } = useUserEditingStore()
   const { current } = useSchemaStore()
+  const schemaKey = useMemo(() => {
+    const str = JSON.stringify(current)
+    return createHash(str)
+  }, [current])
+
   const { nodes, edges } = convertSchemaToNodes({
     schema: current,
     showMode,
@@ -143,7 +149,7 @@ export const ERDRenderer: FC<Props> = ({
                   {errorObjects.length > 0 || (
                     <>
                       <ERDContent
-                        key={`${nodes.length}-${showMode}`}
+                        key={`${schemaKey}-${showMode}`}
                         nodes={nodes}
                         edges={edges}
                         displayArea="main"

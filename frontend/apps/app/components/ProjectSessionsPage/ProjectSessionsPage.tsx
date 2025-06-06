@@ -2,9 +2,9 @@ import { urlgen } from '@/libs/routes'
 import { Button, MessagesSquare } from '@liam-hq/ui'
 import Link from 'next/link'
 import type { FC } from 'react'
-import { fetchProjectSessions } from '../services/fetchProjectSessions'
 import styles from './ProjectSessionsPage.module.css'
 import { SessionItem } from './SessionItem'
+import { fetchProjectSessions } from './services/fetchProjectSessions'
 
 type Props = {
   projectId: string

@@ -1,4 +1,4 @@
-import { ProjectSessionsPage } from '@/components/ProjectLayout/ProjectSessionsPage'
+import { ProjectSessionsPage } from '@/components/ProjectSessionsPage'
 import type { FC } from 'react'
 
 type Props = {

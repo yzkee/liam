@@ -31,6 +31,8 @@ interface Props {
   tableGroups?: Record<string, TableGroupData>
   designSessionId?: string
   organizationId?: string
+  buildingSchemaId: string
+  latestVersionNumber?: number
 }
 
 export const Chat: FC<Props> = ({
@@ -38,6 +40,8 @@ export const Chat: FC<Props> = ({
   tableGroups,
   designSessionId,
   organizationId,
+  buildingSchemaId,
+  latestVersionNumber = 0,
 }) => {
   const [messages, setMessages] = useState<ChatEntry[]>([WELCOME_MESSAGE])
   const [isLoading, setIsLoading] = useState(false)
@@ -237,6 +241,8 @@ export const Chat: FC<Props> = ({
           history,
           mode,
           organizationId,
+          buildingSchemaId,
+          latestVersionNumber,
         }),
       })
 

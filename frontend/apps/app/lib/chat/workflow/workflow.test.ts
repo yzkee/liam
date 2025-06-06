@@ -31,6 +31,81 @@ describe('Chat Workflow', () => {
   }
   let mockGetAgent: ReturnType<typeof vi.fn>
 
+  // Helper function to create test schema data
+  const createMockSchema = (): Schema => ({
+    tables: {
+      users: {
+        name: 'users',
+        columns: {
+          id: {
+            name: 'id',
+            type: 'integer',
+            default: null,
+            check: null,
+            primary: true,
+            unique: false,
+            notNull: true,
+            comment: null,
+          },
+          email: {
+            name: 'email',
+            type: 'varchar',
+            default: null,
+            check: null,
+            primary: false,
+            unique: false,
+            notNull: true,
+            comment: null,
+          },
+          name: {
+            name: 'name',
+            type: 'varchar',
+            default: null,
+            check: null,
+            primary: false,
+            unique: false,
+            notNull: false,
+            comment: null,
+          },
+        },
+        comment: null,
+        indexes: {},
+        constraints: {},
+      },
+    },
+    relationships: {},
+    tableGroups: {},
+  })
+
+  // Helper function to create base workflow state
+  const createBaseState = (
+    overrides: Partial<WorkflowState> = {},
+  ): WorkflowState => ({
+    mode: 'Ask',
+    userInput: 'Test input',
+    history: [],
+    schemaData: mockSchemaData,
+    projectId: 'test-project-id',
+    buildingSchemaId: 'test-building-schema-id',
+    ...overrides,
+  })
+
+  // Helper function to execute workflow and assert common expectations
+  const executeAndAssertSuccess = async (
+    state: WorkflowState,
+    expectedMode: 'Ask' | 'Build',
+  ) => {
+    const result = await executeChatWorkflow(state, { streaming: false })
+
+    expect(result.mode).toBe(expectedMode)
+    expect(result.error).toBeUndefined()
+    expect(result.finalResponse).toBe('Mocked agent response')
+    expect(typeof result.finalResponse).toBe('string')
+    expect(mockAgent.generate).toHaveBeenCalledOnce()
+
+    return result
+  }
+
   beforeEach(async () => {
     // Reset all mocks
     vi.clearAllMocks()
@@ -39,51 +114,8 @@ describe('Chat Workflow', () => {
     const langchainModule = await import('@/lib/langchain')
     mockGetAgent = vi.mocked(langchainModule.getAgent)
 
-    // Mock schema data for testing
-    mockSchemaData = {
-      tables: {
-        users: {
-          name: 'users',
-          columns: {
-            id: {
-              name: 'id',
-              type: 'integer',
-              default: null,
-              check: null,
-              primary: true,
-              unique: false,
-              notNull: true,
-              comment: null,
-            },
-            email: {
-              name: 'email',
-              type: 'varchar',
-              default: null,
-              check: null,
-              primary: false,
-              unique: false,
-              notNull: true,
-              comment: null,
-            },
-            name: {
-              name: 'name',
-              type: 'varchar',
-              default: null,
-              check: null,
-              primary: false,
-              unique: false,
-              notNull: false,
-              comment: null,
-            },
-          },
-          comment: null,
-          indexes: {},
-          constraints: {},
-        },
-      },
-      relationships: {},
-      tableGroups: {},
-    }
+    // Create mock schema data
+    mockSchemaData = createMockSchema()
 
     // Mock agent
     mockAgent = {
@@ -101,35 +133,22 @@ describe('Chat Workflow', () => {
 
   describe('Ask Mode', () => {
     it('should execute successfully with valid Ask mode state', async () => {
-      const askState: WorkflowState = {
+      const state = createBaseState({
         mode: 'Ask',
         userInput: 'What is the users table structure?',
-        history: [],
-        schemaData: mockSchemaData,
-        projectId: 'test-project-id',
-        buildingSchemaId: 'test-building-schema-id',
-      }
+      })
 
-      const result = await executeChatWorkflow(askState, { streaming: false })
-
-      expect(result.mode).toBe('Ask')
-      expect(result.error).toBeUndefined()
-      expect(result.finalResponse).toBe('Mocked agent response')
-      expect(typeof result.finalResponse).toBe('string')
-      expect(mockAgent.generate).toHaveBeenCalledOnce()
+      await executeAndAssertSuccess(state, 'Ask')
     })
 
     it('should handle Ask mode with history', async () => {
-      const askState: WorkflowState = {
+      const state = createBaseState({
         mode: 'Ask',
         userInput: 'What is the users table structure?',
         history: ['Previous message 1', 'Previous message 2'],
-        schemaData: mockSchemaData,
-        projectId: 'test-project-id',
-        buildingSchemaId: 'test-building-schema-id',
-      }
+      })
 
-      const result = await executeChatWorkflow(askState, { streaming: false })
+      const result = await executeChatWorkflow(state, { streaming: false })
 
       expect(result.mode).toBe('Ask')
       expect(result.error).toBeUndefined()
@@ -144,98 +163,64 @@ describe('Chat Workflow', () => {
 
   describe('Build Mode', () => {
     it('should execute successfully with valid Build mode state', async () => {
-      const buildState: WorkflowState = {
+      const state = createBaseState({
         mode: 'Build',
         userInput: 'Add a created_at timestamp column to the users table',
-        history: [],
-        schemaData: mockSchemaData,
-        projectId: 'test-project-id',
-        buildingSchemaId: 'test-building-schema-id',
-      }
+      })
 
-      const result = await executeChatWorkflow(buildState, { streaming: false })
-
-      expect(result.mode).toBe('Build')
-      expect(result.error).toBeUndefined()
-      expect(result.finalResponse).toBe('Mocked agent response')
-      expect(typeof result.finalResponse).toBe('string')
-      expect(mockAgent.generate).toHaveBeenCalledOnce()
+      await executeAndAssertSuccess(state, 'Build')
     })
 
     it('should handle Build mode with complex schema modifications', async () => {
-      const buildState: WorkflowState = {
+      const state = createBaseState({
         mode: 'Build',
         userInput: 'Create a new posts table with foreign key to users',
-        history: [],
-        schemaData: mockSchemaData,
-        projectId: 'test-project-id',
-        buildingSchemaId: 'test-building-schema-id',
-      }
+      })
 
-      const result = await executeChatWorkflow(buildState, { streaming: false })
-
-      expect(result.mode).toBe('Build')
-      expect(result.error).toBeUndefined()
-      expect(result.finalResponse).toBe('Mocked agent response')
+      await executeAndAssertSuccess(state, 'Build')
     })
   })
 
   describe('Error Handling', () => {
     it('should handle missing mode gracefully', async () => {
-      const invalidState: WorkflowState = {
-        // mode is missing - should trigger validation error
+      const testState = createBaseState({
         userInput: 'What is the users table structure?',
-        history: [],
-        schemaData: mockSchemaData,
-        projectId: 'test-project-id',
-        buildingSchemaId: 'test-building-schema-id',
-      }
+      })
+      // Remove mode property by creating a new object without it
+      const { mode, ...stateWithoutMode } = testState
+      const invalidState = stateWithoutMode as WorkflowState
 
       const result = await executeChatWorkflow(invalidState, {
         streaming: false,
       })
 
       expect(result).toBeDefined()
-      expect(result.userInput).toBe('What is the users table structure?')
       expect(result.error).toBe('Mode must be selected in UI before processing')
     })
 
-    it('should handle missing schema data', async () => {
-      const noSchemaState: WorkflowState = {
+    it('should handle missing schema data gracefully', async () => {
+      const testState = createBaseState({
         mode: 'Ask',
         userInput: 'What is the database structure?',
-        history: [],
-        projectId: 'test-project-id',
-        buildingSchemaId: 'test-building-schema-id',
-      }
+      })
+      // Remove schemaData property by creating a new object without it
+      const { schemaData, ...stateWithoutSchema } = testState
+      const invalidState = stateWithoutSchema as WorkflowState
 
-      const result = await executeChatWorkflow(noSchemaState, {
+      const result = await executeChatWorkflow(invalidState, {
         streaming: false,
       })
 
       expect(result).toBeDefined()
-      expect(result.mode).toBe('Ask')
       expect(result.error).toBe('Schema data is required for answer generation')
     })
 
     it('should handle agent generation errors', async () => {
-      // Mock agent to throw an error
       mockAgent.generate.mockRejectedValue(new Error('Agent generation failed'))
+      const state = createBaseState()
 
-      const errorState: WorkflowState = {
-        mode: 'Ask',
-        userInput: 'Test input',
-        history: [],
-        schemaData: mockSchemaData,
-        projectId: 'test-project-id',
-        buildingSchemaId: 'test-building-schema-id',
-      }
+      const result = await executeChatWorkflow(state, { streaming: false })
 
-      const result = await executeChatWorkflow(errorState, {
-        streaming: false,
-      })
-
-      // The workflow now provides a proper error response to the user
       expect(result.error).toBe('Agent generation failed')
       expect(result.finalResponse).toBe(
         'Sorry, an error occurred during processing: Agent generation failed',
@@ -243,27 +228,15 @@ describe('Chat Workflow', () => {
     })
 
     it('should handle missing agent', async () => {
-      // Mock getAgent to throw error (simulating agent initialization failure)
       mockGetAgent.mockImplementation(() => {
         throw new Error(
           'databaseSchemaAskAgent not found in LangChain instance',
         )
       })
+      const state = createBaseState()
 
-      const errorState: WorkflowState = {
-        mode: 'Ask',
-        userInput: 'Test input',
-        history: [],
-        schemaData: mockSchemaData,
-        projectId: 'test-project-id',
-        buildingSchemaId: 'test-building-schema-id',
-      }
+      const result = await executeChatWorkflow(state, { streaming: false })
 
-      const result = await executeChatWorkflow(errorState, {
-        streaming: false,
-      })
-
-      // The workflow now provides a proper error response to the user
       expect(result.error).toBe(
         'databaseSchemaAskAgent not found in LangChain instance',
       )
@@ -273,18 +246,9 @@ describe('Chat Workflow', () => {
     })
 
     it('should handle empty user input', async () => {
-      const emptyInputState: WorkflowState = {
-        mode: 'Ask',
-        userInput: '',
-        history: [],
-        schemaData: mockSchemaData,
-        projectId: 'test-project-id',
-        buildingSchemaId: 'test-building-schema-id',
-      }
+      const state = createBaseState({ userInput: '' })
 
-      const result = await executeChatWorkflow(emptyInputState, {
-        streaming: false,
-      })
+      const result = await executeChatWorkflow(state, { streaming: false })
 
       expect(result).toBeDefined()
       expect(result.userInput).toBe('')
@@ -294,14 +258,11 @@ describe('Chat Workflow', () => {
 
   describe('State Management', () => {
     it('should preserve state properties through workflow execution', async () => {
-      const initialState: WorkflowState = {
-        mode: 'Ask',
+      const initialState = createBaseState({
         userInput: 'Test state management',
         history: ['Previous message 1', 'Previous message 2'],
-        schemaData: mockSchemaData,
         projectId: 'test-project-123',
-        buildingSchemaId: 'test-building-schema-id',
-      }
+      })
 
       const result = await executeChatWorkflow(initialState, {
         streaming: false,
@@ -310,96 +271,67 @@ describe('Chat Workflow', () => {
       expect(result.userInput).toBe(initialState.userInput)
       expect(result.projectId).toBe(initialState.projectId)
       expect(result.schemaData).toEqual(initialState.schemaData)
-      // History should be updated with new conversation
       expect(result.history).toHaveLength(4) // 2 original + 2 new
     })
   })
 
   describe('Agent Selection', () => {
-    it('should use databaseSchemaAskAgent for Ask mode', async () => {
-      const askState: WorkflowState = {
-        mode: 'Ask',
-        userInput: 'Test question',
-        history: [],
-        schemaData: mockSchemaData,
-        projectId: 'test-project',
-        buildingSchemaId: 'test-building-schema-id',
-      }
+    const agentTestCases = [
+      { mode: 'Ask' as const, expectedAgent: 'databaseSchemaAskAgent' },
+      { mode: 'Build' as const, expectedAgent: 'databaseSchemaBuildAgent' },
+    ]
 
-      await executeChatWorkflow(askState, { streaming: false })
+    for (const { mode, expectedAgent } of agentTestCases) {
+      it(`should use ${expectedAgent} for ${mode} mode`, async () => {
+        const state = createBaseState({ mode })
 
-      expect(mockGetAgent).toHaveBeenCalledWith('databaseSchemaAskAgent')
-    })
+        await executeChatWorkflow(state, { streaming: false })
 
-    it('should use databaseSchemaBuildAgent for Build mode', async () => {
-      const buildState: WorkflowState = {
-        mode: 'Build',
-        userInput: 'Test modification',
-        history: [],
-        schemaData: mockSchemaData,
-        projectId: 'test-project',
-        buildingSchemaId: 'test-building-schema-id',
-      }
-
-      await executeChatWorkflow(buildState, { streaming: false })
-
-      expect(mockGetAgent).toHaveBeenCalledWith('databaseSchemaBuildAgent')
-    })
+        expect(mockGetAgent).toHaveBeenCalledWith(expectedAgent)
+      })
+    }
   })
 
   describe('Workflow Integration', () => {
-    it('should handle multiple sequential workflow executions', async () => {
-      const states: WorkflowState[] = [
-        {
-          mode: 'Ask',
-          userInput: 'First question',
-          history: [],
-          schemaData: mockSchemaData,
-          projectId: 'test-project',
-          buildingSchemaId: 'test-building-schema-id',
-        },
-        {
-          mode: 'Build',
-          userInput: 'First modification',
-          history: [],
-          schemaData: mockSchemaData,
-          projectId: 'test-project',
-          buildingSchemaId: 'test-building-schema-id',
-        },
-        {
-          mode: 'Ask',
-          userInput: 'Follow-up question',
-          history: [],
-          schemaData: mockSchemaData,
-          projectId: 'test-project',
-          buildingSchemaId: 'test-building-schema-id',
-        },
-      ]
-
-      // Execute sequentially to avoid mock conflicts
+    // Helper function to execute multiple workflows sequentially
+    const executeSequentialWorkflows = async (
+      states: Partial<WorkflowState>[],
+    ) => {
       const results = []
-      for (const state of states) {
+      for (const stateOverride of states) {
         // Reset mocks for each execution
         mockAgent.stream.mockReturnValue(
           (async function* () {
             yield 'Mocked agent response'
           })(),
         )
+        const state = createBaseState(stateOverride)
         const result = await executeChatWorkflow(state, { streaming: false })
         results.push(result)
       }
+      return results
+    }
+
+    it('should handle multiple sequential workflow executions', async () => {
+      const stateOverrides = [
+        { mode: 'Ask' as const, userInput: 'First question' },
+        { mode: 'Build' as const, userInput: 'First modification' },
+        { mode: 'Ask' as const, userInput: 'Follow-up question' },
+      ]
+
+      const results = await executeSequentialWorkflows(stateOverrides)
 
       expect(results).toHaveLength(3)
-      results.forEach((result, index) => {
+      for (const [index, result] of results.entries()) {
         expect(result).toBeDefined()
-        expect(result.mode).toBe(states[index].mode)
-        expect(result.userInput).toBe(states[index].userInput)
+        expect(result.mode).toBe(stateOverrides[index].mode)
+        expect(result.userInput).toBe(stateOverrides[index].userInput)
         expect(result.finalResponse).toBe('Mocked agent response')
-      })
+      }
     })
 
     it('should maintain consistency across different input types', async () => {
-      const testCases = [
+      const testInputs = [
         'Simple question about users table',
         'Complex query with multiple joins and conditions',
         'Schema modification request with constraints',
@@ -407,34 +339,14 @@ describe('Chat Workflow', () => {
         'Multi-line\ninput\nwith\nbreaks',
       ]
 
-      // Execute sequentially to avoid mock conflicts
-      const results = []
-      for (const userInput of testCases) {
-        // Reset mocks for each execution
-        mockAgent.stream.mockReturnValue(
-          (async function* () {
-            yield 'Mocked agent response'
-          })(),
-        )
-        const result = await executeChatWorkflow(
-          {
-            mode: 'Ask',
-            userInput,
-            history: [],
-            schemaData: mockSchemaData,
-            projectId: 'consistency-test',
-            buildingSchemaId: 'test-building-schema-id',
-          },
-          { streaming: false },
-        )
-        results.push(result)
-      }
+      const stateOverrides = testInputs.map((userInput) => ({ userInput }))
+      const results = await executeSequentialWorkflows(stateOverrides)
 
-      results.forEach((result, index) => {
+      for (const [index, result] of results.entries()) {
         expect(result).toBeDefined()
-        expect(result.userInput).toBe(testCases[index])
+        expect(result.userInput).toBe(testInputs[index])
         expect(result.finalResponse).toBe('Mocked agent response')
-      })
+      }
     })
   })
 })

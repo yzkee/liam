@@ -149,6 +149,10 @@ export const toLangGraphState = (state: WorkflowState) => {
     schemaText: state.schemaText,
     formattedChatHistory: state.formattedChatHistory,
     agentName: state.agentName,
+    buildingSchemaId: state.buildingSchemaId,
+    latestVersionNumber: state.latestVersionNumber,
+    organizationId: state.organizationId,
+    userId: state.userId,
   }
 }
 
@@ -243,8 +247,7 @@ export const fromLangGraphResult = (
     ),
     agentName: parseAgentName(validatedResult.agentName),
     // Schema update fields - buildingSchemaId is required, provide fallback
-    buildingSchemaId:
-      parseOptionalString(validatedResult.buildingSchemaId) || 'unknown',
+    buildingSchemaId: parseOptionalString(validatedResult.buildingSchemaId) || '',
     latestVersionNumber:
       typeof validatedResult.latestVersionNumber === 'number'
         ? validatedResult.latestVersionNumber

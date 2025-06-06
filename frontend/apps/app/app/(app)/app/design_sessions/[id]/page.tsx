@@ -2,6 +2,7 @@ import type { PageProps } from '@/app/types'
 import { SessionDetailPage } from '@/components/SessionDetailPage'
 import { fetchSchemaData } from '@/components/SessionDetailPage/services/fetchSchemaData'
 import { schemaSchema } from '@liam-hq/db-structure'
+import type { Schema } from '@liam-hq/db-structure'
 import * as v from 'valibot'
 import { fetchDesignSessionData } from './services/fetchDesignSessionData'
 
@@ -29,12 +30,37 @@ export default async function Page({ params }: PageProps) {
     throw new Error('Failed to fetch schema data')
   }
 
-  const schemaParseResult = v.safeParse(schemaSchema, schemaResult.data?.schema)
-  if (!schemaParseResult.success) {
-    throw new Error('Invalid schema data')
+  // Provide default schema if data is empty or invalid
+  const defaultSchema = {
+    tables: {},
+    relationships: {},
+    tableGroups: {},
   }
 
-  const schema = schemaParseResult.output
+  const schemaToValidate = schemaResult.data?.schema || defaultSchema
+  const schemaParseResult = v.safeParse(schemaSchema, schemaToValidate)
+
+  let schema: Schema
+  if (!schemaParseResult.success) {
+    console.error('Schema validation error:', schemaParseResult.issues)
+    // Use default schema if validation fails
+    const defaultSchemaParseResult = v.safeParse(schemaSchema, defaultSchema)
+    if (!defaultSchemaParseResult.success) {
+      throw new Error('Failed to create default schema')
+    }
+    console.warn('Using default schema due to validation failure')
+    schema = defaultSchemaParseResult.output
+  } else {
+    schema = schemaParseResult.output
+  }
+  const buildingSchemaId = schemaResult.data?.id
+
+  // buildingSchemaId is required - this should never happen given 1:1 relationship
+  if (!buildingSchemaId) {
+    throw new Error(
+      'Building schema ID not found for design session. Data integrity issue.',
+    )
+  }
 
   return (
     <SessionDetailPage
@@ -42,6 +68,7 @@ export default async function Page({ params }: PageProps) {
       designSession={{
         id: designSessionId,
         organizationId: designSessionData.organization_id,
+        buildingSchemaId,
       }}
     />
   )

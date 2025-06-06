@@ -159,11 +159,9 @@ export const setupRealtimeSubscription = (
       },
       (payload) => {
         try {
-          // Use valibot for runtime type validation instead of type assertion
           const validatedMessage = v.parse(realtimeMessageSchema, payload.new)
           onNewMessage(validatedMessage)
         } catch (error) {
-          console.error('Error processing realtime message:', error)
           onError?.(
             error instanceof Error
               ? error

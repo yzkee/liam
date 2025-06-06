@@ -8,10 +8,13 @@ import type { AppDatabaseOverrides } from './types'
 export type {
   EmailOtpType,
   QueryData,
+  SupabaseClient,
 } from '@supabase/supabase-js'
 export type { Database } from '../supabase/database.types'
 export type { Tables } from '../supabase/database.types'
 export type { AppDatabaseOverrides } from './types'
+
+export type SupabaseClientType = ReturnType<typeof createServerClient>
 
 // for Server Components
 export const createServerClient = _createServerClient<AppDatabaseOverrides>

@@ -1,7 +1,7 @@
 import { getOrganizationId } from '@/features/organizations/services/getOrganizationId'
 import { createClient } from '@/libs/db/server'
-import { parse } from '@liam-hq/db-structure/parser'
 import type { Schema } from '@liam-hq/db-structure'
+import { parse } from '@liam-hq/db-structure/parser'
 import type { TablesInsert } from '@liam-hq/db/supabase/database.types'
 import { getFileContent } from '@liam-hq/github'
 import { Panel } from './Panel'
@@ -52,9 +52,12 @@ async function getGithubRepositoryInfo(projectId: string) {
   return repository
 }
 
-async function createOrGetDesignSession(projectId: string, branchOrCommit: string) {
+async function createOrGetDesignSession(
+  projectId: string,
+  branchOrCommit: string,
+) {
   const supabase = await createClient()
-  
+
   // Get current user
   const { data: userData, error: userError } = await supabase.auth.getUser()
   if (userError || !userData.user) {
@@ -117,7 +120,7 @@ async function createOrGetBuildingSchema(
   schema: Schema,
   organizationId: string,
   schemaFilePath: string | null,
-  gitSha: string | null
+  gitSha: string | null,
 ) {
   const supabase = await createClient()
 
@@ -167,7 +170,10 @@ export async function BuildPage({ projectId, branchOrCommit }: Props) {
   ])
 
   // Create or get existing design session
-  const designSession = await createOrGetDesignSession(projectId, branchOrCommit)
+  const designSession = await createOrGetDesignSession(
+    projectId,
+    branchOrCommit,
+  )
 
   const repositoryFullName = `${repository.owner}/${repository.name}`
 
@@ -199,7 +205,7 @@ export async function BuildPage({ projectId, branchOrCommit }: Props) {
     schema,
     organizationId,
     githubSchemaFilePath.path,
-    null // gitSha can be added later if needed
+    null, // gitSha can be added later if needed
   )
 
   return (
@@ -208,6 +214,9 @@ export async function BuildPage({ projectId, branchOrCommit }: Props) {
       errors={errors || []}
       tableGroups={{}}
       buildingSchemaId={buildingSchemaId}
+      designSessionId={designSession.id}
+      organizationId={organizationId}
+      latestVersionNumber={0}
     />
   )
 }

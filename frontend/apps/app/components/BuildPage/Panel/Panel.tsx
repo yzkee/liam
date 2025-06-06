@@ -27,6 +27,9 @@ type Props = {
   errors: ErrorObject[]
   tableGroups: Record<string, TableGroup>
   buildingSchemaId: string
+  designSessionId: string
+  organizationId: string
+  latestVersionNumber?: number
 }
 
 export const Panel: FC<Props> = ({
@@ -34,6 +37,9 @@ export const Panel: FC<Props> = ({
   errors,
   tableGroups: initialTableGroups = {},
   buildingSchemaId,
+  designSessionId,
+  organizationId,
+  latestVersionNumber = 0,
 }) => {
   const { tableGroups, addTableGroup } = useTableGroups(initialTableGroups)
 
@@ -57,7 +63,13 @@ export const Panel: FC<Props> = ({
     <div className={styles.container}>
       <div className={styles.columns}>
         <div className={styles.chatSection}>
-          <Chat schemaData={schema} buildingSchemaId={buildingSchemaId} />
+          <Chat
+            schemaData={schema}
+            designSessionId={designSessionId}
+            organizationId={organizationId}
+            buildingSchemaId={buildingSchemaId}
+            latestVersionNumber={latestVersionNumber}
+          />
         </div>
         <TabsRoot defaultValue="tables" className={styles.tabsRoot}>
           <TabsList className={styles.tabsList}>

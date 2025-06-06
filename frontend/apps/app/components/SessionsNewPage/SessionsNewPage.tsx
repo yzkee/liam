@@ -2,16 +2,27 @@
 
 import { ArrowRight, Button } from '@liam-hq/ui'
 import type { ChangeEvent, FC } from 'react'
-import { useActionState, useEffect, useRef } from 'react'
+import { useActionState, useEffect, useRef, useTransition } from 'react'
+import type { Projects } from '../CommonLayout/AppBar/ProjectsDropdownMenu/services/getProjects'
 import styles from './SessionsNewPage.module.css'
 import { createSession } from './actions/createSession'
+import { getBranches } from './actions/getBranches'
 
-export const SessionsNewPage: FC = () => {
+type Props = {
+  projects: Projects | null
+}
+
+export const SessionsNewPage: FC<Props> = ({ projects }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-
+  const [_isPending, startTransition] = useTransition()
   const [state, formAction, isPending] = useActionState(createSession, {
     success: false,
   })
+
+  const [branchesState, branchesAction, isBranchesLoading] = useActionState(
+    getBranches,
+    { branches: [], loading: false },
+  )
 
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const textarea = e.target
@@ -39,6 +50,63 @@ export const SessionsNewPage: FC = () => {
           <form action={formAction}>
             <div className={styles.formContent}>
               <div className={styles.formGroup}>
+                <label htmlFor="project" className={styles.label}>
+                  Project (Optional)
+                </label>
+                <select
+                  id="project"
+                  name="projectId"
+                  onChange={(e) => {
+                    startTransition(() => {
+                      const formData = new FormData()
+                      formData.append('projectId', e.target.value)
+                      branchesAction(formData)
+                    })
+                  }}
+                  disabled={isPending}
+                  className={styles.select}
+                >
+                  <option value="">Select a project...</option>
+                  {projects?.map((project) => (
+                    <option key={project.id} value={project.id}>
+                      {project.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {branchesState.branches.length > 0 && (
+                <div className={styles.formGroup}>
+                  <label htmlFor="branch" className={styles.label}>
+                    Branch
+                  </label>
+                  <select
+                    id="branch"
+                    name="gitSha"
+                    disabled={isPending || isBranchesLoading}
+                    className={styles.select}
+                  >
+                    <option value="">Select a branch...</option>
+                    {branchesState.branches.map((branch) => (
+                      <option key={branch.name} value={branch.sha}>
+                        {branch.name}
+                        {branch.protected && ' (production)'}
+                      </option>
+                    ))}
+                  </select>
+                  {isBranchesLoading && (
+                    <p className={styles.loading}>Loading branches...</p>
+                  )}
+                  {branchesState.error && (
+                    <p className={styles.error}>{branchesState.error}</p>
+                  )}
+                </div>
+              )}
+
+              <div className={styles.formGroup}>
+                <label htmlFor="instructions" className={styles.label}>
+                  Instructions
+                </label>
                 <div className={styles.inputWrapper}>
                   <textarea
                     id="instructions"

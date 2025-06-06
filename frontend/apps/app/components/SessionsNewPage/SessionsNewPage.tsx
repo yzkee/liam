@@ -14,7 +14,7 @@ type Props = {
 
 export const SessionsNewPage: FC<Props> = ({ projects }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const [_isPending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
   const [state, formAction, isPending] = useActionState(createSession, {
     success: false,
   })
@@ -88,7 +88,7 @@ export const SessionsNewPage: FC<Props> = ({ projects }) => {
                   >
                     <option value="">Select a branch...</option>
                     {branchesState.branches.map((branch) => (
-                      <option key={branch.name} value={branch.sha}>
+                      <option key={branch.sha} value={branch.sha}>
                         {branch.name}
                         {branch.protected && ' (production)'}
                       </option>

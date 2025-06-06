@@ -10,5 +10,6 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
     environment: 'happy-dom',
+    setupFiles: ['@testing-library/jest-dom/vitest'],
   },
 })

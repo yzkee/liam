@@ -1,9 +1,10 @@
 import type { PageProps } from '@/app/types'
 import { SessionDetailPage } from '@/components/SessionDetailPage'
-import { schemaSchema } from '@liam-hq/db-structure'
-import type { Schema } from '@liam-hq/db-structure'
 import * as v from 'valibot'
-import { fetchDesignSessionData, fetchSchemaData } from './services/fetchDesignSessionData'
+import {
+  fetchDesignSessionData,
+  fetchSchemaData,
+} from './services/fetchDesignSessionData'
 
 const paramsSchema = v.object({
   id: v.string(),
@@ -29,29 +30,6 @@ export default async function Page({ params }: PageProps) {
     throw new Error('Failed to fetch schema data')
   }
 
-  // Provide default schema if data is empty or invalid
-  const defaultSchema = {
-    tables: {},
-    relationships: {},
-    tableGroups: {},
-  }
-
-  const schemaToValidate = schemaResult.data?.schema || defaultSchema
-  const schemaParseResult = v.safeParse(schemaSchema, schemaToValidate)
-
-  let schema: Schema
-  if (!schemaParseResult.success) {
-    console.error('Schema validation error:', schemaParseResult.issues)
-    // Use default schema if validation fails
-    const defaultSchemaParseResult = v.safeParse(schemaSchema, defaultSchema)
-    if (!defaultSchemaParseResult.success) {
-      throw new Error('Failed to create default schema')
-    }
-    console.warn('Using default schema due to validation failure')
-    schema = defaultSchemaParseResult.output
-  } else {
-    schema = schemaParseResult.output
-  }
   const buildingSchemaId = schemaResult.data?.id
   const latestVersionNumber = schemaResult.data?.latestVersionNumber ?? 0
 

@@ -38,3 +38,5 @@ export async function executeQuery(
 
   return data.results
 }
+
+export const query = executeQuery

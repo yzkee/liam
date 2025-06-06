@@ -1,10 +1,9 @@
 import type { PageProps } from '@/app/types'
 import { SessionDetailPage } from '@/components/SessionDetailPage'
-import { fetchSchemaData } from '@/components/SessionDetailPage/services/fetchSchemaData'
 import { schemaSchema } from '@liam-hq/db-structure'
 import type { Schema } from '@liam-hq/db-structure'
 import * as v from 'valibot'
-import { fetchDesignSessionData } from './services/fetchDesignSessionData'
+import { fetchDesignSessionData, fetchSchemaData } from './services/fetchDesignSessionData'
 
 const paramsSchema = v.object({
   id: v.string(),
@@ -65,7 +64,6 @@ export default async function Page({ params }: PageProps) {
 
   return (
     <SessionDetailPage
-      schema={schema}
       designSession={{
         id: designSessionId,
         organizationId: designSessionData.organization_id,

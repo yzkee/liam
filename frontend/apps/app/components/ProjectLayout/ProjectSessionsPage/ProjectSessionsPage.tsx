@@ -1,13 +1,8 @@
-'use client'
-
 import { urlgen } from '@/libs/routes'
 import { Button, MessagesSquare } from '@liam-hq/ui'
 import Link from 'next/link'
-import { type FC, useEffect, useState } from 'react'
-import {
-  type ProjectSession,
-  fetchProjectSessions,
-} from '../services/fetchProjectSessions'
+import type { FC } from 'react'
+import { fetchProjectSessions } from '../services/fetchProjectSessions'
 import styles from './ProjectSessionsPage.module.css'
 import { SessionItem } from './SessionItem'
 
@@ -15,34 +10,8 @@ type Props = {
   projectId: string
 }
 
-export const ProjectSessionsPage: FC<Props> = ({ projectId }) => {
-  const [sessions, setSessions] = useState<ProjectSession[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const loadSessions = async () => {
-      try {
-        const projectSessions = await fetchProjectSessions(projectId)
-        setSessions(projectSessions)
-      } catch (error) {
-        console.error('Failed to load project sessions:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    loadSessions()
-  }, [projectId])
-
-  if (loading) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.loadingState}>
-          <span>Loading sessions...</span>
-        </div>
-      </div>
-    )
-  }
+export const ProjectSessionsPage: FC<Props> = async ({ projectId }) => {
+  const sessions = await fetchProjectSessions(projectId)
 
   return (
     <div className={styles.container}>

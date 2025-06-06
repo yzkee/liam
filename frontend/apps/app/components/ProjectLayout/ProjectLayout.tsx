@@ -9,7 +9,6 @@ import {
   type ProjectTabValue,
 } from './ProjectHeader/projectConstants'
 import styles from './ProjectLayout.module.css'
-import { ProjectSessionsPage } from './ProjectSessionsPage'
 
 const getDefaultTabFromPath = async (): Promise<
   ProjectTabValue | undefined
@@ -53,7 +52,7 @@ export const ProjectLayout: FC<Props> = async ({
         {children}
       </TabsContent>
       <TabsContent value={PROJECT_TAB.SESSIONS} className={styles.tabContent}>
-        <ProjectSessionsPage projectId={projectId} />
+        {children}
       </TabsContent>
     </TabsRoot>
   )

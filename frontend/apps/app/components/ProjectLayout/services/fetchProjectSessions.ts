@@ -1,6 +1,4 @@
-'use client'
-
-import { createClient } from '@/libs/db/client'
+import { createClient } from '@/libs/db/server'
 
 export type ProjectSession = {
   id: string
@@ -13,7 +11,7 @@ export const fetchProjectSessions = async (
   projectId: string,
   limit = 10,
 ): Promise<ProjectSession[]> => {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: userData, error: userError } = await supabase.auth.getUser()
   if (userError || !userData.user) {

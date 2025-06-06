@@ -22,6 +22,6 @@
     "lint:biome": "biome check .",
     "lint:eslint": "eslint .",
     "lint:tsc": "tsc --noEmit",
-    "test": "vitest --watch=false"
+    "test": "vitest --watch=false --passWithNoTests"
   }
 }

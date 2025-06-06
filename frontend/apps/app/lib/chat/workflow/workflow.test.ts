@@ -120,7 +120,7 @@ describe('Chat Workflow', () => {
     // Get the mocked modules
     const langchainModule = await import('@/lib/langchain')
     const schemaModule = await import('@/libs/schema/createNewVersion')
-    
+
     mockGetAgent = vi.mocked(langchainModule.getAgent)
     mockCreateNewVersion = vi.mocked(schemaModule.createNewVersion)
 
@@ -217,7 +217,9 @@ describe('Chat Workflow', () => {
 
       expect(result.mode).toBe('Build')
       expect(result.error).toBeUndefined()
-      expect(result.finalResponse).toBe('Added created_at column to users table')
+      expect(result.finalResponse).toBe(
+        'Added created_at column to users table',
+      )
       expect(mockCreateNewVersion).toHaveBeenCalledWith({
         buildingSchemaId: 'test-building-schema-id',
         latestVersionNumber: 1,
@@ -302,7 +304,9 @@ describe('Chat Workflow', () => {
 
       expect(result.mode).toBe('Build')
       expect(result.error).toBe('Database constraint violation')
-      expect(result.finalResponse).toBe('Sorry, an error occurred during processing: Database constraint violation')
+      expect(result.finalResponse).toBe(
+        'Sorry, an error occurred during processing: Database constraint violation',
+      )
     })
 
     it('should handle schema update exception', async () => {
@@ -331,7 +335,9 @@ describe('Chat Workflow', () => {
 
       expect(result.mode).toBe('Build')
       expect(result.error).toBe('Failed to update schema: Network error')
-      expect(result.finalResponse).toBe('Sorry, an error occurred during processing: Failed to update schema: Network error')
+      expect(result.finalResponse).toBe(
+        'Sorry, an error occurred during processing: Failed to update schema: Network error',
+      )
     })
 
     it('should handle Build mode without buildingSchemaId', async () => {

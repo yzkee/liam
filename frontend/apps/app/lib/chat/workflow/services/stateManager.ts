@@ -247,7 +247,8 @@ export const fromLangGraphResult = (
     ),
     agentName: parseAgentName(validatedResult.agentName),
     // Schema update fields - buildingSchemaId is required, provide fallback
-    buildingSchemaId: parseOptionalString(validatedResult.buildingSchemaId) || '',
+    buildingSchemaId:
+      parseOptionalString(validatedResult.buildingSchemaId) || '',
     latestVersionNumber:
       typeof validatedResult.latestVersionNumber === 'number'
         ? validatedResult.latestVersionNumber

@@ -5,6 +5,7 @@ import {
 } from '@/lib/langchain'
 import { createNewVersion } from '@/libs/schema/createNewVersion'
 import type { Operation } from 'fast-json-patch'
+import * as v from 'valibot'
 import type { WorkflowState } from '../types'
 
 interface PreparedAnswerGeneration {
@@ -14,13 +15,24 @@ interface PreparedAnswerGeneration {
   formattedChatHistory: string
 }
 
-interface BuildAgentResponse {
-  message: string
-  schemaChanges: Operation[]
-}
+// Define schema for JSON Patch operations (RFC 6902)
+const jsonPatchOperationSchema = v.object({
+  op: v.picklist(['add', 'remove', 'replace', 'move', 'copy', 'test']),
+  path: v.string(),
+  value: v.optional(v.unknown()),
+  from: v.optional(v.string()),
+})
+
+// Define schema for BuildAgent response validation
+const buildAgentResponseSchema = v.object({
+  message: v.string(),
+  schemaChanges: v.array(jsonPatchOperationSchema),
+})
+
+type BuildAgentResponse = v.InferOutput<typeof buildAgentResponseSchema>
 
 /**
- * Parse structured response from buildAgent
+ * Parse structured response from buildAgent using valibot for type safety
  */
 const parseStructuredResponse = (
   response: string,
@@ -29,47 +41,73 @@ const parseStructuredResponse = (
     // Try to parse as JSON first
     const parsed: unknown = JSON.parse(response)
 
-    // Validate the structure with proper type guards
-    if (
-      typeof parsed === 'object' &&
-      parsed !== null &&
-      'message' in parsed &&
-      'schemaChanges' in parsed &&
-      typeof (parsed as { message: unknown }).message === 'string' &&
-      Array.isArray((parsed as { schemaChanges: unknown }).schemaChanges)
-    ) {
-      const validatedParsed = parsed as {
-        message: string
-        schemaChanges: Operation[]
-      }
+    // Use valibot to validate and parse the structure
+    const validationResult = v.safeParse(buildAgentResponseSchema, parsed)
+
+    if (validationResult.success) {
       return {
-        message: validatedParsed.message,
-        schemaChanges: validatedParsed.schemaChanges,
+        message: validationResult.output.message,
+        schemaChanges: validationResult.output.schemaChanges,
       }
     }
 
+    // Log validation issues for debugging
+    console.warn(
+      'BuildAgent response validation failed:',
+      validationResult.issues,
+    )
     return null
-  } catch {
-    // If JSON parsing fails, return null
+  } catch (error) {
+    // If JSON parsing fails, log the error and return null
+    console.warn('Failed to parse BuildAgent response as JSON:', error)
     return null
   }
+}
+
+/**
+ * Convert validated schema changes to Operation[] format
+ * Using type assertion after valibot validation ensures runtime safety
+ */
+const convertToOperations = (
+  schemaChanges: BuildAgentResponse['schemaChanges'],
+): Operation[] => {
+  return schemaChanges.map((change): Operation => {
+    // Create base operation object
+    const baseOperation = {
+      op: change.op,
+      path: change.path,
+    }
+
+    // Add optional properties if they exist
+    const operation = {
+      ...baseOperation,
+      ...(change.value !== undefined && { value: change.value }),
+      ...(change.from !== undefined && { from: change.from }),
+    }
+
+    // Type assertion is safe here because:
+    // 1. valibot has already validated the structure
+    // 2. We're following JSON Patch RFC 6902 specification
+    return operation as Operation
+  })
 }
 
 /**
  * Apply schema changes and return updated state
  */
 const applySchemaChanges = async (
-  schemaChanges: Operation[],
+  schemaChanges: BuildAgentResponse['schemaChanges'],
   buildingSchemaId: string,
   latestVersionNumber: number,
   message: string,
   state: WorkflowState,
 ): Promise<WorkflowState> => {
   try {
+    const operations = convertToOperations(schemaChanges)
     const result = await createNewVersion({
       buildingSchemaId,
       latestVersionNumber,
-      patch: schemaChanges,
+      patch: operations,
     })
 
     if (!result.success) {

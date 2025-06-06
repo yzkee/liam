@@ -10,6 +10,7 @@ interface ChatProcessorParams {
   mode: 'build' | 'ask'
   organizationId?: string
   buildingSchemaId: string
+  latestVersionNumber?: number
 }
 
 interface ChatProcessorResult {
@@ -65,6 +66,7 @@ async function processChatMessageSync(
     mode,
     organizationId,
     buildingSchemaId,
+    latestVersionNumber = 0,
   } = params
 
   try {
@@ -90,6 +92,7 @@ async function processChatMessageSync(
       schemaData,
       organizationId,
       buildingSchemaId,
+      latestVersionNumber,
     }
 
     // Execute workflow without streaming
@@ -185,6 +188,7 @@ async function* processChatMessageStreaming(
     mode,
     organizationId,
     buildingSchemaId,
+    latestVersionNumber = 0,
   } = params
 
   try {
@@ -202,6 +206,7 @@ async function* processChatMessageStreaming(
       schemaData,
       organizationId,
       buildingSchemaId,
+      latestVersionNumber,
     }
 
     // Execute workflow with streaming

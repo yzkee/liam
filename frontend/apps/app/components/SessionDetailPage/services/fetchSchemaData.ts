@@ -50,10 +50,17 @@ async function query(designSessionId: string) {
     }
   }
 
+  // Get the latest version number
+  const latestVersionNumber =
+    versions && versions.length > 0
+      ? Math.max(...versions.map((v) => v.number))
+      : 0
+
   return {
     data: {
       id: buildingSchema.id,
       schema: currentSchema,
+      latestVersionNumber,
     },
     error: null,
   }

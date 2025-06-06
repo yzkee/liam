@@ -54,6 +54,7 @@ export default async function Page({ params }: PageProps) {
     schema = schemaParseResult.output
   }
   const buildingSchemaId = schemaResult.data?.id
+  const latestVersionNumber = schemaResult.data?.latestVersionNumber ?? 0
 
   // buildingSchemaId is required - this should never happen given 1:1 relationship
   if (!buildingSchemaId) {
@@ -69,6 +70,7 @@ export default async function Page({ params }: PageProps) {
         id: designSessionId,
         organizationId: designSessionData.organization_id,
         buildingSchemaId,
+        latestVersionNumber,
       }}
     />
   )

@@ -9,6 +9,7 @@ export async function POST(request: Request) {
     mode,
     organizationId,
     buildingSchemaId,
+    latestVersionNumber = 0,
   } = await request.json()
 
   // Input validation
@@ -37,6 +38,7 @@ export async function POST(request: Request) {
           mode,
           organizationId,
           buildingSchemaId,
+          latestVersionNumber,
         })) {
           if (chunk.type === 'text') {
             // Encode and enqueue the text chunk as JSON

@@ -18,6 +18,7 @@ type Props = {
     id: string
     organizationId: string
     buildingSchemaId: string
+    latestVersionNumber: number
   }
 }
 
@@ -51,6 +52,7 @@ export const SessionDetailPage: FC<Props> = ({ schema, designSession }) => {
             designSessionId={designSession.id}
             organizationId={designSession.organizationId}
             buildingSchemaId={designSession.buildingSchemaId}
+            latestVersionNumber={designSession.latestVersionNumber}
           />
         </div>
         <TabsRoot defaultValue="erd" className={styles.tabsRoot}>

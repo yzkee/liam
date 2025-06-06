@@ -32,6 +32,7 @@ interface Props {
   designSessionId?: string
   organizationId?: string
   buildingSchemaId: string
+  latestVersionNumber?: number
 }
 
 export const Chat: FC<Props> = ({
@@ -40,6 +41,7 @@ export const Chat: FC<Props> = ({
   designSessionId,
   organizationId,
   buildingSchemaId,
+  latestVersionNumber = 0,
 }) => {
   const [messages, setMessages] = useState<ChatEntry[]>([WELCOME_MESSAGE])
   const [isLoading, setIsLoading] = useState(false)
@@ -240,6 +242,7 @@ export const Chat: FC<Props> = ({
           mode,
           organizationId,
           buildingSchemaId,
+          latestVersionNumber,
         }),
       })
 

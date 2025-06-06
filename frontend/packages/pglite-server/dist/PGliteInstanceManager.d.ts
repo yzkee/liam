@@ -1,5 +1,5 @@
 import { PGlite } from '@electric-sql/pglite';
-import type { SqlResult, QueryType } from './types';
+import type { QueryType, SqlResult } from './types';
 export declare class PGliteInstanceManager {
     private instances;
     private cleanupInterval;

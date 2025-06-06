@@ -18,7 +18,7 @@ class PGliteInstanceManager {
         const db = new pglite_1.PGlite();
         this.instances.set(sessionId, {
             db,
-            lastAccessed: new Date()
+            lastAccessed: new Date(),
         });
         return db;
     }
@@ -36,9 +36,7 @@ class PGliteInstanceManager {
         if (type === 'DDL') {
             return this.applyDDL(sql, db);
         }
-        else {
-            return this.applyDML(sql, db);
-        }
+        return this.applyDML(sql, db);
     }
     async applyDDL(ddlText, db) {
         const results = [];

@@ -10,7 +10,7 @@ const requestSchema = v.object({
 interface TableSchema {
   [tableName: string]: {
     columns: { [columnName: string]: string }
-    rows: { [key: string]: any }[]
+    rows: { [key: string]: unknown }[]
   }
 }
 
@@ -57,7 +57,7 @@ function parseCreateTable(sql: string): { tableName: string; columns: { [key: st
   return { tableName, columns }
 }
 
-function parseInsert(sql: string): { tableName: string; values: any[] } | null {
+function parseInsert(sql: string): { tableName: string; values: unknown[] } | null {
   const insertRegex = /INSERT\s+INTO\s+(\w+)\s+VALUES\s*\(([^)]+)\)/i
   const match = sql.match(insertRegex)
   
@@ -92,7 +92,13 @@ function parseSelect(sql: string): { tableName: string; columns: string[] } | nu
   return { tableName, columns }
 }
 
-function executeSQL(sessionData: SessionData, sql: string): any {
+interface SqlExecutionResult {
+  command: string
+  rowCount: number
+  rows?: unknown[]
+}
+
+function executeSQL(sessionData: SessionData, sql: string): SqlExecutionResult {
   const trimmedSql = sql.trim()
   
   if (trimmedSql.toUpperCase().startsWith('CREATE TABLE')) {
@@ -112,7 +118,7 @@ function executeSQL(sessionData: SessionData, sql: string): any {
     if (parsed && sessionData.tables[parsed.tableName]) {
       const table = sessionData.tables[parsed.tableName]
       const columnNames = Object.keys(table.columns)
-      const row: { [key: string]: any } = {}
+      const row: { [key: string]: unknown } = {}
       
       columnNames.forEach((colName, index) => {
         row[colName] = parsed.values[index] || null
@@ -132,7 +138,7 @@ function executeSQL(sessionData: SessionData, sql: string): any {
         if (parsed.columns.includes('*')) {
           return row
         }
-        const filteredRow: { [key: string]: any } = {}
+        const filteredRow: { [key: string]: unknown } = {}
         parsed.columns.forEach(col => {
           if (row.hasOwnProperty(col)) {
             filteredRow[col] = row[col]

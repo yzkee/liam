@@ -1,6 +1,6 @@
 export interface SqlResult {
     sql: string;
-    result: any;
+    result: unknown;
     success: boolean;
     id: string;
     metadata: {

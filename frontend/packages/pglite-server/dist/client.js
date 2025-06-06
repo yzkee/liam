@@ -6,13 +6,13 @@ async function executeQuery(sessionId, sql, type) {
     const response = await fetch('/api/pglite/query', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
         },
         body: JSON.stringify({
             sessionId,
             sql,
-            type
-        })
+            type,
+        }),
     });
     if (!response.ok) {
         throw new Error(`Query failed: ${response.statusText}`);

@@ -124,15 +124,17 @@ export const GlobalNav: FC<Props> = ({
             isExpanded={isExpanded}
           />
 
+          <NewSessionButton isExpanded={isExpanded} />
+          <RecentsSection isExpanded={isExpanded} />
+        </div>
+
+        <div className={styles.footerSection}>
           <LinkItem
             href="/app/settings/general"
             icon={<Settings />}
             label="Settings"
             isExpanded={isExpanded}
           />
-
-          <NewSessionButton isExpanded={isExpanded} />
-          <RecentsSection isExpanded={isExpanded} />
         </div>
       </nav>
     </div>

@@ -1399,6 +1399,10 @@ CREATE UNIQUE INDEX "github_repository_owner_name_key" ON "public"."github_repos
 
 
 
+CREATE INDEX "idx_building_schemas_design_session_created" ON "public"."building_schemas" USING "btree" ("design_session_id", "created_at" DESC);
+
+
+
 CREATE INDEX "idx_messages_design_session_created_at" ON "public"."messages" USING "btree" ("design_session_id", "created_at" DESC);
 
 
@@ -2679,6 +2683,10 @@ CREATE POLICY "users_same_organization_select_policy" ON "public"."users" FOR SE
 
 
 ALTER PUBLICATION "supabase_realtime" OWNER TO "postgres";
+
+
+ALTER PUBLICATION "supabase_realtime" ADD TABLE ONLY "public"."building_schemas";
+
 
 
 ALTER PUBLICATION "supabase_realtime" ADD TABLE ONLY "public"."messages";

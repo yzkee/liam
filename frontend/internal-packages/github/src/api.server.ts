@@ -219,7 +219,7 @@ export const getRepositoryBranches = async (
 ) => {
   const octokit = await createOctokit(installationId)
 
-  const { data: branches } = await octokit.repos.listBranches({
+  const branches = await octokit.paginate(octokit.repos.listBranches, {
     owner,
     repo,
     per_page: 100,

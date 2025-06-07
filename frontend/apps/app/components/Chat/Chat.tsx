@@ -31,6 +31,8 @@ interface Props {
   tableGroups?: Record<string, TableGroupData>
   designSessionId?: string
   organizationId?: string
+  buildingSchemaId: string
+  latestVersionNumber?: number
 }
 
 export const Chat: FC<Props> = ({
@@ -38,6 +40,8 @@ export const Chat: FC<Props> = ({
   tableGroups,
   designSessionId,
   organizationId,
+  buildingSchemaId,
+  latestVersionNumber = 0,
 }) => {
   const [messages, setMessages] = useState<ChatEntry[]>([WELCOME_MESSAGE])
   const [isLoading, setIsLoading] = useState(false)
@@ -137,9 +141,9 @@ export const Chat: FC<Props> = ({
   )
 
   // TODO: Implement comprehensive error handling - Add user notifications, retry logic, and distinguish between fatal/temporary errors
-  const handleRealtimeError = useCallback((error: Error) => {
-    console.error('Realtime subscription error:', error)
+  const handleRealtimeError = useCallback((_error: Error) => {
     // TODO: Add user notification system and automatic retry mechanism
+    // console.error('Realtime subscription error:', error)
   }, [])
 
   // TODO: Add network failure handling - Implement reconnection logic and offline message sync
@@ -237,6 +241,8 @@ export const Chat: FC<Props> = ({
           history,
           mode,
           organizationId,
+          buildingSchemaId,
+          latestVersionNumber,
         }),
       })
 

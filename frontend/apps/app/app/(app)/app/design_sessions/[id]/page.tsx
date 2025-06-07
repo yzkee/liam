@@ -1,9 +1,10 @@
 import type { PageProps } from '@/app/types'
 import { SessionDetailPage } from '@/components/SessionDetailPage'
-import { fetchSchemaData } from '@/components/SessionDetailPage/services/fetchSchemaData'
-import { schemaSchema } from '@liam-hq/db-structure'
 import * as v from 'valibot'
-import { fetchDesignSessionData } from './services/fetchDesignSessionData'
+import {
+  fetchDesignSessionData,
+  fetchSchemaData,
+} from './services/fetchDesignSessionData'
 
 const paramsSchema = v.object({
   id: v.string(),
@@ -29,19 +30,23 @@ export default async function Page({ params }: PageProps) {
     throw new Error('Failed to fetch schema data')
   }
 
-  const schemaParseResult = v.safeParse(schemaSchema, schemaResult.data?.schema)
-  if (!schemaParseResult.success) {
-    throw new Error('Invalid schema data')
-  }
+  const buildingSchemaId = schemaResult.data?.id
+  const latestVersionNumber = schemaResult.data?.latestVersionNumber ?? 0
 
-  const schema = schemaParseResult.output
+  // buildingSchemaId is required - this should never happen given 1:1 relationship
+  if (!buildingSchemaId) {
+    throw new Error(
+      'Building schema ID not found for design session. Data integrity issue.',
+    )
+  }
 
   return (
     <SessionDetailPage
-      schema={schema}
       designSession={{
         id: designSessionId,
         organizationId: designSessionData.organization_id,
+        buildingSchemaId,
+        latestVersionNumber,
       }}
     />
   )

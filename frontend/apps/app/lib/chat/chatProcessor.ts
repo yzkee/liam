@@ -9,6 +9,8 @@ interface ChatProcessorParams {
   history?: [string, string][]
   mode: 'build' | 'ask'
   organizationId?: string
+  buildingSchemaId: string
+  latestVersionNumber?: number
 }
 
 interface ChatProcessorResult {
@@ -57,7 +59,15 @@ export function processChatMessage(
 async function processChatMessageSync(
   params: ChatProcessorParams,
 ): Promise<ChatProcessorResult> {
-  const { message, schemaData, history, mode, organizationId } = params
+  const {
+    message,
+    schemaData,
+    history,
+    mode,
+    organizationId,
+    buildingSchemaId,
+    latestVersionNumber = 0,
+  } = params
 
   try {
     // Check if schema has been updated and sync vector store if needed
@@ -80,6 +90,9 @@ async function processChatMessageSync(
       userInput: message,
       history: formattedHistory,
       schemaData,
+      organizationId,
+      buildingSchemaId,
+      latestVersionNumber,
     }
 
     // Execute workflow without streaming
@@ -108,6 +121,58 @@ async function processChatMessageSync(
   }
 }
 
+/**
+ * Handle vector store sync if needed
+ */
+async function handleVectorStoreSync(
+  schemaData: Schema,
+  organizationId?: string,
+): Promise<void> {
+  try {
+    const schemaUpdated = await isSchemaUpdated(schemaData)
+    if (schemaUpdated && organizationId) {
+      await syncSchemaVectorStore(schemaData, organizationId)
+    }
+  } catch (error) {
+    console.warn('Vector store sync failed:', error)
+    // Continue processing even if vector store sync fails
+  }
+}
+
+/**
+ * Process streaming chunks and accumulate results
+ */
+async function* processStreamingChunks(
+  stream: AsyncGenerator<
+    { type: 'text' | 'error' | 'custom'; content: string },
+    unknown,
+    unknown
+  >,
+): AsyncGenerator<
+  { type: 'text' | 'error' | 'custom'; content: string },
+  { finalText: string; hasError: boolean; errorMessage: string },
+  unknown
+> {
+  let finalText = ''
+  let hasError = false
+  let errorMessage = ''
+
+  for await (const chunk of stream) {
+    if (chunk.type === 'text') {
+      finalText += chunk.content
+      yield chunk
+    } else if (chunk.type === 'custom') {
+      yield chunk
+    } else if (chunk.type === 'error') {
+      hasError = true
+      errorMessage = chunk.content
+      yield chunk
+    }
+  }
+
+  return { finalText, hasError, errorMessage }
+}
+
 // streaming implementation using workflow
 async function* processChatMessageStreaming(
   params: ChatProcessorParams,
@@ -116,19 +181,19 @@ async function* processChatMessageStreaming(
   ChatProcessorResult,
   unknown
 > {
-  const { message, schemaData, history, mode, organizationId } = params
+  const {
+    message,
+    schemaData,
+    history,
+    mode,
+    organizationId,
+    buildingSchemaId,
+    latestVersionNumber = 0,
+  } = params
 
   try {
-    // Check if schema has been updated and sync vector store if needed
-    try {
-      const schemaUpdated = await isSchemaUpdated(schemaData)
-      if (schemaUpdated && organizationId) {
-        await syncSchemaVectorStore(schemaData, organizationId)
-      }
-    } catch (error) {
-      console.warn('Vector store sync failed:', error)
-      // Continue processing even if vector store sync fails
-    }
+    // Handle vector store sync
+    await handleVectorStoreSync(schemaData, organizationId)
 
     // Convert history format
     const formattedHistory = history?.map(([, content]) => content) || []
@@ -140,34 +205,21 @@ async function* processChatMessageStreaming(
       history: formattedHistory,
       schemaData,
       organizationId,
+      buildingSchemaId,
+      latestVersionNumber,
     }
 
     // Execute workflow with streaming
     const stream = executeChatWorkflow(workflowState, { streaming: true })
 
-    let finalText = ''
-    let hasError = false
-    let errorMessage = ''
-
-    // Process and yield each chunk
-    for await (const chunk of stream) {
-      if (chunk.type === 'text') {
-        finalText += chunk.content
-        yield chunk
-      } else if (chunk.type === 'custom') {
-        yield chunk
-      } else if (chunk.type === 'error') {
-        hasError = true
-        errorMessage = chunk.content
-        yield chunk
-      }
-    }
+    // Process streaming chunks
+    const result = yield* processStreamingChunks(stream)
 
     // Return the complete result
     return {
-      text: finalText,
-      success: !hasError,
-      error: hasError ? errorMessage : undefined,
+      text: result.finalText,
+      success: !result.hasError,
+      error: result.hasError ? result.errorMessage : undefined,
     }
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : 'Unknown error'

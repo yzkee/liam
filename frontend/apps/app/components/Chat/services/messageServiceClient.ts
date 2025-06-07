@@ -159,11 +159,9 @@ export const setupRealtimeSubscription = (
       },
       (payload) => {
         try {
-          // Use valibot for runtime type validation instead of type assertion
           const validatedMessage = v.parse(realtimeMessageSchema, payload.new)
           onNewMessage(validatedMessage)
         } catch (error) {
-          console.error('Error processing realtime message:', error)
           onError?.(
             error instanceof Error
               ? error
@@ -175,10 +173,6 @@ export const setupRealtimeSubscription = (
     .subscribe((status) => {
       if (status === 'SUBSCRIBED') {
       } else if (status === 'CHANNEL_ERROR') {
-        console.error(
-          'Realtime subscription error for session:',
-          designSessionId,
-        )
         onError?.(new Error('Realtime subscription failed'))
       }
     })

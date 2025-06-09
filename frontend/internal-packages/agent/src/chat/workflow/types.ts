@@ -22,7 +22,7 @@ export type WorkflowState = {
   agentName?: AgentName | undefined
 
   // Schema update fields
-  buildingSchemaId: string
+  buildingSchemaId?: string | undefined
   latestVersionNumber?: number | undefined
   organizationId?: string | undefined
   userId?: string | undefined

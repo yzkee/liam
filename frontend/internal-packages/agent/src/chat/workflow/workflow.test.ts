@@ -360,7 +360,9 @@ describe('Chat Workflow', () => {
         buildingSchemaId: undefined,
       })
 
-      const result = await executeChatWorkflow(state, { streaming: false })
+      const result = await executeChatWorkflow(state, {
+        streaming: false,
+      })
 
       expect(result.mode).toBe('Build')
       expect(result.error).toBeUndefined()

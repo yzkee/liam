@@ -30,6 +30,9 @@ type Props = {
 export const SessionDetailPage: FC<Props> = ({ designSession }) => {
   const [schema, setSchema] = useState<Schema | null>(null)
   const [isLoadingSchema, setIsLoadingSchema] = useState(true)
+  const [latestVersionNumber, setLatestVersionNumber] = useState(
+    designSession.latestVersionNumber,
+  )
   const designSessionId = designSession.id
 
   // Load initial schema data
@@ -45,9 +48,10 @@ export const SessionDetailPage: FC<Props> = ({ designSession }) => {
           return
         }
 
-        if (schemaData?.schema) {
+        if (schemaData.schema) {
           const schema = v.parse(schemaSchema, schemaData.schema)
           setSchema(schema)
+          setLatestVersionNumber(schemaData.latestVersionNumber)
         }
       } catch (error) {
         console.error('Error loading initial schema:', error)
@@ -74,9 +78,10 @@ export const SessionDetailPage: FC<Props> = ({ designSession }) => {
           return
         }
 
-        if (schemaData?.schema) {
+        if (schemaData.schema) {
           const schema = v.parse(schemaSchema, schemaData.schema)
           setSchema(schema)
+          setLatestVersionNumber(schemaData.latestVersionNumber)
         }
       } catch (error) {
         console.error('Error handling schema update:', error)
@@ -146,7 +151,7 @@ export const SessionDetailPage: FC<Props> = ({ designSession }) => {
             designSessionId={designSession.id}
             organizationId={designSession.organizationId}
             buildingSchemaId={designSession.buildingSchemaId}
-            latestVersionNumber={designSession.latestVersionNumber}
+            latestVersionNumber={latestVersionNumber}
           />
         </div>
         <TabsRoot defaultValue="erd" className={styles.tabsRoot}>

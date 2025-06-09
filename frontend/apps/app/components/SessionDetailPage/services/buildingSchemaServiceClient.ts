@@ -15,7 +15,7 @@ export async function fetchSchemaDataClient(designSessionId: string) {
 
   const { data: buildingSchema, error: buildingSchemaError } = await supabase
     .from('building_schemas')
-    .select('schema')
+    .select('id, schema')
     .eq('design_session_id', designSessionId)
     .single()
 
@@ -23,9 +23,25 @@ export async function fetchSchemaDataClient(designSessionId: string) {
     return { data: null, error: buildingSchemaError }
   }
 
+  // Get the latest version number from building_schema_versions
+  const { data: latestVersion, error: versionError } = await supabase
+    .from('building_schema_versions')
+    .select('number')
+    .eq('building_schema_id', buildingSchema.id)
+    .order('number', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (versionError) {
+    return { data: null, error: versionError }
+  }
+
+  const latestVersionNumber = latestVersion ? latestVersion.number : 0
+
   return {
     data: {
       schema: buildingSchema.schema,
+      latestVersionNumber,
     },
     error: null,
   }

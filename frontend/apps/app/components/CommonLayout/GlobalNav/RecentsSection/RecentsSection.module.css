@@ -1,5 +1,18 @@
 .recentsCollapsed {
   cursor: default;
+  display: block;
+}
+
+.recentsExpanded {
+  display: none;
+}
+
+.globalNavContainer:hover .recentsCollapsed {
+  display: none;
+}
+
+.globalNavContainer:hover .recentsExpanded {
+  display: block;
 }
 
 .recentsSection {

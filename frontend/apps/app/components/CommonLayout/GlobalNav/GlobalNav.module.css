@@ -19,7 +19,7 @@
   box-shadow: none;
 }
 
-.globalNavExpanded {
+.globalNavContainer:hover .globalNav {
   width: 11rem;
   box-shadow: 4px 0 16px rgba(0, 0, 0, 0.2);
 }

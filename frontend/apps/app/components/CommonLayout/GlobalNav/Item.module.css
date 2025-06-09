@@ -8,14 +8,15 @@
   color: var(--global-foreground);
   cursor: pointer;
   transition: background-color var(--default-hover-animation-duration)
-    var(--default-timing-function);
+    var(--default-timing-function), width 0.1s var(--default-timing-function),
+    gap 0.1s var(--default-timing-function);
 }
 
 .item:hover {
   background-color: var(--pane-background-active);
 }
 
-.expandItem {
+.globalNavContainer:hover .item {
   width: auto;
   gap: var(--spacing-2half);
 }
@@ -34,9 +35,10 @@
   align-items: center;
   gap: var(--spacing-2);
   opacity: 0;
+  transition: opacity 0.1s var(--default-timing-function);
 }
 
-.expandLabelArea {
+.globalNavContainer:hover .labelArea {
   opacity: 1;
 }
 

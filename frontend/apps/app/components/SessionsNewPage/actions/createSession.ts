@@ -15,9 +15,15 @@ type CreateSessionState = {
   error?: string
 }
 
+// A pipe that transforms an empty string to null.
+const emptyStringToNull = v.pipe(
+  v.string(),
+  v.transform((input) => (input === '' ? null : input)),
+)
+
 const FormDataSchema = v.object({
-  projectId: v.optional(v.nullable(v.string())),
-  parentDesignSessionId: v.optional(v.nullable(v.string())),
+  projectId: v.optional(v.nullable(emptyStringToNull)),
+  parentDesignSessionId: v.optional(v.nullable(emptyStringToNull)),
   gitSha: v.optional(v.nullable(v.string())),
 })
 
@@ -214,6 +220,7 @@ export async function createSession(
     .single()
 
   if (insertError) {
+    console.error('Error creating design session:', insertError)
     return { success: false, error: 'Failed to create design session' }
   }
 

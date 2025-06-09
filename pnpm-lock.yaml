@@ -105,21 +105,9 @@ importers:
       '@next/third-parties':
         specifier: 15.3.2
         version: 15.3.2(next@15.3.2(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
-      '@octokit/auth-app':
-        specifier: 7.2.1
-        version: 7.2.1
-      '@octokit/rest':
-        specifier: 21.1.1
-        version: 21.1.1
       '@sentry/nextjs':
         specifier: '9'
         version: 9.27.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(next@15.3.2(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(webpack@5.99.9(esbuild@0.25.4))
-      '@trigger.dev/build':
-        specifier: 3.3.17
-        version: 3.3.17(typescript@5.8.3)
-      '@trigger.dev/sdk':
-        specifier: 3.3.17
-        version: 3.3.17(zod@3.23.8)
       '@types/react-syntax-highlighter':
         specifier: 15.5.13
         version: 15.5.13
@@ -146,7 +134,7 @@ importers:
         version: 4.0.1(@opentelemetry/api@1.9.0)(next@15.3.2(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       langfuse-vercel:
         specifier: 3.37.2
-        version: 3.37.2(ai@4.3.16(react@18.3.1)(zod@3.23.8))
+        version: 3.37.2(ai@4.3.16(react@18.3.1)(zod@3.24.4))
       lucide-react:
         specifier: 0.511.0
         version: 0.511.0(react@18.3.1)
@@ -187,15 +175,9 @@ importers:
       '@liam-hq/configs':
         specifier: workspace:*
         version: link:../../internal-packages/configs
-      '@octokit/openapi-types':
-        specifier: 25.0.0
-        version: 25.0.0
       '@storybook/react':
         specifier: 8.6.14
         version: 8.6.14(@storybook/test@8.6.14(storybook@8.6.14(prettier@3.5.3)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(storybook@8.6.14(prettier@3.5.3))(typescript@5.8.3)
-      '@types/gtag.js':
-        specifier: 0.0.20
-        version: 0.0.20
       '@types/node':
         specifier: 22.15.21
         version: 22.15.21
@@ -205,9 +187,6 @@ importers:
       '@types/react-dom':
         specifier: '18'
         version: 18.3.7(@types/react@18.3.23)
-      esbuild:
-        specifier: 0.25.4
-        version: 0.25.4
       eslint:
         specifier: 9.27.0
         version: 9.27.0(jiti@2.4.2)
@@ -284,9 +263,6 @@ importers:
       '@tailwindcss/postcss':
         specifier: 4.1.8
         version: 4.1.8
-      '@types/mdx':
-        specifier: 2.0.13
-        version: 2.0.13
       '@types/node':
         specifier: 22.15.21
         version: 22.15.21
@@ -372,9 +348,6 @@ importers:
 
   frontend/internal-packages/configs:
     devDependencies:
-      '@biomejs/biome':
-        specifier: 1.9.4
-        version: 1.9.4
       '@eslint/compat':
         specifier: 1.2.9
         version: 1.2.9(eslint@9.27.0(jiti@2.4.2))
@@ -519,9 +492,6 @@ importers:
       '@trigger.dev/sdk':
         specifier: 3.3.17
         version: 3.3.17(zod@3.23.8)
-      minimatch:
-        specifier: 10.0.1
-        version: 10.0.1
     devDependencies:
       '@biomejs/biome':
         specifier: 1.9.4
@@ -667,9 +637,6 @@ importers:
       '@rollup/plugin-typescript':
         specifier: 12.1.2
         version: 12.1.2(rollup@4.40.2)(tslib@2.8.1)(typescript@5.8.3)
-      '@types/glob':
-        specifier: 8.1.0
-        version: 8.1.0
       '@types/node':
         specifier: 22.15.21
         version: 22.15.21
@@ -791,9 +758,6 @@ importers:
       react:
         specifier: 18.3.1
         version: 18.3.1
-      ts-pattern:
-        specifier: 5.7.1
-        version: 5.7.1
       valibot:
         specifier: 1.1.0
         version: 1.1.0(typescript@5.8.3)
@@ -5119,12 +5083,6 @@ packages:
 
   '@types/glob@7.2.0':
     resolution: {integrity: sha512-ZUxbzKl0IfJILTS6t7ip5fQQM/J3TJYubDm3nMbgubNNYS62eXeUpoLUC8/7fJNiFYHTrGPQn7hspDUzIHX3UA==}
-
-  '@types/glob@8.1.0':
-    resolution: {integrity: sha512-IO+MJPVhoqz+28h1qLAcBEH2+xHMK6MTyHJc7MTnnYb6wsoLR29POVGJ7LycmVXIqyy/4/2ShP5sUwTXuOwb/w==}
-
-  '@types/gtag.js@0.0.20':
-    resolution: {integrity: sha512-wwAbk3SA2QeU67unN7zPxjEHmPmlXwZXZvQEpbEUQuMCRGgKyE1m6XDuTUA9b6pCGb/GqJmdfMOY5LuDjJSbbg==}
 
   '@types/hast@2.3.10':
     resolution: {integrity: sha512-McWspRw8xx8J9HurkVBfYj0xKoE25tOFlHGdx4MJ5xORQrMGZNqJhVQWaIbm6Oyla5kYOXtDiopzKRJzEOkwJw==}
@@ -11090,33 +11048,33 @@ snapshots:
 
   '@adobe/css-tools@4.4.3': {}
 
-  '@ai-sdk/provider-utils@2.2.8(zod@3.23.8)':
+  '@ai-sdk/provider-utils@2.2.8(zod@3.24.4)':
     dependencies:
       '@ai-sdk/provider': 1.1.3
       nanoid: 3.3.11
       secure-json-parse: 2.7.0
-      zod: 3.23.8
+      zod: 3.24.4
 
   '@ai-sdk/provider@1.1.3':
     dependencies:
       json-schema: 0.4.0
 
-  '@ai-sdk/react@1.2.12(react@18.3.1)(zod@3.23.8)':
+  '@ai-sdk/react@1.2.12(react@18.3.1)(zod@3.24.4)':
     dependencies:
-      '@ai-sdk/provider-utils': 2.2.8(zod@3.23.8)
-      '@ai-sdk/ui-utils': 1.2.11(zod@3.23.8)
+      '@ai-sdk/provider-utils': 2.2.8(zod@3.24.4)
+      '@ai-sdk/ui-utils': 1.2.11(zod@3.24.4)
       react: 18.3.1
       swr: 2.3.3(react@18.3.1)
       throttleit: 2.1.0
     optionalDependencies:
-      zod: 3.23.8
+      zod: 3.24.4
 
-  '@ai-sdk/ui-utils@1.2.11(zod@3.23.8)':
+  '@ai-sdk/ui-utils@1.2.11(zod@3.24.4)':
     dependencies:
       '@ai-sdk/provider': 1.1.3
-      '@ai-sdk/provider-utils': 2.2.8(zod@3.23.8)
-      zod: 3.23.8
-      zod-to-json-schema: 3.24.5(zod@3.23.8)
+      '@ai-sdk/provider-utils': 2.2.8(zod@3.24.4)
+      zod: 3.24.4
+      zod-to-json-schema: 3.24.5(zod@3.24.4)
 
   '@alloc/quick-lru@5.2.0': {}
 
@@ -15661,13 +15619,6 @@ snapshots:
       '@types/minimatch': 5.1.2
       '@types/node': 22.15.21
 
-  '@types/glob@8.1.0':
-    dependencies:
-      '@types/minimatch': 5.1.2
-      '@types/node': 22.15.21
-
-  '@types/gtag.js@0.0.20': {}
-
   '@types/hast@2.3.10':
     dependencies:
       '@types/unist': 2.0.11
@@ -16252,15 +16203,15 @@ snapshots:
       clean-stack: 2.2.0
       indent-string: 4.0.0
 
-  ai@4.3.16(react@18.3.1)(zod@3.23.8):
+  ai@4.3.16(react@18.3.1)(zod@3.24.4):
     dependencies:
       '@ai-sdk/provider': 1.1.3
-      '@ai-sdk/provider-utils': 2.2.8(zod@3.23.8)
-      '@ai-sdk/react': 1.2.12(react@18.3.1)(zod@3.23.8)
-      '@ai-sdk/ui-utils': 1.2.11(zod@3.23.8)
+      '@ai-sdk/provider-utils': 2.2.8(zod@3.24.4)
+      '@ai-sdk/react': 1.2.12(react@18.3.1)(zod@3.24.4)
+      '@ai-sdk/ui-utils': 1.2.11(zod@3.24.4)
       '@opentelemetry/api': 1.9.0
       jsondiffpatch: 0.6.0
-      zod: 3.23.8
+      zod: 3.24.4
     optionalDependencies:
       react: 18.3.1
 
@@ -18993,9 +18944,9 @@ snapshots:
       langfuse: 3.37.4
       langfuse-core: 3.37.4
 
-  langfuse-vercel@3.37.2(ai@4.3.16(react@18.3.1)(zod@3.23.8)):
+  langfuse-vercel@3.37.2(ai@4.3.16(react@18.3.1)(zod@3.24.4)):
     dependencies:
-      ai: 4.3.16(react@18.3.1)(zod@3.23.8)
+      ai: 4.3.16(react@18.3.1)(zod@3.24.4)
       langfuse: 3.37.4
       langfuse-core: 3.37.4
 
@@ -22658,10 +22609,6 @@ snapshots:
   zod-error@1.5.0:
     dependencies:
       zod: 3.24.4
-
-  zod-to-json-schema@3.24.5(zod@3.23.8):
-    dependencies:
-      zod: 3.23.8
 
   zod-to-json-schema@3.24.5(zod@3.24.4):
     dependencies:

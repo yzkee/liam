@@ -1,33 +1,16 @@
-'use client'
-
 import { urlgen } from '@/libs/routes'
 import clsx from 'clsx'
 import Link from 'next/link'
-import { type FC, useEffect, useState } from 'react'
+import type { FC } from 'react'
 import itemStyles from '../Item.module.css'
 import type { RecentSession } from '../services/fetchRecentSessions'
-import { fetchRecentSessions } from '../services/fetchRecentSessions'
 import styles from './RecentsSection.module.css'
 
-export const RecentsSection: FC = () => {
-  const [sessions, setSessions] = useState<RecentSession[]>([])
-  const [loading, setLoading] = useState(true)
+type RecentsSectionProps = {
+  sessions: RecentSession[]
+}
 
-  useEffect(() => {
-    const loadSessions = async () => {
-      try {
-        const recentSessions = await fetchRecentSessions(5)
-        setSessions(recentSessions)
-      } catch (error) {
-        console.error('Failed to load recent sessions:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    loadSessions()
-  }, [])
-
+export const RecentsSection: FC<RecentsSectionProps> = ({ sessions }) => {
   return (
     <>
       <div className={clsx(itemStyles.item, styles.recentsCollapsed)}>
@@ -45,11 +28,7 @@ export const RecentsSection: FC = () => {
             </div>
           </div>
 
-          {loading ? (
-            <div className={styles.loadingState}>
-              <span className={styles.loadingText}>Loading...</span>
-            </div>
-          ) : sessions.length > 0 ? (
+          {sessions.length > 0 ? (
             <div className={styles.sessionsList}>
               {sessions.map((session) => (
                 <Link

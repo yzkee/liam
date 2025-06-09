@@ -1,17 +1,17 @@
+import type { PageProps } from '@/app/types'
 import { ProjectSessionsPage } from '@/components/ProjectSessionsPage'
-import type { FC } from 'react'
+import { branchOrCommitSchema } from '@/libs/routes'
+import * as v from 'valibot'
 
-type Props = {
-  params: Promise<{
-    projectId: string
-    branchOrCommit: string
-  }>
-}
+const paramsSchema = v.object({
+  projectId: v.string(),
+  branchOrCommit: branchOrCommitSchema,
+})
 
-const SessionsPage: FC<Props> = async ({ params }) => {
-  const { projectId } = await params
+export default async function Page({ params }: PageProps) {
+  const parsedParams = v.safeParse(paramsSchema, await params)
+  if (!parsedParams.success) throw new Error('Invalid parameters')
 
+  const { projectId } = parsedParams.output
   return <ProjectSessionsPage projectId={projectId} />
 }
-
-export default SessionsPage

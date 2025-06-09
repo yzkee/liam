@@ -357,6 +357,7 @@ describe('Chat Workflow', () => {
       const state = createBaseState({
         mode: 'Build',
         userInput: 'Add a created_at timestamp column to the users table',
+        buildingSchemaId: undefined,
       })
 
       const result = await executeChatWorkflow(state, { streaming: false })

@@ -1,13 +1,9 @@
 {
   "extends": "@liam-hq/configs/tsconfig/base.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "outDir": "dist",
     "declaration": true,
-    "esModuleInterop": true,
-    "module": "ESNext",
-    "target": "ES2022",
-    "moduleResolution": "bundler"
+    "target": "ES2022"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

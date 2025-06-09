@@ -5,7 +5,14 @@
     "jsx": "preserve",
     "lib": ["dom", "es2019"],
     "resolveJsonModule": true,
-    "erasableSyntaxOnly": true
+    "erasableSyntaxOnly": true,
+    "esModuleInterop": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "baseUrl": ".",
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "incremental": true
   },
   "include": ["**/*.ts", "**/*.tsx"]
 }

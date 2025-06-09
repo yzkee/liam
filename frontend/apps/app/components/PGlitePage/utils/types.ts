@@ -2,17 +2,16 @@
 
 import type { PGlite } from '@electric-sql/pglite'
 
-// Result type definition
+// Result type definition - aligned with pglite-server package
 export interface SqlResult {
   sql: string
-  result: { error?: string } | Record<string, unknown>
+  result: unknown
   success: boolean
   id: string
-  // Fields for future extensions
-  metadata?: {
-    executionTime?: number // Execution time (milliseconds)
-    affectedRows?: number // Number of affected rows
-    timestamp?: string // Execution timestamp
+  metadata: {
+    executionTime: number
+    timestamp: string
+    affectedRows?: number
   }
 }
 
@@ -27,5 +26,5 @@ export interface DMLSection {
   id: string
   dmlInput: string
   results: SqlResult[]
-  db: PGlite | null // Each DML section has its own PGlite instance
+  db: PGlite | null // No longer used with server-side instances
 }

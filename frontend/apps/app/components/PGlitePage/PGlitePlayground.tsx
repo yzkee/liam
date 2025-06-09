@@ -1,6 +1,6 @@
 'use client'
 
-import { PGlite } from '@electric-sql/pglite'
+import { executeQuery } from '@liam-hq/pglite-server'
 import {
   forwardRef,
   useCallback,
@@ -11,7 +11,6 @@ import {
 import { DDLInputSection } from './DDLInputSection'
 import { DMLInputSection } from './DMLInputSection'
 import styles from './PGlitePlayground.module.css'
-import { applyDDL, applyDML } from './utils'
 import type { DDLState, DMLSection, SqlResult } from './utils/types'
 
 /**
@@ -73,9 +72,9 @@ export interface PGlitePlaygroundHandle {
   updateDMLQueryAt: (index: number, query: string) => Promise<void>
 
   /**
-   * Returns the current global database instance (for DDL).
+   * Returns the current session ID for the global database.
    */
-  getGlobalDb: () => PGlite | null
+  getSessionId: () => string
 
   /**
    * Returns the DDL execution results (cumulative).
@@ -90,8 +89,8 @@ export interface PGlitePlaygroundHandle {
 }
 
 export const PGlitePlayground = forwardRef<PGlitePlaygroundHandle>((_, ref) => {
-  // Global DB (for DDL)
-  const [globalDb, setGlobalDb] = useState<PGlite | null>(null)
+  const [sessionId] = useState<string>(() => crypto.randomUUID())
+  const [isConnected, setIsConnected] = useState<boolean>(false)
 
   // DDL section state
   const [ddlState, setDdlState] = useState<DDLState>({
@@ -103,40 +102,35 @@ export const PGlitePlayground = forwardRef<PGlitePlaygroundHandle>((_, ref) => {
   const [dmlSections, setDmlSections] = useState<DMLSection[]>([])
 
   // Add DML section
-  const addDMLSection = useCallback(
-    async (initialDb?: PGlite) => {
-      const newDb = initialDb || new PGlite()
-
-      // Apply current DDL to the new DB instance
-      if (ddlState.ddlInput) {
-        await applyDDL(ddlState.ddlInput, newDb)
-      }
-
-      setDmlSections((prev) => [
-        ...prev,
-        {
-          id: crypto.randomUUID(),
-          dmlInput: '',
-          results: [],
-          db: newDb,
-        },
-      ])
-    },
-    [ddlState.ddlInput],
-  )
+  const addDMLSection = useCallback(async () => {
+    setDmlSections((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        dmlInput: '',
+        results: [],
+        db: null, // No longer needed as we use server-side instances
+      },
+    ])
+  }, [])
 
   // Initialization
   useEffect(() => {
-    const initializeDb = async () => {
-      const db = new PGlite()
-      setGlobalDb(db)
+    const initializeConnection = async () => {
+      try {
+        await executeQuery(sessionId, 'SELECT 1', 'DDL')
+        setIsConnected(true)
 
-      // Add one initial DML section
-      addDMLSection(db)
+        // Add one initial DML section
+        addDMLSection()
+      } catch (error) {
+        console.error('Failed to initialize PGlite connection:', error)
+        setIsConnected(false)
+      }
     }
 
-    initializeDb()
-  }, [addDMLSection])
+    initializeConnection()
+  }, [sessionId, addDMLSection])
 
   // Update DDL input
   const updateDdlInput = (value: string) => {
@@ -157,48 +151,35 @@ export const PGlitePlayground = forwardRef<PGlitePlaygroundHandle>((_, ref) => {
 
   // Execute DDL
   const executeDDL = async () => {
-    if (!globalDb || !ddlState.ddlInput.trim()) return
+    if (!isConnected || !ddlState.ddlInput.trim()) return
 
-    // Execute DDL and save results
-    const results = await applyDDL(ddlState.ddlInput, globalDb)
-    setDdlState((prev) => ({
-      ...prev,
-      results: [...prev.results, ...results],
-    }))
-
-    // After DDL execution, update all DML section DBs
-    await updateAllDmlSections()
+    try {
+      // Execute DDL using server-side PGlite instance
+      const results = await executeQuery(sessionId, ddlState.ddlInput, 'DDL')
+      setDdlState((prev) => ({
+        ...prev,
+        results: [...prev.results, ...results],
+      }))
+    } catch (error) {
+      console.error('DDL execution failed:', error)
+      const errorResult: SqlResult = {
+        sql: ddlState.ddlInput,
+        result: {
+          error: error instanceof Error ? error.message : String(error),
+        },
+        success: false,
+        id: crypto.randomUUID(),
+        metadata: {
+          executionTime: 0,
+          timestamp: new Date().toLocaleString(),
+        },
+      }
+      setDdlState((prev) => ({
+        ...prev,
+        results: [...prev.results, errorResult],
+      }))
+    }
   }
-
-  // Update all DML section DBs (after DDL changes)
-  const updateAllDmlSections = useCallback(
-    async (ddlOverride?: string) => {
-      if (!globalDb) return
-
-      const ddlToApply =
-        ddlOverride !== undefined ? ddlOverride : ddlState.ddlInput
-
-      // Create new DB instances for each DML section and apply DDL
-      const updatedSections = await Promise.all(
-        dmlSections.map(async (section) => {
-          const newDb = new PGlite()
-
-          // Apply current DDL to the new DB instance
-          if (ddlToApply) {
-            await applyDDL(ddlToApply, newDb)
-          }
-
-          return {
-            ...section,
-            db: newDb,
-          }
-        }),
-      )
-
-      setDmlSections(updatedSections)
-    },
-    [globalDb, ddlState.ddlInput, dmlSections],
-  )
 
   // Execute DML (for a specific section)
   const executeDML = async (sectionId: string) => {
@@ -206,20 +187,46 @@ export const PGlitePlayground = forwardRef<PGlitePlaygroundHandle>((_, ref) => {
     if (sectionIndex === -1) return
 
     const section = dmlSections[sectionIndex]
-    if (!section.db || !section.dmlInput.trim()) return
+    if (!isConnected || !section.dmlInput.trim()) return
 
-    // Execute DML and save results
-    const results = await applyDML(section.dmlInput, section.db)
+    try {
+      // Execute DML using server-side PGlite instance
+      const results = await executeQuery(sessionId, section.dmlInput, 'DML')
 
-    setDmlSections((prev) => {
-      const newSections = [...prev]
-      newSections[sectionIndex] = {
-        ...newSections[sectionIndex],
-        results: [...newSections[sectionIndex].results, ...results],
-        dmlInput: '', // Clear input
+      setDmlSections((prev) => {
+        const newSections = [...prev]
+        newSections[sectionIndex] = {
+          ...newSections[sectionIndex],
+          results: [...newSections[sectionIndex].results, ...results],
+          dmlInput: '', // Clear input
+        }
+        return newSections
+      })
+    } catch (error) {
+      console.error('DML execution failed:', error)
+      const errorResult: SqlResult = {
+        sql: section.dmlInput,
+        result: {
+          error: error instanceof Error ? error.message : String(error),
+        },
+        success: false,
+        id: crypto.randomUUID(),
+        metadata: {
+          executionTime: 0,
+          timestamp: new Date().toLocaleString(),
+        },
       }
-      return newSections
-    })
+
+      setDmlSections((prev) => {
+        const newSections = [...prev]
+        newSections[sectionIndex] = {
+          ...newSections[sectionIndex],
+          results: [...newSections[sectionIndex].results, errorResult],
+          dmlInput: '', // Clear input
+        }
+        return newSections
+      })
+    }
   }
 
   // Remove DML section
@@ -233,7 +240,7 @@ export const PGlitePlayground = forwardRef<PGlitePlaygroundHandle>((_, ref) => {
     () => ({
       // Insert and execute DDL
       insertDDL: async (ddl: string) => {
-        if (!globalDb) return
+        if (!isConnected) return
 
         // Update DDL input
         setDdlState((prev) => ({
@@ -241,27 +248,37 @@ export const PGlitePlayground = forwardRef<PGlitePlaygroundHandle>((_, ref) => {
           ddlInput: ddl,
         }))
 
-        // Execute DDL and save results
-        const results = await applyDDL(ddl, globalDb)
-        setDdlState((prev) => ({
-          ...prev,
-          results: [...prev.results, ...results],
-        }))
-
-        // Update all DML section DBs
-        await updateAllDmlSections(ddl)
+        try {
+          // Execute DDL using server-side PGlite instance
+          const results = await executeQuery(sessionId, ddl, 'DDL')
+          setDdlState((prev) => ({
+            ...prev,
+            results: [...prev.results, ...results],
+          }))
+        } catch (error) {
+          console.error('DDL execution failed:', error)
+          const errorResult: SqlResult = {
+            sql: ddl,
+            result: {
+              error: error instanceof Error ? error.message : String(error),
+            },
+            success: false,
+            id: crypto.randomUUID(),
+            metadata: {
+              executionTime: 0,
+              timestamp: new Date().toLocaleString(),
+            },
+          }
+          setDdlState((prev) => ({
+            ...prev,
+            results: [...prev.results, errorResult],
+          }))
+        }
       },
 
       // Add new DML section with query and execute
       addDMLWithQuery: async (query: string) => {
-        if (!globalDb) return
-
-        const newDb = new PGlite()
-
-        // Apply current DDL to the new DB instance
-        if (ddlState.ddlInput) {
-          await applyDDL(ddlState.ddlInput, newDb)
-        }
+        if (!isConnected) return
 
         const newSectionId = crypto.randomUUID()
 
@@ -272,34 +289,59 @@ export const PGlitePlayground = forwardRef<PGlitePlaygroundHandle>((_, ref) => {
             id: newSectionId,
             dmlInput: query,
             results: [],
-            db: newDb,
+            db: null, // No longer needed
           },
         ])
 
-        // Execute the query in the new section
-        const results = await applyDML(query, newDb)
+        try {
+          // Execute the query using server-side PGlite instance
+          const results = await executeQuery(sessionId, query, 'DML')
 
-        setDmlSections((prev) => {
-          const sectionIndex = prev.findIndex((s) => s.id === newSectionId)
-          if (sectionIndex === -1) return prev
+          setDmlSections((prev) => {
+            const sectionIndex = prev.findIndex((s) => s.id === newSectionId)
+            if (sectionIndex === -1) return prev
 
-          const newSections = [...prev]
-          newSections[sectionIndex] = {
-            ...newSections[sectionIndex],
-            results,
-            dmlInput: '', // Clear input after execution
+            const newSections = [...prev]
+            newSections[sectionIndex] = {
+              ...newSections[sectionIndex],
+              results,
+              dmlInput: '', // Clear input after execution
+            }
+            return newSections
+          })
+        } catch (error) {
+          console.error('DML execution failed:', error)
+          const errorResult: SqlResult = {
+            sql: query,
+            result: {
+              error: error instanceof Error ? error.message : String(error),
+            },
+            success: false,
+            id: crypto.randomUUID(),
+            metadata: {
+              executionTime: 0,
+              timestamp: new Date().toLocaleString(),
+            },
           }
-          return newSections
-        })
+
+          setDmlSections((prev) => {
+            const sectionIndex = prev.findIndex((s) => s.id === newSectionId)
+            if (sectionIndex === -1) return prev
+
+            const newSections = [...prev]
+            newSections[sectionIndex] = {
+              ...newSections[sectionIndex],
+              results: [errorResult],
+              dmlInput: '', // Clear input after execution
+            }
+            return newSections
+          })
+        }
       },
 
       // Update and execute query in specific DML section
       updateDMLQueryAt: async (index: number, query: string) => {
-        if (index < 0 || index >= dmlSections.length || !globalDb) return
-
-        const section = dmlSections[index]
-
-        if (!section.db) return
+        if (index < 0 || index >= dmlSections.length || !isConnected) return
 
         // Update the query
         setDmlSections((prev) => {
@@ -311,22 +353,47 @@ export const PGlitePlayground = forwardRef<PGlitePlaygroundHandle>((_, ref) => {
           return newSections
         })
 
-        // Execute the query
-        const results = await applyDML(query, section.db)
+        try {
+          // Execute the query using server-side PGlite instance
+          const results = await executeQuery(sessionId, query, 'DML')
 
-        setDmlSections((prev) => {
-          const newSections = [...prev]
-          newSections[index] = {
-            ...newSections[index],
-            results: [...newSections[index].results, ...results],
-            dmlInput: '', // Clear input after execution
+          setDmlSections((prev) => {
+            const newSections = [...prev]
+            newSections[index] = {
+              ...newSections[index],
+              results: [...newSections[index].results, ...results],
+              dmlInput: '', // Clear input after execution
+            }
+            return newSections
+          })
+        } catch (error) {
+          console.error('DML execution failed:', error)
+          const errorResult: SqlResult = {
+            sql: query,
+            result: {
+              error: error instanceof Error ? error.message : String(error),
+            },
+            success: false,
+            id: crypto.randomUUID(),
+            metadata: {
+              executionTime: 0,
+              timestamp: new Date().toLocaleString(),
+            },
           }
-          return newSections
-        })
+
+          setDmlSections((prev) => {
+            const newSections = [...prev]
+            newSections[index] = {
+              ...newSections[index],
+              results: [...newSections[index].results, errorResult],
+              dmlInput: '', // Clear input after execution
+            }
+            return newSections
+          })
+        }
       },
 
-      // Get global DB instance
-      getGlobalDb: () => globalDb,
+      getSessionId: () => sessionId,
 
       // Get DDL results
       getDDLResults: () => ddlState.results,
@@ -337,7 +404,7 @@ export const PGlitePlayground = forwardRef<PGlitePlaygroundHandle>((_, ref) => {
         return dmlSections[index].results
       },
     }),
-    [globalDb, ddlState, dmlSections, updateAllDmlSections],
+    [sessionId, isConnected, ddlState, dmlSections],
   )
 
   return (
@@ -345,9 +412,9 @@ export const PGlitePlayground = forwardRef<PGlitePlaygroundHandle>((_, ref) => {
       <h1 className={styles.title}>PGlite Playground</h1>
 
       <div
-        className={`${styles.status} ${globalDb ? styles.success : styles.loading}`}
+        className={`${styles.status} ${isConnected ? styles.success : styles.loading}`}
       >
-        {globalDb
+        {isConnected
           ? 'PGlite Database Connected'
           : 'PGlite Database Connecting...'}
       </div>

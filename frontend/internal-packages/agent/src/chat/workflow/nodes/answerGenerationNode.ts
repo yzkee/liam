@@ -98,7 +98,6 @@ const applySchemaChanges = async (
     return {
       ...state,
       generatedAnswer: message,
-      error: undefined,
     }
   } catch (error) {
     const errorMessage =
@@ -122,7 +121,6 @@ const handleSchemaChanges = async (
     return {
       ...state,
       generatedAnswer: parsedResponse.message,
-      error: undefined,
     }
   }
 
@@ -134,7 +132,6 @@ const handleSchemaChanges = async (
     return {
       ...state,
       generatedAnswer: parsedResponse.message,
-      error: undefined,
     }
   }
 
@@ -163,7 +160,6 @@ const handleBuildAgentResponse = async (
     return {
       ...state,
       generatedAnswer: response,
-      error: undefined,
     }
   }
 
@@ -236,7 +232,6 @@ export async function answerGenerationNode(
     return {
       ...state,
       generatedAnswer: response,
-      error: undefined,
     }
   } catch (error) {
     const errorMsg =

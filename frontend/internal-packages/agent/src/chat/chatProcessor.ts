@@ -1,6 +1,7 @@
 import type { Schema } from '@liam-hq/db-structure'
 import { isSchemaUpdated, syncSchemaVectorStore } from '../vectorstore'
 import { executeChatWorkflow } from './workflow'
+import type { WorkflowState } from './workflow/types'
 
 interface ChatProcessorParams {
   message: string
@@ -12,11 +13,15 @@ interface ChatProcessorParams {
   latestVersionNumber?: number
 }
 
-interface ChatProcessorResult {
-  text: string
-  success: boolean
-  error?: string
-}
+type ChatProcessorResult =
+  | {
+      text: string
+      success: true
+    }
+  | {
+      success: false
+      error: string | undefined
+    }
 
 // streaming mode
 export function processChatMessage(
@@ -84,7 +89,7 @@ async function processChatMessageSync(
     const formattedHistory = history?.map(([, content]) => content) || []
 
     // Create workflow state
-    const workflowState = {
+    const workflowState: WorkflowState = {
       mode: mode === 'build' ? ('Build' as const) : ('Ask' as const),
       userInput: message,
       history: formattedHistory,
@@ -101,7 +106,6 @@ async function processChatMessageSync(
 
     if (result.error) {
       return {
-        text: '',
         success: false,
         error: result.error,
       }
@@ -113,7 +117,6 @@ async function processChatMessageSync(
     }
   } catch (error) {
     return {
-      text: '',
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
     }
@@ -198,7 +201,7 @@ async function* processChatMessageStreaming(
     const formattedHistory = history?.map(([, content]) => content) || []
 
     // Create workflow state
-    const workflowState = {
+    const workflowState: WorkflowState = {
       mode: mode === 'build' ? ('Build' as const) : ('Ask' as const),
       userInput: message,
       history: formattedHistory,
@@ -224,7 +227,6 @@ async function* processChatMessageStreaming(
     const errorMsg = error instanceof Error ? error.message : 'Unknown error'
     yield { type: 'error', content: errorMsg }
     return {
-      text: '',
       success: false,
       error: errorMsg,
     }

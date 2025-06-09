@@ -38,6 +38,5 @@ export const validationNode = async (
     agentName,
     schemaText,
     formattedChatHistory,
-    error: undefined,
   }
 }

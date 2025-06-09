@@ -357,7 +357,6 @@ describe('Chat Workflow', () => {
       const state = createBaseState({
         mode: 'Build',
         userInput: 'Add a created_at timestamp column to the users table',
-        buildingSchemaId: undefined,
       })
 
       const result = await executeChatWorkflow(state, { streaming: false })
@@ -521,8 +520,8 @@ describe('Chat Workflow', () => {
       expect(results).toHaveLength(3)
       for (const [index, result] of results.entries()) {
         expect(result).toBeDefined()
-        expect(result.mode).toBe(stateOverrides[index].mode)
-        expect(result.userInput).toBe(stateOverrides[index].userInput)
+        expect(result.mode).toBe(stateOverrides?.[index]?.mode)
+        expect(result.userInput).toBe(stateOverrides?.[index]?.userInput)
         expect(result.finalResponse).toBe('Mocked agent response')
       }
     })

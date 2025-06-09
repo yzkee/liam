@@ -19,13 +19,14 @@ export async function createClient({
   const cookieStore = await cookies()
 
   // Use the service role key if specified and available in environment variables
+  const serviceRoleKey = process.env['SUPABASE_SERVICE_ROLE_KEY']
   const apiKey =
-    useServiceRole && process.env.SUPABASE_SERVICE_ROLE_KEY
-      ? process.env.SUPABASE_SERVICE_ROLE_KEY
-      : (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '')
+    useServiceRole && serviceRoleKey
+      ? serviceRoleKey
+      : (process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'] ?? '')
 
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
+    process.env['NEXT_PUBLIC_SUPABASE_URL'] ?? '',
     apiKey,
     {
       cookies: {

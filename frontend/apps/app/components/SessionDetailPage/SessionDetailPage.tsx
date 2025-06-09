@@ -7,21 +7,95 @@ import { useTableGroups } from '@/hooks'
 import { VersionProvider } from '@/providers'
 import { versionSchema } from '@/schemas'
 import type { Schema } from '@liam-hq/db-structure'
+import { schemaSchema } from '@liam-hq/db-structure'
+import type { TablesUpdate } from '@liam-hq/db/supabase/database.types'
 import { initSchemaStore } from '@liam-hq/erd-core'
 import type { FC } from 'react'
-import { useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import * as v from 'valibot'
 import styles from './SessionDetailPage.module.css'
+import {
+  loadBuildingSchema,
+  setupBuildingSchemaRealtimeSubscription,
+} from './services/buildingSchemaServiceClient'
+
+type BuildingSchemaUpdate = TablesUpdate<'building_schemas'>
+
 type Props = {
-  schema: Schema
   designSession: {
     id: string
     organizationId: string
+    buildingSchemaId: string
+    latestVersionNumber: number
   }
 }
 
-export const SessionDetailPage: FC<Props> = ({ schema, designSession }) => {
-  // Update the schema store with the fetched schema
+export const SessionDetailPage: FC<Props> = ({ designSession }) => {
+  const [schema, setSchema] = useState<Schema | null>(null)
+  const [isLoadingSchema, setIsLoadingSchema] = useState(true)
+  const designSessionId = designSession.id
+
+  // Load initial schema data
+  useEffect(() => {
+    const loadInitialSchema = async () => {
+      try {
+        setIsLoadingSchema(true)
+        const { data: schemaData, error } =
+          await loadBuildingSchema(designSessionId)
+
+        if (error) {
+          console.error('Failed to fetch initial schema:', error)
+          return
+        }
+
+        if (schemaData?.schema) {
+          const schema = v.parse(schemaSchema, schemaData.schema)
+          setSchema(schema)
+        }
+      } catch (error) {
+        console.error('Error loading initial schema:', error)
+      } finally {
+        setIsLoadingSchema(false)
+      }
+    }
+
+    if (designSessionId) {
+      loadInitialSchema()
+    }
+  }, [designSessionId])
+
+  // Handle schema updates from realtime subscription
+  const handleSchemaUpdate = useCallback(
+    (updatedSchema: BuildingSchemaUpdate) => {
+      const schema = v.parse(schemaSchema, updatedSchema.schema)
+      setSchema(schema)
+    },
+    [],
+  )
+
+  // Handle realtime subscription errors
+  const handleRealtimeError = useCallback((_error: Error) => {
+    // TODO: Add user notification system
+    // console.error('Schema realtime subscription error:', error)
+  }, [])
+
+  // Set up realtime subscription for schema updates
+  useEffect(() => {
+    if (!designSessionId) {
+      return
+    }
+
+    const subscription = setupBuildingSchemaRealtimeSubscription(
+      designSessionId,
+      handleSchemaUpdate,
+      handleRealtimeError,
+    )
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [designSessionId, handleSchemaUpdate, handleRealtimeError])
+
   useEffect(() => {
     if (schema) {
       initSchemaStore({
@@ -41,6 +115,16 @@ export const SessionDetailPage: FC<Props> = ({ schema, designSession }) => {
   }
   const version = v.parse(versionSchema, versionData)
 
+  // Show loading state while schema is being fetched
+  if (isLoadingSchema) {
+    return <div>Loading schema...</div>
+  }
+
+  // Show error state if no schema is available
+  if (!schema) {
+    return <div>Failed to load schema</div>
+  }
+
   return (
     <div className={styles.container}>
       <div className={styles.columns}>
@@ -49,6 +133,8 @@ export const SessionDetailPage: FC<Props> = ({ schema, designSession }) => {
             schemaData={schema}
             designSessionId={designSession.id}
             organizationId={designSession.organizationId}
+            buildingSchemaId={designSession.buildingSchemaId}
+            latestVersionNumber={designSession.latestVersionNumber}
           />
         </div>
         <TabsRoot defaultValue="erd" className={styles.tabsRoot}>

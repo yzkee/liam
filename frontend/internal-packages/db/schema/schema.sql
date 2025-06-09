@@ -1395,7 +1395,11 @@ CREATE UNIQUE INDEX "github_pull_request_repository_id_pull_number_key" ON "publ
 
 
 
-CREATE UNIQUE INDEX "github_repository_owner_name_key" ON "public"."github_repositories" USING "btree" ("owner", "name");
+CREATE UNIQUE INDEX "github_repository_owner_name_organization_id_key" ON "public"."github_repositories" USING "btree" ("owner", "name", "organization_id");
+
+
+
+CREATE INDEX "idx_building_schemas_design_session_created" ON "public"."building_schemas" USING "btree" ("design_session_id", "created_at" DESC);
 
 
 
@@ -2679,6 +2683,10 @@ CREATE POLICY "users_same_organization_select_policy" ON "public"."users" FOR SE
 
 
 ALTER PUBLICATION "supabase_realtime" OWNER TO "postgres";
+
+
+ALTER PUBLICATION "supabase_realtime" ADD TABLE ONLY "public"."building_schemas";
+
 
 
 ALTER PUBLICATION "supabase_realtime" ADD TABLE ONLY "public"."messages";

@@ -24,6 +24,10 @@ interface ChatState {
   history: string[]
   schemaData?: Schema
   projectId?: string
+  buildingSchemaId: string
+  latestVersionNumber?: number
+  organizationId?: string
+  userId?: string
   error?: string
 
   // Intermediate data for workflow
@@ -46,6 +50,10 @@ const createAnnotations = () => {
     history: Annotation<string[]>,
     schemaData: Annotation<Schema>,
     projectId: Annotation<string>,
+    buildingSchemaId: Annotation<string>,
+    latestVersionNumber: Annotation<number>,
+    organizationId: Annotation<string>,
+    userId: Annotation<string>,
     error: Annotation<string>,
 
     // Additional fields for workflow processing

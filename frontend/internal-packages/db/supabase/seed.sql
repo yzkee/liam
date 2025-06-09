@@ -24,9 +24,9 @@
  * - The script automatically applies the appropriate ID based on detected environment
  *
  * Actions for Both Local and Preview Environments:
- * 1. Creates a test user (test@example.com / liampassword1234)
+ * 1. Creates test users (test@example.com, test2@example.com / liampassword1234)
  * 2. Creates an organization (liam-hq)
- * 3. Links the user to the organization
+ * 3. Links the users to the organization
  * 4. Creates a GitHub repository entry for liam-hq/liam with environment-specific installation ID
  * 5. Creates a project named "liam"
  * 6. Links the project to the repository
@@ -41,6 +41,7 @@ declare
   v_installation_id integer;
   v_org_id uuid;
   v_user_id uuid;
+  v_user_id_2 uuid;
   v_repo_id uuid;
   v_project_id uuid;
 begin
@@ -54,7 +55,8 @@ begin
     server_addr,
     case when is_local then 'local' else 'preview' end;
 
-  -- 1. create a single user
+  -- 1. create test users
+  -- First user
   v_user_id := gen_random_uuid();
   insert into auth.users
     (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, recovery_sent_at, last_sign_in_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at, confirmation_token, email_change, email_change_token_new, recovery_token)
@@ -64,6 +66,16 @@ begin
   values
     (gen_random_uuid(), v_user_id, v_user_id, format('{"sub":"%s","email":"%s"}', v_user_id::text, 'test@example.com')::jsonb, 'email', now(), now(), now());
 
+  -- Second user
+  v_user_id_2 := gen_random_uuid();
+  insert into auth.users
+    (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, recovery_sent_at, last_sign_in_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at, confirmation_token, email_change, email_change_token_new, recovery_token)
+  values
+    ('00000000-0000-0000-0000-000000000000', v_user_id_2, 'authenticated', 'authenticated', 'test2@example.com', crypt('liampassword1234', gen_salt('bf')), now(), now(), now(), '{"provider":"email","providers":["email"]}', '{}', now(), now(), '', '', '', '');
+  insert into auth.identities (id, user_id, provider_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
+  values
+    (gen_random_uuid(), v_user_id_2, v_user_id_2, format('{"sub":"%s","email":"%s"}', v_user_id_2::text, 'test2@example.com')::jsonb, 'email', now(), now(), now());
+
   -- 2. create a single organization
   insert into public.organizations (id, name)
   values
@@ -71,10 +83,11 @@ begin
   on conflict (id) do nothing
   returning id into v_org_id;
 
-  -- 3. link user to organization (organization_members table)
+  -- 3. link users to organization (organization_members table)
   insert into public.organization_members (user_id, organization_id)
   values
-    (v_user_id, v_org_id)
+    (v_user_id, v_org_id),
+    (v_user_id_2, v_org_id)
   on conflict (user_id, organization_id) do nothing;
 
   -- 4. create a single github repository with environment-specific installation_id
@@ -147,6 +160,6 @@ begin
 
   raise notice 'environment: %, seeded database with test data.',
     case when is_local then 'local' else 'preview' end;
-  raise notice 'test user created: test@example.com with password: liampassword1234';
+  raise notice 'test users created: test@example.com, test2@example.com with password: liampassword1234';
   raise notice 'using installation_id: %', v_installation_id;
 end $$;

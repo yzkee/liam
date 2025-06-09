@@ -24,7 +24,7 @@ vi.mock('@/app/lib/schema/convertSchemaToText', () => ({
 }))
 
 // Mock the createNewVersion function
-vi.mock('@/libs/schema/createNewVersion', () => ({
+vi.mock('../../utils/createNewVersion', () => ({
   createNewVersion: vi.fn(),
 }))
 

@@ -40,7 +40,6 @@
     "@liam-hq/configs": "workspace:*",
     "@rollup/plugin-node-resolve": "16.0.1",
     "@rollup/plugin-typescript": "12.1.2",
-    "@types/glob": "8.1.0",
     "@types/node": "22.15.21",
     "@types/react": "18",
     "@types/react-dom": "18",

@@ -9,18 +9,16 @@ import { LinkItem } from './LinkItem'
 import { NewSessionButton } from './NewSessionButton'
 import { OrganizationItem } from './OrganizationItem'
 import { RecentsSection } from './RecentsSection'
-import { fetchRecentSessions } from './services/fetchRecentSessions'
 
 type Props = {
   currentOrganization: Organization | null
   organizations: OrganizationsByUserId | null
 }
 
-export const GlobalNav: FC<Props> = async ({
+export const GlobalNav: FC<Props> = ({
   currentOrganization,
   organizations,
 }) => {
-  const recentSessions = await fetchRecentSessions(5)
   return (
     <div className={styles.globalNavContainer} data-global-nav-container>
       <nav className={styles.globalNav}>
@@ -50,7 +48,7 @@ export const GlobalNav: FC<Props> = async ({
           />
 
           <NewSessionButton />
-          <RecentsSection sessions={recentSessions} />
+          <RecentsSection />
         </div>
 
         <div className={styles.footerSection}>

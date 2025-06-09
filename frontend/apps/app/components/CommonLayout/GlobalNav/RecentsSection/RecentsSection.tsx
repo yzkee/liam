@@ -1,16 +1,13 @@
 import { urlgen } from '@/libs/routes'
 import clsx from 'clsx'
 import Link from 'next/link'
-import type { FC } from 'react'
 import itemStyles from '../Item.module.css'
+import { fetchRecentSessions } from '../services/fetchRecentSessions'
 import type { RecentSession } from '../services/fetchRecentSessions'
 import styles from './RecentsSection.module.css'
 
-type RecentsSectionProps = {
-  sessions: RecentSession[]
-}
-
-export const RecentsSection: FC<RecentsSectionProps> = ({ sessions }) => {
+export const RecentsSection = async () => {
+  const sessions: RecentSession[] = await fetchRecentSessions(5)
   return (
     <>
       <div className={clsx(itemStyles.item, styles.recentsCollapsed)}>

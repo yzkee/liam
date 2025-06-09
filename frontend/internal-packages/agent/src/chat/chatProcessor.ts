@@ -1,7 +1,6 @@
-import { isSchemaUpdated } from '@/app/lib/vectorstore/supabaseVectorStore'
-import { syncSchemaVectorStore } from '@/app/lib/vectorstore/syncSchemaVectorStore'
-import { executeChatWorkflow } from '@/lib/chat/workflow'
 import type { Schema } from '@liam-hq/db-structure'
+import { isSchemaUpdated, syncSchemaVectorStore } from '../vectorstore'
+import { executeChatWorkflow } from './workflow'
 
 interface ChatProcessorParams {
   message: string

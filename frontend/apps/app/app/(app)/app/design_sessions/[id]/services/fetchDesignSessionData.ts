@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/libs/db/server'
-import { applyPatchOperations, operationsSchema } from '@/libs/schema'
+import { applyPatchOperations, operationsSchema } from '@liam-hq/agent'
 import * as v from 'valibot'
 
 interface DesignSessionData {

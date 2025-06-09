@@ -1,7 +1,4 @@
-import type { Schema, TableGroup } from '@liam-hq/db-structure'
-
-// Export TableGroupData type for compatibility
-export type TableGroupData = TableGroup
+import type { Schema } from '@liam-hq/db-structure'
 
 // Convert table data to text document
 const tableToDocument = (

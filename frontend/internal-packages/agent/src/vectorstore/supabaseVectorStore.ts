@@ -1,10 +1,10 @@
 import crypto from 'node:crypto'
-import { convertSchemaToText } from '@/app/lib/schema/convertSchemaToText'
 import { SupabaseVectorStore as LangchainSupabaseVectorStore } from '@langchain/community/vectorstores/supabase'
 import { Document } from '@langchain/core/documents'
 import { OpenAIEmbeddings } from '@langchain/openai'
 import { createClient } from '@liam-hq/db'
 import type { Schema } from '@liam-hq/db-structure'
+import { convertSchemaToText } from '../utils/convertSchemaToText'
 
 /**
  * Generates a hash for the schema data to detect changes

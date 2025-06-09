@@ -1,5 +1,5 @@
-import type { AgentName } from '@/lib/langchain'
 import type { Schema } from '@liam-hq/db-structure'
+import type { AgentName } from '../../langchain'
 
 // Re-export AgentName for use within workflow modules
 export type { AgentName }

@@ -20,7 +20,7 @@ export const GlobalNav: FC<Props> = ({
   organizations,
 }) => {
   return (
-    <div className={styles.globalNavContainer}>
+    <div className={styles.globalNavContainer} data-global-nav-container>
       <nav className={styles.globalNav}>
         <div className={styles.logoContainer}>
           <div className={styles.logoSection}>

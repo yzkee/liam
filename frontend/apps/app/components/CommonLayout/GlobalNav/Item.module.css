@@ -8,15 +8,18 @@
   color: var(--global-foreground);
   cursor: pointer;
   transition: background-color var(--default-hover-animation-duration)
-    var(--default-timing-function), width 0.1s var(--default-timing-function),
-    gap 0.1s var(--default-timing-function);
+    var(--default-timing-function);
 }
 
 .item:hover {
   background-color: var(--pane-background-active);
 }
 
-.globalNavContainer:hover .item {
+:global([data-global-nav-container]):hover .item,
+:global([data-global-nav-container]):has(
+    [data-radix-menu-content][data-state='open']
+  )
+  .item {
   width: auto;
   gap: var(--spacing-2half);
 }
@@ -38,7 +41,11 @@
   transition: opacity 0.1s var(--default-timing-function);
 }
 
-.globalNavContainer:hover .labelArea {
+:global([data-global-nav-container]):hover .labelArea,
+:global([data-global-nav-container]):has(
+    [data-radix-menu-content][data-state='open']
+  )
+  .labelArea {
   opacity: 1;
 }
 

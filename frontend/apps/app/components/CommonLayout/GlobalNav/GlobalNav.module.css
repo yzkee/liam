@@ -19,7 +19,8 @@
   box-shadow: none;
 }
 
-.globalNavContainer:hover .globalNav {
+.globalNav:hover,
+.globalNav:has([data-radix-menu-content][data-state='open']) {
   width: 11rem;
   box-shadow: 4px 0 16px rgba(0, 0, 0, 0.2);
 }

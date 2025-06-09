@@ -2,7 +2,7 @@
 
 import { DropdownMenuRoot, DropdownMenuTrigger } from '@/components'
 import { Building, ChevronsUpDown } from '@/icons'
-import { type FC, useState } from 'react'
+import type { FC } from 'react'
 import type { Organization } from '../../services/getOrganization'
 import type { OrganizationsByUserId } from '../../services/getOrganizationsByUserId'
 import itemStyles from '../Item.module.css'
@@ -18,10 +18,8 @@ export const OrganizationItem: FC<Props> = ({
   currentOrganization,
   organizations,
 }) => {
-  const [open, setOpen] = useState(false)
-
   return (
-    <DropdownMenuRoot open={open} onOpenChange={setOpen}>
+    <DropdownMenuRoot>
       <DropdownMenuTrigger>
         <div className={itemStyles.item}>
           <div className={itemStyles.iconContainer}>

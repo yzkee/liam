@@ -26,7 +26,10 @@ const FormDataSchema = v.object({
   projectId: v.optional(v.nullable(emptyStringToNull)),
   parentDesignSessionId: v.optional(v.nullable(emptyStringToNull)),
   gitSha: v.optional(v.nullable(v.string())),
-  instructions: v.pipe(v.string(), v.minLength(1, 'Instructions are required')),
+  initialMessage: v.pipe(
+    v.string(),
+    v.minLength(1, 'Initial message is required'),
+  ),
 })
 
 type RepositoryData = {
@@ -54,7 +57,7 @@ function parseFormData(
     projectId: formData.get('projectId'),
     parentDesignSessionId: formData.get('parentDesignSessionId'),
     gitSha: formData.get('gitSha'),
-    instructions: formData.get('instructions'),
+    initialMessage: formData.get('initialMessage'),
   }
 
   return v.safeParse(FormDataSchema, rawData)
@@ -219,7 +222,7 @@ export async function createSession(
     return { success: false, error: 'Invalid form data' }
   }
 
-  const { projectId, parentDesignSessionId, gitSha, instructions } =
+  const { projectId, parentDesignSessionId, gitSha, initialMessage } =
     parsedFormDataResult.output
 
   const supabase = await createClient()
@@ -284,18 +287,15 @@ export async function createSession(
     return { success: false, error: 'Failed to create building schema' }
   }
 
-  // Save initial message (now required)
-  if (instructions) {
-    const saveMessageResult = await saveInitialMessage(
-      supabase,
-      designSession.id,
-      organizationId,
-      instructions,
-      currentUserId,
-    )
-    if (!saveMessageResult.success) {
-      return saveMessageResult as CreateSessionState
-    }
+  const saveMessageResult = await saveInitialMessage(
+    supabase,
+    designSession.id,
+    organizationId,
+    initialMessage,
+    currentUserId,
+  )
+  if (!saveMessageResult.success) {
+    return saveMessageResult
   }
 
   // Redirect to the session page on successful creation

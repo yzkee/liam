@@ -41,9 +41,7 @@ export const generateMessageId = (prefix: string): string => {
 export const formatChatHistory = (
   messages: ChatEntry[],
 ): [string, string][] => {
-  return messages
-    .filter((msg) => msg.id !== 'welcome')
-    .map((msg) => [msg.isUser ? 'Human' : 'AI', msg.content])
+  return messages.map((msg) => [msg.isUser ? 'Human' : 'AI', msg.content])
 }
 
 /**

@@ -21,7 +21,7 @@ type Props = {
 export const SessionsNewPage: FC<Props> = ({ projects }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [, startTransition] = useTransition()
-  const [instructions, setInstructions] = useState('')
+  const [initialMessage, setInitialMessage] = useState('')
   const [state, formAction, isPending] = useActionState(createSession, {
     success: false,
   })
@@ -33,12 +33,12 @@ export const SessionsNewPage: FC<Props> = ({ projects }) => {
 
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const textarea = e.target
-    setInstructions(textarea.value)
+    setInitialMessage(textarea.value)
     textarea.style.height = 'auto'
     textarea.style.height = `${textarea.scrollHeight}px`
   }
 
-  const isFormValid = instructions.trim().length > 0
+  const isFormValid = initialMessage.trim().length > 0
 
   useEffect(() => {
     const textarea = textareaRef.current
@@ -114,21 +114,21 @@ export const SessionsNewPage: FC<Props> = ({ projects }) => {
               )}
 
               <div className={styles.formGroup}>
-                <label htmlFor="instructions" className={styles.label}>
-                  Instructions *
+                <label htmlFor="initialMessage" className={styles.label}>
+                  Initial Message *
                 </label>
                 <div className={styles.inputWrapper}>
                   <textarea
-                    id="instructions"
-                    name="instructions"
+                    id="initialMessage"
+                    name="initialMessage"
                     ref={textareaRef}
-                    value={instructions}
+                    value={initialMessage}
                     onChange={handleChange}
                     placeholder="Enter your database design instructions. For example: Design a database for an e-commerce site that manages users, products, and orders..."
                     disabled={isPending}
                     className={styles.textarea}
                     rows={6}
-                    aria-label="Database design instructions"
+                    aria-label="Initial message for database design"
                     required
                   />
                   {state.error && <p className={styles.error}>{state.error}</p>}

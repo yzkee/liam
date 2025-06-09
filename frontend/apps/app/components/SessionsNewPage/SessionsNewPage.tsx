@@ -2,7 +2,13 @@
 
 import { ArrowRight, Button } from '@liam-hq/ui'
 import type { ChangeEvent, FC } from 'react'
-import { useActionState, useEffect, useRef, useTransition } from 'react'
+import {
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+  useTransition,
+} from 'react'
 import type { Projects } from '../CommonLayout/AppBar/ProjectsDropdownMenu/services/getProjects'
 import styles from './SessionsNewPage.module.css'
 import { createSession } from './actions/createSession'
@@ -15,6 +21,7 @@ type Props = {
 export const SessionsNewPage: FC<Props> = ({ projects }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [, startTransition] = useTransition()
+  const [instructions, setInstructions] = useState('')
   const [state, formAction, isPending] = useActionState(createSession, {
     success: false,
   })
@@ -26,9 +33,12 @@ export const SessionsNewPage: FC<Props> = ({ projects }) => {
 
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const textarea = e.target
+    setInstructions(textarea.value)
     textarea.style.height = 'auto'
     textarea.style.height = `${textarea.scrollHeight}px`
   }
+
+  const isFormValid = instructions.trim().length > 0
 
   useEffect(() => {
     const textarea = textareaRef.current
@@ -105,19 +115,21 @@ export const SessionsNewPage: FC<Props> = ({ projects }) => {
 
               <div className={styles.formGroup}>
                 <label htmlFor="instructions" className={styles.label}>
-                  Instructions
+                  Instructions *
                 </label>
                 <div className={styles.inputWrapper}>
                   <textarea
                     id="instructions"
                     name="instructions"
                     ref={textareaRef}
+                    value={instructions}
                     onChange={handleChange}
                     placeholder="Enter your database design instructions. For example: Design a database for an e-commerce site that manages users, products, and orders..."
                     disabled={isPending}
                     className={styles.textarea}
                     rows={6}
                     aria-label="Database design instructions"
+                    required
                   />
                   {state.error && <p className={styles.error}>{state.error}</p>}
                 </div>
@@ -128,7 +140,7 @@ export const SessionsNewPage: FC<Props> = ({ projects }) => {
               <Button
                 type="submit"
                 variant="solid-primary"
-                disabled={isPending}
+                disabled={isPending || !isFormValid}
                 isLoading={isPending}
                 className={styles.buttonCustom}
                 loadingIndicatorType="content"

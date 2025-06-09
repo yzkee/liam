@@ -1,5 +1,26 @@
 .recentsCollapsed {
   cursor: default;
+  display: block;
+}
+
+.recentsExpanded {
+  display: none;
+}
+
+:global([data-global-nav-container]):hover .recentsCollapsed,
+:global([data-global-nav-container]):has(
+    [data-radix-menu-content][data-state='open']
+  )
+  .recentsCollapsed {
+  display: none;
+}
+
+:global([data-global-nav-container]):hover .recentsExpanded,
+:global([data-global-nav-container]):has(
+    [data-radix-menu-content][data-state='open']
+  )
+  .recentsExpanded {
+  display: block;
 }
 
 .recentsSection {

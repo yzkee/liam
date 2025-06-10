@@ -6,9 +6,8 @@ const manager = new PGliteInstanceManager()
 export async function executeQuery(
   sessionId: string,
   sql: string,
-  type: 'DDL' | 'DML',
 ): Promise<SqlResult[]> {
-  return await manager.executeQuery(sessionId, sql, type)
+  return await manager.executeQuery(sessionId, sql)
 }
 
 export const query = executeQuery

@@ -16,5 +16,3 @@ export interface PGliteInstance {
   db: PGlite
   lastAccessed: Date
 }
-
-export type QueryType = 'DDL' | 'DML'

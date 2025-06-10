@@ -1,5 +1,5 @@
 import { PGlite } from '@electric-sql/pglite'
-import type { PGliteInstance, QueryType, SqlResult } from './types'
+import type { PGliteInstance, SqlResult } from './types'
 
 export class PGliteInstanceManager {
   private instances = new Map<string, PGliteInstance>()
@@ -39,23 +39,15 @@ export class PGliteInstanceManager {
     }
   }
 
-  async executeQuery(
-    sessionId: string,
-    sql: string,
-    type: QueryType,
-  ): Promise<SqlResult[]> {
+  async executeQuery(sessionId: string, sql: string): Promise<SqlResult[]> {
     const db = await this.getOrCreateInstance(sessionId)
-
-    if (type === 'DDL') {
-      return this.applyDDL(sql, db)
-    }
-    return this.applyDML(sql, db)
+    return this.executeSql(sql, db)
   }
 
-  private async applyDDL(ddlText: string, db: PGlite): Promise<SqlResult[]> {
+  private async executeSql(sqlText: string, db: PGlite): Promise<SqlResult[]> {
     const results: SqlResult[] = []
 
-    const statements = ddlText
+    const statements = sqlText
       .split(';')
       .map((s) => s.trim())
       .filter(Boolean)
@@ -72,56 +64,6 @@ export class PGliteInstanceManager {
           id: crypto.randomUUID(),
           metadata: {
             executionTime,
-            timestamp: new Date().toLocaleString(),
-          },
-        })
-      } catch (error) {
-        const executionTime = Math.round(performance.now() - startTime)
-        const errorMessage =
-          error instanceof Error ? error.message : String(error)
-        results.push({
-          sql,
-          result: { error: errorMessage },
-          success: false,
-          id: crypto.randomUUID(),
-          metadata: {
-            executionTime,
-            timestamp: new Date().toLocaleString(),
-          },
-        })
-      }
-    }
-
-    return results
-  }
-
-  private async applyDML(dmlText: string, db: PGlite): Promise<SqlResult[]> {
-    const results: SqlResult[] = []
-
-    const statements = dmlText
-      .split(';')
-      .map((s) => s.trim())
-      .filter(Boolean)
-
-    for (const sql of statements) {
-      const startTime = performance.now()
-      try {
-        const result = await db.query(sql)
-        const executionTime = Math.round(performance.now() - startTime)
-
-        let affectedRows: number | undefined = undefined
-        if (result && typeof result === 'object' && 'rowCount' in result) {
-          affectedRows = result.rowCount as number
-        }
-
-        results.push({
-          sql,
-          result,
-          success: true,
-          id: crypto.randomUUID(),
-          metadata: {
-            executionTime,
-            affectedRows,
             timestamp: new Date().toLocaleString(),
           },
         })

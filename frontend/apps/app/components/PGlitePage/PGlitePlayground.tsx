@@ -118,7 +118,7 @@ export const PGlitePlayground = forwardRef<PGlitePlaygroundHandle>((_, ref) => {
   useEffect(() => {
     const initializeConnection = async () => {
       try {
-        await executeQuery(sessionId, 'SELECT 1', 'DDL')
+        await executeQuery(sessionId, 'SELECT 1')
         setIsConnected(true)
 
         // Add one initial DML section
@@ -155,7 +155,7 @@ export const PGlitePlayground = forwardRef<PGlitePlaygroundHandle>((_, ref) => {
 
     try {
       // Execute DDL using server-side PGlite instance
-      const results = await executeQuery(sessionId, ddlState.ddlInput, 'DDL')
+      const results = await executeQuery(sessionId, ddlState.ddlInput)
       setDdlState((prev) => ({
         ...prev,
         results: [...prev.results, ...results],
@@ -191,7 +191,7 @@ export const PGlitePlayground = forwardRef<PGlitePlaygroundHandle>((_, ref) => {
 
     try {
       // Execute DML using server-side PGlite instance
-      const results = await executeQuery(sessionId, section.dmlInput, 'DML')
+      const results = await executeQuery(sessionId, section.dmlInput)
 
       setDmlSections((prev) => {
         const newSections = [...prev]
@@ -250,7 +250,7 @@ export const PGlitePlayground = forwardRef<PGlitePlaygroundHandle>((_, ref) => {
 
         try {
           // Execute DDL using server-side PGlite instance
-          const results = await executeQuery(sessionId, ddl, 'DDL')
+          const results = await executeQuery(sessionId, ddl)
           setDdlState((prev) => ({
             ...prev,
             results: [...prev.results, ...results],
@@ -295,7 +295,7 @@ export const PGlitePlayground = forwardRef<PGlitePlaygroundHandle>((_, ref) => {
 
         try {
           // Execute the query using server-side PGlite instance
-          const results = await executeQuery(sessionId, query, 'DML')
+          const results = await executeQuery(sessionId, query)
 
           setDmlSections((prev) => {
             const sectionIndex = prev.findIndex((s) => s.id === newSectionId)
@@ -355,7 +355,7 @@ export const PGlitePlayground = forwardRef<PGlitePlaygroundHandle>((_, ref) => {
 
         try {
           // Execute the query using server-side PGlite instance
-          const results = await executeQuery(sessionId, query, 'DML')
+          const results = await executeQuery(sessionId, query)
 
           setDmlSections((prev) => {
             const newSections = [...prev]

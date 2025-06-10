@@ -6,12 +6,12 @@ import {
   finalResponseNode,
   validationNode,
 } from '../nodes'
-import type { AgentName, WorkflowState } from '../types'
 import {
   createErrorState,
   fromLangGraphResult,
   toLangGraphState,
-} from './stateManager'
+} from '../shared/stateManager'
+import type { AgentName, WorkflowState } from '../types'
 
 /**
  * ChatState definition for LangGraph

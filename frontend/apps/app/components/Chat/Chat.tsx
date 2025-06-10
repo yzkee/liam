@@ -39,7 +39,6 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups, designSession }) => {
     currentUserId,
   )
   const [isLoading, setIsLoading] = useState(false)
-  const [isLoadingMessages, setIsLoadingMessages] = useState(true)
   const [progressMessages, setProgressMessages] = useState<string[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -60,9 +59,6 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups, designSession }) => {
   // TODO: Add rate limiting - Implement rate limiting for message sending to prevent spam
   // biome-ignore  lint/complexity/noExcessiveCognitiveComplexity: fix later
   const handleSendMessage = async (content: string) => {
-    // Get current user ID for persistence
-    const userId = await getCurrentUserId()
-
     // Add user message
     const userMessage: ChatEntry = {
       id: generateMessageId('user'),

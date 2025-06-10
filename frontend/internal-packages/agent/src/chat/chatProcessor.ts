@@ -1,5 +1,4 @@
 import type { Schema } from '@liam-hq/db-structure'
-import { isSchemaUpdated, syncSchemaVectorStore } from '../vectorstore'
 import { executeChatWorkflow } from './workflow'
 import type { WorkflowState } from './workflow/types'
 
@@ -74,17 +73,6 @@ async function processChatMessageSync(
   } = params
 
   try {
-    // Check if schema has been updated and sync vector store if needed
-    try {
-      const schemaUpdated = await isSchemaUpdated(schemaData)
-      if (schemaUpdated && organizationId) {
-        await syncSchemaVectorStore(schemaData, organizationId)
-      }
-    } catch (error) {
-      console.warn('Vector store sync failed:', error)
-      // Continue processing even if vector store sync fails
-    }
-
     // Convert history format
     const formattedHistory = history?.map(([, content]) => content) || []
 
@@ -120,24 +108,6 @@ async function processChatMessageSync(
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
     }
-  }
-}
-
-/**
- * Handle vector store sync if needed
- */
-async function handleVectorStoreSync(
-  schemaData: Schema,
-  organizationId?: string,
-): Promise<void> {
-  try {
-    const schemaUpdated = await isSchemaUpdated(schemaData)
-    if (schemaUpdated && organizationId) {
-      await syncSchemaVectorStore(schemaData, organizationId)
-    }
-  } catch (error) {
-    console.warn('Vector store sync failed:', error)
-    // Continue processing even if vector store sync fails
   }
 }
 
@@ -194,9 +164,6 @@ async function* processChatMessageStreaming(
   } = params
 
   try {
-    // Handle vector store sync
-    await handleVectorStoreSync(schemaData, organizationId)
-
     // Convert history format
     const formattedHistory = history?.map(([, content]) => content) || []
 

@@ -1,8 +1,9 @@
 'use server'
 
-import { createClient } from '@/libs/db/server'
-import { applyPatchOperations, operationsSchema } from '@liam-hq/agent'
 import * as v from 'valibot'
+import { createClient } from '../db/server'
+import { applyPatchOperations } from './applyPatchOperations'
+import { operationsSchema } from './operationsSchema'
 
 interface DesignSessionData {
   organization_id: string
@@ -112,5 +113,9 @@ export async function fetchSchemaData(designSessionId: string | null) {
     return { data: null, error: null }
   }
 
-  return await querySchemaData(designSessionId)
+  const { data, error } = await querySchemaData(designSessionId)
+  return {
+    data,
+    error: error ? { message: error?.message } : null,
+  }
 }

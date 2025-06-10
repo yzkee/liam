@@ -1,6 +1,6 @@
 import type { PageProps } from '@/app/types'
 import { SessionDetailPage } from '@/components/SessionDetailPage'
-import { fetchDesignSessionData, fetchSchemaData } from '@/libs/schema'
+import { fetchDesignSessionData, fetchSchemaData } from '@liam-hq/agent'
 import * as v from 'valibot'
 
 const paramsSchema = v.object({

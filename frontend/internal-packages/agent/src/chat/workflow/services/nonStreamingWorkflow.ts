@@ -80,6 +80,7 @@ const generateAnswer = async (
     // Use synchronous execution (streaming is now handled by finalResponseNode)
     const result = await answerGenerationNode(state)
     return {
+      latestVersionNumber: result.latestVersionNumber,
       generatedAnswer: result.generatedAnswer,
       error: result.error,
     }
@@ -133,7 +134,7 @@ const createGraph = () => {
 /**
  * Execute non-streaming workflow using LangGraph
  */
-const executeLangGraphWorkflow = async (
+const executeNonStreamingWorkflow = async (
   initialState: WorkflowState,
   recursionLimit: number = DEFAULT_RECURSION_LIMIT,
 ): Promise<WorkflowState> => {
@@ -159,5 +160,5 @@ const executeLangGraphWorkflow = async (
   }
 }
 
-// Export for backward compatibility
-export { executeLangGraphWorkflow as LangGraphWorkflow }
+// Export with new name and backward compatibility
+export { executeNonStreamingWorkflow as LangGraphWorkflow }

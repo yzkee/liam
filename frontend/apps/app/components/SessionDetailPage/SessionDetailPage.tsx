@@ -8,17 +8,14 @@ import { VersionProvider } from '@/providers'
 import { versionSchema } from '@/schemas'
 import type { Schema } from '@liam-hq/db-structure'
 import { schemaSchema } from '@liam-hq/db-structure'
-import type { TablesUpdate } from '@liam-hq/db/supabase/database.types'
 import type { ComponentProps, FC } from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import * as v from 'valibot'
 import styles from './SessionDetailPage.module.css'
 import {
-  loadBuildingSchema,
+  fetchSchemaDataClient,
   setupBuildingSchemaRealtimeSubscription,
 } from './services/buildingSchemaServiceClient'
-
-type BuildingSchemaUpdate = TablesUpdate<'building_schemas'>
 
 type Props = {
   designSession: ComponentProps<typeof Chat>['designSession']
@@ -27,6 +24,9 @@ type Props = {
 export const SessionDetailPage: FC<Props> = ({ designSession }) => {
   const [schema, setSchema] = useState<Schema | null>(null)
   const [isLoadingSchema, setIsLoadingSchema] = useState(true)
+  const [latestVersionNumber, setLatestVersionNumber] = useState(
+    designSession.latestVersionNumber,
+  )
   const designSessionId = designSession.id
 
   // Load initial schema data
@@ -35,16 +35,17 @@ export const SessionDetailPage: FC<Props> = ({ designSession }) => {
       try {
         setIsLoadingSchema(true)
         const { data: schemaData, error } =
-          await loadBuildingSchema(designSessionId)
+          await fetchSchemaDataClient(designSessionId)
 
         if (error) {
           console.error('Failed to fetch initial schema:', error)
           return
         }
 
-        if (schemaData?.schema) {
+        if (schemaData.schema) {
           const schema = v.parse(schemaSchema, schemaData.schema)
           setSchema(schema)
+          setLatestVersionNumber(schemaData.latestVersionNumber)
         }
       } catch (error) {
         console.error('Error loading initial schema:', error)
@@ -60,9 +61,25 @@ export const SessionDetailPage: FC<Props> = ({ designSession }) => {
 
   // Handle schema updates from realtime subscription
   const handleSchemaUpdate = useCallback(
-    (updatedSchema: BuildingSchemaUpdate) => {
-      const schema = v.parse(schemaSchema, updatedSchema.schema)
-      setSchema(schema)
+    async (triggeredDesignSessionId: string) => {
+      try {
+        const { data: schemaData, error } = await fetchSchemaDataClient(
+          triggeredDesignSessionId,
+        )
+
+        if (error) {
+          console.error('Failed to fetch updated schema:', error)
+          return
+        }
+
+        if (schemaData.schema) {
+          const schema = v.parse(schemaSchema, schemaData.schema)
+          setSchema(schema)
+          setLatestVersionNumber(schemaData.latestVersionNumber)
+        }
+      } catch (error) {
+        console.error('Error handling schema update:', error)
+      }
     },
     [],
   )

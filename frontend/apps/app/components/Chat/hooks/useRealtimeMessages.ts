@@ -35,7 +35,7 @@ const updateExistingMessage = (
 const handleOptimisticUserUpdate = (
   messages: ChatEntry[],
   newEntry: ChatEntry,
-  messageUserId: string | null,
+  messageUserId: string | null | undefined,
   currentUserId: string | null,
 ): ChatEntry[] | null => {
   if (!newEntry.isUser || messageUserId !== currentUserId || !newEntry.dbId) {

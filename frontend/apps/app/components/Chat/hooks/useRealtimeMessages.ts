@@ -74,7 +74,7 @@ type UseRealtimeMessagesFunc = (
   messages: ChatEntry[]
   addOrUpdateMessage: (
     newChatEntry: ChatEntry,
-    messageUserId?: string | null,
+    messageUserId?: string | null | undefined,
   ) => void
 }
 

@@ -27,7 +27,6 @@
     "frontend/apps/docs/next.config.mjs"
   ],
 
-  // TODO: Review ignoreDependencies configuration later
   // Dependencies to ignore when analyzing
   "ignoreDependencies": [
     "@prisma/internals", // Used by CLI package for schema parsing

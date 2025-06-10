@@ -1,4 +1,4 @@
-import { createNewVersion, operationsSchema } from '@/libs/schema'
+import { createNewVersion, operationsSchema } from '@liam-hq/agent'
 import { type NextRequest, NextResponse } from 'next/server'
 import * as v from 'valibot'
 

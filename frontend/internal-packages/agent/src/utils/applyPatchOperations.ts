@@ -30,25 +30,31 @@ export function applyPatchOperations<T extends Record<string, unknown>>(
         const path = op.path.split('/').filter(Boolean)
         if (path.length === 0) return
 
+        const lastKey = path.pop()
+        if (lastKey === undefined) return
+
         let current: Record<string, unknown> = target
-        for (let i = 0; i < path.length - 1; i++) {
-          current = getOrCreateObject(current, path[i])
+        for (const key of path) {
+          current = getOrCreateObject(current, key)
         }
 
-        current[path[path.length - 1]] = op.value
+        current[lastKey] = op.value
       })
       .with({ op: 'remove' }, (op) => {
         const path = op.path.split('/').filter(Boolean)
         if (path.length === 0) return
 
+        const lastKey = path.pop()
+        if (lastKey === undefined) return
+
         let current: Record<string, unknown> = target
-        for (let i = 0; i < path.length - 1; i++) {
-          const next = current[path[i]]
+        for (const key of path) {
+          const next = current[key]
           if (!isRecord(next)) return
           current = next
         }
 
-        delete current[path[path.length - 1]]
+        delete current[lastKey]
       })
       .otherwise((op) => {
         throw new Error(`Operation type '${op.op}' is not implemented`)

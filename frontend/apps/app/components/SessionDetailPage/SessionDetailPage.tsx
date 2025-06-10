@@ -9,7 +9,6 @@ import { versionSchema } from '@/schemas'
 import type { Schema } from '@liam-hq/db-structure'
 import { schemaSchema } from '@liam-hq/db-structure'
 import type { TablesUpdate } from '@liam-hq/db/supabase/database.types'
-import { initSchemaStore } from '@liam-hq/erd-core'
 import type { FC } from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import * as v from 'valibot'
@@ -96,14 +95,6 @@ export const SessionDetailPage: FC<Props> = ({ designSession }) => {
     }
   }, [designSessionId, handleSchemaUpdate, handleRealtimeError])
 
-  useEffect(() => {
-    if (schema) {
-      initSchemaStore({
-        current: schema,
-      })
-    }
-  }, [schema])
-
   const { tableGroups, addTableGroup } = useTableGroups({})
 
   const versionData = {
@@ -142,6 +133,7 @@ export const SessionDetailPage: FC<Props> = ({ designSession }) => {
             <div className={styles.erdSection}>
               <VersionProvider version={version}>
                 <ERDRenderer
+                  schema={{ current: schema }}
                   defaultSidebarOpen={false}
                   defaultPanelSizes={[20, 80]}
                   errorObjects={[]}

@@ -4,7 +4,7 @@ import { executeChatWorkflow } from './index'
 import type { WorkflowState } from './types'
 
 // Mock the LangChain module
-vi.mock('@/lib/langchain', () => ({
+vi.mock('../../langchain', () => ({
   getAgent: vi.fn(),
   createPromptVariables: vi.fn(
     (schemaText: string, userMessage: string, history: [string, string][]) => ({
@@ -24,7 +24,7 @@ vi.mock('@/app/lib/schema/convertSchemaToText', () => ({
 }))
 
 // Mock the createNewVersion function
-vi.mock('@/libs/schema/createNewVersion', () => ({
+vi.mock('../../utils/createNewVersion', () => ({
   createNewVersion: vi.fn(),
 }))
 
@@ -118,8 +118,8 @@ describe('Chat Workflow', () => {
     vi.clearAllMocks()
 
     // Get the mocked modules
-    const langchainModule = await import('@/lib/langchain')
-    const schemaModule = await import('@/libs/schema/createNewVersion')
+    const langchainModule = await import('../../langchain')
+    const schemaModule = await import('../../utils/createNewVersion')
 
     mockGetAgent = vi.mocked(langchainModule.getAgent)
     mockCreateNewVersion = vi.mocked(schemaModule.createNewVersion)
@@ -360,7 +360,9 @@ describe('Chat Workflow', () => {
         buildingSchemaId: undefined,
       })
 
-      const result = await executeChatWorkflow(state, { streaming: false })
+      const result = await executeChatWorkflow(state, {
+        streaming: false,
+      })
 
       expect(result.mode).toBe('Build')
       expect(result.error).toBeUndefined()
@@ -521,8 +523,8 @@ describe('Chat Workflow', () => {
       expect(results).toHaveLength(3)
       for (const [index, result] of results.entries()) {
         expect(result).toBeDefined()
-        expect(result.mode).toBe(stateOverrides[index].mode)
-        expect(result.userInput).toBe(stateOverrides[index].userInput)
+        expect(result.mode).toBe(stateOverrides?.[index]?.mode)
+        expect(result.userInput).toBe(stateOverrides?.[index]?.userInput)
         expect(result.finalResponse).toBe('Mocked agent response')
       }
     })

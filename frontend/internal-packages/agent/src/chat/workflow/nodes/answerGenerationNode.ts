@@ -1,12 +1,12 @@
+import type { Operation } from 'fast-json-patch'
+import * as v from 'valibot'
 import {
   type AgentName,
   createPromptVariables,
   getAgent,
-} from '@/lib/langchain'
-import { createNewVersion } from '@/libs/schema/createNewVersion'
-import { operationsSchema } from '@/libs/schema/operationsSchema'
-import type { Operation } from 'fast-json-patch'
-import * as v from 'valibot'
+} from '../../../langchain'
+import { createNewVersion } from '../../../utils/createNewVersion'
+import { operationsSchema } from '../../../utils/operationsSchema'
 import type { WorkflowState } from '../types'
 
 interface PreparedAnswerGeneration {
@@ -98,7 +98,6 @@ const applySchemaChanges = async (
     return {
       ...state,
       generatedAnswer: message,
-      error: undefined,
     }
   } catch (error) {
     const errorMessage =
@@ -122,7 +121,6 @@ const handleSchemaChanges = async (
     return {
       ...state,
       generatedAnswer: parsedResponse.message,
-      error: undefined,
     }
   }
 
@@ -134,7 +132,6 @@ const handleSchemaChanges = async (
     return {
       ...state,
       generatedAnswer: parsedResponse.message,
-      error: undefined,
     }
   }
 
@@ -163,7 +160,6 @@ const handleBuildAgentResponse = async (
     return {
       ...state,
       generatedAnswer: response,
-      error: undefined,
     }
   }
 
@@ -236,7 +232,6 @@ export async function answerGenerationNode(
     return {
       ...state,
       generatedAnswer: response,
-      error: undefined,
     }
   } catch (error) {
     const errorMsg =

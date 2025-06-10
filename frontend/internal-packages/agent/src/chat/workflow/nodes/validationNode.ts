@@ -1,4 +1,4 @@
-import { convertSchemaToText } from '@/app/lib/schema/convertSchemaToText'
+import { convertSchemaToText } from '../../../utils/convertSchemaToText'
 import type { WorkflowState } from '../types'
 
 export const validationNode = async (
@@ -38,6 +38,5 @@ export const validationNode = async (
     agentName,
     schemaText,
     formattedChatHistory,
-    error: undefined,
   }
 }

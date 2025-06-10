@@ -17,23 +17,23 @@ import {
  * ChatState definition for LangGraph
  */
 interface ChatState {
-  mode?: WorkflowMode
+  mode?: WorkflowMode | undefined
   userInput: string
-  generatedAnswer?: string
-  finalResponse?: string
+  generatedAnswer?: string | undefined
+  finalResponse?: string | undefined
   history: string[]
-  schemaData?: Schema
-  projectId?: string
-  buildingSchemaId: string
-  latestVersionNumber?: number
-  organizationId?: string
-  userId?: string
-  error?: string
+  schemaData?: Schema | undefined
+  projectId?: string | undefined
+  buildingSchemaId?: string | undefined
+  latestVersionNumber?: number | undefined
+  organizationId?: string | undefined
+  userId?: string | undefined
+  error?: string | undefined
 
   // Intermediate data for workflow
-  schemaText?: string
-  formattedChatHistory?: string
-  agentName?: AgentName
+  schemaText?: string | undefined
+  formattedChatHistory?: string | undefined
+  agentName?: AgentName | undefined
 }
 
 const DEFAULT_RECURSION_LIMIT = 10
@@ -45,21 +45,21 @@ const createAnnotations = () => {
   return Annotation.Root({
     mode: Annotation<WorkflowMode | undefined>,
     userInput: Annotation<string>,
-    generatedAnswer: Annotation<string>,
-    finalResponse: Annotation<string>,
+    generatedAnswer: Annotation<string | undefined>,
+    finalResponse: Annotation<string | undefined>,
     history: Annotation<string[]>,
-    schemaData: Annotation<Schema>,
-    projectId: Annotation<string>,
-    buildingSchemaId: Annotation<string>,
-    latestVersionNumber: Annotation<number>,
-    organizationId: Annotation<string>,
-    userId: Annotation<string>,
-    error: Annotation<string>,
+    schemaData: Annotation<Schema | undefined>,
+    projectId: Annotation<string | undefined>,
+    buildingSchemaId: Annotation<string | undefined>,
+    latestVersionNumber: Annotation<number | undefined>,
+    organizationId: Annotation<string | undefined>,
+    userId: Annotation<string | undefined>,
+    error: Annotation<string | undefined>,
 
     // Additional fields for workflow processing
-    schemaText: Annotation<string>,
-    formattedChatHistory: Annotation<string>,
-    agentName: Annotation<AgentName>,
+    schemaText: Annotation<string | undefined>,
+    formattedChatHistory: Annotation<string | undefined>,
+    agentName: Annotation<AgentName | undefined>,
   })
 }
 

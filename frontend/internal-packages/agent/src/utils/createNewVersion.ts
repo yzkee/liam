@@ -1,7 +1,8 @@
-import { createClient } from '@/libs/db/server'
 import { type Operation, compare } from 'fast-json-patch'
 import * as v from 'valibot'
-import { applyPatchOperations, operationsSchema } from '.'
+import { createClient } from '../db/server'
+import { applyPatchOperations } from './applyPatchOperations'
+import { operationsSchema } from './operationsSchema'
 
 const updateBuildingSchemaResultSchema = v.union([
   v.object({

@@ -2,13 +2,13 @@ import type { PGlite } from '@electric-sql/pglite'
 
 export interface SqlResult {
   sql: string
-  result: { error?: string } | Record<string, unknown>
+  result: unknown
   success: boolean
   id: string
-  metadata?: {
-    executionTime?: number
+  metadata: {
+    executionTime: number
+    timestamp: string
     affectedRows?: number
-    timestamp?: string
   }
 }
 

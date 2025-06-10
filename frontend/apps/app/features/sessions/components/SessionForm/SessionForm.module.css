@@ -1,12 +1,4 @@
-.standaloneContainer {
-  width: 1080px;
-  background-color: var(--callout-default-background);
-  border: 1px solid var(--global-border);
-  border-radius: var(--border-radius-md);
-  overflow: hidden;
-}
-
-.embeddedContainer {
+.container {
   width: 100%;
   background-color: var(--callout-default-background);
   border: 1px solid var(--global-border);

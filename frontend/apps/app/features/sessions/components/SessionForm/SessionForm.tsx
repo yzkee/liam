@@ -10,15 +10,9 @@ import styles from './SessionForm.module.css'
 
 type Props = {
   projects: Projects | null
-  variant?: 'standalone' | 'embedded'
-  className?: string
 }
 
-export const SessionForm: FC<Props> = ({
-  projects,
-  variant = 'standalone',
-  className,
-}) => {
+export const SessionForm: FC<Props> = ({ projects }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [, startTransition] = useTransition()
   const [state, formAction, isPending] = useActionState(createSession, {
@@ -44,13 +38,8 @@ export const SessionForm: FC<Props> = ({
     }
   }, [])
 
-  const containerClass =
-    variant === 'standalone'
-      ? styles.standaloneContainer
-      : styles.embeddedContainer
-
   return (
-    <div className={`${containerClass} ${className || ''}`}>
+    <div className={styles.container}>
       <form action={formAction}>
         <div className={styles.formContent}>
           <div className={styles.formGroup}>

@@ -1,1 +1,1 @@
-export { SessionForm } from './SessionForm'
+export { SessionFormContainer } from './SessionFormContainer'

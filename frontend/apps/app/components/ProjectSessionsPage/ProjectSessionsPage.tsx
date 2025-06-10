@@ -1,7 +1,8 @@
-import { urlgen } from '@/libs/routes'
-import { Button, MessagesSquare } from '@liam-hq/ui'
-import Link from 'next/link'
+import { getOrganizationId } from '@/features/organizations/services/getOrganizationId'
+import { SessionForm } from '@/features/sessions/components/SessionForm'
+import { MessagesSquare } from '@liam-hq/ui'
 import type { FC } from 'react'
+import { getProjects } from '../CommonLayout/AppBar/ProjectsDropdownMenu/services/getProjects'
 import styles from './ProjectSessionsPage.module.css'
 import { SessionItem } from './SessionItem'
 import { fetchProjectSessions } from './services/fetchProjectSessions'
@@ -12,6 +13,9 @@ type Props = {
 
 export const ProjectSessionsPage: FC<Props> = async ({ projectId }) => {
   const sessions = await fetchProjectSessions(projectId)
+  const organizationId = await getOrganizationId()
+  const projectsResponse = await getProjects(organizationId)
+  const projects = projectsResponse.data
 
   return (
     <div className={styles.container}>
@@ -20,12 +24,11 @@ export const ProjectSessionsPage: FC<Props> = async ({ projectId }) => {
           <h2 className={styles.title}>Sessions</h2>
           <p className={styles.description}>Design sessions for this project</p>
         </div>
-        <Link href={urlgen('design_sessions/new')}>
-          <Button>
-            <MessagesSquare size={16} />
-            New Session
-          </Button>
-        </Link>
+      </div>
+
+      <div className={styles.formSection}>
+        <h3 className={styles.formTitle}>Create New Session</h3>
+        <SessionForm projects={projects} variant="embedded" />
       </div>
 
       {sessions.length > 0 ? (
@@ -44,12 +47,6 @@ export const ProjectSessionsPage: FC<Props> = async ({ projectId }) => {
             Start a new design session to explore ideas and generate artifacts
             for this project.
           </p>
-          <Link href={urlgen('design_sessions/new')}>
-            <Button>
-              <MessagesSquare size={16} />
-              Create First Session
-            </Button>
-          </Link>
         </div>
       )}
     </div>

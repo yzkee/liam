@@ -1,98 +1,19 @@
-import { Annotation, END, START, StateGraph } from '@langchain/langgraph'
-import type { Schema } from '@liam-hq/db-structure'
+import { END, START, StateGraph } from '@langchain/langgraph'
 import { WORKFLOW_ERROR_MESSAGES } from '../constants/progressMessages'
+import { finalResponseNode } from '../nodes'
 import {
-  answerGenerationNode,
-  finalResponseNode,
-  validationNode,
-} from '../nodes'
-import type { AgentName, WorkflowMode, WorkflowState } from '../types'
+  type ChatState,
+  DEFAULT_RECURSION_LIMIT,
+  createAnnotations,
+  generateAnswer,
+  validateInput,
+} from '../shared/langGraphUtils'
 import {
   createErrorState,
   fromLangGraphResult,
   toLangGraphState,
-} from './stateManager'
-
-/**
- * ChatState definition for LangGraph
- */
-interface ChatState {
-  mode?: WorkflowMode | undefined
-  userInput: string
-  generatedAnswer?: string | undefined
-  finalResponse?: string | undefined
-  history: string[]
-  schemaData?: Schema | undefined
-  projectId?: string | undefined
-  buildingSchemaId?: string | undefined
-  latestVersionNumber?: number | undefined
-  organizationId?: string | undefined
-  userId?: string | undefined
-  error?: string | undefined
-
-  // Intermediate data for workflow
-  schemaText?: string | undefined
-  formattedChatHistory?: string | undefined
-  agentName?: AgentName | undefined
-}
-
-const DEFAULT_RECURSION_LIMIT = 10
-
-/**
- * Create LangGraph-compatible annotations
- */
-const createAnnotations = () => {
-  return Annotation.Root({
-    mode: Annotation<WorkflowMode | undefined>,
-    userInput: Annotation<string>,
-    generatedAnswer: Annotation<string | undefined>,
-    finalResponse: Annotation<string | undefined>,
-    history: Annotation<string[]>,
-    schemaData: Annotation<Schema | undefined>,
-    projectId: Annotation<string | undefined>,
-    buildingSchemaId: Annotation<string | undefined>,
-    latestVersionNumber: Annotation<number | undefined>,
-    organizationId: Annotation<string | undefined>,
-    userId: Annotation<string | undefined>,
-    error: Annotation<string | undefined>,
-
-    // Additional fields for workflow processing
-    schemaText: Annotation<string | undefined>,
-    formattedChatHistory: Annotation<string | undefined>,
-    agentName: Annotation<AgentName | undefined>,
-  })
-}
-
-/**
- * Wrap validationNode to match LangGraph node format
- */
-const validateInput = async (state: ChatState): Promise<Partial<ChatState>> => {
-  return validationNode(state)
-}
-
-/**
- * Wrap answerGenerationNode for non-streaming execution
- */
-const generateAnswer = async (
-  state: ChatState,
-): Promise<Partial<ChatState>> => {
-  try {
-    // Use synchronous execution (streaming is now handled by finalResponseNode)
-    const result = await answerGenerationNode(state)
-    return {
-      latestVersionNumber: result.latestVersionNumber,
-      generatedAnswer: result.generatedAnswer,
-      error: result.error,
-    }
-  } catch (e) {
-    return {
-      error:
-        e instanceof Error
-          ? e.message
-          : WORKFLOW_ERROR_MESSAGES.ANSWER_GENERATION_FAILED,
-    }
-  }
-}
+} from '../shared/stateManager'
+import type { WorkflowState } from '../types'
 
 /**
  * Wrap finalResponseNode for non-streaming execution

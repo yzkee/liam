@@ -3,13 +3,26 @@ import { useCallback, useEffect, useState } from 'react'
 import { WELCOME_MESSAGE } from '../constants/chatConstants'
 import {
   convertMessageToChatEntry,
-  loadMessages,
   setupRealtimeSubscription,
 } from '../services'
 import type { ChatEntry } from '../types/chatTypes'
 
+export type Message = {
+  id: string
+  content: string
+  role: 'user' | 'assistant'
+  user_id: string | null
+  created_at: string
+  updated_at: string
+  organization_id: string
+  design_session_id: string
+}
+
 type UseRealtimeMessagesFunc = (
-  designSessionId?: string,
+  designSession: {
+    id: string
+    messages: Message[]
+  },
   currentUserId?: string | null,
 ) => {
   messages: ChatEntry[]
@@ -17,37 +30,22 @@ type UseRealtimeMessagesFunc = (
     newChatEntry: ChatEntry,
     messageUserId?: string | null,
   ) => void
-  isLoadingMessages: boolean
 }
 
 export const useRealtimeMessages: UseRealtimeMessagesFunc = (
-  designSessionId,
+  designSession,
   currentUserId,
 ) => {
-  const [messages, setMessages] = useState<ChatEntry[]>([WELCOME_MESSAGE])
-  const [isLoadingMessages, setIsLoadingMessages] = useState(true)
+  // Initialize messages with welcome message and existing messages
+  const initialMessages = [
+    WELCOME_MESSAGE,
+    ...designSession.messages.map((msg) => ({
+      ...convertMessageToChatEntry(msg),
+      dbId: msg.id,
+    })),
+  ]
 
-  // Load existing messages on component mount
-  useEffect(() => {
-    if (!designSessionId) {
-      setIsLoadingMessages(false)
-      return
-    }
-    const loadExistingMessages = async () => {
-      const result = await loadMessages({ designSessionId })
-      if (result.success && result.messages) {
-        const chatEntries = result.messages.map((msg) => ({
-          ...convertMessageToChatEntry(msg),
-          dbId: msg.id,
-        }))
-        // Keep the welcome message and add loaded messages
-        setMessages((prev) => [prev[0], ...chatEntries])
-      }
-      setIsLoadingMessages(false)
-    }
-
-    loadExistingMessages()
-  }, [designSessionId])
+  const [messages, setMessages] = useState<ChatEntry[]>(initialMessages)
 
   // Add or update message with duplicate checking and optimistic update handling
   const addOrUpdateMessage = useCallback(
@@ -65,8 +63,6 @@ export const useRealtimeMessages: UseRealtimeMessagesFunc = (
 
         // TODO: Improve optimistic update logic - Use temporary IDs or timestamps instead of content comparison for better reliability
 
-        // For user messages from current user, we already add them optimistically
-        // so we should update the existing message with the database ID instead of adding a new one
         if (
           newChatEntry.isUser &&
           messageUserId === currentUserId &&
@@ -126,14 +122,14 @@ export const useRealtimeMessages: UseRealtimeMessagesFunc = (
 
   // TODO: Add network failure handling - Implement reconnection logic and offline message sync
   // TODO: Add authentication/authorization validation - Verify user permissions for realtime subscription
-  // Set up realtime subscription for new messages only after currentUserId is available
+  // Set up realtime subscription for new messages
   useEffect(() => {
-    if (!designSessionId || currentUserId === null) {
+    if (currentUserId === null) {
       return
     }
 
     const subscription = setupRealtimeSubscription(
-      designSessionId,
+      designSession.id,
       handleNewMessage,
       handleRealtimeError,
     )
@@ -141,11 +137,10 @@ export const useRealtimeMessages: UseRealtimeMessagesFunc = (
     return () => {
       subscription.unsubscribe()
     }
-  }, [designSessionId, currentUserId, handleNewMessage, handleRealtimeError])
+  }, [designSession.id, currentUserId, handleNewMessage, handleRealtimeError])
 
   return {
     messages,
     addOrUpdateMessage,
-    isLoadingMessages,
   }
 }

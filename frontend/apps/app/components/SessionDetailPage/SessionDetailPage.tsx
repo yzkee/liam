@@ -9,7 +9,7 @@ import { versionSchema } from '@/schemas'
 import type { Schema } from '@liam-hq/db-structure'
 import { schemaSchema } from '@liam-hq/db-structure'
 import type { TablesUpdate } from '@liam-hq/db/supabase/database.types'
-import type { FC } from 'react'
+import type { ComponentProps, FC } from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import * as v from 'valibot'
 import styles from './SessionDetailPage.module.css'
@@ -21,12 +21,7 @@ import {
 type BuildingSchemaUpdate = TablesUpdate<'building_schemas'>
 
 type Props = {
-  designSession: {
-    id: string
-    organizationId: string
-    buildingSchemaId: string
-    latestVersionNumber: number
-  }
+  designSession: ComponentProps<typeof Chat>['designSession']
 }
 
 export const SessionDetailPage: FC<Props> = ({ designSession }) => {
@@ -120,13 +115,7 @@ export const SessionDetailPage: FC<Props> = ({ designSession }) => {
     <div className={styles.container}>
       <div className={styles.columns}>
         <div className={styles.chatSection}>
-          <Chat
-            schemaData={schema}
-            designSessionId={designSession.id}
-            organizationId={designSession.organizationId}
-            buildingSchemaId={designSession.buildingSchemaId}
-            latestVersionNumber={designSession.latestVersionNumber}
-          />
+          <Chat schemaData={schema} designSession={designSession} />
         </div>
         <TabsRoot defaultValue="erd" className={styles.tabsRoot}>
           <TabsContent value="erd" className={styles.tabsContent}>

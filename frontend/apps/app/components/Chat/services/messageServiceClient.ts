@@ -14,10 +14,6 @@ const saveMessageSchema = v.object({
   userId: v.optional(v.nullable(v.pipe(v.string(), v.uuid()))),
 })
 
-const loadMessagesSchema = v.object({
-  designSessionId: v.pipe(v.string(), v.uuid()),
-})
-
 // Schema for validating realtime message payload
 const realtimeMessageSchema = v.object({
   id: v.string(),
@@ -78,31 +74,6 @@ export const saveMessage = async (data: {
   }
 
   return { success: true, message }
-}
-
-/**
- * Load messages for a design session (client-side)
- */
-export const loadMessages = async (data: {
-  designSessionId: string
-}): Promise<{ success: boolean; messages?: Message[]; error?: string }> => {
-  const parsedData = v.parse(loadMessagesSchema, data)
-  const { designSessionId } = parsedData
-
-  const supabase = createClient()
-
-  const { data: messages, error } = await supabase
-    .from('messages')
-    .select('*')
-    .eq('design_session_id', designSessionId)
-    .order('created_at', { ascending: true })
-
-  if (error) {
-    console.error('Failed to load messages:', error)
-    return { success: false, error: error.message }
-  }
-
-  return { success: true, messages: messages || [] }
 }
 
 /**

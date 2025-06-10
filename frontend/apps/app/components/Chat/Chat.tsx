@@ -8,7 +8,7 @@ import type { Mode } from '../ChatInput/components/ModeToggleSwitch/ModeToggleSw
 import { ChatMessage } from '../ChatMessage'
 import styles from './Chat.module.css'
 import { ERROR_MESSAGES } from './constants/chatConstants'
-import { useRealtimeMessages } from './hooks/useRealtimeMessages'
+import { type Message, useRealtimeMessages } from './hooks/useRealtimeMessages'
 import { getCurrentUserId, saveMessage } from './services'
 import {
   createChatEntry,
@@ -19,26 +19,26 @@ import {
 } from './services/messageHelpers'
 import type { ChatEntry } from './types/chatTypes'
 
-interface Props {
-  schemaData: Schema
-  tableGroups?: Record<string, TableGroup>
-  designSessionId?: string
-  organizationId?: string
+type DesignSession = {
+  id: string
+  organizationId: string
+  messages: Message[]
   buildingSchemaId: string
   latestVersionNumber?: number
 }
 
-export const Chat: FC<Props> = ({
-  schemaData,
-  tableGroups,
-  designSessionId,
-  organizationId,
-  buildingSchemaId,
-  latestVersionNumber = 0,
-}) => {
+interface Props {
+  schemaData: Schema
+  tableGroups?: Record<string, TableGroup>
+  designSession: DesignSession
+}
+
+export const Chat: FC<Props> = ({ schemaData, tableGroups, designSession }) => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
-  const { messages, addOrUpdateMessage, isLoadingMessages } =
-    useRealtimeMessages(designSessionId, currentUserId)
+  const { messages, addOrUpdateMessage } = useRealtimeMessages(
+    designSession,
+    currentUserId,
+  )
   const [isLoading, setIsLoading] = useState(false)
   const [currentMode, setCurrentMode] = useState<Mode>('ask')
   const [progressMessages, setProgressMessages] = useState<string[]>([])
@@ -76,21 +76,19 @@ export const Chat: FC<Props> = ({
     addOrUpdateMessage(userMessage)
 
     // Save user message to database
-    if (designSessionId) {
-      const saveResult = await saveMessage({
-        designSessionId,
-        content,
-        role: 'user',
-        userId: currentUserId,
-      })
-      if (saveResult.success && saveResult.message) {
-        // Update the message with the database ID
-        const updatedUserMessage = {
-          ...userMessage,
-          dbId: saveResult.message?.id,
-        }
-        addOrUpdateMessage(updatedUserMessage, currentUserId)
+    const saveResult = await saveMessage({
+      designSessionId: designSession.id,
+      content,
+      role: 'user',
+      userId: currentUserId,
+    })
+    if (saveResult.success && saveResult.message) {
+      // Update the message with the database ID
+      const updatedUserMessage = {
+        ...userMessage,
+        dbId: saveResult.message?.id,
       }
+      addOrUpdateMessage(updatedUserMessage, currentUserId)
     }
 
     setIsLoading(true)
@@ -123,9 +121,9 @@ export const Chat: FC<Props> = ({
           tableGroups,
           history,
           mode,
-          organizationId,
-          buildingSchemaId,
-          latestVersionNumber,
+          organizationId: designSession.organizationId,
+          buildingSchemaId: designSession.buildingSchemaId,
+          latestVersionNumber: designSession.latestVersionNumber || 0,
         }),
       })
 
@@ -148,16 +146,14 @@ export const Chat: FC<Props> = ({
 
         if (done) {
           // Streaming is complete, save to database and add timestamp
-          if (designSessionId) {
-            const saveResult = await saveMessage({
-              designSessionId,
-              content: accumulatedContent,
-              role: 'assistant',
-              userId: null,
-            })
-            if (saveResult.success && saveResult.message) {
-              aiDbId = saveResult.message.id
-            }
+          const saveResult = await saveMessage({
+            designSessionId: designSession.id,
+            content: accumulatedContent,
+            role: 'assistant',
+            userId: null,
+          })
+          if (saveResult.success && saveResult.message) {
+            aiDbId = saveResult.message.id
           }
 
           // Update message with final content, timestamp, and database ID
@@ -242,7 +238,7 @@ export const Chat: FC<Props> = ({
           content: ERROR_MESSAGES.GENERAL,
           timestamp: new Date(),
           isGenerating: false, // Remove generating state on error
-          agentType: mode, // Ensure the agent type is set for error messages
+          agentType: currentMode, // Ensure the agent type is set for error messages
         })
         addOrUpdateMessage(errorAiMessage)
       } else {
@@ -253,7 +249,7 @@ export const Chat: FC<Props> = ({
           isUser: false,
           timestamp: new Date(),
           isGenerating: false, // Ensure error message is not in generating state
-          agentType: mode, // Use the current mode for error messages
+          agentType: currentMode, // Use the current mode for error messages
         }
         addOrUpdateMessage(errorMessage)
       }
@@ -265,39 +261,29 @@ export const Chat: FC<Props> = ({
   return (
     <div className={styles.wrapper}>
       <div className={styles.messagesContainer}>
-        {isLoadingMessages ? (
-          <div className={styles.loadingIndicator}>
-            <div className={styles.loadingDot} />
-            <div className={styles.loadingDot} />
-            <div className={styles.loadingDot} />
-          </div>
-        ) : (
-          <>
-            {/* Display all messages */}
-            {messages.map((message, index) => {
-              // Check if this is the last AI message and has progress messages
-              const isLastAIMessage =
-                !message.isUser && index === messages.length - 1
-              const shouldShowProgress =
-                progressMessages.length > 0 && isLastAIMessage
+        {/* Display all messages */}
+        {messages.map((message, index) => {
+          // Check if this is the last AI message and has progress messages
+          const isLastAIMessage =
+            !message.isUser && index === messages.length - 1
+          const shouldShowProgress =
+            progressMessages.length > 0 && isLastAIMessage
 
-              return (
-                <ChatMessage
-                  key={message.id}
-                  content={message.content}
-                  isUser={message.isUser}
-                  timestamp={message.timestamp}
-                  isGenerating={message.isGenerating}
-                  agentType={message.agentType || currentMode}
-                  progressMessages={
-                    shouldShowProgress ? progressMessages : undefined
-                  }
-                  showProgress={shouldShowProgress}
-                />
-              )
-            })}
-          </>
-        )}
+          return (
+            <ChatMessage
+              key={message.id}
+              content={message.content}
+              isUser={message.isUser}
+              timestamp={message.timestamp}
+              isGenerating={message.isGenerating}
+              agentType={message.agentType || currentMode}
+              progressMessages={
+                shouldShowProgress ? progressMessages : undefined
+              }
+              showProgress={shouldShowProgress}
+            />
+          )
+        })}
         {isLoading && (
           <div className={styles.loadingIndicator}>
             <div className={styles.loadingDot} />

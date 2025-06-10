@@ -2,7 +2,7 @@
 
 import styles from './DDLInputSection.module.css'
 import { QueryResultBox } from './QueryResultBox'
-import type { DDLState } from './utils/types'
+import type { DDLState } from './utils'
 
 interface DDLInputSectionProps {
   ddlState: DDLState

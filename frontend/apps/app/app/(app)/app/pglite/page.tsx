@@ -19,7 +19,7 @@ export default function Page() {
     const demonstrateHandle = () => {
       if (playgroundRef.current) {
         // Just verify the methods exist - minimal usage to satisfy knip
-        playgroundRef.current.getGlobalDb()
+        playgroundRef.current.getSessionId()
         playgroundRef.current.getDDLResults()
       }
     }

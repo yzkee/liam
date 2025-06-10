@@ -1,4 +1,4 @@
-import { LangGraphWorkflow } from './services/langGraphWorkflow'
+import { LangGraphWorkflow } from './services/nonStreamingWorkflow'
 import { executeStreamingWorkflow } from './services/streamingWorkflow'
 import type { ResponseChunk, WorkflowOptions, WorkflowState } from './types'
 

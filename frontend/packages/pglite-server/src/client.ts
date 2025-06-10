@@ -10,6 +10,4 @@ export async function executeQuery(
   return await manager.executeQuery(sessionId, sql)
 }
 
-export const query = executeQuery
-
 export { manager as pgliteManager }

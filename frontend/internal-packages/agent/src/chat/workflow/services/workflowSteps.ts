@@ -1,7 +1,10 @@
 import { finalResponseNode } from '../nodes'
+import {
+  createFallbackFinalState,
+  prepareFinalState,
+} from '../shared/stateManager'
 import type { WorkflowState } from '../types'
 import { isWorkflowState } from '../types'
-import { createFallbackFinalState, prepareFinalState } from './stateManager'
 
 /**
  * Prepare final response generator

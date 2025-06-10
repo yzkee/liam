@@ -4,19 +4,19 @@ import {
   WORKFLOW_ERROR_MESSAGES,
 } from '../constants/progressMessages'
 import { finalResponseNode } from '../nodes'
-import type { ResponseChunk, WorkflowState } from '../types'
 import {
   type ChatState,
   DEFAULT_RECURSION_LIMIT,
   createAnnotations,
   generateAnswer,
   validateInput,
-} from './sharedLangGraphComponents'
+} from '../shared/langGraphUtils'
 import {
   createErrorState,
   fromLangGraphResult,
   toLangGraphState,
-} from './stateManager'
+} from '../shared/stateManager'
+import type { ResponseChunk, WorkflowState } from '../types'
 import {
   extractFinalState,
   prepareFinalResponseGenerator,

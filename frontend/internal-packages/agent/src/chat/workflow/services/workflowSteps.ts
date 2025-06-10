@@ -1,53 +1,7 @@
-import {
-  answerGenerationNode,
-  finalResponseNode,
-  validationNode,
-} from '../nodes'
-import type { WorkflowState, WorkflowStepResult } from '../types'
-import {
-  createErrorState,
-  createFallbackFinalState,
-  mergeStates,
-  prepareFinalState,
-} from './stateManager'
-
-/**
- * Execute validation step
- */
-export const executeValidation = async (
-  initialState: WorkflowState,
-): Promise<WorkflowStepResult> => {
-  const validationResult = await validationNode(initialState)
-
-  if (validationResult.error) {
-    const errorState = createErrorState(initialState, validationResult.error)
-    const finalResult = await finalResponseNode(errorState, {
-      streaming: false,
-    })
-    return { error: validationResult.error, finalState: finalResult }
-  }
-
-  return { state: mergeStates(initialState, validationResult) }
-}
-
-/**
- * Execute answer generation step
- */
-export const executeAnswerGeneration = async (
-  state: WorkflowState,
-): Promise<WorkflowStepResult> => {
-  const answerResult = await answerGenerationNode(state)
-
-  if (answerResult.error) {
-    const errorState = createErrorState(state, answerResult.error)
-    const finalResult = await finalResponseNode(errorState, {
-      streaming: false,
-    })
-    return { error: answerResult.error, finalState: finalResult }
-  }
-
-  return { state: mergeStates(state, answerResult) }
-}
+import { finalResponseNode } from '../nodes'
+import type { WorkflowState } from '../types'
+import { isWorkflowState } from '../types'
+import { createFallbackFinalState, prepareFinalState } from './stateManager'
 
 /**
  * Prepare final response generator
@@ -71,9 +25,6 @@ export const extractFinalState = async (
   try {
     const generatorResult = await generator.next()
     const value = generatorResult.value
-
-    // Use type guard from types.ts
-    const { isWorkflowState } = await import('../types')
 
     return isWorkflowState(value)
       ? value

@@ -57,21 +57,6 @@ const langGraphResultSchema = v.object({
 })
 
 /**
- * Merge workflow states with proper fallbacks
- */
-export const mergeStates = (
-  baseState: WorkflowState,
-  updates: Partial<WorkflowState>,
-): WorkflowState => {
-  return {
-    ...baseState,
-    ...updates,
-    // Ensure arrays are properly handled
-    history: updates.history || baseState.history || [],
-  }
-}
-
-/**
  * Prepare final state for streaming
  */
 export const prepareFinalState = (

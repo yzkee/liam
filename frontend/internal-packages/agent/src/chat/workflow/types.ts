@@ -45,31 +45,6 @@ export interface WorkflowOptions {
 }
 
 /**
- * Result types for workflow steps
- */
-type WorkflowStepSuccess = {
-  state: WorkflowState
-  error?: never
-}
-
-type WorkflowStepFailure = {
-  error: string
-  finalState: WorkflowState
-  state?: never
-}
-
-export type WorkflowStepResult = WorkflowStepSuccess | WorkflowStepFailure
-
-/**
- * Type guard for workflow step failure
- */
-export const isWorkflowStepFailure = (
-  result: WorkflowStepResult,
-): result is WorkflowStepFailure => {
-  return 'error' in result && typeof result.error === 'string'
-}
-
-/**
  * Type guard for WorkflowState
  */
 export const isWorkflowState = (val: unknown): val is WorkflowState => {

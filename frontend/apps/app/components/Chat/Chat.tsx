@@ -51,7 +51,6 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups, designSession }) => {
   }, [])
 
   // TODO: Add rate limiting - Implement rate limiting for message sending to prevent spam
-  // biome-ignore  lint/complexity/noExcessiveCognitiveComplexity: fix later
   const handleSendMessage = async (content: string) => {
     // Add user message
     const userMessage: ChatEntry = {

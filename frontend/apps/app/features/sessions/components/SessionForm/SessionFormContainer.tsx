@@ -3,9 +3,13 @@ import { getOrganizationId } from '@/features/organizations/services/getOrganiza
 import type { FC } from 'react'
 import { SessionForm } from './SessionForm'
 
-export const SessionFormContainer: FC = async () => {
+type Props = {
+  defaultProjectId?: string
+}
+
+export const SessionFormContainer: FC<Props> = async ({ defaultProjectId }) => {
   const organizationId = await getOrganizationId()
   const { data: projects } = await getProjects(organizationId)
 
-  return <SessionForm projects={projects} />
+  return <SessionForm projects={projects} defaultProjectId={defaultProjectId} />
 }

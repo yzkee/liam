@@ -10,9 +10,10 @@ import styles from './SessionForm.module.css'
 
 type Props = {
   projects: Projects | null
+  defaultProjectId?: string
 }
 
-export const SessionForm: FC<Props> = ({ projects }) => {
+export const SessionForm: FC<Props> = ({ projects, defaultProjectId }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [, startTransition] = useTransition()
   const [state, formAction, isPending] = useActionState(createSession, {
@@ -38,6 +39,18 @@ export const SessionForm: FC<Props> = ({ projects }) => {
     }
   }, [])
 
+  // Auto-load branches when a default project is provided (e.g., from ProjectSessionsPage)
+  // This ensures users don't need to manually reselect the project to see branch options
+  useEffect(() => {
+    if (defaultProjectId && projects?.some((p) => p.id === defaultProjectId)) {
+      startTransition(() => {
+        const formData = new FormData()
+        formData.append('projectId', defaultProjectId)
+        branchesAction(formData)
+      })
+    }
+  }, [defaultProjectId, projects, branchesAction])
+
   return (
     <div className={styles.container}>
       <form action={formAction}>
@@ -49,6 +62,7 @@ export const SessionForm: FC<Props> = ({ projects }) => {
             <select
               id="project"
               name="projectId"
+              value={defaultProjectId || ''}
               onChange={(e) => {
                 startTransition(() => {
                   const formData = new FormData()

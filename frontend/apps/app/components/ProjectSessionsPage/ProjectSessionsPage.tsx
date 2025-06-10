@@ -23,7 +23,7 @@ export const ProjectSessionsPage: FC<Props> = async ({ projectId }) => {
 
       <div className={styles.formSection}>
         <h3 className={styles.formTitle}>Create New Session</h3>
-        <SessionFormContainer />
+        <SessionFormContainer defaultProjectId={projectId} />
       </div>
 
       {sessions.length > 0 ? (

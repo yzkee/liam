@@ -1,17 +1,12 @@
 'use client'
-
-import { TabsContent, TabsRoot } from '@/components'
 import { Chat } from '@/components/Chat'
-import { ERDRenderer } from '@/features'
-import { useTableGroups } from '@/hooks'
-import { VersionProvider } from '@/providers'
-import { versionSchema } from '@/schemas'
 import type { Schema } from '@liam-hq/db-structure'
 import { schemaSchema } from '@liam-hq/db-structure'
 import type { ComponentProps, FC } from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import * as v from 'valibot'
 import styles from './SessionDetailPage.module.css'
+import { Artifact } from './components/Artifact'
 import {
   fetchSchemaDataClient,
   setupBuildingSchemaRealtimeSubscription,
@@ -102,17 +97,6 @@ export const SessionDetailPage: FC<Props> = ({ designSession }) => {
     }
   }, [designSessionId, handleSchemaUpdate, handleRealtimeError])
 
-  const { tableGroups, addTableGroup } = useTableGroups({})
-
-  const versionData = {
-    version: '0.1.0',
-    gitHash: process.env.NEXT_PUBLIC_GIT_HASH,
-    envName: process.env.NEXT_PUBLIC_ENV_NAME,
-    date: process.env.NEXT_PUBLIC_RELEASE_DATE,
-    displayedOn: 'web',
-  }
-  const version = v.parse(versionSchema, versionData)
-
   // Show loading state while schema is being fetched
   if (isLoadingSchema) {
     return <div>Loading schema...</div>
@@ -129,22 +113,7 @@ export const SessionDetailPage: FC<Props> = ({ designSession }) => {
         <div className={styles.chatSection}>
           <Chat schemaData={schema} designSession={designSession} />
         </div>
-        <TabsRoot defaultValue="erd" className={styles.tabsRoot}>
-          <TabsContent value="erd" className={styles.tabsContent}>
-            <div className={styles.erdSection}>
-              <VersionProvider version={version}>
-                <ERDRenderer
-                  schema={{ current: schema }}
-                  defaultSidebarOpen={false}
-                  defaultPanelSizes={[20, 80]}
-                  errorObjects={[]}
-                  tableGroups={tableGroups}
-                  onAddTableGroup={addTableGroup}
-                />
-              </VersionProvider>
-            </div>
-          </TabsContent>
-        </TabsRoot>
+        <Artifact schema={schema} />
       </div>
     </div>
   )

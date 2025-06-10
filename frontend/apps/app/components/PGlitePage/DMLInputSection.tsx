@@ -2,7 +2,7 @@
 
 import styles from './DMLInputSection.module.css'
 import { QueryResultBox } from './QueryResultBox'
-import type { DMLSection } from './utils/types'
+import type { DMLSection } from './utils'
 
 interface DMLInputSectionProps {
   section: DMLSection

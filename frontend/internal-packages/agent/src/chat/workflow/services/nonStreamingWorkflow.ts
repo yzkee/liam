@@ -134,7 +134,7 @@ const createGraph = () => {
 /**
  * Execute non-streaming workflow using LangGraph
  */
-const executeLangGraphWorkflow = async (
+const executeNonStreamingWorkflow = async (
   initialState: WorkflowState,
   recursionLimit: number = DEFAULT_RECURSION_LIMIT,
 ): Promise<WorkflowState> => {
@@ -160,5 +160,5 @@ const executeLangGraphWorkflow = async (
   }
 }
 
-// Export for backward compatibility
-export { executeLangGraphWorkflow as LangGraphWorkflow }
+// Export with new name and backward compatibility
+export { executeNonStreamingWorkflow as LangGraphWorkflow }

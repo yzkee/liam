@@ -138,6 +138,16 @@ export const getIssueComments = async (
   return comments
 }
 
+export async function getRepositoriesByInstallationId(installationId: number) {
+  const octokit = await createOctokit(installationId)
+
+  const { data } = await octokit.request('GET /installation/repositories', {
+    per_page: 100,
+  })
+
+  return data
+}
+
 export const getRepository = async (
   projectId: string,
   installationId: number,

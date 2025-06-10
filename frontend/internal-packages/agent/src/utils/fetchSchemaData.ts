@@ -7,6 +7,16 @@ import { operationsSchema } from './operationsSchema'
 
 interface DesignSessionData {
   organization_id: string
+  messages: Array<{
+    id: string
+    content: string
+    role: 'user' | 'assistant'
+    user_id: string | null
+    created_at: string
+    updated_at: string
+    organization_id: string
+    design_session_id: string
+  }>
 }
 
 /**
@@ -19,10 +29,24 @@ export async function fetchDesignSessionData(
 ): Promise<DesignSessionData | null> {
   const supabase = await createClient()
 
+  // Fetch design session with messages
   const { data, error } = await supabase
     .from('design_sessions')
-    .select('organization_id')
+    .select(`
+      organization_id,
+      messages (
+        id,
+        content,
+        role,
+        user_id,
+        created_at,
+        updated_at,
+        organization_id,
+        design_session_id
+      )
+    `)
     .eq('id', designSessionId)
+    .order('created_at', { ascending: true, referencedTable: 'messages' })
     .single()
 
   if (error || !data) {
@@ -33,7 +57,21 @@ export async function fetchDesignSessionData(
     return null
   }
 
-  return data
+  return {
+    organization_id: data.organization_id,
+    // FIXME: This typecast is necessary because the database type of the role is text type.
+    // If the role can be defined in an enum, supabase can generate the type, which will be modified later.
+    messages: (data.messages || []) as Array<{
+      id: string
+      content: string
+      role: 'user' | 'assistant'
+      user_id: string | null
+      created_at: string
+      updated_at: string
+      organization_id: string
+      design_session_id: string
+    }>,
+  }
 }
 
 /**

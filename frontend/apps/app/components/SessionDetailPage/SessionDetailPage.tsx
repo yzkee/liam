@@ -8,7 +8,7 @@ import { VersionProvider } from '@/providers'
 import { versionSchema } from '@/schemas'
 import type { Schema } from '@liam-hq/db-structure'
 import { schemaSchema } from '@liam-hq/db-structure'
-import type { FC } from 'react'
+import type { ComponentProps, FC } from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import * as v from 'valibot'
 import styles from './SessionDetailPage.module.css'
@@ -18,20 +18,12 @@ import {
 } from './services/buildingSchemaServiceClient'
 
 type Props = {
-  designSession: {
-    id: string
-    organizationId: string
-    buildingSchemaId: string
-    latestVersionNumber: number
-  }
+  designSession: ComponentProps<typeof Chat>['designSession']
 }
 
 export const SessionDetailPage: FC<Props> = ({ designSession }) => {
   const [schema, setSchema] = useState<Schema | null>(null)
   const [isLoadingSchema, setIsLoadingSchema] = useState(true)
-  const [latestVersionNumber, setLatestVersionNumber] = useState(
-    designSession.latestVersionNumber,
-  )
   const designSessionId = designSession.id
 
   // Load initial schema data
@@ -50,7 +42,6 @@ export const SessionDetailPage: FC<Props> = ({ designSession }) => {
         if (schemaData.schema) {
           const schema = v.parse(schemaSchema, schemaData.schema)
           setSchema(schema)
-          setLatestVersionNumber(schemaData.latestVersionNumber)
         }
       } catch (error) {
         console.error('Error loading initial schema:', error)
@@ -80,7 +71,6 @@ export const SessionDetailPage: FC<Props> = ({ designSession }) => {
         if (schemaData.schema) {
           const schema = v.parse(schemaSchema, schemaData.schema)
           setSchema(schema)
-          setLatestVersionNumber(schemaData.latestVersionNumber)
         }
       } catch (error) {
         console.error('Error handling schema update:', error)
@@ -137,13 +127,7 @@ export const SessionDetailPage: FC<Props> = ({ designSession }) => {
     <div className={styles.container}>
       <div className={styles.columns}>
         <div className={styles.chatSection}>
-          <Chat
-            schemaData={schema}
-            designSessionId={designSession.id}
-            organizationId={designSession.organizationId}
-            buildingSchemaId={designSession.buildingSchemaId}
-            latestVersionNumber={latestVersionNumber}
-          />
+          <Chat schemaData={schema} designSession={designSession} />
         </div>
         <TabsRoot defaultValue="erd" className={styles.tabsRoot}>
           <TabsContent value="erd" className={styles.tabsContent}>

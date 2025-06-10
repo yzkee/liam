@@ -57,10 +57,13 @@ export const Panel: FC<Props> = ({
         <div className={styles.chatSection}>
           <Chat
             schemaData={schema}
-            designSessionId={designSessionId}
-            organizationId={organizationId}
-            buildingSchemaId={buildingSchemaId}
-            latestVersionNumber={latestVersionNumber}
+            designSession={{
+              id: designSessionId,
+              organizationId,
+              messages: [], // TODO: BuildPage doesn't need message history yet
+              buildingSchemaId,
+              latestVersionNumber,
+            }}
           />
         </div>
         <TabsRoot defaultValue="tables" className={styles.tabsRoot}>

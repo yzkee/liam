@@ -1,21 +1,10 @@
 'use server'
 
-import type { Repository } from '@liam-hq/github'
-import { createAppAuth } from '@octokit/auth-app'
-import { Octokit } from '@octokit/rest'
+import {
+  type Repository,
+  getRepositoriesByInstallationId,
+} from '@liam-hq/github'
 import * as v from 'valibot'
-
-const createOctokit = async (installationId: number) => {
-  const octokit = new Octokit({
-    authStrategy: createAppAuth,
-    auth: {
-      appId: process.env.GITHUB_APP_ID,
-      privateKey: process.env.GITHUB_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-      installationId,
-    },
-  })
-  return octokit
-}
 
 type GetRepositoriesState = {
   repositories: Repository[]
@@ -46,15 +35,8 @@ export async function getRepositories(
 
   const { installationId } = parseResult.output
 
-  if (!installationId) {
-    return { repositories: [], loading: false }
-  }
-
   try {
-    const octokit = await createOctokit(installationId)
-    const { data } = await octokit.request('GET /installation/repositories', {
-      per_page: 100,
-    })
+    const data = await getRepositoriesByInstallationId(installationId)
     return { repositories: data.repositories, loading: false }
   } catch (error) {
     console.error('Error fetching repositories:', error)

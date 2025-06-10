@@ -1,4 +1,5 @@
 import { StateEffect, StateField } from '@codemirror/state'
+import type { Text } from '@codemirror/state'
 import {
   Decoration,
   type DecorationSet,
@@ -25,6 +26,44 @@ class CommentWidget extends WidgetType {
   }
 }
 
+// Helper function to create line decorations for a comment
+const createLineDecorations = (comment: ReviewComment, doc: Text) => {
+  const decorations = []
+  for (let i = comment.fromLine; i <= comment.toLine; i++) {
+    if (i > doc.lines) continue
+    const line = doc.line(i)
+    decorations.push(
+      Decoration.line({
+        attributes: {
+          class: `cm-highlighted-line severity-bg-${comment.severity.toLowerCase()}`,
+        },
+      }).range(line.from),
+    )
+  }
+  return decorations
+}
+
+// Helper function to create widget decoration for a comment
+const createWidgetDecoration = (comment: ReviewComment, doc: Text) => {
+  const widgetLine = doc.line(comment.toLine)
+  return Decoration.widget({
+    widget: new CommentWidget(comment),
+    side: 1,
+  }).range(widgetLine.to)
+}
+
+// Helper function to create all decorations for a comment
+const createCommentDecorations = (comment: ReviewComment, doc: Text) => {
+  if (comment.toLine > doc.lines) {
+    return []
+  }
+
+  const lineDecorations = createLineDecorations(comment, doc)
+  const widgetDecoration = createWidgetDecoration(comment, doc)
+
+  return [...lineDecorations, widgetDecoration]
+}
+
 export const setCommentsEffect = StateEffect.define<ReviewComment[]>()
 
 export const commentStateField = () => {
@@ -40,30 +79,9 @@ export const commentStateField = () => {
             return Decoration.none
           }
 
-          const newDecorations = comments.flatMap((comment) => {
-            if (comment.toLine > tr.state.doc.lines) {
-              return []
-            }
-            const lineDecorations = []
-            for (let i = comment.fromLine; i <= comment.toLine; i++) {
-              if (i > tr.state.doc.lines) continue
-              const line = tr.state.doc.line(i)
-              lineDecorations.push(
-                Decoration.line({
-                  attributes: {
-                    class: `cm-highlighted-line severity-bg-${comment.severity.toLowerCase()}`,
-                  },
-                }).range(line.from),
-              )
-            }
-            const widgetLine = tr.state.doc.line(comment.toLine)
-            const widgetDecoration = Decoration.widget({
-              widget: new CommentWidget(comment),
-              side: 1,
-            }).range(widgetLine.to)
-
-            return [...lineDecorations, widgetDecoration]
-          })
+          const newDecorations = comments.flatMap((comment) =>
+            createCommentDecorations(comment, tr.state.doc),
+          )
 
           return Decoration.set(newDecorations, true)
         }

@@ -46,6 +46,7 @@ export async function fetchDesignSessionData(
       )
     `)
     .eq('id', designSessionId)
+    .order('created_at', { ascending: true, referencedTable: 'messages' })
     .single()
 
   if (error || !data) {

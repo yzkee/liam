@@ -1,11 +1,11 @@
 'use client'
 
 import type { Projects } from '@/components/CommonLayout/AppBar/ProjectsDropdownMenu/services/getProjects'
-import { createSession } from '@/components/SessionsNewPage/actions/createSession'
-import { getBranches } from '@/components/SessionsNewPage/actions/getBranches'
 import { ArrowRight, Button } from '@liam-hq/ui'
 import type { ChangeEvent, FC } from 'react'
 import { useActionState, useEffect, useRef, useTransition } from 'react'
+import { createSession } from '../../actions/createSession'
+import { getBranches } from '../../actions/getBranches'
 import styles from './SessionForm.module.css'
 
 type Props = {

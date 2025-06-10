@@ -8,7 +8,7 @@ export class DatabaseSchemaAskAgent implements ChatAgent {
 
   constructor() {
     this.model = new ChatOpenAI({
-      model: 'o3-mini',
+      model: 'o3',
       callbacks: [createLangfuseHandler()],
     })
   }

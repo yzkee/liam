@@ -1,7 +1,6 @@
 'use client'
 
-import type { TableGroupData } from '@/app/lib/schema/convertSchemaToText'
-import type { Schema } from '@liam-hq/db-structure'
+import type { Schema, TableGroup } from '@liam-hq/db-structure'
 import { Button } from '@liam-hq/ui'
 import { MessageCircleIcon } from 'lucide-react'
 import type { FC } from 'react'
@@ -11,7 +10,7 @@ import { ChatbotDialog } from './components/ChatbotDialog'
 
 interface ChatbotButtonProps {
   schemaData: Schema
-  tableGroups?: Record<string, TableGroupData>
+  tableGroups?: Record<string, TableGroup>
   projectId: string
 }
 

@@ -1,10 +1,10 @@
 import crypto from 'node:crypto'
-import { convertSchemaToText } from '@/app/lib/schema/convertSchemaToText'
 import { SupabaseVectorStore as LangchainSupabaseVectorStore } from '@langchain/community/vectorstores/supabase'
 import { Document } from '@langchain/core/documents'
 import { OpenAIEmbeddings } from '@langchain/openai'
 import { createClient } from '@liam-hq/db'
 import type { Schema } from '@liam-hq/db-structure'
+import { convertSchemaToText } from '../utils/convertSchemaToText'
 
 /**
  * Generates a hash for the schema data to detect changes
@@ -72,7 +72,7 @@ class SupabaseVectorStore extends LangchainSupabaseVectorStore {
   /**
    * Override addDocuments method to ensure updated_at is set
    */
-  async addDocuments(documents: Document[]): Promise<string[]> {
+  override async addDocuments(documents: Document[]): Promise<string[]> {
     // Add updated_at field to each document if not already present
     // Type assertion is required because LangChain's Document class defines metadata as Record<string, any>,
     // which prevents TypeScript from inferring specific properties like organization_id
@@ -107,7 +107,7 @@ class SupabaseVectorStore extends LangchainSupabaseVectorStore {
       const text = texts[i]
 
       // Ensure updated_at is set
-      if (!metadata.updated_at) {
+      if (metadata && !metadata.updated_at) {
         metadata.updated_at = new Date().toISOString()
       }
 
@@ -183,7 +183,7 @@ export async function createSupabaseVectorStore(
  * @throws Error if no valid API key is found
  */
 function validateOpenAIKey(): string {
-  const openAIApiKey = process.env.OPENAI_API_KEY
+  const openAIApiKey = process.env['OPENAI_API_KEY']
 
   if (!openAIApiKey) {
     throw new Error(
@@ -200,8 +200,8 @@ function validateOpenAIKey(): string {
  */
 function createSupabaseClient() {
   return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
-    process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
+    process.env['NEXT_PUBLIC_SUPABASE_URL'] ?? '',
+    process.env['SUPABASE_SERVICE_ROLE_KEY'] ?? '',
   )
 }
 
@@ -348,7 +348,7 @@ async function getStoredSchemaHash(): Promise<string | null> {
     // Check if we found a metadata document with a hash
     if (metadataDocs && metadataDocs.length > 0) {
       // Type assertion for metadata
-      const metadata = metadataDocs[0].metadata as SchemaMetadata
+      const metadata = metadataDocs[0]?.metadata as SchemaMetadata
       if (metadata?.schemaHash) {
         const hash = metadata.schemaHash
         process.stdout.write(
@@ -374,7 +374,7 @@ async function getStoredSchemaHash(): Promise<string | null> {
     // Check if we found a content document with a hash
     if (contentDocs && contentDocs.length > 0) {
       // Type assertion for metadata
-      const metadata = contentDocs[0].metadata as SchemaMetadata
+      const metadata = contentDocs[0]?.metadata as SchemaMetadata
       if (metadata?.schemaHash) {
         const hash = metadata.schemaHash
         process.stdout.write(`Found stored hash in content document: ${hash}\n`)

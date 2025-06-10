@@ -1,4 +1,4 @@
-import { processChatMessage } from '@/lib/chat/chatProcessor'
+import { processChatMessage } from '@liam-hq/agent'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {

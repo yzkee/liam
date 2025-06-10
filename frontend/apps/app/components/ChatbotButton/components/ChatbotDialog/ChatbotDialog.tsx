@@ -1,9 +1,8 @@
 'use client'
 
-import type { TableGroupData } from '@/app/lib/schema/convertSchemaToText'
 import { ChatInput } from '@/components/ChatInput'
 import { ChatMessage, type ChatMessageProps } from '@/components/ChatMessage'
-import type { Schema } from '@liam-hq/db-structure'
+import type { Schema, TableGroup } from '@liam-hq/db-structure'
 import {
   ModalContent,
   ModalOverlay,
@@ -19,7 +18,7 @@ interface ChatbotDialogProps {
   isOpen: boolean
   onClose: () => void
   schemaData: Schema
-  tableGroups?: Record<string, TableGroupData>
+  tableGroups?: Record<string, TableGroup>
   projectId: string
 }
 

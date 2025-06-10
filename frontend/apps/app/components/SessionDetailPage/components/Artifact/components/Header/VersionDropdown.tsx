@@ -28,7 +28,7 @@ export const VersionDropdown: FC = () => {
 
   const handleVersionSelect = (version: Version) => {
     setSelectedVersion(version)
-    // TODO: バージョン切り替え処理を実装
+    // TODO: Implement version switching functionality
   }
 
   return (

@@ -8,7 +8,7 @@ export interface SqlResult {
   metadata: {
     executionTime: number
     timestamp: string
-    affectedRows?: number
+    affectedRows?: number | undefined
   }
 }
 

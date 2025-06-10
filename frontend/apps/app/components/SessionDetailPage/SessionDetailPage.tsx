@@ -16,6 +16,7 @@ import {
   fetchSchemaDataClient,
   setupBuildingSchemaRealtimeSubscription,
 } from './services/buildingSchemaServiceClient'
+import { Artifact } from './components/Artifact'
 
 type Props = {
   designSession: ComponentProps<typeof Chat>['designSession']
@@ -129,22 +130,7 @@ export const SessionDetailPage: FC<Props> = ({ designSession }) => {
         <div className={styles.chatSection}>
           <Chat schemaData={schema} designSession={designSession} />
         </div>
-        <TabsRoot defaultValue="erd" className={styles.tabsRoot}>
-          <TabsContent value="erd" className={styles.tabsContent}>
-            <div className={styles.erdSection}>
-              <VersionProvider version={version}>
-                <ERDRenderer
-                  schema={{ current: schema }}
-                  defaultSidebarOpen={false}
-                  defaultPanelSizes={[20, 80]}
-                  errorObjects={[]}
-                  tableGroups={tableGroups}
-                  onAddTableGroup={addTableGroup}
-                />
-              </VersionProvider>
-            </div>
-          </TabsContent>
-        </TabsRoot>
+        <Artifact schema={schema} />
       </div>
     </div>
   )

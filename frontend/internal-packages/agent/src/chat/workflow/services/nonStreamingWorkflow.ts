@@ -80,6 +80,7 @@ const generateAnswer = async (
     // Use synchronous execution (streaming is now handled by finalResponseNode)
     const result = await answerGenerationNode(state)
     return {
+      latestVersionNumber: result.latestVersionNumber,
       generatedAnswer: result.generatedAnswer,
       error: result.error,
     }

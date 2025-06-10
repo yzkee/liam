@@ -5,7 +5,8 @@
   "entry": [
     "frontend/packages/cli/bin/cli.ts",
     "frontend/apps/app/instrumentation-client.ts",
-    "frontend/apps/docs/instrumentation-client.ts"
+    "frontend/apps/docs/instrumentation-client.ts",
+    "frontend/internal-packages/jobs/trigger.config.ts"
   ],
 
   // Files to ignore when analyzing
@@ -26,36 +27,17 @@
     "frontend/apps/docs/next.config.mjs"
   ],
 
-  // TODO: Review ignoreDependencies configuration later
   // Dependencies to ignore when analyzing
   "ignoreDependencies": [
-    "@octokit/auth-app",
-    "@octokit/rest",
-    "@octokit/openapi-types",
-    "@prisma/internals",
-    "@trigger.dev/build",
-    "@trigger.dev/sdk",
-
-    // zod is used in `src/parser/tbls/schema.generated.ts`,
-    // which is ignored by git but imported in parser.ts and tests
-    "zod",
-    "ts-pattern",
-    "minimatch",
-    "destyle.css",
-    "json-refs",
-    "json-schema-to-zod",
-    "glob",
-    "@vitest/coverage-v8",
-    "@types/gtag.js",
-    "esbuild",
-    "@types/mdx",
-    "@types/glob",
-    "@biomejs/biome",
-    "@sentry/node",
-    "@sentry/esbuild-plugin",
-    "@liam-hq/cli",
-    "@liam-hq/configs",
-    "@turbo/gen"
+    "@prisma/internals", // Used by CLI package for schema parsing
+    "zod", // Used by db-structure package
+    "destyle.css", // Used by CSS imports in ui package
+    "json-refs", // Used by db-structure npm scripts
+    "json-schema-to-zod", // Used by db-structure npm scripts
+    "@vitest/coverage-v8", // Used by CLI package vite.config.ts
+    "@liam-hq/cli", // Used by erd-sample build script
+    "@liam-hq/configs", // Used by tsconfig and biome configuration files
+    "@turbo/gen" // Required for `turbo gen` command in npm scripts
   ],
 
 

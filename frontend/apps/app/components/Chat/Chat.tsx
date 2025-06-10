@@ -1,7 +1,6 @@
 'use client'
 
-import type { TableGroupData } from '@/app/lib/schema/convertSchemaToText'
-import type { Schema } from '@liam-hq/db-structure'
+import type { Schema, TableGroup } from '@liam-hq/db-structure'
 import type { Tables } from '@liam-hq/db/supabase/database.types'
 import type { FC } from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -28,9 +27,11 @@ import type { ChatEntry } from './types/chatTypes'
 
 interface Props {
   schemaData: Schema
-  tableGroups?: Record<string, TableGroupData>
+  tableGroups?: Record<string, TableGroup>
   designSessionId?: string
   organizationId?: string
+  buildingSchemaId: string
+  latestVersionNumber?: number
 }
 
 export const Chat: FC<Props> = ({
@@ -38,6 +39,8 @@ export const Chat: FC<Props> = ({
   tableGroups,
   designSessionId,
   organizationId,
+  buildingSchemaId,
+  latestVersionNumber = 0,
 }) => {
   const [messages, setMessages] = useState<ChatEntry[]>([WELCOME_MESSAGE])
   const [isLoading, setIsLoading] = useState(false)
@@ -237,6 +240,8 @@ export const Chat: FC<Props> = ({
           history,
           mode,
           organizationId,
+          buildingSchemaId,
+          latestVersionNumber,
         }),
       })
 

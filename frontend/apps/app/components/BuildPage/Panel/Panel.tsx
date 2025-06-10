@@ -6,9 +6,8 @@ import { ERDRenderer } from '@/features'
 import { useTableGroups } from '@/hooks'
 import { VersionProvider } from '@/providers'
 import { versionSchema } from '@/schemas'
-import { initSchemaStore } from '@/stores'
 import type { Schema, TableGroup } from '@liam-hq/db-structure'
-import { type FC, useEffect } from 'react'
+import type { FC } from 'react'
 import * as v from 'valibot'
 import styles from './Panel.module.css'
 import { SchemaEditor } from './SchemaEditor'
@@ -26,21 +25,22 @@ type Props = {
   schema: Schema
   errors: ErrorObject[]
   tableGroups: Record<string, TableGroup>
+  buildingSchemaId: string
+  designSessionId: string
+  organizationId: string
+  latestVersionNumber?: number
 }
 
 export const Panel: FC<Props> = ({
   schema,
   errors,
   tableGroups: initialTableGroups = {},
+  buildingSchemaId,
+  designSessionId,
+  organizationId,
+  latestVersionNumber = 0,
 }) => {
   const { tableGroups, addTableGroup } = useTableGroups(initialTableGroups)
-
-  useEffect(() => {
-    initSchemaStore({
-      current: AFTER as unknown as Schema,
-      previous: BEFORE as unknown as Schema,
-    })
-  }, [])
 
   const versionData = {
     version: '0.1.0',
@@ -55,7 +55,13 @@ export const Panel: FC<Props> = ({
     <div className={styles.container}>
       <div className={styles.columns}>
         <div className={styles.chatSection}>
-          <Chat schemaData={schema} />
+          <Chat
+            schemaData={schema}
+            designSessionId={designSessionId}
+            organizationId={organizationId}
+            buildingSchemaId={buildingSchemaId}
+            latestVersionNumber={latestVersionNumber}
+          />
         </div>
         <TabsRoot defaultValue="tables" className={styles.tabsRoot}>
           <TabsList className={styles.tabsList}>
@@ -86,6 +92,10 @@ export const Panel: FC<Props> = ({
             <div className={styles.erdSection}>
               <VersionProvider version={version}>
                 <ERDRenderer
+                  schema={{
+                    current: AFTER as unknown as Schema,
+                    previous: BEFORE as unknown as Schema,
+                  }}
                   defaultSidebarOpen={false}
                   defaultPanelSizes={[20, 80]}
                   errorObjects={errors}

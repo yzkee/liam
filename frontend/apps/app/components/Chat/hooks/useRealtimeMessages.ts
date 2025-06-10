@@ -51,7 +51,7 @@ export const useRealtimeMessages: UseRealtimeMessagesFunc = (
   const addOrUpdateMessage = useCallback(
     (newChatEntry: ChatEntry, messageUserId?: string | null) => {
       setMessages((prev) => {
-        // Check if message already exists to prevent duplicates
+        // Check if message already exists by dbId to prevent duplicates
         if (newChatEntry.dbId) {
           const messageExists = prev.some(
             (msg) => msg.dbId === newChatEntry.dbId,
@@ -61,8 +61,20 @@ export const useRealtimeMessages: UseRealtimeMessagesFunc = (
           }
         }
 
-        // TODO: Improve optimistic update logic - Use temporary IDs or timestamps instead of content comparison for better reliability
+        // Check if we need to update an existing message by its temporary ID
+        // This handles streaming updates and other in-place updates
+        const existingMessageIndex = prev.findIndex(
+          (msg) => msg.id === newChatEntry.id,
+        )
 
+        if (existingMessageIndex >= 0) {
+          // Update existing message in place
+          const updated = [...prev]
+          updated[existingMessageIndex] = newChatEntry
+          return updated
+        }
+
+        // Handle optimistic updates for user messages
         if (
           newChatEntry.isUser &&
           messageUserId === currentUserId &&
@@ -90,7 +102,7 @@ export const useRealtimeMessages: UseRealtimeMessagesFunc = (
           // so we should add it as a new message
         }
 
-        // For AI messages or messages from other users, add them to the chat
+        // For new messages (AI messages from realtime or messages from other users), add them to the chat
         return [...prev, newChatEntry]
       })
     },

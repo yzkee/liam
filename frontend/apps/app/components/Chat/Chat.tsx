@@ -9,7 +9,7 @@ import { ChatInput } from '../ChatInput'
 import type { Mode } from '../ChatInput/components/ModeToggleSwitch/ModeToggleSwitch'
 import { ChatMessage } from '../ChatMessage'
 import styles from './Chat.module.css'
-import { ERROR_MESSAGES } from './constants/chatConstants'
+import { ERROR_MESSAGES, WELCOME_MESSAGE } from './constants/chatConstants'
 import {
   convertMessageToChatEntry,
   getCurrentUserId,
@@ -43,15 +43,13 @@ export const Chat: FC<Props> = ({
   buildingSchemaId,
   latestVersionNumber = 0,
 }) => {
-  const [messages, setMessages] = useState<ChatEntry[]>([])
+  const [messages, setMessages] = useState<ChatEntry[]>([WELCOME_MESSAGE])
   const [isLoading, setIsLoading] = useState(false)
   const [currentMode, setCurrentMode] = useState<Mode>('ask')
   const [isLoadingMessages, setIsLoadingMessages] = useState(true)
   const [progressMessages, setProgressMessages] = useState<string[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
-  const [hasTriggeredAutoResponse, setHasTriggeredAutoResponse] =
-    useState(false)
 
   // TODO: Extract complex state management into custom hook - Create useRealtimeChat hook for better testability and reusability
   // TODO: Add connection state management - Track realtime connection status and display to user
@@ -77,265 +75,14 @@ export const Chat: FC<Props> = ({
           ...convertMessageToChatEntry(msg),
           dbId: msg.id,
         }))
-        setMessages(chatEntries)
+        // Keep the welcome message and add loaded messages
+        setMessages((prev) => [prev[0], ...chatEntries])
       }
       setIsLoadingMessages(false)
     }
 
     loadExistingMessages()
   }, [designSessionId])
-
-  // Check for unanswered messages and trigger auto response
-  useEffect(() => {
-    if (!designSessionId || hasTriggeredAutoResponse || isLoadingMessages) {
-      return
-    }
-
-    const checkForUnansweredMessages = async () => {
-      // Find the latest user message that doesn't have a following AI response
-      const userMessageIndex = messages.findLastIndex((msg) => msg.isUser)
-      if (userMessageIndex === -1) return
-
-      // Check if there's already an AI response after this user message
-      const hasAIResponse = messages
-        .slice(userMessageIndex + 1)
-        .some((msg) => !msg.isUser)
-
-      if (!hasAIResponse) {
-        // There's an unanswered user message, trigger auto response
-        setHasTriggeredAutoResponse(true)
-        const latestUserMessage = messages[userMessageIndex]
-
-        // Trigger auto response directly
-        await triggerAutoResponse(latestUserMessage.content)
-      }
-    }
-
-    // Delay the check to ensure component is fully initialized
-    const timeoutId = setTimeout(checkForUnansweredMessages, 1000)
-
-    return () => clearTimeout(timeoutId)
-  }, [messages, hasTriggeredAutoResponse, isLoadingMessages, designSessionId])
-
-  // Update AI message content during streaming
-  const updateStreamingMessage = useCallback(
-    (aiMessageId: string, content: string) => {
-      setMessages((prev) => {
-        const updatedMessages = [...prev]
-        const aiMsgIndex = updatedMessages.findIndex(
-          (msg) => msg.id === aiMessageId,
-        )
-
-        if (aiMsgIndex >= 0) {
-          updatedMessages[aiMsgIndex] = createChatEntry(
-            updatedMessages[aiMsgIndex],
-            {
-              content,
-              isGenerating: true,
-            },
-          )
-        }
-
-        return updatedMessages
-      })
-
-      // Force immediate update for smoother streaming experience
-      setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-      }, 10)
-    },
-    [],
-  )
-
-  // Process a single parsed message from stream
-  const processStreamMessage = useCallback(
-    (parsed: unknown, accumulatedContent: string, aiMessageId: string) => {
-      if (parsed.type === 'text') {
-        const newContent = accumulatedContent + parsed.content
-        updateStreamingMessage(aiMessageId, newContent)
-        return newContent
-      }
-      if (parsed.type === 'custom') {
-        setProgressMessages((prev) =>
-          updateProgressMessages(prev, parsed.content),
-        )
-      } else if (parsed.type === 'error') {
-        console.error('Stream error:', parsed.content)
-        setProgressMessages([])
-        throw new Error(parsed.content)
-      }
-      return accumulatedContent
-    },
-    [updateStreamingMessage],
-  )
-
-  // Process lines from streaming chunk
-  const processStreamLines = useCallback(
-    (lines: string[], accumulatedContent: string, aiMessageId: string) => {
-      let content = accumulatedContent
-
-      for (const line of lines) {
-        try {
-          const parsed = JSON.parse(line)
-
-          if (!isResponseChunk(parsed)) {
-            console.error('Invalid response format:', parsed)
-            continue
-          }
-
-          content = processStreamMessage(parsed, content, aiMessageId)
-        } catch (error) {
-          if (error instanceof Error && error.message.includes('JSON')) {
-            // Handle non-JSON content as plain text
-            updateStreamingMessage(aiMessageId, content)
-          } else {
-            throw error
-          }
-        }
-      }
-
-      return content
-    },
-    [processStreamMessage, updateStreamingMessage],
-  )
-
-  // Common streaming processor with UI updates
-  const processStreamingWithUI = useCallback(
-    async (
-      reader: ReadableStreamDefaultReader<Uint8Array>,
-      aiMessageId: string,
-    ) => {
-      let accumulatedContent = ''
-
-      while (true) {
-        const { done, value } = await reader.read()
-
-        if (done) {
-          return accumulatedContent
-        }
-
-        const chunk = new TextDecoder().decode(value)
-        const lines = chunk.split('\n').filter((line) => line.trim())
-
-        accumulatedContent = processStreamLines(
-          lines,
-          accumulatedContent,
-          aiMessageId,
-        )
-
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-      }
-    },
-    [processStreamLines],
-  )
-
-  // Process streaming response from chat API (for auto response)
-  const processStreamingResponse = useCallback(
-    async (reader: ReadableStreamDefaultReader<Uint8Array>) => {
-      // Create AI message placeholder for auto response streaming
-      const aiMessageId = generateMessageId('ai')
-      const aiMessage: ChatEntry = {
-        id: aiMessageId,
-        content: '',
-        isUser: false,
-        isGenerating: true,
-        agentType: 'ask',
-      }
-      setMessages((prev) => [...prev, aiMessage])
-
-      // Process streaming with UI updates
-      const content = await processStreamingWithUI(reader, aiMessageId)
-
-      // Update message with final content and timestamp
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === aiMessageId
-            ? createChatEntry(msg, {
-                content,
-                timestamp: new Date(),
-                isGenerating: false,
-              })
-            : msg,
-        ),
-      )
-
-      return content
-    },
-    [processStreamingWithUI],
-  )
-
-  // Call chat API and get response
-  const callChatAPI = useCallback(
-    async (userMessage: string) => {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: userMessage,
-          schemaData,
-          tableGroups,
-          history: formatChatHistory(messages),
-          mode: 'ask',
-          organizationId,
-          buildingSchemaId,
-          latestVersionNumber,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to get auto response')
-      }
-
-      const reader = response.body?.getReader()
-      if (!reader) {
-        throw new Error('Response body is not readable')
-      }
-
-      return reader
-    },
-    [
-      messages,
-      schemaData,
-      tableGroups,
-      organizationId,
-      buildingSchemaId,
-      latestVersionNumber,
-    ],
-  )
-
-  // Save message to database
-  const saveAutoResponseMessage = useCallback(
-    async (content: string, isError = false) => {
-      if (!designSessionId) return
-
-      await saveMessage({
-        designSessionId,
-        content: isError
-          ? 'Sorry, an error occurred while generating a response. Please try again.'
-          : content,
-        role: 'assistant',
-        userId: null,
-      })
-    },
-    [designSessionId],
-  )
-
-  // Auto response function
-  const triggerAutoResponse = useCallback(
-    async (userMessage: string) => {
-      try {
-        const reader = await callChatAPI(userMessage)
-        const content = await processStreamingResponse(reader)
-        await saveAutoResponseMessage(content)
-      } catch (error) {
-        console.error('Error in auto response:', error)
-        await saveAutoResponseMessage('', true)
-      }
-    },
-    [callChatAPI, processStreamingResponse, saveAutoResponseMessage],
-  )
 
   // Handle new messages from realtime subscription
   const handleNewMessage = useCallback(
@@ -512,35 +259,115 @@ export const Chat: FC<Props> = ({
       let accumulatedContent = ''
       let aiDbId: string | undefined
 
-      // Process streaming with UI updates
-      accumulatedContent = await processStreamingWithUI(reader, aiMessageId)
+      // Read the stream
+      while (true) {
+        const { done, value } = await reader.read()
 
-      // Streaming is complete, save to database and add timestamp
-      if (designSessionId) {
-        const saveResult = await saveMessage({
-          designSessionId,
-          content: accumulatedContent,
-          role: 'assistant',
-          userId: null,
-        })
-        if (saveResult.success && saveResult.message) {
-          aiDbId = saveResult.message.id
+        if (done) {
+          // Streaming is complete, save to database and add timestamp
+          if (designSessionId) {
+            const saveResult = await saveMessage({
+              designSessionId,
+              content: accumulatedContent,
+              role: 'assistant',
+              userId: null,
+            })
+            if (saveResult.success && saveResult.message) {
+              aiDbId = saveResult.message.id
+            }
+          }
+
+          // Update message with final content, timestamp, and database ID
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === aiMessageId
+                ? createChatEntry(msg, {
+                    content: accumulatedContent,
+                    timestamp: new Date(),
+                    isGenerating: false, // Remove generating state when complete
+                    dbId: aiDbId,
+                  })
+                : msg,
+            ),
+          )
+          break
         }
-      }
 
-      // Update message with final content, timestamp, and database ID
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === aiMessageId
-            ? createChatEntry(msg, {
-                content: accumulatedContent,
-                timestamp: new Date(),
-                isGenerating: false, // Remove generating state when complete
-                dbId: aiDbId,
+        // Decode the chunk and process JSON messages
+        const chunk = new TextDecoder().decode(value)
+        const lines = chunk.split('\n').filter((line) => line.trim())
+
+        for (const line of lines) {
+          try {
+            const parsed = JSON.parse(line)
+
+            // Validate the parsed data has the expected structure
+            if (!isResponseChunk(parsed)) {
+              console.error('Invalid response format:', parsed)
+              continue
+            }
+
+            if (parsed.type === 'text') {
+              // Append text content to accumulated content
+              accumulatedContent += parsed.content
+
+              // Update the AI message with the accumulated content (without timestamp)
+              // Keep isGenerating: true during streaming
+              setMessages((prev) => {
+                // Update immediately to improve streaming UX
+                const updatedMessages = [...prev]
+                const aiMsgIndex = updatedMessages.findIndex(
+                  (msg) => msg.id === aiMessageId,
+                )
+
+                if (aiMsgIndex >= 0) {
+                  updatedMessages[aiMsgIndex] = createChatEntry(
+                    updatedMessages[aiMsgIndex],
+                    {
+                      content: accumulatedContent,
+                      isGenerating: true,
+                    },
+                  )
+                }
+
+                return updatedMessages
               })
-            : msg,
-        ),
-      )
+
+              // Force immediate update for smoother streaming experience
+              // Using a small timeout to allow React to batch updates
+              setTimeout(() => {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+              }, 10)
+            } else if (parsed.type === 'custom') {
+              // Update progress messages
+              setProgressMessages((prev) =>
+                updateProgressMessages(prev, parsed.content),
+              )
+            } else if (parsed.type === 'error') {
+              // Handle error message
+              console.error('Stream error:', parsed.content)
+              setProgressMessages([])
+              throw new Error(parsed.content)
+            }
+          } catch {
+            // If JSON parsing fails, treat as plain text (backward compatibility)
+            accumulatedContent += chunk
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === aiMessageId
+                  ? createChatEntry(msg, {
+                      content: accumulatedContent,
+                      isGenerating: true,
+                    })
+                  : msg,
+              ),
+            )
+          }
+        }
+
+        // Scroll to bottom as content streams in
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+      }
     } catch (error) {
       console.error('Error sending message:', error)
       // Clear progress messages and streaming state on error

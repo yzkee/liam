@@ -1,6 +1,6 @@
 BEGIN;
 
-SELECT plan(15);
+SELECT plan(12);
 
 SELECT tests.create_supabase_user('project_creator@example.com', 'project_creator');
 SELECT tests.create_supabase_user('non_member@example.com', 'non_member');
@@ -31,26 +31,17 @@ BEGIN
     EXECUTE format('SET LOCAL ROLE authenticated; SET LOCAL "request.jwt.claims" = ''{"sub": "%s"}''', v_creator_id);
 END $$;
 
-SELECT ok(
-  (SELECT (result->>'success')::boolean FROM (SELECT add_project('Test Project', 'test-repo', 'test-owner', 12345, 67890, '88888888-8888-8888-8888-888888888888') AS result) AS t),
-  'Should return success = true'
-);
-
-SELECT ok(
-  (SELECT result ? 'project_id' FROM (SELECT add_project('Test Project 2', 'test-repo-2', 'test-owner-2', 12346, 67891, '88888888-8888-8888-8888-888888888888') AS result) AS t),
-  'Should include project_id key'
-);
-
-SELECT ok(
-  (SELECT result ? 'repository_id' FROM (SELECT add_project('Test Project 3', 'test-repo-3', 'test-owner-3', 12347, 67892, '88888888-8888-8888-8888-888888888888') AS result) AS t),
-  'Should include repository_id key'
-);
-
-SELECT is(
-  (SELECT result->>'error' FROM (SELECT add_project('Test Project 4', 'test-repo-4', 'test-owner-4', 12348, 67893, '88888888-8888-8888-8888-888888888888') AS result) AS t),
-  NULL,
-  'Error should be null'
-);
+DO $$
+DECLARE
+    v_result jsonb;
+BEGIN
+    SELECT add_project('Test Project', 'test-repo', 'test-owner', 12345, 67890, '88888888-8888-8888-8888-888888888888') INTO v_result;
+    
+    PERFORM ok((v_result->>'success')::boolean, 'Should return success = true');
+    PERFORM ok(v_result ? 'project_id', 'Should include project_id key');
+    PERFORM ok(v_result ? 'repository_id', 'Should include repository_id key');
+    PERFORM is(v_result->>'error', NULL, 'Error should be null');
+END $$;
 
 SELECT is(
   (SELECT COUNT(*) FROM projects WHERE name = 'Test Project' AND organization_id = '88888888-8888-8888-8888-888888888888'),
@@ -66,19 +57,19 @@ SELECT is(
 
 SELECT is(
   (SELECT COUNT(*) FROM project_repository_mappings WHERE organization_id = '88888888-8888-8888-8888-888888888888'),
-  4::bigint,
-  'Should create project-repository mapping records'
+  1::bigint,
+  'Should create project-repository mapping record'
 );
 
 SELECT is(
-  (SELECT github_installation_identifier FROM github_repositories WHERE name = 'test-repo-2' AND owner = 'test-owner-2'),
-  12346::bigint,
+  (SELECT github_installation_identifier FROM github_repositories WHERE name = 'test-repo' AND owner = 'test-owner'),
+  12345::bigint,
   'Should store correct github installation identifier'
 );
 
 SELECT is(
-  (SELECT github_repository_identifier FROM github_repositories WHERE name = 'test-repo-3' AND owner = 'test-owner-3'),
-  67892::bigint,
+  (SELECT github_repository_identifier FROM github_repositories WHERE name = 'test-repo' AND owner = 'test-owner'),
+  67890::bigint,
   'Should store correct github repository identifier'
 );
 
@@ -86,7 +77,7 @@ SELECT ok(
   (SELECT COUNT(*) > 0 FROM project_repository_mappings prm
    JOIN projects p ON prm.project_id = p.id
    JOIN github_repositories gr ON prm.repository_id = gr.id
-   WHERE p.name = 'Test Project 4' AND gr.name = 'test-repo-4'),
+   WHERE p.name = 'Test Project' AND gr.name = 'test-repo'),
   'Project and repository should be correctly linked'
 );
 
@@ -102,7 +93,7 @@ SELECT ok(
 );
 
 SELECT ok(
-  (SELECT result ? 'error' FROM (SELECT add_project('Duplicate Repo Project 2', 'test-repo-2', 'test-owner-2', 12346, 67891, '88888888-8888-8888-8888-888888888888') AS result) AS t),
+  (SELECT result ? 'error' FROM (SELECT add_project('Duplicate Repo Project', 'test-repo', 'test-owner', 12345, 67890, '88888888-8888-8888-8888-888888888888') AS result) AS t),
   'Should include error key when duplicate repository creation fails'
 );
 

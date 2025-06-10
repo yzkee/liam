@@ -6,6 +6,7 @@ import { createClient } from '@/libs/db/server'
 import type { SupabaseClientType } from '@liam-hq/db'
 import type { Schema } from '@liam-hq/db-structure'
 import { parse, setPrismWasmUrl } from '@liam-hq/db-structure/parser'
+import type { TablesInsert } from '@liam-hq/db/supabase/database.types'
 import { getFileContent } from '@liam-hq/github'
 import { redirect } from 'next/navigation'
 import * as v from 'valibot'
@@ -25,6 +26,10 @@ const FormDataSchema = v.object({
   projectId: v.optional(v.nullable(emptyStringToNull)),
   parentDesignSessionId: v.optional(v.nullable(emptyStringToNull)),
   gitSha: v.optional(v.nullable(v.string())),
+  initialMessage: v.pipe(
+    v.string(),
+    v.minLength(1, 'Initial message is required'),
+  ),
 })
 
 type RepositoryData = {
@@ -52,6 +57,7 @@ function parseFormData(
     projectId: formData.get('projectId'),
     parentDesignSessionId: formData.get('parentDesignSessionId'),
     gitSha: formData.get('gitSha'),
+    initialMessage: formData.get('initialMessage'),
   }
 
   return v.safeParse(FormDataSchema, rawData)
@@ -175,6 +181,38 @@ async function processSchema(
   }
 }
 
+async function saveInitialMessage(
+  supabase: SupabaseClientType,
+  designSessionId: string,
+  organizationId: string,
+  content: string,
+  userId: string,
+): Promise<CreateSessionState | { success: true }> {
+  const now = new Date().toISOString()
+
+  const messageData: TablesInsert<'messages'> = {
+    design_session_id: designSessionId,
+    content,
+    role: 'user',
+    user_id: userId,
+    updated_at: now,
+    organization_id: organizationId,
+  }
+
+  const { error } = await supabase
+    .from('messages')
+    .insert(messageData)
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Failed to save initial message:', error)
+    return { success: false, error: 'Failed to save initial message' }
+  }
+
+  return { success: true }
+}
+
 export async function createSession(
   _prevState: CreateSessionState,
   formData: FormData,
@@ -184,7 +222,7 @@ export async function createSession(
     return { success: false, error: 'Invalid form data' }
   }
 
-  const { projectId, parentDesignSessionId, gitSha } =
+  const { projectId, parentDesignSessionId, gitSha, initialMessage } =
     parsedFormDataResult.output
 
   const supabase = await createClient()
@@ -247,6 +285,17 @@ export async function createSession(
   if (buildingSchemaError) {
     console.error('Error creating building schema:', buildingSchemaError)
     return { success: false, error: 'Failed to create building schema' }
+  }
+
+  const saveMessageResult = await saveInitialMessage(
+    supabase,
+    designSession.id,
+    organizationId,
+    initialMessage,
+    currentUserId,
+  )
+  if (!saveMessageResult.success) {
+    return saveMessageResult
   }
 
   // Redirect to the session page on successful creation

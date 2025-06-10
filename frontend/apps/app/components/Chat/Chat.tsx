@@ -4,7 +4,6 @@ import type { Schema, TableGroup } from '@liam-hq/db-structure'
 import type { FC } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { ChatInput } from '../ChatInput'
-import type { Mode } from '../ChatInput/components/ModeToggleSwitch/ModeToggleSwitch'
 import { ChatMessage } from '../ChatMessage'
 import styles from './Chat.module.css'
 import { ERROR_MESSAGES } from './constants/chatConstants'
@@ -40,7 +39,7 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups, designSession }) => {
     currentUserId,
   )
   const [isLoading, setIsLoading] = useState(false)
-  const [currentMode, setCurrentMode] = useState<Mode>('ask')
+  const [isLoadingMessages, setIsLoadingMessages] = useState(true)
   const [progressMessages, setProgressMessages] = useState<string[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -60,9 +59,9 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups, designSession }) => {
 
   // TODO: Add rate limiting - Implement rate limiting for message sending to prevent spam
   // biome-ignore  lint/complexity/noExcessiveCognitiveComplexity: fix later
-  const handleSendMessage = async (content: string, mode: Mode) => {
-    // Update the current mode and agent type
-    setCurrentMode(mode)
+  const handleSendMessage = async (content: string) => {
+    // Get current user ID for persistence
+    const userId = await getCurrentUserId()
 
     // Add user message
     const userMessage: ChatEntry = {
@@ -71,7 +70,6 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups, designSession }) => {
       isUser: true,
       timestamp: new Date(),
       isGenerating: false, // Explicitly set to false for consistency
-      agentType: mode, // Store the current mode with the user message as well
     }
     addOrUpdateMessage(userMessage)
 
@@ -101,7 +99,6 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups, designSession }) => {
       isUser: false,
       // No timestamp during streaming
       isGenerating: true, // Mark as generating
-      agentType: mode, // Store the current mode with the message
     }
     addOrUpdateMessage(aiMessage)
 
@@ -120,7 +117,6 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups, designSession }) => {
           schemaData,
           tableGroups,
           history,
-          mode,
           organizationId: designSession.organizationId,
           buildingSchemaId: designSession.buildingSchemaId,
           latestVersionNumber: designSession.latestVersionNumber || 0,
@@ -238,7 +234,6 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups, designSession }) => {
           content: ERROR_MESSAGES.GENERAL,
           timestamp: new Date(),
           isGenerating: false, // Remove generating state on error
-          agentType: currentMode, // Ensure the agent type is set for error messages
         })
         addOrUpdateMessage(errorAiMessage)
       } else {
@@ -249,7 +244,6 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups, designSession }) => {
           isUser: false,
           timestamp: new Date(),
           isGenerating: false, // Ensure error message is not in generating state
-          agentType: currentMode, // Use the current mode for error messages
         }
         addOrUpdateMessage(errorMessage)
       }
@@ -276,7 +270,6 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups, designSession }) => {
               isUser={message.isUser}
               timestamp={message.timestamp}
               isGenerating={message.isGenerating}
-              agentType={message.agentType || currentMode}
               progressMessages={
                 shouldShowProgress ? progressMessages : undefined
               }
@@ -297,7 +290,6 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups, designSession }) => {
         onSendMessage={handleSendMessage}
         isLoading={isLoading}
         schema={schemaData}
-        initialMode={currentMode}
       />
     </div>
   )

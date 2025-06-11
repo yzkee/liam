@@ -1,5 +1,5 @@
 import type { Mode } from '../../ChatInput/components/ModeToggleSwitch/ModeToggleSwitch'
-import type { ChatMessageProps } from '../../ChatMessage'
+import type { ChatMessageProps } from '../../ChatMessage/ChatMessage'
 
 /**
  * Represents a chat message entry with additional metadata

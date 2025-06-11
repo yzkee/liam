@@ -1,6 +1,5 @@
 import type { Tables } from '@liam-hq/db/supabase/database.types'
 import { useCallback, useEffect, useState } from 'react'
-import { WELCOME_MESSAGE } from '../constants/chatConstants'
 import {
   convertMessageToChatEntry,
   setupRealtimeSubscription,
@@ -82,19 +81,15 @@ export const useRealtimeMessages: UseRealtimeMessagesFunc = (
   designSession,
   currentUserId,
 ) => {
-  // Initialize messages with welcome message and existing messages
-  const initialMessages = [
-    WELCOME_MESSAGE,
-    ...designSession.messages.map((msg) => ({
-      ...convertMessageToChatEntry(msg),
-      dbId: msg.id,
-    })),
-  ]
+  // Initialize messages with existing messages (no welcome message)
+  const initialMessages = designSession.messages.map((msg) => ({
+    ...convertMessageToChatEntry(msg),
+    dbId: msg.id,
+  }))
 
   const [messages, setMessages] = useState<ChatEntry[]>(initialMessages)
 
   // Add or update message with duplicate checking and optimistic update handling
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Complex message handling logic required for real-time features
   const addOrUpdateMessage = useCallback(
     (newChatEntry: ChatEntry, messageUserId?: string | null) => {
       setMessages((prev) => {

@@ -11,5 +11,10 @@ export const SessionFormContainer: FC<Props> = async ({ defaultProjectId }) => {
   const organizationId = await getOrganizationId()
   const { data: projects } = await getProjects(organizationId)
 
-  return <SessionForm projects={projects} defaultProjectId={defaultProjectId} />
+  return (
+    <SessionForm
+      projects={projects ?? []}
+      defaultProjectId={defaultProjectId}
+    />
+  )
 }

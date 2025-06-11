@@ -20,7 +20,7 @@
 
 .wrapper {
   display: flex;
-  width: 1080px;
+  width: 782px;
   flex-direction: column;
   align-items: center;
   gap: var(--spacing-7, 28px);

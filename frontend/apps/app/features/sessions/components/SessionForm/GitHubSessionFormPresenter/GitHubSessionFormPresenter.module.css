@@ -1,7 +1,5 @@
 .container {
   width: 100%;
-  max-width: 782px;
-  margin: 0 auto;
   background-color: var(--callout-default-background);
   border: 1px solid var(--global-border);
   border-radius: var(--border-radius-md);

@@ -60,3 +60,9 @@
 .relatedSchemaWrapper {
   height: 400px;
 }
+
+.useCaseList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}

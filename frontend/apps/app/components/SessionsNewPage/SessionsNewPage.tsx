@@ -7,7 +7,8 @@ export const SessionsNewPage: FC = () => {
     <div className={styles.container}>
       <div className={styles.wrapper}>
         <h1 className={styles.title}>
-          What can I help you <br />Database Design?
+          What can I help you <br />
+          Database Design?
         </h1>
         <SessionFormContainer />
       </div>

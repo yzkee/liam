@@ -1,61 +1,27 @@
 import { PGlite } from '@electric-sql/pglite'
-import type { PGliteInstance, SqlResult } from './types'
+import type { SqlResult } from './types'
 
 /**
- * Manages PGlite database instances with automatic cleanup of inactive sessions
+ * Manages PGlite database instances with immediate cleanup after query execution
  */
 export class PGliteInstanceManager {
-  private instances = new Map<string, PGliteInstance>()
-  private cleanupInterval: NodeJS.Timeout
-
-  constructor() {
-    // Setup automatic cleanup of inactive instances every 5 minutes
-    this.cleanupInterval = setInterval(
-      () => {
-        this.cleanupInactiveInstances()
-      },
-      5 * 60 * 1000,
-    )
+  /**
+   * Creates a new PGlite instance for query execution
+   */
+  private async createInstance(): Promise<PGlite> {
+    return new PGlite()
   }
 
   /**
-   * Retrieves existing PGlite instance or creates a new one for the session
+   * Execute SQL query with immediate instance cleanup
    */
-  async getOrCreateInstance(sessionId: string): Promise<PGlite> {
-    const existing = this.instances.get(sessionId)
-    if (existing) {
-      existing.lastAccessed = new Date()
-      return existing.db
+  async executeQuery(_sessionId: string, sql: string): Promise<SqlResult[]> {
+    const db = await this.createInstance()
+    try {
+      return await this.executeSql(sql, db)
+    } finally {
+      db.close?.()
     }
-
-    // Create new PGlite instance for this session
-    const db = new PGlite()
-    this.instances.set(sessionId, {
-      db,
-      lastAccessed: new Date(),
-    })
-    return db
-  }
-
-  /**
-   * Cleanup instances that haven't been accessed for 30 minutes
-   */
-  private cleanupInactiveInstances() {
-    const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000)
-    for (const [sessionId, instance] of Array.from(this.instances.entries())) {
-      if (instance.lastAccessed < thirtyMinutesAgo) {
-        instance.db.close?.()
-        this.instances.delete(sessionId)
-      }
-    }
-  }
-
-  /**
-   * Execute SQL query for a specific session
-   */
-  async executeQuery(sessionId: string, sql: string): Promise<SqlResult[]> {
-    const db = await this.getOrCreateInstance(sessionId)
-    return this.executeSql(sql, db)
   }
 
   /**
@@ -108,14 +74,8 @@ export class PGliteInstanceManager {
   }
 
   /**
-   * Cleanup all instances and stop the cleanup interval
+   * Cleanup method for compatibility - no longer needed since instances are not stored
    * Should be called when shutting down the application
    */
-  destroy() {
-    clearInterval(this.cleanupInterval)
-    for (const [, instance] of Array.from(this.instances.entries())) {
-      instance.db.close?.()
-    }
-    this.instances.clear()
-  }
+  destroy() {}
 }

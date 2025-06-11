@@ -8,10 +8,12 @@
 }
 
 .title {
-  font-size: var(--font-size-10);
+  font-size: 52px;
   font-weight: 600;
   color: var(--global-foreground);
   text-align: center;
+  line-height: 1;
+  letter-spacing: -0.312px;
   margin: 0 0 var(--spacing-4) 0;
   width: 100%;
 }

@@ -35,6 +35,7 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups, designSession }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [progressMessages, setProgressMessages] = useState<string[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const autoStartExecuted = useRef(false)
 
   // Get current user ID on component mount
   useEffect(() => {
@@ -45,10 +46,50 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups, designSession }) => {
     fetchUserId()
   }, [])
 
+  // Auto-start AI response for initial user message
+  useEffect(() => {
+    if (!currentUserId || autoStartExecuted.current || isLoading) return
+
+    // Only auto-start if there's exactly one message and it's from user
+    if (
+      designSession.messages.length === 1 &&
+      designSession.messages[0].role === 'user'
+    ) {
+      const initialMessage = designSession.messages[0]
+      autoStartExecuted.current = true
+      startAIResponse(initialMessage.content)
+    }
+  }, [currentUserId, designSession.messages, isLoading])
+
   // Scroll to bottom when component mounts or messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [])
+
+  // Start AI response without saving user message (for auto-start scenarios)
+  const startAIResponse = async (content: string) => {
+    setIsLoading(true)
+
+    // Create and stream AI message
+    const result = await createAndStreamAIMessage({
+      message: content,
+      schemaData,
+      tableGroups,
+      messages,
+      designSession,
+      addOrUpdateMessage,
+      setProgressMessages,
+    })
+
+    if (result.success) {
+      // Scroll to bottom after successful completion
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+      }, 10)
+    }
+
+    setIsLoading(false)
+  }
 
   // TODO: Add rate limiting - Implement rate limiting for message sending to prevent spam
   const handleSendMessage = async (content: string) => {
@@ -78,27 +119,7 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups, designSession }) => {
       addOrUpdateMessage(updatedUserMessage, currentUserId)
     }
 
-    setIsLoading(true)
-
-    // Create and stream AI message
-    const result = await createAndStreamAIMessage({
-      message: content,
-      schemaData,
-      tableGroups,
-      messages,
-      designSession,
-      addOrUpdateMessage,
-      setProgressMessages,
-    })
-
-    if (result.success) {
-      // Scroll to bottom after successful completion
-      setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-      }, 10)
-    }
-
-    setIsLoading(false)
+    await startAIResponse(content)
   }
 
   return (

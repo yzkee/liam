@@ -1,7 +1,6 @@
 'use client'
 
 import type { Schema, TableGroup } from '@liam-hq/db-structure'
-import type { Mode } from '../../ChatInput/components/ModeToggleSwitch/ModeToggleSwitch'
 import { ERROR_MESSAGES } from '../constants/chatConstants'
 import type { ChatEntry } from '../types/chatTypes'
 import {
@@ -25,7 +24,6 @@ interface CreateAIMessageParams {
   schemaData: Schema
   tableGroups?: Record<string, TableGroup>
   messages: ChatEntry[]
-  mode: Mode
   designSession: DesignSession
   addOrUpdateMessage: (message: ChatEntry, userId?: string | null) => void
   setProgressMessages: (updater: (prev: string[]) => string[]) => void
@@ -41,7 +39,6 @@ interface CreateAIMessageResult {
  * Creates an AI message placeholder for streaming
  */
 const createAIMessagePlaceholder = (
-  mode: Mode,
   addOrUpdateMessage: (message: ChatEntry, userId?: string | null) => void,
 ): ChatEntry => {
   const aiMessageId = generateMessageId('ai')
@@ -51,7 +48,6 @@ const createAIMessagePlaceholder = (
     isUser: false,
     // No timestamp during streaming
     isGenerating: true, // Mark as generating
-    agentType: mode, // Store the current mode with the message
   }
   addOrUpdateMessage(aiMessage)
   return aiMessage
@@ -65,7 +61,6 @@ const callChatAPI = async (
   schemaData: Schema,
   tableGroups: Record<string, TableGroup> | undefined,
   history: [string, string][],
-  mode: Mode,
   designSession: DesignSession,
 ): Promise<Response> => {
   const response = await fetch('/api/chat', {
@@ -78,7 +73,6 @@ const callChatAPI = async (
       schemaData,
       tableGroups,
       history,
-      mode,
       organizationId: designSession.organizationId,
       buildingSchemaId: designSession.buildingSchemaId,
       latestVersionNumber: designSession.latestVersionNumber || 0,
@@ -156,7 +150,6 @@ const processStreamLine = (
 const handleStreamingError = (
   error: unknown,
   messages: ChatEntry[],
-  mode: Mode,
   addOrUpdateMessage: (message: ChatEntry, userId?: string | null) => void,
   setProgressMessages: (updater: (prev: string[]) => string[]) => void,
 ): CreateAIMessageResult => {
@@ -175,7 +168,6 @@ const handleStreamingError = (
       content: ERROR_MESSAGES.GENERAL,
       timestamp: new Date(),
       isGenerating: false, // Remove generating state on error
-      agentType: mode, // Ensure the agent type is set for error messages
     })
     addOrUpdateMessage(errorAiMessage)
   } else {
@@ -186,7 +178,6 @@ const handleStreamingError = (
       isUser: false,
       timestamp: new Date(),
       isGenerating: false, // Ensure error message is not in generating state
-      agentType: mode, // Use the current mode for error messages
     }
     addOrUpdateMessage(errorMessage)
   }
@@ -205,14 +196,13 @@ export const createAndStreamAIMessage = async ({
   schemaData,
   tableGroups,
   messages,
-  mode,
   designSession,
   addOrUpdateMessage,
   setProgressMessages,
 }: CreateAIMessageParams): Promise<CreateAIMessageResult> => {
   try {
     // Create AI message placeholder for streaming (without timestamp)
-    const aiMessage = createAIMessagePlaceholder(mode, addOrUpdateMessage)
+    const aiMessage = createAIMessagePlaceholder(addOrUpdateMessage)
 
     // Format chat history for API
     const history = formatChatHistory(messages)
@@ -223,7 +213,6 @@ export const createAndStreamAIMessage = async ({
       schemaData,
       tableGroups,
       history,
-      mode,
       designSession,
     )
 
@@ -284,7 +273,6 @@ export const createAndStreamAIMessage = async ({
     return handleStreamingError(
       error,
       messages,
-      mode,
       addOrUpdateMessage,
       setProgressMessages,
     )

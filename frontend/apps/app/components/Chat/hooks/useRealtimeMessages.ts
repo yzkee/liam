@@ -94,6 +94,7 @@ export const useRealtimeMessages: UseRealtimeMessagesFunc = (
   const [messages, setMessages] = useState<ChatEntry[]>(initialMessages)
 
   // Add or update message with duplicate checking and optimistic update handling
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Complex message handling logic required for real-time features
   const addOrUpdateMessage = useCallback(
     (newChatEntry: ChatEntry, messageUserId?: string | null) => {
       setMessages((prev) => {

@@ -10,7 +10,6 @@ export const WELCOME_MESSAGE: ChatEntry = {
   isUser: false,
   timestamp: new Date(),
   isGenerating: false,
-  agentType: 'ask',
 }
 
 /**

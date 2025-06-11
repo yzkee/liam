@@ -1,3 +1,5 @@
+import type { BusinessRequirement } from './components/BRDList/types'
+
 export const MIGRATIONS_DOC = `
 -- Migrations will appear here as you chat with AI
 create table documents (
@@ -76,5 +78,212 @@ export const REVIEW_COMMENTS = [
     severity: 'High' as const,
     message:
       '【パフォーマンス】複合主キー `(document_id, tag_id)` は`document_id`での検索には有効ですが、`tag_id`単体での検索性能を向上させるために、`tag_id`カラムにも個別インデックスを作成することを推奨します。例: `CREATE INDEX idx_document_tags_tag_id ON document_tags (tag_id);`',
+  },
+]
+
+export const BRD_LIST: BusinessRequirement[] = [
+  {
+    id: 'BRD-001',
+    title: 'User Registration',
+    overview: [
+      'A feature that allows new users to create an account necessary to use this service',
+      'Users complete account registration by entering required information and agreeing to the terms of service',
+    ],
+    relatedSchema: {
+      tables: {
+        users: {
+          name: 'users',
+          comment: 'User information management table',
+          columns: {
+            user_id: {
+              name: 'user_id',
+              type: 'uuid',
+              default: null,
+              check: null,
+              primary: true,
+              unique: false,
+              notNull: true,
+              comment: 'Unique identifier for the user',
+            },
+            username: {
+              name: 'username',
+              type: 'varchar(255)',
+              default: null,
+              check: null,
+              primary: false,
+              unique: false,
+              notNull: true,
+              comment: 'Username (nickname)',
+            },
+            email: {
+              name: 'email',
+              type: 'varchar(255)',
+              default: null,
+              check: null,
+              primary: false,
+              unique: false,
+              notNull: true,
+              comment: 'Email address',
+            },
+          },
+          indexes: {
+            idx_email: {
+              name: 'idx_email',
+              unique: true,
+              columns: ['email'],
+              type: 'btree',
+            },
+          },
+          constraints: {},
+        },
+        countries: {
+          name: 'countries',
+          comment: '国・地域情報テーブル',
+          columns: {
+            country_code: {
+              name: 'country_code',
+              type: 'varchar(3)',
+              default: null,
+              check: null,
+              primary: true,
+              unique: false,
+              notNull: true,
+              comment: 'Country code',
+            },
+            is_serviced: {
+              name: 'is_serviced',
+              type: 'boolean',
+              default: null,
+              check: null,
+              primary: false,
+              unique: false,
+              notNull: true,
+              comment: 'Service availability flag',
+            },
+          },
+          indexes: {},
+          constraints: {},
+        },
+      },
+      relationships: {},
+      tableGroups: {},
+    },
+  },
+  {
+    id: 'BRD-002',
+    title: 'Login',
+    overview: [
+      'A feature that allows registered users to authenticate using their credentials (email and password) to access the service',
+      'After successful authentication, users can access various features within the service',
+    ],
+    relatedSchema: {
+      tables: {
+        users: {
+          name: 'users',
+          comment: 'User information management table',
+          columns: {
+            user_id: {
+              name: 'user_id',
+              type: 'uuid',
+              default: null,
+              check: null,
+              primary: true,
+              unique: false,
+              notNull: true,
+              comment: 'Unique user identifier',
+            },
+            username: {
+              name: 'username',
+              type: 'varchar(255)',
+              default: null,
+              check: null,
+              primary: false,
+              unique: false,
+              notNull: true,
+              comment: 'Username (nickname)',
+            },
+            email: {
+              name: 'email',
+              type: 'varchar(255)',
+              default: null,
+              check: null,
+              primary: false,
+              unique: false,
+              notNull: true,
+              comment: 'Email address',
+            },
+          },
+          indexes: {
+            idx_email: {
+              name: 'idx_email',
+              unique: true,
+              columns: ['email'],
+              type: 'btree',
+            },
+          },
+          constraints: {},
+        },
+        user_login_history: {
+          name: 'user_login_history',
+          comment: 'User login history table',
+          columns: {
+            id: {
+              name: 'id',
+              type: 'bigint',
+              default: null,
+              check: null,
+              primary: true,
+              unique: false,
+              notNull: true,
+              comment: 'Login history ID',
+            },
+            user_id: {
+              name: 'user_id',
+              type: 'uuid',
+              default: null,
+              check: null,
+              primary: false,
+              unique: false,
+              notNull: true,
+              comment: 'User ID',
+            },
+            login_at: {
+              name: 'login_at',
+              type: 'timestamp',
+              default: null,
+              check: null,
+              primary: false,
+              unique: false,
+              notNull: true,
+              comment: 'Login date and time',
+            },
+            ip_address: {
+              name: 'ip_address',
+              type: 'varchar(45)',
+              default: null,
+              check: null,
+              primary: false,
+              unique: false,
+              notNull: true,
+              comment: 'IP address',
+            },
+            login_status: {
+              name: 'login_status',
+              type: 'varchar(20)',
+              default: null,
+              check: null,
+              primary: false,
+              unique: false,
+              notNull: true,
+              comment: 'Login status',
+            },
+          },
+          indexes: {},
+          constraints: {},
+        },
+      },
+      relationships: {},
+      tableGroups: {},
+    },
   },
 ]

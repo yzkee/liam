@@ -14,7 +14,7 @@
   text-align: center;
   line-height: 1;
   letter-spacing: -0.312px;
-  margin: 0 0 var(--spacing-4) 0;
+  margin: 0 0 var(--spacing-7) 0;
   width: 100%;
 }
 
@@ -22,7 +22,7 @@
   display: flex;
   width: 1080px;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--spacing-7, 28px);
 }
 

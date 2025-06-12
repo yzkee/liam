@@ -1,33 +1,5 @@
 .container {
-  display: flex;
-  padding: var(--spacing-20, 80px) var(--spacing-4, 16px);
-  flex-direction: column;
-  align-items: center;
-  gap: var(--spacing-20, 80px);
-  font-family: var(--main-font);
-}
-
-.title {
-  font-size: 52px;
-  font-weight: 600;
-  color: var(--global-foreground);
-  text-align: center;
-  line-height: 1;
-  letter-spacing: -0.312px;
-  margin: 0 0 var(--spacing-7) 0;
   width: 100%;
-}
-
-.wrapper {
-  display: flex;
-  width: 782px;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--spacing-7, 28px);
-}
-
-.formContainer {
-  width: 1080px;
   background-color: var(--callout-default-background);
   border: 1px solid var(--global-border);
   border-radius: var(--border-radius-md);
@@ -45,12 +17,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-3);
-}
-
-.heading {
-  display: flex;
-  height: 36px;
-  align-items: center;
 }
 
 .label {
@@ -93,11 +59,6 @@
 
 .textarea::placeholder {
   color: var(--overlay-30);
-}
-
-.helperText {
-  font-size: var(--font-size-2);
-  color: var(--global-mute-text);
 }
 
 .divider {

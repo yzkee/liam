@@ -51,6 +51,7 @@ export {
   Search,
   Table2,
   Ungroup,
+  Upload,
   Users,
   Waypoints,
   XIcon,

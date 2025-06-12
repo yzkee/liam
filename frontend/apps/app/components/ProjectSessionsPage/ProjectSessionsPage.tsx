@@ -1,6 +1,5 @@
-import { urlgen } from '@/libs/routes'
-import { Button, MessagesSquare } from '@liam-hq/ui'
-import Link from 'next/link'
+import { SessionFormContainer } from '@/features/sessions/components/SessionForm'
+import { MessagesSquare } from '@liam-hq/ui'
 import type { FC } from 'react'
 import styles from './ProjectSessionsPage.module.css'
 import { SessionItem } from './SessionItem'
@@ -20,12 +19,11 @@ export const ProjectSessionsPage: FC<Props> = async ({ projectId }) => {
           <h2 className={styles.title}>Sessions</h2>
           <p className={styles.description}>Design sessions for this project</p>
         </div>
-        <Link href={urlgen('design_sessions/new')}>
-          <Button>
-            <MessagesSquare size={16} />
-            New Session
-          </Button>
-        </Link>
+      </div>
+
+      <div className={styles.formSection}>
+        <h3 className={styles.formTitle}>Create New Session</h3>
+        <SessionFormContainer defaultProjectId={projectId} />
       </div>
 
       {sessions.length > 0 ? (
@@ -44,12 +42,6 @@ export const ProjectSessionsPage: FC<Props> = async ({ projectId }) => {
             Start a new design session to explore ideas and generate artifacts
             for this project.
           </p>
-          <Link href={urlgen('design_sessions/new')}>
-            <Button>
-              <MessagesSquare size={16} />
-              Create First Session
-            </Button>
-          </Link>
         </div>
       )}
     </div>

@@ -29,6 +29,21 @@
   margin: 0;
 }
 
+.formSection {
+  margin-bottom: 32px;
+  padding: 24px;
+  background-color: var(--callout-default-background);
+  border: 1px solid var(--global-border);
+  border-radius: var(--border-radius-md);
+}
+
+.formTitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+  color: var(--color-text-primary);
+}
+
 .loadingState {
   display: flex;
   justify-content: center;

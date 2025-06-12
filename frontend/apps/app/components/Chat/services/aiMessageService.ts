@@ -1,6 +1,7 @@
 'use client'
 
 import type { Schema, TableGroup } from '@liam-hq/db-structure'
+import { boolean, object, optional, parse, string } from 'valibot'
 import { ERROR_MESSAGES } from '../constants/chatConstants'
 import type { ChatEntry } from '../types/chatTypes'
 import {
@@ -32,6 +33,15 @@ interface CreateAIMessageResult {
   finalMessage?: ChatEntry
   error?: string
 }
+
+/**
+ * Schema for API response validation
+ */
+const ChatAPIResponseSchema = object({
+  success: optional(boolean()),
+  text: optional(string()),
+  error: optional(string()),
+})
 
 /**
  * Creates an AI message placeholder
@@ -157,11 +167,8 @@ export const createAndStreamAIMessage = async ({
     )
 
     // Parse JSON response with type safety
-    const data = (await response.json()) as {
-      success?: boolean
-      text?: string
-      error?: string
-    }
+    const rawData = await response.json()
+    const data = parse(ChatAPIResponseSchema, rawData)
 
     if (!data.success || !data.text) {
       throw new Error(data.error || ERROR_MESSAGES.GENERAL)

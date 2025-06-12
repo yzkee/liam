@@ -1,5 +1,6 @@
 import { Annotation } from '@langchain/langgraph'
 import type { Schema } from '@liam-hq/db-structure'
+import type { Repositories } from '../../../repositories'
 import { WORKFLOW_ERROR_MESSAGES } from '../constants/progressMessages'
 import { answerGenerationNode, validationNode } from '../nodes'
 import type { AgentName } from '../types'
@@ -24,6 +25,9 @@ export interface ChatState {
   schemaText?: string | undefined
   formattedChatHistory?: string | undefined
   agentName?: AgentName | undefined
+
+  // Repository dependencies for data access
+  repositories: Repositories
 }
 
 export const DEFAULT_RECURSION_LIMIT = 10
@@ -49,6 +53,9 @@ export const createAnnotations = () => {
     schemaText: Annotation<string | undefined>,
     formattedChatHistory: Annotation<string | undefined>,
     agentName: Annotation<AgentName | undefined>,
+
+    // Repository dependencies for data access
+    repositories: Annotation<Repositories>,
   })
 }
 

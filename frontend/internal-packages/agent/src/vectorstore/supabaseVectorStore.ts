@@ -271,8 +271,7 @@ async function processBatch({
     try {
       // Create the vector store instance directly instead of using fromDocuments
       const vectorStore = new SupabaseVectorStore(embeddings, {
-        // biome-ignore lint/suspicious/noExplicitAny: Type mismatch between our Supabase client and LangChain's expected client
-        client: supabaseClient as any,
+        client: supabaseClient,
         tableName: 'documents',
         queryName: 'match_documents',
       })

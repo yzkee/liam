@@ -1,4 +1,5 @@
 import type { Schema } from '@liam-hq/db-structure'
+import type { Repositories } from '../repositories'
 import { executeChatWorkflow } from './workflow'
 import type { WorkflowState } from './workflow/types'
 
@@ -9,6 +10,7 @@ interface ChatProcessorParams {
   organizationId?: string
   buildingSchemaId: string
   latestVersionNumber?: number
+  repositories: Repositories
 }
 
 type ChatProcessorResult =
@@ -34,6 +36,7 @@ export const processChatMessage = async (
     organizationId,
     buildingSchemaId,
     latestVersionNumber = 0,
+    repositories,
   } = params
 
   try {
@@ -48,6 +51,7 @@ export const processChatMessage = async (
       organizationId,
       buildingSchemaId,
       latestVersionNumber,
+      repositories,
     }
 
     // Execute workflow

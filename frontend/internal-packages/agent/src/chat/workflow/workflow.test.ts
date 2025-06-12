@@ -1,5 +1,6 @@
 import type { Schema } from '@liam-hq/db-structure'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import type { Repositories, SchemaRepository } from '../../repositories'
 import { executeChatWorkflow } from './index'
 import type { WorkflowState } from './types'
 
@@ -23,11 +24,6 @@ vi.mock('@/app/lib/schema/convertSchemaToText', () => ({
   convertSchemaToText: vi.fn(() => 'Mocked schema text'),
 }))
 
-// Mock the createNewVersion function
-vi.mock('../../utils/createNewVersion', () => ({
-  createNewVersion: vi.fn(),
-}))
-
 describe('Chat Workflow', () => {
   let mockSchemaData: Schema
   let mockAgent: {
@@ -35,7 +31,8 @@ describe('Chat Workflow', () => {
     stream: ReturnType<typeof vi.fn>
   }
   let mockGetAgent: ReturnType<typeof vi.fn>
-  let mockCreateNewVersion: ReturnType<typeof vi.fn>
+  let mockRepositories: Repositories
+  let mockSchemaRepository: SchemaRepository
 
   // Helper function to create test schema data
   const createMockSchema = (): Schema => ({
@@ -93,6 +90,7 @@ describe('Chat Workflow', () => {
     projectId: 'test-project-id',
     buildingSchemaId: 'test-building-schema-id',
     latestVersionNumber: 1,
+    repositories: mockRepositories,
     ...overrides,
   })
 
@@ -114,10 +112,19 @@ describe('Chat Workflow', () => {
 
     // Get the mocked modules
     const langchainModule = await import('../../langchain')
-    const schemaModule = await import('../../utils/createNewVersion')
 
     mockGetAgent = vi.mocked(langchainModule.getAgent)
-    mockCreateNewVersion = vi.mocked(schemaModule.createNewVersion)
+
+    // Create mock repositories
+    mockSchemaRepository = {
+      getSchema: vi.fn(),
+      getDesignSession: vi.fn(),
+      createVersion: vi.fn(),
+    } as SchemaRepository
+
+    mockRepositories = {
+      schema: mockSchemaRepository,
+    }
 
     // Create mock schema data
     mockSchemaData = createMockSchema()
@@ -135,10 +142,9 @@ describe('Chat Workflow', () => {
     // Setup langchain mock
     mockGetAgent.mockReturnValue(mockAgent)
 
-    // Setup createNewVersion mock
-    mockCreateNewVersion.mockResolvedValue({
+    // Setup createVersion mock
+    vi.mocked(mockSchemaRepository.createVersion).mockResolvedValue({
       success: true,
-      versionNumber: 2,
     })
   })
 
@@ -182,7 +188,7 @@ describe('Chat Workflow', () => {
       expect(result.finalResponse).toBe(
         'Added created_at column to users table',
       )
-      expect(mockCreateNewVersion).toHaveBeenCalledWith({
+      expect(mockSchemaRepository.createVersion).toHaveBeenCalledWith({
         buildingSchemaId: 'test-building-schema-id',
         latestVersionNumber: 1,
         patch: [
@@ -211,7 +217,7 @@ describe('Chat Workflow', () => {
 
       expect(result.error).toBeUndefined()
       expect(result.finalResponse).toBe('Invalid JSON response')
-      expect(mockCreateNewVersion).not.toHaveBeenCalled()
+      expect(mockSchemaRepository.createVersion).not.toHaveBeenCalled()
     })
 
     it('should handle Build mode with malformed structured response', async () => {
@@ -230,7 +236,7 @@ describe('Chat Workflow', () => {
 
       expect(result.error).toBeUndefined()
       expect(result.finalResponse).toBe(malformedResponse)
-      expect(mockCreateNewVersion).not.toHaveBeenCalled()
+      expect(mockSchemaRepository.createVersion).not.toHaveBeenCalled()
     })
 
     it('should handle schema update failure', async () => {
@@ -246,7 +252,7 @@ describe('Chat Workflow', () => {
       })
 
       mockAgent.generate.mockResolvedValue(structuredResponse)
-      mockCreateNewVersion.mockResolvedValue({
+      vi.mocked(mockSchemaRepository.createVersion).mockResolvedValue({
         success: false,
         error: 'Database constraint violation',
       })
@@ -278,7 +284,9 @@ describe('Chat Workflow', () => {
       })
 
       mockAgent.generate.mockResolvedValue(structuredResponse)
-      mockCreateNewVersion.mockRejectedValue(new Error('Network error'))
+      vi.mocked(mockSchemaRepository.createVersion).mockRejectedValue(
+        new Error('Network error'),
+      )
 
       const state = createBaseState({
         userInput: 'Add a created_at timestamp column to the users table',
@@ -317,7 +325,7 @@ describe('Chat Workflow', () => {
 
       expect(result.error).toBeUndefined()
       expect(result.finalResponse).toBe('Attempted to add created_at column')
-      expect(mockCreateNewVersion).not.toHaveBeenCalled()
+      expect(mockSchemaRepository.createVersion).not.toHaveBeenCalled()
     })
 
     it('should handle complex schema modifications', async () => {

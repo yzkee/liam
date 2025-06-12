@@ -1,5 +1,6 @@
 import type { Schema } from '@liam-hq/db-structure'
 import type { AgentName } from '../../langchain'
+import type { Repositories } from '../../repositories'
 
 // Re-export AgentName for use within workflow modules
 export type { AgentName }
@@ -23,6 +24,9 @@ export type WorkflowState = {
   latestVersionNumber?: number | undefined
   organizationId?: string | undefined
   userId?: string | undefined
+
+  // Repository dependencies for data access
+  repositories: Repositories
 }
 
 /**

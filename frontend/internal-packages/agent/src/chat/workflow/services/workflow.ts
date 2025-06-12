@@ -66,7 +66,7 @@ export const executeWorkflow = async (
       recursionLimit,
     })
 
-    return fromLangGraphResult(result)
+    return fromLangGraphResult(result, initialState)
   } catch (error) {
     console.error(WORKFLOW_ERROR_MESSAGES.LANGGRAPH_FAILED, error)
 

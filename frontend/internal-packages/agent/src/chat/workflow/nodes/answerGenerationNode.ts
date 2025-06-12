@@ -4,7 +4,6 @@ import {
   createPromptVariables,
   getAgent,
 } from '../../../langchain'
-import { createNewVersion } from '../../../utils/createNewVersion'
 import { operationsSchema } from '../../../utils/operationsSchema'
 import type { WorkflowState } from '../types'
 
@@ -67,7 +66,7 @@ const applySchemaChanges = async (
   state: WorkflowState,
 ): Promise<WorkflowState> => {
   try {
-    const result = await createNewVersion({
+    const result = await state.repositories.schema.createVersion({
       buildingSchemaId,
       latestVersionNumber,
       patch: schemaChanges,

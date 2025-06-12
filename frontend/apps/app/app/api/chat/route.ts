@@ -1,3 +1,4 @@
+import { createRepositories } from '@/utils/agentSupabaseHelper'
 import { processChatMessage } from '@liam-hq/agent'
 import { NextResponse } from 'next/server'
 
@@ -23,33 +24,27 @@ export async function POST(request: Request) {
     )
   }
 
-  try {
-    // Process the chat message
-    const result = await processChatMessage({
-      message,
-      schemaData,
-      history,
-      organizationId,
-      buildingSchemaId,
-      latestVersionNumber,
-    })
+  const repositories = await createRepositories()
 
-    if (!result.success) {
-      return NextResponse.json(
-        { error: result.error || 'Processing failed' },
-        { status: 500 },
-      )
-    }
+  const result = await processChatMessage({
+    message,
+    schemaData,
+    history,
+    organizationId,
+    buildingSchemaId,
+    latestVersionNumber,
+    repositories,
+  })
 
-    return NextResponse.json({
-      text: result.text,
-      success: true,
-    })
-  } catch (error) {
-    console.error('Chat processing error:', error)
+  if (!result.success) {
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: result.error || 'Processing failed' },
       { status: 500 },
     )
   }
+
+  return NextResponse.json({
+    text: result.text,
+    success: true,
+  })
 }

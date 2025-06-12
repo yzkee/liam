@@ -3,31 +3,6 @@ import * as v from 'valibot'
 import type { WorkflowState } from '../types'
 
 /**
- * Valibot schema for AgentName
- */
-const agentNameSchema = v.optional(v.picklist(['databaseSchemaBuildAgent']))
-
-/**
- * Valibot schema for WorkflowState
- */
-const workflowStateSchema = v.object({
-  userInput: v.string(),
-  generatedAnswer: v.optional(v.string()),
-  finalResponse: v.optional(v.string()),
-  history: v.array(v.string()),
-  schemaData: v.optional(schemaSchema),
-  projectId: v.optional(v.string()),
-  error: v.optional(v.string()),
-  schemaText: v.optional(v.string()),
-  formattedChatHistory: v.optional(v.string()),
-  agentName: agentNameSchema,
-  buildingSchemaId: v.string(),
-  latestVersionNumber: v.optional(v.number()),
-  organizationId: v.optional(v.string()),
-  userId: v.optional(v.string()),
-})
-
-/**
  * Schema for validating LangGraph result
  */
 const langGraphResultSchema = v.object({
@@ -79,6 +54,7 @@ export const toLangGraphState = (state: WorkflowState) => {
     latestVersionNumber: state.latestVersionNumber,
     organizationId: state.organizationId,
     userId: state.userId,
+    repositories: state.repositories,
   }
 }
 
@@ -129,6 +105,7 @@ const parseSchema = (value: unknown): WorkflowState['schemaData'] => {
  */
 export const fromLangGraphResult = (
   result: Record<string, unknown>,
+  initialState: WorkflowState,
 ): WorkflowState => {
   // First validate the basic structure
   const parseResult = v.safeParse(langGraphResultSchema, result)
@@ -169,15 +146,10 @@ export const fromLangGraphResult = (
         : undefined,
     organizationId: parseOptionalString(validatedResult.organizationId),
     userId: parseOptionalString(validatedResult.userId),
+    repositories: initialState.repositories, // Preserve from initial state
   }
 
-  // Final validation to ensure the result matches WorkflowState schema
-  const finalParseResult = v.safeParse(workflowStateSchema, workflowState)
-  if (!finalParseResult.success) {
-    throw new Error(
-      `Failed to create valid WorkflowState: ${finalParseResult.issues.map((issue) => issue.message).join(', ')}`,
-    )
-  }
-
-  return finalParseResult.output
+  // Skip final validation since repositories contain functions that cannot be validated
+  // The individual field parsing above ensures type safety
+  return workflowState
 }

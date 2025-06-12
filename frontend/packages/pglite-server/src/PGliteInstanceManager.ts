@@ -73,9 +73,4 @@ export class PGliteInstanceManager {
     return results
   }
 
-  /**
-   * Cleanup method for compatibility - no longer needed since instances are not stored
-   * Should be called when shutting down the application
-   */
-  destroy() {}
 }

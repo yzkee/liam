@@ -72,5 +72,4 @@ export class PGliteInstanceManager {
 
     return results
   }
-
 }

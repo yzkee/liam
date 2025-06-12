@@ -84,6 +84,7 @@ export const UploadSessionFormPresenter: FC<Props> = ({
               <input
                 ref={fileInputRef}
                 type="file"
+                name="schemaFile"
                 onChange={handleFileSelect}
                 accept=".sql,.rb,.prisma,.json,.yaml,.yml"
                 className={styles.hiddenFileInput}

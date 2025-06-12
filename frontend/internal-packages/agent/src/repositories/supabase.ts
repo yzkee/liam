@@ -5,8 +5,10 @@ import * as v from 'valibot'
 import { applyPatchOperations } from '../utils/applyPatchOperations'
 import { operationsSchema } from '../utils/operationsSchema'
 import type {
+  CreateMessageParams,
   CreateVersionParams,
   DesignSessionData,
+  MessageResult,
   SchemaData,
   SchemaRepository,
   VersionResult,
@@ -304,6 +306,38 @@ export class SupabaseSchemaRepository implements SchemaRepository {
     return {
       success: false,
       error: 'Invalid response from server',
+    }
+  }
+
+  async createMessage(params: CreateMessageParams): Promise<MessageResult> {
+    const { designSessionId, content, role } = params
+    const userId = role === 'user' ? params.userId : null
+
+    const now = new Date().toISOString()
+
+    const { data: message, error } = await this.client
+      .from('messages')
+      .insert({
+        design_session_id: designSessionId,
+        content,
+        role,
+        user_id: userId,
+        updated_at: now,
+      })
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Failed to save message:', JSON.stringify(error, null, 2))
+      return {
+        success: false,
+        error: error.message,
+      }
+    }
+
+    return {
+      success: true,
+      message,
     }
   }
 }

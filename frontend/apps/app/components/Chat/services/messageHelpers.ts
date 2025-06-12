@@ -1,16 +1,6 @@
 import type { ChatEntry } from '../types/chatTypes'
 
 /**
- * Helper function to create a ChatEntry from an existing message and additional properties
- */
-export const createChatEntry = (
-  baseMessage: ChatEntry,
-  additionalProps: Partial<ChatEntry>,
-): ChatEntry => {
-  return { ...baseMessage, ...additionalProps }
-}
-
-/**
  * Generate unique message ID
  */
 export const generateMessageId = (prefix: string): string => {

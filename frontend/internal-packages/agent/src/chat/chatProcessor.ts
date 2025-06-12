@@ -11,6 +11,8 @@ interface ChatProcessorParams {
   buildingSchemaId: string
   latestVersionNumber?: number
   repositories: Repositories
+  designSessionId: string
+  userId: string
 }
 
 type ChatProcessorResult =
@@ -37,9 +39,27 @@ export const processChatMessage = async (
     buildingSchemaId,
     latestVersionNumber = 0,
     repositories,
+    designSessionId,
+    userId,
   } = params
 
   try {
+    // Save user message to database
+    const saveResult = await repositories.schema.createMessage({
+      designSessionId,
+      content: message,
+      role: 'user',
+      userId,
+    })
+
+    if (!saveResult.success) {
+      console.error('Failed to save user message:', saveResult.error)
+      return {
+        success: false,
+        error: saveResult.error,
+      }
+    }
+
     // Convert history format
     const formattedHistory = history?.map(([, content]) => content) || []
 
@@ -52,6 +72,8 @@ export const processChatMessage = async (
       buildingSchemaId,
       latestVersionNumber,
       repositories,
+      designSessionId,
+      userId,
     }
 
     // Execute workflow

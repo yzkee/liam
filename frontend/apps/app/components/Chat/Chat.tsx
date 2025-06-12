@@ -7,8 +7,8 @@ import { ChatInput } from '../ChatInput'
 import { ChatMessage } from '../ChatMessage'
 import styles from './Chat.module.css'
 import { type Message, useRealtimeMessages } from './hooks/useRealtimeMessages'
-import { getCurrentUserId, saveMessage } from './services'
-import { createAndStreamAIMessage } from './services/aiMessageService'
+import { getCurrentUserId } from './services'
+import { sendChatMessage } from './services/aiMessageService'
 import { generateMessageId } from './services/messageHelpers'
 import type { ChatEntry } from './types/chatTypes'
 
@@ -68,17 +68,19 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups, designSession }) => {
 
   // Start AI response without saving user message (for auto-start scenarios)
   const startAIResponse = async (content: string) => {
+    if (!currentUserId) return
+
     setIsLoading(true)
 
-    // Create and stream AI message
-    const result = await createAndStreamAIMessage({
+    // Send chat message to API
+    const result = await sendChatMessage({
       message: content,
       schemaData,
       tableGroups,
       messages,
       designSession,
-      addOrUpdateMessage,
       setProgressMessages,
+      currentUserId,
     })
 
     if (result.success) {
@@ -102,22 +104,6 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups, designSession }) => {
       isGenerating: false, // Explicitly set to false for consistency
     }
     addOrUpdateMessage(userMessage)
-
-    // Save user message to database
-    const saveResult = await saveMessage({
-      designSessionId: designSession.id,
-      content,
-      role: 'user',
-      userId: currentUserId,
-    })
-    if (saveResult.success && saveResult.message) {
-      // Update the message with the database ID
-      const updatedUserMessage = {
-        ...userMessage,
-        dbId: saveResult.message?.id,
-      }
-      addOrUpdateMessage(updatedUserMessage, currentUserId)
-    }
 
     await startAIResponse(content)
   }

@@ -90,6 +90,8 @@ describe('Chat Workflow', () => {
     projectId: 'test-project-id',
     buildingSchemaId: 'test-building-schema-id',
     latestVersionNumber: 1,
+    userId: 'test-user-id',
+    designSessionId: 'test-design-session-id',
     repositories: mockRepositories,
     ...overrides,
   })
@@ -120,6 +122,7 @@ describe('Chat Workflow', () => {
       getSchema: vi.fn(),
       getDesignSession: vi.fn(),
       createVersion: vi.fn(),
+      createMessage: vi.fn(),
     } as SchemaRepository
 
     mockRepositories = {
@@ -145,6 +148,21 @@ describe('Chat Workflow', () => {
     // Setup createVersion mock
     vi.mocked(mockSchemaRepository.createVersion).mockResolvedValue({
       success: true,
+    })
+
+    // Setup createMessage mock
+    vi.mocked(mockSchemaRepository.createMessage).mockResolvedValue({
+      success: true,
+      message: {
+        id: 'test-message-id',
+        content: 'Test message content',
+        role: 'assistant',
+        user_id: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        organization_id: 'test-org-id',
+        design_session_id: 'test-design-session-id',
+      },
     })
   })
 

@@ -19,6 +19,18 @@ export const finalResponseNode = async (
       // Normal case: use the generated answer
       finalResponse = state.generatedAnswer
       errorToReturn = undefined
+
+      // Save AI message to database
+      const saveResult = await state.repositories.schema.createMessage({
+        designSessionId: state.designSessionId,
+        content: finalResponse,
+        role: 'assistant',
+      })
+
+      if (!saveResult.success) {
+        console.error('Failed to save AI message:', saveResult.error)
+        // Continue processing even if message saving fails
+      }
     } else {
       // Fallback case: no generated answer and no specific error
       finalResponse =

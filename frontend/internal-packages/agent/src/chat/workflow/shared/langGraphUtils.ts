@@ -18,7 +18,8 @@ export interface ChatState {
   buildingSchemaId?: string | undefined
   latestVersionNumber?: number | undefined
   organizationId?: string | undefined
-  userId?: string | undefined
+  userId: string
+  designSessionId: string
   error?: string | undefined
 
   // Intermediate data for workflow
@@ -46,7 +47,8 @@ export const createAnnotations = () => {
     buildingSchemaId: Annotation<string | undefined>,
     latestVersionNumber: Annotation<number | undefined>,
     organizationId: Annotation<string | undefined>,
-    userId: Annotation<string | undefined>,
+    userId: Annotation<string>,
+    designSessionId: Annotation<string>,
     error: Annotation<string | undefined>,
 
     // Additional fields for workflow processing

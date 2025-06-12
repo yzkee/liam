@@ -31,6 +31,38 @@ export interface VersionResult {
   error?: string | null
 }
 
+export type CreateMessageParams = {
+  designSessionId: string
+  content: string
+} & (
+  | {
+      role: 'user'
+      userId: string
+    }
+  | {
+      role: 'assistant'
+    }
+)
+
+export type MessageResult =
+  | {
+      success: true
+      message: {
+        id: string
+        content: string
+        role: 'user' | 'assistant'
+        user_id: string | null
+        created_at: string
+        updated_at: string
+        organization_id: string
+        design_session_id: string
+      }
+    }
+  | {
+      success: false
+      error: string
+    }
+
 /**
  * Schema repository interface for data access abstraction
  */
@@ -52,6 +84,11 @@ export interface SchemaRepository {
    * Create a new schema version with optimistic locking
    */
   createVersion(params: CreateVersionParams): Promise<VersionResult>
+
+  /**
+   * Create a new message in the design session
+   */
+  createMessage(params: CreateMessageParams): Promise<MessageResult>
 }
 
 /**

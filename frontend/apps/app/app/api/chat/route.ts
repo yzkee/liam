@@ -1,25 +1,32 @@
 import { createRepositories } from '@/utils/agentSupabaseHelper'
 import { processChatMessage } from '@liam-hq/agent'
+import { schemaSchema } from '@liam-hq/db-structure'
 import { NextResponse } from 'next/server'
+import * as v from 'valibot'
+
+const chatRequestSchema = v.object({
+  message: v.pipe(v.string(), v.minLength(1, 'Message is required')),
+  schemaData: schemaSchema,
+  history: v.array(v.tuple([v.string(), v.string()])),
+  organizationId: v.string(),
+  buildingSchemaId: v.string(),
+  latestVersionNumber: v.number(),
+  designSessionId: v.pipe(v.string(), v.uuid('Invalid design session ID')),
+  userId: v.pipe(v.string(), v.uuid('Invalid user ID')),
+})
 
 export async function POST(request: Request) {
-  const {
-    message,
-    schemaData,
-    history,
-    organizationId,
-    buildingSchemaId,
-    latestVersionNumber = 0,
-  } = await request.json()
+  const requestBody = await request.json()
 
-  // Input validation
-  if (!message || typeof message !== 'string' || !message.trim()) {
-    return NextResponse.json({ error: 'Message is required' }, { status: 400 })
-  }
+  // Input validation using Valibot safeParse
+  const validationResult = v.safeParse(chatRequestSchema, requestBody)
 
-  if (!schemaData || typeof schemaData !== 'object') {
+  if (!validationResult.success) {
+    const errorMessage = validationResult.issues
+      .map((issue) => issue.message)
+      .join(', ')
     return NextResponse.json(
-      { error: 'Valid schema data is required' },
+      { error: `Validation error: ${errorMessage}` },
       { status: 400 },
     )
   }
@@ -27,12 +34,7 @@ export async function POST(request: Request) {
   const repositories = await createRepositories()
 
   const result = await processChatMessage({
-    message,
-    schemaData,
-    history,
-    organizationId,
-    buildingSchemaId,
-    latestVersionNumber,
+    ...validationResult.output,
     repositories,
   })
 
@@ -44,7 +46,6 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json({
-    text: result.text,
     success: true,
   })
 }

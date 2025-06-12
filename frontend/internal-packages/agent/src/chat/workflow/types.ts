@@ -23,7 +23,10 @@ export type WorkflowState = {
   buildingSchemaId?: string | undefined
   latestVersionNumber?: number | undefined
   organizationId?: string | undefined
-  userId?: string | undefined
+  userId: string
+
+  // Message saving fields
+  designSessionId: string
 
   // Repository dependencies for data access
   repositories: Repositories

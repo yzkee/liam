@@ -20,6 +20,7 @@ const langGraphResultSchema = v.object({
   latestVersionNumber: v.optional(v.unknown()),
   organizationId: v.optional(v.unknown()),
   userId: v.optional(v.unknown()),
+  designSessionId: v.optional(v.unknown()),
 })
 
 /**
@@ -54,6 +55,7 @@ export const toLangGraphState = (state: WorkflowState) => {
     latestVersionNumber: state.latestVersionNumber,
     organizationId: state.organizationId,
     userId: state.userId,
+    designSessionId: state.designSessionId,
     repositories: state.repositories,
   }
 }
@@ -145,7 +147,8 @@ export const fromLangGraphResult = (
         ? validatedResult.latestVersionNumber
         : undefined,
     organizationId: parseOptionalString(validatedResult.organizationId),
-    userId: parseOptionalString(validatedResult.userId),
+    userId: parseOptionalString(validatedResult.userId) ?? '',
+    designSessionId: parseOptionalString(validatedResult.designSessionId) ?? '',
     repositories: initialState.repositories, // Preserve from initial state
   }
 

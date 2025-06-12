@@ -5,7 +5,7 @@ import { answerGenerationNode, validationNode } from '../nodes'
 import type { AgentName } from '../types'
 
 /**
- * ChatState definition for LangGraph (shared between streaming and non-streaming)
+ * ChatState definition for LangGraph
  */
 export interface ChatState {
   userInput: string

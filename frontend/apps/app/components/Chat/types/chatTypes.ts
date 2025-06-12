@@ -9,11 +9,3 @@ export interface ChatEntry extends ChatMessageProps {
   /** Database message ID for persistence */
   dbId?: string
 }
-
-/**
- * Type guard for streaming response chunks
- */
-export interface ResponseChunk {
-  type: string
-  content: string
-}

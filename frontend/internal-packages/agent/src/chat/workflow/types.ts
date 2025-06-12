@@ -26,29 +26,8 @@ export type WorkflowState = {
 }
 
 /**
- * Response chunk type for streaming
- */
-export type ResponseChunk = {
-  type: 'text' | 'error' | 'custom'
-  content: string
-}
-
-/**
  * Workflow execution options
  */
 export interface WorkflowOptions {
-  streaming?: boolean
   recursionLimit?: number
-}
-
-/**
- * Type guard for WorkflowState
- */
-export const isWorkflowState = (val: unknown): val is WorkflowState => {
-  return (
-    val !== null &&
-    typeof val === 'object' &&
-    'userInput' in val &&
-    'history' in val
-  )
 }

@@ -23,62 +23,33 @@ export async function POST(request: Request) {
     )
   }
 
-  // Create a ReadableStream for streaming response
-  const stream = new ReadableStream({
-    async start(controller) {
-      const encoder = new TextEncoder()
+  try {
+    // Process the chat message
+    const result = await processChatMessage({
+      message,
+      schemaData,
+      history,
+      organizationId,
+      buildingSchemaId,
+      latestVersionNumber,
+    })
 
-      try {
-        // Process the chat message with streaming
-        for await (const chunk of processChatMessage({
-          message,
-          schemaData,
-          history,
-          organizationId,
-          buildingSchemaId,
-          latestVersionNumber,
-        })) {
-          if (chunk.type === 'text') {
-            // Encode and enqueue the text chunk as JSON
-            controller.enqueue(
-              encoder.encode(
-                `${JSON.stringify({ type: 'text', content: chunk.content })}\n`,
-              ),
-            )
-          } else if (chunk.type === 'custom') {
-            // Encode and enqueue the custom progress message as JSON
-            controller.enqueue(
-              encoder.encode(
-                `${JSON.stringify({ type: 'custom', content: chunk.content })}\n`,
-              ),
-            )
-          } else if (chunk.type === 'error') {
-            // Handle error by sending error message and closing the stream
-            controller.enqueue(
-              encoder.encode(
-                `${JSON.stringify({ type: 'error', content: chunk.content })}\n`,
-              ),
-            )
-            controller.close()
-            return
-          }
-        }
+    if (!result.success) {
+      return NextResponse.json(
+        { error: result.error || 'Processing failed' },
+        { status: 500 },
+      )
+    }
 
-        // Close the stream when done
-        controller.close()
-      } catch (error) {
-        // Handle any unexpected errors
-        controller.error(error)
-      }
-    },
-  })
-
-  // Return streaming response
-  return new Response(stream, {
-    headers: {
-      'Content-Type': 'text/plain; charset=utf-8',
-      'Cache-Control': 'no-cache',
-      Connection: 'keep-alive',
-    },
-  })
+    return NextResponse.json({
+      text: result.text,
+      success: true,
+    })
+  } catch (error) {
+    console.error('Chat processing error:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 },
+    )
+  }
 }

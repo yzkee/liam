@@ -561,7 +561,7 @@ export type Database = {
           design_session_id: string
           id: string
           organization_id: string
-          role: string
+          role: Database['public']['Enums']['message_role_enum']
           updated_at: string
           user_id: string | null
         }
@@ -571,7 +571,7 @@ export type Database = {
           design_session_id: string
           id?: string
           organization_id: string
-          role: string
+          role: Database['public']['Enums']['message_role_enum']
           updated_at: string
           user_id?: string | null
         }
@@ -581,7 +581,7 @@ export type Database = {
           design_session_id?: string
           id?: string
           organization_id?: string
-          role?: string
+          role?: Database['public']['Enums']['message_role_enum']
           updated_at?: string
           user_id?: string | null
         }
@@ -1207,6 +1207,17 @@ export type Database = {
         Args: { p_token: string }
         Returns: Json
       }
+      add_project: {
+        Args: {
+          p_project_name: string
+          p_repository_name: string
+          p_repository_owner: string
+          p_installation_id: number
+          p_repository_identifier: number
+          p_organization_id: string
+        }
+        Returns: Json
+      }
       binary_quantize: {
         Args: { '': string } | { '': unknown }
         Returns: unknown
@@ -1348,6 +1359,7 @@ export type Database = {
         | 'PROJECT_RULES_CONSISTENCY'
         | 'SECURITY_OR_SCALABILITY'
       knowledge_type: 'SCHEMA' | 'DOCS'
+      message_role_enum: 'user' | 'assistant'
       schema_format_enum: 'schemarb' | 'postgres' | 'prisma' | 'tbls'
       severity_enum: 'CRITICAL' | 'WARNING' | 'POSITIVE' | 'QUESTION'
     }
@@ -1476,6 +1488,7 @@ export const Constants = {
         'SECURITY_OR_SCALABILITY',
       ],
       knowledge_type: ['SCHEMA', 'DOCS'],
+      message_role_enum: ['user', 'assistant'],
       schema_format_enum: ['schemarb', 'postgres', 'prisma', 'tbls'],
       severity_enum: ['CRITICAL', 'WARNING', 'POSITIVE', 'QUESTION'],
     },

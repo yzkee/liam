@@ -1,10 +1,10 @@
 import type { PageProps } from '@/app/types'
 import { SessionDetailPage } from '@/components/SessionDetailPage'
-import * as v from 'valibot'
 import {
   fetchDesignSessionData,
   fetchSchemaData,
-} from './services/fetchDesignSessionData'
+} from '@/utils/agentSupabaseHelper'
+import * as v from 'valibot'
 
 const paramsSchema = v.object({
   id: v.string(),
@@ -45,6 +45,7 @@ export default async function Page({ params }: PageProps) {
       designSession={{
         id: designSessionId,
         organizationId: designSessionData.organization_id,
+        messages: designSessionData.messages,
         buildingSchemaId,
         latestVersionNumber,
       }}

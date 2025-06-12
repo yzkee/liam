@@ -93,6 +93,15 @@ CREATE TYPE "public"."knowledge_type" AS ENUM (
 ALTER TYPE "public"."knowledge_type" OWNER TO "postgres";
 
 
+CREATE TYPE "public"."message_role_enum" AS ENUM (
+    'user',
+    'assistant'
+);
+
+
+ALTER TYPE "public"."message_role_enum" OWNER TO "postgres";
+
+
 CREATE TYPE "public"."schema_format_enum" AS ENUM (
     'schemarb',
     'postgres',
@@ -186,6 +195,85 @@ $$;
 
 
 ALTER FUNCTION "public"."accept_invitation"("p_token" "uuid") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."add_project"("p_project_name" "text", "p_repository_name" "text", "p_repository_owner" "text", "p_installation_id" bigint, "p_repository_identifier" bigint, "p_organization_id" "uuid") RETURNS "jsonb"
+    LANGUAGE "plpgsql"
+    AS $$
+declare
+  v_result jsonb;
+  v_project_id uuid;
+  v_repository_id uuid;
+  v_now timestamp;
+begin
+  -- Start transaction
+  begin
+    v_now := now();
+    
+    -- 1. Create project
+    insert into projects (
+      name,
+      organization_id,
+      created_at,
+      updated_at
+    ) values (
+      p_project_name,
+      p_organization_id,
+      v_now,
+      v_now
+    ) returning id into v_project_id;
+
+    -- 2. Create github repository
+    insert into github_repositories (
+      name,
+      owner,
+      github_installation_identifier,
+      github_repository_identifier,
+      organization_id,
+      updated_at
+    ) values (
+      p_repository_name,
+      p_repository_owner,
+      p_installation_id,
+      p_repository_identifier,
+      p_organization_id,
+      v_now
+    ) returning id into v_repository_id;
+
+    -- 3. Create project-repository mapping
+    insert into project_repository_mappings (
+      project_id,
+      repository_id,
+      organization_id,
+      updated_at
+    ) values (
+      v_project_id,
+      v_repository_id,
+      p_organization_id,
+      v_now
+    );
+
+    -- Return success with project and repository IDs
+    v_result := jsonb_build_object(
+      'success', true,
+      'project_id', v_project_id,
+      'repository_id', v_repository_id
+    );
+    return v_result;
+    
+  exception when others then
+    -- Handle any errors and rollback transaction
+    v_result := jsonb_build_object(
+      'success', false,
+      'error', sqlerrm
+    );
+    return v_result;
+  end;
+end;
+$$;
+
+
+ALTER FUNCTION "public"."add_project"("p_project_name" "text", "p_repository_name" "text", "p_repository_owner" "text", "p_installation_id" bigint, "p_repository_identifier" bigint, "p_organization_id" "uuid") OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."get_invitation_data"("p_token" "uuid") RETURNS "jsonb"
@@ -1016,7 +1104,7 @@ CREATE TABLE IF NOT EXISTS "public"."messages" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "design_session_id" "uuid" NOT NULL,
     "user_id" "uuid",
-    "role" "text" NOT NULL,
+    "role" "public"."message_role_enum" NOT NULL,
     "content" "text" NOT NULL,
     "created_at" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "updated_at" timestamp(3) with time zone NOT NULL,
@@ -1395,7 +1483,7 @@ CREATE UNIQUE INDEX "github_pull_request_repository_id_pull_number_key" ON "publ
 
 
 
-CREATE UNIQUE INDEX "github_repository_owner_name_key" ON "public"."github_repositories" USING "btree" ("owner", "name");
+CREATE UNIQUE INDEX "github_repository_owner_name_organization_id_key" ON "public"."github_repositories" USING "btree" ("owner", "name", "organization_id");
 
 
 
@@ -3145,6 +3233,11 @@ GRANT ALL ON FUNCTION "public"."vector"("public"."vector", integer, boolean) TO 
 
 GRANT ALL ON FUNCTION "public"."accept_invitation"("p_token" "uuid") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."accept_invitation"("p_token" "uuid") TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."add_project"("p_project_name" "text", "p_repository_name" "text", "p_repository_owner" "text", "p_installation_id" bigint, "p_repository_identifier" bigint, "p_organization_id" "uuid") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."add_project"("p_project_name" "text", "p_repository_name" "text", "p_repository_owner" "text", "p_installation_id" bigint, "p_repository_identifier" bigint, "p_organization_id" "uuid") TO "service_role";
 
 
 

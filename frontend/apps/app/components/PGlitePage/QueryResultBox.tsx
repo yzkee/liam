@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import styles from './QueryResultBox.module.css'
-import type { SqlResult } from './utils/types'
+import type { SqlResult } from './utils'
 
 export const QueryResultBox = ({ result }: { result: SqlResult }) => {
   const [isExpanded, setIsExpanded] = useState(false)

@@ -162,6 +162,35 @@ const fetchFile = async (
 }
 
 /**
+ * Find the best breaking point for text chunking
+ */
+const findOptimalBreakPoint = (
+  text: string,
+  start: number,
+  end: number,
+  chunkSize: number,
+): number => {
+  const minBreakPoint = start + chunkSize / 2
+
+  const paragraphBreak = text.lastIndexOf('\n\n', end)
+  if (paragraphBreak > minBreakPoint) {
+    return paragraphBreak
+  }
+
+  const sentenceBreak = text.lastIndexOf('.', end)
+  if (sentenceBreak > minBreakPoint) {
+    return sentenceBreak + 1
+  }
+
+  const lineBreak = text.lastIndexOf('\n', end)
+  if (lineBreak > minBreakPoint) {
+    return lineBreak
+  }
+
+  return end
+}
+
+/**
  * Split text into chunks with overlap
  */
 const splitTextIntoChunks = (
@@ -179,30 +208,12 @@ const splitTextIntoChunks = (
   while (start < text.length) {
     let end = start + chunkSize
 
-    // If this is not the last chunk, try to find a good breaking point
     if (end < text.length) {
-      // Look for paragraph breaks first
-      const paragraphBreak = text.lastIndexOf('\n\n', end)
-      if (paragraphBreak > start + chunkSize / 2) {
-        end = paragraphBreak
-      } else {
-        // Look for sentence breaks
-        const sentenceBreak = text.lastIndexOf('.', end)
-        if (sentenceBreak > start + chunkSize / 2) {
-          end = sentenceBreak + 1
-        } else {
-          // Look for line breaks
-          const lineBreak = text.lastIndexOf('\n', end)
-          if (lineBreak > start + chunkSize / 2) {
-            end = lineBreak
-          }
-        }
-      }
+      end = findOptimalBreakPoint(text, start, end, chunkSize)
     }
 
     chunks.push(text.slice(start, end).trim())
 
-    // Move start position with overlap
     start = end - overlap
     if (start >= text.length) break
   }

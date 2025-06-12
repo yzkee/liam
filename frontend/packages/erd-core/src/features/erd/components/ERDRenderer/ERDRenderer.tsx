@@ -24,7 +24,8 @@ import '@/styles/globals.css'
 import { toggleLogEvent } from '@/features/gtm/utils'
 import { useIsTouchDevice } from '@/hooks'
 import { useVersion } from '@/providers'
-import { useSchemaStore, useUserEditingStore } from '@/stores'
+import { SchemaProvider, useSchema, useUserEditingStore } from '@/stores'
+import type { SchemaStore } from '@/stores/schema/schema'
 import { convertSchemaToNodes, createHash } from '../../utils'
 import { ERDContent } from '../ERDContent'
 import { CardinalityMarkers } from './CardinalityMarkers'
@@ -35,7 +36,7 @@ import { RelationshipEdgeParticleMarker } from './RelationshipEdgeParticleMarker
 import { TableDetailDrawer, TableDetailDrawerRoot } from './TableDetailDrawer'
 import { Toolbar } from './Toolbar'
 
-type Props = {
+type InnerProps = {
   defaultSidebarOpen?: boolean | undefined
   errorObjects?: ComponentProps<typeof ErrorDisplay>['errors']
   defaultPanelSizes?: number[]
@@ -44,11 +45,23 @@ type Props = {
   onAddTableGroup?: ((params: TableGroup) => void) | undefined
 }
 
+type Props = InnerProps & {
+  schema: SchemaStore
+}
+
 const SIDEBAR_COOKIE_NAME = 'sidebar:state'
 const PANEL_LAYOUT_COOKIE_NAME = 'panels:layout'
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 7
 
-export const ERDRenderer: FC<Props> = ({
+export const ERDRenderer: FC<Props> = ({ schema, ...innerProps }) => {
+  return (
+    <SchemaProvider schema={schema}>
+      <ERDRendererInner {...innerProps} />
+    </SchemaProvider>
+  )
+}
+
+const ERDRendererInner: FC<InnerProps> = ({
   defaultSidebarOpen = false,
   errorObjects = [],
   defaultPanelSizes = [20, 80],
@@ -60,7 +73,7 @@ export const ERDRenderer: FC<Props> = ({
   const [isResizing, setIsResizing] = useState(false)
 
   const { showMode } = useUserEditingStore()
-  const { current } = useSchemaStore()
+  const { current } = useSchema()
   const schemaKey = useMemo(() => {
     const str = JSON.stringify(current)
     return createHash(str)

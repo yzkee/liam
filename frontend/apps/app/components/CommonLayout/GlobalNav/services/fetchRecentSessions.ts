@@ -1,6 +1,4 @@
-'use client'
-
-import { createClient } from '@/libs/db/client'
+import { createClient } from '@/libs/db/server'
 
 export type RecentSession = {
   id: string
@@ -12,7 +10,7 @@ export type RecentSession = {
 export const fetchRecentSessions = async (
   limit = 5,
 ): Promise<RecentSession[]> => {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: userData, error: userError } = await supabase.auth.getUser()
   if (userError || !userData.user) {

@@ -1,4 +1,3 @@
-import type { Operation } from 'fast-json-patch'
 import * as v from 'valibot'
 import {
   type AgentName,
@@ -58,18 +57,6 @@ const parseStructuredResponse = (
 }
 
 /**
- * Convert validated schema changes to Operation[] format
- * Using type assertion after valibot validation ensures runtime safety
- */
-const convertToOperations = (
-  schemaChanges: BuildAgentResponse['schemaChanges'],
-): Operation[] => {
-  return schemaChanges.map((change): Operation => {
-    return change
-  })
-}
-
-/**
  * Apply schema changes and return updated state
  */
 const applySchemaChanges = async (
@@ -80,11 +67,10 @@ const applySchemaChanges = async (
   state: WorkflowState,
 ): Promise<WorkflowState> => {
   try {
-    const operations = convertToOperations(schemaChanges)
     const result = await createNewVersion({
       buildingSchemaId,
       latestVersionNumber,
-      patch: operations,
+      patch: schemaChanges,
     })
 
     if (!result.success) {

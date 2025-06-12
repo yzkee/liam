@@ -1,5 +1,3 @@
-import type { PGlite } from '@electric-sql/pglite'
-
 export interface SqlResult {
   sql: string
   result: unknown
@@ -10,9 +8,4 @@ export interface SqlResult {
     timestamp: string
     affectedRows?: number | undefined
   }
-}
-
-export interface PGliteInstance {
-  db: PGlite
-  lastAccessed: Date
 }

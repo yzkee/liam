@@ -21,7 +21,7 @@ import type { WorkflowState } from '../types'
 const formatFinalResponse = async (
   state: ChatState,
 ): Promise<Partial<ChatState>> => {
-  const result = await finalResponseNode(state, { streaming: false })
+  const result = await finalResponseNode(state)
   return result
 }
 
@@ -77,6 +77,6 @@ export const executeWorkflow = async (
         : WORKFLOW_ERROR_MESSAGES.EXECUTION_FAILED
 
     const errorState = createErrorState(initialState, errorMessage)
-    return await finalResponseNode(errorState, { streaming: false })
+    return await finalResponseNode(errorState)
   }
 }

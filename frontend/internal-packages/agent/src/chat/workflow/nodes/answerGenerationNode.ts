@@ -192,7 +192,6 @@ async function prepareAnswerGeneration(
 
 /**
  * Answer generation node - synchronous execution only
- * Streaming is now handled by finalResponseNode
  */
 export async function answerGenerationNode(
   state: WorkflowState,

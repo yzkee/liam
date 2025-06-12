@@ -50,7 +50,7 @@ export const processChatMessage = async (
       latestVersionNumber,
     }
 
-    // Execute workflow (non-streaming)
+    // Execute workflow
     const result = await executeChatWorkflow(workflowState)
 
     if (result.error) {

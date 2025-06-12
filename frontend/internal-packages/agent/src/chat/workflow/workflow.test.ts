@@ -98,7 +98,7 @@ describe('Chat Workflow', () => {
 
   // Helper function to execute workflow and assert common expectations
   const executeAndAssertSuccess = async (state: WorkflowState) => {
-    const result = await executeChatWorkflow(state, { streaming: false })
+    const result = await executeChatWorkflow(state)
 
     expect(result.error).toBeUndefined()
     expect(result.finalResponse).toBe('Mocked agent response')
@@ -176,7 +176,7 @@ describe('Chat Workflow', () => {
         latestVersionNumber: 1,
       })
 
-      const result = await executeChatWorkflow(state, { streaming: false })
+      const result = await executeChatWorkflow(state)
 
       expect(result.error).toBeUndefined()
       expect(result.finalResponse).toBe(
@@ -207,7 +207,7 @@ describe('Chat Workflow', () => {
         userInput: 'Add a created_at timestamp column to the users table',
       })
 
-      const result = await executeChatWorkflow(state, { streaming: false })
+      const result = await executeChatWorkflow(state)
 
       expect(result.error).toBeUndefined()
       expect(result.finalResponse).toBe('Invalid JSON response')
@@ -226,7 +226,7 @@ describe('Chat Workflow', () => {
         userInput: 'Add a created_at timestamp column to the users table',
       })
 
-      const result = await executeChatWorkflow(state, { streaming: false })
+      const result = await executeChatWorkflow(state)
 
       expect(result.error).toBeUndefined()
       expect(result.finalResponse).toBe(malformedResponse)
@@ -257,7 +257,7 @@ describe('Chat Workflow', () => {
         latestVersionNumber: 1,
       })
 
-      const result = await executeChatWorkflow(state, { streaming: false })
+      const result = await executeChatWorkflow(state)
 
       expect(result.error).toBe('Database constraint violation')
       expect(result.finalResponse).toBe(
@@ -286,7 +286,7 @@ describe('Chat Workflow', () => {
         latestVersionNumber: 1,
       })
 
-      const result = await executeChatWorkflow(state, { streaming: false })
+      const result = await executeChatWorkflow(state)
 
       expect(result.error).toBe('Failed to update schema: Network error')
       expect(result.finalResponse).toBe(
@@ -313,9 +313,7 @@ describe('Chat Workflow', () => {
         buildingSchemaId: undefined,
       })
 
-      const result = await executeChatWorkflow(state, {
-        streaming: false,
-      })
+      const result = await executeChatWorkflow(state)
 
       expect(result.error).toBeUndefined()
       expect(result.finalResponse).toBe('Attempted to add created_at column')
@@ -340,9 +338,7 @@ describe('Chat Workflow', () => {
       const { schemaData, ...stateWithoutSchema } = testState
       const invalidState = stateWithoutSchema as WorkflowState
 
-      const result = await executeChatWorkflow(invalidState, {
-        streaming: false,
-      })
+      const result = await executeChatWorkflow(invalidState, {})
 
       expect(result).toBeDefined()
       expect(result.error).toBe('Schema data is required for answer generation')
@@ -352,7 +348,7 @@ describe('Chat Workflow', () => {
       mockAgent.generate.mockRejectedValue(new Error('Agent generation failed'))
       const state = createBaseState()
 
-      const result = await executeChatWorkflow(state, { streaming: false })
+      const result = await executeChatWorkflow(state)
 
       expect(result.error).toBe('Agent generation failed')
       expect(result.finalResponse).toBe(
@@ -368,7 +364,7 @@ describe('Chat Workflow', () => {
       })
       const state = createBaseState()
 
-      const result = await executeChatWorkflow(state, { streaming: false })
+      const result = await executeChatWorkflow(state)
 
       expect(result.error).toBe(
         'databaseSchemaBuildAgent not found in LangChain instance',
@@ -381,7 +377,7 @@ describe('Chat Workflow', () => {
     it('should handle empty user input', async () => {
       const state = createBaseState({ userInput: '' })
 
-      const result = await executeChatWorkflow(state, { streaming: false })
+      const result = await executeChatWorkflow(state)
 
       expect(result).toBeDefined()
       expect(result.userInput).toBe('')
@@ -397,9 +393,7 @@ describe('Chat Workflow', () => {
         projectId: 'test-project-123',
       })
 
-      const result = await executeChatWorkflow(initialState, {
-        streaming: false,
-      })
+      const result = await executeChatWorkflow(initialState, {})
 
       expect(result.userInput).toBe(initialState.userInput)
       expect(result.projectId).toBe(initialState.projectId)
@@ -412,7 +406,7 @@ describe('Chat Workflow', () => {
     it('should use databaseSchemaBuildAgent for Build mode', async () => {
       const state = createBaseState({})
 
-      await executeChatWorkflow(state, { streaming: false })
+      await executeChatWorkflow(state)
 
       expect(mockGetAgent).toHaveBeenCalledWith('databaseSchemaBuildAgent')
     })
@@ -432,7 +426,7 @@ describe('Chat Workflow', () => {
           })(),
         )
         const state = createBaseState(stateOverride)
-        const result = await executeChatWorkflow(state, { streaming: false })
+        const result = await executeChatWorkflow(state)
         results.push(result)
       }
       return results

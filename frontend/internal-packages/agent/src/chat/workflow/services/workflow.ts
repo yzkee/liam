@@ -16,7 +16,7 @@ import {
 import type { WorkflowState } from '../types'
 
 /**
- * Wrap finalResponseNode for non-streaming execution
+ * Wrap finalResponseNode
  */
 const formatFinalResponse = async (
   state: ChatState,
@@ -53,9 +53,9 @@ const createGraph = () => {
 }
 
 /**
- * Execute non-streaming workflow using LangGraph
+ * Execute workflow using LangGraph
  */
-const executeNonStreamingWorkflow = async (
+export const executeWorkflow = async (
   initialState: WorkflowState,
   recursionLimit: number = DEFAULT_RECURSION_LIMIT,
 ): Promise<WorkflowState> => {
@@ -80,6 +80,3 @@ const executeNonStreamingWorkflow = async (
     return await finalResponseNode(errorState, { streaming: false })
   }
 }
-
-// Export with new name and backward compatibility
-export { executeNonStreamingWorkflow as LangGraphWorkflow }

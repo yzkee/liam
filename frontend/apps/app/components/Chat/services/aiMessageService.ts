@@ -7,8 +7,6 @@ import {
   createChatEntry,
   formatChatHistory,
   generateMessageId,
-  isResponseChunk,
-  updateProgressMessages,
 } from './messageHelpers'
 import { saveMessage } from './messageServiceClient'
 
@@ -36,7 +34,7 @@ interface CreateAIMessageResult {
 }
 
 /**
- * Creates an AI message placeholder for streaming
+ * Creates an AI message placeholder
  */
 const createAIMessagePlaceholder = (
   addOrUpdateMessage: (message: ChatEntry, userId?: string | null) => void,
@@ -46,7 +44,7 @@ const createAIMessagePlaceholder = (
     id: aiMessageId,
     content: '',
     isUser: false,
-    // No timestamp during streaming
+    // No timestamp during generation
     isGenerating: true, // Mark as generating
   }
   addOrUpdateMessage(aiMessage)
@@ -87,67 +85,9 @@ const callChatAPI = async (
 }
 
 /**
- * Processes a single line from the streaming response
- */
-const processStreamLine = (
-  line: string,
-  accumulatedContent: string,
-  aiMessage: ChatEntry,
-  addOrUpdateMessage: (message: ChatEntry, userId?: string | null) => void,
-  setProgressMessages: (updater: (prev: string[]) => string[]) => void,
-): string => {
-  try {
-    const parsed = JSON.parse(line)
-
-    // Validate the parsed data has the expected structure
-    if (!isResponseChunk(parsed)) {
-      console.error('Invalid response format:', parsed)
-      return accumulatedContent
-    }
-
-    if (parsed.type === 'text') {
-      // Append text content to accumulated content
-      const newAccumulatedContent = accumulatedContent + parsed.content
-
-      // Update the AI message with the accumulated content (without timestamp)
-      // Keep isGenerating: true during streaming
-      const streamingAiMessage = createChatEntry(aiMessage, {
-        content: newAccumulatedContent,
-        isGenerating: true,
-      })
-      addOrUpdateMessage(streamingAiMessage)
-
-      return newAccumulatedContent
-    }
-    if (parsed.type === 'custom') {
-      // Update progress messages
-      setProgressMessages((prev) =>
-        updateProgressMessages(prev, parsed.content),
-      )
-    } else if (parsed.type === 'error') {
-      // Handle error message
-      console.error('Stream error:', parsed.content)
-      setProgressMessages(() => [])
-      throw new Error(parsed.content)
-    }
-  } catch {
-    // If JSON parsing fails, treat as plain text (backward compatibility)
-    const newAccumulatedContent = accumulatedContent + line
-    const backwardCompatMessage = createChatEntry(aiMessage, {
-      content: newAccumulatedContent,
-      isGenerating: true,
-    })
-    addOrUpdateMessage(backwardCompatMessage)
-    return newAccumulatedContent
-  }
-
-  return accumulatedContent
-}
-
-/**
  * Handles errors and updates AI message with error content
  */
-const handleStreamingError = (
+const handleAIMessageError = (
   error: unknown,
   messages: ChatEntry[],
   addOrUpdateMessage: (message: ChatEntry, userId?: string | null) => void,
@@ -155,7 +95,7 @@ const handleStreamingError = (
 ): CreateAIMessageResult => {
   console.error('Error in createAndStreamAIMessage:', error)
 
-  // Clear progress messages and streaming state on error
+  // Clear progress messages on error
   setProgressMessages(() => [])
 
   // Update error in the AI message or add a new error message
@@ -189,7 +129,7 @@ const handleStreamingError = (
 }
 
 /**
- * Creates an AI message by calling the /api/chat endpoint and processing the streaming response
+ * Creates an AI message by calling the /api/chat endpoint and processing the non-streaming response
  */
 export const createAndStreamAIMessage = async ({
   message,
@@ -201,13 +141,13 @@ export const createAndStreamAIMessage = async ({
   setProgressMessages,
 }: CreateAIMessageParams): Promise<CreateAIMessageResult> => {
   try {
-    // Create AI message placeholder for streaming (without timestamp)
+    // Create AI message placeholder (without timestamp)
     const aiMessage = createAIMessagePlaceholder(addOrUpdateMessage)
 
     // Format chat history for API
     const history = formatChatHistory(messages)
 
-    // Call API with streaming response
+    // Call API with non-streaming response
     const response = await callChatAPI(
       message,
       schemaData,
@@ -216,61 +156,46 @@ export const createAndStreamAIMessage = async ({
       designSession,
     )
 
-    // Process the streaming response
-    const reader = response.body?.getReader()
-    if (!reader) {
-      throw new Error(ERROR_MESSAGES.RESPONSE_NOT_READABLE)
+    // Parse JSON response with type safety
+    const data = (await response.json()) as {
+      success?: boolean
+      text?: string
+      error?: string
     }
 
-    let accumulatedContent = ''
+    if (!data.success || !data.text) {
+      throw new Error(data.error || ERROR_MESSAGES.GENERAL)
+    }
+
+    const content = data.text
     let aiDbId: string | undefined
 
-    // Read the stream
-    while (true) {
-      const { done, value } = await reader.read()
-
-      if (done) {
-        // Streaming is complete, save to database and add timestamp
-        const saveResult = await saveMessage({
-          designSessionId: designSession.id,
-          content: accumulatedContent,
-          role: 'assistant',
-          userId: null,
-        })
-        if (saveResult.success && saveResult.message) {
-          aiDbId = saveResult.message.id
-        }
-
-        // Update message with final content, timestamp, and database ID
-        const finalAiMessage = createChatEntry(aiMessage, {
-          content: accumulatedContent,
-          timestamp: new Date(),
-          isGenerating: false, // Remove generating state when complete
-          dbId: aiDbId,
-        })
-        addOrUpdateMessage(finalAiMessage)
-
-        return { success: true, finalMessage: finalAiMessage }
-      }
-
-      // Decode the chunk and process JSON messages
-      const chunk = new TextDecoder().decode(value)
-      const lines = chunk.split('\n').filter((line) => line.trim())
-
-      for (const line of lines) {
-        accumulatedContent = processStreamLine(
-          line,
-          accumulatedContent,
-          aiMessage,
-          addOrUpdateMessage,
-          setProgressMessages,
-        )
-      }
-
-      // Note: Scroll handling should be done by the caller component
+    // Save to database
+    const saveResult = await saveMessage({
+      designSessionId: designSession.id,
+      content,
+      role: 'assistant',
+      userId: null,
+    })
+    if (saveResult.success && saveResult.message) {
+      aiDbId = saveResult.message.id
     }
+
+    // Update message with final content, timestamp, and database ID
+    const finalAiMessage = createChatEntry(aiMessage, {
+      content,
+      timestamp: new Date(),
+      isGenerating: false, // Remove generating state when complete
+      dbId: aiDbId,
+    })
+    addOrUpdateMessage(finalAiMessage)
+
+    // Clear progress messages
+    setProgressMessages(() => [])
+
+    return { success: true, finalMessage: finalAiMessage }
   } catch (error) {
-    return handleStreamingError(
+    return handleAIMessageError(
       error,
       messages,
       addOrUpdateMessage,

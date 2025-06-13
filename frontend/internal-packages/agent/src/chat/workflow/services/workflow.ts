@@ -5,7 +5,6 @@ import {
   DEFAULT_RECURSION_LIMIT,
   createAnnotations,
 } from '../shared/langGraphUtils'
-import { createErrorState } from '../shared/stateManager'
 import type { WorkflowState } from '../types'
 
 /**
@@ -54,7 +53,7 @@ export const executeWorkflow = async (
         ? error.message
         : WORKFLOW_ERROR_MESSAGES.EXECUTION_FAILED
 
-    const errorState = createErrorState(initialState, errorMessage)
+    const errorState = { ...initialState, error: errorMessage }
     return await finalResponseNode(errorState)
   }
 }

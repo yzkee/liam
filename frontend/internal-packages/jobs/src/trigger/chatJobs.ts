@@ -21,14 +21,15 @@ export const processChatTask = task({
       const supabaseClient = createClient()
       const repositories = createSupabaseRepositories(supabaseClient)
 
-      const result = await processChatMessage({
+      const chatParams: ChatProcessorParams = {
         ...payload,
         repositories,
-      } as ChatProcessorParams)
+      }
+
+      const result = await processChatMessage(chatParams)
 
       logger.log('Chat processing completed:', {
         success: result.success,
-        hasError: !result.success,
       })
 
       return result

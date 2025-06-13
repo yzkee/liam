@@ -71,6 +71,7 @@ export const MobileToolbar: FC<MobileToolbarProps> = ({
           [styles.openShowModeMenu]: isOpen && isShowModeMenu,
         })}
         aria-label="Toolbar"
+        data-testid="toolbar"
       >
         <div className={styles.positionRelative}>
           {/* Default(closed) */}
@@ -84,6 +85,7 @@ export const MobileToolbar: FC<MobileToolbarProps> = ({
               type="button"
               onClick={toggleOpenClose}
               aria-label="Open toolbar"
+              data-testid="open-toolbar-button"
             >
               <Ellipsis color="var(--global-foreground)" />
             </button>

@@ -2,7 +2,7 @@ import { Annotation } from '@langchain/langgraph'
 import type { Schema } from '@liam-hq/db-structure'
 import type { Repositories } from '../../../repositories'
 import { WORKFLOW_ERROR_MESSAGES } from '../constants/progressMessages'
-import { answerGenerationNode, validationNode } from '../nodes'
+import { answerGenerationNode } from '../nodes'
 
 /**
  * ChatState definition for LangGraph
@@ -48,15 +48,6 @@ export const createAnnotations = () => {
     // Repository dependencies for data access
     repositories: Annotation<Repositories>,
   })
-}
-
-/**
- * Wrap validationNode for LangGraph (shared)
- */
-export const validateInput = async (
-  state: ChatState,
-): Promise<Partial<ChatState>> => {
-  return validationNode(state)
 }
 
 /**

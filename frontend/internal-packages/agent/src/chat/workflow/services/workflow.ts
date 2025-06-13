@@ -6,7 +6,6 @@ import {
   DEFAULT_RECURSION_LIMIT,
   createAnnotations,
   generateAnswer,
-  validateInput,
 } from '../shared/langGraphUtils'
 import {
   createErrorState,
@@ -33,17 +32,12 @@ const createGraph = () => {
   const graph = new StateGraph(ChatStateAnnotation)
 
   graph
-    .addNode('validateInput', validateInput)
     .addNode('generateAnswer', generateAnswer)
     .addNode('formatFinalResponse', formatFinalResponse)
-    .addEdge(START, 'validateInput')
+    .addEdge(START, 'generateAnswer')
     .addEdge('formatFinalResponse', END)
 
     // Conditional edges - simplified to prevent loops
-    .addConditionalEdges('validateInput', (state: ChatState) => {
-      if (state.error) return 'formatFinalResponse'
-      return 'generateAnswer'
-    })
     .addConditionalEdges('generateAnswer', () => {
       // Always go to formatFinalResponse regardless of error state
       return 'formatFinalResponse'

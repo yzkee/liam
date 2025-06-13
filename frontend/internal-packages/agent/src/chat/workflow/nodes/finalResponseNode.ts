@@ -32,8 +32,7 @@ export const finalResponseNode = async (
     }
   } else {
     // Fallback case: no generated answer and no specific error
-    finalResponse =
-      'Sorry, we could not generate an answer. Please try again.'
+    finalResponse = 'Sorry, we could not generate an answer. Please try again.'
     errorToReturn = 'No generated answer available'
   }
 

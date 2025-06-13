@@ -5,11 +5,7 @@ import {
   DEFAULT_RECURSION_LIMIT,
   createAnnotations,
 } from '../shared/langGraphUtils'
-import {
-  createErrorState,
-  fromLangGraphResult,
-  toLangGraphState,
-} from '../shared/stateManager'
+import { createErrorState, fromLangGraphResult } from '../shared/stateManager'
 import type { WorkflowState } from '../types'
 
 /**
@@ -44,7 +40,7 @@ export const executeWorkflow = async (
   try {
     const compiled = createGraph()
 
-    const result = await compiled.invoke(toLangGraphState(initialState), {
+    const result = await compiled.invoke(initialState, {
       recursionLimit,
     })
 

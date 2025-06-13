@@ -34,27 +34,6 @@ export const createErrorState = (
 }
 
 /**
- * Convert WorkflowState to LangGraph compatible format
- */
-export const toLangGraphState = (state: WorkflowState) => {
-  return {
-    userInput: state.userInput,
-    generatedAnswer: state.generatedAnswer,
-    finalResponse: state.finalResponse,
-    history: state.history || [],
-    schemaData: state.schemaData,
-    projectId: state.projectId,
-    error: state.error,
-    buildingSchemaId: state.buildingSchemaId,
-    latestVersionNumber: state.latestVersionNumber,
-    organizationId: state.organizationId,
-    userId: state.userId,
-    designSessionId: state.designSessionId,
-    repositories: state.repositories,
-  }
-}
-
-/**
  * Helper function to safely parse string values
  */
 const parseOptionalString = (value: unknown): string | undefined => {

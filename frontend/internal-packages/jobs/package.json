@@ -9,6 +9,7 @@
   "dependencies": {
     "@langchain/core": "0.3.57",
     "@langchain/openai": "0.5.11",
+    "@liam-hq/agent": "workspace:*",
     "@liam-hq/db": "workspace:*",
     "@liam-hq/github": "workspace:*",
     "@octokit/auth-app": "7.2.1",

@@ -471,6 +471,9 @@ importers:
       '@langchain/openai':
         specifier: 0.5.11
         version: 0.5.11(@langchain/core@0.3.57(openai@4.104.0(ws@8.18.2)(zod@3.23.8)))(ws@8.18.2)
+      '@liam-hq/agent':
+        specifier: workspace:*
+        version: link:../agent
       '@liam-hq/db':
         specifier: workspace:*
         version: link:../db

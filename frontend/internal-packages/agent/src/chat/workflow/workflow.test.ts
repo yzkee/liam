@@ -20,7 +20,7 @@ vi.mock('../../langchain', () => ({
 }))
 
 // Mock the schema converter
-vi.mock('@/app/lib/schema/convertSchemaToText', () => ({
+vi.mock('../../../utils/convertSchemaToText', () => ({
   convertSchemaToText: vi.fn(() => 'Mocked schema text'),
 }))
 

@@ -11,7 +11,6 @@ export type WorkflowState = {
   error?: string | undefined
 
   // Additional fields for workflow processing
-  schemaText?: string | undefined
   formattedChatHistory?: string | undefined
 
   // Schema update fields

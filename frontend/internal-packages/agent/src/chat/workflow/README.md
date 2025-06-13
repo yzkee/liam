@@ -24,7 +24,6 @@ flowchart TD
 
 ```typescript
 interface WorkflowState {
-  mode?: 'Ask' | 'Build'
   userInput: string
   generatedAnswer?: string
   finalResponse?: string
@@ -33,9 +32,13 @@ interface WorkflowState {
   projectId?: string
   error?: string
   // Additional processing fields
-  schemaText?: string
   formattedChatHistory?: string
-  agentName?: string
+  buildingSchemaId?: string
+  latestVersionNumber?: number
+  organizationId?: string
+  userId: string
+  designSessionId: string
+  repositories: Repositories
 }
 ```
 

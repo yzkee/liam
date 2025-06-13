@@ -22,7 +22,6 @@ export interface ChatState {
   error?: string | undefined
 
   // Intermediate data for workflow
-  schemaText?: string | undefined
   formattedChatHistory?: string | undefined
 
   // Repository dependencies for data access
@@ -50,7 +49,6 @@ export const createAnnotations = () => {
     error: Annotation<string | undefined>,
 
     // Additional fields for workflow processing
-    schemaText: Annotation<string | undefined>,
     formattedChatHistory: Annotation<string | undefined>,
 
     // Repository dependencies for data access

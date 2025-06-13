@@ -1,4 +1,3 @@
-import { convertSchemaToText } from '../../../utils/convertSchemaToText'
 import type { WorkflowState } from '../types'
 
 export const validationNode = async (
@@ -11,9 +10,6 @@ export const validationNode = async (
     }
   }
 
-  // Convert schema to text
-  const schemaText = convertSchemaToText(state.schemaData)
-
   // Format chat history for prompt
   const formattedChatHistory =
     state.history && state.history.length > 0
@@ -22,7 +18,6 @@ export const validationNode = async (
 
   return {
     ...state,
-    schemaText,
     formattedChatHistory,
   }
 }

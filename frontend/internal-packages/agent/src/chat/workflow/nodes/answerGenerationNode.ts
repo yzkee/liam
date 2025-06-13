@@ -1,6 +1,7 @@
 import * as v from 'valibot'
 import { createPromptVariables, getAgent } from '../../../langchain'
 import { operationsSchema } from '../../../utils/operationsSchema'
+import { convertSchemaToText } from '../../../utils/convertSchemaToText'
 import type { WorkflowState } from '../types'
 
 interface PreparedAnswerGeneration {
@@ -151,12 +152,12 @@ async function prepareAnswerGeneration(
 ): Promise<PreparedAnswerGeneration | { error: string }> {
   // Since validationNode has already validated required fields,
   // we can trust that the processed data is available
-  if (!state.schemaText || !state.formattedChatHistory) {
+  if (!state.schemaData || !state.formattedChatHistory) {
     return { error: 'Required processed data is missing from validation step' }
   }
 
   const formattedChatHistory = state.formattedChatHistory
-  const schemaText = state.schemaText
+  const schemaText = convertSchemaToText(state.schemaData)
 
   // Get the agent from LangChain
   const agent = getAgent('databaseSchemaBuildAgent')

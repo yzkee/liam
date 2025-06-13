@@ -5,7 +5,7 @@ import {
   DEFAULT_RECURSION_LIMIT,
   createAnnotations,
 } from '../shared/langGraphUtils'
-import { createErrorState, fromLangGraphResult } from '../shared/stateManager'
+import { createErrorState } from '../shared/stateManager'
 import type { WorkflowState } from '../types'
 
 /**
@@ -44,7 +44,7 @@ export const executeWorkflow = async (
       recursionLimit,
     })
 
-    return fromLangGraphResult(result, initialState)
+    return result
   } catch (error) {
     console.error(WORKFLOW_ERROR_MESSAGES.LANGGRAPH_FAILED, error)
 

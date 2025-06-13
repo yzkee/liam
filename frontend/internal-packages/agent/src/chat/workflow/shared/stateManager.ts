@@ -10,13 +10,10 @@ const langGraphResultSchema = v.object({
   generatedAnswer: v.optional(v.unknown()),
   finalResponse: v.optional(v.unknown()),
   history: v.optional(v.unknown()),
-  schemaData: v.optional(v.unknown()),
+  schemaData: v.unknown(),
   projectId: v.optional(v.unknown()),
   error: v.optional(v.unknown()),
-  schemaText: v.optional(v.unknown()),
-  formattedChatHistory: v.optional(v.unknown()),
-  agentName: v.optional(v.unknown()),
-  buildingSchemaId: v.optional(v.unknown()),
+  buildingSchemaId: v.unknown(),
   latestVersionNumber: v.optional(v.unknown()),
   organizationId: v.optional(v.unknown()),
   userId: v.optional(v.unknown()),
@@ -48,9 +45,6 @@ export const toLangGraphState = (state: WorkflowState) => {
     schemaData: state.schemaData,
     projectId: state.projectId,
     error: state.error,
-    schemaText: state.schemaText,
-    formattedChatHistory: state.formattedChatHistory,
-    agentName: state.agentName,
     buildingSchemaId: state.buildingSchemaId,
     latestVersionNumber: state.latestVersionNumber,
     organizationId: state.organizationId,
@@ -68,6 +62,11 @@ const parseOptionalString = (value: unknown): string | undefined => {
   return undefined
 }
 
+const parseRequiredString = (value: unknown, fieldName: string): string => {
+  if (typeof value === 'string') return value
+  throw new Error(`${fieldName} is required but was not provided`)
+}
+
 /**
  * Helper function to safely parse string arrays
  */
@@ -79,26 +78,21 @@ const parseStringArray = (value: unknown): string[] => {
 }
 
 /**
- * Helper function to safely parse AgentName
- */
-const parseAgentName = (value: unknown): WorkflowState['agentName'] => {
-  if (value === 'databaseSchemaBuildAgent') {
-    return value
-  }
-  return undefined
-}
-
-/**
  * Helper function to safely parse Schema
  */
 const parseSchema = (value: unknown): WorkflowState['schemaData'] => {
-  if (!value || typeof value !== 'object') return undefined
+  if (!value || typeof value !== 'object') {
+    throw new Error('schemaData is required but was not provided')
+  }
 
   try {
     const parseResult = v.safeParse(schemaSchema, value)
-    return parseResult.success ? parseResult.output : undefined
+    if (!parseResult.success) {
+      throw new Error('Invalid schemaData format')
+    }
+    return parseResult.output
   } catch {
-    return undefined
+    throw new Error('Failed to parse schemaData')
   }
 }
 
@@ -134,14 +128,11 @@ export const fromLangGraphResult = (
     schemaData: parseSchema(validatedResult.schemaData),
     projectId: parseOptionalString(validatedResult.projectId),
     error: parseOptionalString(validatedResult.error),
-    schemaText: parseOptionalString(validatedResult.schemaText),
-    formattedChatHistory: parseOptionalString(
-      validatedResult.formattedChatHistory,
+    // Schema update fields
+    buildingSchemaId: parseRequiredString(
+      validatedResult.buildingSchemaId,
+      'buildingSchemaId',
     ),
-    agentName: parseAgentName(validatedResult.agentName),
-    // Schema update fields - buildingSchemaId is required, provide fallback
-    buildingSchemaId:
-      parseOptionalString(validatedResult.buildingSchemaId) || '',
     latestVersionNumber:
       typeof validatedResult.latestVersionNumber === 'number'
         ? validatedResult.latestVersionNumber

@@ -6,7 +6,7 @@ import type { WorkflowState } from './workflow/types'
 export interface ChatProcessorParams {
   message: string
   schemaData: Schema
-  history?: [string, string][]
+  history: [string, string][]
   organizationId?: string
   buildingSchemaId: string
   latestVersionNumber?: number
@@ -61,7 +61,7 @@ export const processChatMessage = async (
     }
 
     // Convert history format
-    const formattedHistory = history?.map(([, content]) => content) || []
+    const formattedHistory = history.map(([, content]) => content)
 
     // Create workflow state
     const workflowState: WorkflowState = {

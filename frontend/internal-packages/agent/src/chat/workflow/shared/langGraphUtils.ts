@@ -2,8 +2,7 @@ import { Annotation } from '@langchain/langgraph'
 import type { Schema } from '@liam-hq/db-structure'
 import type { Repositories } from '../../../repositories'
 import { WORKFLOW_ERROR_MESSAGES } from '../constants/progressMessages'
-import { answerGenerationNode, validationNode } from '../nodes'
-import type { AgentName } from '../types'
+import { answerGenerationNode } from '../nodes'
 
 /**
  * ChatState definition for LangGraph
@@ -13,19 +12,14 @@ export interface ChatState {
   generatedAnswer?: string | undefined
   finalResponse?: string | undefined
   history: string[]
-  schemaData?: Schema | undefined
+  schemaData: Schema
   projectId?: string | undefined
-  buildingSchemaId?: string | undefined
+  buildingSchemaId: string
   latestVersionNumber?: number | undefined
   organizationId?: string | undefined
   userId: string
   designSessionId: string
   error?: string | undefined
-
-  // Intermediate data for workflow
-  schemaText?: string | undefined
-  formattedChatHistory?: string | undefined
-  agentName?: AgentName | undefined
 
   // Repository dependencies for data access
   repositories: Repositories
@@ -42,32 +36,18 @@ export const createAnnotations = () => {
     generatedAnswer: Annotation<string | undefined>,
     finalResponse: Annotation<string | undefined>,
     history: Annotation<string[]>,
-    schemaData: Annotation<Schema | undefined>,
+    schemaData: Annotation<Schema>,
     projectId: Annotation<string | undefined>,
-    buildingSchemaId: Annotation<string | undefined>,
+    buildingSchemaId: Annotation<string>,
     latestVersionNumber: Annotation<number | undefined>,
     organizationId: Annotation<string | undefined>,
     userId: Annotation<string>,
     designSessionId: Annotation<string>,
     error: Annotation<string | undefined>,
 
-    // Additional fields for workflow processing
-    schemaText: Annotation<string | undefined>,
-    formattedChatHistory: Annotation<string | undefined>,
-    agentName: Annotation<AgentName | undefined>,
-
     // Repository dependencies for data access
     repositories: Annotation<Repositories>,
   })
-}
-
-/**
- * Wrap validationNode for LangGraph (shared)
- */
-export const validateInput = async (
-  state: ChatState,
-): Promise<Partial<ChatState>> => {
-  return validationNode(state)
 }
 
 /**

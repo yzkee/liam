@@ -10,9 +10,6 @@ export type WorkflowState = {
   projectId?: string | undefined
   error?: string | undefined
 
-  // Additional fields for workflow processing
-  formattedChatHistory: string
-
   // Schema update fields
   buildingSchemaId: string
   latestVersionNumber?: number | undefined

@@ -1,6 +1,6 @@
 import * as v from 'valibot'
-import { createPromptVariables } from '../../../langchain'
 import { DatabaseSchemaBuildAgent } from '../../../langchain/agents'
+import type { BasePromptVariables } from '../../../langchain/utils/types'
 import { convertSchemaToText } from '../../../utils/convertSchemaToText'
 import { operationsSchema } from '../../../utils/operationsSchema'
 import type { WorkflowState } from '../types'
@@ -8,7 +8,6 @@ import type { WorkflowState } from '../types'
 interface PreparedAnswerGeneration {
   agent: DatabaseSchemaBuildAgent
   schemaText: string
-  formattedChatHistory: string
 }
 
 // Define schema for BuildAgent response validation
@@ -143,7 +142,6 @@ const handleBuildAgentResponse = async (
 async function prepareAnswerGeneration(
   state: WorkflowState,
 ): Promise<PreparedAnswerGeneration> {
-  const formattedChatHistory = state.formattedChatHistory
   const schemaText = convertSchemaToText(state.schemaData)
 
   // Create the agent instance
@@ -152,7 +150,6 @@ async function prepareAnswerGeneration(
   return {
     agent,
     schemaText,
-    formattedChatHistory,
   }
 }
 
@@ -163,20 +160,20 @@ export async function answerGenerationNode(
   state: WorkflowState,
 ): Promise<WorkflowState> {
   try {
-    const { agent, schemaText, formattedChatHistory } =
-      await prepareAnswerGeneration(state)
+    const { agent, schemaText } = await prepareAnswerGeneration(state)
 
-    // Convert formatted chat history to array format if needed
-    const historyArray: [string, string][] = formattedChatHistory
-      ? [['Assistant', formattedChatHistory]]
-      : []
+    // Format chat history for prompt
+    const formattedChatHistory =
+      state.history.length > 0
+        ? state.history.map((content) => `User: ${content}`).join('\n')
+        : 'No previous conversation.'
 
-    // Create prompt variables with correct format
-    const promptVariables = createPromptVariables(
-      schemaText,
-      state.userInput,
-      historyArray,
-    )
+    // Create prompt variables directly
+    const promptVariables: BasePromptVariables = {
+      schema_text: schemaText,
+      chat_history: formattedChatHistory,
+      user_message: state.userInput,
+    }
 
     // Use agent's generate method with prompt variables
     const response = await agent.generate(promptVariables)

@@ -13,7 +13,6 @@ const langGraphResultSchema = v.object({
   schemaData: v.unknown(),
   projectId: v.optional(v.unknown()),
   error: v.optional(v.unknown()),
-  formattedChatHistory: v.unknown(),
   buildingSchemaId: v.unknown(),
   latestVersionNumber: v.optional(v.unknown()),
   organizationId: v.optional(v.unknown()),
@@ -46,7 +45,6 @@ export const toLangGraphState = (state: WorkflowState) => {
     schemaData: state.schemaData,
     projectId: state.projectId,
     error: state.error,
-    formattedChatHistory: state.formattedChatHistory,
     buildingSchemaId: state.buildingSchemaId,
     latestVersionNumber: state.latestVersionNumber,
     organizationId: state.organizationId,
@@ -130,10 +128,6 @@ export const fromLangGraphResult = (
     schemaData: parseSchema(validatedResult.schemaData),
     projectId: parseOptionalString(validatedResult.projectId),
     error: parseOptionalString(validatedResult.error),
-    formattedChatHistory: parseRequiredString(
-      validatedResult.formattedChatHistory,
-      'formattedChatHistory',
-    ),
     // Schema update fields
     buildingSchemaId: parseRequiredString(
       validatedResult.buildingSchemaId,

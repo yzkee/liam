@@ -68,10 +68,6 @@ export const processChatMessage = async (
       userInput: message,
       history: formattedHistory,
       schemaData,
-      formattedChatHistory:
-        formattedHistory.length > 0
-          ? formattedHistory.join('\n')
-          : 'No previous conversation.',
       organizationId,
       buildingSchemaId,
       latestVersionNumber,

@@ -4,20 +4,6 @@ import type { Repositories, SchemaRepository } from '../../repositories'
 import { executeChatWorkflow } from './index'
 import type { WorkflowState } from './types'
 
-// Mock the LangChain module
-vi.mock('../../langchain', () => ({
-  createPromptVariables: vi.fn(
-    (schemaText: string, userMessage: string, history: [string, string][]) => ({
-      schema_text: schemaText,
-      user_message: userMessage,
-      chat_history:
-        history
-          .map(([role, content]: [string, string]) => `${role}: ${content}`)
-          .join('\n') || 'No previous conversation.',
-    }),
-  ),
-}))
-
 // Mock the DatabaseSchemaBuildAgent
 vi.mock('../../langchain/agents', () => ({
   DatabaseSchemaBuildAgent: vi.fn(),
@@ -91,7 +77,6 @@ describe('Chat Workflow', () => {
     userInput: 'Test input',
     history: [],
     schemaData: mockSchemaData,
-    formattedChatHistory: 'No previous conversation.',
     projectId: 'test-project-id',
     buildingSchemaId: 'test-building-schema-id',
     latestVersionNumber: 1,

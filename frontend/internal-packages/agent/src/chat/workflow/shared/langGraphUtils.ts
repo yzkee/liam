@@ -21,9 +21,6 @@ export interface ChatState {
   designSessionId: string
   error?: string | undefined
 
-  // Intermediate data for workflow
-  formattedChatHistory: string
-
   // Repository dependencies for data access
   repositories: Repositories
 }
@@ -47,9 +44,6 @@ export const createAnnotations = () => {
     userId: Annotation<string>,
     designSessionId: Annotation<string>,
     error: Annotation<string | undefined>,
-
-    // Additional fields for workflow processing
-    formattedChatHistory: Annotation<string>,
 
     // Repository dependencies for data access
     repositories: Annotation<Repositories>,

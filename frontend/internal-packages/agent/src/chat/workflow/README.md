@@ -28,12 +28,10 @@ interface WorkflowState {
   generatedAnswer?: string
   finalResponse?: string
   history: string[]
-  schemaData?: Schema
+  schemaData: Schema
   projectId?: string
   error?: string
-  // Additional processing fields
-  formattedChatHistory?: string
-  buildingSchemaId?: string
+  buildingSchemaId: string
   latestVersionNumber?: number
   organizationId?: string
   userId: string

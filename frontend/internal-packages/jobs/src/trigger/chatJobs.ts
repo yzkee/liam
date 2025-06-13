@@ -16,6 +16,8 @@ export const processChatTask = task({
 
     try {
       // Create fresh repositories in job to avoid serialization issues
+      // When repositories are passed from API Route to Job, class instances lose their methods
+      // during JSON serialization/deserialization, causing "createMessage is not a function" errors
       const supabaseClient = createClient()
       const repositories = createSupabaseRepositories(supabaseClient)
 

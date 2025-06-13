@@ -1,14 +1,14 @@
 import { Annotation } from '@langchain/langgraph'
 import type { Schema } from '@liam-hq/db-structure'
+import type { Repositories } from '../../../repositories'
 import { WORKFLOW_ERROR_MESSAGES } from '../constants/progressMessages'
 import { answerGenerationNode, validationNode } from '../nodes'
-import type { AgentName, WorkflowMode } from '../types'
+import type { AgentName } from '../types'
 
 /**
- * ChatState definition for LangGraph (shared between streaming and non-streaming)
+ * ChatState definition for LangGraph
  */
 export interface ChatState {
-  mode?: WorkflowMode | undefined
   userInput: string
   generatedAnswer?: string | undefined
   finalResponse?: string | undefined
@@ -18,13 +18,17 @@ export interface ChatState {
   buildingSchemaId?: string | undefined
   latestVersionNumber?: number | undefined
   organizationId?: string | undefined
-  userId?: string | undefined
+  userId: string
+  designSessionId: string
   error?: string | undefined
 
   // Intermediate data for workflow
   schemaText?: string | undefined
   formattedChatHistory?: string | undefined
   agentName?: AgentName | undefined
+
+  // Repository dependencies for data access
+  repositories: Repositories
 }
 
 export const DEFAULT_RECURSION_LIMIT = 10
@@ -34,7 +38,6 @@ export const DEFAULT_RECURSION_LIMIT = 10
  */
 export const createAnnotations = () => {
   return Annotation.Root({
-    mode: Annotation<WorkflowMode | undefined>,
     userInput: Annotation<string>,
     generatedAnswer: Annotation<string | undefined>,
     finalResponse: Annotation<string | undefined>,
@@ -44,13 +47,17 @@ export const createAnnotations = () => {
     buildingSchemaId: Annotation<string | undefined>,
     latestVersionNumber: Annotation<number | undefined>,
     organizationId: Annotation<string | undefined>,
-    userId: Annotation<string | undefined>,
+    userId: Annotation<string>,
+    designSessionId: Annotation<string>,
     error: Annotation<string | undefined>,
 
     // Additional fields for workflow processing
     schemaText: Annotation<string | undefined>,
     formattedChatHistory: Annotation<string | undefined>,
     agentName: Annotation<AgentName | undefined>,
+
+    // Repository dependencies for data access
+    repositories: Annotation<Repositories>,
   })
 }
 

@@ -3,43 +3,9 @@ import * as v from 'valibot'
 import type { WorkflowState } from '../types'
 
 /**
- * Valibot schema for WorkflowMode
- */
-const workflowModeSchema = v.optional(v.picklist(['Ask', 'Build']))
-
-/**
- * Valibot schema for AgentName
- */
-const agentNameSchema = v.optional(
-  v.picklist(['databaseSchemaAskAgent', 'databaseSchemaBuildAgent']),
-)
-
-/**
- * Valibot schema for WorkflowState
- */
-const workflowStateSchema = v.object({
-  mode: workflowModeSchema,
-  userInput: v.string(),
-  generatedAnswer: v.optional(v.string()),
-  finalResponse: v.optional(v.string()),
-  history: v.array(v.string()),
-  schemaData: v.optional(schemaSchema),
-  projectId: v.optional(v.string()),
-  error: v.optional(v.string()),
-  schemaText: v.optional(v.string()),
-  formattedChatHistory: v.optional(v.string()),
-  agentName: agentNameSchema,
-  buildingSchemaId: v.string(),
-  latestVersionNumber: v.optional(v.number()),
-  organizationId: v.optional(v.string()),
-  userId: v.optional(v.string()),
-})
-
-/**
  * Schema for validating LangGraph result
  */
 const langGraphResultSchema = v.object({
-  mode: v.optional(v.unknown()),
   userInput: v.unknown(),
   generatedAnswer: v.optional(v.unknown()),
   finalResponse: v.optional(v.unknown()),
@@ -54,37 +20,8 @@ const langGraphResultSchema = v.object({
   latestVersionNumber: v.optional(v.unknown()),
   organizationId: v.optional(v.unknown()),
   userId: v.optional(v.unknown()),
+  designSessionId: v.optional(v.unknown()),
 })
-
-/**
- * Prepare final state for streaming
- */
-export const prepareFinalState = (
-  currentState: WorkflowState,
-  initialState: WorkflowState,
-): WorkflowState => {
-  return {
-    mode: currentState.mode || initialState.mode,
-    userInput: currentState.userInput || initialState.userInput,
-    history: currentState.history || initialState.history || [],
-    schemaData: currentState.schemaData || initialState.schemaData,
-    projectId: currentState.projectId || initialState.projectId,
-    generatedAnswer: currentState.generatedAnswer,
-    finalResponse: currentState.finalResponse,
-    error: currentState.error,
-    // Include processed fields
-    schemaText: currentState.schemaText,
-    formattedChatHistory: currentState.formattedChatHistory,
-    agentName: currentState.agentName,
-    // Include schema update fields
-    buildingSchemaId:
-      currentState.buildingSchemaId || initialState.buildingSchemaId,
-    latestVersionNumber:
-      currentState.latestVersionNumber || initialState.latestVersionNumber,
-    organizationId: currentState.organizationId || initialState.organizationId,
-    userId: currentState.userId || initialState.userId,
-  }
-}
 
 /**
  * Create error state with proper fallbacks
@@ -100,30 +37,10 @@ export const createErrorState = (
 }
 
 /**
- * Create fallback final state when generator fails
- */
-export const createFallbackFinalState = (
-  finalState: WorkflowState,
-): WorkflowState => {
-  const response = finalState.generatedAnswer || 'No response generated'
-
-  return {
-    ...finalState,
-    finalResponse: response,
-    history: [
-      ...finalState.history,
-      `User: ${finalState.userInput}`,
-      `Assistant: ${response}`,
-    ],
-  }
-}
-
-/**
  * Convert WorkflowState to LangGraph compatible format
  */
 export const toLangGraphState = (state: WorkflowState) => {
   return {
-    mode: state.mode,
     userInput: state.userInput,
     generatedAnswer: state.generatedAnswer,
     finalResponse: state.finalResponse,
@@ -138,6 +55,8 @@ export const toLangGraphState = (state: WorkflowState) => {
     latestVersionNumber: state.latestVersionNumber,
     organizationId: state.organizationId,
     userId: state.userId,
+    designSessionId: state.designSessionId,
+    repositories: state.repositories,
   }
 }
 
@@ -160,21 +79,10 @@ const parseStringArray = (value: unknown): string[] => {
 }
 
 /**
- * Helper function to safely parse WorkflowMode
- */
-const parseWorkflowMode = (value: unknown): WorkflowState['mode'] => {
-  if (value === 'Ask' || value === 'Build') return value
-  return undefined
-}
-
-/**
  * Helper function to safely parse AgentName
  */
 const parseAgentName = (value: unknown): WorkflowState['agentName'] => {
-  if (
-    value === 'databaseSchemaAskAgent' ||
-    value === 'databaseSchemaBuildAgent'
-  ) {
+  if (value === 'databaseSchemaBuildAgent') {
     return value
   }
   return undefined
@@ -199,6 +107,7 @@ const parseSchema = (value: unknown): WorkflowState['schemaData'] => {
  */
 export const fromLangGraphResult = (
   result: Record<string, unknown>,
+  initialState: WorkflowState,
 ): WorkflowState => {
   // First validate the basic structure
   const parseResult = v.safeParse(langGraphResultSchema, result)
@@ -218,7 +127,6 @@ export const fromLangGraphResult = (
 
   // Build the WorkflowState with proper type validation
   const workflowState: WorkflowState = {
-    mode: parseWorkflowMode(validatedResult.mode),
     userInput,
     generatedAnswer: parseOptionalString(validatedResult.generatedAnswer),
     finalResponse: parseOptionalString(validatedResult.finalResponse),
@@ -239,16 +147,12 @@ export const fromLangGraphResult = (
         ? validatedResult.latestVersionNumber
         : undefined,
     organizationId: parseOptionalString(validatedResult.organizationId),
-    userId: parseOptionalString(validatedResult.userId),
+    userId: parseOptionalString(validatedResult.userId) ?? '',
+    designSessionId: parseOptionalString(validatedResult.designSessionId) ?? '',
+    repositories: initialState.repositories, // Preserve from initial state
   }
 
-  // Final validation to ensure the result matches WorkflowState schema
-  const finalParseResult = v.safeParse(workflowStateSchema, workflowState)
-  if (!finalParseResult.success) {
-    throw new Error(
-      `Failed to create valid WorkflowState: ${finalParseResult.issues.map((issue) => issue.message).join(', ')}`,
-    )
-  }
-
-  return finalParseResult.output
+  // Skip final validation since repositories contain functions that cannot be validated
+  // The individual field parsing above ensures type safety
+  return workflowState
 }

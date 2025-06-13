@@ -1,86 +1,51 @@
+import { createRepositories } from '@/utils/agentSupabaseHelper'
 import { processChatMessage } from '@liam-hq/agent'
+import { schemaSchema } from '@liam-hq/db-structure'
 import { NextResponse } from 'next/server'
+import * as v from 'valibot'
+
+const chatRequestSchema = v.object({
+  message: v.pipe(v.string(), v.minLength(1, 'Message is required')),
+  schemaData: schemaSchema,
+  history: v.array(v.tuple([v.string(), v.string()])),
+  organizationId: v.string(),
+  buildingSchemaId: v.string(),
+  latestVersionNumber: v.number(),
+  designSessionId: v.pipe(v.string(), v.uuid('Invalid design session ID')),
+  userId: v.pipe(v.string(), v.uuid('Invalid user ID')),
+})
 
 export async function POST(request: Request) {
-  const {
-    message,
-    schemaData,
-    history,
-    mode,
-    organizationId,
-    buildingSchemaId,
-    latestVersionNumber = 0,
-  } = await request.json()
+  const requestBody = await request.json()
 
-  // Input validation
-  if (!message || typeof message !== 'string' || !message.trim()) {
-    return NextResponse.json({ error: 'Message is required' }, { status: 400 })
-  }
+  // Input validation using Valibot safeParse
+  const validationResult = v.safeParse(chatRequestSchema, requestBody)
 
-  if (!schemaData || typeof schemaData !== 'object') {
+  if (!validationResult.success) {
+    const errorMessage = validationResult.issues
+      .map((issue) => issue.message)
+      .join(', ')
     return NextResponse.json(
-      { error: 'Valid schema data is required' },
+      { error: `Validation error: ${errorMessage}` },
       { status: 400 },
     )
   }
 
-  // Create a ReadableStream for streaming response
-  const stream = new ReadableStream({
-    async start(controller) {
-      const encoder = new TextEncoder()
+  const repositories = await createRepositories()
 
-      try {
-        // Process the chat message with streaming
-        for await (const chunk of processChatMessage({
-          message,
-          schemaData,
-          history,
-          mode,
-          organizationId,
-          buildingSchemaId,
-          latestVersionNumber,
-        })) {
-          if (chunk.type === 'text') {
-            // Encode and enqueue the text chunk as JSON
-            controller.enqueue(
-              encoder.encode(
-                `${JSON.stringify({ type: 'text', content: chunk.content })}\n`,
-              ),
-            )
-          } else if (chunk.type === 'custom') {
-            // Encode and enqueue the custom progress message as JSON
-            controller.enqueue(
-              encoder.encode(
-                `${JSON.stringify({ type: 'custom', content: chunk.content })}\n`,
-              ),
-            )
-          } else if (chunk.type === 'error') {
-            // Handle error by sending error message and closing the stream
-            controller.enqueue(
-              encoder.encode(
-                `${JSON.stringify({ type: 'error', content: chunk.content })}\n`,
-              ),
-            )
-            controller.close()
-            return
-          }
-        }
-
-        // Close the stream when done
-        controller.close()
-      } catch (error) {
-        // Handle any unexpected errors
-        controller.error(error)
-      }
-    },
+  const result = await processChatMessage({
+    ...validationResult.output,
+    repositories,
   })
 
-  // Return streaming response
-  return new Response(stream, {
-    headers: {
-      'Content-Type': 'text/plain; charset=utf-8',
-      'Cache-Control': 'no-cache',
-      Connection: 'keep-alive',
-    },
+  if (!result.success) {
+    return NextResponse.json(
+      { error: result.error || 'Processing failed' },
+      { status: 500 },
+    )
+  }
+
+  return NextResponse.json({
+    success: true,
   })
 }

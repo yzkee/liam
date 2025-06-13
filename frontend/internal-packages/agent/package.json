@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "main": "src/index.ts",
   "dependencies": {
-    "@langchain/community": "0.3.43",
+    "@langchain/community": "0.3.45",
     "@langchain/core": "0.3.57",
     "@langchain/langgraph": "0.3.0",
     "@langchain/openai": "0.5.11",
@@ -12,7 +12,6 @@
     "@liam-hq/db-structure": "workspace:*",
     "fast-json-patch": "3.1.1",
     "langfuse-langchain": "3.37.2",
-    "next": "15.3.2",
     "ts-pattern": "5.7.1",
     "valibot": "1.1.0"
   },

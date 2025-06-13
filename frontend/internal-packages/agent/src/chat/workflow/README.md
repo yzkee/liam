@@ -11,8 +11,7 @@ flowchart TD
     DESIGN[designSchema<br/>DB Design & DDL Execution<br/><i>dbAgent</i>]
     VALIDATE[validateSchema<br/>Use Case Verification & DML Execution<br/><i>qaAgent</i>]
     REVIEW[reviewDeliverables<br/>Final Requirements & Deliverables Confirmation<br/><i>pmAgentReview</i>]
-    GENERATE[generateArtifacts<br/>Artifact Generation<br/><i>dbAgentArtifactGen</i>]
-    SAVE[saveToDB<br/>Save Results]
+    FINALIZE[finalizeArtifacts<br/>Generate & Save Artifacts<br/><i>dbAgentArtifactGen</i>]
     END([__end__<br/>End])
 
     START --> ANALYZE
@@ -20,10 +19,9 @@ flowchart TD
     DESIGN --> VALIDATE
     VALIDATE -->|success| REVIEW
     VALIDATE -->|dml error or test fail| DESIGN
-    REVIEW -->|OK| GENERATE
+    REVIEW -->|OK| FINALIZE
     REVIEW -->|NG or issues found| ANALYZE
-    GENERATE --> SAVE
-    SAVE --> END
+    FINALIZE --> END
 
 ```
 
@@ -59,8 +57,7 @@ interface WorkflowState {
 2. **designSchema**: Designs database schema and executes DDL statements (performed by dbAgent)
 3. **validateSchema**: Verifies use cases and executes DML for testing (performed by qaAgent)
 4. **reviewDeliverables**: Performs final confirmation of requirements and deliverables (performed by pmAgentReview)
-5. **generateArtifacts**: Generates comprehensive artifacts (performed by dbAgentArtifactGen)
-6. **saveToDB**: Saves workflow results to database
+5. **finalizeArtifacts**: Generates and saves comprehensive artifacts to database (performed by dbAgentArtifactGen)
 
 ## Usage
 

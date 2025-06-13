@@ -7,17 +7,22 @@ A **LangGraph implementation** for processing chat messages in the LIAM applicat
 ```mermaid
 flowchart TD
     START([START])
-    A[validationNode<br/>Input Validation]
-    B[answerGenerationNode<br/>Answer Generation]
-    C[finalResponseNode<br/>Final Response]
-    END([END])
+    ANALYZE[analyzeRequirements<br/>Requirements Organization<br/><i>pmAgent</i>]
+    DESIGN[designSchema<br/>DB Design & DDL Execution<br/><i>dbAgent</i>]
+    VALIDATE[validateSchema<br/>Use Case Verification & DML Execution<br/><i>qaAgent</i>]
+    REVIEW[reviewDeliverables<br/>Final Requirements & Deliverables Confirmation<br/><i>pmAgentReview</i>]
+    FINALIZE[finalizeArtifacts<br/>Generate & Save Artifacts<br/><i>dbAgentArtifactGen</i>]
+    END([__end__<br/>End])
 
-    START --> A
-    A -->|success| B
-    A -->|error| END
-    B -->|success| C
-    B -->|error| END
-    C --> END
+    START --> ANALYZE
+    ANALYZE --> DESIGN
+    DESIGN --> VALIDATE
+    VALIDATE -->|success| REVIEW
+    VALIDATE -->|dml error or test fail| DESIGN
+    REVIEW -->|OK| FINALIZE
+    REVIEW -->|NG or issues found| ANALYZE
+    FINALIZE --> END
+
 ```
 
 ## Workflow State
@@ -48,9 +53,11 @@ interface WorkflowState {
 
 ## Nodes
 
-1. **validationNode**: Validates inputs (mode, schemaData, projectId) and prepares workflow state for agent execution
-2. **answerGenerationNode**: Selects the appropriate Mastra agent based on mode ('Ask' or 'Build') and generates a response
-3. **finalResponseNode**: Takes the generated answer, formats it as the final response, and updates chat history
+1. **analyzeRequirements**: Organizes and clarifies requirements from user input (performed by pmAgent)
+2. **designSchema**: Designs database schema and executes DDL statements (performed by dbAgent)
+3. **validateSchema**: Verifies use cases and executes DML for testing (performed by qaAgent)
+4. **reviewDeliverables**: Performs final confirmation of requirements and deliverables (performed by pmAgentReview)
+5. **finalizeArtifacts**: Generates and saves comprehensive artifacts to database (performed by dbAgentArtifactGen)
 
 ## Usage
 
@@ -58,12 +65,14 @@ interface WorkflowState {
 import { executeChatWorkflow } from './workflow'
 
 const result = await executeChatWorkflow({
-  mode: 'Ask',
-  userInput: 'What is the users table structure?',
+  userInput: 'Create a schema for a fitness tracking app with users, workout plans, exercise logs, and progress charts.',
   history: [],
   schemaData: mySchemaData,
-  projectId: 'my-project-id',
+  organizationId: 'my-organization-id',
+  buildingSchemaId: 'my-building-schema-id',
+  latestVersionNumber: 1,
+  userId: 'my-user-id',
+  designSessionId: 'my-design-session-id',
+  repositories: myRepositories,
 })
 ```
-
-This workflow provides a structured approach to chat processing while maintaining compatibility with the existing LIAM codebase.

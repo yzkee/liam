@@ -1,6 +1,5 @@
-import { createRepositories } from '@/utils/agentSupabaseHelper'
-import { processChatMessage } from '@liam-hq/agent'
 import { schemaSchema } from '@liam-hq/db-structure'
+import { processChatTask } from '@liam-hq/jobs'
 import { NextResponse } from 'next/server'
 import * as v from 'valibot'
 
@@ -31,21 +30,23 @@ export async function POST(request: Request) {
     )
   }
 
-  const repositories = await createRepositories()
+  try {
+    // Trigger the chat processing job
+    const handle = await processChatTask.trigger({
+      ...validationResult.output,
+    })
 
-  const result = await processChatMessage({
-    ...validationResult.output,
-    repositories,
-  })
-
-  if (!result.success) {
+    return NextResponse.json({
+      success: true,
+      jobId: handle.id,
+      status: 'processing',
+      message: 'Chat processing started',
+    })
+  } catch (error) {
+    console.error('Failed to trigger chat processing job:', error)
     return NextResponse.json(
-      { error: result.error || 'Processing failed' },
+      { error: 'Failed to start processing' },
       { status: 500 },
     )
   }
-
-  return NextResponse.json({
-    success: true,
-  })
 }

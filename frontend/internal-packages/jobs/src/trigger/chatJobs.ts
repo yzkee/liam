@@ -1,0 +1,38 @@
+import { createSupabaseRepositories, processChatMessage } from '@liam-hq/agent'
+import type { ChatProcessorParams } from '@liam-hq/agent'
+import { logger, task } from '@trigger.dev/sdk/v3'
+import { createClient } from '../libs/supabase'
+
+// Define type excluding repositories
+type ChatJobPayload = Omit<ChatProcessorParams, 'repositories'>
+
+export const processChatTask = task({
+  id: 'process-chat-message',
+  run: async (payload: ChatJobPayload) => {
+    logger.log('Starting chat processing job:', {
+      buildingSchemaId: payload.buildingSchemaId,
+      messageLength: payload.message.length,
+    })
+
+    try {
+      // Create fresh repositories in job to avoid serialization issues
+      const supabaseClient = createClient()
+      const repositories = createSupabaseRepositories(supabaseClient)
+
+      const result = await processChatMessage({
+        ...payload,
+        repositories,
+      } as ChatProcessorParams)
+
+      logger.log('Chat processing completed:', {
+        success: result.success,
+        hasError: !result.success,
+      })
+
+      return result
+    } catch (error) {
+      logger.error('Chat processing failed:', { error })
+      throw error
+    }
+  },
+})

@@ -4,7 +4,7 @@ import {
   createSupabaseRepositories,
 } from '@liam-hq/agent'
 
-export async function createRepositories() {
+async function createRepositories() {
   const client = await createClient()
 
   return createSupabaseRepositories(client)

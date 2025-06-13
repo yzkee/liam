@@ -3,7 +3,11 @@ import type { Repositories } from '../repositories'
 import { executeChatWorkflow } from './workflow'
 import type { WorkflowState } from './workflow/types'
 
-interface ChatProcessorParams {
+// Export for testing purposes
+export { executeChatWorkflow } from './workflow'
+export type { WorkflowState } from './workflow/types'
+
+export interface ChatProcessorParams {
   message: string
   schemaData: Schema
   history?: [string, string][]
@@ -15,7 +19,7 @@ interface ChatProcessorParams {
   userId: string
 }
 
-type ChatProcessorResult =
+export type ChatProcessorResult =
   | {
       text: string
       success: true

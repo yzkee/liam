@@ -6,12 +6,12 @@ export type WorkflowState = {
   generatedAnswer?: string | undefined
   finalResponse?: string | undefined
   history: string[]
-  schemaData?: Schema | undefined
+  schemaData: Schema
   projectId?: string | undefined
   error?: string | undefined
 
   // Additional fields for workflow processing
-  formattedChatHistory?: string | undefined
+  formattedChatHistory: string
 
   // Schema update fields
   buildingSchemaId?: string | undefined

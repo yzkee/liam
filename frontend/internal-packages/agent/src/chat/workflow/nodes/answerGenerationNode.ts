@@ -150,13 +150,7 @@ const handleBuildAgentResponse = async (
 
 async function prepareAnswerGeneration(
   state: WorkflowState,
-): Promise<PreparedAnswerGeneration | { error: string }> {
-  // Since validationNode has already validated required fields,
-  // we can trust that the processed data is available
-  if (!state.schemaData || !state.formattedChatHistory) {
-    return { error: 'Required processed data is missing from validation step' }
-  }
-
+): Promise<PreparedAnswerGeneration> {
   const formattedChatHistory = state.formattedChatHistory
   const schemaText = convertSchemaToText(state.schemaData)
 
@@ -177,16 +171,8 @@ export async function answerGenerationNode(
   state: WorkflowState,
 ): Promise<WorkflowState> {
   try {
-    const prepared = await prepareAnswerGeneration(state)
-
-    if ('error' in prepared) {
-      return {
-        ...state,
-        error: prepared.error,
-      }
-    }
-
-    const { agent, schemaText, formattedChatHistory } = prepared
+    const { agent, schemaText, formattedChatHistory } =
+      await prepareAnswerGeneration(state)
 
     // Convert formatted chat history to array format if needed
     const historyArray: [string, string][] = formattedChatHistory

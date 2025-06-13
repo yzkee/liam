@@ -91,6 +91,7 @@ describe('Chat Workflow', () => {
     userInput: 'Test input',
     history: [],
     schemaData: mockSchemaData,
+    formattedChatHistory: 'No previous conversation.',
     projectId: 'test-project-id',
     buildingSchemaId: 'test-building-schema-id',
     latestVersionNumber: 1,
@@ -373,7 +374,7 @@ describe('Chat Workflow', () => {
       const result = await executeChatWorkflow(invalidState, {})
 
       expect(result).toBeDefined()
-      expect(result.error).toBe('Schema data is required for answer generation')
+      expect(result.error).toBe('schemaData is required but was not provided')
     })
 
     it('should handle agent generation errors', async () => {

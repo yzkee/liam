@@ -12,7 +12,7 @@ export interface ChatState {
   generatedAnswer?: string | undefined
   finalResponse?: string | undefined
   history: string[]
-  schemaData?: Schema | undefined
+  schemaData: Schema
   projectId?: string | undefined
   buildingSchemaId?: string | undefined
   latestVersionNumber?: number | undefined
@@ -22,7 +22,7 @@ export interface ChatState {
   error?: string | undefined
 
   // Intermediate data for workflow
-  formattedChatHistory?: string | undefined
+  formattedChatHistory: string
 
   // Repository dependencies for data access
   repositories: Repositories
@@ -39,7 +39,7 @@ export const createAnnotations = () => {
     generatedAnswer: Annotation<string | undefined>,
     finalResponse: Annotation<string | undefined>,
     history: Annotation<string[]>,
-    schemaData: Annotation<Schema | undefined>,
+    schemaData: Annotation<Schema>,
     projectId: Annotation<string | undefined>,
     buildingSchemaId: Annotation<string | undefined>,
     latestVersionNumber: Annotation<number | undefined>,
@@ -49,7 +49,7 @@ export const createAnnotations = () => {
     error: Annotation<string | undefined>,
 
     // Additional fields for workflow processing
-    formattedChatHistory: Annotation<string | undefined>,
+    formattedChatHistory: Annotation<string>,
 
     // Repository dependencies for data access
     repositories: Annotation<Repositories>,

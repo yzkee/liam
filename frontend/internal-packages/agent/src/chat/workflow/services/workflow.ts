@@ -1,11 +1,9 @@
 import { END, START, StateGraph } from '@langchain/langgraph'
 import { WORKFLOW_ERROR_MESSAGES } from '../constants/progressMessages'
-import { finalResponseNode } from '../nodes'
+import { answerGenerationNode, finalResponseNode } from '../nodes'
 import {
-  type ChatState,
   DEFAULT_RECURSION_LIMIT,
   createAnnotations,
-  generateAnswer,
 } from '../shared/langGraphUtils'
 import {
   createErrorState,
@@ -15,16 +13,6 @@ import {
 import type { WorkflowState } from '../types'
 
 /**
- * Wrap finalResponseNode
- */
-const formatFinalResponse = async (
-  state: ChatState,
-): Promise<Partial<ChatState>> => {
-  const result = await finalResponseNode(state)
-  return result
-}
-
-/**
  * Create and configure the LangGraph workflow
  */
 const createGraph = () => {
@@ -32,8 +20,8 @@ const createGraph = () => {
   const graph = new StateGraph(ChatStateAnnotation)
 
   graph
-    .addNode('generateAnswer', generateAnswer)
-    .addNode('formatFinalResponse', formatFinalResponse)
+    .addNode('generateAnswer', answerGenerationNode)
+    .addNode('formatFinalResponse', finalResponseNode)
     .addEdge(START, 'generateAnswer')
     .addEdge('formatFinalResponse', END)
 

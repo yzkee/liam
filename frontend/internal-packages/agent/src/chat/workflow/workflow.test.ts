@@ -306,9 +306,9 @@ describe('Chat Workflow', () => {
 
       const result = await executeChatWorkflow(state)
 
-      expect(result.error).toBe('Failed to update schema: Network error')
+      expect(result.error).toBe('Network error')
       expect(result.finalResponse).toBe(
-        'Sorry, an error occurred during processing: Failed to update schema: Network error',
+        'Sorry, an error occurred during processing: Network error',
       )
     })
 

@@ -61,33 +61,23 @@ const applySchemaChanges = async (
   message: string,
   state: WorkflowState,
 ): Promise<WorkflowState> => {
-  try {
-    const result = await state.repositories.schema.createVersion({
-      buildingSchemaId,
-      latestVersionNumber,
-      patch: schemaChanges,
-    })
+  const result = await state.repositories.schema.createVersion({
+    buildingSchemaId,
+    latestVersionNumber,
+    patch: schemaChanges,
+  })
 
-    if (!result.success) {
-      return {
-        ...state,
-        generatedAnswer: message,
-        error: result.error || 'Failed to update schema',
-      }
-    }
-
+  if (!result.success) {
     return {
       ...state,
       generatedAnswer: message,
+      error: result.error || 'Failed to update schema',
     }
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error occurred'
-    return {
-      ...state,
-      generatedAnswer: message,
-      error: `Failed to update schema: ${errorMessage}`,
-    }
+  }
+
+  return {
+    ...state,
+    generatedAnswer: message,
   }
 }
 

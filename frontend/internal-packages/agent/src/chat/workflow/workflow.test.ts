@@ -6,7 +6,6 @@ import type { WorkflowState } from './types'
 
 // Mock the LangChain module
 vi.mock('../../langchain', () => ({
-  getAgent: vi.fn(),
   createPromptVariables: vi.fn(
     (schemaText: string, userMessage: string, history: [string, string][]) => ({
       schema_text: schemaText,
@@ -17,6 +16,11 @@ vi.mock('../../langchain', () => ({
           .join('\n') || 'No previous conversation.',
     }),
   ),
+}))
+
+// Mock the DatabaseSchemaBuildAgent
+vi.mock('../../langchain/agents', () => ({
+  DatabaseSchemaBuildAgent: vi.fn(),
 }))
 
 // Mock the schema converter
@@ -30,7 +34,7 @@ describe('Chat Workflow', () => {
     generate: ReturnType<typeof vi.fn>
     stream: ReturnType<typeof vi.fn>
   }
-  let mockGetAgent: ReturnType<typeof vi.fn>
+  let MockDatabaseSchemaBuildAgent: ReturnType<typeof vi.fn>
   let mockRepositories: Repositories
   let mockSchemaRepository: SchemaRepository
 
@@ -113,9 +117,11 @@ describe('Chat Workflow', () => {
     vi.clearAllMocks()
 
     // Get the mocked modules
-    const langchainModule = await import('../../langchain')
+    const agentsModule = await import('../../langchain/agents')
 
-    mockGetAgent = vi.mocked(langchainModule.getAgent)
+    MockDatabaseSchemaBuildAgent = vi.mocked(
+      agentsModule.DatabaseSchemaBuildAgent,
+    )
 
     // Create mock repositories
     mockSchemaRepository = {
@@ -142,8 +148,8 @@ describe('Chat Workflow', () => {
       ),
     }
 
-    // Setup langchain mock
-    mockGetAgent.mockReturnValue(mockAgent)
+    // Setup DatabaseSchemaBuildAgent mock
+    MockDatabaseSchemaBuildAgent.mockImplementation(() => mockAgent)
 
     // Setup createVersion mock
     vi.mocked(mockSchemaRepository.createVersion).mockResolvedValue({
@@ -382,21 +388,17 @@ describe('Chat Workflow', () => {
       )
     })
 
-    it('should handle missing agent', async () => {
-      mockGetAgent.mockImplementation(() => {
-        throw new Error(
-          'databaseSchemaBuildAgent not found in LangChain instance',
-        )
+    it('should handle agent creation failure', async () => {
+      MockDatabaseSchemaBuildAgent.mockImplementation(() => {
+        throw new Error('Failed to create DatabaseSchemaBuildAgent')
       })
       const state = createBaseState()
 
       const result = await executeChatWorkflow(state)
 
-      expect(result.error).toBe(
-        'databaseSchemaBuildAgent not found in LangChain instance',
-      )
+      expect(result.error).toBe('Failed to create DatabaseSchemaBuildAgent')
       expect(result.finalResponse).toBe(
-        'Sorry, an error occurred during processing: databaseSchemaBuildAgent not found in LangChain instance',
+        'Sorry, an error occurred during processing: Failed to create DatabaseSchemaBuildAgent',
       )
     })
 
@@ -429,12 +431,12 @@ describe('Chat Workflow', () => {
   })
 
   describe('Agent Selection', () => {
-    it('should use databaseSchemaBuildAgent for Build mode', async () => {
+    it('should instantiate DatabaseSchemaBuildAgent', async () => {
       const state = createBaseState({})
 
       await executeChatWorkflow(state)
 
-      expect(mockGetAgent).toHaveBeenCalledWith('databaseSchemaBuildAgent')
+      expect(MockDatabaseSchemaBuildAgent).toHaveBeenCalledOnce()
     })
   })
 

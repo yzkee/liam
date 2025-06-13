@@ -1,11 +1,12 @@
 import * as v from 'valibot'
-import { createPromptVariables, getAgent } from '../../../langchain'
-import { operationsSchema } from '../../../utils/operationsSchema'
+import { createPromptVariables } from '../../../langchain'
+import { DatabaseSchemaBuildAgent } from '../../../langchain/agents'
 import { convertSchemaToText } from '../../../utils/convertSchemaToText'
+import { operationsSchema } from '../../../utils/operationsSchema'
 import type { WorkflowState } from '../types'
 
 interface PreparedAnswerGeneration {
-  agent: ReturnType<typeof getAgent>
+  agent: DatabaseSchemaBuildAgent
   schemaText: string
   formattedChatHistory: string
 }
@@ -159,8 +160,8 @@ async function prepareAnswerGeneration(
   const formattedChatHistory = state.formattedChatHistory
   const schemaText = convertSchemaToText(state.schemaData)
 
-  // Get the agent from LangChain
-  const agent = getAgent('databaseSchemaBuildAgent')
+  // Create the agent instance
+  const agent = new DatabaseSchemaBuildAgent()
 
   return {
     agent,

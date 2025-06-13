@@ -327,32 +327,6 @@ describe('Chat Workflow', () => {
       )
     })
 
-    it('should handle Build mode without buildingSchemaId', async () => {
-      const structuredResponse = JSON.stringify({
-        message: 'Attempted to add created_at column',
-        schemaChanges: [
-          {
-            op: 'add',
-            path: '/tables/users/columns/created_at',
-            value: { name: 'created_at', type: 'timestamp' },
-          },
-        ],
-      })
-
-      mockAgent.generate.mockResolvedValue(structuredResponse)
-
-      const state = createBaseState({
-        userInput: 'Add a created_at timestamp column to the users table',
-        buildingSchemaId: undefined,
-      })
-
-      const result = await executeChatWorkflow(state)
-
-      expect(result.error).toBeUndefined()
-      expect(result.finalResponse).toBe('Attempted to add created_at column')
-      expect(mockSchemaRepository.createVersion).not.toHaveBeenCalled()
-    })
-
     it('should handle complex schema modifications', async () => {
       const state = createBaseState({
         userInput: 'Create a new posts table with foreign key to users',

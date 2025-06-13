@@ -14,7 +14,7 @@ export type WorkflowState = {
   formattedChatHistory: string
 
   // Schema update fields
-  buildingSchemaId?: string | undefined
+  buildingSchemaId: string
   latestVersionNumber?: number | undefined
   organizationId?: string | undefined
   userId: string

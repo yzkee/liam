@@ -14,7 +14,7 @@ export interface ChatState {
   history: string[]
   schemaData: Schema
   projectId?: string | undefined
-  buildingSchemaId?: string | undefined
+  buildingSchemaId: string
   latestVersionNumber?: number | undefined
   organizationId?: string | undefined
   userId: string
@@ -41,7 +41,7 @@ export const createAnnotations = () => {
     history: Annotation<string[]>,
     schemaData: Annotation<Schema>,
     projectId: Annotation<string | undefined>,
-    buildingSchemaId: Annotation<string | undefined>,
+    buildingSchemaId: Annotation<string>,
     latestVersionNumber: Annotation<number | undefined>,
     organizationId: Annotation<string | undefined>,
     userId: Annotation<string>,

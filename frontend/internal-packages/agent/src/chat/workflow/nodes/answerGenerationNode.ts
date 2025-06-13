@@ -109,14 +109,6 @@ const handleSchemaChanges = async (
   const buildingSchemaId = state.buildingSchemaId
   const latestVersionNumber = state.latestVersionNumber || 0
 
-  if (!buildingSchemaId) {
-    console.warn('Missing buildingSchemaId for schema update')
-    return {
-      ...state,
-      generatedAnswer: parsedResponse.message,
-    }
-  }
-
   return await applySchemaChanges(
     parsedResponse.schemaChanges,
     buildingSchemaId,

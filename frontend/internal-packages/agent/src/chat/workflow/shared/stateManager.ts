@@ -14,7 +14,7 @@ const langGraphResultSchema = v.object({
   projectId: v.optional(v.unknown()),
   error: v.optional(v.unknown()),
   formattedChatHistory: v.unknown(),
-  buildingSchemaId: v.optional(v.unknown()),
+  buildingSchemaId: v.unknown(),
   latestVersionNumber: v.optional(v.unknown()),
   organizationId: v.optional(v.unknown()),
   userId: v.optional(v.unknown()),
@@ -134,9 +134,11 @@ export const fromLangGraphResult = (
       validatedResult.formattedChatHistory,
       'formattedChatHistory',
     ),
-    // Schema update fields - buildingSchemaId is required, provide fallback
-    buildingSchemaId:
-      parseOptionalString(validatedResult.buildingSchemaId) || '',
+    // Schema update fields
+    buildingSchemaId: parseRequiredString(
+      validatedResult.buildingSchemaId,
+      'buildingSchemaId',
+    ),
     latestVersionNumber:
       typeof validatedResult.latestVersionNumber === 'number'
         ? validatedResult.latestVersionNumber

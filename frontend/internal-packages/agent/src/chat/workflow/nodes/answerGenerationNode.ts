@@ -1,15 +1,10 @@
 import * as v from 'valibot'
-import {
-  type AgentName,
-  createPromptVariables,
-  getAgent,
-} from '../../../langchain'
+import { createPromptVariables, getAgent } from '../../../langchain'
 import { operationsSchema } from '../../../utils/operationsSchema'
 import type { WorkflowState } from '../types'
 
 interface PreparedAnswerGeneration {
   agent: ReturnType<typeof getAgent>
-  agentName: AgentName
   schemaText: string
   formattedChatHistory: string
 }
@@ -156,20 +151,18 @@ async function prepareAnswerGeneration(
 ): Promise<PreparedAnswerGeneration | { error: string }> {
   // Since validationNode has already validated required fields,
   // we can trust that the processed data is available
-  if (!state.agentName || !state.schemaText || !state.formattedChatHistory) {
+  if (!state.schemaText || !state.formattedChatHistory) {
     return { error: 'Required processed data is missing from validation step' }
   }
 
-  const agentName = state.agentName
   const formattedChatHistory = state.formattedChatHistory
   const schemaText = state.schemaText
 
   // Get the agent from LangChain
-  const agent = getAgent(agentName)
+  const agent = getAgent('databaseSchemaBuildAgent')
 
   return {
     agent,
-    agentName,
     schemaText,
     formattedChatHistory,
   }
@@ -191,7 +184,7 @@ export async function answerGenerationNode(
       }
     }
 
-    const { agent, agentName, schemaText, formattedChatHistory } = prepared
+    const { agent, schemaText, formattedChatHistory } = prepared
 
     // Convert formatted chat history to array format if needed
     const historyArray: [string, string][] = formattedChatHistory
@@ -207,16 +200,7 @@ export async function answerGenerationNode(
 
     // Use agent's generate method with prompt variables
     const response = await agent.generate(promptVariables)
-
-    // If this is the buildAgent, handle structured response and schema updates
-    if (agentName === 'databaseSchemaBuildAgent') {
-      return await handleBuildAgentResponse(response, state)
-    }
-
-    return {
-      ...state,
-      generatedAnswer: response,
-    }
+    return await handleBuildAgentResponse(response, state)
   } catch (error) {
     const errorMsg =
       error instanceof Error ? error.message : 'Failed to generate answer'

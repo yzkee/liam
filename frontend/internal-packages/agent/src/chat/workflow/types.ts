@@ -1,9 +1,5 @@
 import type { Schema } from '@liam-hq/db-structure'
-import type { AgentName } from '../../langchain'
 import type { Repositories } from '../../repositories'
-
-// Re-export AgentName for use within workflow modules
-export type { AgentName }
 
 export type WorkflowState = {
   userInput: string
@@ -17,7 +13,6 @@ export type WorkflowState = {
   // Additional fields for workflow processing
   schemaText?: string | undefined
   formattedChatHistory?: string | undefined
-  agentName?: AgentName | undefined
 
   // Schema update fields
   buildingSchemaId?: string | undefined

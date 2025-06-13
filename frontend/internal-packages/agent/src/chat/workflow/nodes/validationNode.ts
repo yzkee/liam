@@ -11,9 +11,6 @@ export const validationNode = async (
     }
   }
 
-  // Always use Build agent
-  const agentName = 'databaseSchemaBuildAgent' as const
-
   // Convert schema to text
   const schemaText = convertSchemaToText(state.schemaData)
 
@@ -25,7 +22,6 @@ export const validationNode = async (
 
   return {
     ...state,
-    agentName,
     schemaText,
     formattedChatHistory,
   }

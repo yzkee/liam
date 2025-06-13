@@ -15,7 +15,6 @@ const langGraphResultSchema = v.object({
   error: v.optional(v.unknown()),
   schemaText: v.optional(v.unknown()),
   formattedChatHistory: v.optional(v.unknown()),
-  agentName: v.optional(v.unknown()),
   buildingSchemaId: v.optional(v.unknown()),
   latestVersionNumber: v.optional(v.unknown()),
   organizationId: v.optional(v.unknown()),
@@ -50,7 +49,6 @@ export const toLangGraphState = (state: WorkflowState) => {
     error: state.error,
     schemaText: state.schemaText,
     formattedChatHistory: state.formattedChatHistory,
-    agentName: state.agentName,
     buildingSchemaId: state.buildingSchemaId,
     latestVersionNumber: state.latestVersionNumber,
     organizationId: state.organizationId,
@@ -76,16 +74,6 @@ const parseStringArray = (value: unknown): string[] => {
     return value
   }
   return []
-}
-
-/**
- * Helper function to safely parse AgentName
- */
-const parseAgentName = (value: unknown): WorkflowState['agentName'] => {
-  if (value === 'databaseSchemaBuildAgent') {
-    return value
-  }
-  return undefined
 }
 
 /**
@@ -138,7 +126,6 @@ export const fromLangGraphResult = (
     formattedChatHistory: parseOptionalString(
       validatedResult.formattedChatHistory,
     ),
-    agentName: parseAgentName(validatedResult.agentName),
     // Schema update fields - buildingSchemaId is required, provide fallback
     buildingSchemaId:
       parseOptionalString(validatedResult.buildingSchemaId) || '',

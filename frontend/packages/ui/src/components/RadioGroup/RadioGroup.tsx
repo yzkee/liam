@@ -1,19 +1,17 @@
 import * as RadioGroupPrimitive from '@radix-ui/react-radio-group'
 import clsx from 'clsx'
-import {
-  type ComponentProps,
-  type ElementRef,
-  type ReactNode,
-  forwardRef,
-} from 'react'
+import type { ComponentProps, ElementRef, ReactNode, Ref } from 'react'
 import { Check } from '../../icons'
 import styles from './RadioGroup.module.css'
 
 // Root
-export const RadioGroup = forwardRef<
-  ElementRef<typeof RadioGroupPrimitive.Root>,
-  ComponentProps<typeof RadioGroupPrimitive.Root>
->(({ className, ...props }, ref) => {
+export const RadioGroup = ({
+  className,
+  ref,
+  ...props
+}: ComponentProps<typeof RadioGroupPrimitive.Root> & {
+  ref?: Ref<ElementRef<typeof RadioGroupPrimitive.Root>>
+}) => {
   return (
     <RadioGroupPrimitive.Root
       ref={ref}
@@ -21,19 +19,23 @@ export const RadioGroup = forwardRef<
       {...props}
     />
   )
-})
+}
 
 RadioGroup.displayName = 'RadioGroup'
 
 // Item
 type RadioGroupItemProps = ComponentProps<typeof RadioGroupPrimitive.Item> & {
   label?: ReactNode
+  ref?: Ref<ElementRef<typeof RadioGroupPrimitive.Item>>
 }
 
-export const RadioGroupItem = forwardRef<
-  ElementRef<typeof RadioGroupPrimitive.Item>,
-  RadioGroupItemProps
->(({ className, label, id, ...props }, ref) => {
+export const RadioGroupItem = ({
+  className,
+  label,
+  id,
+  ref,
+  ...props
+}: RadioGroupItemProps) => {
   const itemId = id ?? props.value
 
   return (
@@ -55,6 +57,6 @@ export const RadioGroupItem = forwardRef<
       </RadioGroupPrimitive.Item>
     </div>
   )
-})
+}
 
 RadioGroupItem.displayName = 'RadioGroupItem'

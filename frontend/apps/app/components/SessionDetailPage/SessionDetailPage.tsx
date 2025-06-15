@@ -2,8 +2,13 @@
 import { Chat } from '@/components/Chat'
 import type { Schema } from '@liam-hq/db-structure'
 import { schemaSchema } from '@liam-hq/db-structure'
-import type { ComponentProps, FC } from 'react'
-import { useCallback, useEffect, useState } from 'react'
+import {
+  type ComponentProps,
+  type FC,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react'
 import * as v from 'valibot'
 import styles from './SessionDetailPage.module.css'
 import { Artifact } from './components/Artifact'

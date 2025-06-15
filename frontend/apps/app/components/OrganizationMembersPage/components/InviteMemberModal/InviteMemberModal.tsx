@@ -12,8 +12,13 @@ import {
   ModalTitle,
   useToast,
 } from '@liam-hq/ui'
-import { useRef, useState } from 'react'
-import type { ChangeEvent, FC, FormEvent } from 'react'
+import {
+  type ChangeEvent,
+  type FC,
+  type FormEvent,
+  useRef,
+  useState,
+} from 'react'
 import styles from './InviteMemberModal.module.css'
 import { inviteMember } from './actions/inviteMember'
 

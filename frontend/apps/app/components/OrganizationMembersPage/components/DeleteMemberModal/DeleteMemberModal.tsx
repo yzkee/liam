@@ -11,8 +11,7 @@ import {
   ModalTitle,
   useToast,
 } from '@liam-hq/ui'
-import { useState } from 'react'
-import type { FC } from 'react'
+import { type FC, useState } from 'react'
 import { removeMember } from './actions/removeMember'
 
 interface DeleteMemberModalProps {

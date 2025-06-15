@@ -3,21 +3,20 @@
 import { AgentMessage } from '@/components/Chat/AgentMessage'
 import { UserMessage } from '@/components/Chat/UserMessage'
 import { syntaxCodeTagProps, syntaxCustomStyle, syntaxTheme } from '@liam-hq/ui'
-import type React from 'react'
-import type { FC, ReactNode } from 'react'
+import type { CSSProperties, FC, HTMLAttributes, ReactNode } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import remarkGfm from 'remark-gfm'
 import styles from './ChatMessage.module.css'
 
 // Define CodeProps interface
-interface CodeProps extends React.HTMLAttributes<HTMLElement> {
+interface CodeProps extends HTMLAttributes<HTMLElement> {
   node?: unknown
   inline?: boolean
   className?: string
   children?: ReactNode
   // Additional props that might be passed by react-markdown
-  style?: React.CSSProperties
+  style?: CSSProperties
 }
 
 export interface ChatMessageProps {

@@ -1,8 +1,7 @@
 'use client'
 
 import type { Schema, TableGroup } from '@liam-hq/db-structure'
-import type { FC } from 'react'
-import { useEffect, useRef, useState } from 'react'
+import { type FC, useEffect, useRef, useState } from 'react'
 import { ChatInput } from '../ChatInput'
 import { ChatMessage } from '../ChatMessage'
 import styles from './Chat.module.css'

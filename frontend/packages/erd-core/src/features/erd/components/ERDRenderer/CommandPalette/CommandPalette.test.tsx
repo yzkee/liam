@@ -1,7 +1,7 @@
 import { SchemaProvider } from '@/stores'
 import type { SchemaStore } from '@/stores/schema/schema'
 import { aTable } from '@liam-hq/db-structure'
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -27,6 +27,21 @@ const schema: SchemaStore = {
 const wrapper = ({ children }: { children: ReactNode }) => (
   <SchemaProvider schema={schema}>{children}</SchemaProvider>
 )
+
+const prepareCommandPalette = async () => {
+  const user = userEvent.setup()
+
+  render(<CommandPalette />, { wrapper })
+
+  await user.keyboard('{Meta>}k{/Meta}')
+  const dialog = await screen.findByRole('dialog', {
+    name: 'Command Palette',
+  })
+  const searchCombobox = within(dialog).getByRole('combobox')
+  const preview = within(dialog).getByTestId('CommandPalettePreview')
+
+  return { user, elements: { dialog, searchCombobox, preview } }
+}
 
 it('displays nothing by default', () => {
   render(<CommandPalette />, { wrapper })
@@ -57,5 +72,63 @@ describe('dialog opening interactions', () => {
     expect(
       screen.getByRole('dialog', { name: 'Command Palette' }),
     ).toBeInTheDocument()
+  })
+})
+
+describe('options and combobox interactions', () => {
+  it('renders options with table name', async () => {
+    const {
+      elements: { dialog },
+    } = await prepareCommandPalette()
+
+    expect(within(dialog).getAllByRole('option')).toHaveLength(4)
+    expect(within(dialog).getByRole('option', { name: 'users' }))
+    expect(within(dialog).getByRole('option', { name: 'posts' }))
+    expect(within(dialog).getByRole('option', { name: 'follows' }))
+    expect(within(dialog).getByRole('option', { name: 'user_settings' }))
+  })
+
+  it('filters options based on user input in the combobox', async () => {
+    const {
+      user,
+      elements: { dialog, searchCombobox },
+    } = await prepareCommandPalette()
+
+    expect(searchCombobox).toHaveFocus()
+
+    await user.keyboard('user')
+
+    expect(within(dialog).getAllByRole('option')).toHaveLength(2)
+    expect(within(dialog).getByRole('option', { name: 'users' }))
+    expect(within(dialog).getByRole('option', { name: 'user_settings' }))
+  })
+
+  it('renders "No results found." if user input does not match any options', async () => {
+    const {
+      user,
+      elements: { dialog, searchCombobox },
+    } = await prepareCommandPalette()
+
+    expect(searchCombobox).toHaveFocus()
+
+    await user.keyboard('HelloWorld')
+
+    expect(within(dialog).queryByRole('option')).not.toBeInTheDocument()
+    expect(within(dialog).getByText('No results found.')).toBeInTheDocument()
+  })
+})
+
+describe('preview with option interactions', () => {
+  it('renders the table preview with selected options', async () => {
+    const {
+      user,
+      elements: { dialog, preview },
+    } = await prepareCommandPalette()
+
+    expect(within(preview).getByText('users')).toBeInTheDocument()
+
+    await user.hover(within(dialog).getByRole('option', { name: 'follows' }))
+
+    expect(within(preview).getByText('follows')).toBeInTheDocument()
   })
 })

@@ -61,7 +61,10 @@ export const CommandPalette: FC = () => {
             ))}
           </Command.Group>
         </Command.List>
-        <div className={styles.previewContainer}>
+        <div
+          className={styles.previewContainer}
+          data-testid="CommandPalettePreview"
+        >
           <div className={styles.previewBackground}>
             {table && (
               <div className={styles.tableNodeContainer}>

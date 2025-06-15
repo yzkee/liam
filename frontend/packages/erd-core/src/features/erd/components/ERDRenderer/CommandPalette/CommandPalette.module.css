@@ -115,11 +115,11 @@
   color: var(--overlay-40);
 }
 
-.main [cmdk-item][data-selected="true"] {
+.main [cmdk-item][data-selected='true'] {
   background: var(--overlay-5);
 }
 
-.main [cmdk-item][data-selected="true"] .itemIcon {
+.main [cmdk-item][data-selected='true'] .itemIcon {
   color: var(--global-foreground);
 }
 

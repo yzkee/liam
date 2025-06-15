@@ -3,7 +3,7 @@
 import { Search, Table2 } from '@liam-hq/ui'
 import { DialogDescription, DialogTitle } from '@radix-ui/react-dialog'
 import { Command } from 'cmdk'
-import { type FC, useEffect, useState } from 'react'
+import { type FC, useCallback, useEffect, useState } from 'react'
 import { useTableSelection } from '@/features/erd/hooks'
 import { useSchema } from '@/stores'
 import { TableNode } from '../../ERDContent/components'
@@ -16,6 +16,14 @@ export const CommandPalette: FC = () => {
   const [tableName, setTableName] = useState<string | null>(null)
   const table = schema.current.tables[tableName ?? '']
   const { selectTable } = useTableSelection()
+
+  const goToERD = useCallback(
+    (tableName: string) => {
+      selectTable({ tableId: tableName, displayArea: 'main' })
+      setOpen(false)
+    },
+    [selectTable],
+  )
 
   // Toggle the menu when ⌘K is pressed
   useEffect(() => {
@@ -55,7 +63,11 @@ export const CommandPalette: FC = () => {
           <Command.Empty>No results found.</Command.Empty>
           <Command.Group heading="Suggestions">
             {Object.values(schema.current.tables).map((table) => (
-              <Command.Item key={table.name} value={table.name}>
+              <Command.Item
+                key={table.name}
+                value={table.name}
+                onSelect={() => goToERD(table.name)}
+              >
                 <Table2 className={styles.itemIcon} />
                 {table.name}
               </Command.Item>

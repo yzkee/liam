@@ -1,6 +1,7 @@
 import { aTable } from '@liam-hq/db-structure'
 import { cleanup, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { ReactFlowProvider } from '@xyflow/react'
 import { NuqsAdapter } from 'nuqs/adapters/react'
 import type { ReactNode } from 'react'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -27,9 +28,11 @@ const schema: SchemaStore = {
 
 const wrapper = ({ children }: { children: ReactNode }) => (
   <NuqsAdapter>
-    <UserEditingProvider>
-      <SchemaProvider schema={schema}>{children}</SchemaProvider>
-    </UserEditingProvider>
+    <ReactFlowProvider>
+      <UserEditingProvider>
+        <SchemaProvider schema={schema}>{children}</SchemaProvider>
+      </UserEditingProvider>
+    </ReactFlowProvider>
   </NuqsAdapter>
 )
 

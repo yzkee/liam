@@ -3,7 +3,10 @@ import { fileURLToPath } from 'node:url'
 import { sentryEsbuildPlugin } from '@sentry/esbuild-plugin'
 import * as Sentry from '@sentry/node'
 import { esbuildPlugin } from '@trigger.dev/build/extensions'
-import { additionalFiles } from '@trigger.dev/build/extensions/core'
+import {
+  additionalFiles,
+  syncVercelEnvVars,
+} from '@trigger.dev/build/extensions/core'
 import { defineConfig } from '@trigger.dev/sdk'
 import * as dotenv from 'dotenv'
 import { globSync } from 'glob'
@@ -80,6 +83,11 @@ export default defineConfig({
       // Add all necessary WASM files
       additionalFiles({
         files: ['prism.wasm', ...prismaWasmFiles],
+      }),
+      // Sync Vercel environment variables
+      syncVercelEnvVars({
+        accessToken: process.env.VERCEL_ACCESS_TOKEN,
+        projectId: process.env.VERCEL_PROJECT_ID,
       }),
     ],
     external: [

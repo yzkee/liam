@@ -4,23 +4,13 @@ import type { Repositories, SchemaRepository } from '../../repositories'
 import { executeChatWorkflow } from './index'
 import type { WorkflowState } from './types'
 
-// Mock the LangChain module
-vi.mock('../../langchain', () => ({
-  getAgent: vi.fn(),
-  createPromptVariables: vi.fn(
-    (schemaText: string, userMessage: string, history: [string, string][]) => ({
-      schema_text: schemaText,
-      user_message: userMessage,
-      chat_history:
-        history
-          .map(([role, content]: [string, string]) => `${role}: ${content}`)
-          .join('\n') || 'No previous conversation.',
-    }),
-  ),
+// Mock the DatabaseSchemaBuildAgent
+vi.mock('../../langchain/agents', () => ({
+  DatabaseSchemaBuildAgent: vi.fn(),
 }))
 
 // Mock the schema converter
-vi.mock('@/app/lib/schema/convertSchemaToText', () => ({
+vi.mock('../../../utils/convertSchemaToText', () => ({
   convertSchemaToText: vi.fn(() => 'Mocked schema text'),
 }))
 
@@ -30,7 +20,7 @@ describe('Chat Workflow', () => {
     generate: ReturnType<typeof vi.fn>
     stream: ReturnType<typeof vi.fn>
   }
-  let mockGetAgent: ReturnType<typeof vi.fn>
+  let MockDatabaseSchemaBuildAgent: ReturnType<typeof vi.fn>
   let mockRepositories: Repositories
   let mockSchemaRepository: SchemaRepository
 
@@ -113,9 +103,11 @@ describe('Chat Workflow', () => {
     vi.clearAllMocks()
 
     // Get the mocked modules
-    const langchainModule = await import('../../langchain')
+    const agentsModule = await import('../../langchain/agents')
 
-    mockGetAgent = vi.mocked(langchainModule.getAgent)
+    MockDatabaseSchemaBuildAgent = vi.mocked(
+      agentsModule.DatabaseSchemaBuildAgent,
+    )
 
     // Create mock repositories
     mockSchemaRepository = {
@@ -142,8 +134,8 @@ describe('Chat Workflow', () => {
       ),
     }
 
-    // Setup langchain mock
-    mockGetAgent.mockReturnValue(mockAgent)
+    // Setup DatabaseSchemaBuildAgent mock
+    MockDatabaseSchemaBuildAgent.mockImplementation(() => mockAgent)
 
     // Setup createVersion mock
     vi.mocked(mockSchemaRepository.createVersion).mockResolvedValue({
@@ -162,6 +154,7 @@ describe('Chat Workflow', () => {
         updated_at: new Date().toISOString(),
         organization_id: 'test-org-id',
         design_session_id: 'test-design-session-id',
+        building_schema_version_id: null,
       },
     })
   })
@@ -314,36 +307,10 @@ describe('Chat Workflow', () => {
 
       const result = await executeChatWorkflow(state)
 
-      expect(result.error).toBe('Failed to update schema: Network error')
+      expect(result.error).toBe('Network error')
       expect(result.finalResponse).toBe(
-        'Sorry, an error occurred during processing: Failed to update schema: Network error',
+        'Sorry, an error occurred during processing: Network error',
       )
-    })
-
-    it('should handle Build mode without buildingSchemaId', async () => {
-      const structuredResponse = JSON.stringify({
-        message: 'Attempted to add created_at column',
-        schemaChanges: [
-          {
-            op: 'add',
-            path: '/tables/users/columns/created_at',
-            value: { name: 'created_at', type: 'timestamp' },
-          },
-        ],
-      })
-
-      mockAgent.generate.mockResolvedValue(structuredResponse)
-
-      const state = createBaseState({
-        userInput: 'Add a created_at timestamp column to the users table',
-        buildingSchemaId: undefined,
-      })
-
-      const result = await executeChatWorkflow(state)
-
-      expect(result.error).toBeUndefined()
-      expect(result.finalResponse).toBe('Attempted to add created_at column')
-      expect(mockSchemaRepository.createVersion).not.toHaveBeenCalled()
     })
 
     it('should handle complex schema modifications', async () => {
@@ -356,20 +323,6 @@ describe('Chat Workflow', () => {
   })
 
   describe('Error Handling', () => {
-    it('should handle missing schema data gracefully', async () => {
-      const testState = createBaseState({
-        userInput: 'What is the database structure?',
-      })
-      // Remove schemaData property by creating a new object without it
-      const { schemaData, ...stateWithoutSchema } = testState
-      const invalidState = stateWithoutSchema as WorkflowState
-
-      const result = await executeChatWorkflow(invalidState, {})
-
-      expect(result).toBeDefined()
-      expect(result.error).toBe('Schema data is required for answer generation')
-    })
-
     it('should handle agent generation errors', async () => {
       mockAgent.generate.mockRejectedValue(new Error('Agent generation failed'))
       const state = createBaseState()
@@ -382,21 +335,17 @@ describe('Chat Workflow', () => {
       )
     })
 
-    it('should handle missing agent', async () => {
-      mockGetAgent.mockImplementation(() => {
-        throw new Error(
-          'databaseSchemaBuildAgent not found in LangChain instance',
-        )
+    it('should handle agent creation failure', async () => {
+      MockDatabaseSchemaBuildAgent.mockImplementation(() => {
+        throw new Error('Failed to create DatabaseSchemaBuildAgent')
       })
       const state = createBaseState()
 
       const result = await executeChatWorkflow(state)
 
-      expect(result.error).toBe(
-        'databaseSchemaBuildAgent not found in LangChain instance',
-      )
+      expect(result.error).toBe('Failed to create DatabaseSchemaBuildAgent')
       expect(result.finalResponse).toBe(
-        'Sorry, an error occurred during processing: databaseSchemaBuildAgent not found in LangChain instance',
+        'Sorry, an error occurred during processing: Failed to create DatabaseSchemaBuildAgent',
       )
     })
 
@@ -429,12 +378,12 @@ describe('Chat Workflow', () => {
   })
 
   describe('Agent Selection', () => {
-    it('should use databaseSchemaBuildAgent for Build mode', async () => {
+    it('should instantiate DatabaseSchemaBuildAgent', async () => {
       const state = createBaseState({})
 
       await executeChatWorkflow(state)
 
-      expect(mockGetAgent).toHaveBeenCalledWith('databaseSchemaBuildAgent')
+      expect(MockDatabaseSchemaBuildAgent).toHaveBeenCalledOnce()
     })
   })
 

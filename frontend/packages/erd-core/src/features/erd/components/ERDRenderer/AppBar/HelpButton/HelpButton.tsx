@@ -16,11 +16,15 @@ import type { Ref } from 'react'
 import styles from './HelpButton.module.css'
 import { ReleaseVersion } from './ReleaseVersion'
 
+type Props = {
+  ref?: Ref<HTMLButtonElement>
+}
+
 const handleSelect = (url: string) => () => {
   window.open(url, '_blank', 'noreferrer')
 }
 
-export const HelpButton = ({ ref }: { ref: Ref<HTMLButtonElement> }) => {
+export const HelpButton = ({ ref }: Props) => {
   return (
     <DropdownMenuRoot>
       <TooltipProvider>

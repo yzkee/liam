@@ -9,6 +9,7 @@
   "dependencies": {
     "@langchain/core": "0.3.57",
     "@langchain/openai": "0.5.11",
+    "@liam-hq/agent": "workspace:*",
     "@liam-hq/db": "workspace:*",
     "@liam-hq/github": "workspace:*",
     "@octokit/auth-app": "7.2.1",
@@ -21,7 +22,7 @@
     "@biomejs/biome": "1.9.4",
     "@liam-hq/configs": "workspace:*",
     "@sentry/esbuild-plugin": "3.4.0",
-    "@types/node": "22.15.21",
+    "@types/node": "22.15.29",
     "dotenv": "16.5.0",
     "eslint": "9.27.0",
     "glob": "11.0.2",

@@ -1,17 +1,13 @@
 import * as v from 'valibot'
-import {
-  type AgentName,
-  createPromptVariables,
-  getAgent,
-} from '../../../langchain'
+import { DatabaseSchemaBuildAgent } from '../../../langchain/agents'
+import type { BasePromptVariables } from '../../../langchain/utils/types'
+import { convertSchemaToText } from '../../../utils/convertSchemaToText'
 import { operationsSchema } from '../../../utils/operationsSchema'
 import type { WorkflowState } from '../types'
 
 interface PreparedAnswerGeneration {
-  agent: ReturnType<typeof getAgent>
-  agentName: AgentName
+  agent: DatabaseSchemaBuildAgent
   schemaText: string
-  formattedChatHistory: string
 }
 
 // Define schema for BuildAgent response validation
@@ -65,33 +61,23 @@ const applySchemaChanges = async (
   message: string,
   state: WorkflowState,
 ): Promise<WorkflowState> => {
-  try {
-    const result = await state.repositories.schema.createVersion({
-      buildingSchemaId,
-      latestVersionNumber,
-      patch: schemaChanges,
-    })
+  const result = await state.repositories.schema.createVersion({
+    buildingSchemaId,
+    latestVersionNumber,
+    patch: schemaChanges,
+  })
 
-    if (!result.success) {
-      return {
-        ...state,
-        generatedAnswer: message,
-        error: result.error || 'Failed to update schema',
-      }
-    }
-
+  if (!result.success) {
     return {
       ...state,
       generatedAnswer: message,
+      error: result.error || 'Failed to update schema',
     }
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error occurred'
-    return {
-      ...state,
-      generatedAnswer: message,
-      error: `Failed to update schema: ${errorMessage}`,
-    }
+  }
+
+  return {
+    ...state,
+    generatedAnswer: message,
   }
 }
 
@@ -111,14 +97,6 @@ const handleSchemaChanges = async (
 
   const buildingSchemaId = state.buildingSchemaId
   const latestVersionNumber = state.latestVersionNumber || 0
-
-  if (!buildingSchemaId) {
-    console.warn('Missing buildingSchemaId for schema update')
-    return {
-      ...state,
-      generatedAnswer: parsedResponse.message,
-    }
-  }
 
   return await applySchemaChanges(
     parsedResponse.schemaChanges,
@@ -153,25 +131,15 @@ const handleBuildAgentResponse = async (
 
 async function prepareAnswerGeneration(
   state: WorkflowState,
-): Promise<PreparedAnswerGeneration | { error: string }> {
-  // Since validationNode has already validated required fields,
-  // we can trust that the processed data is available
-  if (!state.agentName || !state.schemaText || !state.formattedChatHistory) {
-    return { error: 'Required processed data is missing from validation step' }
-  }
+): Promise<PreparedAnswerGeneration> {
+  const schemaText = convertSchemaToText(state.schemaData)
 
-  const agentName = state.agentName
-  const formattedChatHistory = state.formattedChatHistory
-  const schemaText = state.schemaText
-
-  // Get the agent from LangChain
-  const agent = getAgent(agentName)
+  // Create the agent instance
+  const agent = new DatabaseSchemaBuildAgent()
 
   return {
     agent,
-    agentName,
     schemaText,
-    formattedChatHistory,
   }
 }
 
@@ -182,41 +150,24 @@ export async function answerGenerationNode(
   state: WorkflowState,
 ): Promise<WorkflowState> {
   try {
-    const prepared = await prepareAnswerGeneration(state)
+    const { agent, schemaText } = await prepareAnswerGeneration(state)
 
-    if ('error' in prepared) {
-      return {
-        ...state,
-        error: prepared.error,
-      }
+    // Format chat history for prompt
+    const formattedChatHistory =
+      state.history.length > 0
+        ? state.history.map((content) => `User: ${content}`).join('\n')
+        : 'No previous conversation.'
+
+    // Create prompt variables directly
+    const promptVariables: BasePromptVariables = {
+      schema_text: schemaText,
+      chat_history: formattedChatHistory,
+      user_message: state.userInput,
     }
-
-    const { agent, agentName, schemaText, formattedChatHistory } = prepared
-
-    // Convert formatted chat history to array format if needed
-    const historyArray: [string, string][] = formattedChatHistory
-      ? [['Assistant', formattedChatHistory]]
-      : []
-
-    // Create prompt variables with correct format
-    const promptVariables = createPromptVariables(
-      schemaText,
-      state.userInput,
-      historyArray,
-    )
 
     // Use agent's generate method with prompt variables
     const response = await agent.generate(promptVariables)
-
-    // If this is the buildAgent, handle structured response and schema updates
-    if (agentName === 'databaseSchemaBuildAgent') {
-      return await handleBuildAgentResponse(response, state)
-    }
-
-    return {
-      ...state,
-      generatedAnswer: response,
-    }
+    return await handleBuildAgentResponse(response, state)
   } catch (error) {
     const errorMsg =
       error instanceof Error ? error.message : 'Failed to generate answer'

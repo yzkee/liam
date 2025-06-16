@@ -18,7 +18,6 @@ describe('Chat Workflow', () => {
   let mockSchemaData: Schema
   let mockAgent: {
     generate: ReturnType<typeof vi.fn>
-    stream: ReturnType<typeof vi.fn>
   }
   let MockDatabaseSchemaBuildAgent: ReturnType<typeof vi.fn>
   let mockRepositories: Repositories
@@ -131,14 +130,6 @@ describe('Chat Workflow', () => {
           message: 'Mocked agent response',
           schemaChanges: [],
         }),
-      ),
-      stream: vi.fn().mockReturnValue(
-        (async function* () {
-          yield JSON.stringify({
-            message: 'Mocked agent response',
-            schemaChanges: [],
-          })
-        })(),
       ),
     }
 
@@ -405,15 +396,6 @@ describe('Chat Workflow', () => {
     ) => {
       const results = []
       for (const stateOverride of states) {
-        // Reset mocks for each execution
-        mockAgent.stream.mockReturnValue(
-          (async function* () {
-            yield JSON.stringify({
-              message: 'Mocked agent response',
-              schemaChanges: [],
-            })
-          })(),
-        )
         const state = createBaseState(stateOverride)
         const result = await executeChatWorkflow(state)
         results.push(result)

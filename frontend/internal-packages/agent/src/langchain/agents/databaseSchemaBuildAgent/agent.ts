@@ -18,15 +18,4 @@ export class DatabaseSchemaBuildAgent implements ChatAgent {
     const response = await this.model.invoke(formattedPrompt)
     return response.content as string
   }
-
-  async *stream(variables: BasePromptVariables): AsyncGenerator<string> {
-    const formattedPrompt = await buildAgentPrompt.format(variables)
-    const stream = await this.model.stream(formattedPrompt)
-
-    for await (const chunk of stream) {
-      if (chunk.content) {
-        yield chunk.content as string
-      }
-    }
-  }
 }

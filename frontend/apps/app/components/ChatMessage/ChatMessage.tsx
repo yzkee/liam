@@ -2,6 +2,7 @@
 
 import { AgentMessage } from '@/components/Chat/AgentMessage'
 import { UserMessage } from '@/components/Chat/UserMessage'
+import type { Database } from '@liam-hq/db'
 import { syntaxCodeTagProps, syntaxCustomStyle, syntaxTheme } from '@liam-hq/ui'
 import type { CSSProperties, FC, HTMLAttributes, ReactNode } from 'react'
 import ReactMarkdown from 'react-markdown'
@@ -21,7 +22,7 @@ interface CodeProps extends HTMLAttributes<HTMLElement> {
 
 export interface ChatMessageProps {
   content: string
-  isUser: boolean
+  role: Database['public']['Enums']['message_role_enum']
   timestamp?: Date
   avatarSrc?: string
   avatarAlt?: string
@@ -47,7 +48,7 @@ export interface ChatMessageProps {
 
 export const ChatMessage: FC<ChatMessageProps> = ({
   content,
-  isUser,
+  role,
   timestamp,
   avatarSrc,
   avatarAlt,
@@ -66,42 +67,43 @@ export const ChatMessage: FC<ChatMessageProps> = ({
     : null
 
   // For bot messages, we'll render the markdown content with syntax highlighting
-  const markdownContent = !isUser ? (
-    <ReactMarkdown
-      remarkPlugins={[remarkGfm]}
-      components={{
-        code(props: CodeProps) {
-          const { children, className, node, ...rest } = props
-          const match = /language-(\w+)/.exec(className || '')
-          const isInline = !match && !className
+  const markdownContent =
+    role !== 'user' ? (
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          code(props: CodeProps) {
+            const { children, className, node, ...rest } = props
+            const match = /language-(\w+)/.exec(className || '')
+            const isInline = !match && !className
 
-          return !isInline && match ? (
-            <SyntaxHighlighter
-              // @ts-expect-error - syntaxTheme has a complex type structure that's compatible at runtime
-              style={syntaxTheme}
-              language={match[1]}
-              PreTag="div"
-              customStyle={syntaxCustomStyle}
-              codeTagProps={syntaxCodeTagProps}
-              {...rest}
-            >
-              {String(children).replace(/\n$/, '')}
-            </SyntaxHighlighter>
-          ) : (
-            <code className={className} {...rest}>
-              {children}
-            </code>
-          )
-        },
-      }}
-    >
-      {content}
-    </ReactMarkdown>
-  ) : null
+            return !isInline && match ? (
+              <SyntaxHighlighter
+                // @ts-expect-error - syntaxTheme has a complex type structure that's compatible at runtime
+                style={syntaxTheme}
+                language={match[1]}
+                PreTag="div"
+                customStyle={syntaxCustomStyle}
+                codeTagProps={syntaxCodeTagProps}
+                {...rest}
+              >
+                {String(children).replace(/\n$/, '')}
+              </SyntaxHighlighter>
+            ) : (
+              <code className={className} {...rest}>
+                {children}
+              </code>
+            )
+          },
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    ) : null
 
   return (
     <div className={styles.messageContainer}>
-      {isUser ? (
+      {role === 'user' ? (
         <UserMessage
           content={content}
           timestamp={timestamp}

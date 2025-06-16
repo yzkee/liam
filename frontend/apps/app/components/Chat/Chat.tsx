@@ -99,7 +99,7 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups, designSession }) => {
     const userMessage: ChatEntry = {
       id: generateMessageId('user'),
       content,
-      isUser: true,
+      role: 'user',
       timestamp: new Date(),
       isGenerating: false, // Explicitly set to false for consistency
     }
@@ -115,7 +115,7 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups, designSession }) => {
         {messages.map((message, index) => {
           // Check if this is the last AI message and has progress messages
           const isLastAIMessage =
-            !message.isUser && index === messages.length - 1
+            message.role !== 'user' && index === messages.length - 1
           const shouldShowProgress =
             progressMessages.length > 0 && isLastAIMessage
 
@@ -123,7 +123,7 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups, designSession }) => {
             <ChatMessage
               key={message.id}
               content={message.content}
-              isUser={message.isUser}
+              role={message.role}
               timestamp={message.timestamp}
               isGenerating={message.isGenerating}
               progressMessages={

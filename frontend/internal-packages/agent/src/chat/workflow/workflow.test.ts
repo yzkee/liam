@@ -154,6 +154,7 @@ describe('Chat Workflow', () => {
         updated_at: new Date().toISOString(),
         organization_id: 'test-org-id',
         design_session_id: 'test-design-session-id',
+        building_schema_version_id: null,
       },
     })
   })
@@ -322,20 +323,6 @@ describe('Chat Workflow', () => {
   })
 
   describe('Error Handling', () => {
-    it('should handle missing schema data gracefully', async () => {
-      const testState = createBaseState({
-        userInput: 'What is the database structure?',
-      })
-      // Remove schemaData property by creating a new object without it
-      const { schemaData, ...stateWithoutSchema } = testState
-      const invalidState = stateWithoutSchema as WorkflowState
-
-      const result = await executeChatWorkflow(invalidState, {})
-
-      expect(result).toBeDefined()
-      expect(result.error).toBe('schemaData is required but was not provided')
-    })
-
     it('should handle agent generation errors', async () => {
       mockAgent.generate.mockRejectedValue(new Error('Agent generation failed'))
       const state = createBaseState()

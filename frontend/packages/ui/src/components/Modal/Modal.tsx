@@ -1,6 +1,7 @@
 import * as Dialog from '@radix-ui/react-dialog'
 import clsx from 'clsx'
-import React, { type PropsWithChildren, type ComponentProps } from 'react'
+import type React from 'react'
+import type { ComponentProps, PropsWithChildren, Ref } from 'react'
 import styles from './Modal.module.css'
 
 export const ModalRoot = Dialog.Root
@@ -9,22 +10,28 @@ export const ModalTrigger = Dialog.Trigger
 
 export const ModalPortal = Dialog.Portal
 
-export const ModalOverlay = React.forwardRef<HTMLDivElement>((props, ref) => (
+export const ModalOverlay = ({
+  ref,
+  ...props
+}: { ref?: Ref<HTMLDivElement> }) => (
   <Dialog.Overlay ref={ref} className={styles.dialogOverlay} {...props} />
-))
+)
 ModalOverlay.displayName = 'ModalOverlay'
 
-export const ModalContent = React.forwardRef<
-  HTMLDivElement,
-  ComponentProps<typeof Dialog.Content>
->(({ className, ...props }, ref) => (
+export const ModalContent = ({
+  className,
+  ref,
+  ...props
+}: ComponentProps<typeof Dialog.Content> & {
+  ref?: Ref<HTMLDivElement>
+}) => (
   <Dialog.Content
     ref={ref}
     className={clsx(styles.dialogContent, className)}
     {...props}
     role="dialog"
   />
-))
+)
 ModalContent.displayName = 'ModalContent'
 
 export const ModalTitle: React.FC<ComponentProps<typeof Dialog.Title>> = ({

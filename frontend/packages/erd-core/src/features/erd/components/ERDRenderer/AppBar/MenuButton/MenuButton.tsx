@@ -1,8 +1,8 @@
 import { Menu, XIcon, useSidebar } from '@liam-hq/ui'
-import { forwardRef, useCallback } from 'react'
+import { type Ref, useCallback } from 'react'
 import styles from './MenuButton.module.css'
 
-export const MenuButton = forwardRef<HTMLButtonElement>((_, ref) => {
+export const MenuButton = ({ ref }: { ref: Ref<HTMLButtonElement> }) => {
   const { open, toggleSidebar } = useSidebar()
 
   const handleClick = useCallback(() => {
@@ -23,5 +23,5 @@ export const MenuButton = forwardRef<HTMLButtonElement>((_, ref) => {
       )}
     </button>
   )
-})
+}
 MenuButton.displayName = 'MenuButton'

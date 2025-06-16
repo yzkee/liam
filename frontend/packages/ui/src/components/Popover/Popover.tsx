@@ -2,11 +2,7 @@
 
 import * as PopoverPrimitive from '@radix-ui/react-popover'
 import { clsx } from 'clsx'
-import {
-  type ComponentPropsWithoutRef,
-  type ElementRef,
-  forwardRef,
-} from 'react'
+import type { ComponentPropsWithoutRef, ElementRef, Ref } from 'react'
 import styles from './Popover.module.css'
 
 export const PopoverRoot = PopoverPrimitive.Root
@@ -17,10 +13,14 @@ export const PopoverAnchor = PopoverPrimitive.Anchor
 
 export const PopoverPortal = PopoverPrimitive.Portal
 
-export const PopoverContent = forwardRef<
-  ElementRef<typeof PopoverPrimitive.Content>,
-  ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>
->(({ className, children, ...props }, ref) => (
+export const PopoverContent = ({
+  className,
+  children,
+  ref,
+  ...props
+}: ComponentPropsWithoutRef<typeof PopoverPrimitive.Content> & {
+  ref?: Ref<ElementRef<typeof PopoverPrimitive.Content>>
+}) => (
   <PopoverPrimitive.Content
     ref={ref}
     {...props}
@@ -28,7 +28,7 @@ export const PopoverContent = forwardRef<
   >
     {children}
   </PopoverPrimitive.Content>
-))
+)
 PopoverContent.displayName = PopoverPrimitive.Content.displayName
 
 export const PopoverClose = PopoverPrimitive.Close

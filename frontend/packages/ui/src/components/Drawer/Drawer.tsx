@@ -1,11 +1,7 @@
 'use client'
 
 import { clsx } from 'clsx'
-import {
-  type ComponentPropsWithoutRef,
-  type ElementRef,
-  forwardRef,
-} from 'react'
+import type { ComponentPropsWithoutRef, ElementRef, Ref } from 'react'
 import { Drawer } from 'vaul'
 import styles from './Drawer.module.css'
 
@@ -15,10 +11,14 @@ export const DrawerTrigger = Drawer.Trigger
 
 export const DrawerPortal = Drawer.Portal
 
-export const DrawerContent = forwardRef<
-  ElementRef<typeof Drawer.Content>,
-  ComponentPropsWithoutRef<typeof Drawer.Content>
->(({ className, children, ...props }, ref) => (
+export const DrawerContent = ({
+  className,
+  children,
+  ref,
+  ...props
+}: ComponentPropsWithoutRef<typeof Drawer.Content> & {
+  ref?: Ref<ElementRef<typeof Drawer.Content>>
+}) => (
   <Drawer.Content
     ref={ref}
     {...props}
@@ -26,7 +26,7 @@ export const DrawerContent = forwardRef<
   >
     {children}
   </Drawer.Content>
-))
+)
 DrawerContent.displayName = Drawer.Content.displayName
 
 export const DrawerTitle = Drawer.Title

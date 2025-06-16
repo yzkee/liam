@@ -7,15 +7,17 @@ import {
   Root,
   Trigger,
 } from '@radix-ui/react-tooltip'
-import { type ComponentProps, type FC, forwardRef } from 'react'
+import type { ComponentProps, FC, Ref } from 'react'
 import styles from './Tooltip.module.css'
 
-export const TooltipContent = forwardRef<
-  HTMLDivElement,
-  ComponentProps<typeof Content>
->((props, ref) => {
+export const TooltipContent = ({
+  ref,
+  ...props
+}: ComponentProps<typeof Content> & {
+  ref?: Ref<HTMLDivElement>
+}) => {
   return <Content {...props} ref={ref} className={styles.content} />
-})
+}
 
 TooltipContent.displayName = 'TooltipContent'
 

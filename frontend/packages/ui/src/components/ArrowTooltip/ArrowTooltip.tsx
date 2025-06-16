@@ -8,17 +8,21 @@ import {
   Root,
   Trigger,
 } from '@radix-ui/react-tooltip'
-import { type ComponentProps, type FC, forwardRef } from 'react'
+import type { ComponentProps, FC, Ref } from 'react'
 import styles from './ArrowTooltip.module.css'
 
 type ArrowTooltipContentProps = ComponentProps<typeof Content> & {
   showArrow?: boolean
+  ref?: Ref<HTMLDivElement>
 }
 
-export const ArrowTooltipContent = forwardRef<
-  HTMLDivElement,
-  ArrowTooltipContentProps
->(({ showArrow = true, sideOffset = 5, children, ...props }, ref) => {
+export const ArrowTooltipContent = ({
+  showArrow = true,
+  sideOffset = 5,
+  children,
+  ref,
+  ...props
+}: ArrowTooltipContentProps) => {
   return (
     <Content
       {...props}
@@ -30,7 +34,7 @@ export const ArrowTooltipContent = forwardRef<
       {showArrow && <Arrow className={styles.arrow} width={6} height={3} />}
     </Content>
   )
-})
+}
 
 ArrowTooltipContent.displayName = 'ArrowTooltipContent'
 

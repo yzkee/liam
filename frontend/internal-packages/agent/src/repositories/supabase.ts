@@ -284,7 +284,6 @@ export class SupabaseSchemaRepository implements SchemaRepository {
       p_schema_version_patch: JSON.parse(JSON.stringify(patch)),
       p_schema_version_reverse_patch: JSON.parse(JSON.stringify(reversePatch)),
       p_latest_schema_version_number: actualLatestVersionNumber,
-      p_design_session_id: buildingSchema.design_session_id,
       p_message_content: messageContent,
     }
 

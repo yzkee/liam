@@ -5,7 +5,7 @@ import { convertSchemaToText } from '../../../utils/convertSchemaToText'
 import { operationsSchema } from '../../../utils/operationsSchema'
 import type { WorkflowState } from '../types'
 
-interface PreparedAnswerGeneration {
+interface PreparedSchemaDesign {
   agent: DatabaseSchemaBuildAgent
   schemaText: string
 }
@@ -129,9 +129,9 @@ const handleBuildAgentResponse = async (
   return await handleSchemaChanges(parsedResponse, state)
 }
 
-async function prepareAnswerGeneration(
+async function prepareSchemaDesign(
   state: WorkflowState,
-): Promise<PreparedAnswerGeneration> {
+): Promise<PreparedSchemaDesign> {
   const schemaText = convertSchemaToText(state.schemaData)
 
   // Create the agent instance
@@ -144,36 +144,28 @@ async function prepareAnswerGeneration(
 }
 
 /**
- * Answer generation node - synchronous execution only
+ * Design Schema Node - DB Design & DDL Execution
+ * Performed by dbAgent
  */
-export async function answerGenerationNode(
+export async function designSchemaNode(
   state: WorkflowState,
 ): Promise<WorkflowState> {
-  try {
-    const { agent, schemaText } = await prepareAnswerGeneration(state)
+  const { agent, schemaText } = await prepareSchemaDesign(state)
 
-    // Format chat history for prompt
-    const formattedChatHistory =
-      state.history.length > 0
-        ? state.history.map((content) => `User: ${content}`).join('\n')
-        : 'No previous conversation.'
+  // Format chat history for prompt
+  const formattedChatHistory =
+    state.history.length > 0
+      ? state.history.map((content) => `User: ${content}`).join('\n')
+      : 'No previous conversation.'
 
-    // Create prompt variables directly
-    const promptVariables: BasePromptVariables = {
-      schema_text: schemaText,
-      chat_history: formattedChatHistory,
-      user_message: state.userInput,
-    }
-
-    // Use agent's generate method with prompt variables
-    const response = await agent.generate(promptVariables)
-    return await handleBuildAgentResponse(response, state)
-  } catch (error) {
-    const errorMsg =
-      error instanceof Error ? error.message : 'Failed to generate answer'
-    return {
-      ...state,
-      error: errorMsg,
-    }
+  // Create prompt variables directly
+  const promptVariables: BasePromptVariables = {
+    schema_text: schemaText,
+    chat_history: formattedChatHistory,
+    user_message: state.userInput,
   }
+
+  // Use agent's generate method with prompt variables
+  const response = await agent.generate(promptVariables)
+  return await handleBuildAgentResponse(response, state)
 }

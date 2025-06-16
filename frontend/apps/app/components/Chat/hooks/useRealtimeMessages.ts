@@ -37,7 +37,11 @@ const handleOptimisticUserUpdate = (
   messageUserId: string | null | undefined,
   currentUserId: string | null | undefined,
 ): ChatEntry[] | null => {
-  if (newEntry.role !== 'user' || messageUserId !== currentUserId || !newEntry.dbId) {
+  if (
+    newEntry.role !== 'user' ||
+    messageUserId !== currentUserId ||
+    !newEntry.dbId
+  ) {
     return null
   }
 

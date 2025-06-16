@@ -7,9 +7,10 @@ import {
   ArrowTooltipRoot,
   ArrowTooltipTrigger,
   Button,
+  DeepModelingToggle,
 } from '@liam-hq/ui'
 import type { ChangeEvent, FC } from 'react'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import styles from './GitHubSessionFormPresenter.module.css'
 
 type Branch = {
@@ -42,6 +43,7 @@ export const GitHubSessionFormPresenter: FC<Props> = ({
   formAction,
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const [isDeepModelingActive, setIsDeepModelingActive] = useState(false)
 
   const handleTextareaChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const textarea = e.target
@@ -133,6 +135,12 @@ export const GitHubSessionFormPresenter: FC<Props> = ({
           </div>
           <div className={styles.divider} />
           <div className={styles.buttonContainer}>
+            <DeepModelingToggle
+              isActive={isDeepModelingActive}
+              onClick={() => setIsDeepModelingActive(!isDeepModelingActive)}
+            >
+              Deep Modeling
+            </DeepModelingToggle>
             <ArrowTooltipRoot>
               <ArrowTooltipTrigger asChild>
                 <Button

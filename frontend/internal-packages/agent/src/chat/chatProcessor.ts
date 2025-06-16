@@ -3,10 +3,10 @@ import type { Repositories } from '../repositories'
 import { executeChatWorkflow } from './workflow'
 import type { WorkflowState } from './workflow/types'
 
-interface ChatProcessorParams {
+export interface ChatProcessorParams {
   message: string
   schemaData: Schema
-  history?: [string, string][]
+  history: [string, string][]
   organizationId?: string
   buildingSchemaId: string
   latestVersionNumber?: number
@@ -15,7 +15,7 @@ interface ChatProcessorParams {
   userId: string
 }
 
-type ChatProcessorResult =
+export type ChatProcessorResult =
   | {
       text: string
       success: true
@@ -61,7 +61,7 @@ export const processChatMessage = async (
     }
 
     // Convert history format
-    const formattedHistory = history?.map(([, content]) => content) || []
+    const formattedHistory = history.map(([, content]) => content)
 
     // Create workflow state
     const workflowState: WorkflowState = {

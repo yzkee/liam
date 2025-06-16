@@ -12,15 +12,19 @@ import {
   TooltipRoot,
   TooltipTrigger,
 } from '@liam-hq/ui'
-import { forwardRef } from 'react'
+import type { Ref } from 'react'
 import styles from './HelpButton.module.css'
 import { ReleaseVersion } from './ReleaseVersion'
+
+type Props = {
+  ref?: Ref<HTMLButtonElement>
+}
 
 const handleSelect = (url: string) => () => {
   window.open(url, '_blank', 'noreferrer')
 }
 
-export const HelpButton = forwardRef<HTMLButtonElement>((_, ref) => {
+export const HelpButton = ({ ref }: Props) => {
   return (
     <DropdownMenuRoot>
       <TooltipProvider>
@@ -63,6 +67,6 @@ export const HelpButton = forwardRef<HTMLButtonElement>((_, ref) => {
       </DropdownMenuPortal>
     </DropdownMenuRoot>
   )
-})
+}
 
 HelpButton.displayName = 'HelpButton'

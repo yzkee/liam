@@ -2,7 +2,7 @@
 
 import { executeQuery } from '@liam-hq/pglite-server'
 import {
-  forwardRef,
+  type Ref,
   useCallback,
   useEffect,
   useImperativeHandle,
@@ -88,7 +88,9 @@ export interface PGlitePlaygroundHandle {
   getDMLResults: (index: number) => SqlResult[] | null
 }
 
-export const PGlitePlayground = forwardRef<PGlitePlaygroundHandle>((_, ref) => {
+export const PGlitePlayground = ({
+  ref,
+}: { ref: Ref<PGlitePlaygroundHandle> }) => {
   const [sessionId] = useState<string>(() => crypto.randomUUID())
   const [isConnected, setIsConnected] = useState<boolean>(false)
 
@@ -462,7 +464,7 @@ export const PGlitePlayground = forwardRef<PGlitePlaygroundHandle>((_, ref) => {
       </div>
     </div>
   )
-})
+}
 
 // Add display name for debugging
 PGlitePlayground.displayName = 'PGlitePlayground'

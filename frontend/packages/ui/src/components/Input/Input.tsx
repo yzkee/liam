@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { type ComponentProps, type ReactNode, forwardRef } from 'react'
+import type { ComponentProps, ReactNode, Ref } from 'react'
 import { match } from 'ts-pattern'
 import styles from './Input.module.css'
 
@@ -10,25 +10,23 @@ type Props = Omit<ComponentProps<'input'>, 'size'> & {
   rightIcon?: ReactNode
   wrapperClassName?: string
   error?: boolean | undefined
+  ref?: Ref<HTMLInputElement>
 }
 
-export const Input = forwardRef<HTMLInputElement, Props>(function Input(
-  {
-    type = 'text',
-    align = 'left',
-    size = 'md',
-    className,
-    wrapperClassName,
-    leftIcon,
-    rightIcon,
-    disabled,
-    readOnly,
-    error,
-    ...rest
-  },
+export const Input = ({
+  type = 'text',
+  align = 'left',
+  size = 'md',
+  className,
+  wrapperClassName,
+  leftIcon,
+  rightIcon,
+  disabled,
+  readOnly,
+  error,
   ref,
-) {
-  size
+  ...rest
+}: Props) => {
   const sizeClassName = match(size)
     .with('md', () => styles.md)
     .with('sm', () => styles.sm)
@@ -57,4 +55,4 @@ export const Input = forwardRef<HTMLInputElement, Props>(function Input(
       {rightIcon && <div className={styles.icon}>{rightIcon}</div>}
     </div>
   )
-})
+}

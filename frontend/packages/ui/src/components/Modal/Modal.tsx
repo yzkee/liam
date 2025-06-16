@@ -1,6 +1,6 @@
 import * as Dialog from '@radix-ui/react-dialog'
 import clsx from 'clsx'
-import React, { type PropsWithChildren, type ComponentProps } from 'react'
+import type { ComponentProps, FC, PropsWithChildren, Ref } from 'react'
 import styles from './Modal.module.css'
 
 export const ModalRoot = Dialog.Root
@@ -9,25 +9,31 @@ export const ModalTrigger = Dialog.Trigger
 
 export const ModalPortal = Dialog.Portal
 
-export const ModalOverlay = React.forwardRef<HTMLDivElement>((props, ref) => (
+export const ModalOverlay = ({
+  ref,
+  ...props
+}: { ref?: Ref<HTMLDivElement> }) => (
   <Dialog.Overlay ref={ref} className={styles.dialogOverlay} {...props} />
-))
+)
 ModalOverlay.displayName = 'ModalOverlay'
 
-export const ModalContent = React.forwardRef<
-  HTMLDivElement,
-  ComponentProps<typeof Dialog.Content>
->(({ className, ...props }, ref) => (
+export const ModalContent = ({
+  className,
+  ref,
+  ...props
+}: ComponentProps<typeof Dialog.Content> & {
+  ref?: Ref<HTMLDivElement>
+}) => (
   <Dialog.Content
     ref={ref}
     className={clsx(styles.dialogContent, className)}
     {...props}
     role="dialog"
   />
-))
+)
 ModalContent.displayName = 'ModalContent'
 
-export const ModalTitle: React.FC<ComponentProps<typeof Dialog.Title>> = ({
+export const ModalTitle: FC<ComponentProps<typeof Dialog.Title>> = ({
   className,
   children,
   ...props
@@ -37,7 +43,7 @@ export const ModalTitle: React.FC<ComponentProps<typeof Dialog.Title>> = ({
   </Dialog.Title>
 )
 
-export const ModalDescription: React.FC<
+export const ModalDescription: FC<
   ComponentProps<typeof Dialog.Description>
 > = ({ children, ...props }) => (
   <Dialog.Description className={styles.dialogDescription} {...props}>
@@ -49,14 +55,14 @@ type ModalActionsProps = PropsWithChildren & {
   className?: string
 }
 
-export const ModalActions: React.FC<ModalActionsProps> = ({
+export const ModalActions: FC<ModalActionsProps> = ({
   children,
   className,
 }) => {
   return <div className={clsx(styles.dialogActions, className)}>{children}</div>
 }
 
-export const ModalClose: React.FC<ComponentProps<typeof Dialog.Close>> = ({
+export const ModalClose: FC<ComponentProps<typeof Dialog.Close>> = ({
   children,
   ...props
 }) => {
@@ -67,6 +73,6 @@ export const ModalClose: React.FC<ComponentProps<typeof Dialog.Close>> = ({
   )
 }
 
-export const ModalConfirm: React.FC<ComponentProps<'button'>> = (props) => {
+export const ModalConfirm: FC<ComponentProps<'button'>> = (props) => {
   return <button type="button" className={styles.confirmButton} {...props} />
 }

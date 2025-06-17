@@ -15,6 +15,18 @@ export async function finalizeArtifactsNode(
     // If there's an error, create an error response for the user
     finalResponse = `Sorry, an error occurred during processing: ${state.error}`
     errorToReturn = state.error
+
+    // Save error message to database
+    const saveResult = await state.repositories.schema.createMessage({
+      designSessionId: state.designSessionId,
+      content: finalResponse,
+      role: 'error',
+    })
+
+    if (!saveResult.success) {
+      console.error('Failed to save error message:', saveResult.error)
+      // Continue processing even if message saving fails
+    }
   } else if (state.generatedAnswer) {
     // Normal case: use the generated answer
     finalResponse = state.generatedAnswer

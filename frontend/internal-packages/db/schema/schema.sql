@@ -96,7 +96,8 @@ ALTER TYPE "public"."knowledge_type" OWNER TO "postgres";
 CREATE TYPE "public"."message_role_enum" AS ENUM (
     'user',
     'assistant',
-    'schema_version'
+    'schema_version',
+    'error'
 );
 
 

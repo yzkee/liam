@@ -9,12 +9,12 @@ const NODE_NAME = 'reviewDeliverablesNode'
 export async function reviewDeliverablesNode(
   state: WorkflowState,
 ): Promise<WorkflowState> {
-  state.log.info(`[${NODE_NAME}] Started`)
+  state.log.log(`[${NODE_NAME}] Started`)
 
   // TODO: Implement deliverables review logic
   // This node should perform final confirmation of requirements and deliverables
 
-  state.log.info(`[${NODE_NAME}] Completed`)
+  state.log.log(`[${NODE_NAME}] Completed`)
 
   // For now, pass through the state unchanged (assuming review passes)
   // Future implementation will review deliverables and confirm requirements

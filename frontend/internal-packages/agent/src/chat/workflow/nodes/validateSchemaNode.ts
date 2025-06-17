@@ -9,12 +9,12 @@ const NODE_NAME = 'validateSchemaNode'
 export async function validateSchemaNode(
   state: WorkflowState,
 ): Promise<WorkflowState> {
-  state.log.info(`[${NODE_NAME}] Started`)
+  state.log.log(`[${NODE_NAME}] Started`)
 
   // TODO: Implement schema validation logic
   // This node should verify use cases and execute DML for testing
 
-  state.log.info(`[${NODE_NAME}] Completed`)
+  state.log.log(`[${NODE_NAME}] Completed`)
 
   // For now, pass through the state unchanged (assuming validation passes)
   // Future implementation will validate schema and execute test DML

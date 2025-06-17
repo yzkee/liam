@@ -12,6 +12,9 @@ function createWorkflowLogger(): NodeLogger {
     debug: (message: string, metadata?: Record<string, unknown>) => {
       logger.debug(message, metadata)
     },
+    log: (message: string, metadata?: Record<string, unknown>) => {
+      logger.log(message, metadata)
+    },
     info: (message: string, metadata?: Record<string, unknown>) => {
       logger.info(message, metadata)
     },

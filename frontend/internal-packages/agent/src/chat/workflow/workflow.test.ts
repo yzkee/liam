@@ -126,6 +126,7 @@ describe('Chat Workflow', () => {
     // Create mock logger
     mockLogger = {
       debug: vi.fn(),
+      log: vi.fn(),
       info: vi.fn(),
       warn: vi.fn(),
       error: vi.fn(),

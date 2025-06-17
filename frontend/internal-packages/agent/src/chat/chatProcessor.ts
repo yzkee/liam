@@ -32,6 +32,7 @@ export const processChatMessage = async (
   params: ChatProcessorParams,
   log: NodeLogger = {
     debug: () => {},
+    log: () => {},
     info: () => {},
     warn: () => {},
     error: () => {},

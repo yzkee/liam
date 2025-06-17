@@ -1,11 +1,9 @@
-import { schemaSchema } from '@liam-hq/db-structure'
 import { processChatTask } from '@liam-hq/jobs'
 import { NextResponse } from 'next/server'
 import * as v from 'valibot'
 
 const chatRequestSchema = v.object({
   message: v.pipe(v.string(), v.minLength(1, 'Message is required')),
-  schemaData: schemaSchema,
   history: v.array(v.tuple([v.string(), v.string()])),
   organizationId: v.string(),
   buildingSchemaId: v.string(),

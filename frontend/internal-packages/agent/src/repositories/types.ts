@@ -1,9 +1,10 @@
+import type { Schema } from '@liam-hq/db-structure'
 import type { Database, Tables } from '@liam-hq/db/supabase/database.types'
 import type { Operation } from 'fast-json-patch'
 
 export interface SchemaData {
   id: string
-  schema: Record<string, unknown>
+  schema: Schema
   latestVersionNumber: number
 }
 

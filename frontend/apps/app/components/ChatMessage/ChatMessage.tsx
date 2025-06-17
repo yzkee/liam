@@ -2,6 +2,7 @@
 
 import { AgentMessage } from '@/components/Chat/AgentMessage'
 import { UserMessage } from '@/components/Chat/UserMessage'
+import { VersionMessage } from '@/components/Chat/VersionMessage'
 import type { Database } from '@liam-hq/db'
 import { syntaxCodeTagProps, syntaxCustomStyle, syntaxTheme } from '@liam-hq/ui'
 import type { CSSProperties, FC, HTMLAttributes, ReactNode } from 'react'
@@ -20,44 +21,66 @@ interface CodeProps extends HTMLAttributes<HTMLElement> {
   style?: CSSProperties
 }
 
-export interface ChatMessageProps {
-  content: string
-  role: Database['public']['Enums']['message_role_enum']
-  timestamp?: Date
-  avatarSrc?: string
-  avatarAlt?: string
-  initial?: string
-  /**
-   * Whether the bot is generating a response
-   * @default false
-   */
-  isGenerating?: boolean
-  /**
-   * Optional children to render below the message content
-   */
-  children?: ReactNode
-  /**
-   * Progress messages to display above the main message
-   */
-  progressMessages?: string[]
-  /**
-   * Whether to show progress messages
-   */
-  showProgress?: boolean
-}
+// TODO: Modify to use what is inferred from the valibot schema
+export type ChatMessageProps =
+  | {
+      content: string
+      role: Database['public']['Enums']['message_role_enum']
+      timestamp?: Date
+      avatarSrc?: string
+      avatarAlt?: string
+      initial?: string
+      /**
+       * Whether the bot is generating a response
+       * @default false
+       */
+      isGenerating?: boolean
+      /**
+       * Optional children to render below the message content
+       */
+      children?: ReactNode
+      /**
+       * Progress messages to display above the main message
+       */
+      progressMessages?: string[]
+      /**
+       * Whether to show progress messages
+       */
+      showProgress?: boolean
+    }
+  | {
+      id: string
+      role: 'schema_version'
+      content: string
+      building_schema_version_id: string
+    }
 
-export const ChatMessage: FC<ChatMessageProps> = ({
-  content,
-  role,
-  timestamp,
-  avatarSrc,
-  avatarAlt,
-  initial,
-  isGenerating = false,
-  children,
-  progressMessages,
-  showProgress,
-}) => {
+export const ChatMessage: FC<ChatMessageProps> = (props) => {
+  // Handle schema_version role separately
+  if ('building_schema_version_id' in props) {
+    return (
+      <div className={styles.messageContainer}>
+        <VersionMessage
+          buildingSchemaVersionId={props.building_schema_version_id}
+        />
+      </div>
+    )
+  }
+
+  // Destructure props for regular messages
+  const {
+    content,
+    role,
+    timestamp,
+    avatarSrc,
+    avatarAlt,
+    initial,
+    isGenerating = false,
+    children,
+    progressMessages,
+    showProgress,
+  } = props
+
   // Only format and display timestamp if it exists
   const formattedTime = timestamp
     ? timestamp.toLocaleTimeString([], {

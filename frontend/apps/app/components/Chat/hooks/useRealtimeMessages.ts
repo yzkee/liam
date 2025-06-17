@@ -56,17 +56,25 @@ const handleOptimisticUserUpdate = (
   return wasUpdated ? updated : null
 }
 
-export type Message = {
-  id: string
-  content: string
-  role: Database['public']['Enums']['message_role_enum']
-  user_id: string | null
-  created_at: string
-  updated_at: string
-  organization_id: string
-  design_session_id: string
-  building_schema_version_id: string | null
-}
+// TODO: Modify to use what is inferred from the valibot schema
+export type Message =
+  | {
+      id: string
+      content: string
+      role: Database['public']['Enums']['message_role_enum']
+      user_id: string | null
+      created_at: string
+      updated_at: string
+      organization_id: string
+      design_session_id: string
+      building_schema_version_id: string | null
+    }
+  | {
+      id: string
+      role: 'schema_version'
+      content: string
+      building_schema_version_id: string
+    }
 
 type UseRealtimeMessagesFunc = (
   designSession: {
@@ -87,10 +95,13 @@ export const useRealtimeMessages: UseRealtimeMessagesFunc = (
   currentUserId,
 ) => {
   // Initialize messages with existing messages (no welcome message)
-  const initialMessages = designSession.messages.map((msg) => ({
-    ...convertMessageToChatEntry(msg),
-    dbId: msg.id,
-  }))
+  const initialMessages = designSession.messages.map((msg) => {
+    const chatEntry = convertMessageToChatEntry(msg)
+    return {
+      ...chatEntry,
+      dbId: 'id' in msg ? msg.id : chatEntry.id,
+    }
+  })
 
   const [messages, setMessages] = useState<ChatEntry[]>(initialMessages)
 

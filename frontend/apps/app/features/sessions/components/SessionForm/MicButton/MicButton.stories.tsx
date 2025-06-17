@@ -1,8 +1,8 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta } from '@storybook/react'
 import { useState } from 'react'
 import { MicButton } from './MicButton'
 
-const meta: Meta<typeof MicButton> = {
+const meta = {
   title: 'Features/Sessions/MicButton',
   component: MicButton,
   parameters: {
@@ -16,68 +16,57 @@ const meta: Meta<typeof MicButton> = {
     },
   },
   tags: ['autodocs'],
-}
+} satisfies Meta<typeof MicButton>
 
 export default meta
-type Story = StoryObj<typeof meta>
 
-export const Default: Story = {
+export const Default = {
   args: {
     state: 'default',
   },
 }
 
-export const Hover: Story = {
+export const Hover = {
   args: {
     state: 'hover',
   },
 }
 
-export const Active: Story = {
+export const Active = {
   args: {
     state: 'active',
   },
 }
 
-export const ActiveHover: Story = {
+export const ActiveHover = {
   args: {
     state: 'active-hover',
   },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'Active state with hover (when mouse is over the button while recording)',
-      },
-    },
-  },
 }
 
-export const Interactive: Story = {
-  render: () => {
-    const [isRecording, setIsRecording] = useState(false)
+export const Interactive = () => {
+  const [isRecording, setIsRecording] = useState(false)
 
-    const handleClick = () => {
-      setIsRecording(!isRecording)
-    }
+  const handleClick = () => {
+    setIsRecording(!isRecording)
+  }
 
-    return (
-      <div style={{ padding: '40px', minHeight: '200px' }}>
-        <MicButton onClick={handleClick} />
-        <div style={{ marginTop: '40px', color: '#ccc', fontSize: '14px' }}>
-          <p>
-            Recording:{' '}
-            <strong style={{ color: isRecording ? '#1ded83' : '#666' }}>
-              {isRecording ? 'Yes' : 'No'}
-            </strong>
-          </p>
-          <ul style={{ marginTop: '20px', lineHeight: '1.8' }}>
-            <li>Hover over the button to see hover state</li>
-            <li>Click to toggle recording on/off</li>
-            <li>The button manages its own visual state automatically</li>
-          </ul>
-        </div>
+  return (
+    <div style={{ padding: '40px', minHeight: '200px' }}>
+      <MicButton onClick={handleClick} />
+      <div style={{ marginTop: '40px', color: '#ccc', fontSize: '14px' }}>
+        <p>
+          Recording:{' '}
+          <strong style={{ color: isRecording ? '#1ded83' : '#666' }}>
+            {isRecording ? 'Yes' : 'No'}
+          </strong>
+        </p>
+        <ul style={{ marginTop: '20px', lineHeight: '1.8' }}>
+          <li>Hover over the button to see hover state</li>
+          <li>Click to toggle recording on/off</li>
+          <li>The button manages its own visual state automatically</li>
+        </ul>
       </div>
-    )
-  },
+    </div>
+  )
 }

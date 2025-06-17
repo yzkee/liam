@@ -13,6 +13,8 @@ export const generateMessageId = (prefix: string): string => {
 export const formatChatHistory = (
   messages: ChatEntry[],
 ): [string, string][] => {
-  return messages
-    .map((msg) => [msg.role === 'user' ? 'Human' : 'AI', msg.content])
+  return messages.map((msg) => [
+    msg.role === 'user' ? 'Human' : 'AI',
+    msg.content,
+  ])
 }

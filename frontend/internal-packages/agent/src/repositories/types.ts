@@ -48,6 +48,9 @@ export type CreateMessageParams = {
       role: 'schema_version'
       buildingSchemaVersionId: string
     }
+  | {
+      role: 'error'
+    }
 )
 
 export type MessageResult =

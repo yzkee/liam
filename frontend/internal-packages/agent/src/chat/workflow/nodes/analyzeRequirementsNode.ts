@@ -1,4 +1,3 @@
-import type { NodeLogger } from '../../../utils/nodeLogger'
 import type { WorkflowState } from '../types'
 
 /**
@@ -7,14 +6,15 @@ import type { WorkflowState } from '../types'
  */
 export async function analyzeRequirementsNode(
   state: WorkflowState,
-  log: NodeLogger = () => {},
 ): Promise<WorkflowState> {
-  log({ node: 'analyzeRequirementsNode', state: 'start' })
+  state.log.info('Node execution started', { node: 'analyzeRequirementsNode' })
 
   // TODO: Implement requirements analysis logic
   // This node should organize and clarify requirements from user input
 
-  log({ node: 'analyzeRequirementsNode', state: 'end' })
+  state.log.info('Node execution completed', {
+    node: 'analyzeRequirementsNode',
+  })
 
   // For now, pass through the state unchanged
   // Future implementation will analyze and organize user requirements

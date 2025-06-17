@@ -3,7 +3,6 @@ import * as v from 'valibot'
 import { DatabaseSchemaBuildAgent } from '../../../langchain/agents'
 import type { BasePromptVariables } from '../../../langchain/utils/types'
 import { convertSchemaToText } from '../../../utils/convertSchemaToText'
-import type { NodeLogger } from '../../../utils/nodeLogger'
 import type { WorkflowState } from '../types'
 
 interface PreparedSchemaDesign {
@@ -150,9 +149,8 @@ async function prepareSchemaDesign(
  */
 export async function designSchemaNode(
   state: WorkflowState,
-  log: NodeLogger = () => {},
 ): Promise<WorkflowState> {
-  log({ node: 'designSchemaNode', state: 'start' })
+  state.log.info('Node execution started', { node: 'designSchemaNode' })
 
   const { agent, schemaText } = await prepareSchemaDesign(state)
 
@@ -173,6 +171,6 @@ export async function designSchemaNode(
   const response = await agent.generate(promptVariables)
   const result = await handleBuildAgentResponse(response, state)
 
-  log({ node: 'designSchemaNode', state: 'end' })
+  state.log.info('Node execution completed', { node: 'designSchemaNode' })
   return result
 }

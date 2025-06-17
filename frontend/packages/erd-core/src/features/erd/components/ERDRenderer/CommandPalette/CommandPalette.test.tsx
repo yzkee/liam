@@ -3,10 +3,11 @@ import { cleanup, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ReactFlowProvider } from '@xyflow/react'
 import { NuqsAdapter } from 'nuqs/adapters/react'
-import type { ReactNode } from 'react'
+import { type FC, type ReactNode, useContext } from 'react'
 import { afterEach, describe, expect, it } from 'vitest'
 import { SchemaProvider, UserEditingProvider } from '@/stores'
 import type { SchemaStore } from '@/stores/schema/schema'
+import { UserEditingContext } from '@/stores/userEditing/context'
 import { CommandPalette } from './CommandPalette'
 
 afterEach(() => {
@@ -26,10 +27,22 @@ const schema: SchemaStore = {
   },
 }
 
+const ActiveTableNameDisplay: FC = () => {
+  const userEditing = useContext(UserEditingContext)
+
+  return (
+    //  The currently selected table name is displayed via Context, and used in tests for assertions.
+    <div data-testid="test-active-table-name-display">
+      {userEditing?.activeTableName}
+    </div>
+  )
+}
+
 const wrapper = ({ children }: { children: ReactNode }) => (
   <NuqsAdapter>
     <ReactFlowProvider>
       <UserEditingProvider>
+        <ActiveTableNameDisplay />
         <SchemaProvider schema={schema}>{children}</SchemaProvider>
       </UserEditingProvider>
     </ReactFlowProvider>
@@ -156,5 +169,46 @@ describe('preview with option interactions', () => {
 
     await user.keyboard('{ArrowUp}')
     expect(within(preview).getByText('posts')).toBeInTheDocument()
+  })
+})
+
+describe('go to ERD with option select', () => {
+  it('go to the table of clicked option and close dialog', async () => {
+    const {
+      user,
+      elements: { dialog },
+    } = await prepareCommandPalette()
+
+    expect(
+      screen.getByTestId('test-active-table-name-display'),
+    ).toBeEmptyDOMElement()
+
+    await user.click(within(dialog).getByRole('option', { name: 'follows' }))
+
+    expect(
+      screen.getByTestId('test-active-table-name-display'),
+    ).toHaveTextContent('follows')
+    expect(dialog).not.toBeInTheDocument()
+  })
+
+  it('go to the table of selected option by typing Enter key and close dialog', async () => {
+    const {
+      user,
+      elements: { dialog, preview },
+    } = await prepareCommandPalette()
+
+    expect(
+      screen.getByTestId('test-active-table-name-display'),
+    ).toBeEmptyDOMElement()
+
+    // select "posts" option by typing Enter key
+    await user.keyboard('{ArrowDown}')
+    expect(within(preview).getByText('posts')).toBeInTheDocument()
+    await user.keyboard('{Enter}')
+
+    expect(dialog).not.toBeInTheDocument()
+    expect(
+      screen.getByTestId('test-active-table-name-display'),
+    ).toHaveTextContent('posts')
   })
 })

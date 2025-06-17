@@ -47,6 +47,18 @@ export async function finalizeArtifactsNode(
     // Fallback case: no generated answer and no specific error
     finalResponse = 'Sorry, we could not generate an answer. Please try again.'
     errorToReturn = 'No generated answer available'
+
+    // Save fallback message to database
+    const saveResult = await state.repositories.schema.createMessage({
+      designSessionId: state.designSessionId,
+      content: finalResponse,
+      role: 'error',
+    })
+
+    if (!saveResult.success) {
+      console.error('Failed to save fallback message:', saveResult.error)
+      // Continue processing even if message saving fails
+    }
   }
 
   // Update chat history with the new conversation

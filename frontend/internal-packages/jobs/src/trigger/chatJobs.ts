@@ -24,21 +24,13 @@ export const processChatTask = task({
       payload.designSessionId,
     )
     if (schemaResult.error || !schemaResult.data) {
-      const errorMessage =
-        schemaResult.error?.message || 'Failed to fetch schema data'
-      logger.log('Failed to fetch schema data:', { error: errorMessage })
-      return {
-        success: false,
-        error: errorMessage,
-      }
+      throw new Error(`Failed to fetch schema data: ${schemaResult.error}`)
     }
 
     const chatParams: ChatProcessorParams = {
       ...payload,
       repositories,
-      schemaData: schemaResult.data.schema as Parameters<
-        typeof processChatMessage
-      >[0]['schemaData'],
+      schemaData: schemaResult.data.schema,
     }
 
     const result = await processChatMessage(chatParams)

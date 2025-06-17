@@ -31,12 +31,12 @@ export const CollapsibleHeader: FC<CollapsibleHeaderProps> = ({
 
   const handleClose = (event: MouseEvent | KeyboardEvent<HTMLDivElement>) => {
     event.stopPropagation()
-    setIsClosed(!isClosed)
+    setIsClosed((isClosed) => !isClosed)
   }
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key === 'Enter' || event.key === ' ') {
-      setIsClosed(!isClosed)
+      setIsClosed((isClosed) => !isClosed)
     }
   }
 

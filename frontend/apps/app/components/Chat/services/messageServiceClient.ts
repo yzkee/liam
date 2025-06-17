@@ -3,10 +3,19 @@
 import { createClient } from '@/libs/db/client'
 import type { Tables } from '@liam-hq/db/supabase/database.types'
 import * as v from 'valibot'
+import type { ChatEntry } from '../types/chatTypes'
 
-type Message = Tables<'messages'>
+type SchemaVersionMessage = {
+  id: string
+  role: 'schema_version'
+  content: string
+  building_schema_version_id: string
+}
 
-// Schema for validating realtime message payload
+// TODO: Modify to use what is inferred from the valibot schema
+type Message = Tables<'messages'> | SchemaVersionMessage
+
+// TODO: Make sure to use it when storing data and as an inferential type
 const realtimeMessageSchema = v.object({
   id: v.string(),
   design_session_id: v.pipe(v.string(), v.uuid()),
@@ -40,7 +49,28 @@ export const getCurrentUserId = async (): Promise<string | null> => {
 /**
  * Convert database message to ChatEntry format
  */
-export const convertMessageToChatEntry = (message: Message) => {
+function isSchemaVersionMessage(
+  message: Message,
+): message is SchemaVersionMessage {
+  return (
+    message.role === 'schema_version' &&
+    'building_schema_version_id' in message &&
+    typeof message.building_schema_version_id === 'string'
+  )
+}
+
+export const convertMessageToChatEntry = (message: Message): ChatEntry => {
+  if (isSchemaVersionMessage(message)) {
+    // Schema version message
+    return {
+      id: message.id,
+      role: message.role,
+      content: message.content,
+      building_schema_version_id: message.building_schema_version_id,
+    }
+  }
+
+  // Regular message from Tables<'messages'>
   return {
     id: message.id,
     content: message.content,
@@ -55,7 +85,7 @@ export const convertMessageToChatEntry = (message: Message) => {
  */
 export const setupRealtimeSubscription = (
   designSessionId: string,
-  onNewMessage: (message: Message) => void,
+  onNewMessage: (message: Tables<'messages'>) => void,
   onError?: (error: Error) => void,
 ) => {
   const supabase = createClient()

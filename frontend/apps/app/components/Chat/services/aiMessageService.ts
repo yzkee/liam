@@ -1,6 +1,6 @@
 'use client'
 
-import type { Schema, TableGroup } from '@liam-hq/db-structure'
+import type { TableGroup } from '@liam-hq/db-structure'
 import { boolean, object, optional, parse, string } from 'valibot'
 import { ERROR_MESSAGES } from '../constants/chatConstants'
 import type { ChatEntry } from '../types/chatTypes'
@@ -15,7 +15,6 @@ type DesignSession = {
 
 interface SendChatMessageParams {
   message: string
-  schemaData: Schema
   tableGroups?: Record<string, TableGroup>
   messages: ChatEntry[]
   designSession: DesignSession
@@ -42,7 +41,6 @@ const ChatAPIResponseSchema = object({
  */
 const callChatAPI = async (
   message: string,
-  schemaData: Schema,
   tableGroups: Record<string, TableGroup> | undefined,
   history: [string, string][],
   designSession: DesignSession,
@@ -55,7 +53,6 @@ const callChatAPI = async (
     },
     body: JSON.stringify({
       message,
-      schemaData,
       tableGroups,
       history,
       organizationId: designSession.organizationId,
@@ -97,7 +94,6 @@ const handleChatError = (
  */
 export const sendChatMessage = async ({
   message,
-  schemaData,
   tableGroups,
   messages,
   designSession,
@@ -111,7 +107,6 @@ export const sendChatMessage = async ({
     // Call API
     const response = await callChatAPI(
       message,
-      schemaData,
       tableGroups,
       history,
       designSession,

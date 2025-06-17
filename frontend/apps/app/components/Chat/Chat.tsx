@@ -74,7 +74,6 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups, designSession }) => {
     // Send chat message to API
     const result = await sendChatMessage({
       message: content,
-      schemaData,
       tableGroups,
       messages,
       designSession,
@@ -121,10 +120,7 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups, designSession }) => {
           return (
             <ChatMessage
               key={message.id}
-              content={message.content}
-              role={message.role}
-              timestamp={message.timestamp}
-              isGenerating={message.isGenerating}
+              {...message}
               progressMessages={
                 shouldShowProgress ? progressMessages : undefined
               }

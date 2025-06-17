@@ -86,7 +86,7 @@ export const ProcessIndicator: FC<ProcessIndicatorProps> = ({
 
   // Toggle expanded/collapsed state
   const handleToggle = () => {
-    setIsExpanded(!isExpanded)
+    setIsExpanded((isExpanded) => !isExpanded)
   }
 
   // Limit progress to 0-100 range

@@ -1,9 +1,9 @@
+import { operationsSchema } from '@liam-hq/db-structure'
 import * as v from 'valibot'
 import { DatabaseSchemaBuildAgent } from '../../../langchain/agents'
 import type { BasePromptVariables } from '../../../langchain/utils/types'
 import { convertSchemaToText } from '../../../utils/convertSchemaToText'
 import type { NodeLogger } from '../../../utils/nodeLogger'
-import { operationsSchema } from '../../../utils/operationsSchema'
 import type { WorkflowState } from '../types'
 
 interface PreparedSchemaDesign {

@@ -1,9 +1,8 @@
 import type { SupabaseClientType } from '@liam-hq/db'
 import { schemaSchema } from '@liam-hq/db-structure'
+import { applyPatchOperations, operationsSchema } from '@liam-hq/db-structure'
 import { compare } from 'fast-json-patch'
 import * as v from 'valibot'
-import { applyPatchOperations } from '../utils/applyPatchOperations'
-import { operationsSchema } from '../utils/operationsSchema'
 import type {
   CreateMessageParams,
   CreateVersionParams,

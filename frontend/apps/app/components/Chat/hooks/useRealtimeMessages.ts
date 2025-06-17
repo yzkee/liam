@@ -10,8 +10,37 @@ const isDuplicateMessage = (
   messages: ChatEntry[],
   newEntry: ChatEntry,
 ): boolean => {
-  if (!newEntry.dbId) return false
-  return messages.some((msg) => msg.dbId === newEntry.dbId)
+  // Check by message ID
+  const duplicateById = messages.some((msg) => msg.id === newEntry.id)
+  if (duplicateById) {
+    return true
+  }
+
+  // For user messages, check by content and role with timestamp tolerance
+  if (newEntry.role === 'user') {
+    const contentDuplicate = messages.some((msg) => {
+      if (msg.role !== 'user' || msg.content !== newEntry.content) {
+        return false
+      }
+
+      // If both have timestamps, check if they're within reasonable range (5 seconds)
+      if (msg.timestamp && newEntry.timestamp) {
+        const timeDiff = Math.abs(
+          newEntry.timestamp.getTime() - msg.timestamp.getTime(),
+        )
+        return timeDiff < 5000 // 5 seconds tolerance
+      }
+
+      // If either doesn't have timestamp, consider it a duplicate by content alone
+      return true
+    })
+
+    if (contentDuplicate) {
+      return true
+    }
+  }
+
+  return false
 }
 
 const findExistingMessageIndex = (
@@ -37,23 +66,26 @@ const handleOptimisticUserUpdate = (
   messageUserId: string | null | undefined,
   currentUserId: string | null | undefined,
 ): ChatEntry[] | null => {
-  if (
-    newEntry.role !== 'user' ||
-    messageUserId !== currentUserId ||
-    !newEntry.dbId
-  ) {
+  if (newEntry.role !== 'user' || messageUserId !== currentUserId) {
     return null
   }
 
-  const updated = messages.map((msg) => {
-    if (msg.role === 'user' && !msg.dbId && msg.content === newEntry.content) {
-      return { ...msg, dbId: newEntry.dbId }
-    }
-    return msg
-  })
+  // Find optimistic message (user message with temporary ID) that matches content
+  const optimisticIndex = messages.findIndex(
+    (msg) =>
+      msg.role === 'user' &&
+      msg.content === newEntry.content &&
+      msg.id !== newEntry.id,
+  )
 
-  const wasUpdated = updated.some((msg, index) => msg !== messages[index])
-  return wasUpdated ? updated : null
+  if (optimisticIndex >= 0) {
+    // Replace the optimistic message with the persisted one
+    const updated = [...messages]
+    updated[optimisticIndex] = newEntry
+    return updated
+  }
+
+  return null
 }
 
 // TODO: Modify to use what is inferred from the valibot schema
@@ -96,11 +128,7 @@ export const useRealtimeMessages: UseRealtimeMessagesFunc = (
 ) => {
   // Initialize messages with existing messages (no welcome message)
   const initialMessages = designSession.messages.map((msg) => {
-    const chatEntry = convertMessageToChatEntry(msg)
-    return {
-      ...chatEntry,
-      dbId: 'id' in msg ? msg.id : chatEntry.id,
-    }
+    return convertMessageToChatEntry(msg)
   })
 
   const [messages, setMessages] = useState<ChatEntry[]>(initialMessages)
@@ -109,7 +137,7 @@ export const useRealtimeMessages: UseRealtimeMessagesFunc = (
   const addOrUpdateMessage = useCallback(
     (newChatEntry: ChatEntry, messageUserId?: string | null) => {
       setMessages((prev) => {
-        // Check if message already exists by dbId to prevent duplicates
+        // Check if message already exists to prevent duplicates
         if (isDuplicateMessage(prev, newChatEntry)) {
           return prev
         }
@@ -146,10 +174,7 @@ export const useRealtimeMessages: UseRealtimeMessagesFunc = (
   const handleNewMessage = useCallback(
     (newMessage: Tables<'messages'>) => {
       // Convert database message to ChatEntry format
-      const chatEntry = {
-        ...convertMessageToChatEntry(newMessage),
-        dbId: newMessage.id,
-      }
+      const chatEntry = convertMessageToChatEntry(newMessage)
 
       // TODO: Implement efficient duplicate checking - Use Set/Map for O(1) duplicate checking instead of O(n) array.some()
       // TODO: Implement smart auto-scroll - Consider user's scroll position and only auto-scroll when user is at bottom

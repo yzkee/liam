@@ -6,6 +6,4 @@ import type { ChatMessageProps } from '../../ChatMessage/ChatMessage'
 export type ChatEntry = ChatMessageProps & {
   /** Unique identifier for the message */
   id: string
-  /** Database message ID for persistence */
-  dbId?: string
 }

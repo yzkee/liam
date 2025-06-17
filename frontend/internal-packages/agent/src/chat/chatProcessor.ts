@@ -1,8 +1,8 @@
 import type { Schema } from '@liam-hq/db-structure'
 import type { Repositories } from '../repositories'
+import type { NodeLogger } from '../utils/nodeLogger'
 import { executeChatWorkflow } from './workflow'
 import type { WorkflowState } from './workflow/types'
-
 export interface ChatProcessorParams {
   message: string
   schemaData: Schema
@@ -30,6 +30,7 @@ export type ChatProcessorResult =
  */
 export const processChatMessage = async (
   params: ChatProcessorParams,
+  logger: NodeLogger,
 ): Promise<ChatProcessorResult> => {
   const {
     message,
@@ -73,6 +74,7 @@ export const processChatMessage = async (
     repositories,
     designSessionId,
     userId,
+    logger,
   }
 
   // Execute workflow

@@ -1,6 +1,7 @@
 import type { Schema } from '@liam-hq/db-structure'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Repositories, SchemaRepository } from '../../repositories'
+import type { NodeLogger } from '../../utils/nodeLogger'
 import { executeChatWorkflow } from './index'
 import type { WorkflowState } from './types'
 
@@ -22,6 +23,7 @@ describe('Chat Workflow', () => {
   let MockDatabaseSchemaBuildAgent: ReturnType<typeof vi.fn>
   let mockRepositories: Repositories
   let mockSchemaRepository: SchemaRepository
+  let mockLogger: NodeLogger
 
   // Helper function to create test schema data
   const createMockSchema = (): Schema => ({
@@ -82,6 +84,7 @@ describe('Chat Workflow', () => {
     userId: 'test-user-id',
     designSessionId: 'test-design-session-id',
     repositories: mockRepositories,
+    logger: mockLogger,
     ...overrides,
   })
 
@@ -118,6 +121,15 @@ describe('Chat Workflow', () => {
 
     mockRepositories = {
       schema: mockSchemaRepository,
+    }
+
+    // Create mock logger
+    mockLogger = {
+      debug: vi.fn(),
+      log: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
     }
 
     // Create mock schema data

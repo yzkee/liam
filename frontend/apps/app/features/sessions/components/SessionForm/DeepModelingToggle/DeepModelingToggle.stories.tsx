@@ -3,25 +3,12 @@ import { useState } from 'react'
 import { DeepModelingToggle } from './DeepModelingToggle'
 
 const meta: Meta<typeof DeepModelingToggle> = {
-  title: 'Components/DeepModelingToggle',
+  title: 'Features/Sessions/DeepModelingToggle',
   component: DeepModelingToggle,
   parameters: {
     layout: 'centered',
   },
   tags: ['autodocs'],
-  argTypes: {
-    isActive: {
-      control: 'boolean',
-      description: 'Toggle active state',
-    },
-    children: {
-      control: 'text',
-      description: 'Button label text',
-    },
-    onClick: {
-      action: 'clicked',
-    },
-  },
 }
 
 export default meta
@@ -29,33 +16,29 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
-    children: 'Deep Modeling',
     isActive: false,
+    children: 'Deep Modeling',
   },
 }
 
 export const Active: Story = {
   args: {
-    children: 'Deep Modeling',
     isActive: true,
+    children: 'Deep Modeling',
   },
 }
 
 export const Interactive: Story = {
-  render: ({ children, ...args }) => {
+  render: () => {
     const [isActive, setIsActive] = useState(false)
 
     return (
       <DeepModelingToggle
-        {...args}
         isActive={isActive}
         onClick={() => setIsActive(!isActive)}
       >
-        {children}
+        Deep Modeling
       </DeepModelingToggle>
     )
-  },
-  args: {
-    children: 'Deep Modeling',
   },
 }

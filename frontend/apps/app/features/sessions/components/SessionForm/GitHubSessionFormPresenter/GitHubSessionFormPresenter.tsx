@@ -7,10 +7,11 @@ import {
   ArrowTooltipRoot,
   ArrowTooltipTrigger,
   Button,
-  DeepModelingToggle,
 } from '@liam-hq/ui'
 import type { ChangeEvent, FC } from 'react'
 import { useEffect, useRef, useState } from 'react'
+import { DeepModelingToggle } from '../DeepModelingToggle'
+import { MicButton } from '../MicButton'
 import styles from './GitHubSessionFormPresenter.module.css'
 
 type Branch = {
@@ -141,6 +142,7 @@ export const GitHubSessionFormPresenter: FC<Props> = ({
             >
               Deep Modeling
             </DeepModelingToggle>
+            <MicButton onClick={(_e) => {}} />
             <ArrowTooltipRoot>
               <ArrowTooltipTrigger asChild>
                 <Button

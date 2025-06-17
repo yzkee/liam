@@ -1,8 +1,13 @@
 import { Ellipsis } from '@liam-hq/ui'
 import * as ToolbarPrimitive from '@radix-ui/react-toolbar'
 import clsx from 'clsx'
-import { useEffect, useRef, useState } from 'react'
-import type { ComponentProps, FC } from 'react'
+import {
+  type ComponentProps,
+  type FC,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import styles from './MobileToolbar.module.css'
 import { OpenedMobileToolbar } from './OpenedMobileToolbar'
 import { ShowModeMenu } from './ShowModeMenu'
@@ -66,6 +71,7 @@ export const MobileToolbar: FC<MobileToolbarProps> = ({
           [styles.openShowModeMenu]: isOpen && isShowModeMenu,
         })}
         aria-label="Toolbar"
+        data-testid="toolbar"
       >
         <div className={styles.positionRelative}>
           {/* Default(closed) */}
@@ -79,6 +85,7 @@ export const MobileToolbar: FC<MobileToolbarProps> = ({
               type="button"
               onClick={toggleOpenClose}
               aria-label="Open toolbar"
+              data-testid="open-toolbar-button"
             >
               <Ellipsis color="var(--global-foreground)" />
             </button>

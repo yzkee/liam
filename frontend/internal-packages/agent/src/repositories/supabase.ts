@@ -1,9 +1,8 @@
 import type { SupabaseClientType } from '@liam-hq/db'
 import { schemaSchema } from '@liam-hq/db-structure'
+import { applyPatchOperations, operationsSchema } from '@liam-hq/db-structure'
 import { compare } from 'fast-json-patch'
 import * as v from 'valibot'
-import { applyPatchOperations } from '../utils/applyPatchOperations'
-import { operationsSchema } from '../utils/operationsSchema'
 import type {
   CreateMessageParams,
   CreateVersionParams,
@@ -284,7 +283,6 @@ export class SupabaseSchemaRepository implements SchemaRepository {
       p_schema_version_patch: JSON.parse(JSON.stringify(patch)),
       p_schema_version_reverse_patch: JSON.parse(JSON.stringify(reversePatch)),
       p_latest_schema_version_number: actualLatestVersionNumber,
-      p_design_session_id: buildingSchema.design_session_id,
       p_message_content: messageContent,
     }
 

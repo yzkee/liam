@@ -14,6 +14,5 @@ export const formatChatHistory = (
   messages: ChatEntry[],
 ): [string, string][] => {
   return messages
-    .filter((msg) => msg.id !== 'welcome')
     .map((msg) => [msg.role === 'user' ? 'Human' : 'AI', msg.content])
 }

@@ -12,7 +12,7 @@ import { Paperclip } from 'lucide-react'
 import type { ComponentProps, Ref } from 'react'
 import styles from './AttachButton.module.css'
 
-export type AttachButtonProps = ComponentProps<'button'> & {
+type AttachButtonProps = ComponentProps<'button'> & {
   tooltipSide?: ComponentProps<typeof ArrowTooltipContent>['side']
   ref?: Ref<HTMLButtonElement>
 }

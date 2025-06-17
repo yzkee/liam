@@ -10,8 +10,7 @@ export type {
   QueryData,
   SupabaseClient,
 } from '@supabase/supabase-js'
-export type { Database } from '../supabase/database.types'
-export type { Tables } from '../supabase/database.types'
+export type { Tables, Json, Database } from '../supabase/database.types'
 export type { AppDatabaseOverrides } from './types'
 
 export type SupabaseClientType = ReturnType<typeof createServerClient>

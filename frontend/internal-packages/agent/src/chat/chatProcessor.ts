@@ -30,7 +30,7 @@ export type ChatProcessorResult =
  */
 export const processChatMessage = async (
   params: ChatProcessorParams,
-  log: NodeLogger,
+  logger: NodeLogger,
 ): Promise<ChatProcessorResult> => {
   const {
     message,
@@ -74,7 +74,7 @@ export const processChatMessage = async (
     repositories,
     designSessionId,
     userId,
-    log,
+    logger,
   }
 
   // Execute workflow

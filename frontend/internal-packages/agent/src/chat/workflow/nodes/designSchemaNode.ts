@@ -152,7 +152,7 @@ async function prepareSchemaDesign(
 export async function designSchemaNode(
   state: WorkflowState,
 ): Promise<WorkflowState> {
-  state.log.log(`[${NODE_NAME}] Started`)
+  state.logger.log(`[${NODE_NAME}] Started`)
 
   const { agent, schemaText } = await prepareSchemaDesign(state)
 
@@ -173,6 +173,6 @@ export async function designSchemaNode(
   const response = await agent.generate(promptVariables)
   const result = await handleBuildAgentResponse(response, state)
 
-  state.log.log(`[${NODE_NAME}] Completed`)
+  state.logger.log(`[${NODE_NAME}] Completed`)
   return result
 }

@@ -84,7 +84,7 @@ describe('Chat Workflow', () => {
     userId: 'test-user-id',
     designSessionId: 'test-design-session-id',
     repositories: mockRepositories,
-    log: mockLogger,
+    logger: mockLogger,
     ...overrides,
   })
 

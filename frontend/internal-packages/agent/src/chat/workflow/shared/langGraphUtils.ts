@@ -27,6 +27,6 @@ export const createAnnotations = () => {
     repositories: Annotation<Repositories>,
 
     // Logging functionality
-    log: Annotation<NodeLogger>,
+    logger: Annotation<NodeLogger>,
   })
 }

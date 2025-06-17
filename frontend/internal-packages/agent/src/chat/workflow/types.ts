@@ -24,7 +24,7 @@ export type WorkflowState = {
   repositories: Repositories
 
   // Logging functionality
-  log: NodeLogger
+  logger: NodeLogger
 }
 
 /**

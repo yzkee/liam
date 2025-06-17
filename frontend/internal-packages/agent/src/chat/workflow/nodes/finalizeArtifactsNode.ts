@@ -9,7 +9,7 @@ const NODE_NAME = 'finalizeArtifactsNode'
 export async function finalizeArtifactsNode(
   state: WorkflowState,
 ): Promise<WorkflowState> {
-  state.log.log(`[${NODE_NAME}] Started`)
+  state.logger.log(`[${NODE_NAME}] Started`)
 
   let finalResponse: string
   let errorToReturn: string | undefined
@@ -72,7 +72,7 @@ export async function finalizeArtifactsNode(
     `Assistant: ${finalResponse}`,
   ]
 
-  state.log.log(`[${NODE_NAME}] Completed`)
+  state.logger.log(`[${NODE_NAME}] Completed`)
 
   return {
     ...state,

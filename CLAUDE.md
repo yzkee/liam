@@ -52,6 +52,9 @@ pnpm add <package> --filter @liam-hq/app
 pnpm --filter @liam-hq/cli build
 ```
 
+### Database Operations
+For database migration and type generation workflows, see [`docs/migrationOpsContext.md`](docs/migrationOpsContext.md).
+
 ## Architecture
 
 ### Monorepo Structure

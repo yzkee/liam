@@ -1,6 +1,10 @@
 import type { SupabaseClientType } from '@liam-hq/db'
-import { schemaSchema } from '@liam-hq/db-structure'
-import { applyPatchOperations, operationsSchema } from '@liam-hq/db-structure'
+import type { Schema } from '@liam-hq/db-structure'
+import {
+  applyPatchOperations,
+  operationsSchema,
+  schemaSchema,
+} from '@liam-hq/db-structure'
 import { compare } from 'fast-json-patch'
 import * as v from 'valibot'
 import type {
@@ -139,10 +143,12 @@ export class SupabaseSchemaRepository implements SchemaRepository {
     return { data: { versions: versions || [] }, error: null }
   }
 
+  // TODO: Set response type to `{ success: true, data: Schema } | { success: false, error: unknown }`
+  // to be able to return errors
   private buildCurrentSchema(
     buildingSchema: { initial_schema_snapshot: unknown },
     versions: Array<{ number: number; patch: unknown }>,
-  ): Record<string, unknown> {
+  ): Schema {
     const currentSchema: Record<string, unknown> =
       typeof buildingSchema.initial_schema_snapshot === 'object' &&
       buildingSchema.initial_schema_snapshot !== null
@@ -161,7 +167,14 @@ export class SupabaseSchemaRepository implements SchemaRepository {
       }
     }
 
-    return currentSchema
+    // Validate and return as Schema type
+    const validationResult = v.safeParse(schemaSchema, currentSchema)
+    if (!validationResult.success) {
+      console.warn('Schema validation failed, using fallback schema')
+      return { tables: {}, relationships: {}, tableGroups: {} }
+    }
+
+    return validationResult.output
   }
 
   private getLatestVersionNumber(versions: Array<{ number: number }>): number {

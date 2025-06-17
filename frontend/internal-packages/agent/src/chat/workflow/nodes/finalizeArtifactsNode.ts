@@ -1,5 +1,7 @@
 import type { WorkflowState } from '../types'
 
+const NODE_NAME = 'finalizeArtifactsNode'
+
 /**
  * Finalize Artifacts Node - Generate & Save Artifacts
  * Performed by dbAgentArtifactGen
@@ -7,7 +9,7 @@ import type { WorkflowState } from '../types'
 export async function finalizeArtifactsNode(
   state: WorkflowState,
 ): Promise<WorkflowState> {
-  state.log.info('Node execution started', { node: 'finalizeArtifactsNode' })
+  state.log.info(`[${NODE_NAME}] Started`)
 
   let finalResponse: string
   let errorToReturn: string | undefined
@@ -70,7 +72,7 @@ export async function finalizeArtifactsNode(
     `Assistant: ${finalResponse}`,
   ]
 
-  state.log.info('Node execution completed', { node: 'finalizeArtifactsNode' })
+  state.log.info(`[${NODE_NAME}] Completed`)
 
   return {
     ...state,

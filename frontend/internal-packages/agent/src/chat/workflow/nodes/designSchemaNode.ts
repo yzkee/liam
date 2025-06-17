@@ -5,6 +5,8 @@ import type { BasePromptVariables } from '../../../langchain/utils/types'
 import { convertSchemaToText } from '../../../utils/convertSchemaToText'
 import type { WorkflowState } from '../types'
 
+const NODE_NAME = 'designSchemaNode'
+
 interface PreparedSchemaDesign {
   agent: DatabaseSchemaBuildAgent
   schemaText: string
@@ -150,7 +152,7 @@ async function prepareSchemaDesign(
 export async function designSchemaNode(
   state: WorkflowState,
 ): Promise<WorkflowState> {
-  state.log.info('Node execution started', { node: 'designSchemaNode' })
+  state.log.info(`[${NODE_NAME}] Started`)
 
   const { agent, schemaText } = await prepareSchemaDesign(state)
 
@@ -171,6 +173,6 @@ export async function designSchemaNode(
   const response = await agent.generate(promptVariables)
   const result = await handleBuildAgentResponse(response, state)
 
-  state.log.info('Node execution completed', { node: 'designSchemaNode' })
+  state.log.info(`[${NODE_NAME}] Completed`)
   return result
 }

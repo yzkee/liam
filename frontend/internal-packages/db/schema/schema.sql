@@ -3054,10 +3054,6 @@ ALTER TABLE "public"."validation_results" ENABLE ROW LEVEL SECURITY;
 ALTER PUBLICATION "supabase_realtime" OWNER TO "postgres";
 
 
-
-
-
-
 ALTER PUBLICATION "supabase_realtime" ADD TABLE ONLY "public"."building_schemas";
 
 

@@ -1,2 +1,7 @@
 // NodeLogger is defined for use with Trigger.dev logging.
-export type NodeLogger = (info: { node: string; state: string }) => void
+export type NodeLogger = {
+  debug: (message: string, metadata?: Record<string, unknown>) => void
+  info: (message: string, metadata?: Record<string, unknown>) => void
+  warn: (message: string, metadata?: Record<string, unknown>) => void
+  error: (message: string, metadata?: Record<string, unknown>) => void
+}

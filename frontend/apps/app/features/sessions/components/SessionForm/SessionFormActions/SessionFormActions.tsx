@@ -35,7 +35,7 @@ export const SessionFormActions: FC<Props> = ({
     <div className={styles.container}>
       <DeepModelingToggle
         isActive={isDeepModelingActive}
-        onClick={() => setIsDeepModelingActive(!isDeepModelingActive)}
+        onClick={() => setIsDeepModelingActive((prev) => !prev}
       >
         Deep Modeling
       </DeepModelingToggle>

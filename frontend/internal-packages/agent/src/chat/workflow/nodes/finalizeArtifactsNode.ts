@@ -1,3 +1,4 @@
+import type { NodeLogger } from '../../../utils/nodeLogger'
 import type { WorkflowState } from '../types'
 
 /**
@@ -6,7 +7,10 @@ import type { WorkflowState } from '../types'
  */
 export async function finalizeArtifactsNode(
   state: WorkflowState,
+  log: NodeLogger = () => {},
 ): Promise<WorkflowState> {
+  log({ node: 'finalizeArtifactsNode', state: 'start' })
+
   let finalResponse: string
   let errorToReturn: string | undefined
 
@@ -43,6 +47,8 @@ export async function finalizeArtifactsNode(
     `User: ${state.userInput}`,
     `Assistant: ${finalResponse}`,
   ]
+
+  log({ node: 'finalizeArtifactsNode', state: 'end' })
 
   return {
     ...state,

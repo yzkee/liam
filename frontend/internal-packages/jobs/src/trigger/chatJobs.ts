@@ -25,7 +25,15 @@ export const processChatTask = task({
       repositories,
     }
 
-    const result = await processChatMessage(chatParams)
+    // NodeLogger implementation for Trigger.dev
+    const triggerLogger = ({
+      node,
+      state,
+    }: { node: string; state: string }) => {
+      logger.log(`${node} - ${state}`)
+    }
+
+    const result = await processChatMessage(chatParams, triggerLogger)
 
     logger.log('Chat processing completed:', {
       success: result.success,

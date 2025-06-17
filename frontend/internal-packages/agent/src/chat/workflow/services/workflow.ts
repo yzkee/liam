@@ -1,4 +1,5 @@
 import { END, START, StateGraph } from '@langchain/langgraph'
+import type { NodeLogger } from '../../../utils/nodeLogger'
 import { WORKFLOW_ERROR_MESSAGES } from '../constants/progressMessages'
 import {
   analyzeRequirementsNode,
@@ -16,16 +17,20 @@ import type { WorkflowState } from '../types'
 /**
  * Create and configure the LangGraph workflow
  */
-const createGraph = () => {
+const createGraph = (log: NodeLogger = () => {}) => {
   const ChatStateAnnotation = createAnnotations()
   const graph = new StateGraph(ChatStateAnnotation)
 
   graph
-    .addNode('analyzeRequirements', analyzeRequirementsNode)
-    .addNode('designSchema', designSchemaNode)
-    .addNode('validateSchema', validateSchemaNode)
-    .addNode('reviewDeliverables', reviewDeliverablesNode)
-    .addNode('finalizeArtifacts', finalizeArtifactsNode)
+    .addNode('analyzeRequirements', (state) =>
+      analyzeRequirementsNode(state, log),
+    )
+    .addNode('designSchema', (state) => designSchemaNode(state, log))
+    .addNode('validateSchema', (state) => validateSchemaNode(state, log))
+    .addNode('reviewDeliverables', (state) =>
+      reviewDeliverablesNode(state, log),
+    )
+    .addNode('finalizeArtifacts', (state) => finalizeArtifactsNode(state, log))
 
     .addEdge(START, 'analyzeRequirements')
     .addEdge('analyzeRequirements', 'designSchema')
@@ -55,9 +60,10 @@ const createGraph = () => {
 export const executeWorkflow = async (
   initialState: WorkflowState,
   recursionLimit: number = DEFAULT_RECURSION_LIMIT,
+  log: NodeLogger = () => {},
 ): Promise<WorkflowState> => {
   try {
-    const compiled = createGraph()
+    const compiled = createGraph(log)
 
     const result = await compiled.invoke(initialState, {
       recursionLimit,

@@ -121,10 +121,7 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups, designSession }) => {
           return (
             <ChatMessage
               key={message.id}
-              content={message.content}
-              role={message.role}
-              timestamp={message.timestamp}
-              isGenerating={message.isGenerating}
+              {...message}
               progressMessages={
                 shouldShowProgress ? progressMessages : undefined
               }

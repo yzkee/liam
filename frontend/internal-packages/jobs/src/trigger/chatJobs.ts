@@ -1,10 +1,28 @@
 import { createSupabaseRepositories, processChatMessage } from '@liam-hq/agent'
 import type { ChatProcessorParams } from '@liam-hq/agent'
+import type { NodeLogger } from '@liam-hq/agent'
 import { logger, task } from '@trigger.dev/sdk'
 import { createClient } from '../libs/supabase'
 
 // Define type excluding repositories and schemaData
 type ChatJobPayload = Omit<ChatProcessorParams, 'repositories' | 'schemaData'>
+
+function createWorkflowLogger(): NodeLogger {
+  return {
+    debug: (message: string, metadata?: Record<string, unknown>) => {
+      logger.debug(message, metadata)
+    },
+    info: (message: string, metadata?: Record<string, unknown>) => {
+      logger.info(message, metadata)
+    },
+    warn: (message: string, metadata?: Record<string, unknown>) => {
+      logger.warn(message, metadata)
+    },
+    error: (message: string, metadata?: Record<string, unknown>) => {
+      logger.error(message, metadata)
+    },
+  }
+}
 
 export const processChatTask = task({
   id: 'process-chat-message',
@@ -33,15 +51,9 @@ export const processChatTask = task({
       schemaData: schemaResult.data.schema,
     }
 
-    // NodeLogger implementation for Trigger.dev
-    const triggerLogger = ({
-      node,
-      state,
-    }: { node: string; state: string }) => {
-      logger.log(`${node} - ${state}`)
-    }
+    const workflowLogger = createWorkflowLogger()
 
-    const result = await processChatMessage(chatParams, triggerLogger)
+    const result = await processChatMessage(chatParams, workflowLogger)
 
     logger.log('Chat processing completed:', {
       success: result.success,

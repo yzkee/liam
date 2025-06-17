@@ -3,8 +3,8 @@ import type { ChatProcessorParams } from '@liam-hq/agent'
 import { logger, task } from '@trigger.dev/sdk'
 import { createClient } from '../libs/supabase'
 
-// Define type excluding repositories
-type ChatJobPayload = Omit<ChatProcessorParams, 'repositories'>
+// Define type excluding repositories and schemaData
+type ChatJobPayload = Omit<ChatProcessorParams, 'repositories' | 'schemaData'>
 
 export const processChatTask = task({
   id: 'process-chat-message',
@@ -20,9 +20,25 @@ export const processChatTask = task({
     const supabaseClient = createClient()
     const repositories = createSupabaseRepositories(supabaseClient)
 
+    const schemaResult = await repositories.schema.getSchema(
+      payload.designSessionId,
+    )
+    if (schemaResult.error || !schemaResult.data) {
+      const errorMessage =
+        schemaResult.error?.message || 'Failed to fetch schema data'
+      logger.log('Failed to fetch schema data:', { error: errorMessage })
+      return {
+        success: false,
+        error: errorMessage,
+      }
+    }
+
     const chatParams: ChatProcessorParams = {
       ...payload,
       repositories,
+      schemaData: schemaResult.data.schema as Parameters<
+        typeof processChatMessage
+      >[0]['schemaData'],
     }
 
     const result = await processChatMessage(chatParams)

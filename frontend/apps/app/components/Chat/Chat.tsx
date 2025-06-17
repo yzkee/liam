@@ -74,7 +74,6 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups, designSession }) => {
     // Send chat message to API
     const result = await sendChatMessage({
       message: content,
-      schemaData,
       tableGroups,
       messages,
       designSession,

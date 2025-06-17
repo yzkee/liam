@@ -2,6 +2,7 @@
 
 import { createClient } from '@/libs/db/client'
 import type { Json, Tables } from '@liam-hq/db'
+import { operationsSchema } from '@liam-hq/db-structure'
 import { Check, ChevronDown } from '@liam-hq/ui'
 import { type FC, useEffect, useState, useTransition } from 'react'
 import * as v from 'valibot'
@@ -13,20 +14,7 @@ import styles from './VersionMessage.module.css'
 const parsePatchOperations = (
   patch: Json,
 ): Array<{ path: string; op: string; status: string }> => {
-  // The operationsSchema could not be imported as is.
-  // The reason is probably that the `@liam-hq/agent` package also includes a node.js module
-  // TODO: Modify to use operationsSchema.
-  // const operations = v.parse(operationsSchema, patch)
-  const operations = v.parse(
-    v.array(
-      v.object({
-        op: v.string(),
-        path: v.string(),
-        value: v.any(),
-      }),
-    ),
-    patch,
-  )
+  const operations = v.parse(operationsSchema, patch)
 
   return operations.map((operation) => {
     const path = operation.path.replace(/^\//, '').replace(/\//g, ' → ')

@@ -51,7 +51,6 @@ export const SessionFormActions: FC<Props> = ({
               isLoading={isPending}
               className={styles.sendButton}
               loadingIndicatorType="content"
-              onClick={onSubmit}
             >
               <ArrowRight size={16} />
             </Button>

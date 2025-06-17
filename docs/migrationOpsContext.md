@@ -32,6 +32,21 @@ Our project uses Supabase Branching for database migration management. This syst
 
 This project uses the migrations provided by the Supabase CLI.
 
+### Prerequisites
+
+Before working with migrations, ensure the Supabase local environment is running:
+
+```bash
+# Navigate to the database package
+cd frontend/internal-packages/db
+
+# Check current status
+pnpm supabase status
+
+# Start local development environment if not running
+pnpm supabase:start
+```
+
 ### Creating a migration file
 
 Given the context of the user's message, create a database migration file inside the folder `frontend/internal-packages/db/supabase/migrations/`.
@@ -97,6 +112,21 @@ ALTER TABLE "public"."table_name"
 ALTER COLUMN "new_column" SET NOT NULL;
 
 COMMIT;
+```
+
+## Applying Migrations
+
+After creating a migration file, apply it to the local database:
+
+```bash
+# Navigate to the database package
+cd frontend/internal-packages/db
+
+# Apply pending migrations
+pnpm supabase:migration:up
+
+# Alternative: Reset database and apply all migrations from scratch
+pnpm supabase:reset
 ```
 
 ## Post-Migration Steps

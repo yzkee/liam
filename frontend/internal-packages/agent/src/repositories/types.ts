@@ -50,7 +50,7 @@ export type CreateTimelineItemParams = {
       buildingSchemaVersionId: string
     }
   | {
-      role: 'error'
+      type: 'error'
     }
 )
 

@@ -337,9 +337,11 @@ export class SupabaseSchemaRepository implements SchemaRepository {
     params: CreateTimelineItemParams,
   ): Promise<TimelineItemResult> {
     const { designSessionId, content, type } = params
-    const userId = type === 'user' ? params.userId : null
+    const userId = 'userId' in params ? params.userId : null
     const buildingSchemaVersionId =
-      type === 'schema_version' ? params.buildingSchemaVersionId : null
+      'buildingSchemaVersionId' in params
+        ? params.buildingSchemaVersionId
+        : null
 
     const now = new Date().toISOString()
 

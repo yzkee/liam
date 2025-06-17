@@ -43,16 +43,16 @@ export const processChatMessage = async (
     userId,
   } = params
 
-  // Save user message to database
-  const saveResult = await repositories.schema.createMessage({
+  // Save user timeline item to database
+  const saveResult = await repositories.schema.createTimelineItem({
     designSessionId,
     content: message,
-    role: 'user',
+    type: 'user',
     userId,
   })
 
   if (!saveResult.success) {
-    console.error('Failed to save user message:', saveResult.error)
+    console.error('Failed to save user timeline item:', saveResult.error)
     return {
       success: false,
       error: saveResult.error,

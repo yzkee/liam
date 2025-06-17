@@ -113,7 +113,7 @@ describe('Chat Workflow', () => {
       getSchema: vi.fn(),
       getDesignSession: vi.fn(),
       createVersion: vi.fn(),
-      createMessage: vi.fn(),
+      createTimelineItem: vi.fn(),
     } as SchemaRepository
 
     mockRepositories = {
@@ -141,13 +141,13 @@ describe('Chat Workflow', () => {
       success: true,
     })
 
-    // Setup createMessage mock
-    vi.mocked(mockSchemaRepository.createMessage).mockResolvedValue({
+    // Setup createTimelineItem mock
+    vi.mocked(mockSchemaRepository.createTimelineItem).mockResolvedValue({
       success: true,
-      message: {
-        id: 'test-message-id',
-        content: 'Test message content',
-        role: 'assistant',
+      timelineItem: {
+        id: 'test-timeline-item-id',
+        content: 'Test timeline item content',
+        type: 'assistant',
         user_id: null,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),

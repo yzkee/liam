@@ -32,16 +32,16 @@ export async function finalizeArtifactsNode(
     finalResponse = state.generatedAnswer
     errorToReturn = undefined
 
-    // Save AI message to database
-    const saveResult = await state.repositories.schema.createMessage({
+    // Save AI timeline item to database
+    const saveResult = await state.repositories.schema.createTimelineItem({
       designSessionId: state.designSessionId,
       content: finalResponse,
-      role: 'assistant',
+      type: 'assistant',
     })
 
     if (!saveResult.success) {
-      console.error('Failed to save AI message:', saveResult.error)
-      // Continue processing even if message saving fails
+      console.error('Failed to save AI timeline item:', saveResult.error)
+      // Continue processing even if timeline item saving fails
     }
   } else {
     // Fallback case: no generated answer and no specific error

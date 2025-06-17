@@ -10,10 +10,10 @@ export interface SchemaData {
 
 export interface DesignSessionData {
   organization_id: string
-  messages: Array<{
+  timeline_items: Array<{
     id: string
     content: string
-    role: Database['public']['Enums']['message_role_enum']
+    type: Database['public']['Enums']['timeline_item_type_enum']
     user_id: string | null
     created_at: string
     updated_at: string
@@ -34,19 +34,19 @@ export interface VersionResult {
   error?: string | null
 }
 
-export type CreateMessageParams = {
+export type CreateTimelineItemParams = {
   designSessionId: string
   content: string
 } & (
   | {
-      role: 'user'
+      type: 'user'
       userId: string
     }
   | {
-      role: 'assistant'
+      type: 'assistant'
     }
   | {
-      role: 'schema_version'
+      type: 'schema_version'
       buildingSchemaVersionId: string
     }
   | {
@@ -54,10 +54,10 @@ export type CreateMessageParams = {
     }
 )
 
-export type MessageResult =
+export type TimelineItemResult =
   | {
       success: true
-      message: Tables<'messages'>
+      timelineItem: Tables<'timeline_items'>
     }
   | {
       success: false
@@ -77,7 +77,7 @@ export interface SchemaRepository {
   }>
 
   /**
-   * Fetch design session data including organization_id and messages
+   * Fetch design session data including organization_id and timeline_items
    */
   getDesignSession(designSessionId: string): Promise<DesignSessionData | null>
 
@@ -87,9 +87,11 @@ export interface SchemaRepository {
   createVersion(params: CreateVersionParams): Promise<VersionResult>
 
   /**
-   * Create a new message in the design session
+   * Create a new timeline item in the design session
    */
-  createMessage(params: CreateMessageParams): Promise<MessageResult>
+  createTimelineItem(
+    params: CreateTimelineItemParams,
+  ): Promise<TimelineItemResult>
 }
 
 /**

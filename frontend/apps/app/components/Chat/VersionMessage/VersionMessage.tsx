@@ -10,7 +10,9 @@ import styles from './VersionMessage.module.css'
 /**
  * Parse JSON patch operations into structured format
  */
-const parsePatchOperations = (patch: Json): Array<{ path: string; op: string; status: string }> => {
+const parsePatchOperations = (
+  patch: Json,
+): Array<{ path: string; op: string; status: string }> => {
   // The operationsSchema could not be imported as is.
   // The reason is probably that the `@liam-hq/agent` package also includes a node.js module
   // TODO: Modify to use operationsSchema.
@@ -110,11 +112,7 @@ export const VersionMessage: FC<Props> = ({ buildingSchemaVersionId }) => {
   return (
     <div className={styles.container}>
       {/* Header */}
-      <button
-        type="button"
-        className={styles.header}
-        onClick={toggleExpanded}
-      >
+      <button type="button" className={styles.header} onClick={toggleExpanded}>
         <div
           className={`${styles.chevron} ${isExpanded ? styles.expanded : ''}`}
         >
@@ -129,7 +127,10 @@ export const VersionMessage: FC<Props> = ({ buildingSchemaVersionId }) => {
       <div className={`${styles.content} ${isExpanded ? styles.expanded : ''}`}>
         <div className={styles.operationList}>
           {patchOperations.map((operation, index) => (
-            <div key={`${version.id}-${index}`} className={styles.operationItem}>
+            <div
+              key={`${version.id}-${index}`}
+              className={styles.operationItem}
+            >
               <span className={styles.operationName}>{operation.path}</span>
               <span className={styles.operationStatus}>{operation.status}</span>
             </div>

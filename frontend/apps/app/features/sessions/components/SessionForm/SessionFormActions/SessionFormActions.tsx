@@ -18,14 +18,12 @@ import styles from './SessionFormActions.module.css'
 
 type Props = {
   isPending?: boolean
-  onSubmit?: () => void
   onMicClick?: () => void
   onAttachClick?: () => void
 }
 
 export const SessionFormActions: FC<Props> = ({
   isPending = false,
-  onSubmit,
   onMicClick,
   onAttachClick,
 }) => {
@@ -35,7 +33,7 @@ export const SessionFormActions: FC<Props> = ({
     <div className={styles.container}>
       <DeepModelingToggle
         isActive={isDeepModelingActive}
-        onClick={() => setIsDeepModelingActive((prev) => !prev}
+        onClick={() => setIsDeepModelingActive((prev) => !prev)}
       >
         Deep Modeling
       </DeepModelingToggle>

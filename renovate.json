@@ -44,6 +44,33 @@
       ],
       "matchPaths": ["frontend/internal-packages/**"],
       "automerge": true
+    },
+    {
+      "groupName": "dev-tools",
+      "description": "Automerge development tools that only need CI to pass",
+      "matchPackageNames": [
+        "eslint",
+        "/^eslint-/",
+        "/^@eslint/",
+        "@typescript-eslint/eslint-plugin",
+        "@typescript-eslint/parser",
+        "biome",
+        "@biomejs/biome",
+        "typescript",
+        "turbo",
+        "@types/node",
+        "/^@types/",
+        "vitest",
+        "/^@vitest/",
+        "playwright",
+        "@playwright/test",
+        "pnpm",
+        "knip"
+      ],
+      "matchDepTypes": [
+        "devDependencies"
+      ],
+      "automerge": true
     }
   ]
 }

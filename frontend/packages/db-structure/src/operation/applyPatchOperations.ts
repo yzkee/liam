@@ -17,9 +17,6 @@ function getOrCreateObject(
   return newObj
 }
 
-/**
- * Applies JSON patch operations to a target object
- */
 export function applyPatchOperations<T extends Record<string, unknown>>(
   target: T,
   operations: Operation[],

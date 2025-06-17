@@ -1,6 +1,6 @@
 import type { Operation } from 'fast-json-patch'
 import { describe, expect, it } from 'vitest'
-import { applyPatchOperations } from '../applyPatchOperations'
+import { applyPatchOperations } from '../applyPatchOperations.js'
 
 describe('applyPatchOperations', () => {
   describe('add operation', () => {
@@ -230,8 +230,6 @@ describe('applyPatchOperations', () => {
         },
       }
 
-      // Note: The function treats array indices as object keys
-      // It doesn't have special handling for arrays
       const operations: Operation[] = [
         { op: 'add', path: '/users/0/age', value: 30 },
         { op: 'replace', path: '/users/1/name', value: 'Jane Doe' },

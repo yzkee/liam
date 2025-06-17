@@ -38,3 +38,5 @@ export type {
   IndexRelatedDiffItem,
   ConstraintRelatedDiffItem,
 } from './diff/index.js'
+
+export { operationsSchema, applyPatchOperations } from './operation/index.js'

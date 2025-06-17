@@ -63,4 +63,5 @@ export {
   ChevronRight,
   ArrowUpRight,
   Sparkle,
+  Mic,
 } from 'lucide-react'

@@ -30,13 +30,7 @@ export type ChatProcessorResult =
  */
 export const processChatMessage = async (
   params: ChatProcessorParams,
-  log: NodeLogger = {
-    debug: () => {},
-    log: () => {},
-    info: () => {},
-    warn: () => {},
-    error: () => {},
-  },
+  log: NodeLogger,
 ): Promise<ChatProcessorResult> => {
   const {
     message,

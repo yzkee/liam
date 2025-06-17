@@ -52,13 +52,10 @@ export const useTableGroupBoundingBox = ({
       const endX = event.clientX - rect.left
       const endY = event.clientY - rect.top
 
-      setCurrentBox((currentBox) => {
-        if (!currentBox) return null
-        return {
-          ...currentBox,
-          width: endX - currentBox.x,
-          height: endY - currentBox.y,
-        }
+      setCurrentBox({
+        ...currentBox,
+        width: endX - currentBox.x,
+        height: endY - currentBox.y,
       })
     },
     [isTableGroupEditMode, currentBox],

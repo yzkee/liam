@@ -2,14 +2,15 @@
 
 import { createClient } from '@/libs/db/client'
 import type { Json, Tables } from '@liam-hq/db'
+import { Check, ChevronDown } from '@liam-hq/ui'
 import { type FC, useEffect, useState, useTransition } from 'react'
 import * as v from 'valibot'
 import styles from './VersionMessage.module.css'
 
 /**
- * Parse JSON patch operations into human-readable format
+ * Parse JSON patch operations into structured format
  */
-const parsePatchOperations = (patch: Json): string[] => {
+const parsePatchOperations = (patch: Json): Array<{ path: string; op: string; status: string }> => {
   // The operationsSchema could not be imported as is.
   // The reason is probably that the `@liam-hq/agent` package also includes a node.js module
   // TODO: Modify to use operationsSchema.
@@ -28,15 +29,35 @@ const parsePatchOperations = (patch: Json): string[] => {
   return operations.map((operation) => {
     const path = operation.path.replace(/^\//, '').replace(/\//g, ' → ')
 
+    let status: string
     switch (operation.op) {
       case 'add':
-        return `Added: ${path}`
+        status = 'Added'
+        break
       case 'remove':
-        return `Removed: ${path}`
+        status = 'Removed'
+        break
       case 'replace':
-        return `Modified: ${path}`
+        status = 'Modified'
+        break
+      case 'move':
+        status = 'Moved'
+        break
+      case 'copy':
+        status = 'Copied'
+        break
+      case 'test':
+        status = 'Tested'
+        break
       default:
-        return `Unknown operation: ${path}`
+        status = 'Unknown'
+        break
+    }
+
+    return {
+      path,
+      op: operation.op,
+      status,
     }
   })
 }
@@ -53,6 +74,7 @@ interface Props {
 export const VersionMessage: FC<Props> = ({ buildingSchemaVersionId }) => {
   const [version, setVersion] = useState<BuildingSchemaVersion | null>(null)
   const [isPending, startTransition] = useTransition()
+  const [isExpanded, setIsExpanded] = useState(false)
 
   useEffect(() => {
     startTransition(async () => {
@@ -81,43 +103,46 @@ export const VersionMessage: FC<Props> = ({ buildingSchemaVersionId }) => {
   const displayVersionNumber = version.number
   const patchOperations = parsePatchOperations(version.patch)
 
+  const toggleExpanded = () => {
+    setIsExpanded(!isExpanded)
+  }
+
   return (
     <div className={styles.container}>
-      <div className={styles.iconContainer}>
-        <div className={styles.versionIcon}>📊</div>
-      </div>
-      <div className={styles.contentContainer}>
-        <div className={styles.header}>
-          <span className={styles.title}>Schema Version</span>
-          {displayVersionNumber && (
-            <span className={styles.versionNumber}>
-              v{displayVersionNumber}
-            </span>
-          )}
+      {/* Header */}
+      <button
+        type="button"
+        className={styles.header}
+        onClick={toggleExpanded}
+      >
+        <div
+          className={`${styles.chevron} ${isExpanded ? styles.expanded : ''}`}
+        >
+          <ChevronDown />
         </div>
-        <div className={styles.messageWrapper}>
-          <div className={styles.messageContent}>
-            <div className={styles.messageText}>
-              Schema updated to new version
-            </div>
+        <span className={styles.versionNumber}>
+          Version {displayVersionNumber}
+        </span>
+      </button>
 
-            {/* Display patch operations if available */}
-            {patchOperations.length > 0 && (
-              <div className={styles.patchContainer}>
-                <div className={styles.patchTitle}>Schema Changes:</div>
-                <ul className={styles.patchList}>
-                  {patchOperations.map((operation, index) => (
-                    <li
-                      key={`${version.id}-${index}`}
-                      className={styles.patchItem}
-                    >
-                      {operation}
-                    </li>
-                  ))}
-                </ul>
+      {/* Content */}
+      <div className={`${styles.content} ${isExpanded ? styles.expanded : ''}`}>
+        <div className={styles.operationList}>
+          {patchOperations.map((operation, index) => (
+            <div key={`${version.id}-${index}`} className={styles.operationItem}>
+              <span className={styles.operationName}>{operation.path}</span>
+              <span className={styles.operationStatus}>{operation.status}</span>
+            </div>
+          ))}
+          {patchOperations.length === 0 && (
+            <div className={styles.operationItem}>
+              <div className={styles.operationIcon}>
+                <Check />
               </div>
-            )}
-          </div>
+              <span className={styles.operationName}>Schema updated</span>
+              <span className={styles.operationStatus}>Generated</span>
+            </div>
+          )}
         </div>
       </div>
     </div>

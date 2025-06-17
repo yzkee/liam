@@ -30,7 +30,12 @@ export type ChatProcessorResult =
  */
 export const processChatMessage = async (
   params: ChatProcessorParams,
-  log: NodeLogger = () => {},
+  log: NodeLogger = {
+    debug: () => {},
+    info: () => {},
+    warn: () => {},
+    error: () => {},
+  },
 ): Promise<ChatProcessorResult> => {
   const {
     message,
@@ -74,10 +79,11 @@ export const processChatMessage = async (
     repositories,
     designSessionId,
     userId,
+    log,
   }
 
   // Execute workflow
-  const result = await executeChatWorkflow(workflowState, undefined, log)
+  const result = await executeChatWorkflow(workflowState)
 
   if (result.error) {
     return {

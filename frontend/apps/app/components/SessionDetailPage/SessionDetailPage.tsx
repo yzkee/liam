@@ -12,7 +12,12 @@ import {
 } from 'react'
 import * as v from 'valibot'
 import styles from './SessionDetailPage.module.css'
-import { Artifact } from './components/Artifact'
+import { Output } from './components/Output'
+import {
+  ARTIFACT_DOC,
+  SCHEMA_UPDATES_DOC,
+  SCHEMA_UPDATES_REVIEW_COMMENTS,
+} from './mock'
 import {
   fetchSchemaDataClient,
   setupBuildingSchemaRealtimeSubscription,
@@ -25,7 +30,17 @@ type Props = {
 export const SessionDetailPage: FC<Props> = ({ designSession }) => {
   const [schema, setSchema] = useState<Schema | null>(null)
   const [isLoadingSchema, startTransition] = useTransition()
+  const [, setQuickFixMessage] = useState<string>('')
   const designSessionId = designSession.id
+
+  const handleQuickFix = useCallback((comment: string) => {
+    const fixMessage = `以下のQA Agentからの指摘を修正してください：
+
+"${comment}"
+
+この問題を解決するための具体的な修正案を提案してください。`
+    setQuickFixMessage(fixMessage)
+  }, [])
 
   // Load initial schema data
   useEffect(() => {
@@ -118,7 +133,15 @@ export const SessionDetailPage: FC<Props> = ({ designSession }) => {
         <div className={styles.chatSection}>
           <Chat schemaData={schema} designSession={designSession} />
         </div>
-        <Artifact schema={schema} />
+        <div className={styles.outputSection}>
+          <Output
+            schema={schema}
+            schemaUpdatesDoc={SCHEMA_UPDATES_DOC}
+            schemaUpdatesReviewComments={SCHEMA_UPDATES_REVIEW_COMMENTS}
+            onQuickFix={handleQuickFix}
+            artifactDoc={ARTIFACT_DOC}
+          />
+        </div>
       </div>
     </div>
   )

@@ -33,6 +33,13 @@ IMPORTANT: You must ALWAYS respond with a valid JSON object in the following for
   ]
 }}
 
+CRITICAL JSON RULES:
+- NO COMMENTS of any kind in your JSON response (no /* */, no //, no #)
+- NO extra text before or after the JSON object
+- NO explanatory text outside the JSON structure
+- Your response must be PURE JSON that can be parsed by JSON.parse()
+- Comments will break the JSON parser and cause errors
+
 Schema Change Rules:
 - Use JSON Patch format (RFC 6902) for all schema modifications
 - "path" should point to specific schema elements like "/tables/users/columns/email" or "/tables/posts"

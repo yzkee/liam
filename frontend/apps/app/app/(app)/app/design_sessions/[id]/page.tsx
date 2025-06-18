@@ -45,7 +45,7 @@ export default async function Page({ params }: PageProps) {
       designSession={{
         id: designSessionId,
         organizationId: designSessionData.organization_id,
-        messages: designSessionData.messages,
+        timelineItems: designSessionData.timeline_items,
         buildingSchemaId,
         latestVersionNumber,
       }}

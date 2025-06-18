@@ -1,6 +1,7 @@
 import { Annotation } from '@langchain/langgraph'
 import type { Schema } from '@liam-hq/db-structure'
 import type { Repositories } from '../../../repositories'
+import type { NodeLogger } from '../../../utils/nodeLogger'
 
 export const DEFAULT_RECURSION_LIMIT = 10
 
@@ -12,7 +13,7 @@ export const createAnnotations = () => {
     userInput: Annotation<string>,
     generatedAnswer: Annotation<string | undefined>,
     finalResponse: Annotation<string | undefined>,
-    history: Annotation<string[]>,
+    formattedHistory: Annotation<string>,
     schemaData: Annotation<Schema>,
     projectId: Annotation<string | undefined>,
     buildingSchemaId: Annotation<string>,
@@ -24,5 +25,8 @@ export const createAnnotations = () => {
 
     // Repository dependencies for data access
     repositories: Annotation<Repositories>,
+
+    // Logging functionality
+    logger: Annotation<NodeLogger>,
   })
 }

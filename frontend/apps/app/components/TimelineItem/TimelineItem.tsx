@@ -9,7 +9,7 @@ import type { CSSProperties, FC, HTMLAttributes, ReactNode } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import remarkGfm from 'remark-gfm'
-import styles from './ChatMessage.module.css'
+import styles from './TimelineItem.module.css'
 
 // Define CodeProps interface
 interface CodeProps extends HTMLAttributes<HTMLElement> {
@@ -22,10 +22,10 @@ interface CodeProps extends HTMLAttributes<HTMLElement> {
 }
 
 // TODO: Modify to use what is inferred from the valibot schema
-export type ChatMessageProps =
+export type TimelineItemProps =
   | {
       content: string
-      role: Database['public']['Enums']['message_role_enum']
+      role: Database['public']['Enums']['timeline_item_type_enum']
       timestamp?: Date
       avatarSrc?: string
       avatarAlt?: string
@@ -55,7 +55,7 @@ export type ChatMessageProps =
       building_schema_version_id: string
     }
 
-export const ChatMessage: FC<ChatMessageProps> = (props) => {
+export const TimelineItem: FC<TimelineItemProps> = (props) => {
   // Handle schema_version role separately
   if ('building_schema_version_id' in props) {
     return (

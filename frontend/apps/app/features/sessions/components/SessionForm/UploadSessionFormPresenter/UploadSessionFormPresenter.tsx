@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
 } from 'react'
+import { SessionFormActions } from '../SessionFormActions'
 import styles from './UploadSessionFormPresenter.module.css'
 
 type Props = {
@@ -100,16 +101,7 @@ export const UploadSessionFormPresenter: FC<Props> = ({
         </div>
         <div className={styles.divider} />
         <div className={styles.buttonContainer}>
-          <Button
-            type="submit"
-            variant="solid-primary"
-            disabled={isPending || !selectedFile}
-            isLoading={isPending}
-            className={styles.buttonCustom}
-            loadingIndicatorType="content"
-          >
-            Upload & Start
-          </Button>
+          <SessionFormActions isPending={isPending || !selectedFile} />
         </div>
       </form>
     </div>

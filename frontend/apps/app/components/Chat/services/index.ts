@@ -1,2 +1,2 @@
-export * from './messageServiceClient'
+export * from './timelineItemServiceClient'
 export * from './aiMessageService'

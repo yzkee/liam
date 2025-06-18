@@ -554,71 +554,6 @@ export type Database = {
           },
         ]
       }
-      messages: {
-        Row: {
-          building_schema_version_id: string | null
-          content: string
-          created_at: string
-          design_session_id: string
-          id: string
-          organization_id: string
-          role: Database['public']['Enums']['message_role_enum']
-          updated_at: string
-          user_id: string | null
-        }
-        Insert: {
-          building_schema_version_id?: string | null
-          content: string
-          created_at?: string
-          design_session_id: string
-          id?: string
-          organization_id: string
-          role: Database['public']['Enums']['message_role_enum']
-          updated_at: string
-          user_id?: string | null
-        }
-        Update: {
-          building_schema_version_id?: string | null
-          content?: string
-          created_at?: string
-          design_session_id?: string
-          id?: string
-          organization_id?: string
-          role?: Database['public']['Enums']['message_role_enum']
-          updated_at?: string
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'messages_building_schema_version_id_fkey'
-            columns: ['building_schema_version_id']
-            isOneToOne: false
-            referencedRelation: 'building_schema_versions'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'messages_design_session_id_fkey'
-            columns: ['design_session_id']
-            isOneToOne: false
-            referencedRelation: 'design_sessions'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'messages_organization_id_fkey'
-            columns: ['organization_id']
-            isOneToOne: false
-            referencedRelation: 'organizations'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'messages_user_id_fkey'
-            columns: ['user_id']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          },
-        ]
-      }
       migration_pull_request_mappings: {
         Row: {
           created_at: string
@@ -1190,6 +1125,71 @@ export type Database = {
           },
         ]
       }
+      timeline_items: {
+        Row: {
+          building_schema_version_id: string | null
+          content: string
+          created_at: string
+          design_session_id: string
+          id: string
+          organization_id: string
+          type: Database['public']['Enums']['timeline_item_type_enum']
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          building_schema_version_id?: string | null
+          content: string
+          created_at?: string
+          design_session_id: string
+          id?: string
+          organization_id: string
+          type: Database['public']['Enums']['timeline_item_type_enum']
+          updated_at: string
+          user_id?: string | null
+        }
+        Update: {
+          building_schema_version_id?: string | null
+          content?: string
+          created_at?: string
+          design_session_id?: string
+          id?: string
+          organization_id?: string
+          type?: Database['public']['Enums']['timeline_item_type_enum']
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'timeline_items_building_schema_version_id_fkey'
+            columns: ['building_schema_version_id']
+            isOneToOne: false
+            referencedRelation: 'building_schema_versions'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'timeline_items_design_session_id_fkey'
+            columns: ['design_session_id']
+            isOneToOne: false
+            referencedRelation: 'design_sessions'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'timeline_items_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'timeline_items_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       users: {
         Row: {
           email: string
@@ -1370,9 +1370,9 @@ export type Database = {
         | 'PROJECT_RULES_CONSISTENCY'
         | 'SECURITY_OR_SCALABILITY'
       knowledge_type: 'SCHEMA' | 'DOCS'
-      message_role_enum: 'user' | 'assistant' | 'schema_version' | 'error'
       schema_format_enum: 'schemarb' | 'postgres' | 'prisma' | 'tbls'
       severity_enum: 'CRITICAL' | 'WARNING' | 'POSITIVE' | 'QUESTION'
+      timeline_item_type_enum: 'user' | 'assistant' | 'schema_version' | 'error'
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1499,9 +1499,9 @@ export const Constants = {
         'SECURITY_OR_SCALABILITY',
       ],
       knowledge_type: ['SCHEMA', 'DOCS'],
-      message_role_enum: ['user', 'assistant', 'schema_version', 'error'],
       schema_format_enum: ['schemarb', 'postgres', 'prisma', 'tbls'],
       severity_enum: ['CRITICAL', 'WARNING', 'POSITIVE', 'QUESTION'],
+      timeline_item_type_enum: ['user', 'assistant', 'schema_version', 'error'],
     },
   },
 } as const

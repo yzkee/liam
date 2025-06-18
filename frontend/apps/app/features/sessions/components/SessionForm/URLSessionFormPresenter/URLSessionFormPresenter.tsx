@@ -1,5 +1,6 @@
 import { Button } from '@liam-hq/ui'
 import { type FC, useState } from 'react'
+import { SessionFormActions } from '../SessionFormActions'
 import styles from './URLSessionFormPresenter.module.css'
 
 type Props = {
@@ -48,16 +49,7 @@ export const URLSessionFormPresenter: FC<Props> = ({
         </div>
         <div className={styles.divider} />
         <div className={styles.buttonContainer}>
-          <Button
-            type="submit"
-            variant="solid-primary"
-            disabled={isPending || !urlPath.trim()}
-            isLoading={isPending}
-            className={styles.buttonCustom}
-            loadingIndicatorType="content"
-          >
-            Start with URL
-          </Button>
+          <SessionFormActions isPending={isPending || !urlPath.trim()} />
         </div>
       </form>
     </div>

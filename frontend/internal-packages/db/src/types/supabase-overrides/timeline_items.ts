@@ -1,7 +1,7 @@
-export interface MessagesOverride {
+export interface TimelineItemsOverride {
   public: {
     Tables: {
-      messages: {
+      timeline_items: {
         Insert: {
           organization_id?: string | null
         }

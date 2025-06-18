@@ -7,7 +7,6 @@ import type { GithubPullRequestCommentsOverride } from './github_pull_request_co
 import type { GithubPullRequestsOverride } from './github_pull_requests'
 import type { KnowledgeSuggestionDocMappingsOverride } from './knowledge_suggestion_doc_mappings'
 import type { KnowledgeSuggestionsOverride } from './knowledge_suggestions'
-import type { MessagesOverride } from './messages'
 import type { MigrationPullRequestMappingsOverride } from './migration_pull_request_mappings'
 import type { MigrationsOverride } from './migrations'
 import type { OverallReviewKnowledgeSuggestionMappingsOverride } from './overall_review_knowledge_suggestion_mappings'
@@ -18,6 +17,7 @@ import type { ReviewFeedbackKnowledgeSuggestionMappingsOverride } from './review
 import type { ReviewFeedbacksOverride } from './review_feedbacks'
 import type { ReviewSuggestionSnippetsOverride } from './review_suggestion_snippets'
 import type { SchemaFilePathsOverride } from './schema_file_paths'
+import type { TimelineItemsOverride } from './timeline_items'
 
 export type AppDatabaseOverrides = MergeDeep<
   DatabaseGenerated,
@@ -39,6 +39,6 @@ export type AppDatabaseOverrides = MergeDeep<
     MigrationsOverride &
     GithubPullRequestsOverride &
     DesignSessionsOverride &
-    MessagesOverride &
+    TimelineItemsOverride &
     BuildingSchemasOverride
 >

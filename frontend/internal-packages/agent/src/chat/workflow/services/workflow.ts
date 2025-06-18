@@ -4,6 +4,7 @@ import {
   analyzeRequirementsNode,
   designSchemaNode,
   finalizeArtifactsNode,
+  generateDDLNode,
   reviewDeliverablesNode,
   validateSchemaNode,
 } from '../nodes'
@@ -23,13 +24,15 @@ const createGraph = () => {
   graph
     .addNode('analyzeRequirements', analyzeRequirementsNode)
     .addNode('designSchema', designSchemaNode)
+    .addNode('generateDDL', generateDDLNode)
     .addNode('validateSchema', validateSchemaNode)
     .addNode('reviewDeliverables', reviewDeliverablesNode)
     .addNode('finalizeArtifacts', finalizeArtifactsNode)
 
     .addEdge(START, 'analyzeRequirements')
     .addEdge('analyzeRequirements', 'designSchema')
-    .addEdge('designSchema', 'validateSchema')
+    .addEdge('designSchema', 'generateDDL')
+    .addEdge('generateDDL', 'validateSchema')
     .addEdge('finalizeArtifacts', END)
 
     // Conditional edges for validation results

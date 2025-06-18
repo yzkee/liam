@@ -8,6 +8,7 @@ on:
       - frontend/packages/db-structure/**
       - frontend/packages/github/**
       - frontend/internal-packages/db/**
+      - frontend/internal-packages/agent/**
       - turbo.json
 
 concurrency:

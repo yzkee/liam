@@ -3,8 +3,11 @@ import { WORKFLOW_ERROR_MESSAGES } from '../constants/progressMessages'
 import {
   analyzeRequirementsNode,
   designSchemaNode,
+  executeDDLNode,
   finalizeArtifactsNode,
   generateDDLNode,
+  generateUsecaseNode,
+  prepareDMLNode,
   reviewDeliverablesNode,
   validateSchemaNode,
 } from '../nodes'
@@ -25,6 +28,9 @@ const createGraph = () => {
     .addNode('analyzeRequirements', analyzeRequirementsNode)
     .addNode('designSchema', designSchemaNode)
     .addNode('generateDDL', generateDDLNode)
+    .addNode('executeDDL', executeDDLNode)
+    .addNode('generateUsecase', generateUsecaseNode)
+    .addNode('prepareDML', prepareDMLNode)
     .addNode('validateSchema', validateSchemaNode)
     .addNode('reviewDeliverables', reviewDeliverablesNode)
     .addNode('finalizeArtifacts', finalizeArtifactsNode)
@@ -32,7 +38,10 @@ const createGraph = () => {
     .addEdge(START, 'analyzeRequirements')
     .addEdge('analyzeRequirements', 'designSchema')
     .addEdge('designSchema', 'generateDDL')
-    .addEdge('generateDDL', 'validateSchema')
+    .addEdge('generateDDL', 'executeDDL')
+    .addEdge('executeDDL', 'generateUsecase')
+    .addEdge('generateUsecase', 'prepareDML')
+    .addEdge('prepareDML', 'validateSchema')
     .addEdge('finalizeArtifacts', END)
 
     // Conditional edges for validation results

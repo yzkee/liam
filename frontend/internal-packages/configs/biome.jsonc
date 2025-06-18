@@ -25,7 +25,7 @@
         "noUnusedImports": "error"
       },
       "suspicious": {
-        "noConsole": { "level": "error", "options": { "allow": ["log"] } }
+        "noConsole": { "level": "error", "options": { "allow": ["warn", "error", "info", "debug"] } }
       },
       "complexity": {
         "useLiteralKeys": "off",

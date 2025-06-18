@@ -20,7 +20,8 @@ import type {
 const updateBuildingSchemaResultSchema = v.union([
   v.object({
     success: v.literal(true),
-    versionNumber: v.number(),
+    messageId: v.string(),
+    versionId: v.string(),
   }),
   v.object({
     success: v.literal(false),

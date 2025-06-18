@@ -70,6 +70,9 @@ const applySchemaChanges = async (
   })
 
   if (!result.success) {
+    state.logger.error('Schema update failed:', {
+      error: result.error || 'Failed to update schema',
+    })
     return {
       ...state,
       generatedAnswer: message,
@@ -80,6 +83,7 @@ const applySchemaChanges = async (
   return {
     ...state,
     generatedAnswer: message,
+    error: undefined,
   }
 }
 

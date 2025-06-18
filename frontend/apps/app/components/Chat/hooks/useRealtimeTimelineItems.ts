@@ -10,8 +10,37 @@ const isDuplicateTimelineItem = (
   timelineItems: TimelineItemEntry[],
   newEntry: TimelineItemEntry,
 ): boolean => {
-  if (!newEntry.dbId) return false
-  return timelineItems.some((item) => item.dbId === newEntry.dbId)
+  // Check by timeline item ID
+  const duplicateById = timelineItems.some((item) => item.id === newEntry.id)
+  if (duplicateById) {
+    return true
+  }
+
+  // For user timeline items, check by content and role with timestamp tolerance
+  if (newEntry.role === 'user') {
+    const contentDuplicate = timelineItems.some((item) => {
+      if (item.role !== 'user' || item.content !== newEntry.content) {
+        return false
+      }
+
+      // If both have timestamps, check if they're within reasonable range (5 seconds)
+      if (item.timestamp && newEntry.timestamp) {
+        const timeDiff = Math.abs(
+          newEntry.timestamp.getTime() - item.timestamp.getTime(),
+        )
+        return timeDiff < 5000 // 5 seconds tolerance
+      }
+
+      // If either doesn't have timestamp, consider it a duplicate by content alone
+      return true
+    })
+
+    if (contentDuplicate) {
+      return true
+    }
+  }
+
+  return false
 }
 
 const findExistingTimelineItemIndex = (
@@ -37,29 +66,26 @@ const handleOptimisticUserUpdate = (
   timelineItemUserId: string | null | undefined,
   currentUserId: string | null | undefined,
 ): TimelineItemEntry[] | null => {
-  if (
-    newEntry.role !== 'user' ||
-    timelineItemUserId !== currentUserId ||
-    !newEntry.dbId
-  ) {
+  if (newEntry.role !== 'user' || timelineItemUserId !== currentUserId) {
     return null
   }
 
-  const updated = timelineItems.map((item) => {
-    if (
+  // Find optimistic timeline item (user timeline item with temporary ID) that matches content
+  const optimisticIndex = timelineItems.findIndex(
+    (item) =>
       item.role === 'user' &&
-      !item.dbId &&
-      item.content === newEntry.content
-    ) {
-      return { ...item, dbId: newEntry.dbId }
-    }
-    return item
-  })
-
-  const wasUpdated = updated.some(
-    (item, index) => item !== timelineItems[index],
+      item.content === newEntry.content &&
+      item.id !== newEntry.id,
   )
-  return wasUpdated ? updated : null
+
+  if (optimisticIndex >= 0) {
+    // Replace the optimistic timeline item with the persisted one
+    const updated = [...timelineItems]
+    updated[optimisticIndex] = newEntry
+    return updated
+  }
+
+  return null
 }
 
 // TODO: Modify to use what is inferred from the valibot schema
@@ -102,11 +128,7 @@ export const useRealtimeTimelineItems: UseRealtimeTimelineItemsFunc = (
 ) => {
   // Initialize timeline items with existing timeline items (no welcome message)
   const initialTimelineItems = designSession.timelineItems.map((item) => {
-    const chatEntry = convertTimelineItemToChatEntry(item)
-    return {
-      ...chatEntry,
-      dbId: 'id' in item ? item.id : chatEntry.id,
-    }
+    return convertTimelineItemToChatEntry(item)
   })
 
   const [timelineItems, setTimelineItems] =
@@ -116,7 +138,7 @@ export const useRealtimeTimelineItems: UseRealtimeTimelineItemsFunc = (
   const addOrUpdateTimelineItem = useCallback(
     (newChatEntry: TimelineItemEntry, timelineItemUserId?: string | null) => {
       setTimelineItems((prev) => {
-        // Check if timeline item already exists by dbId to prevent duplicates
+        // Check if timeline item already exists to prevent duplicates
         if (isDuplicateTimelineItem(prev, newChatEntry)) {
           return prev
         }
@@ -156,16 +178,16 @@ export const useRealtimeTimelineItems: UseRealtimeTimelineItemsFunc = (
   // Handle new timeline items from realtime subscription
   const handleNewTimelineItem = useCallback(
     (newTimelineItem: Tables<'timeline_items'>) => {
-      // Convert database timeline item to ChatEntry format
-      const chatEntry = {
-        ...convertTimelineItemToChatEntry(newTimelineItem),
-        dbId: newTimelineItem.id,
-      }
+      // Convert database timeline item to TimelineItemEntry format
+      const timelineItemEntry = convertTimelineItemToChatEntry(newTimelineItem)
 
       // TODO: Implement efficient duplicate checking - Use Set/Map for O(1) duplicate checking instead of O(n) array.some()
       // TODO: Implement smart auto-scroll - Consider user's scroll position and only auto-scroll when user is at bottom
 
-      addOrUpdateTimelineItem(chatEntry, newTimelineItem.user_id ?? null)
+      addOrUpdateTimelineItem(
+        timelineItemEntry,
+        newTimelineItem.user_id ?? null,
+      )
     },
     [addOrUpdateTimelineItem],
   )

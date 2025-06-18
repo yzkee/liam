@@ -13,7 +13,8 @@ export const generateTimelineItemId = (prefix: string): string => {
 export const formatTimelineItemHistory = (
   timelineItems: TimelineItemEntry[],
 ): [string, string][] => {
-  return timelineItems
-    .filter((item) => item.id !== 'welcome')
-    .map((item) => [item.role === 'user' ? 'Human' : 'AI', item.content])
+  return timelineItems.map((item) => [
+    item.role === 'user' ? 'Human' : 'AI',
+    item.content,
+  ])
 }

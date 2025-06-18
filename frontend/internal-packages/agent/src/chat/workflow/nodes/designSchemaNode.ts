@@ -5,6 +5,8 @@ import type { BasePromptVariables } from '../../../langchain/utils/types'
 import { convertSchemaToText } from '../../../utils/convertSchemaToText'
 import type { WorkflowState } from '../types'
 
+const NODE_NAME = 'designSchemaNode'
+
 interface PreparedSchemaDesign {
   agent: DatabaseSchemaBuildAgent
   schemaText: string
@@ -150,22 +152,21 @@ async function prepareSchemaDesign(
 export async function designSchemaNode(
   state: WorkflowState,
 ): Promise<WorkflowState> {
-  const { agent, schemaText } = await prepareSchemaDesign(state)
+  state.logger.log(`[${NODE_NAME}] Started`)
 
-  // Format chat history for prompt
-  const formattedChatHistory =
-    state.history.length > 0
-      ? state.history.map((content) => `User: ${content}`).join('\n')
-      : 'No previous conversation.'
+  const { agent, schemaText } = await prepareSchemaDesign(state)
 
   // Create prompt variables directly
   const promptVariables: BasePromptVariables = {
     schema_text: schemaText,
-    chat_history: formattedChatHistory,
+    chat_history: state.formattedHistory,
     user_message: state.userInput,
   }
 
   // Use agent's generate method with prompt variables
   const response = await agent.generate(promptVariables)
-  return await handleBuildAgentResponse(response, state)
+  const result = await handleBuildAgentResponse(response, state)
+
+  state.logger.log(`[${NODE_NAME}] Completed`)
+  return result
 }

@@ -6,6 +6,4 @@ import type { TimelineItemProps } from '../../TimelineItem/TimelineItem'
 export type TimelineItemEntry = TimelineItemProps & {
   /** Unique identifier for the timeline item */
   id: string
-  /** Database timeline item ID for persistence */
-  dbId?: string
 }

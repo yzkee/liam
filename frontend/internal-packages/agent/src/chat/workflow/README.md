@@ -9,14 +9,22 @@ flowchart TD
     START([START])
     ANALYZE[analyzeRequirements<br/>Requirements Organization<br/><i>pmAgent</i>]
     DESIGN[designSchema<br/>DB Design & DDL Execution<br/><i>dbAgent</i>]
-    VALIDATE[validateSchema<br/>Use Case Verification & DML Execution<br/><i>qaAgent</i>]
+    GENERATE_DDL[generateDDL<br/>DDL Generation<br/><i>agent</i>]
+    EXECUTE_DDL[executeDDL<br/>DDL Execution<br/><i>agent</i>]
+    GENERATE_USECASE[generateUsecase<br/>Use Case Creation<br/><i>qaAgent</i>]
+    PREPARE_DML[prepareDML<br/>DML Generation<br/><i>qaAgent</i>]
+    VALIDATE[validateSchema<br/>DML Execution & Validation<br/><i>qaAgent</i>]
     REVIEW[reviewDeliverables<br/>Final Requirements & Deliverables Confirmation<br/><i>pmAgentReview</i>]
     FINALIZE[finalizeArtifacts<br/>Generate & Save Artifacts<br/><i>dbAgentArtifactGen</i>]
     END([__end__<br/>End])
 
     START --> ANALYZE
     ANALYZE --> DESIGN
-    DESIGN --> VALIDATE
+    DESIGN --> GENERATE_DDL
+    GENERATE_DDL --> EXECUTE_DDL
+    EXECUTE_DDL --> GENERATE_USECASE
+    GENERATE_USECASE --> PREPARE_DML
+    PREPARE_DML --> VALIDATE
     VALIDATE -->|success| REVIEW
     VALIDATE -->|dml error or test fail| DESIGN
     REVIEW -->|OK| FINALIZE
@@ -55,9 +63,13 @@ interface WorkflowState {
 
 1. **analyzeRequirements**: Organizes and clarifies requirements from user input (performed by pmAgent)
 2. **designSchema**: Designs database schema and executes DDL statements (performed by dbAgent)
-3. **validateSchema**: Verifies use cases and executes DML for testing (performed by qaAgent)
-4. **reviewDeliverables**: Performs final confirmation of requirements and deliverables (performed by pmAgentReview)
-5. **finalizeArtifacts**: Generates and saves comprehensive artifacts to database (performed by dbAgentArtifactGen)
+3. **generateDDL**: Generates DDL statements (performed by agent)
+4. **executeDDL**: Executes DDL statements (performed by agent)
+5. **generateUsecase**: Creates use cases for testing (performed by qaAgent)
+6. **prepareDML**: Generates DML statements for testing (performed by qaAgent)
+7. **validateSchema**: Executes DML and validates schema (performed by qaAgent)
+8. **reviewDeliverables**: Performs final confirmation of requirements and deliverables (performed by pmAgentReview)
+9. **finalizeArtifacts**: Generates and saves comprehensive artifacts to database (performed by dbAgentArtifactGen)
 
 ## Usage
 

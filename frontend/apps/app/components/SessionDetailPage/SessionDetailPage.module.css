@@ -10,7 +10,7 @@
 }
 
 .chatSection {
-  width: 25rem;
+  width: 23rem;
   border-right: solid 1px var(--pane-border);
   height: 100%;
   overflow: hidden;

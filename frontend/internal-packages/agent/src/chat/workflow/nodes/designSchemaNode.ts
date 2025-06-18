@@ -156,16 +156,10 @@ export async function designSchemaNode(
 
   const { agent, schemaText } = await prepareSchemaDesign(state)
 
-  // Format chat history for prompt
-  const formattedChatHistory =
-    state.history.length > 0
-      ? state.history.map((content) => `User: ${content}`).join('\n')
-      : 'No previous conversation.'
-
   // Create prompt variables directly
   const promptVariables: BasePromptVariables = {
     schema_text: schemaText,
-    chat_history: formattedChatHistory,
+    chat_history: state.formattedHistory,
     user_message: state.userInput,
   }
 

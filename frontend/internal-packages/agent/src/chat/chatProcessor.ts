@@ -3,6 +3,7 @@ import type { Repositories } from '../repositories'
 import type { NodeLogger } from '../utils/nodeLogger'
 import { executeChatWorkflow } from './workflow'
 import type { WorkflowState } from './workflow/types'
+
 export interface ChatProcessorParams {
   message: string
   schemaData: Schema
@@ -60,13 +61,21 @@ export const processChatMessage = async (
     }
   }
 
-  // Convert history format
-  const formattedHistory = history.map(([, content]) => content)
+  // Convert history format with role prefix
+  const historyArray = history.map(([role, content]) => {
+    const prefix = role === 'assistant' ? 'Assistant' : 'User'
+    return `${prefix}: ${content}`
+  })
+
+  // Format chat history
+  const formatChatHistory = (history: string[]): string => {
+    return history.length > 0 ? history.join('\n') : 'No previous conversation.'
+  }
 
   // Create workflow state
   const workflowState: WorkflowState = {
     userInput: message,
-    history: formattedHistory,
+    formattedHistory: formatChatHistory(historyArray),
     schemaData,
     organizationId,
     buildingSchemaId,

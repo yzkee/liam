@@ -65,19 +65,11 @@ export async function finalizeArtifactsNode(
     }
   }
 
-  // Update chat history with the new conversation
-  const updatedHistory = [
-    ...state.history,
-    `User: ${state.userInput}`,
-    `Assistant: ${finalResponse}`,
-  ]
-
   state.logger.log(`[${NODE_NAME}] Completed`)
 
   return {
     ...state,
     finalResponse,
-    history: updatedHistory,
     error: errorToReturn,
   }
 }

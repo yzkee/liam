@@ -6,7 +6,7 @@ export type WorkflowState = {
   userInput: string
   generatedAnswer?: string | undefined
   finalResponse?: string | undefined
-  history: string[]
+  formattedHistory: string
   schemaData: Schema
   projectId?: string | undefined
   error?: string | undefined

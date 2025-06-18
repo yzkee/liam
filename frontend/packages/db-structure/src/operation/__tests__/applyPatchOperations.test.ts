@@ -163,7 +163,7 @@ describe('applyPatchOperations', () => {
       applyPatchOperations(target, operations)
 
       expect(target).toEqual({
-        'special~1path': 'value with ~',
+        'special/path': 'value with ~',
         'with spaces': 'value with spaces',
       })
     })

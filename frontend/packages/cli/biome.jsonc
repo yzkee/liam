@@ -7,11 +7,7 @@
           "level": "error",
           "fix": "safe",
           "options": {
-            "suggestedExtensions": {
-              "ts": {
-                "module": "js"
-              }
-            }
+            "forceJsExtensions": true
           }
         }
       }

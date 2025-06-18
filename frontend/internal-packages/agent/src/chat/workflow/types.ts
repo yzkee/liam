@@ -4,6 +4,13 @@ import type { NodeLogger } from '../../utils/nodeLogger'
 
 export type WorkflowState = {
   userInput: string
+  analyzedRequirements?:
+    | {
+        brd: string
+        functionalRequirements: Record<string, string[]>
+        nonFunctionalRequirements: Record<string, string[]>
+      }
+    | undefined
   generatedAnswer?: string | undefined
   finalResponse?: string | undefined
   formattedHistory: string

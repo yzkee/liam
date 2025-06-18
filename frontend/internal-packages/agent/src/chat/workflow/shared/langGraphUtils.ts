@@ -11,6 +11,14 @@ export const DEFAULT_RECURSION_LIMIT = 10
 export const createAnnotations = () => {
   return Annotation.Root({
     userInput: Annotation<string>,
+    analyzedRequirements: Annotation<
+      | {
+          brd: string
+          functionalRequirements: Record<string, string[]>
+          nonFunctionalRequirements: Record<string, string[]>
+        }
+      | undefined
+    >,
     generatedAnswer: Annotation<string | undefined>,
     finalResponse: Annotation<string | undefined>,
     formattedHistory: Annotation<string>,

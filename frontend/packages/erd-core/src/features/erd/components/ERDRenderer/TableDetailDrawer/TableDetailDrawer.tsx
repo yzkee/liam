@@ -46,9 +46,11 @@ export const TableDetailDrawer: FC = () => {
 
   return (
     <DrawerPortal>
-      <DrawerContent className={styles.content} {...ariaDescribedBy}>
-        {table !== undefined && <TableDetail table={table} />}
-      </DrawerContent>
+      {table !== undefined && (
+        <DrawerContent className={styles.content} {...ariaDescribedBy}>
+          <TableDetail table={table} />
+        </DrawerContent>
+      )}
     </DrawerPortal>
   )
 }

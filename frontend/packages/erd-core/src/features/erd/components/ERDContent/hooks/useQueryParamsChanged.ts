@@ -57,7 +57,6 @@ export const useQueryParamsChanged = ({ displayArea }: Params) => {
     hiddenNodeIds,
   ])
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: To detect changes in query parameters (activeTableName, showMode, hiddenNodeIds) managed by nuqs and trigger re-layout
   useEffect(() => {
     handleChangeQueryParams()
   }, [activeTableName, hiddenNodeIds, showMode, handleChangeQueryParams])

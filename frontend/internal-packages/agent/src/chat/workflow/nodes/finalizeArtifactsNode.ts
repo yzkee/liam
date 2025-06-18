@@ -20,11 +20,11 @@ export async function finalizeArtifactsNode(
     finalResponse = `Sorry, an error occurred during processing: ${state.error}`
     errorToReturn = state.error
 
-    // Save error message to database
-    const saveResult = await state.repositories.schema.createMessage({
+    // Save error timeline item to database
+    const saveResult = await state.repositories.schema.createTimelineItem({
       designSessionId: state.designSessionId,
       content: finalResponse,
-      role: 'error',
+      type: 'error',
     })
 
     if (!saveResult.success) {
@@ -36,27 +36,27 @@ export async function finalizeArtifactsNode(
     finalResponse = state.generatedAnswer
     errorToReturn = undefined
 
-    // Save AI message to database
-    const saveResult = await state.repositories.schema.createMessage({
+    // Save AI timeline item to database
+    const saveResult = await state.repositories.schema.createTimelineItem({
       designSessionId: state.designSessionId,
       content: finalResponse,
-      role: 'assistant',
+      type: 'assistant',
     })
 
     if (!saveResult.success) {
-      console.error('Failed to save AI message:', saveResult.error)
-      // Continue processing even if message saving fails
+      console.error('Failed to save AI timeline item:', saveResult.error)
+      // Continue processing even if timeline item saving fails
     }
   } else {
     // Fallback case: no generated answer and no specific error
     finalResponse = 'Sorry, we could not generate an answer. Please try again.'
     errorToReturn = 'No generated answer available'
 
-    // Save fallback message to database
-    const saveResult = await state.repositories.schema.createMessage({
+    // Save fallback timeline item to database
+    const saveResult = await state.repositories.schema.createTimelineItem({
       designSessionId: state.designSessionId,
       content: finalResponse,
-      role: 'error',
+      type: 'error',
     })
 
     if (!saveResult.success) {

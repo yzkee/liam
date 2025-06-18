@@ -3,24 +3,24 @@
 import { createClient } from '@/libs/db/client'
 import type { Tables } from '@liam-hq/db/supabase/database.types'
 import * as v from 'valibot'
-import type { ChatEntry } from '../types/chatTypes'
+import type { TimelineItemEntry } from '../types/chatTypes'
 
-type SchemaVersionMessage = {
+type SchemaVersionTimelineItem = {
   id: string
-  role: 'schema_version'
+  type: 'schema_version'
   content: string
   building_schema_version_id: string
 }
 
 // TODO: Modify to use what is inferred from the valibot schema
-type Message = Tables<'messages'> | SchemaVersionMessage
+type TimelineItem = Tables<'timeline_items'> | SchemaVersionTimelineItem
 
 // TODO: Make sure to use it when storing data and as an inferential type
-const realtimeMessageSchema = v.object({
+const realtimeTimelineItemSchema = v.object({
   id: v.string(),
   design_session_id: v.pipe(v.string(), v.uuid()),
   content: v.string(),
-  role: v.picklist(['user', 'assistant', 'schema_version']),
+  type: v.picklist(['user', 'assistant', 'schema_version']),
   user_id: v.nullable(v.string()),
   created_at: v.string(),
   updated_at: v.string(),
@@ -47,68 +47,73 @@ export const getCurrentUserId = async (): Promise<string | null> => {
 }
 
 /**
- * Convert database message to ChatEntry format
+ * Convert database timeline item to TimelineItemEntry format
  */
-function isSchemaVersionMessage(
-  message: Message,
-): message is SchemaVersionMessage {
+function isSchemaVersionTimelineItem(
+  timelineItem: TimelineItem,
+): timelineItem is SchemaVersionTimelineItem {
   return (
-    message.role === 'schema_version' &&
-    'building_schema_version_id' in message &&
-    typeof message.building_schema_version_id === 'string'
+    timelineItem.type === 'schema_version' &&
+    'building_schema_version_id' in timelineItem &&
+    typeof timelineItem.building_schema_version_id === 'string'
   )
 }
 
-export const convertMessageToChatEntry = (message: Message): ChatEntry => {
-  if (isSchemaVersionMessage(message)) {
-    // Schema version message
+export const convertTimelineItemToChatEntry = (
+  timelineItem: TimelineItem,
+): TimelineItemEntry => {
+  if (isSchemaVersionTimelineItem(timelineItem)) {
+    // Schema version timeline item
     return {
-      id: message.id,
-      role: message.role,
-      content: message.content,
-      building_schema_version_id: message.building_schema_version_id,
+      id: timelineItem.id,
+      role: timelineItem.type,
+      content: timelineItem.content,
+      building_schema_version_id: timelineItem.building_schema_version_id,
     }
   }
 
-  // Regular message from Tables<'messages'>
+  // Regular timeline item from Tables<'timeline_items'>
   return {
-    id: message.id,
-    content: message.content,
-    role: message.role,
-    timestamp: new Date(message.created_at),
+    id: timelineItem.id,
+    content: timelineItem.content,
+    role: timelineItem.type,
+    timestamp: new Date(timelineItem.created_at),
     isGenerating: false,
   }
 }
 
 /**
- * Set up realtime subscription for messages in a design session
+ * Set up realtime subscription for timeline items in a design session
  */
 export const setupRealtimeSubscription = (
   designSessionId: string,
-  onNewMessage: (message: Tables<'messages'>) => void,
+  onNewTimelineItem: (timelineItem: Tables<'timeline_items'>) => void,
   onError?: (error: Error) => void,
 ) => {
   const supabase = createClient()
 
   const subscription = supabase
-    .channel(`messages:${designSessionId}`)
+    .channel(`timeline_items:${designSessionId}`)
     .on(
       'postgres_changes',
       {
         event: 'INSERT',
         schema: 'public',
-        table: 'messages',
+        table: 'timeline_items',
         filter: `design_session_id=eq.${designSessionId}`,
       },
       (payload) => {
         try {
-          const validatedMessage = v.parse(realtimeMessageSchema, payload.new)
-          onNewMessage(validatedMessage)
+          const validatedTimelineItem = v.parse(
+            realtimeTimelineItemSchema,
+            payload.new,
+          )
+          onNewTimelineItem(validatedTimelineItem)
         } catch (error) {
           onError?.(
             error instanceof Error
               ? error
-              : new Error('Invalid message format or validation failed'),
+              : new Error('Invalid timeline item format or validation failed'),
           )
         }
       },

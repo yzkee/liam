@@ -3,8 +3,8 @@
 import type { TableGroup } from '@liam-hq/db-structure'
 import { boolean, object, optional, parse, string } from 'valibot'
 import { ERROR_MESSAGES } from '../constants/chatConstants'
-import type { ChatEntry } from '../types/chatTypes'
-import { formatChatHistory } from './messageHelpers'
+import type { TimelineItemEntry } from '../types/chatTypes'
+import { formatTimelineItemHistory } from './timelineItemHelpers'
 
 type DesignSession = {
   id: string
@@ -16,7 +16,7 @@ type DesignSession = {
 interface SendChatMessageParams {
   message: string
   tableGroups?: Record<string, TableGroup>
-  messages: ChatEntry[]
+  timelineItems: TimelineItemEntry[]
   designSession: DesignSession
   setProgressMessages: (updater: (prev: string[]) => string[]) => void
   currentUserId: string
@@ -95,14 +95,14 @@ const handleChatError = (
 export const sendChatMessage = async ({
   message,
   tableGroups,
-  messages,
+  timelineItems,
   designSession,
   setProgressMessages,
   currentUserId,
 }: SendChatMessageParams): Promise<SendChatMessageResult> => {
   try {
-    // Format chat history for API
-    const history = formatChatHistory(messages)
+    // Format timeline item history for API
+    const history = formatTimelineItemHistory(timelineItems)
 
     // Call API
     const response = await callChatAPI(

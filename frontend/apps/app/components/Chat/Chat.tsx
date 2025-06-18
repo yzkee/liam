@@ -3,18 +3,21 @@
 import type { Schema, TableGroup } from '@liam-hq/db-structure'
 import { type FC, useEffect, useRef, useState, useTransition } from 'react'
 import { ChatInput } from '../ChatInput'
-import { ChatMessage } from '../ChatMessage'
+import { TimelineItem } from '../TimelineItem'
 import styles from './Chat.module.css'
-import { type Message, useRealtimeMessages } from './hooks/useRealtimeMessages'
+import {
+  type TimelineItemType,
+  useRealtimeTimelineItems,
+} from './hooks/useRealtimeTimelineItems'
 import { getCurrentUserId } from './services'
 import { sendChatMessage } from './services/aiMessageService'
-import { generateMessageId } from './services/messageHelpers'
-import type { ChatEntry } from './types/chatTypes'
+import { generateTimelineItemId } from './services/timelineItemHelpers'
+import type { TimelineItemEntry } from './types/chatTypes'
 
 type DesignSession = {
   id: string
   organizationId: string
-  messages: Message[]
+  timelineItems: TimelineItemType[]
   buildingSchemaId: string
   latestVersionNumber?: number
 }
@@ -27,7 +30,7 @@ interface Props {
 
 export const Chat: FC<Props> = ({ schemaData, tableGroups, designSession }) => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
-  const { messages, addOrUpdateMessage } = useRealtimeMessages(
+  const { timelineItems, addOrUpdateTimelineItem } = useRealtimeTimelineItems(
     designSession,
     currentUserId,
   )
@@ -49,18 +52,18 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups, designSession }) => {
   useEffect(() => {
     if (!currentUserId || autoStartExecuted.current || isLoading) return
 
-    // Only auto-start if there's exactly one message and it's from user
+    // Only auto-start if there's exactly one timeline item and it's from user
     if (
-      designSession.messages.length === 1 &&
-      designSession.messages[0].role === 'user'
+      designSession.timelineItems.length === 1 &&
+      designSession.timelineItems[0].type === 'user'
     ) {
-      const initialMessage = designSession.messages[0]
+      const initialTimelineItem = designSession.timelineItems[0]
       autoStartExecuted.current = true
       startTransition(() => {
-        startAIResponse(initialMessage.content)
+        startAIResponse(initialTimelineItem.content)
       })
     }
-  }, [currentUserId, designSession.messages, isLoading])
+  }, [currentUserId, designSession.timelineItems, isLoading])
 
   // Scroll to bottom when component mounts or messages change
   useEffect(() => {
@@ -75,7 +78,7 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups, designSession }) => {
     const result = await sendChatMessage({
       message: content,
       tableGroups,
-      messages,
+      timelineItems,
       designSession,
       setProgressMessages,
       currentUserId,
@@ -92,14 +95,14 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups, designSession }) => {
   // TODO: Add rate limiting - Implement rate limiting for message sending to prevent spam
   const handleSendMessage = async (content: string) => {
     // Add user message
-    const userMessage: ChatEntry = {
-      id: generateMessageId('user'),
+    const userMessage: TimelineItemEntry = {
+      id: generateTimelineItemId('user'),
       content,
       role: 'user',
       timestamp: new Date(),
       isGenerating: false, // Explicitly set to false for consistency
     }
-    addOrUpdateMessage(userMessage)
+    addOrUpdateTimelineItem(userMessage)
 
     startTransition(() => {
       startAIResponse(content)
@@ -109,18 +112,18 @@ export const Chat: FC<Props> = ({ schemaData, tableGroups, designSession }) => {
   return (
     <div className={styles.wrapper}>
       <div className={styles.messagesContainer}>
-        {/* Display all messages */}
-        {messages.map((message, index) => {
-          // Check if this is the last AI message and has progress messages
-          const isLastAIMessage =
-            message.role !== 'user' && index === messages.length - 1
+        {/* Display all timeline items */}
+        {timelineItems.map((timelineItem, index) => {
+          // Check if this is the last AI timeline item and has progress messages
+          const isLastAITimelineItem =
+            timelineItem.role !== 'user' && index === timelineItems.length - 1
           const shouldShowProgress =
-            progressMessages.length > 0 && isLastAIMessage
+            progressMessages.length > 0 && isLastAITimelineItem
 
           return (
-            <ChatMessage
-              key={message.id}
-              {...message}
+            <TimelineItem
+              key={timelineItem.id}
+              {...timelineItem}
               progressMessages={
                 shouldShowProgress ? progressMessages : undefined
               }

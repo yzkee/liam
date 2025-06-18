@@ -8,12 +8,12 @@ import {
 import { compare } from 'fast-json-patch'
 import * as v from 'valibot'
 import type {
-  CreateMessageParams,
+  CreateTimelineItemParams,
   CreateVersionParams,
   DesignSessionData,
-  MessageResult,
   SchemaData,
   SchemaRepository,
+  TimelineItemResult,
   VersionResult,
 } from './types'
 
@@ -41,15 +41,15 @@ export class SupabaseSchemaRepository implements SchemaRepository {
   async getDesignSession(
     designSessionId: string,
   ): Promise<DesignSessionData | null> {
-    // Fetch design session with messages
+    // Fetch design session with timeline items
     const { data, error } = await this.client
       .from('design_sessions')
       .select(`
         organization_id,
-        messages (
+        timeline_items (
           id,
           content,
-          role,
+          type,
           user_id,
           created_at,
           updated_at,
@@ -59,7 +59,10 @@ export class SupabaseSchemaRepository implements SchemaRepository {
         )
       `)
       .eq('id', designSessionId)
-      .order('created_at', { ascending: true, referencedTable: 'messages' })
+      .order('created_at', {
+        ascending: true,
+        referencedTable: 'timeline_items',
+      })
       .single()
 
     if (error || !data) {
@@ -72,7 +75,7 @@ export class SupabaseSchemaRepository implements SchemaRepository {
 
     return {
       organization_id: data.organization_id,
-      messages: data.messages || [],
+      timeline_items: data.timeline_items || [],
     }
   }
 
@@ -330,20 +333,24 @@ export class SupabaseSchemaRepository implements SchemaRepository {
     }
   }
 
-  async createMessage(params: CreateMessageParams): Promise<MessageResult> {
-    const { designSessionId, content, role } = params
-    const userId = role === 'user' ? params.userId : null
+  async createTimelineItem(
+    params: CreateTimelineItemParams,
+  ): Promise<TimelineItemResult> {
+    const { designSessionId, content, type } = params
+    const userId = 'userId' in params ? params.userId : null
     const buildingSchemaVersionId =
-      role === 'schema_version' ? params.buildingSchemaVersionId : null
+      'buildingSchemaVersionId' in params
+        ? params.buildingSchemaVersionId
+        : null
 
     const now = new Date().toISOString()
 
-    const { data: message, error } = await this.client
-      .from('messages')
+    const { data: timelineItem, error } = await this.client
+      .from('timeline_items')
       .insert({
         design_session_id: designSessionId,
         content,
-        role,
+        type,
         user_id: userId,
         building_schema_version_id: buildingSchemaVersionId,
         updated_at: now,
@@ -352,7 +359,10 @@ export class SupabaseSchemaRepository implements SchemaRepository {
       .single()
 
     if (error) {
-      console.error('Failed to save message:', JSON.stringify(error, null, 2))
+      console.error(
+        'Failed to save timeline item:',
+        JSON.stringify(error, null, 2),
+      )
       return {
         success: false,
         error: error.message,
@@ -361,7 +371,7 @@ export class SupabaseSchemaRepository implements SchemaRepository {
 
     return {
       success: true,
-      message,
+      timelineItem,
     }
   }
 }

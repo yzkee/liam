@@ -1,9 +1,9 @@
-import type { ChatMessageProps } from '../../ChatMessage/ChatMessage'
+import type { TimelineItemProps } from '../../TimelineItem/TimelineItem'
 
 /**
- * Represents a chat message entry with additional metadata
+ * Represents a timeline item entry with additional metadata
  */
-export type ChatEntry = ChatMessageProps & {
-  /** Unique identifier for the message */
+export type TimelineItemEntry = TimelineItemProps & {
+  /** Unique identifier for the timeline item */
   id: string
 }

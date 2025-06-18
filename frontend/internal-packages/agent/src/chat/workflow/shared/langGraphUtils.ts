@@ -13,7 +13,7 @@ export const createAnnotations = () => {
     userInput: Annotation<string>,
     generatedAnswer: Annotation<string | undefined>,
     finalResponse: Annotation<string | undefined>,
-    history: Annotation<string[]>,
+    formattedHistory: Annotation<string>,
     schemaData: Annotation<Schema>,
     projectId: Annotation<string | undefined>,
     buildingSchemaId: Annotation<string>,

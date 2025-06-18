@@ -76,7 +76,7 @@ describe('Chat Workflow', () => {
     overrides: Partial<WorkflowState> = {},
   ): WorkflowState => ({
     userInput: 'Test input',
-    history: [],
+    formattedHistory: 'No previous conversation.',
     schemaData: mockSchemaData,
     projectId: 'test-project-id',
     buildingSchemaId: 'test-building-schema-id',
@@ -378,7 +378,7 @@ describe('Chat Workflow', () => {
     it('should preserve state properties through workflow execution', async () => {
       const initialState = createBaseState({
         userInput: 'Test state management',
-        history: ['Previous message 1', 'Previous message 2'],
+        formattedHistory: 'Previous message 1\nPrevious message 2',
         projectId: 'test-project-123',
       })
 
@@ -387,7 +387,7 @@ describe('Chat Workflow', () => {
       expect(result.userInput).toBe(initialState.userInput)
       expect(result.projectId).toBe(initialState.projectId)
       expect(result.schemaData).toEqual(initialState.schemaData)
-      expect(result.history).toHaveLength(4) // 2 original + 2 new
+      expect(result.formattedHistory).toBe(initialState.formattedHistory)
     })
   })
 

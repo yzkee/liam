@@ -11,9 +11,7 @@
     "enabled": true,
     "rules": {
       "recommended": true,
-      "nursery": {
-        "useImportRestrictions": "off"
-      },
+      "nursery": {},
       "correctness": {
         "noUndeclaredDependencies": "error",
         "noUnusedVariables": "error",

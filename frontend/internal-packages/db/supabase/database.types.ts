@@ -1257,7 +1257,7 @@ export type Database = {
           executed_at: string
           id: string
           organization_id: string
-          result_set: string | null
+          result_set: Json[] | null
           status: string
           updated_at: string
           validation_query_id: string
@@ -1268,7 +1268,7 @@ export type Database = {
           executed_at?: string
           id?: string
           organization_id: string
-          result_set?: string | null
+          result_set?: Json[] | null
           status: string
           updated_at?: string
           validation_query_id: string
@@ -1279,7 +1279,7 @@ export type Database = {
           executed_at?: string
           id?: string
           organization_id?: string
-          result_set?: string | null
+          result_set?: Json[] | null
           status?: string
           updated_at?: string
           validation_query_id?: string

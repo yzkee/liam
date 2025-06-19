@@ -16,7 +16,7 @@ ALTER TABLE "public"."validation_queries" OWNER TO "postgres";
 CREATE TABLE IF NOT EXISTS "public"."validation_results" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "validation_query_id" "uuid" NOT NULL,
-    "result_set" "text",
+    "result_set" "jsonb"[],
     "executed_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "status" "text" NOT NULL,
     "error_message" "text",

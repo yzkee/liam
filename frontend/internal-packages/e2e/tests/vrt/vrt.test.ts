@@ -1,6 +1,14 @@
 import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 
+const waitForPageReady = async (page: Page) => {
+  await page.waitForLoadState('domcontentloaded')
+  await page.waitForLoadState('load')
+  await page.waitForLoadState('networkidle')
+  await page.evaluate(() => document.fonts.ready)
+  await expect(page.getByRole('status', { name: 'Loading' })).toBeHidden()
+}
+
 const screenshot = async (page: Page, targetPage: TargetPage) => {
   // Disable Vercel Toolbar for automation
   await page.setExtraHTTPHeaders({
@@ -8,7 +16,7 @@ const screenshot = async (page: Page, targetPage: TargetPage) => {
   })
 
   await page.goto(targetPage.path)
-  await expect(page.getByRole('status', { name: 'Loading' })).toBeHidden()
+  await waitForPageReady(page)
 
   await expect(page).toHaveScreenshot({ fullPage: true })
 }

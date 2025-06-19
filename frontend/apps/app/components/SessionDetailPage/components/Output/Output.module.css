@@ -1,0 +1,10 @@
+.tabsRoot {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100%;
+}
+
+.tabsContent {
+  min-height: 0;
+  height: 100%;
+}

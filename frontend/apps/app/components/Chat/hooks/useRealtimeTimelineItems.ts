@@ -2,46 +2,10 @@ import type { Database, Tables } from '@liam-hq/db/supabase/database.types'
 import { useCallback, useEffect, useState } from 'react'
 import {
   convertTimelineItemToChatEntry,
+  isDuplicateTimelineItem,
   setupRealtimeSubscription,
 } from '../services'
 import type { TimelineItemEntry } from '../types/chatTypes'
-
-const isDuplicateTimelineItem = (
-  timelineItems: TimelineItemEntry[],
-  newEntry: TimelineItemEntry,
-): boolean => {
-  // Check by timeline item ID
-  const duplicateById = timelineItems.some((item) => item.id === newEntry.id)
-  if (duplicateById) {
-    return true
-  }
-
-  // For user timeline items, check by content and role with timestamp tolerance
-  if (newEntry.role === 'user') {
-    const contentDuplicate = timelineItems.some((item) => {
-      if (item.role !== 'user' || item.content !== newEntry.content) {
-        return false
-      }
-
-      // If both have timestamps, check if they're within reasonable range (5 seconds)
-      if (item.timestamp && newEntry.timestamp) {
-        const timeDiff = Math.abs(
-          newEntry.timestamp.getTime() - item.timestamp.getTime(),
-        )
-        return timeDiff < 5000 // 5 seconds tolerance
-      }
-
-      // If either doesn't have timestamp, consider it a duplicate by content alone
-      return true
-    })
-
-    if (contentDuplicate) {
-      return true
-    }
-  }
-
-  return false
-}
 
 const findExistingTimelineItemIndex = (
   timelineItems: TimelineItemEntry[],

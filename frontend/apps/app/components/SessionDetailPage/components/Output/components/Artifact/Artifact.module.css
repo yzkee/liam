@@ -1,0 +1,395 @@
+.container {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  width: 100%;
+  height: 100%;
+  gap: var(--spacing-2);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: var(--spacing-1) var(--spacing-2);
+  border-bottom: solid 1px var(--pane-border);
+}
+
+.title {
+  font-size: var(--font-size-5);
+  font-weight: 600;
+  color: var(--global-foreground);
+  margin: 0;
+}
+
+.copyButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.body {
+  width: 100%;
+  max-width: 100%;
+  min-height: 0;
+  overflow-y: scroll;
+  padding: var(--spacing-4);
+  font-family: var(--main-font);
+  font-weight: 400;
+  font-size: var(--font-size-4);
+  line-height: 1.8em;
+  color: var(--global-body-text);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Exclude code blocks from text wrapping */
+.body :global(pre),
+.body :global(pre code),
+.body :global(pre > div) {
+  word-wrap: normal !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+}
+
+/* Headings */
+.body :global(h1),
+.body :global(h2),
+.body :global(h3),
+.body :global(h4),
+.body :global(h5),
+.body :global(h6) {
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--global-body-text);
+}
+
+/* First element spacing adjustments */
+.body :global(*:first-child) {
+  margin-top: 0;
+}
+
+.body :global(h1) {
+  margin: 0.67em 0;
+  font-weight: 600;
+  padding-bottom: 0.3em;
+  font-size: 2em;
+  border-bottom: 1px solid var(--global-border);
+}
+
+.body :global(h2) {
+  font-weight: 600;
+  padding-bottom: 0.3em;
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--global-border);
+}
+
+.body :global(h3) {
+  font-weight: 600;
+  font-size: 1.25em;
+}
+
+.body :global(h4) {
+  font-weight: 600;
+  font-size: 1em;
+}
+
+.body :global(h5) {
+  font-weight: 600;
+  font-size: 0.875em;
+}
+
+.body :global(h6) {
+  font-weight: 600;
+  font-size: 0.85em;
+  color: var(--global-body-text-subtle);
+}
+
+/* Paragraphs */
+.body :global(p) {
+  margin-top: 0;
+  margin-bottom: var(--spacing-2);
+}
+
+/* Lists */
+.body :global(ul),
+.body :global(ol) {
+  margin-top: 0;
+  margin-bottom: var(--spacing-2);
+  padding-left: 2em;
+}
+
+.body :global(ul) {
+  list-style-type: disc;
+}
+
+.body :global(ol) {
+  list-style-type: decimal;
+}
+
+.body :global(ol ol),
+.body :global(ul ol) {
+  list-style-type: lower-roman;
+}
+
+.body :global(ul ul),
+.body :global(ol ul) {
+  list-style-type: circle;
+}
+
+.body :global(ul ul ul),
+.body :global(ul ol ul),
+.body :global(ol ul ul),
+.body :global(ol ol ul) {
+  list-style-type: square;
+}
+
+.body :global(ul ul ol),
+.body :global(ul ol ol),
+.body :global(ol ul ol),
+.body :global(ol ol ol) {
+  list-style-type: lower-alpha;
+}
+
+.body :global(li + li) {
+  margin-top: 0.25em;
+}
+
+/* Code */
+.body :global(code),
+.body :global(tt) {
+  padding: 0.2em 0.4em;
+  margin: 0;
+  font-size: 85%;
+  white-space: break-spaces;
+  background-color: var(--global-foreground-subtle);
+  border-radius: var(--border-radius-small);
+  font-family: var(--code-font);
+}
+
+/* Inline code within paragraphs and other elements */
+.body :global(p > code),
+.body :global(li > code),
+.body :global(h1 > code),
+.body :global(h2 > code),
+.body :global(h3 > code),
+.body :global(h4 > code),
+.body :global(h5 > code),
+.body :global(h6 > code),
+.body :global(a > code),
+.body :global(em > code),
+.body :global(strong > code) {
+  display: inline;
+  padding: 0.1em 0.3em;
+  vertical-align: baseline;
+  color: #e3e3e3;
+  background-color: var(--overlay-10);
+  border-radius: 3px;
+  font-family: var(--code-font, monospace);
+  font-size: 85%;
+}
+
+.body :global(pre) {
+  margin-bottom: var(--spacing-2);
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+  overflow-x: auto;
+  border-radius: var(--border-radius-base);
+}
+
+/* Add a subtle scrollbar for code blocks that overflow */
+.body :global(pre::-webkit-scrollbar) {
+  height: 8px;
+  background-color: transparent;
+}
+
+.body :global(pre::-webkit-scrollbar-thumb) {
+  background-color: var(--global-border);
+  border-radius: 4px;
+}
+
+.body :global(pre::-webkit-scrollbar-track) {
+  background-color: transparent;
+}
+
+.body :global(pre code) {
+  display: inline-block;
+  max-width: 100%;
+  padding: 0;
+  margin: 0;
+  overflow: visible;
+  line-height: inherit;
+  word-wrap: normal !important;
+  word-break: normal !important;
+  white-space: pre !important;
+  background-color: transparent;
+  border: 0;
+  font-size: 12px;
+}
+
+/* Ensure SyntaxHighlighter's container displays properly */
+.body :global(pre > div) {
+  white-space: pre !important;
+  overflow-x: auto !important;
+  word-wrap: normal !important;
+  word-break: normal !important;
+}
+
+/* Links */
+.body :global(a) {
+  background-color: transparent;
+  color: var(--primary-accent);
+  text-decoration: none;
+}
+
+.body :global(a:hover) {
+  text-decoration: underline;
+}
+
+/* Images */
+.body :global(img) {
+  border-style: none;
+  max-width: 100%;
+  box-sizing: content-box;
+  border-radius: var(--border-radius-base);
+}
+
+/* Blockquotes */
+.body :global(blockquote) {
+  margin: 0 0 var(--spacing-2) 0;
+  padding: 0 var(--spacing-2);
+  color: var(--global-body-text-subtle);
+  border-left: 0.25em solid var(--global-border);
+}
+
+.body :global(blockquote) > :global(:first-child) {
+  margin-top: 0;
+}
+
+.body :global(blockquote) > :global(:last-child) {
+  margin-bottom: 0;
+}
+
+/* Tables */
+.body :global(table) {
+  border-spacing: 0;
+  border-collapse: separate;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  margin-bottom: var(--spacing-3);
+  border: 1px solid var(--global-border);
+  border-radius: var(--border-radius-base);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Table scrollbar styling */
+.body :global(table::-webkit-scrollbar) {
+  height: 8px;
+  background-color: transparent;
+}
+
+.body :global(table::-webkit-scrollbar-thumb) {
+  background-color: var(--global-border);
+  border-radius: 4px;
+}
+
+.body :global(table::-webkit-scrollbar-track) {
+  background-color: transparent;
+}
+
+.body :global(table th) {
+  font-weight: 600;
+  background-color: var(--global-foreground-subtle);
+  color: var(--global-body-text);
+  text-align: left;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  border-bottom: 2px solid var(--global-border);
+}
+
+.body :global(table th),
+.body :global(table td) {
+  padding: var(--spacing-1half) var(--spacing-2);
+  border: 1px solid var(--global-border);
+  border-top: none;
+  border-left: none;
+}
+
+.body :global(table th:last-child),
+.body :global(table td:last-child) {
+  border-right: none;
+}
+
+.body :global(table tr:last-child td) {
+  border-bottom: none;
+}
+
+.body :global(table tr) {
+  background-color: var(--global-background);
+  transition: background-color 0.15s ease;
+}
+
+.body :global(table tr:nth-child(2n)) {
+  background-color: rgba(var(--global-foreground-subtle-rgb, 0, 0, 0), 0.3);
+}
+
+.body :global(table tr:hover) {
+  background-color: rgba(var(--primary-accent-rgb, 0, 0, 0), 0.05);
+}
+
+/* Horizontal Rule */
+.body :global(hr) {
+  box-sizing: content-box;
+  overflow: hidden;
+  background: transparent;
+  border-bottom: 1px solid var(--global-border);
+  height: 0.25em;
+  padding: 0;
+  margin: var(--spacing-3) 0;
+  background-color: var(--global-border);
+  border: 0;
+}
+
+/* Emphasis */
+.body :global(strong) {
+  font-weight: 600;
+}
+
+.body :global(em) {
+  font-style: italic;
+}
+
+/* Strikethrough */
+.body :global(del) {
+  text-decoration: line-through;
+}
+
+/* Details/Summary */
+.body :global(details) {
+  margin-bottom: var(--spacing-2);
+  border: 1px solid var(--global-border);
+  border-radius: var(--border-radius-base);
+  padding: var(--spacing-2);
+}
+
+.body :global(summary) {
+  cursor: pointer;
+  font-weight: 600;
+  padding: var(--spacing-1) 0;
+  color: var(--global-body-text);
+}
+
+.body :global(summary:hover) {
+  color: var(--primary-accent-hover);
+}
+
+.body :global(details[open] summary) {
+  margin-bottom: var(--spacing-2);
+  border-bottom: 1px solid var(--global-border);
+}

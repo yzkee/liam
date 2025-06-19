@@ -14,7 +14,7 @@ interface CodeProps extends HTMLAttributes<HTMLElement> {
   style?: CSSProperties
 }
 
-export interface MarkdownContentProps {
+interface MarkdownContentProps {
   content: string
   variant?: 'themed' | 'minimal'
   className?: string

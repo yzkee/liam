@@ -1,17 +1,8 @@
-import type { Projects } from '@/components/CommonLayout/AppBar/ProjectsDropdownMenu/services/getProjects'
-import {
-  ArrowRight,
-  ArrowTooltipContent,
-  ArrowTooltipPortal,
-  ArrowTooltipProvider,
-  ArrowTooltipRoot,
-  ArrowTooltipTrigger,
-  Button,
-} from '@liam-hq/ui'
+import { ArrowTooltipProvider } from '@liam-hq/ui'
 import type { ChangeEvent, FC } from 'react'
-import { useEffect, useRef, useState } from 'react'
-import { DeepModelingToggle } from '../DeepModelingToggle'
-import { MicButton } from '../MicButton'
+import { useEffect, useRef } from 'react'
+import type { Projects } from '@/components/CommonLayout/AppBar/ProjectsDropdownMenu/services/getProjects'
+import { SessionFormActions } from '../SessionFormActions'
 import styles from './GitHubSessionFormPresenter.module.css'
 
 type Branch = {
@@ -44,7 +35,6 @@ export const GitHubSessionFormPresenter: FC<Props> = ({
   formAction,
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const [isDeepModelingActive, setIsDeepModelingActive] = useState(false)
 
   const handleTextareaChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const textarea = e.target
@@ -136,32 +126,7 @@ export const GitHubSessionFormPresenter: FC<Props> = ({
           </div>
           <div className={styles.divider} />
           <div className={styles.buttonContainer}>
-            <DeepModelingToggle
-              isActive={isDeepModelingActive}
-              onClick={() => setIsDeepModelingActive(!isDeepModelingActive)}
-            >
-              Deep Modeling
-            </DeepModelingToggle>
-            <MicButton onClick={(_e) => {}} />
-            <ArrowTooltipRoot>
-              <ArrowTooltipTrigger asChild>
-                <Button
-                  type="submit"
-                  variant="solid-primary"
-                  disabled={isPending}
-                  isLoading={isPending}
-                  className={styles.buttonCustom}
-                  loadingIndicatorType="content"
-                >
-                  <ArrowRight size={16} />
-                </Button>
-              </ArrowTooltipTrigger>
-              <ArrowTooltipPortal>
-                <ArrowTooltipContent side="top" align="center">
-                  Send
-                </ArrowTooltipContent>
-              </ArrowTooltipPortal>
-            </ArrowTooltipRoot>
+            <SessionFormActions isPending={isPending} />
           </div>
         </form>
       </div>

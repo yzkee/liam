@@ -1,9 +1,9 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import {
-  type SupportedFormat,
   detectFormat,
   parse,
+  type SupportedFormat,
   supportedFormatSchema,
 } from '@liam-hq/db-structure/parser'
 import * as v from 'valibot'
@@ -25,7 +25,21 @@ export async function runPreprocess(
   outputDir: string,
   format: SupportedFormat | undefined,
 ): Promise<Output> {
-  const input = await getInputContent(inputPath)
+  let input: string
+  try {
+    input = await getInputContent(inputPath)
+  } catch (error) {
+    return {
+      outputFilePath: null,
+      errors: [
+        new ArgumentError(
+          error instanceof Error
+            ? error.message
+            : 'Failed to read input file(s)',
+        ),
+      ],
+    }
+  }
   let detectedFormat: SupportedFormat | undefined
 
   if (format === undefined) {

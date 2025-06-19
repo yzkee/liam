@@ -1,6 +1,6 @@
-import { useSchema, useUserEditing } from '@/stores'
 import { DrawerContent, DrawerPortal, DrawerRoot } from '@liam-hq/ui'
 import { type FC, type PropsWithChildren, useCallback } from 'react'
+import { useSchema, useUserEditing } from '@/stores'
 import { TableDetail } from '../../ERDContent/components/TableNode/TableDetail'
 import styles from './TableDetailDrawer.module.css'
 
@@ -46,9 +46,11 @@ export const TableDetailDrawer: FC = () => {
 
   return (
     <DrawerPortal>
-      <DrawerContent className={styles.content} {...ariaDescribedBy}>
-        {table !== undefined && <TableDetail table={table} />}
-      </DrawerContent>
+      {table !== undefined && (
+        <DrawerContent className={styles.content} {...ariaDescribedBy}>
+          <TableDetail table={table} />
+        </DrawerContent>
+      )}
     </DrawerPortal>
   )
 }

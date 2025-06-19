@@ -1,8 +1,8 @@
+import { useCallback, useEffect } from 'react'
 import type { DisplayArea } from '@/features/erd/types'
 import { computeAutoLayout, highlightNodesAndEdges } from '@/features/erd/utils'
 import { useCustomReactflow } from '@/features/reactflow/hooks'
 import { useUserEditing } from '@/stores'
-import { useCallback, useEffect } from 'react'
 import { hasNonRelatedChildNodes, updateNodesHiddenState } from '../utils'
 import { usePopStateListener } from './usePopStateListener'
 
@@ -57,7 +57,6 @@ export const useQueryParamsChanged = ({ displayArea }: Params) => {
     hiddenNodeIds,
   ])
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: To detect changes in query parameters (activeTableName, showMode, hiddenNodeIds) managed by nuqs and trigger re-layout
   useEffect(() => {
     handleChangeQueryParams()
   }, [activeTableName, hiddenNodeIds, showMode, handleChangeQueryParams])

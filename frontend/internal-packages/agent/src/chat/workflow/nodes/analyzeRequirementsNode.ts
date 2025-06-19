@@ -1,5 +1,7 @@
 import type { WorkflowState } from '../types'
 
+const NODE_NAME = 'analyzeRequirementsNode'
+
 /**
  * Analyze Requirements Node - Requirements Organization
  * Performed by pmAgent
@@ -7,8 +9,12 @@ import type { WorkflowState } from '../types'
 export async function analyzeRequirementsNode(
   state: WorkflowState,
 ): Promise<WorkflowState> {
+  state.logger.log(`[${NODE_NAME}] Started`)
+
   // TODO: Implement requirements analysis logic
   // This node should organize and clarify requirements from user input
+
+  state.logger.log(`[${NODE_NAME}] Completed`)
 
   // For now, pass through the state unchanged
   // Future implementation will analyze and organize user requirements

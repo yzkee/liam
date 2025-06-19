@@ -1,15 +1,15 @@
 'use server'
 
 import path from 'node:path'
-import { getOrganizationId } from '@/features/organizations/services/getOrganizationId'
-import { createClient } from '@/libs/db/server'
 import type { SupabaseClientType } from '@liam-hq/db'
+import type { TablesInsert } from '@liam-hq/db/supabase/database.types'
 import type { Schema } from '@liam-hq/db-structure'
 import { parse, setPrismWasmUrl } from '@liam-hq/db-structure/parser'
-import type { TablesInsert } from '@liam-hq/db/supabase/database.types'
 import { getFileContent } from '@liam-hq/github'
 import { redirect } from 'next/navigation'
 import * as v from 'valibot'
+import { getOrganizationId } from '@/features/organizations/services/getOrganizationId'
+import { createClient } from '@/libs/db/server'
 
 type CreateSessionState = {
   success: boolean
@@ -190,24 +190,24 @@ async function saveInitialMessage(
 ): Promise<CreateSessionState | { success: true }> {
   const now = new Date().toISOString()
 
-  const messageData: TablesInsert<'messages'> = {
+  const timelineItemData: TablesInsert<'timeline_items'> = {
     design_session_id: designSessionId,
     content,
-    role: 'user',
+    type: 'user',
     user_id: userId,
     updated_at: now,
     organization_id: organizationId,
   }
 
   const { error } = await supabase
-    .from('messages')
-    .insert(messageData)
+    .from('timeline_items')
+    .insert(timelineItemData)
     .select()
     .single()
 
   if (error) {
-    console.error('Failed to save initial message:', error)
-    return { success: false, error: 'Failed to save initial message' }
+    console.error('Failed to save initial timeline item:', error)
+    return { success: false, error: 'Failed to save initial timeline item' }
   }
 
   return { success: true }

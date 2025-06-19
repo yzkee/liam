@@ -1,11 +1,11 @@
 'use client'
 
-import { useSchema } from '@/stores'
 import { Search, Table2 } from '@liam-hq/ui'
 import { DialogDescription, DialogTitle } from '@radix-ui/react-dialog'
 import { ReactFlowProvider } from '@xyflow/react'
 import { Command } from 'cmdk'
 import { type FC, useEffect, useState } from 'react'
+import { useSchema } from '@/stores'
 import { TableNode } from '../../ERDContent/components'
 import styles from './CommandPalette.module.css'
 
@@ -67,28 +67,26 @@ export const CommandPalette: FC = () => {
         >
           <div className={styles.previewBackground}>
             {table && (
-              <div className={styles.tableNodeContainer}>
-                <ReactFlowProvider>
-                  <TableNode
-                    id=""
-                    type="table"
-                    data={{
-                      table: table,
-                      isActiveHighlighted: false,
-                      isHighlighted: false,
-                      isTooltipVisible: false,
-                      sourceColumnName: undefined,
-                      targetColumnCardinalities: undefined,
-                      showMode: 'ALL_FIELDS',
-                    }}
-                    dragging={false}
-                    isConnectable={false}
-                    positionAbsoluteX={0}
-                    positionAbsoluteY={0}
-                    zIndex={0}
-                  />
-                </ReactFlowProvider>
-              </div>
+              <ReactFlowProvider>
+                <TableNode
+                  id=""
+                  type="table"
+                  data={{
+                    table: table,
+                    isActiveHighlighted: false,
+                    isHighlighted: false,
+                    isTooltipVisible: false,
+                    sourceColumnName: undefined,
+                    targetColumnCardinalities: undefined,
+                    showMode: 'ALL_FIELDS',
+                  }}
+                  dragging={false}
+                  isConnectable={false}
+                  positionAbsoluteX={0}
+                  positionAbsoluteY={0}
+                  zIndex={0}
+                />
+              </ReactFlowProvider>
             )}
           </div>
         </div>

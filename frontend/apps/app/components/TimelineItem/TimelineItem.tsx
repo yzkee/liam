@@ -1,11 +1,11 @@
 'use client'
 
-import { AgentMessage } from '@/components/Chat/AgentMessage'
-import { MarkdownContent } from '@/components/MarkdownContent'
-import { UserMessage } from '@/components/Chat/UserMessage'
-import { VersionMessage } from '@/components/Chat/VersionMessage'
 import type { Database } from '@liam-hq/db'
 import type { FC, ReactNode } from 'react'
+import { AgentMessage } from '@/components/Chat/AgentMessage'
+import { UserMessage } from '@/components/Chat/UserMessage'
+import { VersionMessage } from '@/components/Chat/VersionMessage'
+import { MarkdownContent } from '@/components/MarkdownContent'
 import styles from './TimelineItem.module.css'
 
 // TODO: Modify to use what is inferred from the valibot schema

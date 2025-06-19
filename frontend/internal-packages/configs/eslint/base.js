@@ -1,6 +1,7 @@
 import { includeIgnoreFile } from '@eslint/compat'
 import tseslint from '@typescript-eslint/eslint-plugin'
 import tsParser from '@typescript-eslint/parser'
+import customRulesModule from './rules/index.js'
 
 /**
  * Base ESLint configuration with typescript-eslint setup
@@ -24,6 +25,7 @@ export function createBaseConfig(options = {}) {
       ],
       plugins: {
         '@typescript-eslint': tseslint,
+        'custom': customRulesModule,
       },
       languageOptions: {
         parser: tsParser,
@@ -35,6 +37,7 @@ export function createBaseConfig(options = {}) {
       },
       rules: {
         '@typescript-eslint/no-unsafe-member-access': 'error',
+        'custom/require-use-server': 'error',
       },
     },
     {

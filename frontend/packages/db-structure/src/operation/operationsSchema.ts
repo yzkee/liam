@@ -1,9 +1,10 @@
 import * as v from 'valibot'
 import { tableSchema } from '../schema/index.js'
+import { PATH_PATTERNS } from './constants.js'
 
 const isTablePath = (input: unknown): boolean => {
   if (typeof input !== 'string') return false
-  return /^\/tables\/[^/]+$/.test(input)
+  return PATH_PATTERNS.TABLE_BASE.test(input)
 }
 
 const addTableOperationSchema = v.object({

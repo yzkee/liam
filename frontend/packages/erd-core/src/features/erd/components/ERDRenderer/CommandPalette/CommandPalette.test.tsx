@@ -193,7 +193,7 @@ describe('go to ERD with option select', () => {
     await user.click(within(dialog).getByRole('option', { name: 'follows' }))
 
     expect(dialog).not.toBeInTheDocument()
-    expect(activeTableNameDisplay).toHaveTextContent('follows')
+    expect(activeTableNameDisplay).toHaveTextContent(/^follows$/)
   })
 
   it('go to the table of selected option by typing Enter key and close dialog', async () => {
@@ -211,6 +211,6 @@ describe('go to ERD with option select', () => {
     await user.keyboard('{Enter}')
 
     expect(dialog).not.toBeInTheDocument()
-    expect(activeTableNameDisplay).toHaveTextContent('posts')
+    expect(activeTableNameDisplay).toHaveTextContent(/^posts$/)
   })
 })

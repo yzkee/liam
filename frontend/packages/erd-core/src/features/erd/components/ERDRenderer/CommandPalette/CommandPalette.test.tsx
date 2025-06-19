@@ -2,7 +2,7 @@ import { aTable } from '@liam-hq/db-structure'
 import { cleanup, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ReactFlowProvider } from '@xyflow/react'
-import { NuqsAdapter } from 'nuqs/adapters/react'
+import { NuqsTestingAdapter } from 'nuqs/adapters/testing'
 import { type FC, type ReactNode, useContext } from 'react'
 import { afterEach, describe, expect, it } from 'vitest'
 import { SchemaProvider, UserEditingProvider } from '@/stores'
@@ -39,14 +39,14 @@ const ActiveTableNameDisplay: FC = () => {
 }
 
 const wrapper = ({ children }: { children: ReactNode }) => (
-  <NuqsAdapter>
+  <NuqsTestingAdapter>
     <ReactFlowProvider>
       <UserEditingProvider>
         <ActiveTableNameDisplay />
         <SchemaProvider schema={schema}>{children}</SchemaProvider>
       </UserEditingProvider>
     </ReactFlowProvider>
-  </NuqsAdapter>
+  </NuqsTestingAdapter>
 )
 
 const prepareCommandPalette = async () => {

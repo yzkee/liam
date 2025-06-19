@@ -1,4 +1,27 @@
 import * as v from 'valibot'
+import { tableSchema } from '../schema/index.js'
+
+const isTablePath = (input: unknown): boolean => {
+  if (typeof input !== 'string') return false
+  return /^\/tables\/[^/]+$/.test(input)
+}
+
+const addTableOperationSchema = v.object({
+  op: v.literal('add'),
+  path: v.custom<`/tables/${string}`>(
+    isTablePath,
+    'Path must match the pattern /tables/{tableName}',
+  ),
+  value: tableSchema,
+})
+
+export type AddTableOperation = v.InferOutput<typeof addTableOperationSchema>
+
+export const isAddTableOperation = (
+  operation: Operation,
+): operation is AddTableOperation => {
+  return operation.op === 'add' && isTablePath(operation.path)
+}
 
 const addOperationSchema = v.object({
   op: v.literal('add'),
@@ -36,6 +59,7 @@ const testOperationSchema = v.object({
 })
 
 const operationSchema = v.union([
+  addTableOperationSchema,
   addOperationSchema,
   removeOperationSchema,
   replaceOperationSchema,
@@ -43,5 +67,6 @@ const operationSchema = v.union([
   copyOperationSchema,
   testOperationSchema,
 ])
+export type Operation = v.InferOutput<typeof operationSchema>
 
 export const operationsSchema = v.array(operationSchema)

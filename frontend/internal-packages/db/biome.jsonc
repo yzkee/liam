@@ -1,4 +1,3 @@
 {
-  "extends": "//",
-  "root": false
+  "extends": ["../../../biome.jsonc"]
 }

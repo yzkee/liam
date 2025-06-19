@@ -1,5 +1,4 @@
 'use client'
-import { Chat } from '@/components/Chat'
 import type { Schema } from '@liam-hq/db-structure'
 import { schemaSchema } from '@liam-hq/db-structure'
 import {
@@ -11,13 +10,14 @@ import {
   useTransition,
 } from 'react'
 import * as v from 'valibot'
-import styles from './SessionDetailPage.module.css'
+import { Chat } from '../Chat'
 import { Output } from './components/Output'
 import {
   ARTIFACT_DOC,
   SCHEMA_UPDATES_DOC,
   SCHEMA_UPDATES_REVIEW_COMMENTS,
 } from './mock'
+import styles from './SessionDetailPage.module.css'
 import {
   fetchSchemaDataClient,
   setupBuildingSchemaRealtimeSubscription,

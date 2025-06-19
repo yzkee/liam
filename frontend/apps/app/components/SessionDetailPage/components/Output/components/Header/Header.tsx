@@ -1,5 +1,5 @@
-import { TabsList, TabsTrigger } from '@/components'
 import type { FC } from 'react'
+import { TabsList, TabsTrigger } from '@/components'
 import { OUTPUT_TABS_LIST } from '../../constants'
 import { ExportDropdown } from './ExportDropdown'
 import styles from './Header.module.css'

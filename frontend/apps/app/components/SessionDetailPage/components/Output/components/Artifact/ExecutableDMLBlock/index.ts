@@ -1,1 +1,1 @@
-export { ExecutableDMLBlock, type DMLBlock } from './ExecutableDMLBlock'
+export { type DMLBlock, ExecutableDMLBlock } from './ExecutableDMLBlock'

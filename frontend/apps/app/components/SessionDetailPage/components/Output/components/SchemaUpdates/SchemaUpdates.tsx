@@ -1,10 +1,10 @@
 'use client'
 
-import { IconButton } from '@/components'
-import type { ReviewComment } from '@/components/SessionDetailPage/types'
 import clsx from 'clsx'
 import { MessageSquareCode } from 'lucide-react'
 import { type FC, useState } from 'react'
+import { IconButton } from '@/components'
+import type { ReviewComment } from '@/components/SessionDetailPage/types'
 import { MigrationsViewer } from './MigrationsViewer'
 import styles from './SchemaUpdates.module.css'
 

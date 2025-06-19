@@ -1,13 +1,13 @@
-import { TabsContent, TabsRoot } from '@/components'
 import type { Schema } from '@liam-hq/db-structure'
 import type { FC } from 'react'
+import { TabsContent, TabsRoot } from '@/components'
 import type { ReviewComment } from '../../types'
-import styles from './Output.module.css'
 import { Artifact } from './components/Artifact'
 import { ERD } from './components/ERD'
 import { Header } from './components/Header'
 import { SchemaUpdates } from './components/SchemaUpdates'
 import { DEFAULT_OUTPUT_TAB, OUTPUT_TABS } from './constants'
+import styles from './Output.module.css'
 
 type Props = {
   schema: Schema

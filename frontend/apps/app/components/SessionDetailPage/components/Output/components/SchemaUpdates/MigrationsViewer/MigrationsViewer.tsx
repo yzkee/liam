@@ -1,5 +1,5 @@
-import type { ReviewComment } from '@/components/SessionDetailPage/types'
 import type { FC } from 'react'
+import type { ReviewComment } from '@/components/SessionDetailPage/types'
 import styles from './MigrationsViewer.module.css'
 import { useMigrationsViewer } from './useMigrationsViewer'
 

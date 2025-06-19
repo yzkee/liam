@@ -34,11 +34,11 @@ export const SessionDetailPage: FC<Props> = ({ designSession }) => {
   const designSessionId = designSession.id
 
   const handleQuickFix = useCallback((comment: string) => {
-    const fixMessage = `以下のQA Agentからの指摘を修正してください：
+    const fixMessage = `Please fix the following issue pointed out by the QA Agent:
 
 "${comment}"
 
-この問題を解決するための具体的な修正案を提案してください。`
+Please suggest a specific solution to resolve this problem.`
     setQuickFixMessage(fixMessage)
   }, [])
 

@@ -31,7 +31,7 @@ const ActiveTableNameDisplay: FC = () => {
   const userEditing = useContext(UserEditingContext)
 
   return (
-    //  The currently selected table name is displayed via Context, and used in tests for assertions.
+    // The currently active table name is displayed via Context. This component is used in tests for assertions only.
     <div data-testid="test-active-table-name-display">
       {userEditing?.activeTableName}
     </div>
@@ -61,7 +61,15 @@ const prepareCommandPalette = async () => {
   const searchCombobox = within(dialog).getByRole('combobox')
   const preview = within(dialog).getByTestId('CommandPalettePreview')
 
-  return { user, elements: { dialog, searchCombobox, preview } }
+  const activeTableNameDisplay = screen.getByTestId(
+    'test-active-table-name-display',
+  )
+
+  return {
+    user,
+    elements: { dialog, searchCombobox, preview },
+    testElements: { activeTableNameDisplay },
+  }
 }
 
 it('displays nothing by default', () => {
@@ -177,29 +185,25 @@ describe('go to ERD with option select', () => {
     const {
       user,
       elements: { dialog },
+      testElements: { activeTableNameDisplay },
     } = await prepareCommandPalette()
 
-    expect(
-      screen.getByTestId('test-active-table-name-display'),
-    ).toBeEmptyDOMElement()
+    expect(activeTableNameDisplay).toBeEmptyDOMElement()
 
     await user.click(within(dialog).getByRole('option', { name: 'follows' }))
 
-    expect(
-      screen.getByTestId('test-active-table-name-display'),
-    ).toHaveTextContent('follows')
     expect(dialog).not.toBeInTheDocument()
+    expect(activeTableNameDisplay).toHaveTextContent('follows')
   })
 
   it('go to the table of selected option by typing Enter key and close dialog', async () => {
     const {
       user,
       elements: { dialog, preview },
+      testElements: { activeTableNameDisplay },
     } = await prepareCommandPalette()
 
-    expect(
-      screen.getByTestId('test-active-table-name-display'),
-    ).toBeEmptyDOMElement()
+    expect(activeTableNameDisplay).toBeEmptyDOMElement()
 
     // select "posts" option by typing Enter key
     await user.keyboard('{ArrowDown}')
@@ -207,8 +211,6 @@ describe('go to ERD with option select', () => {
     await user.keyboard('{Enter}')
 
     expect(dialog).not.toBeInTheDocument()
-    expect(
-      screen.getByTestId('test-active-table-name-display'),
-    ).toHaveTextContent('posts')
+    expect(activeTableNameDisplay).toHaveTextContent('posts')
   })
 })

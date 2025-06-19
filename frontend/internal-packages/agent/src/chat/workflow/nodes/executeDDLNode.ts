@@ -16,9 +16,9 @@ export async function executeDDLNode(
 
     if (!state.ddlStatements || !state.ddlStatements.trim()) {
       state.logger.log(`[${NODE_NAME}] No DDL statements to execute`)
+      state.logger.log(`[${NODE_NAME}] Completed`)
       return {
         ...state,
-        error: 'No DDL statements available for execution',
       }
     }
 
@@ -28,18 +28,20 @@ export async function executeDDLNode(
     )
 
     const hasErrors = results.some((result: SqlResult) => !result.success)
-    
+
     if (hasErrors) {
       const errorMessages = results
         .filter((result: SqlResult) => !result.success)
-        .map((result: SqlResult) => `SQL: ${result.sql}, Error: ${JSON.stringify(result.result)}`)
+        .map(
+          (result: SqlResult) =>
+            `SQL: ${result.sql}, Error: ${JSON.stringify(result.result)}`,
+        )
         .join('; ')
-      
+
       state.logger.log(`[${NODE_NAME}] DDL execution failed: ${errorMessages}`)
-      
+      state.logger.log(`[${NODE_NAME}] Completed`)
       return {
         ...state,
-        error: `DDL execution failed: ${errorMessages}`,
       }
     }
 
@@ -48,15 +50,14 @@ export async function executeDDLNode(
 
     return {
       ...state,
-      error: undefined,
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
     state.logger.log(`[${NODE_NAME}] Failed: ${errorMessage}`)
+    state.logger.log(`[${NODE_NAME}] Completed`)
 
     return {
       ...state,
-      error: `DDL execution failed: ${errorMessage}`,
     }
   }
 }

@@ -12,27 +12,9 @@ export const noNonEnglishPlugin = {
           category: 'Possible Errors',
         },
         fixable: null,
-        schema: [
-          {
-            type: 'object',
-            properties: {
-              allowComments: {
-                type: 'boolean',
-                default: false,
-              },
-              allowStrings: {
-                type: 'boolean', 
-                default: false,
-              },
-            },
-            additionalProperties: false,
-          },
-        ],
+        schema: [],
       },
       create(context) {
-        const options = context.options[0] || {}
-        const allowComments = options.allowComments || false
-        const allowStrings = options.allowStrings || false
 
         const nonEnglishPattern = /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}\p{Script=Hangul}\p{Script=Cyrillic}\p{Script=Arabic}\p{Script=Hebrew}\p{Script=Thai}\p{Script=Devanagari}]/u
 
@@ -52,28 +34,24 @@ export const noNonEnglishPlugin = {
           },
 
           Literal(node) {
-            if (!allowStrings && typeof node.value === 'string') {
+            if (typeof node.value === 'string') {
               checkText(node, node.value, 'string literal')
             }
           },
 
           TemplateLiteral(node) {
-            if (!allowStrings) {
-              node.quasis.forEach(quasi => {
-                checkText(node, quasi.value.raw, 'template literal')
-              })
-            }
+            node.quasis.forEach(quasi => {
+              checkText(node, quasi.value.raw, 'template literal')
+            })
           },
 
           Program(node) {
-            if (!allowComments) {
-              const sourceCode = context.getSourceCode()
-              const comments = sourceCode.getAllComments()
-              
-              comments.forEach(comment => {
-                checkText(comment, comment.value, 'comment')
-              })
-            }
+            const sourceCode = context.getSourceCode()
+            const comments = sourceCode.getAllComments()
+            
+            comments.forEach(comment => {
+              checkText(comment, comment.value, 'comment')
+            })
           },
         }
       },

@@ -78,9 +78,7 @@ export const TimelineItem: FC<TimelineItemProps> = (props) => {
 
   // For bot messages, we'll render the markdown content with syntax highlighting
   const markdownContent =
-    role !== 'user' ? (
-      <MarkdownContent content={content} />
-    ) : null
+    role !== 'user' ? <MarkdownContent content={content} /> : null
 
   return (
     <div className={styles.messageContainer}>

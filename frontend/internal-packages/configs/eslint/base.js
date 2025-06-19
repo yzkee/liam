@@ -22,10 +22,6 @@ export function createBaseConfig(options = {}) {
         '**/dist/**',
         '**/.trigger/**',
         '**/app/.well-known/**',
-        '**/mock.ts',
-        '**/mock/**',
-        '**/*.test.ts',
-        '**/*.spec.ts',
       ],
       plugins: {
         '@typescript-eslint': tseslint,
@@ -59,23 +55,6 @@ export function createBaseConfig(options = {}) {
       },
       rules: {
         'no-non-english/no-non-english-characters': 'error',
-      },
-    },
-    {
-      files: ['**/mock.ts', '**/mock/**', '**/*.test.ts', '**/*.spec.ts'],
-      plugins: {
-        '@typescript-eslint': tseslint,
-        'no-non-english': noNonEnglishPlugin,
-      },
-      languageOptions: {
-        parser: tsParser,
-        parserOptions: {
-          ecmaVersion: 2022,
-          sourceType: 'module',
-        },
-      },
-      rules: {
-        'no-non-english/no-non-english-characters': 'off',
       },
     },
   ]

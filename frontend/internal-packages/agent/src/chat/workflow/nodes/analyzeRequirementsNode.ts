@@ -1,16 +1,11 @@
-import * as v from 'valibot'
+import type * as v from 'valibot'
 import { PMAgent } from '../../../langchain/agents'
+import type { requirementsAnalysisSchema } from '../../../langchain/agents/pmAgent/agent'
 import type { BasePromptVariables } from '../../../langchain/utils/types'
 import { convertSchemaToText } from '../../../utils/convertSchemaToText'
 import type { WorkflowState } from '../types'
 
 const NODE_NAME = 'analyzeRequirementsNode'
-
-export const requirementsAnalysisSchema = v.object({
-  businessRequirement: v.string(),
-  functionalRequirements: v.record(v.string(), v.array(v.string())),
-  nonFunctionalRequirements: v.record(v.string(), v.array(v.string())),
-})
 
 type AnalysisResult = v.InferOutput<typeof requirementsAnalysisSchema>
 

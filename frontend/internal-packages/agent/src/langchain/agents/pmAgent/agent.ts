@@ -1,6 +1,5 @@
 import { ChatOpenAI } from '@langchain/openai'
 import * as v from 'valibot'
-import { requirementsAnalysisSchema } from '../../../chat/workflow/nodes/analyzeRequirementsNode'
 import { createLangfuseHandler } from '../../utils/telemetry'
 import type { BasePromptVariables, ChatAgent } from '../../utils/types'
 import { PMAgentMode, pmAnalysisPrompt, pmReviewPrompt } from './prompts'
@@ -9,6 +8,12 @@ interface PMAgentVariables extends BasePromptVariables {
   requirements_analysis?: string
   proposed_changes?: string
 }
+
+export const requirementsAnalysisSchema = v.object({
+  businessRequirement: v.string(),
+  functionalRequirements: v.record(v.string(), v.array(v.string())),
+  nonFunctionalRequirements: v.record(v.string(), v.array(v.string())),
+})
 
 export class PMAgent implements ChatAgent {
   private model: ChatOpenAI

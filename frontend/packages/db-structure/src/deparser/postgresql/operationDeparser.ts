@@ -1,8 +1,6 @@
-import type {
-  AddTableOperation,
-  Operation,
-} from '../../operation/operationsSchema.js'
-import { isAddTableOperation } from '../../operation/operationsSchema.js'
+import type { Operation } from '../../operation/schema/index.js'
+import type { AddTableOperation } from '../../operation/schema/table.js'
+import { isAddTableOperation } from '../../operation/schema/table.js'
 import type { OperationDeparser } from '../type.js'
 import { generateCreateTableStatement } from './utils.js'
 

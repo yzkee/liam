@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { Operation } from '../../operation/operationsSchema.js'
+import type { Operation } from '../../operation/schema/index.js'
 import { postgresqlOperationDeparser } from './operationDeparser.js'
 
 describe('postgresqlOperationDeparser', () => {

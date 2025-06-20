@@ -13,6 +13,44 @@ const requirementsAnalysisSchema = v.object({
 })
 
 /**
+ * Execute requirements analysis with retry logic
+ */
+async function executeRequirementsAnalysisWithRetry(
+  pmAgent: PMAgent,
+  promptVariables: BasePromptVariables,
+  logger: WorkflowState['logger'],
+  maxRetries = 3,
+): Promise<v.InferOutput<typeof requirementsAnalysisSchema>> {
+  let lastError: Error | undefined
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await pmAgent.analyzeRequirements(promptVariables)
+
+      // Parse and validate JSON response
+      const parsed = JSON.parse(response)
+      return v.parse(requirementsAnalysisSchema, parsed)
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error))
+
+      if (attempt < maxRetries) {
+        logger.warn(
+          `[${NODE_NAME}] Attempt ${attempt} failed: ${lastError.message}. Retrying...`,
+        )
+      } else {
+        logger.error(
+          `[${NODE_NAME}] All ${maxRetries} attempts failed: ${lastError.message}`,
+        )
+      }
+    }
+  }
+
+  throw new Error(
+    `Failed to analyze requirements after ${maxRetries} attempts: ${lastError?.message}`,
+  )
+}
+
+/**
  * Analyze Requirements Node - Requirements Organization
  * Performed by pmAgent
  */
@@ -30,22 +68,14 @@ export async function analyzeRequirementsNode(
     user_message: state.userInput,
   }
 
-  const response = await pmAgent.analyzeRequirements(promptVariables)
-
-  // Parse and validate JSON response
-  let analysisResult: v.InferOutput<typeof requirementsAnalysisSchema>
-  try {
-    const parsed = JSON.parse(response)
-    analysisResult = v.parse(requirementsAnalysisSchema, parsed)
-  } catch (error) {
-    const errorMessage = `Failed to parse requirements analysis response: ${error instanceof Error ? error.message : String(error)}`
-    state.logger.error(`[${NODE_NAME}] ${errorMessage}`)
-    state.logger.error(`[${NODE_NAME}] Raw response: ${response}`)
-    throw new Error(errorMessage)
-  }
+  // Execute analysis with retry logic
+  const analysisResult = await executeRequirementsAnalysisWithRetry(
+    pmAgent,
+    promptVariables,
+    state.logger,
+  )
 
   // Log the analysis result for debugging/monitoring purposes
-  // Currently not used elsewhere in the workflow, but useful for observability
   state.logger.log(`[${NODE_NAME}] Analysis Result:`)
   state.logger.log(`[${NODE_NAME}] BRD: ${analysisResult.businessRequirement}`)
   state.logger.log(

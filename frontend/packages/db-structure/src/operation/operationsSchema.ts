@@ -1,11 +1,6 @@
 import * as v from 'valibot'
 import { tableSchema } from '../schema/index.js'
-import { PATH_PATTERNS } from './constants.js'
-
-const isTablePath = (input: unknown): boolean => {
-  if (typeof input !== 'string') return false
-  return PATH_PATTERNS.TABLE_BASE.test(input)
-}
+import { isTablePath } from './pathValidators.js'
 
 const addTableOperationSchema = v.object({
   op: v.literal('add'),
@@ -21,7 +16,7 @@ export type AddTableOperation = v.InferOutput<typeof addTableOperationSchema>
 export const isAddTableOperation = (
   operation: Operation,
 ): operation is AddTableOperation => {
-  return operation.op === 'add' && isTablePath(operation.path)
+  return v.safeParse(addTableOperationSchema, operation).success
 }
 
 const addOperationSchema = v.object({
@@ -61,6 +56,7 @@ const testOperationSchema = v.object({
 
 const operationSchema = v.union([
   addTableOperationSchema,
+  addColumnOperationSchema,
   addOperationSchema,
   removeOperationSchema,
   replaceOperationSchema,

@@ -50,7 +50,8 @@ export class PMAgent implements ChatAgent {
       variables,
       PMAgentMode.ANALYSIS,
     )
-    return v.parse(requirementsAnalysisSchema, response)
+    const parsedResponse = JSON.parse(response)
+    return v.parse(requirementsAnalysisSchema, parsedResponse)
   }
 
   async reviewDeliverables(variables: PMAgentVariables): Promise<string> {

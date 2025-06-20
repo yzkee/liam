@@ -122,4 +122,56 @@ describe('postgresqlOperationDeparser', () => {
       expect(result.value).toBe('')
     })
   })
+
+  describe('column operations', () => {
+    it('should generate ADD COLUMN statement from add operation', () => {
+      const operation: Operation = {
+        op: 'add',
+        path: '/tables/users/columns/age',
+        value: {
+          name: 'age',
+          type: 'integer',
+          primary: false,
+          notNull: false,
+          unique: false,
+          default: null,
+          check: null,
+          comment: 'User age',
+        },
+      }
+
+      const result = postgresqlOperationDeparser(operation)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "ALTER TABLE users ADD COLUMN age integer;
+
+        COMMENT ON COLUMN users.age IS 'User age';"
+      `)
+    })
+
+    it('should generate ADD COLUMN with constraints', () => {
+      const operation: Operation = {
+        op: 'add',
+        path: '/tables/products/columns/price',
+        value: {
+          name: 'price',
+          type: 'decimal(10,2)',
+          primary: false,
+          notNull: true,
+          unique: false,
+          default: 0.0,
+          check: null,
+          comment: null,
+        },
+      }
+
+      const result = postgresqlOperationDeparser(operation)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "ALTER TABLE products ADD COLUMN price decimal(10,2) NOT NULL DEFAULT 0;"
+      `)
+    })
+  })
 })

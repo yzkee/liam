@@ -1,11 +1,14 @@
-import { createClient } from '@/libs/db/server'
 import { Resend } from 'resend'
+import { createClient } from '@/libs/db/server'
 
 // Email template component
 const InvitationEmail = ({
   organizationName,
   invitationLink,
-}: { organizationName: string; invitationLink: string }) => {
+}: {
+  organizationName: string
+  invitationLink: string
+}) => {
   return `
     <!DOCTYPE html>
     <html>

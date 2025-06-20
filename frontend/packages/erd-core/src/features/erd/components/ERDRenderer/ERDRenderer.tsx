@@ -13,8 +13,8 @@ import {
 import { ReactFlowProvider } from '@xyflow/react'
 import {
   type ComponentProps,
-  type FC,
   createRef,
+  type FC,
   useCallback,
   useMemo,
   useState,
@@ -187,8 +187,8 @@ const ERDRendererInner: FC<InnerProps> = ({
               </main>
             </ResizablePanel>
           </ResizablePanelGroup>
+          <CommandPalette />
         </ReactFlowProvider>
-        <CommandPalette />
       </ToastProvider>
     </SidebarProvider>
   )

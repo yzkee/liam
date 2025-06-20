@@ -12,9 +12,9 @@ import {
   useState,
 } from 'react'
 import type { MentionItem } from '../../types'
-import styles from './MentionSuggestor.module.css'
 import { HighlightedLabel } from './components/HighlightedLabel'
 import { MentionIcon } from './components/MentionIcon'
+import styles from './MentionSuggestor.module.css'
 import { extractActiveMention } from './utils/extractActiveMention'
 import { matchSchemaCandidates } from './utils/matchSchemaCandidates'
 
@@ -115,13 +115,11 @@ export const MentionSuggestor = ({
   }))
 
   // Reset the highlighted index when the query changes
-  // biome-ignore lint/correctness/useExhaustiveDependencies: query is needed to reset the highlighted index when the query changes
   useEffect(() => {
     setHighlightedIndex(0)
   }, [query])
 
   // Scroll to make the highlighted item enabled when it changes
-  // biome-ignore lint/correctness/useExhaustiveDependencies: highlightedIndex is needed to scroll to the highlighted item when it changes
   useEffect(() => {
     if (!enabled || !containerRef.current) return
 

@@ -1,8 +1,9 @@
 {
-  "extends": ["../../internal-packages/configs/biome.jsonc"],
+  "extends": "//",
+  "root": false,
   "linter": {
     "rules": {
-      "nursery": {
+      "style": {
         "noRestrictedImports": {
           "options": {
             "paths": {

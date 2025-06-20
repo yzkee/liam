@@ -17,6 +17,7 @@ export type WorkflowState = {
   schemaData: Schema
   projectId?: string | undefined
   error?: string | undefined
+  retryCount?: Record<string, number> | undefined
 
   ddlStatements?: string | undefined
 

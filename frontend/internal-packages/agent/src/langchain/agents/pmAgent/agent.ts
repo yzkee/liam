@@ -1,4 +1,6 @@
 import { ChatOpenAI } from '@langchain/openai'
+import * as v from 'valibot'
+import { requirementsAnalysisSchema } from '../../../chat/workflow/nodes/analyzeRequirementsNode'
 import { createLangfuseHandler } from '../../utils/telemetry'
 import type { BasePromptVariables, ChatAgent } from '../../utils/types'
 import { PMAgentMode, pmAnalysisPrompt, pmReviewPrompt } from './prompts'
@@ -36,8 +38,14 @@ export class PMAgent implements ChatAgent {
   }
 
   // Convenience methods
-  async analyzeRequirements(variables: BasePromptVariables): Promise<string> {
-    return this.generateWithMode(variables, PMAgentMode.ANALYSIS)
+  async analyzeRequirements(
+    variables: BasePromptVariables,
+  ): Promise<v.InferOutput<typeof requirementsAnalysisSchema>> {
+    const response = await this.generateWithMode(
+      variables,
+      PMAgentMode.ANALYSIS,
+    )
+    return v.parse(requirementsAnalysisSchema, response)
   }
 
   async reviewDeliverables(variables: PMAgentVariables): Promise<string> {

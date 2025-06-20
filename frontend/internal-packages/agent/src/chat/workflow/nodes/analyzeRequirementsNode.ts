@@ -6,47 +6,29 @@ import type { WorkflowState } from '../types'
 
 const NODE_NAME = 'analyzeRequirementsNode'
 
-const requirementsAnalysisSchema = v.object({
+export const requirementsAnalysisSchema = v.object({
   businessRequirement: v.string(),
   functionalRequirements: v.record(v.string(), v.array(v.string())),
   nonFunctionalRequirements: v.record(v.string(), v.array(v.string())),
 })
 
+type AnalysisResult = v.InferOutput<typeof requirementsAnalysisSchema>
+
 /**
- * Execute requirements analysis with retry logic
+ * Log analysis results for debugging/monitoring purposes
+ * TODO: Remove this function once the feature is stable and monitoring is no longer needed
  */
-async function executeRequirementsAnalysisWithRetry(
-  pmAgent: PMAgent,
-  promptVariables: BasePromptVariables,
+const logAnalysisResult = (
   logger: WorkflowState['logger'],
-  maxRetries = 3,
-): Promise<v.InferOutput<typeof requirementsAnalysisSchema>> {
-  let lastError: Error | undefined
-
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      const response = await pmAgent.analyzeRequirements(promptVariables)
-
-      // Parse and validate JSON response
-      const parsed = JSON.parse(response)
-      return v.parse(requirementsAnalysisSchema, parsed)
-    } catch (error) {
-      lastError = error instanceof Error ? error : new Error(String(error))
-
-      if (attempt < maxRetries) {
-        logger.warn(
-          `[${NODE_NAME}] Attempt ${attempt} failed: ${lastError.message}. Retrying...`,
-        )
-      } else {
-        logger.error(
-          `[${NODE_NAME}] All ${maxRetries} attempts failed: ${lastError.message}`,
-        )
-      }
-    }
-  }
-
-  throw new Error(
-    `Failed to analyze requirements after ${maxRetries} attempts: ${lastError?.message}`,
+  result: AnalysisResult,
+): void => {
+  logger.log(`[${NODE_NAME}] Analysis Result:`)
+  logger.log(`[${NODE_NAME}] BRD: ${result.businessRequirement}`)
+  logger.log(
+    `[${NODE_NAME}] Functional Requirements: ${JSON.stringify(result.functionalRequirements)}`,
+  )
+  logger.log(
+    `[${NODE_NAME}] Non-Functional Requirements: ${JSON.stringify(result.nonFunctionalRequirements)}`,
   )
 }
 
@@ -68,31 +50,37 @@ export async function analyzeRequirementsNode(
     user_message: state.userInput,
   }
 
-  // Execute analysis with retry logic
-  const analysisResult = await executeRequirementsAnalysisWithRetry(
-    pmAgent,
-    promptVariables,
-    state.logger,
-  )
+  const retryCount = state.retryCount?.[NODE_NAME] ?? 0
 
-  // Log the analysis result for debugging/monitoring purposes
-  state.logger.log(`[${NODE_NAME}] Analysis Result:`)
-  state.logger.log(`[${NODE_NAME}] BRD: ${analysisResult.businessRequirement}`)
-  state.logger.log(
-    `[${NODE_NAME}] Functional Requirements: ${JSON.stringify(analysisResult.functionalRequirements)}`,
-  )
-  state.logger.log(
-    `[${NODE_NAME}] Non-Functional Requirements: ${JSON.stringify(analysisResult.nonFunctionalRequirements)}`,
-  )
+  try {
+    const analysisResult = await pmAgent.analyzeRequirements(promptVariables)
 
-  state.logger.log(`[${NODE_NAME}] Completed`)
+    // Log the analysis result for debugging/monitoring purposes
+    logAnalysisResult(state.logger, analysisResult)
 
-  return {
-    ...state,
-    analyzedRequirements: {
-      businessRequirement: analysisResult.businessRequirement,
-      functionalRequirements: analysisResult.functionalRequirements,
-      nonFunctionalRequirements: analysisResult.nonFunctionalRequirements,
-    },
+    state.logger.log(`[${NODE_NAME}] Completed`)
+
+    return {
+      ...state,
+      analyzedRequirements: {
+        businessRequirement: analysisResult.businessRequirement,
+        functionalRequirements: analysisResult.functionalRequirements,
+        nonFunctionalRequirements: analysisResult.nonFunctionalRequirements,
+      },
+      error: undefined, // Clear error on success
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    state.logger.error(`[${NODE_NAME}] Failed: ${errorMessage}`)
+
+    // Increment retry count and set error
+    return {
+      ...state,
+      error: errorMessage,
+      retryCount: {
+        ...state.retryCount,
+        [NODE_NAME]: retryCount + 1,
+      },
+    }
   }
 }

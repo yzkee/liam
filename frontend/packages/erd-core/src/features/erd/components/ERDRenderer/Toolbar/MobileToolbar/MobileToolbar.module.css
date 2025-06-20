@@ -10,7 +10,9 @@
   flex-direction: column;
   justify-content: center;
   gap: var(--spacing-2, 8px);
-  transition: width 150ms ease, height 150ms ease; /* Smooth resizing animation */
+  transition:
+    width 150ms ease,
+    height 150ms ease; /* Smooth resizing animation */
   overflow: hidden;
   min-height: 40px;
   z-index: var(--z-index-toolbar-closed);

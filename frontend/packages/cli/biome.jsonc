@@ -1,5 +1,6 @@
 {
-  "extends": ["../../internal-packages/configs/biome.jsonc"],
+  "extends": "//",
+  "root": false,
   "linter": {
     "rules": {
       "correctness": {
@@ -7,11 +8,7 @@
           "level": "error",
           "fix": "safe",
           "options": {
-            "suggestedExtensions": {
-              "ts": {
-                "module": "js"
-              }
-            }
+            "forceJsExtensions": true
           }
         }
       }

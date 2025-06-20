@@ -45,7 +45,7 @@ export async function analyzeRequirementsNode(
     user_message: state.userInput,
   }
 
-  const retryCount = state.retryCount?.[NODE_NAME] ?? 0
+  const retryCount = state.retryCount[NODE_NAME] ?? 0
 
   try {
     const analysisResult = await pmAgent.analyzeRequirements(promptVariables)

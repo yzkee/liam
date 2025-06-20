@@ -90,6 +90,7 @@ describe('Chat Workflow', () => {
     designSessionId: 'test-design-session-id',
     repositories: mockRepositories,
     logger: mockLogger,
+    retryCount: {},
     ...overrides,
   })
 

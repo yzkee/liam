@@ -30,6 +30,7 @@ export const createAnnotations = () => {
     userId: Annotation<string>,
     designSessionId: Annotation<string>,
     error: Annotation<string | undefined>,
+    retryCount: Annotation<Record<string, number>>,
 
     // Repository dependencies for data access
     repositories: Annotation<Repositories>,

@@ -25,7 +25,7 @@ const shouldRetry = (
   nodeName: string,
   maxRetries = 3,
 ): 'retry' | 'continue' => {
-  const retryCount = state.retryCount?.[nodeName] ?? 0
+  const retryCount = state.retryCount[nodeName] ?? 0
 
   if (state.error && retryCount < maxRetries) {
     return 'retry'

@@ -37,13 +37,11 @@ export async function analyzeRequirementsNode(
   try {
     const parsed = JSON.parse(response)
     analysisResult = v.parse(requirementsAnalysisSchema, parsed)
-  } catch {
-    // Fallback: treat response as single requirement
-    analysisResult = {
-      brd: response || 'Failed to parse requirements',
-      functionalRequirements: {},
-      nonFunctionalRequirements: {},
-    }
+  } catch (error) {
+    const errorMessage = `Failed to parse requirements analysis response: ${error instanceof Error ? error.message : String(error)}`
+    state.logger.error(`[${NODE_NAME}] ${errorMessage}`)
+    state.logger.error(`[${NODE_NAME}] Raw response: ${response}`)
+    throw new Error(errorMessage)
   }
 
   // Log the analysis result for debugging/monitoring purposes

@@ -2,6 +2,7 @@ import { includeIgnoreFile } from '@eslint/compat'
 import tseslint from '@typescript-eslint/eslint-plugin'
 import tsParser from '@typescript-eslint/parser'
 import customRulesModule from './rules/index.js'
+import { noNonEnglishPlugin } from './no-non-english-plugin.js'
 
 /**
  * Base ESLint configuration with typescript-eslint setup
@@ -26,6 +27,7 @@ export function createBaseConfig(options = {}) {
       plugins: {
         '@typescript-eslint': tseslint,
         'custom': customRulesModule,
+        'no-non-english': noNonEnglishPlugin,
       },
       languageOptions: {
         parser: tsParser,
@@ -38,12 +40,14 @@ export function createBaseConfig(options = {}) {
       rules: {
         '@typescript-eslint/no-unsafe-member-access': 'error',
         'custom/require-use-server': 'error',
+        'no-non-english/no-non-english-characters': 'error',
       },
     },
     {
       files: ['**/trigger.config.ts', '**/vitest.config.ts'],
       plugins: {
         '@typescript-eslint': tseslint,
+        'no-non-english': noNonEnglishPlugin,
       },
       languageOptions: {
         parser: tsParser,
@@ -52,7 +56,9 @@ export function createBaseConfig(options = {}) {
           sourceType: 'module',
         },
       },
-      rules: {},
+      rules: {
+        'no-non-english/no-non-english-characters': 'error',
+      },
     },
   ]
 }

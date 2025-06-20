@@ -6,7 +6,7 @@ export type WorkflowState = {
   userInput: string
   analyzedRequirements?:
     | {
-        brd: string
+        businessRequirement: string
         functionalRequirements: Record<string, string[]>
         nonFunctionalRequirements: Record<string, string[]>
       }

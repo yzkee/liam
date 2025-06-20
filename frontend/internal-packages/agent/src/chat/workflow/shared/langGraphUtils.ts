@@ -13,7 +13,7 @@ export const createAnnotations = () => {
     userInput: Annotation<string>,
     analyzedRequirements: Annotation<
       | {
-          brd: string
+          businessRequirement: string
           functionalRequirements: Record<string, string[]>
           nonFunctionalRequirements: Record<string, string[]>
         }

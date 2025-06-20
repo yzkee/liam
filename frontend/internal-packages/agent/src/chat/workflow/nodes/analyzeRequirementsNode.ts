@@ -7,7 +7,7 @@ import type { WorkflowState } from '../types'
 const NODE_NAME = 'analyzeRequirementsNode'
 
 const requirementsAnalysisSchema = v.object({
-  brd: v.string(),
+  businessRequirement: v.string(),
   functionalRequirements: v.record(v.string(), v.array(v.string())),
   nonFunctionalRequirements: v.record(v.string(), v.array(v.string())),
 })
@@ -47,7 +47,7 @@ export async function analyzeRequirementsNode(
   // Log the analysis result for debugging/monitoring purposes
   // Currently not used elsewhere in the workflow, but useful for observability
   state.logger.log(`[${NODE_NAME}] Analysis Result:`)
-  state.logger.log(`[${NODE_NAME}] BRD: ${analysisResult.brd}`)
+  state.logger.log(`[${NODE_NAME}] BRD: ${analysisResult.businessRequirement}`)
   state.logger.log(
     `[${NODE_NAME}] Functional Requirements: ${JSON.stringify(analysisResult.functionalRequirements)}`,
   )
@@ -60,7 +60,7 @@ export async function analyzeRequirementsNode(
   return {
     ...state,
     analyzedRequirements: {
-      brd: analysisResult.brd,
+      businessRequirement: analysisResult.businessRequirement,
       functionalRequirements: analysisResult.functionalRequirements,
       nonFunctionalRequirements: analysisResult.nonFunctionalRequirements,
     },

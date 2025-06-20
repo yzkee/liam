@@ -155,7 +155,7 @@ describe('Chat Workflow', () => {
     mockPMAgent = {
       analyzeRequirements: vi.fn().mockResolvedValue(
         JSON.stringify({
-          brd: 'Mocked BRD',
+          businessRequirement: 'Mocked BRD',
           functionalRequirements: {
             'Test Category': ['Mocked functional requirement'],
           },

@@ -18,7 +18,7 @@ Previous Conversation Context:
 OUTPUT REQUIREMENTS (STRICT):
 - Output ONLY valid JSON in the format:
   {{
-    "brd": "Brief summary of the business requirements document",
+    "businessRequirement": "Brief summary of the business requirements document",
     "functionalRequirements": {{
       "Category 1": ["Requirement 1", "Requirement 2"],
       "Category 2": ["Requirement 3", "Requirement 4"]
@@ -29,7 +29,7 @@ OUTPUT REQUIREMENTS (STRICT):
     }}
   }}
 - No extra text or comments
-- brd: Concise (1–2 sentence) summary of overall requirements
+- businessRequirement: Concise (1–2 sentence) summary of overall requirements
 - functionalRequirements: WHAT the system should do (business-level)
 - nonFunctionalRequirements: HOW WELL the system should perform (always include, use empty object {{}} if none specified)
 - Be specific, break down vague or multiple requirements
@@ -43,7 +43,7 @@ Guidelines for Functional Requirements:
 
 Example output:
 {{
-  "brd": "Implementation of user management system and administrator access control features",
+  "businessRequirement": "Implementation of user management system and administrator access control features",
   "functionalRequirements": {{
     "Account Management": [
       "Allow users to register new accounts with email and personal information",

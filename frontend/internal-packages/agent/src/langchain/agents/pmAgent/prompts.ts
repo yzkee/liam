@@ -9,9 +9,6 @@ Your role is to:
 4. Separate multiple use cases into individual requirements
 5. Include specific screens, operations, constraints, and processing details when available
 
-Current Database Schema:
-{schema_text}
-
 Previous Conversation Context:
 {chat_history}
 

@@ -24,7 +24,12 @@ export class DatabaseSchemaBuildAgent implements ChatAgent<BuildAgentResponse> {
     })
 
     // Convert valibot schema to JSON Schema and bind to model
-    const jsonSchema = toJsonSchema(buildAgentResponseSchema)
+    // FIXME: operationsSchema contains v.custom() which cannot be converted to JSON Schema
+    // This causes "The 'custom' schema cannot be converted to JSON Schema" error
+    // Need to find alternative approach for custom validation in structured outputs
+    const jsonSchema = toJsonSchema(buildAgentResponseSchema, {
+      errorMode: 'ignore',
+    })
     this.model = baseModel.withStructuredOutput(jsonSchema)
   }
 

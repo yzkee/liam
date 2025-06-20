@@ -31,7 +31,7 @@ OUTPUT REQUIREMENTS (STRICT):
 - No extra text or comments
 - brd: Concise (1–2 sentence) summary of overall requirements
 - functionalRequirements: WHAT the system should do (business-level)
-- nonFunctionalRequirements: ONLY include if explicitly mentioned by user (omit entirely if none)
+- nonFunctionalRequirements: HOW WELL the system should perform (always include, use empty object {{}} if none specified)
 - Be specific, break down vague or multiple requirements
 - DO NOT infer or assume requirements not explicitly stated by the user
 

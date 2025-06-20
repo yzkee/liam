@@ -9,9 +9,7 @@ const NODE_NAME = 'analyzeRequirementsNode'
 const requirementsAnalysisSchema = v.object({
   brd: v.string(),
   functionalRequirements: v.record(v.string(), v.array(v.string())),
-  nonFunctionalRequirements: v.optional(
-    v.record(v.string(), v.array(v.string())),
-  ),
+  nonFunctionalRequirements: v.record(v.string(), v.array(v.string())),
 })
 
 /**
@@ -66,7 +64,7 @@ export async function analyzeRequirementsNode(
     analyzedRequirements: {
       brd: analysisResult.brd,
       functionalRequirements: analysisResult.functionalRequirements,
-      nonFunctionalRequirements: analysisResult.nonFunctionalRequirements ?? {},
+      nonFunctionalRequirements: analysisResult.nonFunctionalRequirements,
     },
   }
 }

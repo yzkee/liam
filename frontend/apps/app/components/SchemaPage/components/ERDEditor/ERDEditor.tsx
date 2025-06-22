@@ -6,7 +6,7 @@ import { parse } from 'valibot'
 import { Button } from '@/components'
 import { ERDRenderer } from '@/features'
 import { useTableGroups } from '@/hooks'
-import { VersionProvider } from '@/providers'
+import { ERDRendererProvider, VersionProvider } from '@/providers'
 import { versionSchema } from '@/schemas'
 import styles from './ERDEditor.module.css'
 
@@ -83,14 +83,15 @@ export const ERDEditor: FC<Props> = ({
   return (
     <div className={styles.wrapper}>
       <VersionProvider version={version}>
-        <ERDRenderer
-          schema={{ current: schema }}
-          defaultSidebarOpen={defaultSidebarOpen}
-          defaultPanelSizes={defaultPanelSizes}
-          errorObjects={errorObjects}
-          tableGroups={tableGroups}
-          onAddTableGroup={addTableGroup}
-        />
+        <ERDRendererProvider schema={{ current: schema }}>
+          <ERDRenderer
+            defaultSidebarOpen={defaultSidebarOpen}
+            defaultPanelSizes={defaultPanelSizes}
+            errorObjects={errorObjects}
+            tableGroups={tableGroups}
+            onAddTableGroup={addTableGroup}
+          />
+        </ERDRendererProvider>
         {canUpdateFile && (
           <div
             style={{

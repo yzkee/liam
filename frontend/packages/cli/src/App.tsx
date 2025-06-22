@@ -1,11 +1,13 @@
 import { type Schema, schemaSchema } from '@liam-hq/db-structure'
 import {
   ERDRenderer,
+  ERDRendererProvider,
   getCookie,
   getCookieJson,
   VersionProvider,
   versionSchema,
 } from '@liam-hq/erd-core'
+
 import { useEffect, useState } from 'react'
 import * as v from 'valibot'
 
@@ -75,12 +77,13 @@ function App() {
 
   return (
     <VersionProvider version={version}>
-      <ERDRenderer
-        schema={{ current: schema }}
-        withAppBar
-        defaultSidebarOpen={defaultSidebarOpen}
-        defaultPanelSizes={panelSizes}
-      />
+      <ERDRendererProvider schema={{ current: schema }}>
+        <ERDRenderer
+          withAppBar
+          defaultSidebarOpen={defaultSidebarOpen}
+          defaultPanelSizes={panelSizes}
+        />
+      </ERDRendererProvider>
     </VersionProvider>
   )
 }

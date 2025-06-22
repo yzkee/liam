@@ -1,8 +1,9 @@
 import type { Schema } from '@liam-hq/db-structure'
+import { ERDRendererProvider } from '@liam-hq/erd-core/nextjs'
 import { type FC, useMemo } from 'react'
 import { parse } from 'valibot'
 import { ERDRenderer } from '@/features'
-import { ERDRendererProvider, VersionProvider } from '@/providers'
+import { VersionProvider } from '@/providers'
 import { versionSchema } from '@/schemas'
 import styles from './ERD.module.css'
 

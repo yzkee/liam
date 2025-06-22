@@ -1,12 +1,8 @@
 'use client'
 
 import type { Schema } from '@liam-hq/db-structure'
-import {
-  ERDRenderer,
-  ERDRendererProvider,
-  VersionProvider,
-  versionSchema,
-} from '@liam-hq/erd-core'
+import { ERDRenderer, VersionProvider, versionSchema } from '@liam-hq/erd-core'
+import { ERDRendererProvider } from '@liam-hq/erd-core/nextjs'
 import { useEffect, useState } from 'react'
 import * as v from 'valibot'
 import { CookieConsent } from '@/components/CookieConsent'

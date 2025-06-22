@@ -180,6 +180,53 @@ describe('preview with option interactions', () => {
   })
 })
 
+describe('focus on options by single click', () => {
+  it('toggles option focus on single click', async () => {
+    const {
+      user,
+      elements: { dialog, preview },
+    } = await prepareCommandPalette()
+
+    const followsOption = within(dialog).getByRole('option', {
+      name: 'follows',
+    })
+    const usersOption = within(dialog).getByRole('option', { name: 'users' })
+
+    // focuses on "follows" option and displays a preview of the "follows" table
+    await user.click(followsOption.firstChild as Element)
+    await user.hover(usersOption)
+    expect(within(preview).getByText('follows')).toBeInTheDocument()
+
+    // removes focus from "follows" option and displays a preview of the hovered option
+    await user.click(followsOption.firstChild as Element)
+    await user.hover(usersOption)
+    expect(within(preview).getByText('users')).toBeInTheDocument()
+  })
+
+  it('updates the focus when another option is clicked', async () => {
+    const {
+      user,
+      elements: { dialog, preview },
+    } = await prepareCommandPalette()
+
+    const followsOption = within(dialog).getByRole('option', {
+      name: 'follows',
+    })
+    const postsOption = within(dialog).getByRole('option', { name: 'posts' })
+    const usersOption = within(dialog).getByRole('option', { name: 'users' })
+
+    // focuses on "follows" option and displays a preview of the "follows" table
+    await user.click(followsOption.firstChild as Element)
+    await user.hover(usersOption)
+    expect(within(preview).getByText('follows')).toBeInTheDocument()
+
+    // focuses on "posts" option and displays a preview of the "posts" table
+    await user.click(postsOption.firstChild as Element)
+    await user.hover(usersOption)
+    expect(within(preview).getByText('posts')).toBeInTheDocument()
+  })
+})
+
 describe('go to ERD with option select', () => {
   it('go to the table of clicked option and close dialog', async () => {
     const {

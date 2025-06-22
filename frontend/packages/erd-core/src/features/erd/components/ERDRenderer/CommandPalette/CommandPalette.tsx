@@ -79,6 +79,7 @@ export const CommandPalette: FC = () => {
                   className={styles.itemInner}
                   onClick={(event) => {
                     event.stopPropagation()
+                    setTableName(table.name)
                     setFocusedTableName(
                       table.name === focusedTableName ? null : table.name,
                     )

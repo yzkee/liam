@@ -80,8 +80,8 @@ export const CommandPalette: FC = () => {
                   onClick={(event) => {
                     event.stopPropagation()
                     setTableName(table.name)
-                    setFocusedTableName(
-                      table.name === focusedTableName ? null : table.name,
+                    setFocusedTableName((prev) =>
+                      prev === table.name ? null : table.name,
                     )
                   }}
                   onDoubleClick={() => goToERD(table.name)}

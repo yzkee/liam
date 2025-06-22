@@ -193,7 +193,7 @@ describe('go to ERD with option select', () => {
     const followsOption = within(dialog).getByRole('option', {
       name: 'follows',
     })
-    await user.click(followsOption.firstChild as Element)
+    await user.dblClick(followsOption.firstChild as Element)
 
     expect(dialog).not.toBeInTheDocument()
     expect(activeTableNameDisplay).toHaveTextContent(/^follows$/)

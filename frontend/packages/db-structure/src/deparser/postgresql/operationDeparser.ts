@@ -9,6 +9,8 @@ import {
   isRemoveColumnOperation,
   isRenameColumnOperation,
 } from '../../operation/schema/column.js'
+import type { AddConstraintOperation } from '../../operation/schema/constraint.js'
+import { isAddConstraintOperation } from '../../operation/schema/constraint.js'
 import type { Operation } from '../../operation/schema/index.js'
 import type {
   AddIndexOperation,
@@ -31,6 +33,7 @@ import {
 import type { OperationDeparser } from '../type.js'
 import {
   generateAddColumnStatement,
+  generateAddConstraintStatement,
   generateCreateIndexStatement,
   generateCreateTableStatement,
   generateRemoveColumnStatement,
@@ -101,6 +104,22 @@ function extractTableAndIndexNameFromPath(
   return {
     tableName: match[1],
     indexName: match[2],
+  }
+}
+
+/**
+ * Extract table name and constraint name from constraint operation path
+ */
+function extractTableAndConstraintNameFromPath(
+  path: string,
+): { tableName: string; constraintName: string } | null {
+  const match = path.match(PATH_PATTERNS.CONSTRAINT_BASE)
+  if (!match || !match[1] || !match[2]) {
+    return null
+  }
+  return {
+    tableName: match[1],
+    constraintName: match[2],
   }
 }
 
@@ -218,6 +237,20 @@ function generateRemoveIndexFromOperation(
   return generateRemoveIndexStatement(pathInfo.indexName)
 }
 
+/**
+ * Generate ADD CONSTRAINT DDL from constraint creation operation
+ */
+function generateAddConstraintFromOperation(
+  operation: AddConstraintOperation,
+): string {
+  const pathInfo = extractTableAndConstraintNameFromPath(operation.path)
+  if (!pathInfo) {
+    throw new Error(`Invalid constraint path: ${operation.path}`)
+  }
+
+  return generateAddConstraintStatement(pathInfo.tableName, operation.value)
+}
+
 export const postgresqlOperationDeparser: OperationDeparser = (
   operation: Operation,
 ) => {
@@ -260,6 +293,11 @@ export const postgresqlOperationDeparser: OperationDeparser = (
 
   if (isRemoveIndexOperation(operation)) {
     const value = generateRemoveIndexFromOperation(operation)
+    return { value, errors }
+  }
+
+  if (isAddConstraintOperation(operation)) {
+    const value = generateAddConstraintFromOperation(operation)
     return { value, errors }
   }
 

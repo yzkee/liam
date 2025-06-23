@@ -4,9 +4,11 @@ import type {
   Table,
   Tables,
 } from '@liam-hq/db-structure'
+import { constraintsToRelationships } from '@liam-hq/db-structure'
 
 export const extractSchemaForTable = (table: Table, schema: Schema): Schema => {
-  const relatedRelationshipsArray = Object.values(schema.relationships).filter(
+  const relationships = constraintsToRelationships(schema.tables)
+  const relatedRelationshipsArray = Object.values(relationships).filter(
     (relationship) =>
       relationship.primaryTableName === table.name ||
       relationship.foreignTableName === table.name,

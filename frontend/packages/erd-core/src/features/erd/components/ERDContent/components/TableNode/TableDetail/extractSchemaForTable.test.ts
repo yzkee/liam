@@ -1,4 +1,4 @@
-import type { Schema } from '@liam-hq/db-structure'
+import type { ForeignKeyConstraint, Schema } from '@liam-hq/db-structure'
 import { aColumn, aRelationship, aTable } from '@liam-hq/db-structure'
 import { describe, expect, it } from 'vitest'
 import { extractSchemaForTable } from './extractSchemaForTable'
@@ -12,11 +12,33 @@ describe(extractSchemaForTable, () => {
     columns: {
       userId: aColumn({ name: 'userId' }),
     },
+    constraints: {
+      userPosts: {
+        type: 'FOREIGN KEY',
+        name: 'userPosts',
+        columnName: 'userId',
+        targetTableName: 'users',
+        targetColumnName: 'id',
+        updateConstraint: 'NO_ACTION',
+        deleteConstraint: 'NO_ACTION',
+      } as ForeignKeyConstraint,
+    },
   })
   const comments = aTable({
     name: 'comments',
     columns: {
       postId: aColumn({ name: 'postId' }),
+    },
+    constraints: {
+      postComments: {
+        type: 'FOREIGN KEY',
+        name: 'postComments',
+        columnName: 'postId',
+        targetTableName: 'posts',
+        targetColumnName: 'id',
+        updateConstraint: 'NO_ACTION',
+        deleteConstraint: 'NO_ACTION',
+      } as ForeignKeyConstraint,
     },
   })
   const userPosts = aRelationship({

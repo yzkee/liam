@@ -1,4 +1,5 @@
 import type { Schema } from '@liam-hq/db-structure'
+import { constraintsToRelationships } from '@liam-hq/db-structure'
 
 // Convert table data to text document
 const tableToDocument = (
@@ -36,7 +37,7 @@ const tableToDocument = (
 // Convert relationship data to text document
 const relationshipToDocument = (
   relationshipName: string,
-  relationshipData: Schema['relationships'][string],
+  relationshipData: ReturnType<typeof constraintsToRelationships>[string],
 ): string => {
   return `Relationship: ${relationshipName}
 From Table: ${relationshipData.primaryTableName}
@@ -59,17 +60,20 @@ export const convertSchemaToText = (schema: Schema): string => {
     }
   }
 
-  // Process relationships
-  if (schema.relationships) {
-    schemaText += 'RELATIONSHIPS:\n\n'
-    for (const [relationshipName, relationshipData] of Object.entries(
-      schema.relationships,
-    )) {
-      const relationshipDoc = relationshipToDocument(
-        relationshipName,
-        relationshipData,
-      )
-      schemaText = `${schemaText}${relationshipDoc}\n\n`
+  // Process relationships (derived from constraints)
+  if (schema.tables) {
+    const relationships = constraintsToRelationships(schema.tables)
+    if (Object.keys(relationships).length > 0) {
+      schemaText += 'RELATIONSHIPS:\n\n'
+      for (const [relationshipName, relationshipData] of Object.entries(
+        relationships,
+      )) {
+        const relationshipDoc = relationshipToDocument(
+          relationshipName,
+          relationshipData,
+        )
+        schemaText = `${schemaText}${relationshipDoc}\n\n`
+      }
     }
   }
 

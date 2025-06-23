@@ -172,5 +172,5 @@ export function generateCreateIndexStatement(
  * Generate DROP INDEX statement
  */
 export function generateRemoveIndexStatement(indexName: string): string {
-  return `DROP INDEX ${indexName};`
+  return `DROP INDEX ${escapeIdentifier(indexName)};`
 }

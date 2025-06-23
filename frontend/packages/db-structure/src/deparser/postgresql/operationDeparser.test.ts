@@ -311,7 +311,7 @@ describe('postgresqlOperationDeparser', () => {
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
-        "DROP INDEX idx_users_email;"
+        "DROP INDEX \"idx_users_email\";"
       `)
     })
 
@@ -325,7 +325,7 @@ describe('postgresqlOperationDeparser', () => {
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
-        "DROP INDEX idx_user_profiles_email_unique;"
+        "DROP INDEX \"idx_user_profiles_email_unique\";"
       `)
     })
   })

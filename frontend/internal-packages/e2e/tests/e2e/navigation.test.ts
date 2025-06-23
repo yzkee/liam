@@ -100,7 +100,7 @@ test.describe('Navigation and URL Parameters', () => {
         .getByTestId('table-name-menu-button-accounts')
         .getByLabel('Hide Table')
         .click()
-      await expect(page).toHaveURL(/.*hidden=IYYxHsFcDsBcGcg/)
+      await expect(page).toHaveURL(/.*hidden=eJxLTE7OL80rKQYADrsDYQ/)
       await expect(accountsTable).not.toBeVisible()
 
       // Go back to initial state
@@ -110,7 +110,7 @@ test.describe('Navigation and URL Parameters', () => {
 
       // Go forward to hidden state
       await page.goForward()
-      await expect(page).toHaveURL(/.*hidden=IYYxHsFcDsBcGcg/)
+      await expect(page).toHaveURL(/.*hidden=eJxLTE7OL80rKQYADrsDYQ/)
       await expect(accountsTable).not.toBeVisible()
     })
   })

@@ -1,5 +1,6 @@
 import {
   buildSchemaDiff,
+  mergeSchemas,
   type Schema,
   schemaSchema,
 } from '@liam-hq/db-structure'
@@ -24,10 +25,12 @@ export const SchemaProvider: FC<Props> = ({ children, current, previous }) => {
       tableGroups: {},
     }
     const diffItems = buildSchemaDiff(previous ?? emptySchema, current)
+    const merged = previous ? mergeSchemas(previous, current) : current
 
     return {
       current,
       previous,
+      merged,
       diffItems,
     }
   }, [current, previous])

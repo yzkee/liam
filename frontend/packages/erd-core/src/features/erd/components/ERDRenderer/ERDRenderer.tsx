@@ -78,15 +78,20 @@ const ERDRendererInner: FC<InnerProps> = ({
   const [open, setOpen] = useState(defaultSidebarOpen)
   const [isResizing, setIsResizing] = useState(false)
 
-  const { showMode } = useUserEditing()
-  const { current } = useSchema()
+  const { showMode, showDiff } = useUserEditing()
+  const { current, merged } = useSchema()
+
+  const schema = useMemo(() => {
+    return showDiff && merged ? merged : current
+  }, [showDiff, merged, current])
+
   const schemaKey = useMemo(() => {
-    const str = JSON.stringify(current)
+    const str = JSON.stringify(schema)
     return createHash(str)
-  }, [current])
+  }, [schema])
 
   const { nodes, edges } = convertSchemaToNodes({
-    schema: current,
+    schema,
     showMode,
     tableGroups,
   })

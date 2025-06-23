@@ -5,6 +5,7 @@ import * as v from 'valibot'
 const schemaStoreSchema = v.object({
   current: schemaSchema,
   previous: v.optional(schemaSchema),
+  merged: v.optional(schemaSchema),
   diffItems: v.optional(schemaDiffItemsSchema),
 })
 

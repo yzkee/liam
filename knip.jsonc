@@ -1,19 +1,10 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
 
-  // Entry files are the starting point for Knip to find more source files and external dependencies
-  "entry": [
-    "frontend/packages/cli/bin/cli.ts",
-    "frontend/apps/app/instrumentation-client.ts",
-    "frontend/apps/docs/instrumentation-client.ts",
-    "frontend/internal-packages/jobs/trigger.config.ts"
-  ],
-
   // Files to ignore when analyzing
   "ignore": [
     // - config files
     "frontend/turbo/generators/config.ts",
-    "frontend/internal-packages/jobs/trigger.config.ts",
     "frontend/apps/docs/source.config.ts",
     // - Generated files may contain unused exports
     "frontend/internal-packages/db/supabase/database.types.ts",
@@ -47,5 +38,15 @@
   ],
 
   // TODO: Review ignoreBinaries configuration later
-  "ignoreBinaries": ["playwright"]
+  "ignoreBinaries": ["playwright"],
+
+  // Workspace-specific configurations
+  "workspaces": {
+    "frontend/packages/cli": {
+      "entry": ["bin/cli.ts", "src/main.tsx"]
+    },
+    "frontend/internal-packages/jobs": {
+      "entry": ["trigger.config.ts"]
+    }
+  }
 }

@@ -1,3 +1,4 @@
+import { PATH_PATTERNS } from '../../operation/constants.js'
 import type {
   AddColumnOperation,
   RemoveColumnOperation,
@@ -40,7 +41,7 @@ import {
  * Extract table name from operation path
  */
 function extractTableNameFromPath(path: string): string | null {
-  const match = path.match(/^\/tables\/([^/]+)/)
+  const match = path.match(PATH_PATTERNS.TABLE_BASE)
   return match?.[1] || null
 }
 
@@ -50,7 +51,7 @@ function extractTableNameFromPath(path: string): string | null {
 function extractTableAndColumnNameFromPath(
   path: string,
 ): { tableName: string; columnName: string } | null {
-  const match = path.match(/^\/tables\/([^/]+)\/columns\/([^/]+)$/)
+  const match = path.match(PATH_PATTERNS.COLUMN_BASE)
   if (!match || !match[1] || !match[2]) {
     return null
   }
@@ -66,7 +67,7 @@ function extractTableAndColumnNameFromPath(
 function extractTableAndColumnNameFromNamePath(
   path: string,
 ): { tableName: string; columnName: string } | null {
-  const match = path.match(/^\/tables\/([^/]+)\/columns\/([^/]+)\/name$/)
+  const match = path.match(PATH_PATTERNS.COLUMN_NAME)
   if (!match || !match[1] || !match[2]) {
     return null
   }
@@ -82,7 +83,7 @@ function extractTableAndColumnNameFromNamePath(
 function extractTableAndIndexNameFromPath(
   path: string,
 ): { tableName: string; indexName: string } | null {
-  const match = path.match(/^\/tables\/([^/]+)\/indexes\/([^/]+)$/)
+  const match = path.match(PATH_PATTERNS.INDEX_BASE)
   if (!match || !match[1] || !match[2]) {
     return null
   }

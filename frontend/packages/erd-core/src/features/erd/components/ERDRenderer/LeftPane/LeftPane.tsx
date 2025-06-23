@@ -20,7 +20,6 @@ import { isTableNode } from '@/features/erd/utils'
 import { useCustomReactflow } from '@/features/reactflow/hooks'
 import { useVersion } from '@/providers'
 import { useUserEditing } from '@/stores'
-import { updateNodesHiddenState } from '../../ERDContent/utils'
 import { CopyLinkButton } from './CopyLinkButton'
 import styles from './LeftPane.module.css'
 import { MenuItemLink, type Props as MenuItemLinkProps } from './MenuItemLink'
@@ -94,11 +93,11 @@ export const LeftPane = () => {
   const showOrHideAllNodes = useCallback(() => {
     resetSelectedNodeIds()
     const shouldHide = visibleCount === allCount
-    const updatedNodes = updateNodesHiddenState({
-      nodes,
-      hiddenNodeIds: shouldHide ? nodes.map((node) => node.id) : [],
-      shouldHideGroupNodeId: true,
-    })
+    const hiddenIds = shouldHide ? nodes.map((node) => node.id) : []
+    const updatedNodes = nodes.map((node) => ({
+      ...node,
+      hidden: hiddenIds.includes(node.id),
+    }))
     setNodes(updatedNodes)
     setHiddenNodeIds(shouldHide ? nodes.map((node) => node.id) : null)
   }, [
@@ -115,11 +114,10 @@ export const LeftPane = () => {
       const hiddenNodeIds = nodes
         .filter((node) => !selectedNodeIds.has(node.id))
         .map((node) => node.id)
-      const updatedNodes = updateNodesHiddenState({
-        nodes,
-        hiddenNodeIds,
-        shouldHideGroupNodeId: true,
-      })
+      const updatedNodes = nodes.map((node) => ({
+        ...node,
+        hidden: hiddenNodeIds.includes(node.id),
+      }))
       setNodes(updatedNodes)
       setHiddenNodeIds(hiddenNodeIds)
     }

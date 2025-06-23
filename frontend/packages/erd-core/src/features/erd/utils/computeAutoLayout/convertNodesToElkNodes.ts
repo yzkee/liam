@@ -11,13 +11,7 @@ export function convertNodesToElkNodes(nodes: Node[]): ElkNode[] {
       width: node.measured?.width ?? 0,
       height: node.measured?.height ?? 0,
       layoutOptions: {
-        /**
-         * NOTE
-         * For NonRelatedTableGroup Nodes, arrange child Nodes in a vertical layout.
-         * For all other cases, use default values.
-         */
-        'elk.aspectRatio':
-          node.type === 'nonRelatedTableGroup' ? '0.5625' : '1.6f',
+        'elk.aspectRatio': '1.6f',
         'elk.alignment': 'LEFT',
       },
     }

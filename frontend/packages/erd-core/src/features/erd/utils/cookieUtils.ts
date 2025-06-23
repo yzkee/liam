@@ -1,5 +1,3 @@
-import { parse, serialize } from 'cookie'
-
 export interface CookieOptions {
   path?: string
   maxAge?: number
@@ -17,8 +15,9 @@ export function getCookie(name: string): string | null {
     return null
   }
 
-  const cookies = parse(document.cookie)
-  return cookies[name] ?? null
+  const cookies = document.cookie.split('; ')
+  const cookie = cookies.find((cookie) => cookie.startsWith(`${name}=`))
+  return cookie ? (cookie.split('=')[1] ?? null) : null
 }
 
 /**
@@ -49,7 +48,32 @@ export function setCookie(
     return
   }
 
-  const cookieString = serialize(name, value, options)
+  let cookieString = `${name}=${value}`
+
+  if (options.path) {
+    cookieString += `; path=${options.path}`
+  }
+
+  if (options.maxAge !== undefined) {
+    cookieString += `; max-age=${options.maxAge}`
+  }
+
+  if (options.domain) {
+    cookieString += `; domain=${options.domain}`
+  }
+
+  if (options.secure) {
+    cookieString += '; secure'
+  }
+
+  if (options.httpOnly) {
+    cookieString += '; httponly'
+  }
+
+  if (options.sameSite) {
+    cookieString += `; samesite=${options.sameSite}`
+  }
+
   // biome-ignore lint/suspicious/noDocumentCookie: This is the cookie utility abstraction layer
   document.cookie = cookieString
 }

@@ -1,10 +1,6 @@
 'use client'
 
 import {
-  compressToEncodedURIComponent,
-  decompressFromEncodedURIComponent,
-} from 'lz-string'
-import {
   createParser,
   parseAsString,
   parseAsStringEnum,
@@ -13,6 +9,8 @@ import {
 import { type FC, type PropsWithChildren, useCallback, useState } from 'react'
 import type { TableNodeType } from '@/features/erd/types'
 import type { ShowMode } from '@/schemas'
+import { compressToEncodedURIComponent } from '@/utils/compressToEncodedURIComponent'
+import { decompressFromEncodedURIComponent } from '@/utils/decompressFromEncodedURIComponent'
 import { UserEditingContext } from './context'
 
 const parseAsCompressedStringArray = createParser({

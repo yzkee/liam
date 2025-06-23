@@ -1,4 +1,9 @@
-import { Check, GitBranch, DropdownMenuPrimitiveRadioItem, DropdownMenuItemIndicator } from '@liam-hq/ui'
+import {
+  Check,
+  DropdownMenuItemIndicator,
+  DropdownMenuPrimitiveRadioItem,
+  GitBranch,
+} from '@liam-hq/ui'
 import type { ComponentProps, FC } from 'react'
 import { ProjectIcon } from '../../../../../components/ProjectIcon'
 import styles from './ProjectRadioItem.module.css'

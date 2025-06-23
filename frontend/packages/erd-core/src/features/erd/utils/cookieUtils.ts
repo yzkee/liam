@@ -1,10 +1,6 @@
 export interface CookieOptions {
   path?: string
   maxAge?: number
-  domain?: string
-  secure?: boolean
-  httpOnly?: boolean
-  sameSite?: 'strict' | 'lax' | 'none'
 }
 
 /**
@@ -56,22 +52,6 @@ export function setCookie(
 
   if (options.maxAge !== undefined) {
     cookieString += `; max-age=${options.maxAge}`
-  }
-
-  if (options.domain) {
-    cookieString += `; domain=${options.domain}`
-  }
-
-  if (options.secure) {
-    cookieString += '; secure'
-  }
-
-  if (options.httpOnly) {
-    cookieString += '; httponly'
-  }
-
-  if (options.sameSite) {
-    cookieString += `; samesite=${options.sameSite}`
   }
 
   // biome-ignore lint/suspicious/noDocumentCookie: This is the cookie utility abstraction layer

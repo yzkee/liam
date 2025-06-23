@@ -93,16 +93,6 @@ describe('Chat Workflow', () => {
     repositories: mockRepositories,
     logger: mockLogger,
     retryCount: {},
-    generatedUsecases: undefined,
-    analyzedRequirements: {
-      businessRequirement: 'Mocked BRD',
-      functionalRequirements: {
-        'Test Category': ['Mocked functional requirement'],
-      },
-      nonFunctionalRequirements: {
-        Performance: ['Mocked non-functional requirement'],
-      },
-    },
     ...overrides,
   })
 

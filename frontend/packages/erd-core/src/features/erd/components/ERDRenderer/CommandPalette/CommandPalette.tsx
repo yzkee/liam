@@ -17,6 +17,8 @@ export const CommandPalette: FC = () => {
   const table = schema.current.tables[tableName ?? '']
   const { selectTable } = useTableSelection()
 
+  const [focusedTableName, setFocusedTableName] = useState<string | null>(null)
+
   const goToERD = useCallback(
     (tableName: string) => {
       selectTable({ tableId: tableName, displayArea: 'main' })
@@ -44,7 +46,10 @@ export const CommandPalette: FC = () => {
       onOpenChange={setOpen}
       contentClassName={styles.content}
       value={tableName ?? ''}
-      onValueChange={(v) => setTableName(v)}
+      onValueChange={(v) => {
+        if (focusedTableName) return
+        setTableName(v)
+      }}
     >
       <DialogTitle hidden>Command Palette</DialogTitle>
       <DialogDescription hidden>
@@ -67,9 +72,23 @@ export const CommandPalette: FC = () => {
                 key={table.name}
                 value={table.name}
                 onSelect={() => goToERD(table.name)}
+                data-focused={focusedTableName === table.name}
               >
-                <Table2 className={styles.itemIcon} />
-                {table.name}
+                {/** biome-ignore lint/a11y/useKeyWithClickEvents: Keyboard interaction is implemented in the parent Command.Item component's onSelect handler. */}
+                <div
+                  className={styles.itemInner}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    setTableName(table.name)
+                    setFocusedTableName((prev) =>
+                      prev === table.name ? null : table.name,
+                    )
+                  }}
+                  onDoubleClick={() => goToERD(table.name)}
+                >
+                  <Table2 className={styles.itemIcon} />
+                  {table.name}
+                </div>
               </Command.Item>
             ))}
           </Command.Group>

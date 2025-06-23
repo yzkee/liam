@@ -45,7 +45,6 @@ describe(extractSchemaForTable, () => {
       userPosts,
       postComments,
     },
-    tableGroups: {},
   }
 
   it('should extract related tables and relationships for the given table (primary table)', () => {
@@ -70,7 +69,6 @@ describe(extractSchemaForTable, () => {
     const emptySchema: Schema = {
       tables: { users },
       relationships: {},
-      tableGroups: {},
     }
     const result = extractSchemaForTable(users, emptySchema)
     expect(result).toEqual({

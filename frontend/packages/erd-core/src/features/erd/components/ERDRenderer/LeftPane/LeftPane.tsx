@@ -97,6 +97,7 @@ export const LeftPane = () => {
     const updatedNodes = updateNodesHiddenState({
       nodes,
       hiddenNodeIds: shouldHide ? nodes.map((node) => node.id) : [],
+      shouldHideGroupNodeId: true,
     })
     setNodes(updatedNodes)
     setHiddenNodeIds(shouldHide ? nodes.map((node) => node.id) : null)
@@ -117,6 +118,7 @@ export const LeftPane = () => {
       const updatedNodes = updateNodesHiddenState({
         nodes,
         hiddenNodeIds,
+        shouldHideGroupNodeId: true,
       })
       setNodes(updatedNodes)
       setHiddenNodeIds(hiddenNodeIds)

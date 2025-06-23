@@ -9,7 +9,6 @@ import {
   useEdgesState,
   useNodesState,
 } from '@xyflow/react'
-import clsx from 'clsx'
 import { type FC, useCallback } from 'react'
 import { useTableSelection } from '@/features/erd/hooks'
 import type { DisplayArea } from '@/features/erd/types'

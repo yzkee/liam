@@ -6,7 +6,13 @@ import {
   parseAsStringEnum,
   useQueryState,
 } from 'nuqs'
-import { type FC, type PropsWithChildren, useCallback, useState } from 'react'
+import {
+  type FC,
+  type PropsWithChildren,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react'
 import type { TableNodeType } from '@/features/erd/types'
 import type { ShowMode } from '@/schemas'
 import { compressToEncodedURIComponent } from '@/utils/compressToEncodedURIComponent'
@@ -31,7 +37,16 @@ const parseAsCompressedStringArray = createParser({
   },
 })
 
-export const UserEditingProvider: FC<PropsWithChildren> = ({ children }) => {
+type UserEditingProviderValue = {
+  showDiff?: boolean | undefined
+}
+
+type Props = PropsWithChildren & UserEditingProviderValue
+
+export const UserEditingProvider: FC<Props> = ({
+  children,
+  showDiff: initialShowDiff = false,
+}) => {
   const [activeTableName, setActiveTableName] = useQueryState(
     'active',
     parseAsString.withDefault('').withOptions({ history: 'push' }),
@@ -56,6 +71,11 @@ export const UserEditingProvider: FC<PropsWithChildren> = ({ children }) => {
   const [selectedNodeIds, setSelectedNodeIds] = useState<Set<string>>(new Set())
   const [isPopstateInProgress, setIsPopstateInProgress] = useState(false)
   const [isTableGroupEditMode, setIsTableGroupEditMode] = useState(false)
+  const [showDiff, setShowDiff] = useState(initialShowDiff)
+
+  useEffect(() => {
+    setShowDiff(initialShowDiff)
+  }, [initialShowDiff])
 
   const toggleHiddenNodeId = useCallback(
     (nodeId: string) => {
@@ -194,6 +214,8 @@ export const UserEditingProvider: FC<PropsWithChildren> = ({ children }) => {
         setIsPopstateInProgress,
         isTableGroupEditMode,
         setIsTableGroupEditMode,
+        showDiff,
+        setShowDiff,
       }}
     >
       {children}

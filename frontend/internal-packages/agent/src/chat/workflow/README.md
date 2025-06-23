@@ -7,14 +7,14 @@ A **LangGraph implementation** for processing chat messages in the LIAM applicat
 ```mermaid
 flowchart TD
     START([START])
-    ANALYZE[analyzeRequirements<br/>Requirements Organization<br/><i>pmAgent</i>]
+    ANALYZE[analyzeRequirements<br/>Requirements Organization<br/><i>pmAnalysisAgent</i>]
     DESIGN[designSchema<br/>DB Design & DDL Execution<br/><i>dbAgent</i>]
     GENERATE_DDL[generateDDL<br/>DDL Generation<br/><i>agent</i>]
     EXECUTE_DDL[executeDDL<br/>DDL Execution<br/><i>agent</i>]
     GENERATE_USECASE[generateUsecase<br/>Use Case Creation<br/><i>qaAgent</i>]
     PREPARE_DML[prepareDML<br/>DML Generation<br/><i>qaAgent</i>]
     VALIDATE[validateSchema<br/>DML Execution & Validation<br/><i>qaAgent</i>]
-    REVIEW[reviewDeliverables<br/>Final Requirements & Deliverables Confirmation<br/><i>pmAgentReview</i>]
+    REVIEW[reviewDeliverables<br/>Final Requirements & Deliverables Confirmation<br/><i>pmAnalysisAgentReview</i>]
     FINALIZE[finalizeArtifacts<br/>Generate & Save Artifacts<br/><i>dbAgentArtifactGen</i>]
     END([__end__<br/>End])
 
@@ -61,14 +61,14 @@ interface WorkflowState {
 
 ## Nodes
 
-1. **analyzeRequirements**: Organizes and clarifies requirements from user input (performed by pmAgent)
+1. **analyzeRequirements**: Organizes and clarifies requirements from user input (performed by pmAnalysisAgent)
 2. **designSchema**: Designs database schema and executes DDL statements (performed by dbAgent)
 3. **generateDDL**: Generates DDL statements (performed by agent)
 4. **executeDDL**: Executes DDL statements (performed by agent)
 5. **generateUsecase**: Creates use cases for testing (performed by qaAgent)
 6. **prepareDML**: Generates DML statements for testing (performed by qaAgent)
 7. **validateSchema**: Executes DML and validates schema (performed by qaAgent)
-8. **reviewDeliverables**: Performs final confirmation of requirements and deliverables (performed by pmAgentReview)
+8. **reviewDeliverables**: Performs final confirmation of requirements and deliverables (performed by pmAnalysisAgentReview)
 9. **finalizeArtifacts**: Generates and saves comprehensive artifacts to database (performed by dbAgentArtifactGen)
 
 ## Usage

@@ -1,6 +1,6 @@
 import type * as v from 'valibot'
-import { PMAgent } from '../../../langchain/agents'
-import type { requirementsAnalysisSchema } from '../../../langchain/agents/pmAgent/agent'
+import { PMAnalysisAgent } from '../../../langchain/agents'
+import type { requirementsAnalysisSchema } from '../../../langchain/agents/pmAnalysisAgent/agent'
 import type { BasePromptVariables } from '../../../langchain/utils/types'
 import { convertSchemaToText } from '../../../utils/convertSchemaToText'
 import type { WorkflowState } from '../types'
@@ -29,14 +29,14 @@ const logAnalysisResult = (
 
 /**
  * Analyze Requirements Node - Requirements Organization
- * Performed by pmAgent
+ * Performed by pmAnalysisAgent
  */
 export async function analyzeRequirementsNode(
   state: WorkflowState,
 ): Promise<WorkflowState> {
   state.logger.log(`[${NODE_NAME}] Started`)
 
-  const pmAgent = new PMAgent()
+  const pmAgent = new PMAnalysisAgent()
   const schemaText = convertSchemaToText(state.schemaData)
 
   const promptVariables: BasePromptVariables = {

@@ -65,26 +65,8 @@ Example output:
   }}
 }}`
 
-// Requirements Review System Prompt
-// TODO: Implement this
-const pmReviewSystemPrompt = ''
-
 // Analysis Prompt Template
 export const pmAnalysisPrompt = ChatPromptTemplate.fromMessages([
   ['system', pmAnalysisSystemPrompt],
   ['human', '{user_message}'],
 ])
-
-// Review Prompt Template
-export const pmReviewPrompt = ChatPromptTemplate.fromMessages([
-  ['system', pmReviewSystemPrompt],
-  ['human', '{user_message}'],
-])
-
-// Prompt type enum for method selection
-export const PMAgentMode = {
-  ANALYSIS: 'analysis',
-  REVIEW: 'review',
-} as const
-
-export type PMAgentMode = (typeof PMAgentMode)[keyof typeof PMAgentMode]

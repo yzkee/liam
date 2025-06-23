@@ -73,7 +73,6 @@ describe('Chat Workflow', () => {
       },
     },
     relationships: {},
-    tableGroups: {},
   })
 
   // Helper function to create base workflow state

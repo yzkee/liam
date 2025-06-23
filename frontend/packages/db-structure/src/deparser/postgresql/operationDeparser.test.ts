@@ -137,7 +137,6 @@ describe('postgresqlOperationDeparser', () => {
         "ALTER TABLE \"users\" RENAME TO \"user_accounts\";"
       `)
     })
-
   })
 
   describe('column operations', () => {

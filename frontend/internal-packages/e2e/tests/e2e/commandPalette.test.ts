@@ -20,6 +20,7 @@ test('go to table in ERD by CommandPalette', async ({ page }) => {
   await page.keyboard.type('user_roles')
   await page.keyboard.press('Enter')
 
-  // Go to ERD
+  // Close dialog and go to ERD
+  await expect(commandPaletteDialog).not.toBeVisible()
   await expect(page).toHaveURL(/.*active=user_roles/)
 })

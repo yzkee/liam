@@ -42,14 +42,14 @@ describe('postgresqlOperationDeparser', () => {
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
-        "CREATE TABLE users (
-          id bigint PRIMARY KEY,
-          email varchar(255) UNIQUE NOT NULL
+        "CREATE TABLE \"users\" (
+          \"id\" bigint PRIMARY KEY,
+          \"email\" varchar(255) UNIQUE NOT NULL
         );
 
-        COMMENT ON TABLE users IS 'User table';
-        COMMENT ON COLUMN users.id IS 'User ID';
-        COMMENT ON COLUMN users.email IS 'User email';"
+        COMMENT ON TABLE \"users\" IS 'User table';
+        COMMENT ON COLUMN \"users\".\"id\" IS 'User ID';
+        COMMENT ON COLUMN \"users\".\"email\" IS 'User email';"
       `)
     })
 
@@ -101,10 +101,10 @@ describe('postgresqlOperationDeparser', () => {
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
-        "CREATE TABLE settings (
-          id bigint PRIMARY KEY,
-          enabled boolean NOT NULL DEFAULT TRUE,
-          title varchar(100) DEFAULT 'Default Title'
+        "CREATE TABLE \"settings\" (
+          \"id\" bigint PRIMARY KEY,
+          \"enabled\" boolean NOT NULL DEFAULT TRUE,
+          \"title\" varchar(100) DEFAULT 'Default Title'
         );"
       `)
     })
@@ -119,7 +119,7 @@ describe('postgresqlOperationDeparser', () => {
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
-        "DROP TABLE users;"
+        "DROP TABLE \"users\";"
       `)
     })
   })
@@ -145,9 +145,9 @@ describe('postgresqlOperationDeparser', () => {
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
-        "ALTER TABLE users ADD COLUMN age integer;
+        "ALTER TABLE \"users\" ADD COLUMN \"age\" integer;
 
-        COMMENT ON COLUMN users.age IS 'User age';"
+        COMMENT ON COLUMN \"users\".\"age\" IS 'User age';"
       `)
     })
 
@@ -171,7 +171,7 @@ describe('postgresqlOperationDeparser', () => {
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
-        "ALTER TABLE products ADD COLUMN price decimal(10,2) NOT NULL DEFAULT 0;"
+        "ALTER TABLE \"products\" ADD COLUMN \"price\" decimal(10,2) NOT NULL DEFAULT 0;"
       `)
     })
 
@@ -185,7 +185,147 @@ describe('postgresqlOperationDeparser', () => {
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
-        "ALTER TABLE users DROP COLUMN age;"
+        "ALTER TABLE \"users\" DROP COLUMN \"age\";"
+      `)
+    })
+
+    it('should generate RENAME COLUMN statement from replace operation', () => {
+      const operation: Operation = {
+        op: 'replace',
+        path: '/tables/users/columns/email/name',
+        value: 'email_address',
+      }
+
+      const result = postgresqlOperationDeparser(operation)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "ALTER TABLE \"users\" RENAME COLUMN \"email\" TO \"email_address\";"
+      `)
+    })
+
+    it('should generate RENAME COLUMN for complex table and column names', () => {
+      const operation: Operation = {
+        op: 'replace',
+        path: '/tables/user_profiles/columns/first_name/name',
+        value: 'given_name',
+      }
+
+      const result = postgresqlOperationDeparser(operation)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "ALTER TABLE \"user_profiles\" RENAME COLUMN \"first_name\" TO \"given_name\";"
+      `)
+    })
+  })
+
+  describe('index operations', () => {
+    it('should generate CREATE INDEX statement from add operation', () => {
+      const operation: Operation = {
+        op: 'add',
+        path: '/tables/users/indexes/idx_users_email',
+        value: {
+          name: 'idx_users_email',
+          unique: false,
+          columns: ['email'],
+          type: 'BTREE',
+        },
+      }
+
+      const result = postgresqlOperationDeparser(operation)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "CREATE INDEX \"idx_users_email\" ON \"users\" USING BTREE (\"email\");"
+      `)
+    })
+
+    it('should generate CREATE UNIQUE INDEX statement', () => {
+      const operation: Operation = {
+        op: 'add',
+        path: '/tables/users/indexes/idx_users_username_unique',
+        value: {
+          name: 'idx_users_username_unique',
+          unique: true,
+          columns: ['username'],
+          type: 'BTREE',
+        },
+      }
+
+      const result = postgresqlOperationDeparser(operation)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "CREATE UNIQUE INDEX \"idx_users_username_unique\" ON \"users\" USING BTREE (\"username\");"
+      `)
+    })
+
+    it('should generate CREATE INDEX with multiple columns', () => {
+      const operation: Operation = {
+        op: 'add',
+        path: '/tables/orders/indexes/idx_orders_user_date',
+        value: {
+          name: 'idx_orders_user_date',
+          unique: false,
+          columns: ['user_id', 'created_at'],
+          type: 'BTREE',
+        },
+      }
+
+      const result = postgresqlOperationDeparser(operation)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "CREATE INDEX \"idx_orders_user_date\" ON \"orders\" USING BTREE (\"user_id\", \"created_at\");"
+      `)
+    })
+
+    it('should generate CREATE INDEX without index type', () => {
+      const operation: Operation = {
+        op: 'add',
+        path: '/tables/products/indexes/idx_products_category',
+        value: {
+          name: 'idx_products_category',
+          unique: false,
+          columns: ['category_id'],
+          type: '',
+        },
+      }
+
+      const result = postgresqlOperationDeparser(operation)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "CREATE INDEX \"idx_products_category\" ON \"products\" (\"category_id\");"
+      `)
+    })
+
+    it('should generate DROP INDEX statement from remove operation', () => {
+      const operation: Operation = {
+        op: 'remove',
+        path: '/tables/users/indexes/idx_users_email',
+      }
+
+      const result = postgresqlOperationDeparser(operation)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "DROP INDEX \"idx_users_email\";"
+      `)
+    })
+
+    it('should generate DROP INDEX for complex index name', () => {
+      const operation: Operation = {
+        op: 'remove',
+        path: '/tables/user_profiles/indexes/idx_user_profiles_email_unique',
+      }
+
+      const result = postgresqlOperationDeparser(operation)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "DROP INDEX \"idx_user_profiles_email_unique\";"
       `)
     })
   })

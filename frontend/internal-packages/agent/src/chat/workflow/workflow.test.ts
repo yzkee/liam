@@ -9,6 +9,7 @@ import type { WorkflowState } from './types'
 vi.mock('../../langchain/agents', () => ({
   DatabaseSchemaBuildAgent: vi.fn(),
   PMAgent: vi.fn(),
+  QAGenerateUsecaseAgent: vi.fn(),
 }))
 
 // Mock the schema converter
@@ -24,8 +25,12 @@ describe('Chat Workflow', () => {
   let mockPMAgent: {
     analyzeRequirements: ReturnType<typeof vi.fn>
   }
+  let mockQAAgent: {
+    generate: ReturnType<typeof vi.fn>
+  }
   let MockDatabaseSchemaBuildAgent: ReturnType<typeof vi.fn>
   let MockPMAgent: ReturnType<typeof vi.fn>
+  let MockQAGenerateUsecaseAgent: ReturnType<typeof vi.fn>
   let mockRepositories: Repositories
   let mockSchemaRepository: SchemaRepository
   let mockLogger: NodeLogger
@@ -91,6 +96,7 @@ describe('Chat Workflow', () => {
     repositories: mockRepositories,
     logger: mockLogger,
     retryCount: {},
+    generatedUsecases: undefined,
     ...overrides,
   })
 
@@ -117,6 +123,7 @@ describe('Chat Workflow', () => {
       agentsModule.DatabaseSchemaBuildAgent,
     )
     MockPMAgent = vi.mocked(agentsModule.PMAgent)
+    MockQAGenerateUsecaseAgent = vi.mocked(agentsModule.QAGenerateUsecaseAgent)
 
     // Create mock repositories
     mockSchemaRepository = {
@@ -152,22 +159,36 @@ describe('Chat Workflow', () => {
 
     // Mock PM agent
     mockPMAgent = {
-      analyzeRequirements: vi.fn().mockResolvedValue(
-        JSON.stringify({
-          businessRequirement: 'Mocked BRD',
-          functionalRequirements: {
-            'Test Category': ['Mocked functional requirement'],
+      analyzeRequirements: vi.fn().mockResolvedValue({
+        businessRequirement: 'Mocked BRD',
+        functionalRequirements: {
+          'Test Category': ['Mocked functional requirement'],
+        },
+        nonFunctionalRequirements: {
+          Performance: ['Mocked non-functional requirement'],
+        },
+      }),
+    }
+
+    // Mock QA agent
+    mockQAAgent = {
+      generate: vi.fn().mockResolvedValue({
+        usecases: [
+          {
+            requirementType: 'functional',
+            requirementCategory: 'Test Category',
+            requirement: 'Mocked functional requirement',
+            title: 'Mocked Use Case',
+            description: 'Mocked use case description',
           },
-          nonFunctionalRequirements: {
-            Performance: ['Mocked non-functional requirement'],
-          },
-        }),
-      ),
+        ],
+      }),
     }
 
     // Setup agent mocks
     MockDatabaseSchemaBuildAgent.mockImplementation(() => mockAgent)
     MockPMAgent.mockImplementation(() => mockPMAgent)
+    MockQAGenerateUsecaseAgent.mockImplementation(() => mockQAAgent)
 
     // Setup createVersion mock
     vi.mocked(mockSchemaRepository.createVersion).mockResolvedValue({

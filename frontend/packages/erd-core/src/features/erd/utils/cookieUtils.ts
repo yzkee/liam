@@ -1,0 +1,66 @@
+import { parse, serialize } from 'cookie'
+
+export interface CookieOptions {
+  path?: string
+  maxAge?: number
+  domain?: string
+  secure?: boolean
+  httpOnly?: boolean
+  sameSite?: 'strict' | 'lax' | 'none'
+}
+
+/**
+ * Get a cookie value by name
+ */
+export function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') {
+    return null
+  }
+
+  const cookies = parse(document.cookie)
+  return cookies[name] ?? null
+}
+
+/**
+ * Get a cookie value and parse it as JSON
+ */
+export function getCookieJson<T>(name: string): T | null {
+  const value = getCookie(name)
+  if (!value) {
+    return null
+  }
+
+  try {
+    return JSON.parse(value) as T
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Set a cookie value
+ */
+export function setCookie(
+  name: string,
+  value: string,
+  options: CookieOptions = {},
+): void {
+  if (typeof document === 'undefined') {
+    return
+  }
+
+  const cookieString = serialize(name, value, options)
+  // biome-ignore lint/suspicious/noDocumentCookie: This is the cookie utility abstraction layer
+  document.cookie = cookieString
+}
+
+/**
+ * Set a cookie value with JSON serialization
+ */
+export function setCookieJson(
+  name: string,
+  value: unknown,
+  options: CookieOptions = {},
+): void {
+  setCookie(name, JSON.stringify(value), options)
+}

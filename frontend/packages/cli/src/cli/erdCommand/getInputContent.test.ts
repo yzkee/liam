@@ -124,6 +124,7 @@ describe('getInputContent', () => {
     vi.spyOn(fs, 'existsSync')
       .mockReturnValueOnce(true)
       .mockReturnValueOnce(false)
+    vi.spyOn(fs, 'readFileSync').mockReturnValueOnce('file1 content')
 
     await expect(getInputContent('*.sql')).rejects.toThrow(
       'File not found: /path/to/nonexistent.sql',

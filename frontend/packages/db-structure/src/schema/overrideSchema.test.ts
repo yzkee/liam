@@ -59,7 +59,7 @@ describe('overrideSchema', () => {
         },
       }
 
-      const { schema } = overrideSchema(originalSchema, override)
+      const schema = overrideSchema(originalSchema, override)
 
       expect(schema.tables['users']?.comment).toBe(
         'Updated user accounts table',
@@ -105,7 +105,7 @@ describe('overrideSchema', () => {
         },
       }
 
-      const { schema } = overrideSchema(originalSchema, override)
+      const schema = overrideSchema(originalSchema, override)
 
       expect(schema.tables['users']?.columns['id']?.comment).toBe(
         'Updated primary key comment',

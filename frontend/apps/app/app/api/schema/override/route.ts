@@ -61,9 +61,7 @@ export async function POST(request: NextRequest) {
       Number(repository.github_installation_identifier),
     )
 
-    const rawSchemaOverride = content
-      ? parseYaml(content)
-      : { overrides: { tableGroups: {} } }
+    const rawSchemaOverride = content ? parseYaml(content) : { overrides: {} }
 
     const validationResult = v.safeParse(
       schemaOverrideSchema,

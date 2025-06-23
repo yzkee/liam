@@ -52,7 +52,6 @@ describe(extractSchemaForTable, () => {
     expect(result).toEqual({
       tables: { users, posts },
       relationships: { userPosts },
-      tableGroups: {},
     })
   })
 
@@ -61,7 +60,6 @@ describe(extractSchemaForTable, () => {
     expect(result).toEqual({
       tables: { posts, comments },
       relationships: { postComments },
-      tableGroups: {},
     })
   })
 
@@ -74,7 +72,6 @@ describe(extractSchemaForTable, () => {
     expect(result).toEqual({
       tables: { users },
       relationships: {},
-      tableGroups: {},
     })
   })
 })

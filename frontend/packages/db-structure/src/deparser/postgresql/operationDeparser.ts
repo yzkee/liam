@@ -9,8 +9,14 @@ import {
   isRemoveColumnOperation,
   isRenameColumnOperation,
 } from '../../operation/schema/column.js'
-import type { AddConstraintOperation } from '../../operation/schema/constraint.js'
-import { isAddConstraintOperation } from '../../operation/schema/constraint.js'
+import type {
+  AddConstraintOperation,
+  RemoveConstraintOperation,
+} from '../../operation/schema/constraint.js'
+import {
+  isAddConstraintOperation,
+  isRemoveConstraintOperation,
+} from '../../operation/schema/constraint.js'
 import type { Operation } from '../../operation/schema/index.js'
 import type {
   AddIndexOperation,
@@ -37,6 +43,7 @@ import {
   generateCreateIndexStatement,
   generateCreateTableStatement,
   generateRemoveColumnStatement,
+  generateRemoveConstraintStatement,
   generateRemoveIndexStatement,
   generateRemoveTableStatement,
   generateRenameColumnStatement,
@@ -251,6 +258,23 @@ function generateAddConstraintFromOperation(
   return generateAddConstraintStatement(pathInfo.tableName, operation.value)
 }
 
+/**
+ * Generate DROP CONSTRAINT DDL from constraint removal operation
+ */
+function generateRemoveConstraintFromOperation(
+  operation: RemoveConstraintOperation,
+): string {
+  const pathInfo = extractTableAndConstraintNameFromPath(operation.path)
+  if (!pathInfo) {
+    throw new Error(`Invalid constraint path: ${operation.path}`)
+  }
+
+  return generateRemoveConstraintStatement(
+    pathInfo.tableName,
+    pathInfo.constraintName,
+  )
+}
+
 export const postgresqlOperationDeparser: OperationDeparser = (
   operation: Operation,
 ) => {
@@ -298,6 +322,11 @@ export const postgresqlOperationDeparser: OperationDeparser = (
 
   if (isAddConstraintOperation(operation)) {
     const value = generateAddConstraintFromOperation(operation)
+    return { value, errors }
+  }
+
+  if (isRemoveConstraintOperation(operation)) {
+    const value = generateRemoveConstraintFromOperation(operation)
     return { value, errors }
   }
 

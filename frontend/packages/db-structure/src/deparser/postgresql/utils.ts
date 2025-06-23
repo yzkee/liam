@@ -212,3 +212,13 @@ export function generateAddConstraintStatement(
       return constraint satisfies never
   }
 }
+
+/**
+ * Generate DROP CONSTRAINT statement
+ */
+export function generateRemoveConstraintStatement(
+  tableName: string,
+  constraintName: string,
+): string {
+  return `ALTER TABLE ${escapeIdentifier(tableName)} DROP CONSTRAINT ${escapeIdentifier(constraintName)};`
+}

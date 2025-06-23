@@ -425,5 +425,47 @@ describe('postgresqlOperationDeparser', () => {
         "ALTER TABLE \"products\" ADD CONSTRAINT \"ck_products_price_positive\" CHECK (price > 0);"
       `)
     })
+
+    it('should generate DROP CONSTRAINT statement', () => {
+      const operation: Operation = {
+        op: 'remove',
+        path: '/tables/users/constraints/pk_users_id',
+      }
+
+      const result = postgresqlOperationDeparser(operation)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "ALTER TABLE \"users\" DROP CONSTRAINT \"pk_users_id\";"
+      `)
+    })
+
+    it('should generate DROP CONSTRAINT for complex constraint name', () => {
+      const operation: Operation = {
+        op: 'remove',
+        path: '/tables/orders/constraints/fk_orders_user_id',
+      }
+
+      const result = postgresqlOperationDeparser(operation)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "ALTER TABLE \"orders\" DROP CONSTRAINT \"fk_orders_user_id\";"
+      `)
+    })
+
+    it('should generate DROP CONSTRAINT for table with complex name', () => {
+      const operation: Operation = {
+        op: 'remove',
+        path: '/tables/user_profiles/constraints/uk_user_profiles_email',
+      }
+
+      const result = postgresqlOperationDeparser(operation)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "ALTER TABLE \"user_profiles\" DROP CONSTRAINT \"uk_user_profiles_email\";"
+      `)
+    })
   })
 })

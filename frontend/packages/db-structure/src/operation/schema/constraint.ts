@@ -24,4 +24,22 @@ export const isAddConstraintOperation = (
   return v.safeParse(addConstraintOperationSchema, operation).success
 }
 
-export const constraintOperations = [addConstraintOperationSchema]
+const removeConstraintOperationSchema = v.object({
+  op: v.literal('remove'),
+  path: constraintPathSchema,
+})
+
+export type RemoveConstraintOperation = v.InferOutput<
+  typeof removeConstraintOperationSchema
+>
+
+export const isRemoveConstraintOperation = (
+  operation: Operation,
+): operation is RemoveConstraintOperation => {
+  return v.safeParse(removeConstraintOperationSchema, operation).success
+}
+
+export const constraintOperations = [
+  addConstraintOperationSchema,
+  removeConstraintOperationSchema,
+]

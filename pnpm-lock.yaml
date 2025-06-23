@@ -797,7 +797,7 @@ importers:
         specifier: 14.6.1
         version: 14.6.1(@testing-library/dom@10.4.0)
       '@types/cookie':
-        specifier: ^0.6.0
+        specifier: 0.6.0
         version: 0.6.0
       '@types/react':
         specifier: 19.0.0

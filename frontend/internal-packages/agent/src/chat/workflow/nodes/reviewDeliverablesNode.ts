@@ -4,7 +4,7 @@ const NODE_NAME = 'reviewDeliverablesNode'
 
 /**
  * Review Deliverables Node - Final Requirements & Deliverables Confirmation
- * Performed by pmAgentReview
+ * Performed by pmReviewAgent
  */
 export async function reviewDeliverablesNode(
   state: WorkflowState,

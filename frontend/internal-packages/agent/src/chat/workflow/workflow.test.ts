@@ -8,7 +8,7 @@ import type { WorkflowState } from './types'
 // Mock the agents
 vi.mock('../../langchain/agents', () => ({
   DatabaseSchemaBuildAgent: vi.fn(),
-  PMAgent: vi.fn(),
+  PMAnalysisAgent: vi.fn(),
 }))
 
 // Mock the schema converter
@@ -21,11 +21,11 @@ describe('Chat Workflow', () => {
   let mockAgent: {
     generate: ReturnType<typeof vi.fn>
   }
-  let mockPMAgent: {
+  let mockPMAnalysisAgent: {
     analyzeRequirements: ReturnType<typeof vi.fn>
   }
   let MockDatabaseSchemaBuildAgent: ReturnType<typeof vi.fn>
-  let MockPMAgent: ReturnType<typeof vi.fn>
+  let MockPMAnalysisAgent: ReturnType<typeof vi.fn>
   let mockRepositories: Repositories
   let mockSchemaRepository: SchemaRepository
   let mockLogger: NodeLogger
@@ -116,7 +116,7 @@ describe('Chat Workflow', () => {
     MockDatabaseSchemaBuildAgent = vi.mocked(
       agentsModule.DatabaseSchemaBuildAgent,
     )
-    MockPMAgent = vi.mocked(agentsModule.PMAgent)
+    MockPMAnalysisAgent = vi.mocked(agentsModule.PMAnalysisAgent)
 
     // Create mock repositories
     mockSchemaRepository = {
@@ -150,8 +150,8 @@ describe('Chat Workflow', () => {
       }),
     }
 
-    // Mock PM agent
-    mockPMAgent = {
+    // Mock PM Analysis agent
+    mockPMAnalysisAgent = {
       analyzeRequirements: vi.fn().mockResolvedValue(
         JSON.stringify({
           businessRequirement: 'Mocked BRD',
@@ -167,7 +167,7 @@ describe('Chat Workflow', () => {
 
     // Setup agent mocks
     MockDatabaseSchemaBuildAgent.mockImplementation(() => mockAgent)
-    MockPMAgent.mockImplementation(() => mockPMAgent)
+    MockPMAnalysisAgent.mockImplementation(() => mockPMAnalysisAgent)
 
     // Setup createVersion mock
     vi.mocked(mockSchemaRepository.createVersion).mockResolvedValue({

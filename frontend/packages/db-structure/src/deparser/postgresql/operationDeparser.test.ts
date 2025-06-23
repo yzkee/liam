@@ -188,6 +188,36 @@ describe('postgresqlOperationDeparser', () => {
         "ALTER TABLE \"users\" DROP COLUMN \"age\";"
       `)
     })
+
+    it('should generate RENAME COLUMN statement from replace operation', () => {
+      const operation: Operation = {
+        op: 'replace',
+        path: '/tables/users/columns/email/name',
+        value: 'email_address',
+      }
+
+      const result = postgresqlOperationDeparser(operation)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "ALTER TABLE \"users\" RENAME COLUMN \"email\" TO \"email_address\";"
+      `)
+    })
+
+    it('should generate RENAME COLUMN for complex table and column names', () => {
+      const operation: Operation = {
+        op: 'replace',
+        path: '/tables/user_profiles/columns/first_name/name',
+        value: 'given_name',
+      }
+
+      const result = postgresqlOperationDeparser(operation)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "ALTER TABLE \"user_profiles\" RENAME COLUMN \"first_name\" TO \"given_name\";"
+      `)
+    })
   })
 
   describe('index operations', () => {
@@ -207,7 +237,7 @@ describe('postgresqlOperationDeparser', () => {
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
-        "CREATE INDEX idx_users_email ON users USING BTREE (email);"
+        "CREATE INDEX \"idx_users_email\" ON \"users\" USING BTREE (\"email\");"
       `)
     })
 
@@ -227,7 +257,7 @@ describe('postgresqlOperationDeparser', () => {
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
-        "CREATE UNIQUE INDEX idx_users_username_unique ON users USING BTREE (username);"
+        "CREATE UNIQUE INDEX \"idx_users_username_unique\" ON \"users\" USING BTREE (\"username\");"
       `)
     })
 
@@ -247,7 +277,7 @@ describe('postgresqlOperationDeparser', () => {
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
-        "CREATE INDEX idx_orders_user_date ON orders USING BTREE (user_id, created_at);"
+        "CREATE INDEX \"idx_orders_user_date\" ON \"orders\" USING BTREE (\"user_id\", \"created_at\");"
       `)
     })
 
@@ -267,7 +297,7 @@ describe('postgresqlOperationDeparser', () => {
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
-        "CREATE INDEX idx_products_category ON products (category_id);"
+        "CREATE INDEX \"idx_products_category\" ON \"products\" (\"category_id\");"
       `)
     })
   })

@@ -135,6 +135,17 @@ export function generateRemoveColumnStatement(
 }
 
 /**
+ * Generate RENAME COLUMN statement for a column
+ */
+export function generateRenameColumnStatement(
+  tableName: string,
+  oldColumnName: string,
+  newColumnName: string,
+): string {
+  return `ALTER TABLE ${escapeIdentifier(tableName)} RENAME COLUMN ${escapeIdentifier(oldColumnName)} TO ${escapeIdentifier(newColumnName)};`
+}
+
+/**
  * Generate DROP TABLE statement
  */
 export function generateRemoveTableStatement(tableName: string): string {
@@ -150,7 +161,9 @@ export function generateCreateIndexStatement(
 ): string {
   const uniqueKeyword = index.unique ? ' UNIQUE' : ''
   const indexMethod = index.type ? ` USING ${index.type}` : ''
-  const columnList = index.columns.join(', ')
+  const columnList = index.columns
+    .map((col) => escapeIdentifier(col))
+    .join(', ')
 
-  return `CREATE${uniqueKeyword} INDEX ${index.name} ON ${tableName}${indexMethod} (${columnList});`
+  return `CREATE${uniqueKeyword} INDEX ${escapeIdentifier(index.name)} ON ${escapeIdentifier(tableName)}${indexMethod} (${columnList});`
 }

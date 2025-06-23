@@ -1,10 +1,12 @@
 import type {
   AddColumnOperation,
   RemoveColumnOperation,
+  RenameColumnOperation,
 } from '../../operation/schema/column.js'
 import {
   isAddColumnOperation,
   isRemoveColumnOperation,
+  isRenameColumnOperation,
 } from '../../operation/schema/column.js'
 import type { Operation } from '../../operation/schema/index.js'
 import type { AddIndexOperation } from '../../operation/schema/index-operations.js'
@@ -24,6 +26,7 @@ import {
   generateCreateTableStatement,
   generateRemoveColumnStatement,
   generateRemoveTableStatement,
+  generateRenameColumnStatement,
 } from './utils.js'
 
 /**
@@ -41,6 +44,22 @@ function extractTableAndColumnNameFromPath(
   path: string,
 ): { tableName: string; columnName: string } | null {
   const match = path.match(/^\/tables\/([^/]+)\/columns\/([^/]+)$/)
+  if (!match || !match[1] || !match[2]) {
+    return null
+  }
+  return {
+    tableName: match[1],
+    columnName: match[2],
+  }
+}
+
+/**
+ * Extract table name and column name from column name operation path
+ */
+function extractTableAndColumnNameFromNamePath(
+  path: string,
+): { tableName: string; columnName: string } | null {
+  const match = path.match(/^\/tables\/([^/]+)\/columns\/([^/]+)\/name$/)
   if (!match || !match[1] || !match[2]) {
     return null
   }
@@ -107,6 +126,24 @@ function generateRemoveColumnFromOperation(
 }
 
 /**
+ * Generate RENAME COLUMN DDL from column rename operation
+ */
+function generateRenameColumnFromOperation(
+  operation: RenameColumnOperation,
+): string {
+  const pathInfo = extractTableAndColumnNameFromNamePath(operation.path)
+  if (!pathInfo) {
+    throw new Error(`Invalid column name path: ${operation.path}`)
+  }
+
+  return generateRenameColumnStatement(
+    pathInfo.tableName,
+    pathInfo.columnName,
+    operation.value,
+  )
+}
+
+/**
  * Generate DROP TABLE DDL from table removal operation
  */
 function generateRemoveTableFromOperation(
@@ -156,6 +193,11 @@ export const postgresqlOperationDeparser: OperationDeparser = (
 
   if (isRemoveColumnOperation(operation)) {
     const value = generateRemoveColumnFromOperation(operation)
+    return { value, errors }
+  }
+
+  if (isRenameColumnOperation(operation)) {
+    const value = generateRenameColumnFromOperation(operation)
     return { value, errors }
   }
 

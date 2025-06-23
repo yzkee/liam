@@ -167,3 +167,10 @@ export function generateCreateIndexStatement(
 
   return `CREATE${uniqueKeyword} INDEX ${escapeIdentifier(index.name)} ON ${escapeIdentifier(tableName)}${indexMethod} (${columnList});`
 }
+
+/**
+ * Generate DROP INDEX statement
+ */
+export function generateRemoveIndexStatement(indexName: string): string {
+  return `DROP INDEX ${indexName};`
+}

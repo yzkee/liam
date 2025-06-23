@@ -9,8 +9,14 @@ import {
   isRenameColumnOperation,
 } from '../../operation/schema/column.js'
 import type { Operation } from '../../operation/schema/index.js'
-import type { AddIndexOperation } from '../../operation/schema/index-operations.js'
-import { isAddIndexOperation } from '../../operation/schema/index-operations.js'
+import type {
+  AddIndexOperation,
+  RemoveIndexOperation,
+} from '../../operation/schema/index-operations.js'
+import {
+  isAddIndexOperation,
+  isRemoveIndexOperation,
+} from '../../operation/schema/index-operations.js'
 import type {
   AddTableOperation,
   RemoveTableOperation,
@@ -25,6 +31,7 @@ import {
   generateCreateIndexStatement,
   generateCreateTableStatement,
   generateRemoveColumnStatement,
+  generateRemoveIndexStatement,
   generateRemoveTableStatement,
   generateRenameColumnStatement,
 } from './utils.js'
@@ -171,6 +178,20 @@ function generateCreateIndexFromOperation(
   return generateCreateIndexStatement(pathInfo.tableName, operation.value)
 }
 
+/**
+ * Generate DROP INDEX DDL from index removal operation
+ */
+function generateRemoveIndexFromOperation(
+  operation: RemoveIndexOperation,
+): string {
+  const pathInfo = extractTableAndIndexNameFromPath(operation.path)
+  if (!pathInfo) {
+    throw new Error(`Invalid index path: ${operation.path}`)
+  }
+
+  return generateRemoveIndexStatement(pathInfo.indexName)
+}
+
 export const postgresqlOperationDeparser: OperationDeparser = (
   operation: Operation,
 ) => {
@@ -203,6 +224,11 @@ export const postgresqlOperationDeparser: OperationDeparser = (
 
   if (isAddIndexOperation(operation)) {
     const value = generateCreateIndexFromOperation(operation)
+    return { value, errors }
+  }
+
+  if (isRemoveIndexOperation(operation)) {
+    const value = generateRemoveIndexFromOperation(operation)
     return { value, errors }
   }
 

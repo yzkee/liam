@@ -5,7 +5,7 @@ import { computeAutoLayout, highlightNodesAndEdges } from '@/features/erd/utils'
 import { useCustomReactflow } from '@/features/reactflow/hooks'
 import { useUserEditing } from '@/stores'
 import { useERDContentContext } from '../ERDContentContext'
-import { updateNodesHiddenState } from '../utils'
+import { hasNonRelatedChildNodes, updateNodesHiddenState } from '../utils'
 
 type Params = {
   nodes: Node[]
@@ -40,6 +40,7 @@ export const useInitialAutoLayout = ({ nodes, displayArea }: Params) => {
           ? updateNodesHiddenState({
               nodes,
               hiddenNodeIds,
+              shouldHideGroupNodeId: !hasNonRelatedChildNodes(nodes),
             })
           : nodes
       const { nodes: highlightedNodes, edges: highlightedEdges } =

@@ -135,6 +135,17 @@ export function generateRemoveColumnStatement(
 }
 
 /**
+ * Generate RENAME COLUMN statement for a column
+ */
+export function generateRenameColumnStatement(
+  tableName: string,
+  oldColumnName: string,
+  newColumnName: string,
+): string {
+  return `ALTER TABLE ${tableName} RENAME COLUMN ${oldColumnName} TO ${newColumnName};`
+}
+
+/**
  * Generate DROP TABLE statement
  */
 export function generateRemoveTableStatement(tableName: string): string {

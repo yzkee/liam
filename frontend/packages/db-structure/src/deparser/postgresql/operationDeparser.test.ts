@@ -188,6 +188,36 @@ describe('postgresqlOperationDeparser', () => {
         "ALTER TABLE \"users\" DROP COLUMN \"age\";"
       `)
     })
+
+    it('should generate RENAME COLUMN statement from replace operation', () => {
+      const operation: Operation = {
+        op: 'replace',
+        path: '/tables/users/columns/email/name',
+        value: 'email_address',
+      }
+
+      const result = postgresqlOperationDeparser(operation)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "ALTER TABLE users RENAME COLUMN email TO email_address;"
+      `)
+    })
+
+    it('should generate RENAME COLUMN for complex table and column names', () => {
+      const operation: Operation = {
+        op: 'replace',
+        path: '/tables/user_profiles/columns/first_name/name',
+        value: 'given_name',
+      }
+
+      const result = postgresqlOperationDeparser(operation)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "ALTER TABLE user_profiles RENAME COLUMN first_name TO given_name;"
+      `)
+    })
   })
 
   describe('index operations', () => {

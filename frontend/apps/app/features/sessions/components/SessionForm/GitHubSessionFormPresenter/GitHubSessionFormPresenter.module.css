@@ -190,7 +190,7 @@
   gap: var(--spacing-2);
   flex: 1;
   overflow-x: auto;
-  padding: 2px 1px 1px;
+  padding: 2px;
   scrollbar-width: thin;
   scrollbar-color: var(--overlay-20) transparent;
 }

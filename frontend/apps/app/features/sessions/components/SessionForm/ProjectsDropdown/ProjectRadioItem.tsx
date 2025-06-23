@@ -1,10 +1,9 @@
-import { Check, GitBranch } from '@liam-hq/ui'
-import { ItemIndicator, RadioItem } from '@radix-ui/react-dropdown-menu'
+import { Check, GitBranch, DropdownMenuPrimitiveRadioItem, DropdownMenuItemIndicator } from '@liam-hq/ui'
 import type { ComponentProps, FC } from 'react'
 import { ProjectIcon } from '../../../../../components/ProjectIcon'
 import styles from './ProjectRadioItem.module.css'
 
-type Props = ComponentProps<typeof RadioItem> & {
+type Props = ComponentProps<typeof DropdownMenuPrimitiveRadioItem> & {
   label: string
   showIcon?: boolean
   isRepository?: boolean
@@ -17,7 +16,7 @@ export const ProjectRadioItem: FC<Props> = ({
   ...props
 }) => {
   return (
-    <RadioItem {...props} className={styles.item}>
+    <DropdownMenuPrimitiveRadioItem {...props} className={styles.item}>
       <div className={styles.content}>
         {showIcon ? (
           <span className={styles.icon}>
@@ -32,9 +31,9 @@ export const ProjectRadioItem: FC<Props> = ({
         )}
         <span className={styles.label}>{label}</span>
       </div>
-      <ItemIndicator>
+      <DropdownMenuItemIndicator>
         <Check width={10} height={10} />
-      </ItemIndicator>
-    </RadioItem>
+      </DropdownMenuItemIndicator>
+    </DropdownMenuPrimitiveRadioItem>
   )
 }

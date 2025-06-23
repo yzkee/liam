@@ -3,7 +3,7 @@
 import { useEffect, useState, useTransition } from 'react'
 import { fetchOrganizationData } from './OrganizationData'
 import { OrganizationIcon } from './OrganizationIcon'
-import { ProjectIcon } from './ProjectIcon'
+import { ProjectIcon } from '@/components/ProjectIcon'
 import styles from './ProjectItem.module.css'
 
 interface OrganizationDataWrapperProps {

@@ -43,9 +43,9 @@ describe('postgresqlSchemaDeparser', () => {
 
     expect(result.errors).toHaveLength(0)
     expect(result.value).toMatchInlineSnapshot(`
-      "CREATE TABLE users (
-        id bigint PRIMARY KEY,
-        email varchar(255) UNIQUE NOT NULL
+      "CREATE TABLE \"users\" (
+        \"id\" bigint PRIMARY KEY,
+        \"email\" varchar(255) UNIQUE NOT NULL
       );"
     `)
   })
@@ -80,12 +80,12 @@ describe('postgresqlSchemaDeparser', () => {
 
     expect(result.errors).toHaveLength(0)
     expect(result.value).toMatchInlineSnapshot(`
-      "CREATE TABLE products (
-        id bigint PRIMARY KEY
+      "CREATE TABLE \"products\" (
+        \"id\" bigint PRIMARY KEY
       );
 
-      COMMENT ON TABLE products IS 'Product table';
-      COMMENT ON COLUMN products.id IS 'Product ID';"
+      COMMENT ON TABLE \"products\" IS 'Product table';
+      COMMENT ON COLUMN \"products\".\"id\" IS 'Product ID';"
     `)
   })
 
@@ -149,11 +149,11 @@ describe('postgresqlSchemaDeparser', () => {
 
     expect(result.errors).toHaveLength(0)
     expect(result.value).toMatchInlineSnapshot(`
-      "CREATE TABLE settings (
-        id bigint PRIMARY KEY,
-        enabled boolean NOT NULL DEFAULT TRUE,
-        count integer DEFAULT 0,
-        title varchar(50) DEFAULT 'Default Title'
+      "CREATE TABLE \"settings\" (
+        \"id\" bigint PRIMARY KEY,
+        \"enabled\" boolean NOT NULL DEFAULT TRUE,
+        \"count\" integer DEFAULT 0,
+        \"title\" varchar(50) DEFAULT 'Default Title'
       );"
     `)
   })
@@ -189,12 +189,12 @@ describe('postgresqlSchemaDeparser', () => {
     expect(result.errors).toHaveLength(0)
     expect(result.value).toMatchInlineSnapshot(
       `
-      "CREATE TABLE test (
-        id bigint PRIMARY KEY
+      "CREATE TABLE \"test\" (
+        \"id\" bigint PRIMARY KEY
       );
 
-      COMMENT ON TABLE test IS 'Table with ''quotes'' in comment';
-      COMMENT ON COLUMN test.id IS 'Column with ''quotes'' in comment';"
+      COMMENT ON TABLE \"test\" IS 'Table with ''quotes'' in comment';
+      COMMENT ON COLUMN \"test\".\"id\" IS 'Column with ''quotes'' in comment';"
     `,
     )
   })
@@ -257,13 +257,13 @@ describe('postgresqlSchemaDeparser', () => {
 
     expect(result.errors).toHaveLength(0)
     expect(result.value).toMatchInlineSnapshot(`
-      "CREATE TABLE users (
-        id bigint PRIMARY KEY
+      "CREATE TABLE \"users\" (
+        \"id\" bigint PRIMARY KEY
       );
 
-      CREATE TABLE products (
-        id bigint PRIMARY KEY,
-        name varchar(100) NOT NULL
+      CREATE TABLE \"products\" (
+        \"id\" bigint PRIMARY KEY,
+        \"name\" varchar(100) NOT NULL
       );"
     `)
   })

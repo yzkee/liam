@@ -27,7 +27,12 @@ import { useIsTouchDevice } from '@/hooks'
 import { useVersion } from '@/providers'
 import { SchemaProvider, type SchemaProviderValue, useSchema } from '@/stores'
 import { UserEditingProvider, useUserEditing } from '@/stores/userEditing'
-import { convertSchemaToNodes, createHash } from '../../utils'
+import {
+  convertSchemaToNodes,
+  createHash,
+  setCookie,
+  setCookieJson,
+} from '../../utils'
 import { ERDContent } from '../ERDContent'
 import { CardinalityMarkers } from './CardinalityMarkers'
 import { CommandPalette } from './CommandPalette'
@@ -115,13 +120,19 @@ const ERDRendererInner: FC<InnerProps> = ({
         ? leftPanelRef.current?.collapse()
         : leftPanelRef.current?.expand()
 
-      document.cookie = `${SIDEBAR_COOKIE_NAME}=${nextPanelState}; path=/; max-age=${COOKIE_MAX_AGE}`
+      setCookie(SIDEBAR_COOKIE_NAME, nextPanelState.toString(), {
+        path: '/',
+        maxAge: COOKIE_MAX_AGE,
+      })
     },
     [version, leftPanelRef],
   )
 
   const setWidth = useCallback((sizes: number[]) => {
-    document.cookie = `${PANEL_LAYOUT_COOKIE_NAME}=${JSON.stringify(sizes)}; path=/; max-age=${COOKIE_MAX_AGE}`
+    setCookieJson(PANEL_LAYOUT_COOKIE_NAME, sizes, {
+      path: '/',
+      maxAge: COOKIE_MAX_AGE,
+    })
   }, [])
 
   const isMobile = useIsTouchDevice()

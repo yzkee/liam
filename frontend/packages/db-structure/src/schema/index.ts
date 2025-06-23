@@ -9,6 +9,7 @@ export {
   aTable,
   aUniqueConstraint,
 } from './factories.js'
+export { mergeSchemas } from './mergeSchema.js'
 export type { SchemaOverride } from './overrideSchema.js'
 export {
   overrideSchema,

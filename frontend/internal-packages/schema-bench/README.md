@@ -41,7 +41,7 @@ Semantic matching engine that:
 - Calculates cosine similarity scores between embeddings
 - Identifies semantically related terms that may not share exact words
 
-### wordOverlapMatch.ts (Not Implemented)
+### wordOverlapMatch.ts
 Lexical matching engine that:
 - Performs word tokenization and stop word removal
 - Detects exact word overlaps between names

@@ -4,13 +4,19 @@ export {
 } from './deparser/postgresql/index.js'
 export type { OperationDeparser, SchemaDeparser } from './deparser/type.js'
 export type {
+  ChangeStatus,
   ColumnRelatedDiffItem,
   ConstraintRelatedDiffItem,
   IndexRelatedDiffItem,
   SchemaDiffItem,
   TableRelatedDiffItem,
 } from './diff/index.js'
-export { buildSchemaDiff, schemaDiffItemsSchema } from './diff/index.js'
+export {
+  buildSchemaDiff,
+  columnRelatedDiffItemSchema,
+  schemaDiffItemsSchema,
+  tableRelatedDiffItemSchema,
+} from './diff/index.js'
 export { applyPatchOperations, operationsSchema } from './operation/index.js'
 export type { ProcessError } from './parser.js'
 export {

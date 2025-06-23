@@ -53,6 +53,24 @@ function escapeString(str: string): string {
 }
 
 /**
+ * Generate ADD COLUMN statement for a column
+ */
+export function generateAddColumnStatement(
+  tableName: string,
+  column: Column,
+): string {
+  const columnDefinition = generateColumnDefinition(column)
+  let ddl = `ALTER TABLE ${tableName} ADD COLUMN ${columnDefinition};`
+
+  // Add column comment if exists
+  if (column.comment) {
+    ddl += `\n\nCOMMENT ON COLUMN ${tableName}.${column.name} IS '${escapeString(column.comment)}';`
+  }
+
+  return ddl
+}
+
+/**
  * Generate CREATE TABLE statement for a table
  */
 export function generateCreateTableStatement(table: Table): string {
@@ -95,4 +113,21 @@ function generateColumnComments(tableName: string, table: Table): string {
   }
 
   return comments.join('\n')
+}
+
+/**
+ * Generate DROP COLUMN statement for a column
+ */
+export function generateRemoveColumnStatement(
+  tableName: string,
+  columnName: string,
+): string {
+  return `ALTER TABLE ${tableName} DROP COLUMN ${columnName};`
+}
+
+/**
+ * Generate DROP TABLE statement
+ */
+export function generateRemoveTableStatement(tableName: string): string {
+  return `DROP TABLE ${tableName};`
 }

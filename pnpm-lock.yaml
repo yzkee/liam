@@ -62,8 +62,8 @@ importers:
         specifier: 6.1.2
         version: 6.1.2
       '@codemirror/language':
-        specifier: 6.11.0
-        version: 6.11.0
+        specifier: 6.11.1
+        version: 6.11.1
       '@codemirror/lint':
         specifier: 6.8.5
         version: 6.8.5
@@ -74,11 +74,11 @@ importers:
         specifier: 6.5.2
         version: 6.5.2
       '@codemirror/view':
-        specifier: 6.36.8
-        version: 6.36.8
+        specifier: 6.37.1
+        version: 6.37.1
       '@electric-sql/pglite':
-        specifier: 0.3.2
-        version: 0.3.2
+        specifier: 0.3.3
+        version: 0.3.3
       '@lezer/highlight':
         specifier: 1.2.1
         version: 1.2.1
@@ -137,8 +137,8 @@ importers:
         specifier: 4.0.1
         version: 4.0.1(@opentelemetry/api@1.9.0)(next@15.3.3(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       langfuse-vercel:
-        specifier: 3.37.3
-        version: 3.37.3(ai@4.3.16(react@19.1.0)(zod@3.25.63))
+        specifier: 3.37.4
+        version: 3.37.4(ai@4.3.16(react@19.1.0)(zod@3.25.63))
       lucide-react:
         specifier: 0.511.0
         version: 0.511.0(react@19.1.0)
@@ -164,8 +164,8 @@ importers:
         specifier: 4.0.1
         version: 4.0.1
       resend:
-        specifier: 4.5.1
-        version: 4.5.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        specifier: 4.5.2
+        version: 4.5.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       ts-pattern:
         specifier: 5.7.1
         version: 5.7.1
@@ -307,11 +307,11 @@ importers:
         specifier: 0.3.57
         version: 0.3.57(openai@4.104.0(ws@8.18.2)(zod@3.24.4))
       '@langchain/langgraph':
-        specifier: 0.3.0
-        version: 0.3.0(@langchain/core@0.3.57(openai@4.104.0(ws@8.18.2)(zod@3.24.4)))(react@19.1.0)(zod-to-json-schema@3.24.5(zod@3.24.4))
+        specifier: 0.3.1
+        version: 0.3.1(@langchain/core@0.3.57(openai@4.104.0(ws@8.18.2)(zod@3.24.4)))(react@19.1.0)(zod-to-json-schema@3.24.5(zod@3.24.4))
       '@langchain/openai':
-        specifier: 0.5.11
-        version: 0.5.11(@langchain/core@0.3.57(openai@4.104.0(ws@8.18.2)(zod@3.24.4)))(ws@8.18.2)
+        specifier: 0.5.12
+        version: 0.5.12(@langchain/core@0.3.57(openai@4.104.0(ws@8.18.2)(zod@3.24.4)))(ws@8.18.2)
       '@liam-hq/db':
         specifier: workspace:*
         version: link:../db
@@ -473,8 +473,8 @@ importers:
         specifier: 0.3.57
         version: 0.3.57(openai@4.104.0(ws@8.18.2)(zod@3.23.8))
       '@langchain/openai':
-        specifier: 0.5.11
-        version: 0.5.11(@langchain/core@0.3.57(openai@4.104.0(ws@8.18.2)(zod@3.23.8)))(ws@8.18.2)
+        specifier: 0.5.12
+        version: 0.5.12(@langchain/core@0.3.57(openai@4.104.0(ws@8.18.2)(zod@3.23.8)))(ws@8.18.2)
       '@liam-hq/agent':
         specifier: workspace:*
         version: link:../agent
@@ -654,8 +654,8 @@ importers:
         specifier: 19.1.6
         version: 19.1.6(@types/react@19.1.6)
       '@vitejs/plugin-react':
-        specifier: 4.5.0
-        version: 4.5.0(vite@6.3.5(@types/node@22.15.30)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.41.0)(tsx@4.19.4)(yaml@2.8.0))
+        specifier: 4.5.1
+        version: 4.5.1(vite@6.3.5(@types/node@22.15.30)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.41.0)(tsx@4.19.4)(yaml@2.8.0))
       eslint:
         specifier: 9.28.0
         version: 9.28.0(jiti@2.4.2)
@@ -797,8 +797,8 @@ importers:
         specifier: 19.1.6
         version: 19.1.6
       '@vitejs/plugin-react':
-        specifier: 4.5.0
-        version: 4.5.0(vite@6.3.5(@types/node@22.15.30)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.41.0)(tsx@4.19.4)(yaml@2.8.0))
+        specifier: 4.5.1
+        version: 4.5.1(vite@6.3.5(@types/node@22.15.30)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.41.0)(tsx@4.19.4)(yaml@2.8.0))
       eslint:
         specifier: 9.28.0
         version: 9.28.0(jiti@2.4.2)
@@ -818,8 +818,8 @@ importers:
   frontend/packages/pglite-server:
     dependencies:
       '@electric-sql/pglite':
-        specifier: 0.3.2
-        version: 0.3.2
+        specifier: 0.3.3
+        version: 0.3.3
     devDependencies:
       '@biomejs/biome':
         specifier: 2.0.0
@@ -1689,8 +1689,8 @@ packages:
   '@codemirror/lang-yaml@6.1.2':
     resolution: {integrity: sha512-dxrfG8w5Ce/QbT7YID7mWZFKhdhsaTNOYjOkSIMt1qmC4VQnXSDSYVHHHn8k6kJUfIhtLo8t1JJgltlxWdsITw==}
 
-  '@codemirror/language@6.11.0':
-    resolution: {integrity: sha512-A7+f++LodNNc1wGgoRDTt78cOwWm9KVezApgjOMp1W4hM0898nsqBXwF+sbePE7ZRcjN7Sa1Z5m2oN27XkmEjQ==}
+  '@codemirror/language@6.11.1':
+    resolution: {integrity: sha512-5kS1U7emOGV84vxC+ruBty5sUgcD0te6dyupyRVG2zaSjhTDM73LhVKUtVwiqSe6QwmEoA4SCiU8AKPFyumAWQ==}
 
   '@codemirror/lint@6.8.5':
     resolution: {integrity: sha512-s3n3KisH7dx3vsoeGMxsbRAgKe4O1vbrnKBClm99PU0fWxmxsx5rR2PfqQgIt+2MMJBHbiJ5rfIdLYfB9NNvsA==}
@@ -1704,8 +1704,8 @@ packages:
   '@codemirror/state@6.5.2':
     resolution: {integrity: sha512-FVqsPqtPWKVVL3dPSxy8wEF/ymIEuVzF1PK3VbUgrxXpJUSHQWWZz4JMToquRxnkw+36LTamCZG2iua2Ptq0fA==}
 
-  '@codemirror/view@6.36.8':
-    resolution: {integrity: sha512-yoRo4f+FdnD01fFt4XpfpMCcCAo9QvZOtbrXExn4SqzH32YC6LgzqxfLZw/r6Ge65xyY03mK/UfUqrVw1gFiFg==}
+  '@codemirror/view@6.37.1':
+    resolution: {integrity: sha512-Qy4CAUwngy/VQkEz0XzMKVRcckQuqLYWKqVpDDDghBe5FSXSqfVrJn49nw3ePZHxRUz4nRmb05Lgi+9csWo4eg==}
 
   '@colors/colors@1.5.0':
     resolution: {integrity: sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==}
@@ -1801,8 +1801,8 @@ packages:
   '@electric-sql/client@1.0.0-beta.1':
     resolution: {integrity: sha512-Ei9jN3pDoGzc+a/bGqnB5ajb52IvSv7/n2btuyzUlcOHIR2kM9fqtYTJXPwZYKLkGZlHWlpHgWyRtrinkP2nHg==}
 
-  '@electric-sql/pglite@0.3.2':
-    resolution: {integrity: sha512-zfWWa+V2ViDCY/cmUfRqeWY1yLto+EpxjXnZzenB1TyxsTiXaTWeZFIZw6mac52BsuQm0RjCnisjBtdBaXOI6w==}
+  '@electric-sql/pglite@0.3.3':
+    resolution: {integrity: sha512-JrvHOx9q0yvKEby0bK8qzGTVw6K+yEg8enxDWb2IwNKr5XZxRrBb+GNIqoAIP7yXyhRg5jcENWmdHmtnAT87vA==}
 
   '@emnapi/core@1.4.3':
     resolution: {integrity: sha512-4m62DuCE07lw01soJwPiBGC0nAww0Q+RY70VZ+n49yDIO13yyinhbWCeNnaob0lakDtWQzSdtNWzJeOJt2ma+g==}
@@ -2878,8 +2878,8 @@ packages:
       react:
         optional: true
 
-  '@langchain/langgraph@0.3.0':
-    resolution: {integrity: sha512-4WT0DDh7qYXC0EjMk/KdLHjqpNVD0H9zSyOmlVXMCL53iIWFXvBUjgAwTGZytt9sO1td568Ovij0ZXONLzriOg==}
+  '@langchain/langgraph@0.3.1':
+    resolution: {integrity: sha512-BFa6DmKthPG1znkUhTBBqdza4dojs7QGg6o9V9aptIkWWdBF/UhRbjPvCx6ldkmU2oJRNWZ1BlkiP6RflxxPwA==}
     engines: {node: '>=18'}
     peerDependencies:
       '@langchain/core': '>=0.2.36 <0.3.0 || >=0.3.40 < 0.4.0'
@@ -2888,8 +2888,8 @@ packages:
       zod-to-json-schema:
         optional: true
 
-  '@langchain/openai@0.5.11':
-    resolution: {integrity: sha512-DAp7x+NfjSqDvKVMle8yb85nzz+3ctP7zGJaeRS0vLmvkY9qf/jRkowsM0mcsIiEUKhG/AHzWqvxbhktb/jJ6Q==}
+  '@langchain/openai@0.5.12':
+    resolution: {integrity: sha512-k7rxBY3ed/HIiMLd6HBqFibsfB0+L6c82H8JgXDqKeyUoACJIi1JaKHXmofmCeF2SBXBU9dog4gEGpHfcUDGUA==}
     engines: {node: '>=18'}
     peerDependencies:
       '@langchain/core': '>=0.3.48 <0.4.0'
@@ -4167,8 +4167,8 @@ packages:
   '@radix-ui/rect@1.1.1':
     resolution: {integrity: sha512-HPwpGIzkl28mWyZqG52jiqDJ12waP11Pa1lGoiyUkIEuMLBP0oeK/C89esbXrxsky5we7dfd8U58nm0SgAWpVw==}
 
-  '@react-email/render@1.0.6':
-    resolution: {integrity: sha512-zNueW5Wn/4jNC1c5LFgXzbUdv5Lhms+FWjOvWAhal7gx5YVf0q6dPJ0dnR70+ifo59gcMLwCZEaTS9EEuUhKvQ==}
+  '@react-email/render@1.1.2':
+    resolution: {integrity: sha512-RnRehYN3v9gVlNMehHPHhyp2RQo7+pSkHDtXPvg3s0GbzM9SQMW4Qrf8GRNvtpLC4gsI+Wt0VatNRUFqjvevbw==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       react: ^18.0 || ^19.0 || ^19.0.0-rc
@@ -5346,8 +5346,8 @@ packages:
   '@vercel/static-config@3.0.0':
     resolution: {integrity: sha512-2qtvcBJ1bGY0dYGYh3iM7yGKkk971FujLEDXzuW5wcZsPr1GSEjO/w2iSr3qve6nDDtBImsGoDEnus5FI4+fIw==}
 
-  '@vitejs/plugin-react@4.5.0':
-    resolution: {integrity: sha512-JuLWaEqypaJmOJPLWwO335Ig6jSgC1FTONCWAxnqcQthLTK/Yc9aH6hr9z/87xciejbQcnP3GnA1FWUSWeXaeg==}
+  '@vitejs/plugin-react@4.5.1':
+    resolution: {integrity: sha512-uPZBqSI0YD4lpkIru6M35sIfylLGTyhGHvDZbNLuMA73lMlwJKz5xweH7FajfcCAc2HnINciejA9qTz0dr0M7A==}
     engines: {node: ^14.18.0 || >=16.0.0}
     peerDependencies:
       vite: ^4.2.0 || ^5.0.0 || ^6.0.0
@@ -8033,8 +8033,8 @@ packages:
     peerDependencies:
       langchain: '>=0.0.157 <0.4.0'
 
-  langfuse-vercel@3.37.3:
-    resolution: {integrity: sha512-1KUwJaoACN4nZC8U5p2Yn1EV/gekL5ky3CGqPpXigFQcMGQ0YA7YAYUOiGOZ+pPJzRMZ8WQ2ghsowqysWw58FA==}
+  langfuse-vercel@3.37.4:
+    resolution: {integrity: sha512-1a0hXP7WEyCD/HJAU/QR1TFLCOWeuZV94gdHWfRgHSpDsWmNgErtRDW+ppBBzGHlxhptmgD05KSH/Nav8Z3TRg==}
     engines: {node: '>=18'}
     peerDependencies:
       ai: '>=3.2.44'
@@ -9686,8 +9686,8 @@ packages:
   requires-port@1.0.0:
     resolution: {integrity: sha512-KigOCHcocU3XODJxsu8i/j8T9tzT4adHiecwORRQ0ZZFcp7ahwXuRU1m+yuO90C5ZUyGeGfocHDI14M3L3yDAQ==}
 
-  resend@4.5.1:
-    resolution: {integrity: sha512-ryhHpZqCBmuVyzM19IO8Egtc2hkWI4JOL5lf5F3P7Dydu3rFeX6lHNpGqG0tjWoZ63rw0l731JEmuJZBdDm3og==}
+  resend@4.5.2:
+    resolution: {integrity: sha512-Uu11/254nkDFgVXQp18rzuz+9kRy5Ud4qr7FW98Yg4I4jkDKX1cr/8JKdrcJI753oknEq69/i3VTLbtrveQUGw==}
     engines: {node: '>=18'}
 
   resolve-from@4.0.0:
@@ -12291,22 +12291,22 @@ snapshots:
 
   '@codemirror/autocomplete@6.18.6':
     dependencies:
-      '@codemirror/language': 6.11.0
+      '@codemirror/language': 6.11.1
       '@codemirror/state': 6.5.2
-      '@codemirror/view': 6.36.8
+      '@codemirror/view': 6.37.1
       '@lezer/common': 1.2.3
 
   '@codemirror/commands@6.8.1':
     dependencies:
-      '@codemirror/language': 6.11.0
+      '@codemirror/language': 6.11.1
       '@codemirror/state': 6.5.2
-      '@codemirror/view': 6.36.8
+      '@codemirror/view': 6.37.1
       '@lezer/common': 1.2.3
 
   '@codemirror/lang-sql@6.9.0':
     dependencies:
       '@codemirror/autocomplete': 6.18.6
-      '@codemirror/language': 6.11.0
+      '@codemirror/language': 6.11.1
       '@codemirror/state': 6.5.2
       '@lezer/common': 1.2.3
       '@lezer/highlight': 1.2.1
@@ -12315,17 +12315,17 @@ snapshots:
   '@codemirror/lang-yaml@6.1.2':
     dependencies:
       '@codemirror/autocomplete': 6.18.6
-      '@codemirror/language': 6.11.0
+      '@codemirror/language': 6.11.1
       '@codemirror/state': 6.5.2
       '@lezer/common': 1.2.3
       '@lezer/highlight': 1.2.1
       '@lezer/lr': 1.4.2
       '@lezer/yaml': 1.0.3
 
-  '@codemirror/language@6.11.0':
+  '@codemirror/language@6.11.1':
     dependencies:
       '@codemirror/state': 6.5.2
-      '@codemirror/view': 6.36.8
+      '@codemirror/view': 6.37.1
       '@lezer/common': 1.2.3
       '@lezer/highlight': 1.2.1
       '@lezer/lr': 1.4.2
@@ -12334,30 +12334,31 @@ snapshots:
   '@codemirror/lint@6.8.5':
     dependencies:
       '@codemirror/state': 6.5.2
-      '@codemirror/view': 6.36.8
+      '@codemirror/view': 6.37.1
       crelt: 1.0.6
 
   '@codemirror/merge@6.10.2':
     dependencies:
-      '@codemirror/language': 6.11.0
+      '@codemirror/language': 6.11.1
       '@codemirror/state': 6.5.2
-      '@codemirror/view': 6.36.8
+      '@codemirror/view': 6.37.1
       '@lezer/highlight': 1.2.1
       style-mod: 4.1.2
 
   '@codemirror/search@6.5.11':
     dependencies:
       '@codemirror/state': 6.5.2
-      '@codemirror/view': 6.36.8
+      '@codemirror/view': 6.37.1
       crelt: 1.0.6
 
   '@codemirror/state@6.5.2':
     dependencies:
       '@marijn/find-cluster-break': 1.0.2
 
-  '@codemirror/view@6.36.8':
+  '@codemirror/view@6.37.1':
     dependencies:
       '@codemirror/state': 6.5.2
+      crelt: 1.0.6
       style-mod: 4.1.2
       w3c-keyname: 2.2.8
 
@@ -12425,7 +12426,7 @@ snapshots:
     optionalDependencies:
       '@rollup/rollup-darwin-arm64': 4.42.0
 
-  '@electric-sql/pglite@0.3.2': {}
+  '@electric-sql/pglite@0.3.3': {}
 
   '@emnapi/core@1.4.3':
     dependencies:
@@ -12973,7 +12974,7 @@ snapshots:
       '@browserbasehq/stagehand': 1.14.0(@playwright/test@1.52.0)(deepmerge@4.3.1)(dotenv@16.5.0)(openai@4.104.0(ws@8.18.2)(zod@3.24.4))(zod@3.24.4)
       '@ibm-cloud/watsonx-ai': 1.6.7
       '@langchain/core': 0.3.57(openai@4.104.0(ws@8.18.2)(zod@3.24.4))
-      '@langchain/openai': 0.5.11(@langchain/core@0.3.57(openai@4.104.0(ws@8.18.2)(zod@3.24.4)))(ws@8.18.2)
+      '@langchain/openai': 0.5.12(@langchain/core@0.3.57(openai@4.104.0(ws@8.18.2)(zod@3.24.4)))(ws@8.18.2)
       '@langchain/weaviate': 0.2.0(@langchain/core@0.3.57(openai@4.104.0(ws@8.18.2)(zod@3.24.4)))
       binary-extensions: 2.3.0
       expr-eval: 2.0.2
@@ -13064,7 +13065,7 @@ snapshots:
       '@langchain/core': 0.3.57(openai@4.104.0(ws@8.18.2)(zod@3.24.4))
       react: 19.1.0
 
-  '@langchain/langgraph@0.3.0(@langchain/core@0.3.57(openai@4.104.0(ws@8.18.2)(zod@3.24.4)))(react@19.1.0)(zod-to-json-schema@3.24.5(zod@3.24.4))':
+  '@langchain/langgraph@0.3.1(@langchain/core@0.3.57(openai@4.104.0(ws@8.18.2)(zod@3.24.4)))(react@19.1.0)(zod-to-json-schema@3.24.5(zod@3.24.4))':
     dependencies:
       '@langchain/core': 0.3.57(openai@4.104.0(ws@8.18.2)(zod@3.24.4))
       '@langchain/langgraph-checkpoint': 0.0.18(@langchain/core@0.3.57(openai@4.104.0(ws@8.18.2)(zod@3.24.4)))
@@ -13076,7 +13077,7 @@ snapshots:
     transitivePeerDependencies:
       - react
 
-  '@langchain/openai@0.5.11(@langchain/core@0.3.57(openai@4.104.0(ws@8.18.2)(zod@3.23.8)))(ws@8.18.2)':
+  '@langchain/openai@0.5.12(@langchain/core@0.3.57(openai@4.104.0(ws@8.18.2)(zod@3.23.8)))(ws@8.18.2)':
     dependencies:
       '@langchain/core': 0.3.57(openai@4.104.0(ws@8.18.2)(zod@3.23.8))
       js-tiktoken: 1.0.20
@@ -13087,7 +13088,7 @@ snapshots:
       - encoding
       - ws
 
-  '@langchain/openai@0.5.11(@langchain/core@0.3.57(openai@4.104.0(ws@8.18.2)(zod@3.24.4)))(ws@8.18.2)':
+  '@langchain/openai@0.5.12(@langchain/core@0.3.57(openai@4.104.0(ws@8.18.2)(zod@3.24.4)))(ws@8.18.2)':
     dependencies:
       '@langchain/core': 0.3.57(openai@4.104.0(ws@8.18.2)(zod@3.24.4))
       js-tiktoken: 1.0.20
@@ -14526,7 +14527,7 @@ snapshots:
 
   '@radix-ui/rect@1.1.1': {}
 
-  '@react-email/render@1.0.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
+  '@react-email/render@1.1.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
       html-to-text: 9.0.5
       prettier: 3.5.3
@@ -16151,7 +16152,7 @@ snapshots:
       json-schema-to-ts: 1.6.4
       ts-morph: 12.0.0
 
-  '@vitejs/plugin-react@4.5.0(vite@6.3.5(@types/node@22.15.30)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.41.0)(tsx@4.19.4)(yaml@2.8.0))':
+  '@vitejs/plugin-react@4.5.1(vite@6.3.5(@types/node@22.15.30)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.41.0)(tsx@4.19.4)(yaml@2.8.0))':
     dependencies:
       '@babel/core': 7.27.4
       '@babel/plugin-transform-react-jsx-self': 7.27.1(@babel/core@7.27.4)
@@ -17018,11 +17019,11 @@ snapshots:
     dependencies:
       '@codemirror/autocomplete': 6.18.6
       '@codemirror/commands': 6.8.1
-      '@codemirror/language': 6.11.0
+      '@codemirror/language': 6.11.1
       '@codemirror/lint': 6.8.5
       '@codemirror/search': 6.5.11
       '@codemirror/state': 6.5.2
-      '@codemirror/view': 6.36.8
+      '@codemirror/view': 6.37.1
 
   collapse-white-space@2.1.0: {}
 
@@ -19224,7 +19225,7 @@ snapshots:
   langchain@0.3.27(@langchain/core@0.3.57(openai@4.104.0(ws@8.18.2)(zod@3.24.4)))(axios@1.9.0(debug@4.4.1))(cheerio@1.0.0)(handlebars@4.7.8)(openai@4.104.0(ws@8.18.2)(zod@3.24.4))(ws@8.18.2):
     dependencies:
       '@langchain/core': 0.3.57(openai@4.104.0(ws@8.18.2)(zod@3.24.4))
-      '@langchain/openai': 0.5.11(@langchain/core@0.3.57(openai@4.104.0(ws@8.18.2)(zod@3.24.4)))(ws@8.18.2)
+      '@langchain/openai': 0.5.12(@langchain/core@0.3.57(openai@4.104.0(ws@8.18.2)(zod@3.24.4)))(ws@8.18.2)
       '@langchain/textsplitters': 0.1.0(@langchain/core@0.3.57(openai@4.104.0(ws@8.18.2)(zod@3.24.4)))
       js-tiktoken: 1.0.20
       js-yaml: 4.1.0
@@ -19255,7 +19256,7 @@ snapshots:
       langfuse: 3.37.4
       langfuse-core: 3.37.4
 
-  langfuse-vercel@3.37.3(ai@4.3.16(react@19.1.0)(zod@3.25.63)):
+  langfuse-vercel@3.37.4(ai@4.3.16(react@19.1.0)(zod@3.25.63)):
     dependencies:
       ai: 4.3.16(react@19.1.0)(zod@3.25.63)
       langfuse: 3.37.4
@@ -21346,9 +21347,9 @@ snapshots:
 
   requires-port@1.0.0: {}
 
-  resend@4.5.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+  resend@4.5.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
     dependencies:
-      '@react-email/render': 1.0.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@react-email/render': 1.1.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
     transitivePeerDependencies:
       - react
       - react-dom

@@ -5,11 +5,6 @@ import { createLangfuseHandler } from '../../utils/telemetry'
 import type { BasePromptVariables, ChatAgent } from '../../utils/types'
 import { pmAnalysisPrompt } from './prompts'
 
-interface PMAnalysisAgentVariables extends BasePromptVariables {
-  requirements_analysis?: string
-  proposed_changes?: string
-}
-
 export const requirementsAnalysisSchema = v.object({
   businessRequirement: v.string(),
   functionalRequirements: v.record(v.string(), v.array(v.string())),

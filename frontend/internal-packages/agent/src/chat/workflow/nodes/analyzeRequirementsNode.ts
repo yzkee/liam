@@ -36,7 +36,7 @@ export async function analyzeRequirementsNode(
 ): Promise<WorkflowState> {
   state.logger.log(`[${NODE_NAME}] Started`)
 
-  const pmAgent = new PMAnalysisAgent()
+  const pmAnalysisAgent = new PMAnalysisAgent()
   const schemaText = convertSchemaToText(state.schemaData)
 
   const promptVariables: BasePromptVariables = {
@@ -48,7 +48,7 @@ export async function analyzeRequirementsNode(
   const retryCount = state.retryCount[NODE_NAME] ?? 0
 
   try {
-    const analysisResult = await pmAgent.analyzeRequirements(promptVariables)
+    const analysisResult = await pmAnalysisAgent.analyzeRequirements(promptVariables)
 
     // Log the analysis result for debugging/monitoring purposes
     logAnalysisResult(state.logger, analysisResult)

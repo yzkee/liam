@@ -55,7 +55,7 @@
 }
 
 .actionButton:disabled:hover {
-  background-color: var(--overlay-10);
+  background-color: var(--overlay-5);
 }
 
 .iconWrapper {

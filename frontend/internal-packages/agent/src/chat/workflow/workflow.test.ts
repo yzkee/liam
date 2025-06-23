@@ -8,8 +8,8 @@ import type { WorkflowState } from './types'
 // Mock the agents
 vi.mock('../../langchain/agents', () => ({
   DatabaseSchemaBuildAgent: vi.fn(),
-  PMAgent: vi.fn(),
   QAGenerateUsecaseAgent: vi.fn(),
+  PMAnalysisAgent: vi.fn(),
 }))
 
 // Mock the schema converter
@@ -22,15 +22,12 @@ describe('Chat Workflow', () => {
   let mockAgent: {
     generate: ReturnType<typeof vi.fn>
   }
-  let mockPMAgent: {
+  let mockPMAnalysisAgent: {
     analyzeRequirements: ReturnType<typeof vi.fn>
   }
-  let mockQAAgent: {
-    generate: ReturnType<typeof vi.fn>
-  }
   let MockDatabaseSchemaBuildAgent: ReturnType<typeof vi.fn>
-  let MockPMAgent: ReturnType<typeof vi.fn>
   let MockQAGenerateUsecaseAgent: ReturnType<typeof vi.fn>
+  let MockPMAnalysisAgent: ReturnType<typeof vi.fn>
   let mockRepositories: Repositories
   let mockSchemaRepository: SchemaRepository
   let mockLogger: NodeLogger
@@ -97,6 +94,15 @@ describe('Chat Workflow', () => {
     logger: mockLogger,
     retryCount: {},
     generatedUsecases: undefined,
+    analyzedRequirements: {
+      businessRequirement: 'Mocked BRD',
+      functionalRequirements: {
+        'Test Category': ['Mocked functional requirement'],
+      },
+      nonFunctionalRequirements: {
+        Performance: ['Mocked non-functional requirement'],
+      },
+    },
     ...overrides,
   })
 
@@ -122,7 +128,7 @@ describe('Chat Workflow', () => {
     MockDatabaseSchemaBuildAgent = vi.mocked(
       agentsModule.DatabaseSchemaBuildAgent,
     )
-    MockPMAgent = vi.mocked(agentsModule.PMAgent)
+    MockPMAnalysisAgent = vi.mocked(agentsModule.PMAnalysisAgent)
     MockQAGenerateUsecaseAgent = vi.mocked(agentsModule.QAGenerateUsecaseAgent)
 
     // Create mock repositories
@@ -157,8 +163,8 @@ describe('Chat Workflow', () => {
       }),
     }
 
-    // Mock PM agent
-    mockPMAgent = {
+    // Mock PM Analysis agent
+    mockPMAnalysisAgent = {
       analyzeRequirements: vi.fn().mockResolvedValue({
         businessRequirement: 'Mocked BRD',
         functionalRequirements: {
@@ -170,8 +176,10 @@ describe('Chat Workflow', () => {
       }),
     }
 
-    // Mock QA agent
-    mockQAAgent = {
+    // Setup agent mocks
+    MockDatabaseSchemaBuildAgent.mockImplementation(() => mockAgent)
+    MockPMAnalysisAgent.mockImplementation(() => mockPMAnalysisAgent)
+    MockQAGenerateUsecaseAgent.mockImplementation(() => ({
       generate: vi.fn().mockResolvedValue({
         usecases: [
           {
@@ -183,12 +191,7 @@ describe('Chat Workflow', () => {
           },
         ],
       }),
-    }
-
-    // Setup agent mocks
-    MockDatabaseSchemaBuildAgent.mockImplementation(() => mockAgent)
-    MockPMAgent.mockImplementation(() => mockPMAgent)
-    MockQAGenerateUsecaseAgent.mockImplementation(() => mockQAAgent)
+    }))
 
     // Setup createVersion mock
     vi.mocked(mockSchemaRepository.createVersion).mockResolvedValue({

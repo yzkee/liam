@@ -27,6 +27,7 @@ export {
   type ForeignKeyConstraint,
   type Index,
   type Indexes,
+  mergeSchemas,
   overrideSchema,
   type PrimaryKeyConstraint,
   type Relationships,

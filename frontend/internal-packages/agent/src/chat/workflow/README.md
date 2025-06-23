@@ -14,7 +14,7 @@ flowchart TD
     GENERATE_USECASE[generateUsecase<br/>Use Case Creation<br/><i>qaAgent</i>]
     PREPARE_DML[prepareDML<br/>DML Generation<br/><i>qaAgent</i>]
     VALIDATE[validateSchema<br/>DML Execution & Validation<br/><i>qaAgent</i>]
-    REVIEW[reviewDeliverables<br/>Final Requirements & Deliverables Confirmation<br/><i>pmAnalysisAgentReview</i>]
+    REVIEW[reviewDeliverables<br/>Final Requirements & Deliverables Confirmation<br/><i>pmReviewAgent</i>]
     FINALIZE[finalizeArtifacts<br/>Generate & Save Artifacts<br/><i>dbAgentArtifactGen</i>]
     END([__end__<br/>End])
 
@@ -68,7 +68,7 @@ interface WorkflowState {
 5. **generateUsecase**: Creates use cases for testing (performed by qaAgent)
 6. **prepareDML**: Generates DML statements for testing (performed by qaAgent)
 7. **validateSchema**: Executes DML and validates schema (performed by qaAgent)
-8. **reviewDeliverables**: Performs final confirmation of requirements and deliverables (performed by pmAnalysisAgentReview)
+8. **reviewDeliverables**: Performs final confirmation of requirements and deliverables (performed by pmReviewAgent)
 9. **finalizeArtifacts**: Generates and saves comprehensive artifacts to database (performed by dbAgentArtifactGen)
 
 ## Usage

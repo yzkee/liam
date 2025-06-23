@@ -44,14 +44,16 @@ export default meta
 export const Default = {
   render: () => {
     return (
-      <GitHubSessionFormPresenter
-        projects={mockProjects}
-        branches={[]}
-        isBranchesLoading={false}
-        isPending={false}
-        onProjectChange={() => {}}
-        formAction={() => {}}
-      />
+      <div style={{ width: '800px' }}>
+        <GitHubSessionFormPresenter
+          projects={mockProjects}
+          branches={[]}
+          isBranchesLoading={false}
+          isPending={false}
+          onProjectChange={() => {}}
+          formAction={() => {}}
+        />
+      </div>
     )
   },
 }
@@ -59,15 +61,17 @@ export const Default = {
 export const WithProjects = {
   render: () => {
     return (
-      <GitHubSessionFormPresenter
-        projects={mockProjects}
-        defaultProjectId="1"
-        branches={[]}
-        isBranchesLoading={false}
-        isPending={false}
-        onProjectChange={() => {}}
-        formAction={() => {}}
-      />
+      <div style={{ width: '800px' }}>
+        <GitHubSessionFormPresenter
+          projects={mockProjects}
+          defaultProjectId="1"
+          branches={[]}
+          isBranchesLoading={false}
+          isPending={false}
+          onProjectChange={() => {}}
+          formAction={() => {}}
+        />
+      </div>
     )
   },
 }
@@ -75,15 +79,17 @@ export const WithProjects = {
 export const WithBranches = {
   render: () => {
     return (
-      <GitHubSessionFormPresenter
-        projects={mockProjects}
-        defaultProjectId="1"
-        branches={mockBranches}
-        isBranchesLoading={false}
-        isPending={false}
-        onProjectChange={() => {}}
-        formAction={() => {}}
-      />
+      <div style={{ width: '800px' }}>
+        <GitHubSessionFormPresenter
+          projects={mockProjects}
+          defaultProjectId="1"
+          branches={mockBranches}
+          isBranchesLoading={false}
+          isPending={false}
+          onProjectChange={() => {}}
+          formAction={() => {}}
+        />
+      </div>
     )
   },
 }
@@ -91,15 +97,17 @@ export const WithBranches = {
 export const BranchesLoading = {
   render: () => {
     return (
-      <GitHubSessionFormPresenter
-        projects={mockProjects}
-        defaultProjectId="1"
-        branches={[]}
-        isBranchesLoading={true}
-        isPending={false}
-        onProjectChange={() => {}}
-        formAction={() => {}}
-      />
+      <div style={{ width: '800px' }}>
+        <GitHubSessionFormPresenter
+          projects={mockProjects}
+          defaultProjectId="1"
+          branches={[]}
+          isBranchesLoading={true}
+          isPending={false}
+          onProjectChange={() => {}}
+          formAction={() => {}}
+        />
+      </div>
     )
   },
 }
@@ -107,16 +115,18 @@ export const BranchesLoading = {
 export const WithBranchesError = {
   render: () => {
     return (
-      <GitHubSessionFormPresenter
-        projects={mockProjects}
-        defaultProjectId="1"
-        branches={[]}
-        isBranchesLoading={false}
-        branchesError="Failed to load branches. Please check your repository settings."
-        isPending={false}
-        onProjectChange={() => {}}
-        formAction={() => {}}
-      />
+      <div style={{ width: '800px' }}>
+        <GitHubSessionFormPresenter
+          projects={mockProjects}
+          defaultProjectId="1"
+          branches={[]}
+          isBranchesLoading={false}
+          branchesError="Failed to load branches. Please check your repository settings."
+          isPending={false}
+          onProjectChange={() => {}}
+          formAction={() => {}}
+        />
+      </div>
     )
   },
 }
@@ -124,15 +134,17 @@ export const WithBranchesError = {
 export const WithFormError = {
   render: () => {
     return (
-      <GitHubSessionFormPresenter
-        projects={mockProjects}
-        branches={mockBranches}
-        isBranchesLoading={false}
-        formError="Please enter a valid message."
-        isPending={false}
-        onProjectChange={() => {}}
-        formAction={() => {}}
-      />
+      <div style={{ width: '800px' }}>
+        <GitHubSessionFormPresenter
+          projects={mockProjects}
+          branches={mockBranches}
+          isBranchesLoading={false}
+          formError="Please enter a valid message."
+          isPending={false}
+          onProjectChange={() => {}}
+          formAction={() => {}}
+        />
+      </div>
     )
   },
 }
@@ -140,14 +152,16 @@ export const WithFormError = {
 export const Pending = {
   render: () => {
     return (
-      <GitHubSessionFormPresenter
-        projects={mockProjects}
-        branches={mockBranches}
-        isBranchesLoading={false}
-        isPending={true}
-        onProjectChange={() => {}}
-        formAction={() => {}}
-      />
+      <div style={{ width: '800px' }}>
+        <GitHubSessionFormPresenter
+          projects={mockProjects}
+          branches={mockBranches}
+          isBranchesLoading={false}
+          isPending={true}
+          onProjectChange={() => {}}
+          formAction={() => {}}
+        />
+      </div>
     )
   },
 }
@@ -155,14 +169,16 @@ export const Pending = {
 export const EmptyProjects = {
   render: () => {
     return (
-      <GitHubSessionFormPresenter
-        projects={[]}
-        branches={[]}
-        isBranchesLoading={false}
-        isPending={false}
-        onProjectChange={() => {}}
-        formAction={() => {}}
-      />
+      <div style={{ width: '800px' }}>
+        <GitHubSessionFormPresenter
+          projects={[]}
+          branches={[]}
+          isBranchesLoading={false}
+          isPending={false}
+          onProjectChange={() => {}}
+          formAction={() => {}}
+        />
+      </div>
     )
   },
 }
@@ -196,15 +212,17 @@ export const Interactive = {
     }
 
     return (
-      <GitHubSessionFormPresenter
-        projects={mockProjects}
-        branches={branches}
-        isBranchesLoading={isBranchesLoading}
-        isPending={isPending}
-        formAction={handleFormAction}
-        onProjectChange={handleProjectChange}
-        defaultProjectId={selectedProjectId}
-      />
+      <div style={{ width: '800px' }}>
+        <GitHubSessionFormPresenter
+          projects={mockProjects}
+          branches={branches}
+          isBranchesLoading={isBranchesLoading}
+          isPending={isPending}
+          formAction={handleFormAction}
+          onProjectChange={handleProjectChange}
+          defaultProjectId={selectedProjectId}
+        />
+      </div>
     )
   },
 }
@@ -259,7 +277,14 @@ export const InteractiveWithError = {
     }
 
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '16px',
+          width: '800px',
+        }}
+      >
         <div style={{ display: 'flex', gap: '8px' }}>
           <button
             type="button"

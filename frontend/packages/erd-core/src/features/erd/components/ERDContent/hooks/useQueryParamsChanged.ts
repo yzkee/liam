@@ -3,7 +3,7 @@ import type { DisplayArea } from '@/features/erd/types'
 import { computeAutoLayout, highlightNodesAndEdges } from '@/features/erd/utils'
 import { useCustomReactflow } from '@/features/reactflow/hooks'
 import { useUserEditing } from '@/stores'
-import { hasNonRelatedChildNodes, updateNodesHiddenState } from '../utils'
+import { updateNodesHiddenState } from '../utils'
 import { usePopStateListener } from './usePopStateListener'
 
 type Params = {
@@ -27,7 +27,6 @@ export const useQueryParamsChanged = ({ displayArea }: Params) => {
     const updatedNodes = updateNodesHiddenState({
       nodes,
       hiddenNodeIds,
-      shouldHideGroupNodeId: !hasNonRelatedChildNodes(nodes),
     })
 
     const { nodes: highlightedNodes, edges: highlightedEdges } =

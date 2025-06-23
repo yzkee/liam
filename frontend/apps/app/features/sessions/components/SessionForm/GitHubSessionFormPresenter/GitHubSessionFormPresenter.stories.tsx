@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { useState } from 'react'
 import type { Projects } from '@/components/CommonLayout/AppBar/ProjectsDropdownMenu/services/getProjects'
 import { GitHubSessionFormPresenter } from './GitHubSessionFormPresenter'
 
@@ -20,10 +21,40 @@ type GitHubSessionFormPresenterProps = {
   formAction: (formData: FormData) => void
 }
 
-const mockProjects = [
-  { id: '1', name: 'E-commerce Platform' },
-  { id: '2', name: 'Blog System' },
-  { id: '3', name: 'User Management' },
+const mockProjects: Projects = [
+  {
+    id: '1',
+    name: 'E-commerce Platform',
+    visibility: 'public',
+    repositorySlug: 'org/e-commerce',
+    organizationSlug: 'awesome-api',
+    organizationId: 'org-1',
+    isPublic: true,
+    createdAt: new Date().toISOString(),
+    latestCommitHash: 'abc123',
+  },
+  {
+    id: '2',
+    name: 'Blog System',
+    visibility: 'private',
+    repositorySlug: 'org/blog-system',
+    organizationSlug: 'awesome-api',
+    organizationId: 'org-1',
+    isPublic: false,
+    createdAt: new Date().toISOString(),
+    latestCommitHash: 'def456',
+  },
+  {
+    id: '3',
+    name: 'User Management',
+    visibility: 'public',
+    repositorySlug: 'org/user-management',
+    organizationSlug: 'awesome-api',
+    organizationId: 'org-1',
+    isPublic: true,
+    createdAt: new Date().toISOString(),
+    latestCommitHash: 'ghi789',
+  },
 ]
 
 const mockBranches = [
@@ -32,20 +63,24 @@ const mockBranches = [
   { name: 'feature/user-auth', sha: 'ghi789', protected: false },
 ]
 
-const meta: Meta<GitHubSessionFormPresenterProps> = {
+const meta: Meta<typeof GitHubSessionFormPresenter> = {
   title: 'Features/Sessions/GitHubSessionFormPresenter',
   component: GitHubSessionFormPresenter,
   parameters: {
-    layout: 'padded',
-    viewport: {
-      defaultViewport: 'responsive',
-    },
+    layout: 'centered',
   },
   tags: ['autodocs'],
+  decorators: [
+    (Story) => (
+      <div style={{ width: '800px', padding: '0' }}>
+        <Story />
+      </div>
+    ),
+  ],
 }
 
 export default meta
-type Story = StoryObj<GitHubSessionFormPresenterProps>
+type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
@@ -100,7 +135,8 @@ export const WithBranchesError: Story = {
     defaultProjectId: '1',
     branches: [],
     isBranchesLoading: false,
-    branchesError: 'Failed to load branches. Please try again.',
+    branchesError:
+      'Failed to load branches. Please check your repository settings.',
     isPending: false,
     onProjectChange: () => {},
     formAction: () => {},
@@ -138,5 +174,173 @@ export const EmptyProjects: Story = {
     isPending: false,
     onProjectChange: () => {},
     formAction: () => {},
+  },
+}
+
+export const Interactive: Story = {
+  args: {
+    projects: mockProjects,
+    branches: mockBranches,
+    isBranchesLoading: false,
+    isPending: false,
+  },
+  render: (args: GitHubSessionFormPresenterProps) => {
+    const [isPending, setIsPending] = useState(false)
+    const [selectedProjectId, setSelectedProjectId] = useState<string>('')
+    const [branches, setBranches] = useState<Branch[]>(args.branches)
+    const [isBranchesLoading, setIsBranchesLoading] = useState(false)
+
+    const handleFormAction = (_formData: FormData) => {
+      setIsPending(true)
+
+      // Simulate API call
+      setTimeout(() => {
+        setIsPending(false)
+        alert('Form submitted successfully!')
+      }, 3000)
+    }
+
+    const handleProjectChange = (projectId: string) => {
+      setSelectedProjectId(projectId)
+
+      // Simulate loading branches
+      setIsBranchesLoading(true)
+      setTimeout(() => {
+        setBranches(mockBranches)
+        setIsBranchesLoading(false)
+      }, 1000)
+    }
+
+    return (
+      <GitHubSessionFormPresenter
+        {...args}
+        branches={branches}
+        isBranchesLoading={isBranchesLoading}
+        isPending={isPending}
+        formAction={handleFormAction}
+        onProjectChange={handleProjectChange}
+        defaultProjectId={selectedProjectId}
+      />
+    )
+  },
+}
+
+export const InteractiveWithError: Story = {
+  args: {
+    projects: mockProjects,
+    branches: mockBranches,
+    isBranchesLoading: false,
+    isPending: false,
+  },
+  render: (args: GitHubSessionFormPresenterProps) => {
+    const [isPending, setIsPending] = useState(false)
+    const [selectedProjectId, setSelectedProjectId] = useState<string>('')
+    const [branches, setBranches] = useState<Branch[]>(args.branches)
+    const [isBranchesLoading, setIsBranchesLoading] = useState(false)
+    const [formError, setFormError] = useState<string | undefined>()
+    const [branchesError, setBranchesError] = useState<string | undefined>()
+
+    const handleFormAction = (formData: FormData) => {
+      setIsPending(true)
+      setFormError(undefined)
+
+      // Simulate API call with error
+      setTimeout(() => {
+        setIsPending(false)
+        // Error for empty message
+        const message = formData.get('initialMessage') as string
+        if (!message?.trim()) {
+          setFormError('Please enter a valid message.')
+        } else {
+          setFormError(
+            'An error occurred while processing your request. Please try again.',
+          )
+        }
+      }, 2000)
+    }
+
+    const handleProjectChange = (projectId: string) => {
+      setSelectedProjectId(projectId)
+      setBranchesError(undefined)
+
+      // Simulate loading branches with occasional error
+      setIsBranchesLoading(true)
+      setTimeout(() => {
+        setIsBranchesLoading(false)
+        // Randomly show error for demonstration
+        if (Math.random() > 0.5) {
+          setBranchesError(
+            'Failed to load branches. Please check your repository settings.',
+          )
+          setBranches([])
+        } else {
+          setBranchesError(undefined)
+          setBranches(mockBranches)
+        }
+      }, 1000)
+    }
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button
+            type="button"
+            onClick={() => setFormError('Sample form error')}
+            style={{
+              padding: '4px 8px',
+              background: '#ff4444',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+            }}
+          >
+            Trigger Form Error
+          </button>
+          <button
+            type="button"
+            onClick={() => setBranchesError('Sample branches error')}
+            style={{
+              padding: '4px 8px',
+              background: '#ff4444',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+            }}
+          >
+            Trigger Branches Error
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setFormError(undefined)
+              setBranchesError(undefined)
+            }}
+            style={{
+              padding: '4px 8px',
+              background: '#44aa44',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+            }}
+          >
+            Clear Errors
+          </button>
+        </div>
+        <GitHubSessionFormPresenter
+          {...args}
+          branches={branches}
+          isBranchesLoading={isBranchesLoading}
+          isPending={isPending}
+          formError={formError}
+          branchesError={branchesError}
+          formAction={handleFormAction}
+          onProjectChange={handleProjectChange}
+          defaultProjectId={selectedProjectId}
+        />
+      </div>
+    )
   },
 }

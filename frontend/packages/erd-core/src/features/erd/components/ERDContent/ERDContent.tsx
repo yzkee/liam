@@ -20,6 +20,7 @@ import { useVersion } from '@/providers'
 import { useUserEditing } from '@/stores'
 import { highlightNodesAndEdges, isTableNode } from '../../utils'
 import {
+  NonRelatedTableGroupNode,
   RelationshipEdge,
   Spinner,
   TableNode,
@@ -30,6 +31,7 @@ import { useInitialAutoLayout, useQueryParamsChanged } from './hooks'
 
 const nodeTypes = {
   table: TableNode,
+  nonRelatedTableGroup: NonRelatedTableGroupNode,
 }
 
 const edgeTypes = {

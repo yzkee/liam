@@ -20,5 +20,24 @@ export const isAddIndexOperation = (
   return v.safeParse(addIndexOperationSchema, operation).success
 }
 
+// Remove index operation
+const removeIndexOperationSchema = v.object({
+  op: v.literal('remove'),
+  path: indexPathSchema,
+})
+
+export type RemoveIndexOperation = v.InferOutput<
+  typeof removeIndexOperationSchema
+>
+
+export const isRemoveIndexOperation = (
+  operation: Operation,
+): operation is RemoveIndexOperation => {
+  return v.safeParse(removeIndexOperationSchema, operation).success
+}
+
 // Export all index operations
-export const indexOperations = [addIndexOperationSchema]
+export const indexOperations = [
+  addIndexOperationSchema,
+  removeIndexOperationSchema,
+]

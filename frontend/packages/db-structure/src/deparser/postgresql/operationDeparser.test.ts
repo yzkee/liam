@@ -300,5 +300,33 @@ describe('postgresqlOperationDeparser', () => {
         "CREATE INDEX \"idx_products_category\" ON \"products\" (\"category_id\");"
       `)
     })
+
+    it('should generate DROP INDEX statement from remove operation', () => {
+      const operation: Operation = {
+        op: 'remove',
+        path: '/tables/users/indexes/idx_users_email',
+      }
+
+      const result = postgresqlOperationDeparser(operation)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "DROP INDEX \"idx_users_email\";"
+      `)
+    })
+
+    it('should generate DROP INDEX for complex index name', () => {
+      const operation: Operation = {
+        op: 'remove',
+        path: '/tables/user_profiles/indexes/idx_user_profiles_email_unique',
+      }
+
+      const result = postgresqlOperationDeparser(operation)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "DROP INDEX \"idx_user_profiles_email_unique\";"
+      `)
+    })
   })
 })

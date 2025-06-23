@@ -49,7 +49,11 @@ export const URLSessionFormPresenter: FC<Props> = ({
         </div>
         <div className={styles.divider} />
         <div className={styles.buttonContainer}>
-          <SessionFormActions isPending={isPending || !urlPath.trim()} />
+          <SessionFormActions
+            isPending={isPending}
+            hasContent={urlPath.trim().length > 0}
+            onCancel={() => window.location.reload()}
+          />
         </div>
       </form>
     </div>

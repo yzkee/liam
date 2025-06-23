@@ -1,6 +1,6 @@
 import { ArrowTooltipProvider } from '@liam-hq/ui'
 import type { ChangeEvent, FC } from 'react'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Projects } from '@/components/CommonLayout/AppBar/ProjectsDropdownMenu/services/getProjects'
 import { SessionFormActions } from '../SessionFormActions'
 import styles from './GitHubSessionFormPresenter.module.css'
@@ -35,11 +35,13 @@ export const GitHubSessionFormPresenter: FC<Props> = ({
   formAction,
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const [hasContent, setHasContent] = useState(false)
 
   const handleTextareaChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const textarea = e.target
     textarea.style.height = 'auto'
     textarea.style.height = `${textarea.scrollHeight}px`
+    setHasContent(textarea.value.trim().length > 0)
   }
 
   useEffect(() => {
@@ -126,7 +128,11 @@ export const GitHubSessionFormPresenter: FC<Props> = ({
           </div>
           <div className={styles.divider} />
           <div className={styles.buttonContainer}>
-            <SessionFormActions isPending={isPending} />
+            <SessionFormActions
+              isPending={isPending}
+              hasContent={hasContent}
+              onCancel={() => window.location.reload()}
+            />
           </div>
         </form>
       </div>

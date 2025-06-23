@@ -106,3 +106,6 @@ DropdownMenuRadioItem.displayName = 'DropdownMenuRadioItem'
 export const DropdownMenuSeparator = () => {
   return <Separator className={styles.separator} />
 }
+
+// Re-export for custom implementations
+export { RadioItem as DropdownMenuPrimitiveRadioItem, ItemIndicator as DropdownMenuItemIndicator } from '@radix-ui/react-dropdown-menu'

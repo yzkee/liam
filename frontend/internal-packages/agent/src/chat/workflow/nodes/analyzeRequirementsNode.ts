@@ -48,7 +48,8 @@ export async function analyzeRequirementsNode(
   const retryCount = state.retryCount[NODE_NAME] ?? 0
 
   try {
-    const analysisResult = await pmAnalysisAgent.analyzeRequirements(promptVariables)
+    const analysisResult =
+      await pmAnalysisAgent.analyzeRequirements(promptVariables)
 
     // Log the analysis result for debugging/monitoring purposes
     logAnalysisResult(state.logger, analysisResult)

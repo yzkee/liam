@@ -38,12 +38,8 @@ export class PMAgent implements ChatAgent<PMAgentResponse> {
     })
 
     // Convert valibot schemas to JSON Schema and bind to models
-    const analysisJsonSchema = toJsonSchema(requirementsAnalysisSchema, {
-      errorMode: 'ignore',
-    })
-    const reviewJsonSchema = toJsonSchema(reviewResponseSchema, {
-      errorMode: 'ignore',
-    })
+    const analysisJsonSchema = toJsonSchema(requirementsAnalysisSchema)
+    const reviewJsonSchema = toJsonSchema(reviewResponseSchema)
 
     this.analysisModel = baseModel.withStructuredOutput(analysisJsonSchema)
     this.reviewModel = baseModel.withStructuredOutput(reviewJsonSchema)

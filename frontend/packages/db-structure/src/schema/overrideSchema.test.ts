@@ -45,7 +45,6 @@ describe('overrideSchema', () => {
     relationships: {
       // Empty initially
     },
-    tableGroups: {},
   }
 
   describe('Overriding existing tables', () => {
@@ -137,30 +136,6 @@ describe('overrideSchema', () => {
     })
   })
 
-  describe('Table groups', () => {
-    it('should handle table groups', () => {
-      const override: SchemaOverride = {
-        overrides: {
-          tableGroups: {
-            auth: {
-              name: 'Authentication',
-              tables: ['users'],
-              comment: 'Tables related to authentication',
-            },
-          },
-        },
-      }
-
-      const { tableGroups } = overrideSchema(originalSchema, override)
-
-      expect(tableGroups['auth']).toBeDefined()
-      expect(tableGroups['auth']?.name).toBe('Authentication')
-      expect(tableGroups['auth']?.tables).toContain('users')
-      expect(tableGroups['auth']?.comment).toBe(
-        'Tables related to authentication',
-      )
-    })
-  })
 
   describe('Complex scenarios', () => {
     it('should handle multiple override operations at once', () => {
@@ -207,7 +182,6 @@ describe('overrideSchema', () => {
           },
         },
         relationships: {},
-        tableGroups: {},
       }
 
       const override: SchemaOverride = {
@@ -230,22 +204,10 @@ describe('overrideSchema', () => {
               },
             },
           },
-          tableGroups: {
-            content: {
-              name: 'Content',
-              tables: ['posts'],
-              comment: 'Content-related tables',
-            },
-            users: {
-              name: 'Users',
-              tables: ['users'],
-              comment: 'User-related tables',
-            },
-          },
         },
       }
 
-      const { schema, tableGroups } = overrideSchema(
+      const schema = overrideSchema(
         schemaWithPostsForTest,
         override,
       )
@@ -262,10 +224,6 @@ describe('overrideSchema', () => {
         'Post headline',
       )
 
-      expect(tableGroups['content']).toBeDefined()
-      expect(tableGroups['users']).toBeDefined()
-      expect(tableGroups['content']?.tables).toContain('posts')
-      expect(tableGroups['users']?.tables).toContain('users')
     })
   })
 })

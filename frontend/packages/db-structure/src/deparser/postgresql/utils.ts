@@ -153,6 +153,16 @@ export function generateRemoveTableStatement(tableName: string): string {
 }
 
 /**
+ * Generate RENAME TABLE statement
+ */
+export function generateRenameTableStatement(
+  oldTableName: string,
+  newTableName: string,
+): string {
+  return `ALTER TABLE ${escapeIdentifier(oldTableName)} RENAME TO ${escapeIdentifier(newTableName)};`
+}
+
+/**
  * Generate CREATE INDEX statement for an index
  */
 export function generateCreateIndexStatement(

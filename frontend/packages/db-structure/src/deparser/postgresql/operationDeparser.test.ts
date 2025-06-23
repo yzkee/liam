@@ -122,6 +122,22 @@ describe('postgresqlOperationDeparser', () => {
         "DROP TABLE \"users\";"
       `)
     })
+
+    it('should generate RENAME TABLE statement from replace operation', () => {
+      const operation: Operation = {
+        op: 'replace',
+        path: '/tables/users/name',
+        value: 'user_accounts',
+      }
+
+      const result = postgresqlOperationDeparser(operation)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "ALTER TABLE \"users\" RENAME TO \"user_accounts\";"
+      `)
+    })
+
   })
 
   describe('column operations', () => {

@@ -21,10 +21,12 @@ import {
 import type {
   AddTableOperation,
   RemoveTableOperation,
+  ReplaceTableNameOperation,
 } from '../../operation/schema/table.js'
 import {
   isAddTableOperation,
   isRemoveTableOperation,
+  isReplaceTableNameOperation,
 } from '../../operation/schema/table.js'
 import type { OperationDeparser } from '../type.js'
 import {
@@ -35,6 +37,7 @@ import {
   generateRemoveIndexStatement,
   generateRemoveTableStatement,
   generateRenameColumnStatement,
+  generateRenameTableStatement,
 } from './utils.js'
 
 /**
@@ -42,6 +45,14 @@ import {
  */
 function extractTableNameFromPath(path: string): string | null {
   const match = path.match(PATH_PATTERNS.TABLE_BASE)
+  return match?.[1] || null
+}
+
+/**
+ * Extract table name from table name operation path
+ */
+function extractTableNameFromNamePath(path: string): string | null {
+  const match = path.match(PATH_PATTERNS.TABLE_NAME)
   return match?.[1] || null
 }
 
@@ -166,6 +177,20 @@ function generateRemoveTableFromOperation(
 }
 
 /**
+ * Generate RENAME TABLE DDL from table rename operation
+ */
+function generateRenameTableFromOperation(
+  operation: ReplaceTableNameOperation,
+): string {
+  const tableName = extractTableNameFromNamePath(operation.path)
+  if (!tableName) {
+    throw new Error(`Invalid table name path: ${operation.path}`)
+  }
+
+  return generateRenameTableStatement(tableName, operation.value)
+}
+
+/**
  * Generate CREATE INDEX DDL from index creation operation
  */
 function generateCreateIndexFromOperation(
@@ -205,6 +230,11 @@ export const postgresqlOperationDeparser: OperationDeparser = (
 
   if (isRemoveTableOperation(operation)) {
     const value = generateRemoveTableFromOperation(operation)
+    return { value, errors }
+  }
+
+  if (isReplaceTableNameOperation(operation)) {
+    const value = generateRenameTableFromOperation(operation)
     return { value, errors }
   }
 

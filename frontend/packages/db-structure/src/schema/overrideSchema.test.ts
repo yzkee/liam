@@ -136,7 +136,6 @@ describe('overrideSchema', () => {
     })
   })
 
-
   describe('Complex scenarios', () => {
     it('should handle multiple override operations at once', () => {
       const schemaWithPostsForTest: Schema = {
@@ -207,10 +206,7 @@ describe('overrideSchema', () => {
         },
       }
 
-      const schema = overrideSchema(
-        schemaWithPostsForTest,
-        override,
-      )
+      const schema = overrideSchema(schemaWithPostsForTest, override)
 
       expect(schema.tables['users']?.comment).toBe(
         'User accounts with enhanced permissions',
@@ -223,7 +219,6 @@ describe('overrideSchema', () => {
       expect(schema.tables['posts']?.columns['title']?.comment).toBe(
         'Post headline',
       )
-
     })
   })
 })

@@ -148,10 +148,7 @@ export const ERDContentInner: FC<Props> = ({
   const panOnDrag = [1, 2]
 
   return (
-    <div
-      className={styles.wrapper}
-      data-loading={loading}
-    >
+    <div className={styles.wrapper} data-loading={loading}>
       {loading && <Spinner className={styles.loading} />}
       <ReactFlow
         colorMode="dark"

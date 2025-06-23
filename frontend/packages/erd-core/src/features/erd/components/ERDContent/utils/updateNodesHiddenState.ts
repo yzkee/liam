@@ -14,8 +14,9 @@ export function updateNodesHiddenState({
 }: Params): Node[] {
   return nodes.map((node) => {
     const isHiddenById = hiddenNodeIds.includes(node.id)
-    const isGroupNodeToHide = node.id === NON_RELATED_TABLE_GROUP_NODE_ID && shouldHideGroupNodeId
-    
+    const isGroupNodeToHide =
+      node.id === NON_RELATED_TABLE_GROUP_NODE_ID && shouldHideGroupNodeId
+
     return {
       ...node,
       hidden: isHiddenById || isGroupNodeToHide,

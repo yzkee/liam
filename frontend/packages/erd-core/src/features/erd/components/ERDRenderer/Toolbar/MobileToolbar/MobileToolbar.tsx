@@ -1,12 +1,7 @@
 import { Ellipsis } from '@liam-hq/ui'
 import * as ToolbarPrimitive from '@radix-ui/react-toolbar'
 import clsx from 'clsx'
-import {
-  type FC,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
+import { type FC, useEffect, useRef, useState } from 'react'
 import styles from './MobileToolbar.module.css'
 import { OpenedMobileToolbar } from './OpenedMobileToolbar'
 import { ShowModeMenu } from './ShowModeMenu'

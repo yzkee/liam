@@ -40,6 +40,7 @@ export {
   Mic,
   Minus,
   PanelLeft,
+  Pause,
   Plus,
   Rows3,
   Scan,

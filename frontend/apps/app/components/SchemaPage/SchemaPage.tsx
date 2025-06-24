@@ -7,7 +7,6 @@ import type { ComponentProps, FC } from 'react'
 import { TabsContent, TabsRoot } from '@/components'
 import { createClient } from '@/libs/db/server'
 import { ERDEditor } from './components/ERDEditor'
-import { OverrideEditor } from './components/OverrideEditor'
 import { SchemaHeader } from './components/SchemaHeader'
 import { DEFAULT_SCHEMA_TAB, SCHEMA_TAB } from './constants'
 import styles from './SchemaPage.module.css'
@@ -152,9 +151,6 @@ export const SchemaPage: FC<Props> = async ({
       <SchemaHeader />
       <TabsContent value={SCHEMA_TAB.ERD} className={styles.tabsContent}>
         <ERDEditor {...contentProps} />
-      </TabsContent>
-      <TabsContent value={SCHEMA_TAB.EDITOR} className={styles.tabsContent}>
-        <OverrideEditor />
       </TabsContent>
     </TabsRoot>
   )

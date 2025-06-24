@@ -14,9 +14,17 @@ describe('wordOverlapMatch', () => {
     })
   })
 
-  it('does not map if there is no overlap', () => {
+  it('does not map: no shared words between reference and predict names', () => {
     const reference = ['Order', 'Shipment']
     const predict = ['Invoice', 'Customer']
+    const mapping: Record<string, string> = {}
+    wordOverlapMatch(reference, predict, mapping)
+    expect(mapping).toEqual({})
+  })
+
+  it('does not map: similar-looking but non-overlapping words (e.g. "bookingid" vs "bookingno")', () => {
+    const reference = ['bookingid']
+    const predict = ['bookingno']
     const mapping: Record<string, string> = {}
     wordOverlapMatch(reference, predict, mapping)
     expect(mapping).toEqual({})

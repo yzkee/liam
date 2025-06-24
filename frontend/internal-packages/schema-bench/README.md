@@ -45,7 +45,6 @@ Semantic matching engine that:
 Lexical matching engine that:
 - Performs word tokenization and stop word removal
 - Detects exact word overlaps between names
-- Calculates Longest Common Substring (LCS) for character-level similarity
 - Handles variations in naming conventions (e.g., camelCase vs snake_case)
 
 ## Evaluation Metrics

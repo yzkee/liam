@@ -49,8 +49,6 @@ export async function generateDDLNode(
 
     const ddlStatements = await agent.generate(promptVariables)
 
-    console.log(`[${NODE_NAME}] Generated DDL:`, ddlStatements)
-
     state.logger.log(`[${NODE_NAME}] Completed`)
 
     return {

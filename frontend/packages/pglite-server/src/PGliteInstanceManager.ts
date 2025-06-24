@@ -9,7 +9,7 @@ export class PGliteInstanceManager {
    * Creates a new PGlite instance for query execution
    */
   private async createInstance(): Promise<PGlite> {
-    return new PGlite('memory://')
+    return new PGlite()
   }
 
   /**

@@ -241,33 +241,6 @@ describe('constraintsToRelationships', () => {
     expect(result['fk_posts_category']?.deleteConstraint).toBe('SET_NULL')
   })
 
-  it('should return empty object when no foreign key constraints exist', () => {
-    const tables = {
-      users: aTable({
-        name: 'users',
-        columns: {
-          id: aColumn({
-            name: 'id',
-            type: 'bigint',
-            primary: true,
-            notNull: true,
-          }),
-        },
-        constraints: {
-          pk_users: {
-            type: 'PRIMARY KEY',
-            name: 'pk_users',
-            columnName: 'id',
-          },
-        },
-      }),
-    }
-
-    const result = constraintsToRelationships(tables)
-
-    expect(result).toEqual({})
-  })
-
   it('should ignore non-foreign key constraints', () => {
     const tables = {
       users: aTable({

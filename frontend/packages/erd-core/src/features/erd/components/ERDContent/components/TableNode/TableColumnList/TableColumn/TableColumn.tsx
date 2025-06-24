@@ -91,31 +91,34 @@ export const TableColumn: FC<TableColumnProps> = ({
   targetCardinality,
   isHighlightedTable,
 }) => {
-  const { diffItems } = useSchema()
   const { showDiff } = useUserEditing()
+  const { diffItems } = useSchema()
 
-  const changeStatus = getChangeStatus({
-    tableId: table.name,
-    columnId: column.name,
-    diffItems: diffItems ?? [],
-  })
+  // Only calculate diff-related values when showDiff is true
+  const changeStatus = useMemo(() => {
+    if (!showDiff) return undefined
+    return getChangeStatus({
+      tableId: table.name,
+      columnId: column.name,
+      diffItems: diffItems ?? [],
+    })
+  }, [showDiff, table.name, column.name, diffItems])
 
-  const diffStyle = useMemo(
-    () =>
-      match(changeStatus)
-        .with('added', () => diffStyles.addedBg)
-        .with('removed', () => diffStyles.removedBg)
-        .with('modified', () => diffStyles.modifiedBg)
-        .otherwise(() => undefined),
-    [changeStatus],
-  )
+  const diffStyle = useMemo(() => {
+    if (!showDiff || !changeStatus) return undefined
+    return match(changeStatus)
+      .with('added', () => diffStyles.addedBg)
+      .with('removed', () => diffStyles.removedBg)
+      .with('modified', () => diffStyles.modifiedBg)
+      .otherwise(() => undefined)
+  }, [showDiff, changeStatus])
 
   const shouldHighlight =
     isHighlightedTable && (isSource || !!targetCardinality)
 
   return (
     <li className={clsx(styles.wrapper, showDiff && styles.wrapperWithDiff)}>
-      {showDiff && (
+      {showDiff && changeStatus && (
         <div className={clsx(styles.diffBox, diffStyle)}>
           <DiffIcon changeStatus={changeStatus} />
         </div>

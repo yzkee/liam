@@ -17,27 +17,30 @@ type Props = {
 
 export const TableHeader: FC<Props> = ({ data }) => {
   const name = data.table.name
-  const { diffItems } = useSchema()
   const { showMode: _showMode, showDiff } = useUserEditing()
+  const { diffItems } = useSchema()
   const showMode = data.showMode ?? _showMode
 
   const isTarget = data.targetColumnCardinalities !== undefined
   const isSource = data.sourceColumnName !== undefined
 
-  const changeStatus = getChangeStatus({
-    tableId: name,
-    diffItems: diffItems ?? [],
-  })
+  // Only calculate diff-related values when showDiff is true
+  const changeStatus = useMemo(() => {
+    if (!showDiff) return undefined
+    return getChangeStatus({
+      tableId: name,
+      diffItems: diffItems ?? [],
+    })
+  }, [showDiff, name, diffItems])
 
-  const diffStyle = useMemo(
-    () =>
-      match(changeStatus)
-        .with('added', () => diffStyles.addedBg)
-        .with('removed', () => diffStyles.removedBg)
-        .with('modified', () => diffStyles.modifiedBg)
-        .otherwise(() => undefined),
-    [changeStatus],
-  )
+  const diffStyle = useMemo(() => {
+    if (!showDiff || !changeStatus) return undefined
+    return match(changeStatus)
+      .with('added', () => diffStyles.addedBg)
+      .with('removed', () => diffStyles.removedBg)
+      .with('modified', () => diffStyles.modifiedBg)
+      .otherwise(() => undefined)
+  }, [showDiff, changeStatus])
 
   const { updateNode } = useCustomReactflow()
 
@@ -68,7 +71,7 @@ export const TableHeader: FC<Props> = ({ data }) => {
         showMode === 'TABLE_NAME' && styles.wrapperTableNameMode,
       )}
     >
-      {showDiff && (
+      {showDiff && changeStatus && (
         <div
           className={clsx(
             styles.diffBox,

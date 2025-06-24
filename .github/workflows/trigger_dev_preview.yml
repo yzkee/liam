@@ -5,7 +5,7 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event.action != 'closed' }}
 
 jobs:
   trigger_dev:
@@ -36,4 +36,66 @@ jobs:
           TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
           TRIGGER_PROJECT_ID: ${{ vars.TRIGGER_PROJECT_ID }}
         run: |
-          pnpm --filter @liam-hq/jobs exec trigger preview archive --branch ${{ github.head_ref }}
+          set -e
+          
+          # Validate branch name
+          BRANCH_NAME="${{ github.head_ref }}"
+          if [[ -z "$BRANCH_NAME" ]]; then
+            echo "Error: Branch name is empty"
+            exit 1
+          fi
+          
+          echo "Archiving trigger.dev preview for branch: $BRANCH_NAME"
+          
+          # Archive with retry logic
+          MAX_RETRIES=3
+          RETRY_COUNT=0
+          
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            echo "Attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES"
+            
+            if pnpm --filter @liam-hq/jobs exec trigger preview archive --branch "$BRANCH_NAME"; then
+              echo "Successfully archived preview environment for branch: $BRANCH_NAME"
+              
+              # Verify archiving by checking if the environment still exists
+              echo "Verifying archive operation..."
+              sleep 5
+              
+              if pnpm --filter @liam-hq/jobs exec trigger preview list --branch "$BRANCH_NAME" 2>/dev/null | grep -q "$BRANCH_NAME"; then
+                echo "Warning: Environment may still be active after archiving"
+              else
+                echo "Archive verification successful - environment no longer listed"
+              fi
+              
+              exit 0
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                echo "Archive failed, retrying in 10 seconds..."
+                sleep 10
+              else
+                echo "Archive failed after $MAX_RETRIES attempts"
+                exit 1
+              fi
+            fi
+          done
+
+      - name: Cleanup stale environments
+        if: github.event.action == 'closed' && always()
+        shell: bash
+        env:
+          TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
+          TRIGGER_PROJECT_ID: ${{ vars.TRIGGER_PROJECT_ID }}
+        run: |
+          echo "Checking for any stale preview environments..."
+          
+          # List all preview environments and attempt to clean up any that match this branch
+          BRANCH_NAME="${{ github.head_ref }}"
+          if [[ -n "$BRANCH_NAME" ]]; then
+            echo "Ensuring no preview environments remain for branch: $BRANCH_NAME"
+            
+            # Attempt cleanup even if the previous step failed
+            pnpm --filter @liam-hq/jobs exec trigger preview archive --branch "$BRANCH_NAME" 2>/dev/null || true
+            
+            echo "Cleanup check completed"
+          fi

@@ -9,9 +9,9 @@ describe('wordOverlapMatch', () => {
     wordOverlapMatch(reference, predict, mapping)
     expect(mapping).toEqual({
       'Payment Record': 'Payment',
-      // 'Medical Claim': 'MedicalRecord',
       'User Info': 'User Information',
     })
+    expect(mapping).not.toHaveProperty('Medical Claim')
   })
 
   it('does not map: no shared words between reference and predict names', () => {

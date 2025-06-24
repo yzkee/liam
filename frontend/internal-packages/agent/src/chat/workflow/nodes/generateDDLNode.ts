@@ -1,5 +1,5 @@
 import { QADDLGenerationAgent } from '../../../langchain/agents'
-import type { BasePromptVariables } from '../../../langchain/utils/types'
+import type { SchemaAwareChatVariables } from '../../../langchain/utils/types'
 import { convertSchemaToText } from '../../../utils/convertSchemaToText'
 import type { WorkflowState } from '../types'
 
@@ -40,7 +40,7 @@ export async function generateDDLNode(
 
     const { agent, schemaText } = await prepareDDLGeneration(state)
 
-    const promptVariables: BasePromptVariables = {
+    const promptVariables: SchemaAwareChatVariables = {
       schema_text: schemaText,
       chat_history: state.formattedHistory,
       user_message:

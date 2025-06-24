@@ -4,10 +4,3 @@
   align-items: center;
   gap: var(--spacing-3);
 }
-
-.sendButton {
-  min-width: var(--spacing-10);
-  height: var(--spacing-9);
-  font-size: var(--font-size-4);
-  font-weight: 500;
-}

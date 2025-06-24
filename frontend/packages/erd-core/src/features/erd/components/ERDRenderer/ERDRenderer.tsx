@@ -1,6 +1,5 @@
 import { NuqsAdapter } from 'nuqs/adapters/react'
 import '@xyflow/react/dist/style.css'
-import type { TableGroup } from '@liam-hq/db-structure'
 import {
   type ImperativePanelHandle,
   ResizableHandle,
@@ -25,10 +24,14 @@ import '@/styles/globals.css'
 import { toggleLogEvent } from '@/features/gtm/utils'
 import { useIsTouchDevice } from '@/hooks'
 import { useVersion } from '@/providers'
-import { SchemaProvider, useSchema } from '@/stores'
-import type { SchemaStore } from '@/stores/schema/schema'
+import { SchemaProvider, type SchemaProviderValue, useSchema } from '@/stores'
 import { UserEditingProvider, useUserEditing } from '@/stores/userEditing'
-import { convertSchemaToNodes, createHash } from '../../utils'
+import {
+  convertSchemaToNodes,
+  createHash,
+  setCookie,
+  setCookieJson,
+} from '../../utils'
 import { ERDContent } from '../ERDContent'
 import { CardinalityMarkers } from './CardinalityMarkers'
 import { CommandPalette } from './CommandPalette'
@@ -43,23 +46,22 @@ type InnerProps = {
   errorObjects?: ComponentProps<typeof ErrorDisplay>['errors']
   defaultPanelSizes?: number[]
   withAppBar?: boolean
-  tableGroups?: Record<string, TableGroup>
-  onAddTableGroup?: ((params: TableGroup) => void) | undefined
 }
 
 type Props = InnerProps & {
-  schema: SchemaStore
+  schema: SchemaProviderValue
+  showDiff?: boolean
 }
 
 const SIDEBAR_COOKIE_NAME = 'sidebar:state'
 const PANEL_LAYOUT_COOKIE_NAME = 'panels:layout'
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 7
 
-export const ERDRenderer: FC<Props> = ({ schema, ...innerProps }) => {
+export const ERDRenderer: FC<Props> = ({ schema, showDiff, ...innerProps }) => {
   return (
     <NuqsAdapter>
-      <UserEditingProvider>
-        <SchemaProvider schema={schema}>
+      <UserEditingProvider showDiff={showDiff}>
+        <SchemaProvider {...schema}>
           <ERDRendererInner {...innerProps} />
         </SchemaProvider>
       </UserEditingProvider>
@@ -72,23 +74,25 @@ const ERDRendererInner: FC<InnerProps> = ({
   errorObjects = [],
   defaultPanelSizes = [20, 80],
   withAppBar = false,
-  tableGroups = {},
-  onAddTableGroup,
 }) => {
   const [open, setOpen] = useState(defaultSidebarOpen)
   const [isResizing, setIsResizing] = useState(false)
 
-  const { showMode } = useUserEditing()
-  const { current } = useSchema()
+  const { showMode, showDiff } = useUserEditing()
+  const { current, merged } = useSchema()
+
+  const schema = useMemo(() => {
+    return showDiff && merged ? merged : current
+  }, [showDiff, merged, current])
+
   const schemaKey = useMemo(() => {
-    const str = JSON.stringify(current)
+    const str = JSON.stringify(schema)
     return createHash(str)
-  }, [current])
+  }, [schema])
 
   const { nodes, edges } = convertSchemaToNodes({
-    schema: current,
+    schema,
     showMode,
-    tableGroups,
   })
 
   const leftPanelRef = createRef<ImperativePanelHandle>()
@@ -110,13 +114,19 @@ const ERDRendererInner: FC<InnerProps> = ({
         ? leftPanelRef.current?.collapse()
         : leftPanelRef.current?.expand()
 
-      document.cookie = `${SIDEBAR_COOKIE_NAME}=${nextPanelState}; path=/; max-age=${COOKIE_MAX_AGE}`
+      setCookie(SIDEBAR_COOKIE_NAME, nextPanelState.toString(), {
+        path: '/',
+        maxAge: COOKIE_MAX_AGE,
+      })
     },
     [version, leftPanelRef],
   )
 
   const setWidth = useCallback((sizes: number[]) => {
-    document.cookie = `${PANEL_LAYOUT_COOKIE_NAME}=${JSON.stringify(sizes)}; path=/; max-age=${COOKIE_MAX_AGE}`
+    setCookieJson(PANEL_LAYOUT_COOKIE_NAME, sizes, {
+      path: '/',
+      maxAge: COOKIE_MAX_AGE,
+    })
   }, [])
 
   const isMobile = useIsTouchDevice()
@@ -173,7 +183,6 @@ const ERDRendererInner: FC<InnerProps> = ({
                         nodes={nodes}
                         edges={edges}
                         displayArea="main"
-                        onAddTableGroup={onAddTableGroup}
                       />
                       <TableDetailDrawer />
                     </>
@@ -181,7 +190,7 @@ const ERDRendererInner: FC<InnerProps> = ({
                 </TableDetailDrawerRoot>
                 {errorObjects.length === 0 && (
                   <div className={styles.toolbarWrapper}>
-                    <Toolbar withGroupButton={!!onAddTableGroup} />
+                    <Toolbar />
                   </div>
                 )}
               </main>

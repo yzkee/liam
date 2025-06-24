@@ -101,7 +101,11 @@ export const UploadSessionFormPresenter: FC<Props> = ({
         </div>
         <div className={styles.divider} />
         <div className={styles.buttonContainer}>
-          <SessionFormActions isPending={isPending || !selectedFile} />
+          <SessionFormActions
+            isPending={isPending}
+            hasContent={!!selectedFile}
+            onCancel={() => window.location.reload()}
+          />
         </div>
       </form>
     </div>

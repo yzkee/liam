@@ -1,11 +1,37 @@
 .wrapper {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  width: 100%;
+  border-radius: var(--border-radius-md) var(--border-radius-md) 0px 0px;
+  background: var(--global-muted-background);
+}
+
+.wrapperTableNameMode {
+  border-radius: var(--border-radius-md);
+}
+
+.diffBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 100%;
+  border-top-left-radius: var(--border-radius-md);
+  background-color: var(--overlay-10);
+}
+
+.diffBoxTableNameMode {
+  border-bottom-left-radius: var(--border-radius-md);
+}
+
+.container {
+  flex: 1;
   display: flex;
   padding: var(--spacing-2);
   align-items: center;
   gap: var(--spacing-1);
   border-radius: var(--border-radius-md) var(--border-radius-md) 0px 0px;
   background: var(--global-muted-background);
-  backdrop-filter: blur(8px);
   color: var(--overlay-60);
   text-overflow: ellipsis;
   font-size: var(--font-size-5);
@@ -13,29 +39,24 @@
   line-height: normal;
 }
 
-.wrapperTableNameMode {
-  border-bottom-left-radius: var(--border-radius-md);
-  border-bottom-right-radius: var(--border-radius-md);
+.containerTableNameMode {
+  border-radius: var(--border-radius-md);
+}
+
+.containerDiffView {
+  border-top-left-radius: var(--border-radius-none);
+  border-bottom-left-radius: var(--border-radius-none);
 }
 
 .tableIcon {
-  min-width: 16px;
+  min-width: 1rem;
+  width: 1rem;
 }
 
 .name {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-@media (min-width: 767px) {
-  .name {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    flex: 1;
-    min-width: 0;
-  }
 }
 
 .handle {

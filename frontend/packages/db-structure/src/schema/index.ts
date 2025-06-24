@@ -9,11 +9,7 @@ export {
   aTable,
   aUniqueConstraint,
 } from './factories.js'
-export type { SchemaOverride } from './overrideSchema.js'
-export {
-  overrideSchema,
-  schemaOverrideSchema,
-} from './overrideSchema.js'
+export { mergeSchemas } from './mergeSchema.js'
 export type {
   Cardinality,
   CheckConstraint,
@@ -30,8 +26,6 @@ export type {
   Relationships,
   Schema,
   Table,
-  TableGroup,
-  TableGroups,
   Tables,
   UniqueConstraint,
 } from './schema.js'
@@ -54,8 +48,6 @@ export {
   indexTypeSchema,
   indexUniqueSchema,
   schemaSchema,
-  tableGroupSchema,
-  tableGroupsSchema,
   tableNameSchema,
   tableSchema,
 } from './schema.js'

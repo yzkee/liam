@@ -1,7 +1,6 @@
-import { operationsSchema } from '@liam-hq/db-structure'
-import * as v from 'valibot'
 import { DatabaseSchemaBuildAgent } from '../../../langchain/agents'
-import type { BasePromptVariables } from '../../../langchain/utils/types'
+import type { BuildAgentResponse } from '../../../langchain/agents/databaseSchemaBuildAgent/agent'
+import type { SchemaAwareChatVariables } from '../../../langchain/utils/types'
 import { convertSchemaToText } from '../../../utils/convertSchemaToText'
 import type { WorkflowState } from '../types'
 
@@ -10,47 +9,6 @@ const NODE_NAME = 'designSchemaNode'
 interface PreparedSchemaDesign {
   agent: DatabaseSchemaBuildAgent
   schemaText: string
-}
-
-// Define schema for BuildAgent response validation
-const buildAgentResponseSchema = v.object({
-  message: v.string(),
-  schemaChanges: operationsSchema,
-})
-
-type BuildAgentResponse = v.InferOutput<typeof buildAgentResponseSchema>
-
-/**
- * Parse structured response from buildAgent using valibot for type safety
- */
-const parseStructuredResponse = (
-  response: string,
-): BuildAgentResponse | null => {
-  try {
-    // Try to parse as JSON first
-    const parsed: unknown = JSON.parse(response)
-
-    // Use valibot to validate and parse the structure
-    const validationResult = v.safeParse(buildAgentResponseSchema, parsed)
-
-    if (validationResult.success) {
-      return {
-        message: validationResult.output.message,
-        schemaChanges: validationResult.output.schemaChanges,
-      }
-    }
-
-    // Log validation issues for debugging
-    console.warn(
-      'BuildAgent response validation failed:',
-      validationResult.issues,
-    )
-    return null
-  } catch (error) {
-    // If JSON parsing fails, log the error and return null
-    console.warn('Failed to parse BuildAgent response as JSON:', error)
-    return null
-  }
 }
 
 /**
@@ -102,7 +60,7 @@ const handleSchemaChanges = async (
   }
 
   const buildingSchemaId = state.buildingSchemaId
-  const latestVersionNumber = state.latestVersionNumber || 0
+  const latestVersionNumber = state.latestVersionNumber
 
   return await applySchemaChanges(
     parsedResponse.schemaChanges,
@@ -111,28 +69,6 @@ const handleSchemaChanges = async (
     parsedResponse.message,
     state,
   )
-}
-
-/**
- * Handle buildAgent response processing
- */
-const handleBuildAgentResponse = async (
-  response: string,
-  state: WorkflowState,
-): Promise<WorkflowState> => {
-  const parsedResponse = parseStructuredResponse(response)
-
-  if (!parsedResponse) {
-    console.warn(
-      'Failed to parse buildAgent response as structured JSON, using raw response',
-    )
-    return {
-      ...state,
-      generatedAnswer: response,
-    }
-  }
-
-  return await handleSchemaChanges(parsedResponse, state)
 }
 
 async function prepareSchemaDesign(
@@ -161,7 +97,7 @@ export async function designSchemaNode(
   const { agent, schemaText } = await prepareSchemaDesign(state)
 
   // Create prompt variables directly
-  const promptVariables: BasePromptVariables = {
+  const promptVariables: SchemaAwareChatVariables = {
     schema_text: schemaText,
     chat_history: state.formattedHistory,
     user_message: state.userInput,
@@ -169,7 +105,7 @@ export async function designSchemaNode(
 
   // Use agent's generate method with prompt variables
   const response = await agent.generate(promptVariables)
-  const result = await handleBuildAgentResponse(response, state)
+  const result = await handleSchemaChanges(response, state)
 
   state.logger.log(`[${NODE_NAME}] Completed`)
   return result

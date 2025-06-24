@@ -5,8 +5,11 @@ import { ReactFlowProvider } from '@xyflow/react'
 import { NuqsTestingAdapter } from 'nuqs/adapters/testing'
 import { type FC, type ReactNode, useContext } from 'react'
 import { afterEach, describe, expect, it } from 'vitest'
-import { SchemaProvider, UserEditingProvider } from '@/stores'
-import type { SchemaStore } from '@/stores/schema/schema'
+import {
+  SchemaProvider,
+  type SchemaProviderValue,
+  UserEditingProvider,
+} from '@/stores'
 import { UserEditingContext } from '@/stores/userEditing/context'
 import { CommandPalette } from './CommandPalette'
 
@@ -14,7 +17,7 @@ afterEach(() => {
   cleanup()
 })
 
-const schema: SchemaStore = {
+const schema: SchemaProviderValue = {
   current: {
     tables: {
       users: aTable({ name: 'users' }),
@@ -22,7 +25,6 @@ const schema: SchemaStore = {
       follows: aTable({ name: 'follows' }),
       user_settings: aTable({ name: 'user_settings' }),
     },
-    tableGroups: {},
     relationships: {},
   },
 }
@@ -43,7 +45,7 @@ const wrapper = ({ children }: { children: ReactNode }) => (
     <ReactFlowProvider>
       <UserEditingProvider>
         <ActiveTableNameDisplay />
-        <SchemaProvider schema={schema}>{children}</SchemaProvider>
+        <SchemaProvider {...schema}>{children}</SchemaProvider>
       </UserEditingProvider>
     </ReactFlowProvider>
   </NuqsTestingAdapter>
@@ -180,6 +182,53 @@ describe('preview with option interactions', () => {
   })
 })
 
+describe('focus on options by single click', () => {
+  it('toggles option focus on single click', async () => {
+    const {
+      user,
+      elements: { dialog, preview },
+    } = await prepareCommandPalette()
+
+    const followsOption = within(dialog).getByRole('option', {
+      name: 'follows',
+    })
+    const usersOption = within(dialog).getByRole('option', { name: 'users' })
+
+    // focuses on "follows" option and displays a preview of the "follows" table
+    await user.click(followsOption.firstChild as Element)
+    await user.hover(usersOption)
+    expect(within(preview).getByText('follows')).toBeInTheDocument()
+
+    // removes focus from "follows" option and displays a preview of the hovered option
+    await user.click(followsOption.firstChild as Element)
+    await user.hover(usersOption)
+    expect(within(preview).getByText('users')).toBeInTheDocument()
+  })
+
+  it('updates the focus when another option is clicked', async () => {
+    const {
+      user,
+      elements: { dialog, preview },
+    } = await prepareCommandPalette()
+
+    const followsOption = within(dialog).getByRole('option', {
+      name: 'follows',
+    })
+    const postsOption = within(dialog).getByRole('option', { name: 'posts' })
+    const usersOption = within(dialog).getByRole('option', { name: 'users' })
+
+    // focuses on "follows" option and displays a preview of the "follows" table
+    await user.click(followsOption.firstChild as Element)
+    await user.hover(usersOption)
+    expect(within(preview).getByText('follows')).toBeInTheDocument()
+
+    // focuses on "posts" option and displays a preview of the "posts" table
+    await user.click(postsOption.firstChild as Element)
+    await user.hover(usersOption)
+    expect(within(preview).getByText('posts')).toBeInTheDocument()
+  })
+})
+
 describe('go to ERD with option select', () => {
   it('go to the table of clicked option and close dialog', async () => {
     const {
@@ -190,7 +239,10 @@ describe('go to ERD with option select', () => {
 
     expect(activeTableNameDisplay).toBeEmptyDOMElement()
 
-    await user.click(within(dialog).getByRole('option', { name: 'follows' }))
+    const followsOption = within(dialog).getByRole('option', {
+      name: 'follows',
+    })
+    await user.dblClick(followsOption.firstChild as Element)
 
     expect(dialog).not.toBeInTheDocument()
     expect(activeTableNameDisplay).toHaveTextContent(/^follows$/)

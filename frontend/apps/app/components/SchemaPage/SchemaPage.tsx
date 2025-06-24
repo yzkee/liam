@@ -7,11 +7,9 @@ import type { ComponentProps, FC } from 'react'
 import { TabsContent, TabsRoot } from '@/components'
 import { createClient } from '@/libs/db/server'
 import { ERDEditor } from './components/ERDEditor'
-import { OverrideEditor } from './components/OverrideEditor'
 import { SchemaHeader } from './components/SchemaHeader'
 import { DEFAULT_SCHEMA_TAB, SCHEMA_TAB } from './constants'
 import styles from './SchemaPage.module.css'
-import { safeApplySchemaOverride } from './utils/safeApplySchemaOverride'
 
 type Params = {
   projectId: string
@@ -26,7 +24,7 @@ async function getERDEditorContent({
   branchOrCommit,
   schemaFilePath,
 }: Params): Promise<Response> {
-  const blankSchema = { tables: {}, relationships: {}, tableGroups: {} }
+  const blankSchema = { tables: {}, relationships: {} }
   const supabase = await createClient()
 
   const { data: project } = await supabase
@@ -106,25 +104,6 @@ async function getERDEditorContent({
     Sentry.captureException(error)
   }
 
-  const { result, error: overrideError } = await safeApplySchemaOverride(
-    repositoryFullName,
-    branchOrCommit,
-    repository.github_installation_identifier,
-    schema,
-  )
-
-  if (overrideError) {
-    return {
-      schema: blankSchema,
-      defaultSidebarOpen: false,
-      errorObjects: [overrideError],
-    }
-  }
-
-  const { schema: overriddenSchema, tableGroups } = result || {
-    schema,
-    tableGroups: {},
-  }
   const cookieStore = await cookies()
   const defaultSidebarOpen = cookieStore.get('sidebar:state')?.value === 'true'
   const layoutCookie = cookieStore.get('panels:layout')
@@ -138,8 +117,7 @@ async function getERDEditorContent({
   })()
 
   return {
-    schema: overriddenSchema,
-    tableGroups,
+    schema,
     defaultSidebarOpen,
     defaultPanelSizes,
     errorObjects: errors.map((error) => ({
@@ -173,9 +151,6 @@ export const SchemaPage: FC<Props> = async ({
       <SchemaHeader />
       <TabsContent value={SCHEMA_TAB.ERD} className={styles.tabsContent}>
         <ERDEditor {...contentProps} />
-      </TabsContent>
-      <TabsContent value={SCHEMA_TAB.EDITOR} className={styles.tabsContent}>
-        <OverrideEditor />
       </TabsContent>
     </TabsRoot>
   )

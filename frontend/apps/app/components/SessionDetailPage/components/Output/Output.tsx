@@ -1,7 +1,7 @@
 import type { Schema } from '@liam-hq/db-structure'
 import type { FC } from 'react'
 import { TabsContent, TabsRoot } from '@/components'
-import type { ReviewComment } from '../../types'
+import type { ReviewComment, Version } from '../../types'
 import { Artifact } from './components/Artifact'
 import { ERD } from './components/ERD'
 import { Header } from './components/Header'
@@ -11,24 +11,36 @@ import styles from './Output.module.css'
 
 type Props = {
   schema: Schema
+  prevSchema: Schema | null
   schemaUpdatesDoc: string
   schemaUpdatesReviewComments: ReviewComment[]
   onQuickFix?: (comment: string) => void
   artifactDoc: string
+  designSessionId: string
+  currentVersion: Version | null
+  onCurrentVersionChange: (version: Version) => void
 }
 
 export const Output: FC<Props> = ({
   schema,
+  prevSchema,
   schemaUpdatesDoc,
   schemaUpdatesReviewComments,
   onQuickFix,
   artifactDoc,
+  designSessionId,
+  currentVersion,
+  onCurrentVersionChange,
 }) => {
   return (
     <TabsRoot defaultValue={DEFAULT_OUTPUT_TAB} className={styles.tabsRoot}>
-      <Header />
+      <Header
+        designSessionId={designSessionId}
+        currentVersion={currentVersion}
+        onCurrentVersionChange={onCurrentVersionChange}
+      />
       <TabsContent value={OUTPUT_TABS.ERD} className={styles.tabsContent}>
-        <ERD schema={schema} />
+        <ERD schema={schema} prevSchema={prevSchema ?? undefined} />
       </TabsContent>
       <TabsContent
         value={OUTPUT_TABS.SCHEMA_UPDATES}

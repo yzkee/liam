@@ -38,6 +38,7 @@ export const TableColumnList: FC<TableColumnListProps> = ({ data, filter }) => {
         return (
           <TableColumn
             key={column.name}
+            table={data.table}
             column={column}
             handleId={handleId}
             isSource={isSource}

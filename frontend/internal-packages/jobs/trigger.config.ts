@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { sentryEsbuildPlugin } from '@sentry/esbuild-plugin'
@@ -52,15 +53,12 @@ const findPrismaWasmFiles = () => {
 // Find PGLite files using glob patterns relative to the project root
 const findPgliteFiles = () => {
   const patterns = [
-    // Look in pnpm structure for PGLite files
-    'node_modules/.pnpm/@electric-sql+pglite@*/node_modules/@electric-sql/pglite/dist/pglite.data',
-    'node_modules/.pnpm/@electric-sql+pglite@*/node_modules/@electric-sql/pglite/dist/pglite.wasm',
+    // Look for locally copied files first (from postinstall script)
+    'frontend/internal-packages/jobs/pglite.data',
+    'frontend/internal-packages/jobs/pglite.wasm',
     // Look in workspace packages
     'frontend/packages/pglite-server/node_modules/@electric-sql/pglite/dist/pglite.data',
     'frontend/packages/pglite-server/node_modules/@electric-sql/pglite/dist/pglite.wasm',
-    // Fallback to standard node_modules locations
-    'node_modules/@electric-sql/pglite/dist/pglite.data',
-    'node_modules/@electric-sql/pglite/dist/pglite.wasm',
   ]
 
   const files: string[] = []
@@ -71,6 +69,25 @@ const findPgliteFiles = () => {
   }
 
   console.info('Found PGLite files:', files)
+
+  // If no files found, try to find them in the current jobs directory
+  if (files.length === 0) {
+    const localFiles = [
+      resolve(__dirname, 'pglite.data'),
+      resolve(__dirname, 'pglite.wasm'),
+    ]
+
+    // Use synchronous fs check
+    for (const file of localFiles) {
+      try {
+        if (existsSync(file)) {
+          files.push(file)
+        }
+      } catch (error) {
+        console.warn(`Could not check file existence: ${file}`, error)
+      }
+    }
+  }
 
   return files
 }
@@ -128,6 +145,7 @@ export default defineConfig({
       '@prisma/internals',
       '@prisma/prisma-schema-wasm',
       '@prisma/schema-files-loader',
+      '@electric-sql/pglite',
     ],
   },
   init: async () => {

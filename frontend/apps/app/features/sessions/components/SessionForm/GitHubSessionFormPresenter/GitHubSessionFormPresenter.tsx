@@ -1,5 +1,5 @@
 import { ArrowTooltipProvider } from '@liam-hq/ui'
-import type { ChangeEvent, FC } from 'react'
+import type { ChangeEvent, DragEvent, FC } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import type { Projects } from '@/components/CommonLayout/AppBar/ProjectsDropdownMenu/services/getProjects'
 import { AttachmentPreview } from '../AttachmentPreview'
@@ -42,6 +42,7 @@ export const GitHubSessionFormPresenter: FC<Props> = ({
   const [attachments, setAttachments] = useState<
     { id: string; url: string; name: string }[]
   >([])
+  const [dragActive, setDragActive] = useState(false)
 
   const handleFileSelect = (files: FileList) => {
     const newAttachments = Array.from(files).map((file) => ({
@@ -50,6 +51,26 @@ export const GitHubSessionFormPresenter: FC<Props> = ({
       name: file.name,
     }))
     setAttachments((prev) => [...prev, ...newAttachments])
+  }
+
+  const handleDrag = (e: DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true)
+    } else if (e.type === 'dragleave') {
+      setDragActive(false)
+    }
+  }
+
+  const handleDrop = (e: DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragActive(false)
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleFileSelect(e.dataTransfer.files)
+    }
   }
 
   const handleRemoveAttachment = (index: number) => {
@@ -88,7 +109,11 @@ export const GitHubSessionFormPresenter: FC<Props> = ({
   return (
     <ArrowTooltipProvider>
       <div
-        className={`${styles.container} ${isPending ? styles.pending : ''} ${hasError ? styles.error : ''}`}
+        className={`${styles.container} ${isPending ? styles.pending : ''} ${hasError ? styles.error : ''} ${dragActive ? styles.dragActive : ''}`}
+        onDragEnter={handleDrag}
+        onDragLeave={handleDrag}
+        onDragOver={handleDrag}
+        onDrop={handleDrop}
       >
         <form action={formAction}>
           <div className={styles.formContent}>

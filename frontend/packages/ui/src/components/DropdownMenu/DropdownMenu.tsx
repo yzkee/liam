@@ -108,4 +108,7 @@ export const DropdownMenuSeparator = () => {
 }
 
 // Re-export for custom implementations
-export { RadioItem as DropdownMenuPrimitiveRadioItem, ItemIndicator as DropdownMenuItemIndicator } from '@radix-ui/react-dropdown-menu'
+export {
+  ItemIndicator as DropdownMenuItemIndicator,
+  RadioItem as DropdownMenuPrimitiveRadioItem,
+} from '@radix-ui/react-dropdown-menu'

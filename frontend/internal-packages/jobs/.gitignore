@@ -7,3 +7,7 @@ dist
 
 # trigger.dev
 .trigger
+
+# pglite
+pglite.data
+pglite.wasm

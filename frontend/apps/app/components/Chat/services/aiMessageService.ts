@@ -16,7 +16,6 @@ interface SendChatMessageParams {
   message: string
   timelineItems: TimelineItemEntry[]
   designSession: DesignSession
-  setProgressMessages: (updater: (prev: string[]) => string[]) => void
   currentUserId: string
 }
 
@@ -67,16 +66,10 @@ const callChatAPI = async (
 }
 
 /**
- * Handles errors by clearing progress messages
+ * Handles errors
  */
-const handleChatError = (
-  error: unknown,
-  setProgressMessages: (updater: (prev: string[]) => string[]) => void,
-): SendChatMessageResult => {
+const handleChatError = (error: unknown): SendChatMessageResult => {
   console.error('Error in sendChatMessage:', error)
-
-  // Clear progress messages on error
-  setProgressMessages(() => [])
 
   return {
     success: false,
@@ -92,7 +85,6 @@ export const sendChatMessage = async ({
   message,
   timelineItems,
   designSession,
-  setProgressMessages,
   currentUserId,
 }: SendChatMessageParams): Promise<SendChatMessageResult> => {
   try {
@@ -115,11 +107,8 @@ export const sendChatMessage = async ({
       throw new Error(data.error || ERROR_MESSAGES.GENERAL)
     }
 
-    // Clear progress messages on success
-    setProgressMessages(() => [])
-
     return { success: true }
   } catch (error) {
-    return handleChatError(error, setProgressMessages)
+    return handleChatError(error)
   }
 }

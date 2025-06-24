@@ -34,7 +34,6 @@ export const Chat: FC<Props> = ({ schemaData, designSession }) => {
     currentUserId,
   )
   const [isLoading, startTransition] = useTransition()
-  const [progressMessages, setProgressMessages] = useState<string[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const autoStartExecuted = useRef(false)
 
@@ -78,7 +77,6 @@ export const Chat: FC<Props> = ({ schemaData, designSession }) => {
       message: content,
       timelineItems,
       designSession,
-      setProgressMessages,
       currentUserId,
     })
 
@@ -111,24 +109,9 @@ export const Chat: FC<Props> = ({ schemaData, designSession }) => {
     <div className={styles.wrapper}>
       <div className={styles.messagesContainer}>
         {/* Display all timeline items */}
-        {timelineItems.map((timelineItem, index) => {
-          // Check if this is the last AI timeline item and has progress messages
-          const isLastAITimelineItem =
-            timelineItem.role !== 'user' && index === timelineItems.length - 1
-          const shouldShowProgress =
-            progressMessages.length > 0 && isLastAITimelineItem
-
-          return (
-            <TimelineItem
-              key={timelineItem.id}
-              {...timelineItem}
-              progressMessages={
-                shouldShowProgress ? progressMessages : undefined
-              }
-              showProgress={shouldShowProgress}
-            />
-          )
-        })}
+        {timelineItems.map((timelineItem) => (
+          <TimelineItem key={timelineItem.id} {...timelineItem} />
+        ))}
         {isLoading && (
           <div className={styles.loadingIndicator}>
             <div className={styles.loadingDot} />

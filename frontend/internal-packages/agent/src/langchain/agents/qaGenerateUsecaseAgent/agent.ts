@@ -26,7 +26,7 @@ type GenerateUsecasesResponse = v.InferOutput<
 >
 
 export class QAGenerateUsecaseAgent
-  implements ChatAgent<GenerateUsecasesResponse>
+  implements ChatAgent<BasePromptVariables, GenerateUsecasesResponse>
 {
   private model: ReturnType<ChatOpenAI['withStructuredOutput']>
 

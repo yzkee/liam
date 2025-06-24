@@ -1,7 +1,6 @@
 import { QAGenerateUsecaseAgent } from '../../../langchain/agents'
 import type { Usecase } from '../../../langchain/agents/qaGenerateUsecaseAgent/agent'
 import type { BasePromptVariables } from '../../../langchain/utils/types'
-import { convertSchemaToText } from '../../../utils/convertSchemaToText'
 import type { WorkflowState } from '../types'
 
 const NODE_NAME = 'generateUsecaseNode'
@@ -74,7 +73,6 @@ export async function generateUsecaseNode(
   }
 
   const qaAgent = new QAGenerateUsecaseAgent()
-  const schemaText = convertSchemaToText(state.schemaData)
 
   // Create a user message that includes the analyzed requirements
   const requirementsText = formatAnalyzedRequirements(
@@ -83,7 +81,6 @@ export async function generateUsecaseNode(
   )
 
   const promptVariables: BasePromptVariables = {
-    schema_text: schemaText,
     chat_history: state.formattedHistory,
     user_message: requirementsText,
   }

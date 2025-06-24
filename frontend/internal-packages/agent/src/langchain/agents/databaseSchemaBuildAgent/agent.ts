@@ -3,7 +3,7 @@ import { operationsSchema } from '@liam-hq/db-structure'
 import { toJsonSchema } from '@valibot/to-json-schema'
 import * as v from 'valibot'
 import { createLangfuseHandler } from '../../utils/telemetry'
-import type { BasePromptVariables, ChatAgent } from '../../utils/types'
+import type { ChatAgent, SchemaAwareChatVariables } from '../../utils/types'
 import { buildAgentPrompt } from './prompts'
 
 // Define the response schema
@@ -14,7 +14,9 @@ const buildAgentResponseSchema = v.object({
 
 export type BuildAgentResponse = v.InferOutput<typeof buildAgentResponseSchema>
 
-export class DatabaseSchemaBuildAgent implements ChatAgent<BuildAgentResponse> {
+export class DatabaseSchemaBuildAgent
+  implements ChatAgent<SchemaAwareChatVariables, BuildAgentResponse>
+{
   private model: ReturnType<ChatOpenAI['withStructuredOutput']>
 
   constructor() {
@@ -27,7 +29,9 @@ export class DatabaseSchemaBuildAgent implements ChatAgent<BuildAgentResponse> {
     this.model = baseModel.withStructuredOutput(jsonSchema)
   }
 
-  async generate(variables: BasePromptVariables): Promise<BuildAgentResponse> {
+  async generate(
+    variables: SchemaAwareChatVariables,
+  ): Promise<BuildAgentResponse> {
     const formattedPrompt = await buildAgentPrompt.format(variables)
     const rawResponse = await this.model.invoke(formattedPrompt)
 

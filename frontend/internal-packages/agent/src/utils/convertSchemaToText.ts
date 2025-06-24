@@ -1,5 +1,4 @@
 import type { Schema } from '@liam-hq/db-structure'
-import { constraintsToRelationships } from '@liam-hq/db-structure'
 
 // Convert table data to text document
 const tableToDocument = (
@@ -34,19 +33,6 @@ const tableToDocument = (
   return `${tableDescription}${columnsText}${primaryKeyText}`
 }
 
-// Convert relationship data to text document
-const relationshipToDocument = (
-  relationshipName: string,
-  relationshipData: ReturnType<typeof constraintsToRelationships>[string],
-): string => {
-  return `Relationship: ${relationshipName}
-From Table: ${relationshipData.primaryTableName}
-From Column: ${relationshipData.primaryColumnName}
-To Table: ${relationshipData.foreignTableName}
-To Column: ${relationshipData.foreignColumnName}
-Type: ${relationshipData.cardinality || 'unknown'}\n`
-}
-
 // Convert schema data to text format
 export const convertSchemaToText = (schema: Schema): string => {
   let schemaText = 'FULL DATABASE SCHEMA:\n\n'
@@ -57,23 +43,6 @@ export const convertSchemaToText = (schema: Schema): string => {
     for (const [tableName, tableData] of Object.entries(schema.tables)) {
       const tableDoc = tableToDocument(tableName, tableData)
       schemaText = `${schemaText}${tableDoc}\n\n`
-    }
-  }
-
-  // Process relationships (derived from constraints)
-  if (schema.tables) {
-    const relationships = constraintsToRelationships(schema.tables)
-    if (Object.keys(relationships).length > 0) {
-      schemaText += 'RELATIONSHIPS:\n\n'
-      for (const [relationshipName, relationshipData] of Object.entries(
-        relationships,
-      )) {
-        const relationshipDoc = relationshipToDocument(
-          relationshipName,
-          relationshipData,
-        )
-        schemaText = `${schemaText}${relationshipDoc}\n\n`
-      }
     }
   }
 

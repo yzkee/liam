@@ -21,6 +21,8 @@ const STOP_WORDS = new Set(['the', 'a', 'an', 'of', 'record'])
  * Convert string to word set: tokenize, lowercase, and remove stop words
  */
 function toWordSet(str: string): Set<string> {
+  // NOTE: This is a simple implementation.
+  // Consider handling CamelCase and expanding the stop words list in the future.
   return new Set(
     str
       .toLowerCase()

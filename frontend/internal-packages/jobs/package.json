@@ -12,7 +12,6 @@
     "@liam-hq/agent": "workspace:*",
     "@liam-hq/db": "workspace:*",
     "@liam-hq/github": "workspace:*",
-    "@liam-hq/pglite-server": "workspace:*",
     "@octokit/auth-app": "7.2.1",
     "@octokit/rest": "21.1.1",
     "@sentry/node": "9.19.0",

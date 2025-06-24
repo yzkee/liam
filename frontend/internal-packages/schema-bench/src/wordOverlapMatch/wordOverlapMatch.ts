@@ -52,14 +52,16 @@ export function wordOverlapMatch(
   candidates: string[],
   mapping: Mapping,
 ): void {
+  // Track used candidates in a Set for O(1) lookup instead of O(n) Object.values().includes()
+  const usedCandidates = new Set(Object.values(mapping))
+
   for (const referenceName of references) {
     if (!(referenceName in mapping)) {
       for (const predictName of candidates) {
-        if (!Object.values(mapping).includes(predictName)) {
-          if (
-            wordOverlap(referenceName.toLowerCase(), predictName.toLowerCase())
-          ) {
+        if (!usedCandidates.has(predictName)) {
+          if (wordOverlap(referenceName, predictName)) {
             mapping[referenceName] = predictName
+            usedCandidates.add(predictName)
             break
           }
         }

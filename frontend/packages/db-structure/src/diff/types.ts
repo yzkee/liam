@@ -259,7 +259,7 @@ export type ConstraintDetailDiffItem = InferOutput<
   typeof constraintDetailDiffItemSchema
 >
 
-const tableRelatedDiffItemSchema = union([
+export const tableRelatedDiffItemSchema = union([
   tableDiffItemSchema,
   tableNameDiffItemSchema,
   tableCommentDiffItemSchema,
@@ -268,7 +268,7 @@ export type TableRelatedDiffItem = InferOutput<
   typeof tableRelatedDiffItemSchema
 >
 
-const columnRelatedDiffItemSchema = union([
+export const columnRelatedDiffItemSchema = union([
   columnDiffItemSchema,
   columnNameDiffItemSchema,
   columnCommentDiffItemSchema,

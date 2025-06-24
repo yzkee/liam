@@ -37,7 +37,6 @@ describe('postgresqlSchemaDeparser', () => {
         },
       },
       relationships: {},
-      tableGroups: {},
     }
 
     const result = postgresqlSchemaDeparser(schema)
@@ -76,7 +75,6 @@ describe('postgresqlSchemaDeparser', () => {
         },
       },
       relationships: {},
-      tableGroups: {},
     }
 
     const result = postgresqlSchemaDeparser(schema)
@@ -147,7 +145,6 @@ describe('postgresqlSchemaDeparser', () => {
         },
       },
       relationships: {},
-      tableGroups: {},
     }
 
     const result = postgresqlSchemaDeparser(schema)
@@ -188,7 +185,6 @@ describe('postgresqlSchemaDeparser', () => {
         },
       },
       relationships: {},
-      tableGroups: {},
     }
 
     const result = postgresqlSchemaDeparser(schema)
@@ -259,7 +255,6 @@ describe('postgresqlSchemaDeparser', () => {
         },
       },
       relationships: {},
-      tableGroups: {},
     }
 
     const result = postgresqlSchemaDeparser(schema)
@@ -283,7 +278,6 @@ describe('postgresqlSchemaDeparser', () => {
     const schema: Schema = {
       tables: {},
       relationships: {},
-      tableGroups: {},
     }
 
     const result = postgresqlSchemaDeparser(schema)

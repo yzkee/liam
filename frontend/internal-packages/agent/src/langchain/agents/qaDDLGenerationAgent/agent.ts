@@ -1,6 +1,6 @@
 import { ChatOpenAI } from '@langchain/openai'
 import { createLangfuseHandler } from '../../utils/telemetry'
-import type { BasePromptVariables, ChatAgent } from '../../utils/types'
+import type { ChatAgent, SchemaAwareChatVariables } from '../../utils/types'
 import { qaDDLGenerationPrompt } from './prompts'
 
 /**
@@ -9,7 +9,9 @@ import { qaDDLGenerationPrompt } from './prompts'
  * TODO: This LLM-based DDL generation is a temporary solution.
  * In the future, DDL will be generated mechanically without LLM.
  */
-export class QADDLGenerationAgent implements ChatAgent {
+export class QADDLGenerationAgent
+  implements ChatAgent<SchemaAwareChatVariables, string>
+{
   private model: ChatOpenAI
 
   constructor() {
@@ -19,7 +21,7 @@ export class QADDLGenerationAgent implements ChatAgent {
     })
   }
 
-  async generate(variables: BasePromptVariables): Promise<string> {
+  async generate(variables: SchemaAwareChatVariables): Promise<string> {
     const formattedPrompt = await qaDDLGenerationPrompt.format(variables)
     const response = await this.model.invoke(formattedPrompt)
     return response.content as string

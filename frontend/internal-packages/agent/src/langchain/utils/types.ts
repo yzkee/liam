@@ -1,9 +1,15 @@
 export interface BasePromptVariables {
-  schema_text: string
   chat_history: string
   user_message: string
 }
 
-export interface ChatAgent<T = string> {
-  generate(variables: BasePromptVariables): Promise<T>
+export interface SchemaAwareChatVariables extends BasePromptVariables {
+  schema_text: string
+}
+
+export interface ChatAgent<
+  TVariables = BasePromptVariables,
+  TResponse = string,
+> {
+  generate(variables: TVariables): Promise<TResponse>
 }

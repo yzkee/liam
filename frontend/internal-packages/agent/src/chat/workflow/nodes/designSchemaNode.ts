@@ -1,6 +1,6 @@
 import { DatabaseSchemaBuildAgent } from '../../../langchain/agents'
 import type { BuildAgentResponse } from '../../../langchain/agents/databaseSchemaBuildAgent/agent'
-import type { BasePromptVariables } from '../../../langchain/utils/types'
+import type { SchemaAwareChatVariables } from '../../../langchain/utils/types'
 import { convertSchemaToText } from '../../../utils/convertSchemaToText'
 import type { WorkflowState } from '../types'
 
@@ -60,7 +60,7 @@ const handleSchemaChanges = async (
   }
 
   const buildingSchemaId = state.buildingSchemaId
-  const latestVersionNumber = state.latestVersionNumber || 0
+  const latestVersionNumber = state.latestVersionNumber
 
   return await applySchemaChanges(
     parsedResponse.schemaChanges,
@@ -97,7 +97,7 @@ export async function designSchemaNode(
   const { agent, schemaText } = await prepareSchemaDesign(state)
 
   // Create prompt variables directly
-  const promptVariables: BasePromptVariables = {
+  const promptVariables: SchemaAwareChatVariables = {
     schema_text: schemaText,
     chat_history: state.formattedHistory,
     user_message: state.userInput,

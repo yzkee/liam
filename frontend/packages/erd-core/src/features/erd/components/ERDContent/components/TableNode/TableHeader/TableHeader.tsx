@@ -1,12 +1,14 @@
-import { Dot, Minus, Plus, Table2 } from '@liam-hq/ui'
+import { Table2 } from '@liam-hq/ui'
 import { Handle, Position } from '@xyflow/react'
 import clsx from 'clsx'
 import { type FC, type MouseEvent, useMemo } from 'react'
 import { match } from 'ts-pattern'
-import { getChangeStatus } from '@/features/diff/utils/getChangeStatus'
+import { DiffIcon } from '@/features/diff/components/DiffIcon'
+import diffStyles from '@/features/diff/styles/Diff.module.css'
 import type { TableNodeData } from '@/features/erd/types'
 import { useCustomReactflow } from '@/features/reactflow/hooks'
 import { useSchema, useUserEditing } from '@/stores'
+import { getChangeStatus } from './getChangeStatus'
 import styles from './TableHeader.module.css'
 
 type Props = {
@@ -15,28 +17,30 @@ type Props = {
 
 export const TableHeader: FC<Props> = ({ data }) => {
   const name = data.table.name
-  const { diffItems } = useSchema()
   const { showMode: _showMode, showDiff } = useUserEditing()
+  const { diffItems } = useSchema()
   const showMode = data.showMode ?? _showMode
 
   const isTarget = data.targetColumnCardinalities !== undefined
   const isSource = data.sourceColumnName !== undefined
 
-  const tableStatus = getChangeStatus({
-    tableId: name,
-    diffItems: diffItems ?? [],
-    kind: 'table',
-  })
+  // Only calculate diff-related values when showDiff is true
+  const changeStatus = useMemo(() => {
+    if (!showDiff) return undefined
+    return getChangeStatus({
+      tableId: name,
+      diffItems: diffItems ?? [],
+    })
+  }, [showDiff, name, diffItems])
 
-  const diffStyle = useMemo(
-    () =>
-      match(tableStatus)
-        .with('added', () => styles.addedBg)
-        .with('removed', () => styles.removedBg)
-        .with('modified', () => styles.modifiedBg)
-        .otherwise(() => undefined),
-    [tableStatus],
-  )
+  const diffStyle = useMemo(() => {
+    if (!showDiff || !changeStatus) return undefined
+    return match(changeStatus)
+      .with('added', () => diffStyles.addedBg)
+      .with('removed', () => diffStyles.removedBg)
+      .with('modified', () => diffStyles.modifiedBg)
+      .otherwise(() => undefined)
+  }, [showDiff, changeStatus])
 
   const { updateNode } = useCustomReactflow()
 
@@ -67,7 +71,7 @@ export const TableHeader: FC<Props> = ({ data }) => {
         showMode === 'TABLE_NAME' && styles.wrapperTableNameMode,
       )}
     >
-      {showDiff && (
+      {showDiff && changeStatus && (
         <div
           className={clsx(
             styles.diffBox,
@@ -75,17 +79,7 @@ export const TableHeader: FC<Props> = ({ data }) => {
             diffStyle,
           )}
         >
-          {match(tableStatus)
-            .with('added', () => (
-              <Plus className={clsx(styles.diffIcon, styles.addedIcon)} />
-            ))
-            .with('removed', () => (
-              <Minus className={clsx(styles.diffIcon, styles.removedIcon)} />
-            ))
-            .with('modified', () => (
-              <Dot className={clsx(styles.diffIcon, styles.modifiedIcon)} />
-            ))
-            .otherwise(() => null)}
+          <DiffIcon changeStatus={changeStatus} />
         </div>
       )}
 

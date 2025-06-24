@@ -1,63 +1,41 @@
 import { describe, expect, it } from 'vitest'
-import type { Tables } from '../schema/index.js'
+import { aColumn, aTable } from '../schema/index.js'
 import { constraintsToRelationships } from './constraintsToRelationships.js'
 
 describe('constraintsToRelationships', () => {
   it('should convert foreign key constraints to relationships', () => {
-    const tables: Tables = {
-      users: {
+    const tables = {
+      users: aTable({
         name: 'users',
         columns: {
-          id: {
+          id: aColumn({
             name: 'id',
             type: 'bigint',
             primary: true,
-            unique: false,
             notNull: true,
-            default: null,
-            check: null,
-            comment: null,
-          },
-          name: {
+          }),
+          name: aColumn({
             name: 'name',
             type: 'varchar',
-            primary: false,
-            unique: false,
             notNull: true,
-            default: null,
-            check: null,
-            comment: null,
-          },
+          }),
         },
-        indexes: {},
-        constraints: {},
-        comment: null,
-      },
-      posts: {
+      }),
+      posts: aTable({
         name: 'posts',
         columns: {
-          id: {
+          id: aColumn({
             name: 'id',
             type: 'bigint',
             primary: true,
-            unique: false,
             notNull: true,
-            default: null,
-            check: null,
-            comment: null,
-          },
-          user_id: {
+          }),
+          user_id: aColumn({
             name: 'user_id',
             type: 'bigint',
-            primary: false,
-            unique: false,
             notNull: true,
-            default: null,
-            check: null,
-            comment: null,
-          },
+          }),
         },
-        indexes: {},
         constraints: {
           fk_posts_user: {
             type: 'FOREIGN KEY',
@@ -69,8 +47,7 @@ describe('constraintsToRelationships', () => {
             deleteConstraint: 'CASCADE',
           },
         },
-        comment: null,
-      },
+      }),
     }
 
     const result = constraintsToRelationships(tables)
@@ -90,50 +67,34 @@ describe('constraintsToRelationships', () => {
   })
 
   it('should detect ONE_TO_ONE relationship when foreign key column is unique', () => {
-    const tables: Tables = {
-      users: {
+    const tables = {
+      users: aTable({
         name: 'users',
         columns: {
-          id: {
+          id: aColumn({
             name: 'id',
             type: 'bigint',
             primary: true,
-            unique: false,
             notNull: true,
-            default: null,
-            check: null,
-            comment: null,
-          },
+          }),
         },
-        indexes: {},
-        constraints: {},
-        comment: null,
-      },
-      profiles: {
+      }),
+      profiles: aTable({
         name: 'profiles',
         columns: {
-          id: {
+          id: aColumn({
             name: 'id',
             type: 'bigint',
             primary: true,
-            unique: false,
             notNull: true,
-            default: null,
-            check: null,
-            comment: null,
-          },
-          user_id: {
+          }),
+          user_id: aColumn({
             name: 'user_id',
             type: 'bigint',
-            primary: false,
             unique: true, // unique column
             notNull: true,
-            default: null,
-            check: null,
-            comment: null,
-          },
+          }),
         },
-        indexes: {},
         constraints: {
           fk_profiles_user: {
             type: 'FOREIGN KEY',
@@ -145,8 +106,7 @@ describe('constraintsToRelationships', () => {
             deleteConstraint: 'CASCADE',
           },
         },
-        comment: null,
-      },
+      }),
     }
 
     const result = constraintsToRelationships(tables)
@@ -155,50 +115,33 @@ describe('constraintsToRelationships', () => {
   })
 
   it('should detect ONE_TO_ONE relationship when column has UNIQUE constraint', () => {
-    const tables: Tables = {
-      users: {
+    const tables = {
+      users: aTable({
         name: 'users',
         columns: {
-          id: {
+          id: aColumn({
             name: 'id',
             type: 'bigint',
             primary: true,
-            unique: false,
             notNull: true,
-            default: null,
-            check: null,
-            comment: null,
-          },
+          }),
         },
-        indexes: {},
-        constraints: {},
-        comment: null,
-      },
-      profiles: {
+      }),
+      profiles: aTable({
         name: 'profiles',
         columns: {
-          id: {
+          id: aColumn({
             name: 'id',
             type: 'bigint',
             primary: true,
-            unique: false,
             notNull: true,
-            default: null,
-            check: null,
-            comment: null,
-          },
-          user_id: {
+          }),
+          user_id: aColumn({
             name: 'user_id',
             type: 'bigint',
-            primary: false,
-            unique: false, // not unique on column
             notNull: true,
-            default: null,
-            check: null,
-            comment: null,
-          },
+          }),
         },
-        indexes: {},
         constraints: {
           fk_profiles_user: {
             type: 'FOREIGN KEY',
@@ -215,8 +158,7 @@ describe('constraintsToRelationships', () => {
             columnName: 'user_id',
           },
         },
-        comment: null,
-      },
+      }),
     }
 
     const result = constraintsToRelationships(tables)
@@ -225,78 +167,49 @@ describe('constraintsToRelationships', () => {
   })
 
   it('should handle multiple foreign key constraints', () => {
-    const tables: Tables = {
-      users: {
+    const tables = {
+      users: aTable({
         name: 'users',
         columns: {
-          id: {
+          id: aColumn({
             name: 'id',
             type: 'bigint',
             primary: true,
-            unique: false,
             notNull: true,
-            default: null,
-            check: null,
-            comment: null,
-          },
+          }),
         },
-        indexes: {},
-        constraints: {},
-        comment: null,
-      },
-      categories: {
+      }),
+      categories: aTable({
         name: 'categories',
         columns: {
-          id: {
+          id: aColumn({
             name: 'id',
             type: 'bigint',
             primary: true,
-            unique: false,
             notNull: true,
-            default: null,
-            check: null,
-            comment: null,
-          },
+          }),
         },
-        indexes: {},
-        constraints: {},
-        comment: null,
-      },
-      posts: {
+      }),
+      posts: aTable({
         name: 'posts',
         columns: {
-          id: {
+          id: aColumn({
             name: 'id',
             type: 'bigint',
             primary: true,
-            unique: false,
             notNull: true,
-            default: null,
-            check: null,
-            comment: null,
-          },
-          user_id: {
+          }),
+          user_id: aColumn({
             name: 'user_id',
             type: 'bigint',
-            primary: false,
-            unique: false,
             notNull: true,
-            default: null,
-            check: null,
-            comment: null,
-          },
-          category_id: {
+          }),
+          category_id: aColumn({
             name: 'category_id',
             type: 'bigint',
-            primary: false,
-            unique: false,
             notNull: true,
-            default: null,
-            check: null,
-            comment: null,
-          },
+          }),
         },
-        indexes: {},
         constraints: {
           fk_posts_user: {
             type: 'FOREIGN KEY',
@@ -317,8 +230,7 @@ describe('constraintsToRelationships', () => {
             deleteConstraint: 'SET_NULL',
           },
         },
-        comment: null,
-      },
+      }),
     }
 
     const result = constraintsToRelationships(tables)
@@ -330,22 +242,17 @@ describe('constraintsToRelationships', () => {
   })
 
   it('should return empty object when no foreign key constraints exist', () => {
-    const tables: Tables = {
-      users: {
+    const tables = {
+      users: aTable({
         name: 'users',
         columns: {
-          id: {
+          id: aColumn({
             name: 'id',
             type: 'bigint',
             primary: true,
-            unique: false,
             notNull: true,
-            default: null,
-            check: null,
-            comment: null,
-          },
+          }),
         },
-        indexes: {},
         constraints: {
           pk_users: {
             type: 'PRIMARY KEY',
@@ -353,8 +260,7 @@ describe('constraintsToRelationships', () => {
             columnName: 'id',
           },
         },
-        comment: null,
-      },
+      }),
     }
 
     const result = constraintsToRelationships(tables)
@@ -363,42 +269,28 @@ describe('constraintsToRelationships', () => {
   })
 
   it('should ignore non-foreign key constraints', () => {
-    const tables: Tables = {
-      users: {
+    const tables = {
+      users: aTable({
         name: 'users',
         columns: {
-          id: {
+          id: aColumn({
             name: 'id',
             type: 'bigint',
             primary: true,
-            unique: false,
             notNull: true,
-            default: null,
-            check: null,
-            comment: null,
-          },
-          email: {
+          }),
+          email: aColumn({
             name: 'email',
             type: 'varchar',
-            primary: false,
             unique: true,
             notNull: true,
-            default: null,
-            check: null,
-            comment: null,
-          },
-          age: {
+          }),
+          age: aColumn({
             name: 'age',
             type: 'integer',
-            primary: false,
-            unique: false,
             notNull: true,
-            default: null,
-            check: null,
-            comment: null,
-          },
+          }),
         },
-        indexes: {},
         constraints: {
           pk_users: {
             type: 'PRIMARY KEY',
@@ -416,8 +308,7 @@ describe('constraintsToRelationships', () => {
             detail: 'age >= 0',
           },
         },
-        comment: null,
-      },
+      }),
     }
 
     const result = constraintsToRelationships(tables)

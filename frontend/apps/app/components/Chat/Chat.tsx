@@ -35,7 +35,22 @@ export const Chat: FC<Props> = ({ schemaData, designSession }) => {
   )
   const [isLoading, startTransition] = useTransition()
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const autoStartExecuted = useRef(false)
+
+  // Use sessionStorage to persist autoStartExecuted across component remounts
+  const getAutoStartExecuted = () => {
+    if (typeof window === 'undefined') return false
+    return (
+      sessionStorage.getItem(`autoStartExecuted_${designSession.id}`) === 'true'
+    )
+  }
+
+  const setAutoStartExecuted = (value: boolean) => {
+    if (typeof window === 'undefined') return
+    sessionStorage.setItem(
+      `autoStartExecuted_${designSession.id}`,
+      value.toString(),
+    )
+  }
 
   // Get current user ID on component mount
   useEffect(() => {
@@ -48,20 +63,19 @@ export const Chat: FC<Props> = ({ schemaData, designSession }) => {
 
   // Auto-start AI response for initial user message
   useEffect(() => {
-    if (!currentUserId || autoStartExecuted.current || isLoading) return
+    const autoStartExecuted = getAutoStartExecuted()
+
+    if (!currentUserId || autoStartExecuted || isLoading) return
 
     // Only auto-start if there's exactly one timeline item and it's from user
-    if (
-      designSession.timelineItems.length === 1 &&
-      designSession.timelineItems[0].type === 'user'
-    ) {
-      const initialTimelineItem = designSession.timelineItems[0]
-      autoStartExecuted.current = true
+    if (timelineItems.length === 1 && timelineItems[0].role === 'user') {
+      const initialTimelineItem = timelineItems[0]
+      setAutoStartExecuted(true)
       startTransition(() => {
         startAIResponse(initialTimelineItem.content)
       })
     }
-  }, [currentUserId, designSession.timelineItems, isLoading])
+  }, [currentUserId, isLoading, timelineItems, designSession.id])
 
   // Scroll to bottom when component mounts or messages change
   useEffect(() => {

@@ -1,9 +1,6 @@
-import type {
-  Cardinality,
-  ForeignKeyConstraint,
-  Relationships,
-  Tables,
-} from '../schema/index.js'
+import * as v from 'valibot'
+import type { Cardinality, Relationships, Tables } from '../schema/index.js'
+import { foreignKeyConstraintSchema } from '../schema/index.js'
 
 /**
  * Convert foreign key constraints to relationships for UI display
@@ -15,24 +12,27 @@ export const constraintsToRelationships = (tables: Tables): Relationships => {
 
   for (const table of Object.values(tables)) {
     for (const constraint of Object.values(table.constraints)) {
-      if (constraint.type === 'FOREIGN KEY') {
-        const foreignKeyConstraint = constraint as ForeignKeyConstraint
-        const cardinality = determineCardinality(
-          tables,
-          table.name,
-          foreignKeyConstraint.columnName,
-        )
+      const result = v.safeParse(foreignKeyConstraintSchema, constraint)
+      if (!result.success) {
+        continue
+      }
 
-        relationships[constraint.name] = {
-          name: constraint.name,
-          primaryTableName: foreignKeyConstraint.targetTableName,
-          primaryColumnName: foreignKeyConstraint.targetColumnName,
-          foreignTableName: table.name,
-          foreignColumnName: foreignKeyConstraint.columnName,
-          cardinality,
-          updateConstraint: foreignKeyConstraint.updateConstraint,
-          deleteConstraint: foreignKeyConstraint.deleteConstraint,
-        }
+      const foreignKeyConstraint = result.output
+      const cardinality = determineCardinality(
+        tables,
+        table.name,
+        foreignKeyConstraint.columnName,
+      )
+
+      relationships[constraint.name] = {
+        name: constraint.name,
+        primaryTableName: foreignKeyConstraint.targetTableName,
+        primaryColumnName: foreignKeyConstraint.targetColumnName,
+        foreignTableName: table.name,
+        foreignColumnName: foreignKeyConstraint.columnName,
+        cardinality,
+        updateConstraint: foreignKeyConstraint.updateConstraint,
+        deleteConstraint: foreignKeyConstraint.deleteConstraint,
       }
     }
   }

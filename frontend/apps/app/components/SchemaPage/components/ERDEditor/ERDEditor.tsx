@@ -1,7 +1,7 @@
 'use client'
 
 import type { Schema } from '@liam-hq/db-structure'
-import { type ComponentProps, type FC } from 'react'
+import type { ComponentProps, FC } from 'react'
 import { parse } from 'valibot'
 import { ERDRenderer } from '@/features'
 import { VersionProvider } from '@/providers'
@@ -25,7 +25,6 @@ export const ERDEditor: FC<Props> = ({
   projectId,
   branchOrCommit,
 }) => {
-
   const versionData = {
     version: '0.1.0', // NOTE: no maintained version for ERD Web
     gitHash: process.env.NEXT_PUBLIC_GIT_HASH,

@@ -11,7 +11,6 @@ import { OverrideEditor } from './components/OverrideEditor'
 import { SchemaHeader } from './components/SchemaHeader'
 import { DEFAULT_SCHEMA_TAB, SCHEMA_TAB } from './constants'
 import styles from './SchemaPage.module.css'
-import { safeApplySchemaOverride } from './utils/safeApplySchemaOverride'
 
 type Params = {
   projectId: string
@@ -106,22 +105,6 @@ async function getERDEditorContent({
     Sentry.captureException(error)
   }
 
-  const { result, error: overrideError } = await safeApplySchemaOverride(
-    repositoryFullName,
-    branchOrCommit,
-    repository.github_installation_identifier,
-    schema,
-  )
-
-  if (overrideError) {
-    return {
-      schema: blankSchema,
-      defaultSidebarOpen: false,
-      errorObjects: [overrideError],
-    }
-  }
-
-  const overriddenSchema = result || schema
   const cookieStore = await cookies()
   const defaultSidebarOpen = cookieStore.get('sidebar:state')?.value === 'true'
   const layoutCookie = cookieStore.get('panels:layout')
@@ -135,7 +118,7 @@ async function getERDEditorContent({
   })()
 
   return {
-    schema: overriddenSchema,
+    schema,
     defaultSidebarOpen,
     defaultPanelSizes,
     errorObjects: errors.map((error) => ({

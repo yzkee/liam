@@ -14,6 +14,16 @@ export async function executeDDLNode(
   try {
     state.logger.log(`[${NODE_NAME}] Started`)
 
+    console.log(`[${NODE_NAME}] Received ddlStatements:`, state.ddlStatements)
+    console.log(
+      `[${NODE_NAME}] ddlStatements type:`,
+      typeof state.ddlStatements,
+    )
+    console.log(
+      `[${NODE_NAME}] ddlStatements length:`,
+      state.ddlStatements?.length,
+    )
+
     if (!state.ddlStatements || !state.ddlStatements.trim()) {
       state.logger.log(`[${NODE_NAME}] No DDL statements to execute`)
       state.logger.log(`[${NODE_NAME}] Completed`)
@@ -26,6 +36,8 @@ export async function executeDDLNode(
       state.designSessionId,
       state.ddlStatements,
     )
+
+    console.log(`[${NODE_NAME}] Execution results:`, results)
 
     const hasErrors = results.some((result: SqlResult) => !result.success)
 

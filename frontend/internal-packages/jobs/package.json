@@ -12,6 +12,7 @@
     "@liam-hq/agent": "workspace:*",
     "@liam-hq/db": "workspace:*",
     "@liam-hq/github": "workspace:*",
+    "@liam-hq/pglite-server": "workspace:*",
     "@octokit/auth-app": "7.2.1",
     "@octokit/rest": "21.1.1",
     "@sentry/node": "9.19.0",
@@ -40,7 +41,7 @@
     "lint:biome": "biome check .",
     "lint:eslint": "eslint .",
     "lint:tsc": "tsc --noEmit",
-    "postinstall": "cp ../../packages/db-structure/node_modules/@ruby/prism/src/prism.wasm prism.wasm",
+    "postinstall": "cp ../../packages/db-structure/node_modules/@ruby/prism/src/prism.wasm prism.wasm && cp ../../packages/pglite-server/node_modules/@electric-sql/pglite/dist/pglite.data . && cp ../../packages/pglite-server/node_modules/@electric-sql/pglite/dist/pglite.wasm .",
     "test": "vitest --watch=false --passWithNoTests",
     "trigger:dev": "trigger dev"
   }

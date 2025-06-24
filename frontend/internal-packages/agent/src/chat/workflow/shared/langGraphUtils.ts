@@ -23,6 +23,8 @@ export const createAnnotations = () => {
     designSessionId: Annotation<string>,
     error: Annotation<string | undefined>,
 
+    ddlStatements: Annotation<string | undefined>,
+
     // Repository dependencies for data access
     repositories: Annotation<Repositories>,
 

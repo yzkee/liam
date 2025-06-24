@@ -49,8 +49,35 @@ const findPrismaWasmFiles = () => {
   return files
 }
 
+// Find PGLite files using glob patterns relative to the project root
+const findPgliteFiles = () => {
+  const patterns = [
+    // Look in pnpm structure for PGLite files
+    'node_modules/.pnpm/@electric-sql+pglite@*/node_modules/@electric-sql/pglite/dist/pglite.data',
+    'node_modules/.pnpm/@electric-sql+pglite@*/node_modules/@electric-sql/pglite/dist/pglite.wasm',
+    // Look in workspace packages
+    'frontend/packages/pglite-server/node_modules/@electric-sql/pglite/dist/pglite.data',
+    'frontend/packages/pglite-server/node_modules/@electric-sql/pglite/dist/pglite.wasm',
+    // Fallback to standard node_modules locations
+    'node_modules/@electric-sql/pglite/dist/pglite.data',
+    'node_modules/@electric-sql/pglite/dist/pglite.wasm',
+  ]
+
+  const files: string[] = []
+
+  for (const pattern of patterns) {
+    const found = globSync(pattern, { cwd: rootDir, absolute: true })
+    files.push(...found)
+  }
+
+  console.info('Found PGLite files:', files)
+
+  return files
+}
+
 // Find all WASM files and make paths relative for additionalFiles
 const prismaWasmFiles = findPrismaWasmFiles()
+const pgliteFiles = findPgliteFiles()
 
 export default defineConfig({
   project: triggerProjectId,
@@ -80,13 +107,13 @@ export default defineConfig({
         }),
         { placement: 'last', target: 'deploy' },
       ),
-      // Add all necessary WASM files
+      // Add all necessary WASM files and PGLite files
       additionalFiles({
-        files: ['prism.wasm', ...prismaWasmFiles],
+        files: ['prism.wasm', ...prismaWasmFiles, ...pgliteFiles],
       }),
       // Sync Vercel environment variables
       syncVercelEnvVars({
-        accessToken: process.env.VERCEL_ACCESS_TOKEN,
+        vercelAccessToken: process.env.VERCEL_ACCESS_TOKEN,
         projectId: process.env.VERCEL_PROJECT_ID,
       }),
     ],
@@ -118,7 +145,7 @@ export default defineConfig({
     Sentry.captureException(error, {
       extra: {
         taskId: task,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       },
     })
   },

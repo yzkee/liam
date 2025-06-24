@@ -1,6 +1,6 @@
 'use client'
 
-import { X } from 'lucide-react'
+import { X } from '@liam-hq/ui'
 import type { FC } from 'react'
 import styles from './AttachmentPreview.module.css'
 

@@ -53,3 +53,7 @@
 .button.disabled .icon {
   color: var(--overlay-30);
 }
+
+.hiddenInput {
+  display: none;
+}

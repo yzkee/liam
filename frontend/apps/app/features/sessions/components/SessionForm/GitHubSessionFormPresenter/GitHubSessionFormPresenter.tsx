@@ -2,6 +2,7 @@ import { ArrowTooltipProvider } from '@liam-hq/ui'
 import type { ChangeEvent, FC } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import type { Projects } from '@/components/CommonLayout/AppBar/ProjectsDropdownMenu/services/getProjects'
+import { AttachmentPreview } from '../AttachmentPreview'
 import type { Branch } from '../BranchesDropdown'
 import { BranchesDropdown } from '../BranchesDropdown'
 import { ProjectsDropdown } from '../ProjectsDropdown'
@@ -38,6 +39,27 @@ export const GitHubSessionFormPresenter: FC<Props> = ({
     defaultProjectId || '',
   )
   const [selectedBranchSha, setSelectedBranchSha] = useState('')
+  const [attachments, setAttachments] = useState<
+    { id: string; url: string; name: string }[]
+  >([])
+
+  const handleFileSelect = (files: FileList) => {
+    const newAttachments = Array.from(files).map((file) => ({
+      id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      url: URL.createObjectURL(file),
+      name: file.name,
+    }))
+    setAttachments((prev) => [...prev, ...newAttachments])
+  }
+
+  const handleRemoveAttachment = (index: number) => {
+    setAttachments((prev) => {
+      const updated = [...prev]
+      URL.revokeObjectURL(updated[index].url)
+      updated.splice(index, 1)
+      return updated
+    })
+  }
 
   const handleTextareaChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const textarea = e.target
@@ -70,6 +92,18 @@ export const GitHubSessionFormPresenter: FC<Props> = ({
       >
         <form action={formAction}>
           <div className={styles.formContent}>
+            {attachments.length > 0 && (
+              <div className={styles.attachmentsContainer}>
+                {attachments.map((attachment, index) => (
+                  <AttachmentPreview
+                    key={attachment.id}
+                    src={attachment.url}
+                    alt={attachment.name}
+                    onRemove={() => handleRemoveAttachment(index)}
+                  />
+                ))}
+              </div>
+            )}
             <div className={styles.formGroup}>
               <div className={styles.inputWrapper}>
                 <textarea
@@ -123,6 +157,7 @@ export const GitHubSessionFormPresenter: FC<Props> = ({
             <SessionFormActions
               isPending={isPending}
               hasContent={hasContent}
+              onFileSelect={handleFileSelect}
               onCancel={() => window.location.reload()}
             />
           </div>

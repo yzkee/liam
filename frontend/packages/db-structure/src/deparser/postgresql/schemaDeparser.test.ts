@@ -1,12 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { parse } from '../../parser/index.js'
 import type { Schema } from '../../schema/index.js'
 import { postgresqlSchemaDeparser } from './schemaDeparser.js'
-
-const expectGeneratedSQLToBeParseable = async (sql: string) => {
-  const parseResult = await parse(sql, 'postgres')
-  expect(parseResult.errors).toHaveLength(0)
-}
+import { expectGeneratedSQLToBeParseable } from './testUtils.js'
 
 describe('postgresqlSchemaDeparser', () => {
   it('should generate basic CREATE TABLE statement', async () => {

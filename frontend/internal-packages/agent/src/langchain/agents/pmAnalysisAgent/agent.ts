@@ -13,7 +13,9 @@ export const requirementsAnalysisSchema = v.object({
 
 type AnalysisResponse = v.InferOutput<typeof requirementsAnalysisSchema>
 
-export class PMAnalysisAgent implements ChatAgent<AnalysisResponse> {
+export class PMAnalysisAgent
+  implements ChatAgent<BasePromptVariables, AnalysisResponse>
+{
   private analysisModel: ReturnType<ChatOpenAI['withStructuredOutput']>
 
   constructor() {

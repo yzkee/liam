@@ -130,7 +130,7 @@ describe('postgresqlOperationDeparser', () => {
       await expectGeneratedSQLToBeParseable(result.value)
     })
 
-    it('should generate RENAME TABLE statement from replace operation', () => {
+    it('should generate RENAME TABLE statement from replace operation', async () => {
       const operation: Operation = {
         op: 'replace',
         path: '/tables/users/name',
@@ -143,6 +143,8 @@ describe('postgresqlOperationDeparser', () => {
       expect(result.value).toMatchInlineSnapshot(`
         "ALTER TABLE \"users\" RENAME TO \"user_accounts\";"
       `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
     })
   })
 
@@ -375,7 +377,7 @@ describe('postgresqlOperationDeparser', () => {
   })
 
   describe('constraint operations', () => {
-    it('should generate ADD CONSTRAINT PRIMARY KEY statement', () => {
+    it('should generate ADD CONSTRAINT PRIMARY KEY statement', async () => {
       const operation: Operation = {
         op: 'add',
         path: '/tables/users/constraints/pk_users_id',
@@ -392,9 +394,11 @@ describe('postgresqlOperationDeparser', () => {
       expect(result.value).toMatchInlineSnapshot(`
         "ALTER TABLE \"users\" ADD CONSTRAINT \"pk_users_id\" PRIMARY KEY (\"id\");"
       `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
     })
 
-    it('should generate ADD CONSTRAINT FOREIGN KEY statement', () => {
+    it('should generate ADD CONSTRAINT FOREIGN KEY statement', async () => {
       const operation: Operation = {
         op: 'add',
         path: '/tables/orders/constraints/fk_orders_user_id',
@@ -413,11 +417,13 @@ describe('postgresqlOperationDeparser', () => {
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
-        "ALTER TABLE \"orders\" ADD CONSTRAINT \"fk_orders_user_id\" FOREIGN KEY (\"user_id\") REFERENCES \"users\" (\"id\") ON UPDATE CASCADE ON DELETE SET_NULL;"
+        "ALTER TABLE \"orders\" ADD CONSTRAINT \"fk_orders_user_id\" FOREIGN KEY (\"user_id\") REFERENCES \"users\" (\"id\") ON UPDATE CASCADE ON DELETE SET NULL;"
       `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
     })
 
-    it('should generate ADD CONSTRAINT UNIQUE statement', () => {
+    it('should generate ADD CONSTRAINT UNIQUE statement', async () => {
       const operation: Operation = {
         op: 'add',
         path: '/tables/users/constraints/uk_users_email',
@@ -434,9 +440,11 @@ describe('postgresqlOperationDeparser', () => {
       expect(result.value).toMatchInlineSnapshot(`
         "ALTER TABLE \"users\" ADD CONSTRAINT \"uk_users_email\" UNIQUE (\"email\");"
       `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
     })
 
-    it('should generate ADD CONSTRAINT CHECK statement', () => {
+    it('should generate ADD CONSTRAINT CHECK statement', async () => {
       const operation: Operation = {
         op: 'add',
         path: '/tables/products/constraints/ck_products_price_positive',
@@ -453,9 +461,11 @@ describe('postgresqlOperationDeparser', () => {
       expect(result.value).toMatchInlineSnapshot(`
         "ALTER TABLE \"products\" ADD CONSTRAINT \"ck_products_price_positive\" CHECK (price > 0);"
       `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
     })
 
-    it('should generate DROP CONSTRAINT statement', () => {
+    it('should generate DROP CONSTRAINT statement', async () => {
       const operation: Operation = {
         op: 'remove',
         path: '/tables/users/constraints/pk_users_id',
@@ -467,9 +477,11 @@ describe('postgresqlOperationDeparser', () => {
       expect(result.value).toMatchInlineSnapshot(`
         "ALTER TABLE \"users\" DROP CONSTRAINT \"pk_users_id\";"
       `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
     })
 
-    it('should generate DROP CONSTRAINT for complex constraint name', () => {
+    it('should generate DROP CONSTRAINT for complex constraint name', async () => {
       const operation: Operation = {
         op: 'remove',
         path: '/tables/orders/constraints/fk_orders_user_id',
@@ -481,9 +493,11 @@ describe('postgresqlOperationDeparser', () => {
       expect(result.value).toMatchInlineSnapshot(`
         "ALTER TABLE \"orders\" DROP CONSTRAINT \"fk_orders_user_id\";"
       `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
     })
 
-    it('should generate DROP CONSTRAINT for table with complex name', () => {
+    it('should generate DROP CONSTRAINT for table with complex name', async () => {
       const operation: Operation = {
         op: 'remove',
         path: '/tables/user_profiles/constraints/uk_user_profiles_email',
@@ -495,6 +509,8 @@ describe('postgresqlOperationDeparser', () => {
       expect(result.value).toMatchInlineSnapshot(`
         "ALTER TABLE \"user_profiles\" DROP CONSTRAINT \"uk_user_profiles_email\";"
       `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
     })
   })
 })

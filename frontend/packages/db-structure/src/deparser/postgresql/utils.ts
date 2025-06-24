@@ -200,7 +200,11 @@ export function generateAddConstraintStatement(
       return `ALTER TABLE ${tableNameEscaped} ADD CONSTRAINT ${constraintName} PRIMARY KEY (${escapeIdentifier(constraint.columnName)});`
 
     case 'FOREIGN KEY':
-      return `ALTER TABLE ${tableNameEscaped} ADD CONSTRAINT ${constraintName} FOREIGN KEY (${escapeIdentifier(constraint.columnName)}) REFERENCES ${escapeIdentifier(constraint.targetTableName)} (${escapeIdentifier(constraint.targetColumnName)}) ON UPDATE ${constraint.updateConstraint} ON DELETE ${constraint.deleteConstraint};`
+      // TODO: Consider changing the internal representation of foreign key constraints
+      // from underscore format (SET_NULL, SET_DEFAULT, NO_ACTION) to space format
+      // (SET NULL, SET DEFAULT, NO ACTION) to match PostgreSQL syntax directly.
+      // This would be a breaking change requiring updates to all parsers and tests.
+      return `ALTER TABLE ${tableNameEscaped} ADD CONSTRAINT ${constraintName} FOREIGN KEY (${escapeIdentifier(constraint.columnName)}) REFERENCES ${escapeIdentifier(constraint.targetTableName)} (${escapeIdentifier(constraint.targetColumnName)}) ON UPDATE ${constraint.updateConstraint.replace('_', ' ')} ON DELETE ${constraint.deleteConstraint.replace('_', ' ')};`
 
     case 'UNIQUE':
       return `ALTER TABLE ${tableNameEscaped} ADD CONSTRAINT ${constraintName} UNIQUE (${escapeIdentifier(constraint.columnName)});`

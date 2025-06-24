@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest'
+import { parse } from '../../parser/index.js'
 import type { Schema } from '../../schema/index.js'
 import { postgresqlSchemaDeparser } from './schemaDeparser.js'
 
 describe('postgresqlSchemaDeparser', () => {
-  it('should generate basic CREATE TABLE statement', () => {
+  it('should generate basic CREATE TABLE statement', async () => {
     const schema: Schema = {
       tables: {
         users: {
@@ -48,6 +49,12 @@ describe('postgresqlSchemaDeparser', () => {
         \"email\" varchar(255) UNIQUE NOT NULL
       );"
     `)
+
+    // Verify the generated SQL can be parsed correctly
+    if (result.value) {
+      const parseResult = await parse(result.value, 'postgres')
+      expect(parseResult.errors).toHaveLength(0)
+    }
   })
 
   it('should generate CREATE TABLE with comments', () => {

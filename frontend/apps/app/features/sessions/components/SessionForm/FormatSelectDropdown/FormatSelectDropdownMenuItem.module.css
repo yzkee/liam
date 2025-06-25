@@ -34,6 +34,6 @@
 }
 
 .checkIcon {
-  color: var(--global-foreground);
+  color: var(--primary-color);
   flex-shrink: 0;
 }

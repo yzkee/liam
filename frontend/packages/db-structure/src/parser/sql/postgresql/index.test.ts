@@ -193,14 +193,25 @@ describe(processor, () => {
         );
       `)
 
+      // TODO: This test demonstrates the current behavior where we use defaultRelationshipName
+      // instead of PostgreSQL's standard naming convention.
+      //
+      // Current behavior: 'users_id_to_posts_user_id' (using defaultRelationshipName)
+      // Ideal behavior: 'posts_user_id_fkey' (PostgreSQL standard)
+      //
+      // PostgreSQL automatically generates constraint names in the format:
+      // <table>_<column>_fkey when no explicit name is provided.
+      //
+      // We should consider migrating to PostgreSQL's standard naming convention
+      // in a future major version to better reflect actual database behavior.
       expect(value.tables['posts']?.constraints).toEqual({
         PRIMARY_id: {
           name: 'PRIMARY_id',
           type: 'PRIMARY KEY',
           columnName: 'id',
         },
-        posts_user_id_fkey: {
-          name: 'posts_user_id_fkey',
+        users_id_to_posts_user_id: {
+          name: 'users_id_to_posts_user_id',
           type: 'FOREIGN KEY',
           columnName: 'user_id',
           targetColumnName: 'id',
@@ -230,8 +241,8 @@ describe(processor, () => {
           type: 'UNIQUE',
           columnName: 'user_id',
         },
-        posts_user_id_fkey: {
-          name: 'posts_user_id_fkey',
+        users_id_to_posts_user_id: {
+          name: 'users_id_to_posts_user_id',
           type: 'FOREIGN KEY',
           columnName: 'user_id',
           targetColumnName: 'id',

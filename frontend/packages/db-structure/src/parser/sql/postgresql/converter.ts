@@ -21,6 +21,7 @@ import type {
 } from '../../../schema/index.js'
 import { type ProcessError, UnexpectedTokenWarningError } from '../../errors.js'
 import type { ProcessResult } from '../../types.js'
+import { defaultRelationshipName } from '../../utils/index.js'
 
 function isStringNode(node: Node | undefined): node is { String: PgString } {
   return (
@@ -123,7 +124,13 @@ const constraintToForeignKeyConstraint = (
   }
 
   const name =
-    constraint.conname ?? `${foreignTableName}_${foreignColumnName}_fkey`
+    constraint.conname ??
+    defaultRelationshipName(
+      primaryTableName,
+      primaryColumnName,
+      foreignTableName,
+      foreignColumnName,
+    )
   const updateConstraint = getConstraintAction(constraint.fk_upd_action)
   const deleteConstraint = getConstraintAction(constraint.fk_del_action)
 

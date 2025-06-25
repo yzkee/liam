@@ -33,10 +33,10 @@ exports[`parse > should parse postgresql to JSON correctly 1`] = `
           "name": "PRIMARY_id",
           "type": "PRIMARY KEY",
         },
-        "posts_user_id_fkey": {
+        "users_id_to_posts_user_id": {
           "columnName": "user_id",
           "deleteConstraint": "NO_ACTION",
-          "name": "posts_user_id_fkey",
+          "name": "users_id_to_posts_user_id",
           "targetColumnName": "id",
           "targetTableName": "users",
           "type": "FOREIGN KEY",

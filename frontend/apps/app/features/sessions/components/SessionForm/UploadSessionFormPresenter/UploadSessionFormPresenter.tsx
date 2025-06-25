@@ -77,6 +77,7 @@ export const UploadSessionFormPresenter: FC<Props> = ({
           <div className={styles.uploadContainer}>
             <div
               className={`${styles.dropZone} ${schemaDragActive ? styles.dropZoneActive : ''}`}
+              onClick={handleSelectFile}
               onDragEnter={handleSchemaDrag}
               onDragLeave={handleSchemaDrag}
               onDragOver={handleSchemaDrag}

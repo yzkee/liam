@@ -41,7 +41,8 @@ export const DropZone: FC<Props> = ({
   }
 
   return (
-    <div
+    <button
+      type="button"
       className={clsx(
         styles.dropZone,
         schemaDragActive && styles.dropZoneActive,
@@ -55,8 +56,7 @@ export const DropZone: FC<Props> = ({
       onDrop={isPending ? undefined : onDrop}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      tabIndex={isPending ? -1 : 0}
-      role="button"
+      disabled={isPending}
       aria-label="Upload area - drag and drop or click to select schema file"
     >
       <div className={styles.dropZoneContent}>
@@ -97,6 +97,6 @@ export const DropZone: FC<Props> = ({
           Select File
         </Button>
       </div>
-    </div>
+    </button>
   )
 }

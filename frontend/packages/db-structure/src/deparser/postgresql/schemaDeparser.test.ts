@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import type { Schema } from '../../schema/index.js'
 import { postgresqlSchemaDeparser } from './schemaDeparser.js'
+import { expectGeneratedSQLToBeParseable } from './testUtils.js'
 
 describe('postgresqlSchemaDeparser', () => {
-  it('should generate basic CREATE TABLE statement', () => {
+  it('should generate basic CREATE TABLE statement', async () => {
     const schema: Schema = {
       tables: {
         users: {
@@ -47,9 +48,11 @@ describe('postgresqlSchemaDeparser', () => {
         \"email\" varchar(255) UNIQUE NOT NULL
       );"
     `)
+
+    await expectGeneratedSQLToBeParseable(result.value)
   })
 
-  it('should generate CREATE TABLE with comments', () => {
+  it('should generate CREATE TABLE with comments', async () => {
     const schema: Schema = {
       tables: {
         products: {
@@ -85,9 +88,11 @@ describe('postgresqlSchemaDeparser', () => {
       COMMENT ON TABLE \"products\" IS 'Product table';
       COMMENT ON COLUMN \"products\".\"id\" IS 'Product ID';"
     `)
+
+    await expectGeneratedSQLToBeParseable(result.value)
   })
 
-  it('should generate CREATE TABLE with default values', () => {
+  it('should generate CREATE TABLE with default values', async () => {
     const schema: Schema = {
       tables: {
         settings: {
@@ -153,9 +158,11 @@ describe('postgresqlSchemaDeparser', () => {
         \"title\" varchar(50) DEFAULT 'Default Title'
       );"
     `)
+
+    await expectGeneratedSQLToBeParseable(result.value)
   })
 
-  it('should handle string escaping in comments', () => {
+  it('should handle string escaping in comments', async () => {
     const schema: Schema = {
       tables: {
         test: {
@@ -193,9 +200,11 @@ describe('postgresqlSchemaDeparser', () => {
       COMMENT ON COLUMN \"test\".\"id\" IS 'Column with ''quotes'' in comment';"
     `,
     )
+
+    await expectGeneratedSQLToBeParseable(result.value)
   })
 
-  it('should handle multiple tables', () => {
+  it('should handle multiple tables', async () => {
     const schema: Schema = {
       tables: {
         users: {
@@ -261,9 +270,11 @@ describe('postgresqlSchemaDeparser', () => {
         \"name\" varchar(100) NOT NULL
       );"
     `)
+
+    await expectGeneratedSQLToBeParseable(result.value)
   })
 
-  it('should handle empty schema', () => {
+  it('should handle empty schema', async () => {
     const schema: Schema = {
       tables: {},
       relationships: {},
@@ -273,5 +284,7 @@ describe('postgresqlSchemaDeparser', () => {
 
     expect(result.errors).toHaveLength(0)
     expect(result.value).toBe('')
+
+    await expectGeneratedSQLToBeParseable(result.value)
   })
 })

@@ -55,6 +55,7 @@ export {
   Upload,
   Users,
   Waypoints,
+  X,
   XCircle,
   XIcon,
 } from 'lucide-react'

@@ -117,8 +117,12 @@ For database migration and type generation workflows, see [`docs/migrationOpsCon
 - Generate CSS type definitions with `pnpm gen:css`
 - Watch mode available with `pnpm dev:css`
 
+## Pull Requests
+When creating pull requests, refer to @.github/pull_request_template.md for the required information and format.
+
 ## Important Files
 - `frontend/apps/docs/content/docs/contributing/repository-architecture.mdx` - Detailed package structure
 - `.cursorrules` - Contains detailed coding standards and guidelines
 - `turbo.json` - Build system configuration
 - `biome.jsonc` - Linting and formatting configuration
+- `.github/pull_request_template.md` - Pull request template

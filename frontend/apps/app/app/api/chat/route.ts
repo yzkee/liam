@@ -1,4 +1,6 @@
+import { createHash } from 'node:crypto'
 import { processChatTask } from '@liam-hq/jobs'
+import { idempotencyKeys } from '@trigger.dev/sdk'
 import { NextResponse } from 'next/server'
 import * as v from 'valibot'
 
@@ -28,9 +30,19 @@ export async function POST(request: Request) {
     )
   }
 
-  // Trigger the chat processing job
-  await processChatTask.trigger({
-    ...validationResult.output,
+  // Generate idempotency key based on the payload
+  // This ensures the same request won't be processed multiple times
+  const payloadHash = createHash('sha256')
+    .update(JSON.stringify(validationResult.output))
+    .digest('hex')
+
+  const idempotencyKey = await idempotencyKeys.create(
+    `chat-${validationResult.output.designSessionId}-${payloadHash}`,
+  )
+
+  // Trigger the chat processing job with idempotency key
+  await processChatTask.trigger(validationResult.output, {
+    idempotencyKey,
   })
 
   return NextResponse.json({

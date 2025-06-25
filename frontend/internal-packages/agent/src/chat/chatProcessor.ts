@@ -45,22 +45,6 @@ export const processChatMessage = async (
     userId,
   } = params
 
-  // Save user timeline item to database
-  const saveResult = await repositories.schema.createTimelineItem({
-    designSessionId,
-    content: message,
-    type: 'user',
-    userId,
-  })
-
-  if (!saveResult.success) {
-    console.error('Failed to save user timeline item:', saveResult.error)
-    return {
-      success: false,
-      error: saveResult.error,
-    }
-  }
-
   // Convert history format with role prefix
   const historyArray = history.map(([role, content]) => {
     const prefix = role === 'assistant' ? 'Assistant' : 'User'

@@ -349,14 +349,14 @@
 }
 
 .invalidIcon {
-  color: var(--warning);
+  color: var(--severity-warning-100);
   width: var(--spacing-3);
   height: var(--spacing-3);
 }
 
 .invalidSchemaText {
   font-size: var(--font-size-2);
-  color: var(--warning);
+  color: var(--severity-warning-100);
   font-weight: var(--font-weight-regular);
   white-space: nowrap;
 }

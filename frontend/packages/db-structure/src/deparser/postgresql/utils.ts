@@ -3,7 +3,10 @@ import type { Column, Constraint, Index, Table } from '../../schema/index.js'
 /**
  * Generate column definition as DDL string
  */
-function generateColumnDefinition(column: Column): string {
+function generateColumnDefinition(
+  column: Column,
+  isPrimaryKey = false,
+): string {
   let definition = `${escapeIdentifier(column.name)} ${column.type}`
 
   // Add constraints (following PostgreSQL common order)
@@ -11,7 +14,8 @@ function generateColumnDefinition(column: Column): string {
     definition += ' UNIQUE'
   }
 
-  if (column.notNull) {
+  // Don't add NOT NULL if this will be a PRIMARY KEY
+  if (column.notNull && !isPrimaryKey) {
     definition += ' NOT NULL'
   }
 
@@ -80,30 +84,28 @@ export function generateAddColumnStatement(
 export function generateCreateTableStatement(table: Table): string {
   const tableName = table.name
 
-  // Generate column definitions
-  const columnDefinitions = (Object.values(table.columns) as Column[]).map(
-    (column) => generateColumnDefinition(column),
-  )
-
-  // Process PRIMARY KEY constraints inline
+  // First, identify which columns are primary keys
+  const primaryKeyColumns = new Set<string>()
   for (const constraint of Object.values(table.constraints)) {
     if (constraint.type === 'PRIMARY KEY') {
-      // Add PRIMARY KEY directly to the column definition instead of as separate constraint
-      const colIndex = columnDefinitions.findIndex((def) =>
-        def.includes(escapeIdentifier(constraint.columnName)),
-      )
-      if (
-        colIndex !== -1 &&
-        columnDefinitions[colIndex] &&
-        !columnDefinitions[colIndex].includes('PRIMARY KEY')
-      ) {
-        columnDefinitions[colIndex] = columnDefinitions[colIndex].replace(
-          new RegExp(`(${escapeIdentifier(constraint.columnName)}\\s+\\S+)`),
-          '$1 PRIMARY KEY',
-        )
-      }
+      primaryKeyColumns.add(constraint.columnName)
     }
   }
+
+  // Generate column definitions
+  const columnDefinitions = (Object.values(table.columns) as Column[]).map(
+    (column) => {
+      const isPrimaryKey = primaryKeyColumns.has(column.name)
+      let definition = generateColumnDefinition(column, isPrimaryKey)
+
+      // Add PRIMARY KEY inline if this column is a primary key
+      if (isPrimaryKey) {
+        definition += ' PRIMARY KEY'
+      }
+
+      return definition
+    },
+  )
 
   // Basic CREATE TABLE statement
   let ddl = `CREATE TABLE ${escapeIdentifier(tableName)} (\n  ${columnDefinitions.join(',\n  ')}\n);`

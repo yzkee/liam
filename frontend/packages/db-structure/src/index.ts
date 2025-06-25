@@ -17,7 +17,6 @@ export {
   schemaDiffItemsSchema,
   tableRelatedDiffItemSchema,
 } from './diff/index.js'
-export { migratePrimaryToConstraints } from './migrations/migratePrimaryToConstraints.js'
 export { applyPatchOperations, operationsSchema } from './operation/index.js'
 export type { ProcessError } from './parser.js'
 export {

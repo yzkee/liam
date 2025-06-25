@@ -5,6 +5,7 @@ import { type FC, useEffect, useRef, useState, useTransition } from 'react'
 import { ChatInput } from '../ChatInput'
 import { TimelineItem } from '../TimelineItem'
 import styles from './Chat.module.css'
+import { useAutoStartExecuted } from './hooks/useAutoStartExecuted'
 import {
   type TimelineItemType,
   useRealtimeTimelineItems,
@@ -33,22 +34,9 @@ export const Chat: FC<Props> = ({ schemaData, designSession }) => {
     useRealtimeTimelineItems(designSession, currentUserId)
   const [isLoading, startTransition] = useTransition()
   const messagesEndRef = useRef<HTMLDivElement>(null)
-
-  // Use sessionStorage to persist autoStartExecuted across component remounts
-  const getAutoStartExecuted = () => {
-    if (typeof window === 'undefined') return false
-    return (
-      sessionStorage.getItem(`autoStartExecuted_${designSession.id}`) === 'true'
-    )
-  }
-
-  const setAutoStartExecuted = (value: boolean) => {
-    if (typeof window === 'undefined') return
-    sessionStorage.setItem(
-      `autoStartExecuted_${designSession.id}`,
-      value.toString(),
-    )
-  }
+  const { autoStartExecuted, setAutoStartExecuted } = useAutoStartExecuted(
+    designSession.id,
+  )
 
   // Get current user ID on component mount
   useEffect(() => {
@@ -61,8 +49,6 @@ export const Chat: FC<Props> = ({ schemaData, designSession }) => {
 
   // Auto-start AI response for initial user message
   useEffect(() => {
-    const autoStartExecuted = getAutoStartExecuted()
-
     if (!currentUserId || autoStartExecuted || isLoading) return
 
     // Only auto-start if there's exactly one timeline item and it's from user
@@ -76,7 +62,13 @@ export const Chat: FC<Props> = ({ schemaData, designSession }) => {
         startAIResponse(initialTimelineItem.content)
       })
     }
-  }, [currentUserId, isLoading, realtimeTimelineItems, designSession.id])
+  }, [
+    currentUserId,
+    isLoading,
+    realtimeTimelineItems,
+    autoStartExecuted,
+    setAutoStartExecuted,
+  ])
 
   // Scroll to bottom when component mounts or messages change
   useEffect(() => {

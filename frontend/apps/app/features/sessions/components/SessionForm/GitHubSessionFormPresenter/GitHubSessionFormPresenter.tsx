@@ -1,4 +1,5 @@
 import { ArrowTooltipProvider } from '@liam-hq/ui'
+import clsx from 'clsx'
 import type { ChangeEvent, DragEvent, FC } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import type { Projects } from '@/components/CommonLayout/AppBar/ProjectsDropdownMenu/services/getProjects'
@@ -109,7 +110,12 @@ export const GitHubSessionFormPresenter: FC<Props> = ({
   return (
     <ArrowTooltipProvider>
       <div
-        className={`${styles.container} ${isPending ? styles.pending : ''} ${hasError ? styles.error : ''} ${dragActive ? styles.dragActive : ''}`}
+        className={clsx(
+          styles.container,
+          isPending && styles.pending,
+          hasError && styles.error,
+          dragActive && styles.dragActive,
+        )}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
         onDragOver={handleDrag}

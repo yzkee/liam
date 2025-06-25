@@ -25,5 +25,3 @@ export const AttachmentPreview: FC<Props> = ({ src, alt, onRemove }) => {
     </div>
   )
 }
-
-AttachmentPreview.displayName = 'AttachmentPreview'

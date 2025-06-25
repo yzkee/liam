@@ -175,8 +175,7 @@ describe(processor, () => {
     })
 
     // FIXME: `CONSTRAINT` statement is not supported yet
-    it.skip('foreign key (one-to-many)', async () => {
-      // const keyName = 'fk_posts_user_id'
+    it.skip('foreign key constraint in CREATE TABLE', async () => {
       await processor(/* sql */ `
         CREATE TABLE posts (
           id BIGSERIAL PRIMARY KEY,
@@ -184,11 +183,6 @@ describe(processor, () => {
           CONSTRAINT fk_posts_user_id FOREIGN KEY (user_id) REFERENCES users(id)
         );
       `)
-
-      // Relationship assertion removed - relationships are now derived from constraints
-      // expect(value.relationships).toEqual(
-      //   parserTestCases['foreign key (one-to-many)'](keyName),
-      // )
     })
 
     it('foreign key with omit key name', async () => {
@@ -199,12 +193,6 @@ describe(processor, () => {
         );
       `)
 
-      // Relationship assertion removed - relationships are now derived from constraints
-      // expect(value.relationships).toEqual(
-      //   parserTestCases['foreign key (one-to-many)'](
-      //     'users_id_to_posts_user_id',
-      //   ),
-      // )
       expect(value.tables['posts']?.constraints).toEqual({
         PRIMARY_id: {
           name: 'PRIMARY_id',
@@ -223,8 +211,7 @@ describe(processor, () => {
       })
     })
 
-    it('foreign key (one-to-one)', async () => {
-      // const keyName = 'users_id_to_posts_user_id'
+    it('foreign key constraint (one-to-one)', async () => {
       const { value } = await processor(/* sql */ `
         CREATE TABLE posts (
           id BIGSERIAL PRIMARY KEY,
@@ -232,10 +219,6 @@ describe(processor, () => {
         );
       `)
 
-      // Relationship assertion removed - relationships are now derived from constraints
-      // expect(value.relationships).toEqual(
-      //   parserTestCases['foreign key (one-to-one)'](keyName),
-      // )
       expect(value.tables['posts']?.constraints).toEqual({
         PRIMARY_id: {
           name: 'PRIMARY_id',
@@ -284,7 +267,7 @@ describe(processor, () => {
   })
 
   describe('should parse ALTER TABLE statement correctly', () => {
-    it('foreign key (one-to-many)', async () => {
+    it('foreign key constraint (one-to-many)', async () => {
       const keyName = 'fk_posts_user_id'
       const { value } = await processor(/* sql */ `
         CREATE TABLE posts (
@@ -296,10 +279,6 @@ describe(processor, () => {
         ADD CONSTRAINT ${keyName} FOREIGN KEY (user_id) REFERENCES users(id);
       `)
 
-      // Relationship assertion removed - relationships are now derived from constraints
-      // expect(value.relationships).toEqual(
-      //   parserTestCases['foreign key (one-to-many)'](keyName),
-      // )
       expect(value.tables['posts']?.constraints).toEqual({
         PRIMARY_id: {
           name: 'PRIMARY_id',
@@ -318,8 +297,7 @@ describe(processor, () => {
       })
     })
 
-    it('foreign key (one-to-one)', async () => {
-      // const keyName = 'users_id_to_posts_user_id'
+    it('foreign key constraint (one-to-one)', async () => {
       const { value } = await processor(/* sql */ `
         CREATE TABLE posts (
             id SERIAL PRIMARY KEY,
@@ -330,10 +308,6 @@ describe(processor, () => {
         ADD CONSTRAINT users_id_to_posts_user_id FOREIGN KEY (user_id) REFERENCES users(id);
       `)
 
-      // Relationship assertion removed - relationships are now derived from constraints
-      // expect(value.relationships).toEqual(
-      //   parserTestCases['foreign key (one-to-one)'](keyName),
-      // )
       expect(value.tables['posts']?.constraints).toEqual({
         PRIMARY_id: {
           name: 'PRIMARY_id',
@@ -368,10 +342,6 @@ describe(processor, () => {
         ADD CONSTRAINT fk_posts_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE RESTRICT ON DELETE CASCADE;
       `)
 
-      // Relationship assertion removed - relationships are now derived from constraints
-      // expect(value.relationships).toEqual(
-      //   parserTestCases['foreign key with action'],
-      // )
       expect(value.tables['posts']?.constraints).toEqual({
         PRIMARY_id: {
           name: 'PRIMARY_id',

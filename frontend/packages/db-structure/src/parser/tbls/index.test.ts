@@ -693,10 +693,5 @@ describe(processor, () => {
         expect(value.tables['users']?.constraints).toEqual(expected)
       })
     })
-
-    // TODO: Re-implement these tests using constraintsToRelationships
-    // describe('relationship', () => {
-    //   Tests removed as relationships are now derived from constraints
-    // })
   })
 })

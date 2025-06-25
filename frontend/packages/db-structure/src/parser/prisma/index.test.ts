@@ -229,8 +229,7 @@ describe(_processor, () => {
       expect(value).toEqual(expected)
     })
 
-    it('relationship (one-to-many)', async () => {
-      // const keyName = 'postsTousers'
+    it('foreign key constraint (one-to-many)', async () => {
       const { value } = await processor(`
         model users {
           id   BigInt    @id @default(autoincrement())
@@ -244,10 +243,6 @@ describe(_processor, () => {
         }
       `)
 
-      // Relationship assertion removed - relationships are now derived from constraints
-      // expect(value.relationships).toEqual(
-      //   parserTestCases['foreign key (one-to-many)'](keyName),
-      // )
       expect(value.tables['posts']?.constraints['postsTousers']).toEqual({
         type: 'FOREIGN KEY',
         name: 'postsTousers',
@@ -259,8 +254,7 @@ describe(_processor, () => {
       })
     })
 
-    it('relationship (one-to-one)', async () => {
-      // const keyName = 'postsTousers'
+    it('foreign key constraint (one-to-one)', async () => {
       const { value } = await processor(`
         model users {
           id   BigInt    @id @default(autoincrement())
@@ -274,10 +268,6 @@ describe(_processor, () => {
         }
       `)
 
-      // Relationship assertion removed - relationships are now derived from constraints
-      // expect(value.relationships).toEqual(
-      //   parserTestCases['foreign key (one-to-one)'](keyName),
-      // )
       expect(value.tables['posts']?.constraints['postsTousers']).toEqual({
         type: 'FOREIGN KEY',
         name: 'postsTousers',
@@ -314,19 +304,6 @@ describe(_processor, () => {
           }
         `)
 
-          // Relationship assertion removed - relationships are now derived from constraints
-          // expect(value.relationships).toEqual({
-          //   postsTousers: {
-          //     name: 'postsTousers',
-          //     primaryTableName: 'users',
-          //     primaryColumnName: 'id',
-          //     foreignTableName: 'posts',
-          //     foreignColumnName: 'user_id',
-          //     cardinality: 'ONE_TO_MANY',
-          //     updateConstraint: 'NO_ACTION',
-          //     deleteConstraint: expectedAction,
-          //   },
-          // })
           expect(value.tables['posts']?.constraints['postsTousers']).toEqual({
             type: 'FOREIGN KEY',
             name: 'postsTousers',
@@ -544,8 +521,6 @@ describe(_processor, () => {
           }),
         },
       })
-      // Relationships are now derived from constraints
-
       expect(value).toEqual(expectedTables)
     })
 
@@ -673,7 +648,7 @@ describe(_processor, () => {
       expect(value).toEqual(expectedTables)
     })
 
-    it('relationship (implicit many-to-many)', async () => {
+    it('implicit many-to-many relationship with join table', async () => {
       const { value } = await processor(`
         model Post {
           id         Int        @id @default(autoincrement())

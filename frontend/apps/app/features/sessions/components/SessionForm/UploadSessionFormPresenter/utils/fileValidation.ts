@@ -2,7 +2,7 @@ import type { FormatType } from '../../../../../../components/FormatIcon/FormatI
 
 export const getFileFormat = (fileName: string): FormatType => {
   const extension = fileName.split('.').pop()?.toLowerCase()
-  
+
   const formatMap: Record<string, FormatType> = {
     sql: 'postgres',
     rb: 'schemarb',
@@ -11,13 +11,13 @@ export const getFileFormat = (fileName: string): FormatType => {
     yaml: 'yaml',
     yml: 'yaml',
   }
-  
+
   return formatMap[extension || ''] || 'postgres'
 }
 
 export const getDisplayFormat = (fileName: string): string => {
   const extension = fileName.split('.').pop()?.toLowerCase()
-  
+
   const displayMap: Record<string, string> = {
     sql: 'postgresql',
     rb: 'ruby',
@@ -26,7 +26,7 @@ export const getDisplayFormat = (fileName: string): string => {
     yaml: 'yaml',
     yml: 'yaml',
   }
-  
+
   return displayMap[extension || ''] || 'postgresql'
 }
 

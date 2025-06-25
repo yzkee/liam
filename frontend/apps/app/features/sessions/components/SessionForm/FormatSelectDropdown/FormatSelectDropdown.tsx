@@ -1,8 +1,11 @@
 import { ChevronDown } from '@liam-hq/ui'
-import { type FC, useRef, useState, useEffect } from 'react'
-import { FormatIcon, type FormatType } from '../../../../../components/FormatIcon/FormatIcon'
-import { FormatSelectDropdownMenuItem } from './FormatSelectDropdownMenuItem'
+import { type FC, useEffect, useRef, useState } from 'react'
+import {
+  FormatIcon,
+  type FormatType,
+} from '../../../../../components/FormatIcon/FormatIcon'
 import styles from './FormatSelectDropdown.module.css'
+import { FormatSelectDropdownMenuItem } from './FormatSelectDropdownMenuItem'
 
 interface FormatOption {
   format: FormatType
@@ -29,25 +32,30 @@ export const FormatSelectDropdown: FC<FormatSelectDropdownProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
-  
-  const selectedOption = formatOptions.find(option => option.format === selectedFormat) || formatOptions[0]
-  
+
+  const selectedOption =
+    formatOptions.find((option) => option.format === selectedFormat) ||
+    formatOptions[0]
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false)
       }
     }
-    
+
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
-  
+
   const handleSelectFormat = (format: FormatType) => {
     onFormatChange(format)
     setIsOpen(false)
   }
-  
+
   return (
     <div className={styles.container} ref={dropdownRef}>
       <button
@@ -59,12 +67,12 @@ export const FormatSelectDropdown: FC<FormatSelectDropdownProps> = ({
       >
         <FormatIcon format={selectedOption.format} size={16} />
         <span className={styles.label}>{selectedOption.label}</span>
-        <ChevronDown 
-          size={12} 
-          className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ''}`} 
+        <ChevronDown
+          size={12}
+          className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ''}`}
         />
       </button>
-      
+
       {isOpen && (
         <div className={styles.dropdown}>
           <div className={styles.dropdownContent}>

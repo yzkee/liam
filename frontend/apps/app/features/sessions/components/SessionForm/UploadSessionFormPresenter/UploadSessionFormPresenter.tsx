@@ -1,25 +1,40 @@
-import { Button, Check, X, AlertTriangle } from '@liam-hq/ui'
+import { Button } from '@liam-hq/ui'
 import clsx from 'clsx'
+import { type ChangeEvent, type FC, useRef, useState } from 'react'
 import {
-  type ChangeEvent,
-  type FC,
-  useRef,
-  useState,
-} from 'react'
-import { FormatIcon, type FormatType } from '../../../../../components/FormatIcon/FormatIcon'
+  FormatIcon,
+  type FormatType,
+} from '../../../../../components/FormatIcon/FormatIcon'
 import { AttachmentsContainer } from '../AttachmentsContainer'
 import { FormatSelectDropdown } from '../FormatSelectDropdown'
 import { useFileAttachments } from '../hooks/useFileAttachments'
 import { useFileDragAndDrop } from '../hooks/useFileDragAndDrop'
 import { SessionFormActions } from '../SessionFormActions'
+import { DropZone } from './DropZone'
 import { FileIcon } from './FileIcon'
+import { SchemaFileSection } from './SchemaFileSection'
 import styles from './UploadSessionFormPresenter.module.css'
-import { getFileFormat, getDisplayFormat, isValidFileExtension } from './utils/fileValidation'
+import { getFileFormat, isValidFileExtension } from './utils/fileValidation'
 
 type Props = {
   formError?: string
   isPending: boolean
   formAction: (formData: FormData) => void
+}
+
+// Helper function to handle file processing
+const processFile = (
+  file: File,
+  setIsValidSchema: (valid: boolean) => void,
+  setSelectedFile: (file: File) => void,
+  setSelectedFormat: (format: FormatType) => void,
+) => {
+  const isValid = isValidFileExtension(file.name)
+  setIsValidSchema(isValid)
+  setSelectedFile(file)
+  if (isValid) {
+    setSelectedFormat(getFileFormat(file.name))
+  }
 }
 
 export const UploadSessionFormPresenter: FC<Props> = ({
@@ -34,37 +49,36 @@ export const UploadSessionFormPresenter: FC<Props> = ({
   const [isValidSchema, setIsValidSchema] = useState(true)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  
+
   // File attachments hook
-  const { attachments, handleFileSelect, handleRemoveAttachment } = useFileAttachments()
-  
+  const { attachments, handleFileSelect, handleRemoveAttachment } =
+    useFileAttachments()
+
   // File drag and drop for schema file
   const handleSchemaFileDrop = (files: FileList) => {
     const file = files[0]
     if (file) {
-      const isValid = isValidFileExtension(file.name)
-      setIsValidSchema(isValid)
-      setSelectedFile(file)
-      if (isValid) {
-        setSelectedFormat(getFileFormat(file.name))
-      }
+      processFile(file, setIsValidSchema, setSelectedFile, setSelectedFormat)
     }
   }
-  
-  const { dragActive: schemaDragActive, handleDrag: handleSchemaDrag, handleDrop: handleSchemaDrop } = useFileDragAndDrop(handleSchemaFileDrop)
-  
+
+  const {
+    dragActive: schemaDragActive,
+    handleDrag: handleSchemaDrag,
+    handleDrop: handleSchemaDrop,
+  } = useFileDragAndDrop(handleSchemaFileDrop)
+
   // File drag and drop for attachments
-  const { dragActive: attachmentDragActive, handleDrag: handleAttachmentDrag, handleDrop: handleAttachmentDrop } = useFileDragAndDrop(handleFileSelect)
+  const {
+    dragActive: attachmentDragActive,
+    handleDrag: handleAttachmentDrag,
+    handleDrop: handleAttachmentDrop,
+  } = useFileDragAndDrop(handleFileSelect)
 
   const handleSchemaFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      const isValid = isValidFileExtension(file.name)
-      setIsValidSchema(isValid)
-      setSelectedFile(file)
-      if (isValid) {
-        setSelectedFormat(getFileFormat(file.name))
-      }
+      processFile(file, setIsValidSchema, setSelectedFile, setSelectedFormat)
     }
   }
 
@@ -80,134 +94,64 @@ export const UploadSessionFormPresenter: FC<Props> = ({
   }
 
   return (
-    <div className={clsx(
-      styles.container,
-      isPending && styles.pending,
-      formError && styles.error,
-      (attachmentDragActive || schemaDragActive) && styles.dragActive,
-    )}>
+    <div
+      className={clsx(
+        styles.container,
+        isPending && styles.pending,
+        formError && styles.error,
+        (attachmentDragActive || schemaDragActive) && styles.dragActive,
+      )}
+    >
       <form action={formAction}>
         <input type="hidden" name="schemaFormat" value={selectedFormat} />
         <div className={styles.uploadSection}>
           <div className={styles.uploadContainer}>
-            <div
-              className={clsx(
-                styles.dropZone,
-                schemaDragActive && styles.dropZoneActive,
-                isPending && styles.dropZoneDisabled
-              )}
-              onClick={isPending ? undefined : handleSelectFile}
-              onDragEnter={isPending ? undefined : handleSchemaDrag}
-              onDragLeave={isPending ? undefined : handleSchemaDrag}
-              onDragOver={isPending ? undefined : handleSchemaDrag}
-              onDrop={isPending ? undefined : handleSchemaDrop}
+            <DropZone
+              isPending={isPending}
+              schemaDragActive={schemaDragActive}
+              isHovered={isHovered}
+              onSelectFile={handleSelectFile}
+              onDragEnter={handleSchemaDrag}
+              onDragLeave={handleSchemaDrag}
+              onDragOver={handleSchemaDrag}
+              onDrop={handleSchemaDrop}
               onMouseEnter={() => !isPending && setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
-            >
-              <div className={styles.dropZoneContent}>
-                <div className={styles.iconContainer}>
-                  <FileIcon className={styles.fileIcon} isHovered={isHovered} isDragActive={schemaDragActive} />
-                  <div className={styles.extensionTags}>
-                    <span className={styles.extensionTag}>.sql</span>
-                    <span className={styles.extensionTag}>.rb</span>
-                    <span className={styles.extensionTag}>.prisma</span>
-                    <span className={styles.extensionTag}>.json</span>
-                    <span className={styles.extensionTag}>.yaml</span>
-                  </div>
-                </div>
-                <p className={styles.dropZoneText}>
-                  Drag & drop your schema file or click to upload
-                </p>
-                <p className={styles.dropZoneSubtext}>
-                  Supported formats: .sql, .rb, .prisma, .json, .yaml
-                </p>
-                <Button
-                  type="button"
-                  variant={selectedFile && isValidSchema ? "outline-secondary" : "solid-primary"}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleSelectFile()
-                  }}
-                  className={styles.selectFileButton}
-                  disabled={isPending}
-                >
-                  Select File
-                </Button>
-              </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                name="schemaFile"
-                onChange={handleSchemaFileSelect}
-                accept=".sql,.rb,.prisma,.json,.yaml,.yml"
-                className={styles.hiddenFileInput}
-                disabled={isPending}
-              />
-            </div>
+              hasSelectedFile={!!selectedFile}
+              isValidSchema={isValidSchema}
+            />
+            <input
+              ref={fileInputRef}
+              type="file"
+              name="schemaFile"
+              onChange={handleSchemaFileSelect}
+              accept=".sql,.rb,.prisma,.json,.yaml,.yml"
+              className={styles.hiddenFileInput}
+              disabled={isPending}
+            />
             {selectedFile && (
-              <div className={styles.validSchemaContainer}>
-                <div className={styles.validSchemaMessage}>
-                  <div className={styles.fetchStatus}>
-                    {isValidSchema ? (
-                      <>
-                        <Check size={12} className={styles.checkIcon} />
-                        <span className={styles.validSchemaText}>Valid Schema</span>
-                      </>
-                    ) : (
-                      <>
-                        <AlertTriangle size={12} className={styles.invalidIcon} />
-                        <span className={styles.invalidSchemaText}>Invalid Schema</span>
-                      </>
-                    )}
-                  </div>
-                  {isValidSchema ? (
-                    <span className={styles.detectedText}>
-                      Detected as <span className={styles.formatName}>{getDisplayFormat(selectedFile.name)}</span> based on file extension.
-                    </span>
-                  ) : (
-                    <span className={styles.detectedText}>
-                      Unsupported file type. Please upload .sql, .rb, .prisma, .json, or .yaml files.
-                    </span>
-                  )}
-                </div>
-                {isValidSchema && (
-                  <div className={styles.matchFiles}>
-                    <div className={styles.matchFileItem}>
-                      <div className={styles.uploadedFile}>
-                        <FormatIcon format={getFileFormat(selectedFile.name)} size={16} />
-                        <span className={styles.fileName}>{selectedFile.name}</span>
-                        <button
-                          type="button"
-                          className={styles.removeButton}
-                          onClick={() => {
-                            setSelectedFile(null)
-                            setIsValidSchema(true)
-                          }}
-                          aria-label="Remove file"
-                        >
-                          <X size={10} />
-                        </button>
-                      </div>
-                      <FormatSelectDropdown
-                        selectedFormat={selectedFormat}
-                        onFormatChange={setSelectedFormat}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
+              <SchemaFileSection
+                selectedFile={selectedFile}
+                isValidSchema={isValidSchema}
+                selectedFormat={selectedFormat}
+                onFormatChange={setSelectedFormat}
+                onRemoveFile={() => {
+                  setSelectedFile(null)
+                  setIsValidSchema(true)
+                }}
+              />
             )}
           </div>
         </div>
         <div className={styles.divider} />
-        <div 
+        <div
           className={`${styles.inputSection} ${attachmentDragActive ? styles.dragActive : ''}`}
           onDragEnter={handleAttachmentDrag}
           onDragLeave={handleAttachmentDrag}
           onDragOver={handleAttachmentDrag}
           onDrop={handleAttachmentDrop}
         >
-          <AttachmentsContainer 
+          <AttachmentsContainer
             attachments={attachments}
             onRemove={handleRemoveAttachment}
           />

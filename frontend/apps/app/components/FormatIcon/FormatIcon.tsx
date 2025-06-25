@@ -1,4 +1,4 @@
-import { FileJson, FileCode } from '@liam-hq/ui'
+import { FileCode, FileJson } from '@liam-hq/ui'
 import type { FC } from 'react'
 import { match } from 'ts-pattern'
 import {
@@ -12,7 +12,13 @@ import {
 /**
  * Supported database schema format types
  */
-export type FormatType = 'postgres' | 'prisma' | 'schemarb' | 'tbls' | 'json' | 'yaml'
+export type FormatType =
+  | 'postgres'
+  | 'prisma'
+  | 'schemarb'
+  | 'tbls'
+  | 'json'
+  | 'yaml'
 
 /**
  * Props for the FormatIcon component

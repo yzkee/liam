@@ -16,10 +16,7 @@ export const Default = {
   render: () => {
     return (
       <div style={{ width: '800px' }}>
-        <UploadSessionFormPresenter
-          isPending={false}
-          formAction={() => {}}
-        />
+        <UploadSessionFormPresenter isPending={false} formAction={() => {}} />
       </div>
     )
   },
@@ -43,10 +40,7 @@ export const Pending = {
   render: () => {
     return (
       <div style={{ width: '800px' }}>
-        <UploadSessionFormPresenter
-          isPending={true}
-          formAction={() => {}}
-        />
+        <UploadSessionFormPresenter isPending={true} formAction={() => {}} />
       </div>
     )
   },

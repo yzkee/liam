@@ -56,7 +56,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-2);
-  transition: all var(--default-animation-duration) var(--default-timing-function);
+  transition: all var(--default-animation-duration)
+    var(--default-timing-function);
 }
 
 .inputSection.dragActive {
@@ -129,7 +130,8 @@
   padding: var(--spacing-10) var(--spacing-4);
   text-align: center;
   background-color: transparent;
-  transition: all var(--default-animation-duration) var(--default-timing-function);
+  transition: all var(--default-animation-duration)
+    var(--default-timing-function);
   cursor: pointer;
   min-height: 300px;
   display: flex;
@@ -181,7 +183,6 @@
   font-weight: var(--font-weight-medium);
 }
 
-
 .hiddenFileInput {
   display: none;
 }
@@ -195,7 +196,8 @@
   justify-content: center;
   width: 134px;
   height: 93px;
-  transition: all var(--default-animation-duration) var(--default-timing-function);
+  transition: all var(--default-animation-duration)
+    var(--default-timing-function);
 }
 
 .fileIcon {
@@ -203,7 +205,8 @@
   height: 119px;
   color: var(--overlay-40);
   opacity: var(--opacity-60);
-  transition: opacity var(--default-animation-duration) var(--default-timing-function);
+  transition: opacity var(--default-animation-duration)
+    var(--default-timing-function);
   position: relative;
   z-index: 1;
 }
@@ -216,14 +219,16 @@
 /* Back files animation */
 .fileIcon :global(.file-back-left) {
   transform-origin: center bottom;
-  transition: all var(--default-animation-duration) var(--default-timing-function);
+  transition: all var(--default-animation-duration)
+    var(--default-timing-function);
   transform: rotate(-10deg) translateX(8px) translateY(7px);
   opacity: var(--opacity-70);
 }
 
 .fileIcon :global(.file-back-right) {
   transform-origin: center bottom;
-  transition: all var(--default-animation-duration) var(--default-timing-function);
+  transition: all var(--default-animation-duration)
+    var(--default-timing-function);
   transform: rotate(10deg) translateX(-8px) translateY(7px);
   opacity: var(--opacity-70);
 }
@@ -262,7 +267,8 @@
   white-space: nowrap;
   opacity: 0;
   transform: scale(0.8);
-  transition: all var(--default-animation-duration) var(--default-timing-function);
+  transition: all var(--default-animation-duration)
+    var(--default-timing-function);
   line-height: 21px;
   height: 21px;
   display: flex;
@@ -413,7 +419,8 @@
   border: none;
   cursor: pointer;
   color: var(--button-foreground);
-  transition: background-color var(--default-animation-duration) var(--default-timing-function);
+  transition: background-color var(--default-animation-duration)
+    var(--default-timing-function);
 }
 
 .removeButton:hover {
@@ -430,7 +437,8 @@
   border-radius: var(--border-radius-base);
   min-width: 127px;
   cursor: pointer;
-  transition: border-color var(--default-animation-duration) var(--default-timing-function);
+  transition: border-color var(--default-animation-duration)
+    var(--default-timing-function);
 }
 
 .formatSelect:hover {

@@ -1,6 +1,9 @@
 import { Check } from '@liam-hq/ui'
 import type { FC } from 'react'
-import { FormatIcon, type FormatType } from '../../../../../components/FormatIcon/FormatIcon'
+import {
+  FormatIcon,
+  type FormatType,
+} from '../../../../../components/FormatIcon/FormatIcon'
 import styles from './FormatSelectDropdownMenuItem.module.css'
 
 interface FormatSelectDropdownMenuItemProps {
@@ -10,12 +13,9 @@ interface FormatSelectDropdownMenuItemProps {
   onClick?: () => void
 }
 
-export const FormatSelectDropdownMenuItem: FC<FormatSelectDropdownMenuItemProps> = ({
-  format,
-  label,
-  isSelected = false,
-  onClick,
-}) => {
+export const FormatSelectDropdownMenuItem: FC<
+  FormatSelectDropdownMenuItemProps
+> = ({ format, label, isSelected = false, onClick }) => {
   return (
     <button
       type="button"
@@ -26,9 +26,7 @@ export const FormatSelectDropdownMenuItem: FC<FormatSelectDropdownMenuItemProps>
         <FormatIcon format={format} size={16} />
         <span className={styles.label}>{label}</span>
       </div>
-      {isSelected && (
-        <Check size={10} className={styles.checkIcon} />
-      )}
+      {isSelected && <Check size={10} className={styles.checkIcon} />}
     </button>
   )
 }

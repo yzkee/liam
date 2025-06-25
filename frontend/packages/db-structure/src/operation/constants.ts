@@ -5,7 +5,6 @@ export const PATH_PATTERNS = {
   COLUMN_BASE: /^\/tables\/([^/]+)\/columns\/([^/]+)$/,
   COLUMN_NAME: /^\/tables\/([^/]+)\/columns\/([^/]+)\/name$/,
   COLUMN_COMMENT: /^\/tables\/([^/]+)\/columns\/([^/]+)\/comment$/,
-  COLUMN_PRIMARY: /^\/tables\/([^/]+)\/columns\/([^/]+)\/primary$/,
   COLUMN_DEFAULT: /^\/tables\/([^/]+)\/columns\/([^/]+)\/default$/,
   COLUMN_CHECK: /^\/tables\/([^/]+)\/columns\/([^/]+)\/check$/,
   COLUMN_UNIQUE: /^\/tables\/([^/]+)\/columns\/([^/]+)\/unique$/,

@@ -15,7 +15,6 @@ describe('postgresqlOperationDeparser', () => {
             id: {
               name: 'id',
               type: 'bigint',
-              primary: true,
               notNull: true,
               unique: false,
               default: null,
@@ -25,7 +24,6 @@ describe('postgresqlOperationDeparser', () => {
             email: {
               name: 'email',
               type: 'varchar(255)',
-              primary: false,
               notNull: true,
               unique: true,
               default: null,
@@ -35,7 +33,13 @@ describe('postgresqlOperationDeparser', () => {
           },
           comment: 'User table',
           indexes: {},
-          constraints: {},
+          constraints: {
+            users_pkey: {
+              type: 'PRIMARY KEY',
+              name: 'users_pkey',
+              columnName: 'id',
+            },
+          },
         },
       }
 
@@ -43,14 +47,14 @@ describe('postgresqlOperationDeparser', () => {
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
-        "CREATE TABLE \"users\" (
-          \"id\" bigint PRIMARY KEY,
-          \"email\" varchar(255) UNIQUE NOT NULL
+        "CREATE TABLE "users" (
+          "id" bigint NOT NULL,
+          "email" varchar(255) UNIQUE NOT NULL
         );
 
-        COMMENT ON TABLE \"users\" IS 'User table';
-        COMMENT ON COLUMN \"users\".\"id\" IS 'User ID';
-        COMMENT ON COLUMN \"users\".\"email\" IS 'User email';"
+        COMMENT ON TABLE "users" IS 'User table';
+        COMMENT ON COLUMN "users"."id" IS 'User ID';
+        COMMENT ON COLUMN "users"."email" IS 'User email';"
       `)
 
       await expectGeneratedSQLToBeParseable(result.value)
@@ -66,7 +70,6 @@ describe('postgresqlOperationDeparser', () => {
             id: {
               name: 'id',
               type: 'bigint',
-              primary: true,
               notNull: true,
               unique: false,
               default: null,
@@ -76,7 +79,6 @@ describe('postgresqlOperationDeparser', () => {
             enabled: {
               name: 'enabled',
               type: 'boolean',
-              primary: false,
               notNull: true,
               unique: false,
               default: true,
@@ -86,7 +88,6 @@ describe('postgresqlOperationDeparser', () => {
             title: {
               name: 'title',
               type: 'varchar(100)',
-              primary: false,
               notNull: false,
               unique: false,
               default: 'Default Title',
@@ -96,7 +97,13 @@ describe('postgresqlOperationDeparser', () => {
           },
           comment: null,
           indexes: {},
-          constraints: {},
+          constraints: {
+            settings_pkey: {
+              type: 'PRIMARY KEY',
+              name: 'settings_pkey',
+              columnName: 'id',
+            },
+          },
         },
       }
 
@@ -104,10 +111,10 @@ describe('postgresqlOperationDeparser', () => {
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
-        "CREATE TABLE \"settings\" (
-          \"id\" bigint PRIMARY KEY,
-          \"enabled\" boolean NOT NULL DEFAULT TRUE,
-          \"title\" varchar(100) DEFAULT 'Default Title'
+        "CREATE TABLE "settings" (
+          "id" bigint NOT NULL,
+          "enabled" boolean NOT NULL DEFAULT TRUE,
+          "title" varchar(100) DEFAULT 'Default Title'
         );"
       `)
 
@@ -156,7 +163,6 @@ describe('postgresqlOperationDeparser', () => {
         value: {
           name: 'age',
           type: 'integer',
-          primary: false,
           notNull: false,
           unique: false,
           default: null,
@@ -184,7 +190,6 @@ describe('postgresqlOperationDeparser', () => {
         value: {
           name: 'price',
           type: 'decimal(10,2)',
-          primary: false,
           notNull: true,
           unique: false,
           default: 0.0,

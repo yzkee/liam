@@ -22,7 +22,6 @@ describe(_processor, () => {
               type: 'bigserial',
               default: 'autoincrement()',
               notNull: true,
-              primary: true,
               unique: true,
             }),
             ...override?.columns,
@@ -467,7 +466,6 @@ describe(_processor, () => {
                 type: 'bigserial',
                 default: 'autoincrement()',
                 notNull: true,
-                primary: true,
                 unique: true,
               }),
               raw_email_address: aColumn({
@@ -511,7 +509,6 @@ describe(_processor, () => {
                 type: 'bigserial',
                 default: 'autoincrement()',
                 notNull: true,
-                primary: true,
                 unique: true,
               }),
               raw_user_id: aColumn({
@@ -595,7 +592,6 @@ describe(_processor, () => {
                 type: 'serial',
                 default: 'autoincrement()',
                 notNull: true,
-                primary: true,
                 unique: true,
               }),
               raw_email_address: aColumn({
@@ -644,7 +640,6 @@ describe(_processor, () => {
                 type: 'serial',
                 default: 'autoincrement()',
                 notNull: true,
-                primary: true,
                 unique: true,
               }),
               raw_user_id: aColumn({
@@ -721,7 +716,6 @@ describe(_processor, () => {
                 type: 'serial',
                 default: 'autoincrement()',
                 notNull: true,
-                primary: true,
                 unique: true,
               }),
               title: aColumn({
@@ -753,7 +747,6 @@ describe(_processor, () => {
                 type: 'serial',
                 default: 'autoincrement()',
                 notNull: true,
-                primary: true,
                 unique: true,
               }),
               name: aColumn({

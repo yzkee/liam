@@ -35,7 +35,6 @@ export {
   columnDefaultSchema,
   columnNameSchema,
   columnNotNullSchema,
-  columnPrimarySchema,
   columnSchema,
   columnUniqueSchema,
   commentSchema,

@@ -106,7 +106,6 @@ function extractIdColumnAndConstraint(
     name: 'id',
     type: '',
     notNull: true,
-    primary: true,
     unique: true,
   })
   const idPrimaryKeyConstraint: PrimaryKeyConstraint = {

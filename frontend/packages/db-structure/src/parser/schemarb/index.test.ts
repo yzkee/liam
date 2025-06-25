@@ -25,7 +25,6 @@ describe(processor, () => {
               name: 'id',
               type: 'bigserial',
               notNull: true,
-              primary: true,
               unique: true,
             }),
             ...override?.columns,
@@ -172,7 +171,6 @@ describe(processor, () => {
             name: 'id',
             type: 'bigint',
             notNull: true,
-            primary: true,
             unique: true,
           }),
         },
@@ -235,7 +233,6 @@ describe(processor, () => {
               id: aColumn({
                 name: 'id',
                 type: 'bigserial',
-                primary: true,
                 notNull: true,
                 unique: true,
               }),

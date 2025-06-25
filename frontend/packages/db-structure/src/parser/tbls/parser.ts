@@ -108,38 +108,6 @@ function extractUniqueColumnNames(
 }
 
 /**
- * Extract primary key column names from constraints
- */
-function extractPrimaryKeyColumnNames(
-  constraints:
-    | Array<{
-        type: string
-        name: string
-        columns?: string[]
-        def: string
-        referenced_table?: string
-        referenced_columns?: string[]
-      }>
-    | undefined,
-): Set<string> {
-  const primaryKeyColumns: string[] = []
-
-  if (constraints) {
-    const primaryKeyConstraints = constraints.filter(
-      (constraint) => constraint.type === 'PRIMARY KEY',
-    )
-
-    for (const constraint of primaryKeyConstraints) {
-      if (constraint.columns) {
-        primaryKeyColumns.push(...constraint.columns)
-      }
-    }
-  }
-
-  return new Set(primaryKeyColumns)
-}
-
-/**
  * Process columns for a table
  */
 function processColumns(
@@ -151,7 +119,6 @@ function processColumns(
     comment?: string | null
   }>,
   uniqueColumnNames: Set<string>,
-  primaryKeyColumnNames: Set<string>,
 ): Columns {
   const columns: Columns = {}
 
@@ -163,7 +130,6 @@ function processColumns(
       type: tblsColumn.type,
       notNull: !tblsColumn.nullable,
       default: defaultValue,
-      primary: primaryKeyColumnNames.has(tblsColumn.name),
       comment: tblsColumn.comment ?? null,
       unique: uniqueColumnNames.has(tblsColumn.name),
     })
@@ -398,16 +364,9 @@ function processTable(tblsTable: {
 }): [string, Tables[string]] {
   // Extract column metadata
   const uniqueColumnNames = extractUniqueColumnNames(tblsTable.constraints)
-  const primaryKeyColumnNames = extractPrimaryKeyColumnNames(
-    tblsTable.constraints,
-  )
 
   // Process table components
-  const columns = processColumns(
-    tblsTable.columns,
-    uniqueColumnNames,
-    primaryKeyColumnNames,
-  )
+  const columns = processColumns(tblsTable.columns, uniqueColumnNames)
   const constraints = processConstraints(tblsTable.constraints)
   const indexes = processIndexes(tblsTable.indexes)
 

@@ -1,9 +1,10 @@
-import type {
-  Column,
-  Relationships,
-  Schema,
-  Table,
-  Tables,
+import {
+  type Column,
+  isPrimaryKey,
+  type Relationships,
+  type Schema,
+  type Table,
+  type Tables,
 } from '@liam-hq/db-structure'
 import type { MentionItem } from '../../../types'
 
@@ -46,7 +47,7 @@ const getColumnProperties = (
     )?.cardinality
 
   // Explicitly set the column type
-  const columnType = column.primary
+  const columnType = isPrimaryKey(column.name, table.constraints || {})
     ? 'primary'
     : isSource || !!targetCardinality
       ? 'foreign'

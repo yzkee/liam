@@ -79,7 +79,7 @@
   color: var(--global-foreground);
   font-size: var(--font-size-6);
   font-family: inherit;
-  line-height: var(--line-height-normal);
+  line-height: 1.6;
   resize: none;
   overflow: hidden;
 }
@@ -164,14 +164,14 @@
   font-weight: var(--font-weight-medium);
   color: var(--global-foreground);
   margin: 0 0 var(--spacing-2) 0;
-  line-height: var(--line-height-normal);
+  line-height: 1.6;
 }
 
 .dropZoneSubtext {
   font-size: var(--font-size-5);
   color: var(--overlay-60);
   margin: 0 0 var(--spacing-4) 0;
-  line-height: var(--line-height-normal);
+  line-height: 1.6;
 }
 
 .selectFileButton {
@@ -364,7 +364,7 @@
 .detectedText {
   font-size: var(--font-size-2);
   color: var(--global-mute-text);
-  line-height: var(--line-height-normal);
+  line-height: 1.6;
 }
 
 .formatName {

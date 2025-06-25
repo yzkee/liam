@@ -29,6 +29,7 @@ export {
   type Constraints,
   columnSchema,
   type ForeignKeyConstraint,
+  foreignKeyConstraintSchema,
   type Index,
   type Indexes,
   mergeSchemas,

@@ -16,6 +16,8 @@ import type {
   PrimaryKeyConstraint,
   Schema,
 } from '@liam-hq/db-structure'
+import { foreignKeyConstraintSchema } from '@liam-hq/db-structure'
+import * as v from 'valibot'
 import { nameSimilarity } from '../nameSimilarity'
 import { wordOverlapMatch } from '../wordOverlapMatch'
 
@@ -177,10 +179,11 @@ const createForeignKeyMapping = (
     for (const [constraintName, constraint] of Object.entries(
       table.constraints,
     )) {
-      if (constraint.type === 'FOREIGN KEY') {
+      const result = v.safeParse(foreignKeyConstraintSchema, constraint)
+      if (result.success) {
         referenceForeignKeys.push({
           name: constraintName,
-          constraint: constraint as ForeignKeyConstraint,
+          constraint: result.output,
           tableName,
         })
       }
@@ -197,10 +200,11 @@ const createForeignKeyMapping = (
     for (const [constraintName, constraint] of Object.entries(
       table.constraints,
     )) {
-      if (constraint.type === 'FOREIGN KEY') {
+      const result = v.safeParse(foreignKeyConstraintSchema, constraint)
+      if (result.success) {
         predictForeignKeys.push({
           name: constraintName,
-          constraint: constraint as ForeignKeyConstraint,
+          constraint: result.output,
           tableName,
         })
       }

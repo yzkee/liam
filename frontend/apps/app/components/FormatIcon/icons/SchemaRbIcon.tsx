@@ -5,9 +5,10 @@ export const SchemaRbIcon: FC<IconProps> = ({ size = 16 }) => {
   return (
     <img
       src="/assets/schema-rb-icon.png"
-      alt="SchemaRbIcon"
+      alt="SchemaRb"
       width={size}
       height={size}
+      style={{ objectFit: 'contain' }}
     />
   )
 }

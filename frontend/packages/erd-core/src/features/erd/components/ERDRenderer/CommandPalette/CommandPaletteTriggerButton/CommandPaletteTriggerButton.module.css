@@ -1,0 +1,9 @@
+.container {
+  height: 30px;
+  width: 240px;
+  border-radius: var(--border-radius-base);
+  font-size: var(--font-size-3);
+  color: var(--overlay-30);
+  background-color: var(--global-background);
+  padding: var(--spacing-0) var(--spacing-2);
+}

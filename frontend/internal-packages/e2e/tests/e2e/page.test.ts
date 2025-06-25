@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { DEFAULT_TEST_URL } from '../../playwright.config'
+import { DEFAULT_TEST_URL } from '../../default_test_url'
 
 test('Page has title', async ({ page }) => {
   await page.goto(DEFAULT_TEST_URL)

@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
-import { DEFAULT_TEST_URL } from '../../playwright.config'
+import { DEFAULT_TEST_URL } from '../../default_test_url'
 
 const waitForPageReady = async (page: Page) => {
   await page.waitForLoadState('domcontentloaded')

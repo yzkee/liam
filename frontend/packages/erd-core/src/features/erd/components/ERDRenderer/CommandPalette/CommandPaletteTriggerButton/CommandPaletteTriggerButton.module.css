@@ -18,4 +18,16 @@
 .text {
   font-size: var(--font-size-3);
   color: var(--overlay-30);
+  flex-grow: 1;
+}
+
+.keyIcon {
+  display: inline-flex;
+  height: 21px;
+  width: 21px;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-2);
+  color: var(--global-mute-text);
+  background-color: var(--overlay-5);
 }

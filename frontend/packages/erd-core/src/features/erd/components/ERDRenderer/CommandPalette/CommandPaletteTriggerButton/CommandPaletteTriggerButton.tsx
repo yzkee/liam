@@ -14,6 +14,8 @@ export const CommandPaletteTriggerButton: FC = () => {
     >
       <Search className={styles.searchIcon} />
       <span className={styles.text}>Search</span>
+      <span className={styles.keyIcon}>⌘</span>
+      <span className={styles.keyIcon}>K</span>
     </button>
   )
 }

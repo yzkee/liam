@@ -52,7 +52,7 @@ export const AttachButton = ({
         type="file"
         accept={accept}
         onChange={handleFileChange}
-        className={styles.hiddenInput}
+        hidden
         multiple
       />
       <ArrowTooltipProvider>

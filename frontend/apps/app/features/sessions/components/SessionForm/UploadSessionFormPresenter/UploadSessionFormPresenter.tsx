@@ -105,7 +105,10 @@ export const UploadSessionFormPresenter: FC<Props> = ({
                 <Button
                   type="button"
                   variant="solid-primary"
-                  onClick={handleSelectFile}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleSelectFile()
+                  }}
                   className={styles.selectFileButton}
                 >
                   Select File

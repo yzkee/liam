@@ -38,14 +38,7 @@ jobs:
         run: |
           set -e
           
-          # Validate branch name
-          BRANCH_NAME="${{ github.head_ref }}"
-          if [[ -z "$BRANCH_NAME" ]]; then
-            echo "Error: Branch name is empty"
-            exit 1
-          fi
-          
-          echo "Archiving trigger.dev preview for branch: $BRANCH_NAME"
+          echo "Archiving trigger.dev preview for branch: ${{ github.head_ref }}"
           
           # Archive with retry logic
           MAX_RETRIES=3
@@ -54,14 +47,14 @@ jobs:
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
             echo "Attempt $((RETRY_COUNT + 1)) of $MAX_RETRIES"
             
-            if pnpm --filter @liam-hq/jobs exec trigger preview archive --branch "$BRANCH_NAME"; then
-              echo "Successfully archived preview environment for branch: $BRANCH_NAME"
+            if pnpm --filter @liam-hq/jobs exec trigger preview archive --branch "${{ github.head_ref }}"; then
+              echo "Successfully archived preview environment for branch: ${{ github.head_ref }}"
               
               # Verify archiving by checking if the environment still exists
               echo "Verifying archive operation..."
               sleep 5
               
-              if pnpm --filter @liam-hq/jobs exec trigger preview list --branch "$BRANCH_NAME" 2>/dev/null | grep -q "$BRANCH_NAME"; then
+              if pnpm --filter @liam-hq/jobs exec trigger preview list --branch "${{ github.head_ref }}" 2>/dev/null | grep -q "${{ github.head_ref }}"; then
                 echo "Warning: Environment may still be active after archiving"
               else
                 echo "Archive verification successful - environment no longer listed"
@@ -90,12 +83,9 @@ jobs:
           echo "Checking for any stale preview environments..."
           
           # List all preview environments and attempt to clean up any that match this branch
-          BRANCH_NAME="${{ github.head_ref }}"
-          if [[ -n "$BRANCH_NAME" ]]; then
-            echo "Ensuring no preview environments remain for branch: $BRANCH_NAME"
-            
-            # Attempt cleanup even if the previous step failed
-            pnpm --filter @liam-hq/jobs exec trigger preview archive --branch "$BRANCH_NAME" 2>/dev/null || true
-            
-            echo "Cleanup check completed"
-          fi
+          echo "Ensuring no preview environments remain for branch: ${{ github.head_ref }}"
+          
+          # Attempt cleanup even if the previous step failed
+          pnpm --filter @liam-hq/jobs exec trigger preview archive --branch "${{ github.head_ref }}" 2>/dev/null || true
+          
+          echo "Cleanup check completed"

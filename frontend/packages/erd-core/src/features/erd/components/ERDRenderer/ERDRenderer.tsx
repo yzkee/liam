@@ -24,7 +24,12 @@ import '@/styles/globals.css'
 import { toggleLogEvent } from '@/features/gtm/utils'
 import { useIsTouchDevice } from '@/hooks'
 import { useVersion } from '@/providers'
-import { SchemaProvider, type SchemaProviderValue, useSchema } from '@/stores'
+import {
+  CommandPaletteProvider,
+  SchemaProvider,
+  type SchemaProviderValue,
+  useSchema,
+} from '@/stores'
 import { UserEditingProvider, useUserEditing } from '@/stores/userEditing'
 import {
   convertSchemaToNodes,
@@ -140,64 +145,66 @@ const ERDRendererInner: FC<InnerProps> = ({
       <CardinalityMarkers />
       <RelationshipEdgeParticleMarker />
       <ToastProvider>
-        {withAppBar && <AppBar />}
-        <ReactFlowProvider>
-          <ResizablePanelGroup
-            direction="horizontal"
-            className={styles.mainWrapper}
-            onLayout={setWidth}
-          >
-            <ResizablePanel
-              collapsible
-              defaultSize={open ? defaultPanelSizes[0] : 0}
-              minSize={isMobile ? 40 : 15}
-              maxSize={isMobile ? 80 : 30}
-              ref={leftPanelRef}
-              isResizing={isResizing}
-              onResize={(size: number) => {
-                if (open && size < 15) {
-                  handleChangeOpen(false)
-                }
-              }}
+        <CommandPaletteProvider>
+          {withAppBar && <AppBar />}
+          <ReactFlowProvider>
+            <ResizablePanelGroup
+              direction="horizontal"
+              className={styles.mainWrapper}
+              onLayout={setWidth}
             >
-              <LeftPane />
-            </ResizablePanel>
-            <ResizableHandle onDragging={(e) => setIsResizing(e)} />
-            <ResizablePanel
-              collapsible
-              defaultSize={defaultPanelSizes[1]}
-              isResizing={isResizing}
-            >
-              <main className={styles.main}>
-                <div className={styles.triggerWrapper}>
-                  <SidebarTrigger />
-                </div>
-                <TableDetailDrawerRoot>
-                  {errorObjects.length > 0 && (
-                    <ErrorDisplay errors={errorObjects} />
-                  )}
-                  {errorObjects.length > 0 || (
-                    <>
-                      <ERDContent
-                        key={`${schemaKey}-${showMode}`}
-                        nodes={nodes}
-                        edges={edges}
-                        displayArea="main"
-                      />
-                      <TableDetailDrawer />
-                    </>
-                  )}
-                </TableDetailDrawerRoot>
-                {errorObjects.length === 0 && (
-                  <div className={styles.toolbarWrapper}>
-                    <Toolbar />
+              <ResizablePanel
+                collapsible
+                defaultSize={open ? defaultPanelSizes[0] : 0}
+                minSize={isMobile ? 40 : 15}
+                maxSize={isMobile ? 80 : 30}
+                ref={leftPanelRef}
+                isResizing={isResizing}
+                onResize={(size: number) => {
+                  if (open && size < 15) {
+                    handleChangeOpen(false)
+                  }
+                }}
+              >
+                <LeftPane />
+              </ResizablePanel>
+              <ResizableHandle onDragging={(e) => setIsResizing(e)} />
+              <ResizablePanel
+                collapsible
+                defaultSize={defaultPanelSizes[1]}
+                isResizing={isResizing}
+              >
+                <main className={styles.main}>
+                  <div className={styles.triggerWrapper}>
+                    <SidebarTrigger />
                   </div>
-                )}
-              </main>
-            </ResizablePanel>
-          </ResizablePanelGroup>
-          <CommandPalette />
-        </ReactFlowProvider>
+                  <TableDetailDrawerRoot>
+                    {errorObjects.length > 0 && (
+                      <ErrorDisplay errors={errorObjects} />
+                    )}
+                    {errorObjects.length > 0 || (
+                      <>
+                        <ERDContent
+                          key={`${schemaKey}-${showMode}`}
+                          nodes={nodes}
+                          edges={edges}
+                          displayArea="main"
+                        />
+                        <TableDetailDrawer />
+                      </>
+                    )}
+                  </TableDetailDrawerRoot>
+                  {errorObjects.length === 0 && (
+                    <div className={styles.toolbarWrapper}>
+                      <Toolbar />
+                    </div>
+                  )}
+                </main>
+              </ResizablePanel>
+            </ResizablePanelGroup>
+            <CommandPalette />
+          </ReactFlowProvider>
+        </CommandPaletteProvider>
       </ToastProvider>
     </SidebarProvider>
   )

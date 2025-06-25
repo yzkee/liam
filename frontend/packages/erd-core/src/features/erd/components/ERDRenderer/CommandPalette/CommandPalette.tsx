@@ -5,12 +5,12 @@ import { DialogDescription, DialogTitle } from '@radix-ui/react-dialog'
 import { Command } from 'cmdk'
 import { type FC, useCallback, useEffect, useState } from 'react'
 import { useTableSelection } from '@/features/erd/hooks'
-import { useSchema } from '@/stores'
+import { useCommandPalette, useSchema } from '@/stores'
 import { TableNode } from '../../ERDContent/components'
 import styles from './CommandPalette.module.css'
 
 export const CommandPalette: FC = () => {
-  const [open, setOpen] = useState(false)
+  const { open, setOpen, toggleOpen } = useCommandPalette()
 
   const schema = useSchema()
   const [tableName, setTableName] = useState<string | null>(null)
@@ -32,7 +32,7 @@ export const CommandPalette: FC = () => {
     const down = (event: KeyboardEvent) => {
       if (event.key === 'k' && (event.metaKey || event.ctrlKey)) {
         event.preventDefault()
-        setOpen((open) => !open)
+        toggleOpen()
       }
     }
 

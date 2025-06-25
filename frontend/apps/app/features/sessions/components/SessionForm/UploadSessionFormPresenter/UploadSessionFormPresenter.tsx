@@ -154,9 +154,13 @@ export const UploadSessionFormPresenter: FC<Props> = ({
                       </>
                     )}
                   </div>
-                  {isValidSchema && (
+                  {isValidSchema ? (
                     <span className={styles.detectedText}>
                       Detected as <span className={styles.formatName}>{getDisplayFormat(selectedFile.name)}</span> based on file extension.
+                    </span>
+                  ) : (
+                    <span className={styles.detectedText}>
+                      Unsupported file type. Please upload .sql, .rb, .prisma, .json, or .yaml files.
                     </span>
                   )}
                 </div>

@@ -1,12 +1,14 @@
 import { Button, Check, ChevronDown, X } from '@liam-hq/ui'
 import {
   type ChangeEvent,
-  type DragEvent,
   type FC,
   useRef,
   useState,
 } from 'react'
 import { FormatIcon } from '../../../../../components/FormatIcon/FormatIcon'
+import { AttachmentsContainer } from '../AttachmentsContainer'
+import { useFileAttachments } from '../hooks/useFileAttachments'
+import { useFileDragAndDrop } from '../hooks/useFileDragAndDrop'
 import { SessionFormActions } from '../SessionFormActions'
 import { FileIcon } from './FileIcon'
 import styles from './UploadSessionFormPresenter.module.css'
@@ -23,35 +25,29 @@ export const UploadSessionFormPresenter: FC<Props> = ({
   isPending,
   formAction,
 }) => {
-  const [dragActive, setDragActive] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [textContent, setTextContent] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-
-  const handleDrag = (e: DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (e.type === 'dragenter' || e.type === 'dragover') {
-      setDragActive(true)
-    } else if (e.type === 'dragleave') {
-      setDragActive(false)
-    }
-  }
-
-  const handleDrop = (e: DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setDragActive(false)
-
-    const file = e.dataTransfer.files?.[0]
+  
+  // File attachments hook
+  const { attachments, handleFileSelect, handleRemoveAttachment } = useFileAttachments()
+  
+  // File drag and drop for schema file
+  const handleSchemaFileDrop = (files: FileList) => {
+    const file = files[0]
     if (file && isValidFileExtension(file.name)) {
       setSelectedFile(file)
     }
   }
+  
+  const { dragActive: schemaDragActive, handleDrag: handleSchemaDrag, handleDrop: handleSchemaDrop } = useFileDragAndDrop(handleSchemaFileDrop)
+  
+  // File drag and drop for attachments
+  const { dragActive: attachmentDragActive, handleDrag: handleAttachmentDrag, handleDrop: handleAttachmentDrop } = useFileDragAndDrop(handleFileSelect)
 
-  const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleSchemaFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file && isValidFileExtension(file.name)) {
       setSelectedFile(file)
@@ -75,17 +71,17 @@ export const UploadSessionFormPresenter: FC<Props> = ({
         <div className={styles.uploadSection}>
           <div className={styles.uploadContainer}>
             <div
-              className={`${styles.dropZone} ${dragActive ? styles.dropZoneActive : ''}`}
-              onDragEnter={handleDrag}
-              onDragLeave={handleDrag}
-              onDragOver={handleDrag}
-              onDrop={handleDrop}
+              className={`${styles.dropZone} ${schemaDragActive ? styles.dropZoneActive : ''}`}
+              onDragEnter={handleSchemaDrag}
+              onDragLeave={handleSchemaDrag}
+              onDragOver={handleSchemaDrag}
+              onDrop={handleSchemaDrop}
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
             >
               <div className={styles.dropZoneContent}>
                 <div className={styles.iconContainer}>
-                  <FileIcon className={styles.fileIcon} isHovered={isHovered} isDragActive={dragActive} />
+                  <FileIcon className={styles.fileIcon} isHovered={isHovered} isDragActive={schemaDragActive} />
                   <div className={styles.extensionTags}>
                     <span className={styles.extensionTag}>.sql</span>
                     <span className={styles.extensionTag}>.rb</span>
@@ -113,7 +109,7 @@ export const UploadSessionFormPresenter: FC<Props> = ({
                 ref={fileInputRef}
                 type="file"
                 name="schemaFile"
-                onChange={handleFileSelect}
+                onChange={handleSchemaFileSelect}
                 accept=".sql,.rb,.prisma,.json,.yaml,.yml"
                 className={styles.hiddenFileInput}
               />
@@ -155,7 +151,17 @@ export const UploadSessionFormPresenter: FC<Props> = ({
           </div>
         </div>
         <div className={styles.divider} />
-        <div className={styles.inputSection}>
+        <div 
+          className={`${styles.inputSection} ${attachmentDragActive ? styles.dragActive : ''}`}
+          onDragEnter={handleAttachmentDrag}
+          onDragLeave={handleAttachmentDrag}
+          onDragOver={handleAttachmentDrag}
+          onDrop={handleAttachmentDrop}
+        >
+          <AttachmentsContainer 
+            attachments={attachments}
+            onRemove={handleRemoveAttachment}
+          />
           <div className={styles.textareaWrapper}>
             <textarea
               ref={textareaRef}
@@ -173,6 +179,7 @@ export const UploadSessionFormPresenter: FC<Props> = ({
             <SessionFormActions
               isPending={isPending}
               hasContent={!!selectedFile || textContent.trim().length > 0}
+              onFileSelect={handleFileSelect}
               onCancel={() => window.location.reload()}
             />
           </div>

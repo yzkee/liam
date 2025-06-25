@@ -33,19 +33,6 @@ const tableToDocument = (
   return `${tableDescription}${columnsText}${primaryKeyText}`
 }
 
-// Convert relationship data to text document
-const relationshipToDocument = (
-  relationshipName: string,
-  relationshipData: Schema['relationships'][string],
-): string => {
-  return `Relationship: ${relationshipName}
-From Table: ${relationshipData.primaryTableName}
-From Column: ${relationshipData.primaryColumnName}
-To Table: ${relationshipData.foreignTableName}
-To Column: ${relationshipData.foreignColumnName}
-Type: ${relationshipData.cardinality || 'unknown'}\n`
-}
-
 // Convert schema data to text format
 export const convertSchemaToText = (schema: Schema): string => {
   let schemaText = 'FULL DATABASE SCHEMA:\n\n'
@@ -56,20 +43,6 @@ export const convertSchemaToText = (schema: Schema): string => {
     for (const [tableName, tableData] of Object.entries(schema.tables)) {
       const tableDoc = tableToDocument(tableName, tableData)
       schemaText = `${schemaText}${tableDoc}\n\n`
-    }
-  }
-
-  // Process relationships
-  if (schema.relationships) {
-    schemaText += 'RELATIONSHIPS:\n\n'
-    for (const [relationshipName, relationshipData] of Object.entries(
-      schema.relationships,
-    )) {
-      const relationshipDoc = relationshipToDocument(
-        relationshipName,
-        relationshipData,
-      )
-      schemaText = `${schemaText}${relationshipDoc}\n\n`
     }
   }
 

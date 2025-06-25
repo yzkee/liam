@@ -42,3 +42,4 @@ export {
   type Tables,
   type UniqueConstraint,
 } from './schema/index.js'
+export { constraintsToRelationships } from './utils/constraintsToRelationships.js'

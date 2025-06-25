@@ -77,7 +77,7 @@ export type PrimaryKeyConstraint = v.InferOutput<
   typeof primaryKeyConstraintSchema
 >
 
-const foreignKeyConstraintSchema = v.object({
+export const foreignKeyConstraintSchema = v.object({
   type: v.literal('FOREIGN KEY'),
   name: constraintNameSchema,
   columnName: columnNameSchema,
@@ -144,12 +144,21 @@ export type Relationship = v.InferOutput<typeof relationshipSchema>
 const tablesSchema = v.record(tableNameSchema, tableSchema)
 export type Tables = v.InferOutput<typeof tablesSchema>
 
+/**
+ * @deprecated Use constraintsToRelationships() to derive relationships from constraints instead
+ */
 const relationshipsSchema = v.record(relationshipNameSchema, relationshipSchema)
+/**
+ * @deprecated Use constraintsToRelationships() to derive relationships from constraints instead
+ */
 export type Relationships = v.InferOutput<typeof relationshipsSchema>
 
 // Schema definition for the entire database structure
 export const schemaSchema = v.object({
   tables: tablesSchema,
+  /**
+   * @deprecated Use constraintsToRelationships() to derive relationships from constraints instead
+   */
   relationships: relationshipsSchema,
 })
 

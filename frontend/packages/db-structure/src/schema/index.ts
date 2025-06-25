@@ -42,6 +42,7 @@ export {
   constraintNameSchema,
   constraintSchema,
   foreignKeyConstraintReferenceOptionSchema,
+  foreignKeyConstraintSchema,
   indexColumnsSchema,
   indexNameSchema,
   indexSchema,

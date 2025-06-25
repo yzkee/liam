@@ -60,9 +60,9 @@ test('Cardinality should be highlighted when table node is clicked', async ({
 
   const tableNode = page.getByTestId('rf__node-account_aliases')
 
-  const edge = page.getByTestId(
-    'rf__edge-accounts_id_to_account_aliases_account_id',
-  )
+  const edge = page.getByRole('img', {
+    name: 'Edge from accounts to account_aliases',
+  })
 
   const cardinalityBefore = edge.locator('path').first()
   await expect(cardinalityBefore).toHaveAttribute(
@@ -71,7 +71,7 @@ test('Cardinality should be highlighted when table node is clicked', async ({
   )
   await expect(cardinalityBefore).toHaveAttribute(
     'marker-end',
-    'url(#zeroOrManyLeft)',
+    'url(#zeroOrOneLeft)',
   )
 
   await tableNode.click()
@@ -83,6 +83,6 @@ test('Cardinality should be highlighted when table node is clicked', async ({
   )
   await expect(cardinalityAfter).toHaveAttribute(
     'marker-end',
-    'url(#zeroOrManyLeftHighlight)',
+    'url(#zeroOrOneLeftHighlight)',
   )
 })

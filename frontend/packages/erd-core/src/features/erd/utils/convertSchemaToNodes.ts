@@ -1,4 +1,5 @@
 import type { Cardinality, Schema } from '@liam-hq/db-structure'
+import { constraintsToRelationships } from '@liam-hq/db-structure'
 import type { Edge, Node } from '@xyflow/react'
 import {
   NON_RELATED_TABLE_GROUP_NODE_ID,
@@ -20,7 +21,7 @@ export const convertSchemaToNodes = ({
   edges: Edge[]
 } => {
   const tables = Object.values(schema.tables)
-  const relationships = Object.values(schema.relationships)
+  const relationships = Object.values(constraintsToRelationships(schema.tables))
 
   const tablesWithRelationships = new Set<string>()
   const sourceColumns = new Map<string, string>()

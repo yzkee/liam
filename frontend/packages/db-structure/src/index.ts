@@ -44,3 +44,4 @@ export {
   type UniqueConstraint,
 } from './schema/index.js'
 export { isPrimaryKey } from './utils/isPrimaryKey.js'
+export { constraintsToRelationships } from './utils/constraintsToRelationships.js'

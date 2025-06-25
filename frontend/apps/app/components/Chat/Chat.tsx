@@ -5,6 +5,7 @@ import { type FC, useEffect, useRef, useState, useTransition } from 'react'
 import { ChatInput } from '../ChatInput'
 import { TimelineItem } from '../TimelineItem'
 import styles from './Chat.module.css'
+import { useAutoStartExecuted } from './hooks/useAutoStartExecuted'
 import {
   type TimelineItemType,
   useRealtimeTimelineItems,
@@ -29,13 +30,13 @@ interface Props {
 
 export const Chat: FC<Props> = ({ schemaData, designSession }) => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
-  const { timelineItems, addOrUpdateTimelineItem } = useRealtimeTimelineItems(
-    designSession,
-    currentUserId,
-  )
+  const { timelineItems: realtimeTimelineItems, addOrUpdateTimelineItem } =
+    useRealtimeTimelineItems(designSession, currentUserId)
   const [isLoading, startTransition] = useTransition()
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const autoStartExecuted = useRef(false)
+  const { autoStartExecuted, setAutoStartExecuted } = useAutoStartExecuted(
+    designSession.id,
+  )
 
   // Get current user ID on component mount
   useEffect(() => {
@@ -48,20 +49,26 @@ export const Chat: FC<Props> = ({ schemaData, designSession }) => {
 
   // Auto-start AI response for initial user message
   useEffect(() => {
-    if (!currentUserId || autoStartExecuted.current || isLoading) return
+    if (!currentUserId || autoStartExecuted || isLoading) return
 
     // Only auto-start if there's exactly one timeline item and it's from user
     if (
-      designSession.timelineItems.length === 1 &&
-      designSession.timelineItems[0].type === 'user'
+      realtimeTimelineItems.length === 1 &&
+      realtimeTimelineItems[0].role === 'user'
     ) {
-      const initialTimelineItem = designSession.timelineItems[0]
-      autoStartExecuted.current = true
+      const initialTimelineItem = realtimeTimelineItems[0]
+      setAutoStartExecuted(true)
       startTransition(() => {
         startAIResponse(initialTimelineItem.content)
       })
     }
-  }, [currentUserId, designSession.timelineItems, isLoading])
+  }, [
+    currentUserId,
+    isLoading,
+    realtimeTimelineItems,
+    autoStartExecuted,
+    setAutoStartExecuted,
+  ])
 
   // Scroll to bottom when component mounts or messages change
   useEffect(() => {
@@ -75,7 +82,7 @@ export const Chat: FC<Props> = ({ schemaData, designSession }) => {
     // Send chat message to API
     const result = await sendChatMessage({
       message: content,
-      timelineItems,
+      timelineItems: realtimeTimelineItems,
       designSession,
       currentUserId,
     })
@@ -109,7 +116,7 @@ export const Chat: FC<Props> = ({ schemaData, designSession }) => {
     <div className={styles.wrapper}>
       <div className={styles.messagesContainer}>
         {/* Display all timeline items */}
-        {timelineItems.map((timelineItem) => (
+        {realtimeTimelineItems.map((timelineItem) => (
           <TimelineItem key={timelineItem.id} {...timelineItem} />
         ))}
         {isLoading && (

@@ -12,11 +12,33 @@ describe(extractSchemaForTable, () => {
     columns: {
       userId: aColumn({ name: 'userId' }),
     },
+    constraints: {
+      userPosts: {
+        type: 'FOREIGN KEY',
+        name: 'userPosts',
+        columnName: 'userId',
+        targetTableName: 'users',
+        targetColumnName: 'id',
+        updateConstraint: 'NO_ACTION',
+        deleteConstraint: 'NO_ACTION',
+      },
+    },
   })
   const comments = aTable({
     name: 'comments',
     columns: {
       postId: aColumn({ name: 'postId' }),
+    },
+    constraints: {
+      postComments: {
+        type: 'FOREIGN KEY',
+        name: 'postComments',
+        columnName: 'postId',
+        targetTableName: 'posts',
+        targetColumnName: 'id',
+        updateConstraint: 'NO_ACTION',
+        deleteConstraint: 'NO_ACTION',
+      },
     },
   })
   const userPosts = aRelationship({

@@ -1,9 +1,21 @@
 .container {
+  display: inline-flex;
   height: 30px;
   width: 240px;
+  padding: var(--spacing-0) var(--spacing-2);
+  gap: var(--spacing-1);
   border-radius: var(--border-radius-base);
+  background-color: var(--global-background);
+  align-items: center;
+}
+
+.searchIcon {
+  height: 12px;
+  width: 12px;
+  color: var(--overlay-50);
+}
+
+.text {
   font-size: var(--font-size-3);
   color: var(--overlay-30);
-  background-color: var(--global-background);
-  padding: var(--spacing-0) var(--spacing-2);
 }

@@ -1,3 +1,4 @@
+import { Search } from '@liam-hq/ui'
 import type { FC } from 'react'
 import { useCommandPalette } from '@/stores'
 import styles from './CommandPaletteTriggerButton.module.css'
@@ -11,7 +12,8 @@ export const CommandPaletteTriggerButton: FC = () => {
       type="button"
       onClick={() => setOpen(true)}
     >
-      Search
+      <Search className={styles.searchIcon} />
+      <span className={styles.text}>Search</span>
     </button>
   )
 }

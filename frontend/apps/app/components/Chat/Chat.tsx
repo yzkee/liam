@@ -30,10 +30,8 @@ interface Props {
 
 export const Chat: FC<Props> = ({ schemaData, designSession }) => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
-  const { timelineItems, addOrUpdateTimelineItem } = useRealtimeTimelineItems(
-    designSession,
-    currentUserId,
-  )
+  const { timelineItems: realtimeTimelineItems, addOrUpdateTimelineItem } =
+    useRealtimeTimelineItems(designSession, currentUserId)
   const [isLoading, startTransition] = useTransition()
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { autoStartExecuted, setAutoStartExecuted } = useAutoStartExecuted(
@@ -54,8 +52,11 @@ export const Chat: FC<Props> = ({ schemaData, designSession }) => {
     if (!currentUserId || autoStartExecuted || isLoading) return
 
     // Only auto-start if there's exactly one timeline item and it's from user
-    if (timelineItems.length === 1 && timelineItems[0].role === 'user') {
-      const initialTimelineItem = timelineItems[0]
+    if (
+      realtimeTimelineItems.length === 1 &&
+      realtimeTimelineItems[0].role === 'user'
+    ) {
+      const initialTimelineItem = realtimeTimelineItems[0]
       setAutoStartExecuted(true)
       startTransition(() => {
         startAIResponse(initialTimelineItem.content)
@@ -64,7 +65,7 @@ export const Chat: FC<Props> = ({ schemaData, designSession }) => {
   }, [
     currentUserId,
     isLoading,
-    timelineItems,
+    realtimeTimelineItems,
     autoStartExecuted,
     setAutoStartExecuted,
   ])
@@ -81,7 +82,7 @@ export const Chat: FC<Props> = ({ schemaData, designSession }) => {
     // Send chat message to API
     const result = await sendChatMessage({
       message: content,
-      timelineItems,
+      timelineItems: realtimeTimelineItems,
       designSession,
       currentUserId,
     })
@@ -115,7 +116,7 @@ export const Chat: FC<Props> = ({ schemaData, designSession }) => {
     <div className={styles.wrapper}>
       <div className={styles.messagesContainer}>
         {/* Display all timeline items */}
-        {timelineItems.map((timelineItem) => (
+        {realtimeTimelineItems.map((timelineItem) => (
           <TimelineItem key={timelineItem.id} {...timelineItem} />
         ))}
         {isLoading && (

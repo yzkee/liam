@@ -104,7 +104,7 @@ export const UploadSessionFormPresenter: FC<Props> = ({
                 </p>
                 <Button
                   type="button"
-                  variant="solid-primary"
+                  variant={selectedFile ? "outline-secondary" : "solid-primary"}
                   onClick={(e) => {
                     e.stopPropagation()
                     handleSelectFile()

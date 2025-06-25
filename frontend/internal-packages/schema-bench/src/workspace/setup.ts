@@ -96,7 +96,10 @@ export const setupWorkspace = async (
 const main = async (): Promise<void> => {
   const initCwd = process.env.INIT_CWD || process.cwd()
   const workspacePath = path.resolve(initCwd, 'benchmark-workspace')
-  const defaultDataPath = path.resolve(__dirname, '../../benchmark-workspace-default')
+  const defaultDataPath = path.resolve(
+    __dirname,
+    '../../benchmark-workspace-default',
+  )
   const overwrite = process.argv.includes('--overwrite')
 
   const config: WorkspaceConfig = {

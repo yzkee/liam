@@ -27,7 +27,7 @@ The evaluator performs multi-dimensional analysis across several key areas:
 
 The package consists of three main components:
 
-### evaluate.ts (Not Implemented)
+### evaluate.ts
 The main evaluation orchestrator that:
 - Coordinates the entire evaluation process
 - Integrates results from different matching algorithms
@@ -59,9 +59,9 @@ The evaluator produces the following key metrics:
 - **Attribute F1 Average**: Average F1 score across all matched schemas
 - **Attribute All-Correct Average**: Average all-correct rate for attribute matching
 
-### Structural Metrics
+### Structural Metrics (TODO)
 - **Primary Key Average**: Accuracy rate for primary key prediction
-- **Foreign Key Average**: Accuracy rate for foreign key prediction
+- **(TODO)Foreign Key Average**: Accuracy rate for foreign key prediction
 - **Schema All-Correct Full**: Overall completeness indicator combining all metrics
 
 ## Input Schema Format
@@ -215,25 +215,6 @@ Here's a complete example from an insurance company database schema:
         }
       }
     }
-  },
-  "relationships": {
-    "agent_policy_relationship": {
-      "name": "agent_policy_relationship",
-      "primaryTableName": "insurance_agent",
-      "primaryColumnName": "agent_id",
-      "foreignTableName": "insurance_policy",
-      "foreignColumnName": "agent_id",
-      "cardinality": "ONE_TO_MANY",
-      "updateConstraint": "CASCADE",
-      "deleteConstraint": "RESTRICT"
-    }
-  },
-  "tableGroups": {
-    "core_entities": {
-      "name": "core_entities",
-      "tables": ["insurance_agent", "customer"],
-      "comment": "Core business entities"
-    }
   }
 }
 ```
@@ -245,15 +226,6 @@ Here's a complete example from an insurance company database schema:
   - **Constraints**: Primary key, foreign key, unique, and check constraints
   - **Indexes**: Database indexes for performance optimization
   - **Comments**: Documentation for tables and columns
-
-- **Relationships**: Explicit relationship definitions between tables
-  - **Cardinality**: ONE_TO_ONE or ONE_TO_MANY relationships
-  - **Constraints**: Update and delete cascade behaviors
-  - **References**: Clear mapping between primary and foreign tables/columns
-
-- **Table Groups**: Logical grouping of related tables
-  - **Organization**: Groups tables by business domain or functionality
-  - **Documentation**: Comments explaining the purpose of each group
 
 ## Usage Workflow
 

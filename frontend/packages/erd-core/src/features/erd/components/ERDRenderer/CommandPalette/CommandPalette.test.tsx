@@ -12,6 +12,8 @@ import {
 } from '@/stores'
 import { UserEditingContext } from '@/stores/userEditing/context'
 import { CommandPalette } from './CommandPalette'
+import { CommandPaletteProvider } from './CommandPaletteProvider'
+import { CommandPaletteTriggerButton } from './CommandPaletteTriggerButton'
 
 afterEach(() => {
   cleanup()
@@ -45,7 +47,9 @@ const wrapper = ({ children }: { children: ReactNode }) => (
     <ReactFlowProvider>
       <UserEditingProvider>
         <ActiveTableNameDisplay />
-        <SchemaProvider {...schema}>{children}</SchemaProvider>
+        <SchemaProvider {...schema}>
+          <CommandPaletteProvider>{children}</CommandPaletteProvider>
+        </SchemaProvider>
       </UserEditingProvider>
     </ReactFlowProvider>
   </NuqsTestingAdapter>
@@ -99,6 +103,28 @@ describe('dialog opening interactions', () => {
     render(<CommandPalette />, { wrapper })
 
     await user.keyboard('{Control>}k{/Control}')
+
+    expect(
+      screen.getByRole('dialog', { name: 'Command Palette' }),
+    ).toBeInTheDocument()
+  })
+
+  it('opens the dialog with clicking the trigger button', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <>
+        <CommandPaletteTriggerButton />
+        <CommandPalette />
+      </>,
+      { wrapper },
+    )
+
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Open command palette to search features',
+      }),
+    )
 
     expect(
       screen.getByRole('dialog', { name: 'Command Palette' }),

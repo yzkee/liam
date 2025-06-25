@@ -11,6 +11,7 @@ export const CommandPaletteTriggerButton: FC = () => {
       className={styles.container}
       type="button"
       onClick={() => setOpen(true)}
+      aria-label="Open command palette to search features"
     >
       <Search className={styles.searchIcon} />
       <span className={styles.text}>Search</span>

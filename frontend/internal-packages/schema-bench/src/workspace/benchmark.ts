@@ -1,7 +1,7 @@
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import type { Schema } from '@liam-hq/db-structure'
-import { evaluate } from '../evaluate'
+import { evaluate } from '../evaluate/evaluate.ts'
 import type { BenchmarkConfig, BenchmarkResult, CaseData } from './types'
 
 const loadOutputData = (workspacePath: string): Map<string, Schema> => {

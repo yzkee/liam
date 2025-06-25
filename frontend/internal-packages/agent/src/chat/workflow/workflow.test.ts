@@ -85,7 +85,6 @@ describe('Chat Workflow', () => {
         constraints: {},
       },
     },
-    relationships: {},
   })
 
   // Helper function to create base workflow state

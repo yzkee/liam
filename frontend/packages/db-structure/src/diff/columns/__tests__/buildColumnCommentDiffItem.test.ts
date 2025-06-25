@@ -34,7 +34,6 @@ describe('buildColumnCommentDiffItem', () => {
         constraints: {},
       },
     },
-    relationships: {},
   }
 
   const beforeSchema: Schema = structuredClone(baseSchema)

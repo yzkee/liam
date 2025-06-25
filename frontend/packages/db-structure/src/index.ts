@@ -21,9 +21,7 @@ export { applyPatchOperations, operationsSchema } from './operation/index.js'
 export type { ProcessError } from './parser.js'
 export {
   aColumn,
-  aRelationship,
   aTable,
-  type Cardinality,
   type CheckConstraint,
   type Column,
   type Columns,
@@ -35,11 +33,15 @@ export {
   type Indexes,
   mergeSchemas,
   type PrimaryKeyConstraint,
-  type Relationships,
   type Schema,
   schemaSchema,
   type Table,
   type Tables,
   type UniqueConstraint,
 } from './schema/index.js'
-export { constraintsToRelationships } from './utils/constraintsToRelationships.js'
+export {
+  type Cardinality,
+  constraintsToRelationships,
+  type Relationship,
+  type Relationships,
+} from './utils/constraintsToRelationships.js'

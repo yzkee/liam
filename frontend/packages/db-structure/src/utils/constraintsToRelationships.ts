@@ -1,6 +1,22 @@
 import * as v from 'valibot'
-import type { Cardinality, Relationships, Tables } from '../schema/index.js'
+import type { Tables } from '../schema/index.js'
 import { foreignKeyConstraintSchema } from '../schema/index.js'
+
+// Define types locally since they're no longer exported from schema
+export type Cardinality = 'ONE_TO_ONE' | 'ONE_TO_MANY'
+
+export type Relationship = {
+  name: string
+  primaryTableName: string
+  primaryColumnName: string
+  foreignTableName: string
+  foreignColumnName: string
+  cardinality: Cardinality
+  updateConstraint?: string
+  deleteConstraint?: string
+}
+
+export type Relationships = Record<string, Relationship>
 
 /**
  * Convert foreign key constraints to relationships for UI display

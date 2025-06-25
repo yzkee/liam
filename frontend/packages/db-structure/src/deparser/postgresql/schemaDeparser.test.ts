@@ -36,7 +36,6 @@ describe('postgresqlSchemaDeparser', () => {
           constraints: {},
         },
       },
-      relationships: {},
     }
 
     const result = postgresqlSchemaDeparser(schema)
@@ -74,7 +73,6 @@ describe('postgresqlSchemaDeparser', () => {
           constraints: {},
         },
       },
-      relationships: {},
     }
 
     const result = postgresqlSchemaDeparser(schema)
@@ -144,7 +142,6 @@ describe('postgresqlSchemaDeparser', () => {
           constraints: {},
         },
       },
-      relationships: {},
     }
 
     const result = postgresqlSchemaDeparser(schema)
@@ -184,7 +181,6 @@ describe('postgresqlSchemaDeparser', () => {
           constraints: {},
         },
       },
-      relationships: {},
     }
 
     const result = postgresqlSchemaDeparser(schema)
@@ -254,7 +250,6 @@ describe('postgresqlSchemaDeparser', () => {
           constraints: {},
         },
       },
-      relationships: {},
     }
 
     const result = postgresqlSchemaDeparser(schema)
@@ -277,7 +272,6 @@ describe('postgresqlSchemaDeparser', () => {
   it('should handle empty schema', async () => {
     const schema: Schema = {
       tables: {},
-      relationships: {},
     }
 
     const result = postgresqlSchemaDeparser(schema)

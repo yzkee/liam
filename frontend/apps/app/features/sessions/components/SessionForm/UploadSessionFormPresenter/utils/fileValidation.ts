@@ -7,9 +7,9 @@ export const getFileFormat = (fileName: string): FormatType => {
     sql: 'postgres',
     rb: 'schemarb',
     prisma: 'prisma',
-    json: 'postgres', // Default to postgres for json
-    yaml: 'postgres', // Default to postgres for yaml
-    yml: 'postgres', // Default to postgres for yml
+    json: 'json',
+    yaml: 'yaml',
+    yml: 'yaml',
   }
   
   return formatMap[extension || ''] || 'postgres'

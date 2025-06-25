@@ -21,7 +21,7 @@ jobs:
           fetch-depth: 0  # Need full history for accurate diff analysis
 
       - name: Auto review Renovate PR
-        uses: anthropics/claude-code-action@main
+        uses: anthropics/claude-code-action@beta
         with:
           direct_prompt: |
             Review this Renovate PR for dependency updates. Analyze regression risks by examining:

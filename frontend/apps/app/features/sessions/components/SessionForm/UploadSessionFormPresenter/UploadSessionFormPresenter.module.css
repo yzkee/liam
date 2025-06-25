@@ -150,12 +150,6 @@
   font-weight: 500;
 }
 
-.selectedFile {
-  font-size: var(--font-size-3);
-  color: var(--button-primary-background);
-  margin: 0;
-  font-weight: 500;
-}
 
 .hiddenFileInput {
   display: none;
@@ -287,4 +281,126 @@
   top: 32px;
   left: 0;
   transition-delay: 0.25s;
+}
+
+/* Valid schema styles */
+.validSchemaContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  width: 100%;
+}
+
+.validSchemaMessage {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: 0 var(--spacing-1);
+}
+
+.fetchStatus {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1half);
+}
+
+.checkIcon {
+  color: var(--button-primary-background);
+  width: var(--spacing-3);
+  height: var(--spacing-3);
+}
+
+.validSchemaText {
+  font-size: var(--font-size-2);
+  color: var(--button-primary-background);
+  font-weight: normal;
+  white-space: nowrap;
+}
+
+.detectedText {
+  font-size: var(--font-size-2);
+  color: var(--global-mute-text);
+  line-height: normal;
+}
+
+.formatName {
+  color: var(--global-foreground);
+}
+
+.matchFiles {
+  background-color: var(--overlay-5);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-2);
+  width: 100%;
+}
+
+.matchFileItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.uploadedFile {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1half);
+  background-color: var(--overlay-5);
+  border-radius: var(--border-radius-base);
+  padding: var(--spacing-1half);
+  position: relative;
+}
+
+.fileName {
+  font-size: var(--font-size-3);
+  color: var(--global-foreground);
+  font-weight: normal;
+}
+
+.removeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  padding: 2px;
+  background-color: var(--overlay-70);
+  border-radius: var(--border-radius-full);
+  border: none;
+  cursor: pointer;
+  color: var(--button-foreground);
+  transition: background-color 0.2s ease;
+}
+
+.removeButton:hover {
+  background-color: var(--overlay-90);
+}
+
+.formatSelect {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: var(--spacing-1) var(--spacing-2);
+  background-color: var(--global-background);
+  border: 1px solid var(--pane-border);
+  border-radius: var(--border-radius-base);
+  min-width: 127px;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.formatSelect:hover {
+  border-color: var(--pane-border-hover);
+}
+
+.formatText {
+  font-size: var(--font-size-3);
+  color: var(--global-foreground);
+  flex: 1;
+}
+
+.chevronIcon {
+  width: var(--spacing-3);
+  height: var(--spacing-3);
+  color: var(--overlay-50);
 }

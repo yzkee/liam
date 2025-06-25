@@ -1,4 +1,4 @@
-import { Button } from '@liam-hq/ui'
+import { Button, Check, ChevronDown, X } from '@liam-hq/ui'
 import {
   type ChangeEvent,
   type DragEvent,
@@ -6,9 +6,11 @@ import {
   useRef,
   useState,
 } from 'react'
+import { FormatIcon } from '../../../../../components/FormatIcon/FormatIcon'
 import { SessionFormActions } from '../SessionFormActions'
 import { FileIcon } from './FileIcon'
 import styles from './UploadSessionFormPresenter.module.css'
+import { getFileFormat, getDisplayFormat, isValidFileExtension } from './utils/fileValidation'
 
 type Props = {
   formError?: string
@@ -43,14 +45,16 @@ export const UploadSessionFormPresenter: FC<Props> = ({
     e.stopPropagation()
     setDragActive(false)
 
-    if (e.dataTransfer.files?.[0]) {
-      setSelectedFile(e.dataTransfer.files[0])
+    const file = e.dataTransfer.files?.[0]
+    if (file && isValidFileExtension(file.name)) {
+      setSelectedFile(file)
     }
   }
 
   const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) {
-      setSelectedFile(e.target.files[0])
+    const file = e.target.files?.[0]
+    if (file && isValidFileExtension(file.name)) {
+      setSelectedFile(file)
     }
   }
 
@@ -104,11 +108,6 @@ export const UploadSessionFormPresenter: FC<Props> = ({
                 >
                   Select File
                 </Button>
-                {selectedFile && (
-                  <p className={styles.selectedFile}>
-                    Selected: {selectedFile.name}
-                  </p>
-                )}
               </div>
               <input
                 ref={fileInputRef}
@@ -119,6 +118,40 @@ export const UploadSessionFormPresenter: FC<Props> = ({
                 className={styles.hiddenFileInput}
               />
             </div>
+            {selectedFile && (
+              <div className={styles.validSchemaContainer}>
+                <div className={styles.validSchemaMessage}>
+                  <div className={styles.fetchStatus}>
+                    <Check size={12} className={styles.checkIcon} />
+                    <span className={styles.validSchemaText}>Valid Schema</span>
+                  </div>
+                  <span className={styles.detectedText}>
+                    Detected as <span className={styles.formatName}>{getDisplayFormat(selectedFile.name)}</span> based on file extension.
+                  </span>
+                </div>
+                <div className={styles.matchFiles}>
+                  <div className={styles.matchFileItem}>
+                    <div className={styles.uploadedFile}>
+                      <FormatIcon format={getFileFormat(selectedFile.name)} size={16} />
+                      <span className={styles.fileName}>{selectedFile.name}</span>
+                      <button
+                        type="button"
+                        className={styles.removeButton}
+                        onClick={() => setSelectedFile(null)}
+                        aria-label="Remove file"
+                      >
+                        <X size={10} />
+                      </button>
+                    </div>
+                    <div className={styles.formatSelect}>
+                      <FormatIcon format={getFileFormat(selectedFile.name)} size={16} />
+                      <span className={styles.formatText}>{getDisplayFormat(selectedFile.name)}</span>
+                      <ChevronDown size={12} className={styles.chevronIcon} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
         <div className={styles.divider} />

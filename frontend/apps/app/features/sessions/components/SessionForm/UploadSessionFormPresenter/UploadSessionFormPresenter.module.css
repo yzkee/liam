@@ -379,7 +379,7 @@
 }
 
 .removeButton:hover {
-  background-color: var(--overlay-90);
+  background-color: var(--overlay-100);
 }
 
 .formatSelect {

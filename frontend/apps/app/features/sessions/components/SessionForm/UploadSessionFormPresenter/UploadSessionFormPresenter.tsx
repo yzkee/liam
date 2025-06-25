@@ -91,13 +91,17 @@ export const UploadSessionFormPresenter: FC<Props> = ({
         <div className={styles.uploadSection}>
           <div className={styles.uploadContainer}>
             <div
-              className={`${styles.dropZone} ${schemaDragActive ? styles.dropZoneActive : ''}`}
-              onClick={handleSelectFile}
-              onDragEnter={handleSchemaDrag}
-              onDragLeave={handleSchemaDrag}
-              onDragOver={handleSchemaDrag}
-              onDrop={handleSchemaDrop}
-              onMouseEnter={() => setIsHovered(true)}
+              className={clsx(
+                styles.dropZone,
+                schemaDragActive && styles.dropZoneActive,
+                isPending && styles.dropZoneDisabled
+              )}
+              onClick={isPending ? undefined : handleSelectFile}
+              onDragEnter={isPending ? undefined : handleSchemaDrag}
+              onDragLeave={isPending ? undefined : handleSchemaDrag}
+              onDragOver={isPending ? undefined : handleSchemaDrag}
+              onDrop={isPending ? undefined : handleSchemaDrop}
+              onMouseEnter={() => !isPending && setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
             >
               <div className={styles.dropZoneContent}>
@@ -125,6 +129,7 @@ export const UploadSessionFormPresenter: FC<Props> = ({
                     handleSelectFile()
                   }}
                   className={styles.selectFileButton}
+                  disabled={isPending}
                 >
                   Select File
                 </Button>
@@ -136,6 +141,7 @@ export const UploadSessionFormPresenter: FC<Props> = ({
                 onChange={handleSchemaFileSelect}
                 accept=".sql,.rb,.prisma,.json,.yaml,.yml"
                 className={styles.hiddenFileInput}
+                disabled={isPending}
               />
             </div>
             {selectedFile && (

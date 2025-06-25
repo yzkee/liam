@@ -1,12 +1,13 @@
-import { Button, Check, ChevronDown, X } from '@liam-hq/ui'
+import { Button, Check, X } from '@liam-hq/ui'
 import {
   type ChangeEvent,
   type FC,
   useRef,
   useState,
 } from 'react'
-import { FormatIcon } from '../../../../../components/FormatIcon/FormatIcon'
+import { FormatIcon, type FormatType } from '../../../../../components/FormatIcon/FormatIcon'
 import { AttachmentsContainer } from '../AttachmentsContainer'
+import { FormatSelectDropdown } from '../FormatSelectDropdown'
 import { useFileAttachments } from '../hooks/useFileAttachments'
 import { useFileDragAndDrop } from '../hooks/useFileDragAndDrop'
 import { SessionFormActions } from '../SessionFormActions'
@@ -27,6 +28,7 @@ export const UploadSessionFormPresenter: FC<Props> = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [selectedFormat, setSelectedFormat] = useState<FormatType>('postgres')
   const [textContent, setTextContent] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -39,6 +41,7 @@ export const UploadSessionFormPresenter: FC<Props> = ({
     const file = files[0]
     if (file && isValidFileExtension(file.name)) {
       setSelectedFile(file)
+      setSelectedFormat(getFileFormat(file.name))
     }
   }
   
@@ -51,6 +54,7 @@ export const UploadSessionFormPresenter: FC<Props> = ({
     const file = e.target.files?.[0]
     if (file && isValidFileExtension(file.name)) {
       setSelectedFile(file)
+      setSelectedFormat(getFileFormat(file.name))
     }
   }
 
@@ -68,6 +72,7 @@ export const UploadSessionFormPresenter: FC<Props> = ({
   return (
     <div className={styles.container}>
       <form action={formAction}>
+        <input type="hidden" name="schemaFormat" value={selectedFormat} />
         <div className={styles.uploadSection}>
           <div className={styles.uploadContainer}>
             <div
@@ -139,11 +144,10 @@ export const UploadSessionFormPresenter: FC<Props> = ({
                         <X size={10} />
                       </button>
                     </div>
-                    <div className={styles.formatSelect}>
-                      <FormatIcon format={getFileFormat(selectedFile.name)} size={16} />
-                      <span className={styles.formatText}>{getDisplayFormat(selectedFile.name)}</span>
-                      <ChevronDown size={12} className={styles.chevronIcon} />
-                    </div>
+                    <FormatSelectDropdown
+                      selectedFormat={selectedFormat}
+                      onFormatChange={setSelectedFormat}
+                    />
                   </div>
                 </div>
               </div>

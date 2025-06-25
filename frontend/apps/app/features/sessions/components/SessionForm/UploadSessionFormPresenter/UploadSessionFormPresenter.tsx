@@ -7,6 +7,7 @@ import {
   useState,
 } from 'react'
 import { SessionFormActions } from '../SessionFormActions'
+import { FileIcon } from './FileIcon'
 import styles from './UploadSessionFormPresenter.module.css'
 
 type Props = {
@@ -21,6 +22,7 @@ export const UploadSessionFormPresenter: FC<Props> = ({
   formAction,
 }) => {
   const [dragActive, setDragActive] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -65,8 +67,20 @@ export const UploadSessionFormPresenter: FC<Props> = ({
               onDragLeave={handleDrag}
               onDragOver={handleDrag}
               onDrop={handleDrop}
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
             >
               <div className={styles.dropZoneContent}>
+                <div className={styles.iconContainer}>
+                  <FileIcon className={styles.fileIcon} isHovered={isHovered} isDragActive={dragActive} />
+                  <div className={styles.extensionTags}>
+                    <span className={styles.extensionTag}>.sql</span>
+                    <span className={styles.extensionTag}>.rb</span>
+                    <span className={styles.extensionTag}>.prisma</span>
+                    <span className={styles.extensionTag}>.json</span>
+                    <span className={styles.extensionTag}>.yaml</span>
+                  </div>
+                </div>
                 <p className={styles.dropZoneText}>
                   Drag & drop your schema file or click to upload
                 </p>

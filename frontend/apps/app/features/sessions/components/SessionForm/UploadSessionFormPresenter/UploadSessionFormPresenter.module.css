@@ -48,16 +48,23 @@
 
 /* Drop zone styles */
 .dropZone {
-  border: 2px dashed var(--global-border);
-  border-radius: var(--border-radius-md);
-  padding: var(--spacing-10);
+  border: 1px dashed var(--overlay-20);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-10) var(--spacing-4);
   text-align: center;
-  background-color: var(--global-background);
+  background-color: transparent;
   transition: all 0.2s ease;
   cursor: pointer;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.dropZone:hover,
+.dropZone:hover {
+  background-color: var(--overlay-5);
+}
+
 .dropZoneActive {
   border-color: var(--button-primary-background);
   background-color: var(--overlay-5);
@@ -67,23 +74,28 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-4);
 }
 
 .dropZoneText {
-  font-size: var(--font-size-5);
+  font-size: var(--font-size-6);
+  font-weight: 500;
   color: var(--global-foreground);
-  margin: 0;
+  margin: 0 0 var(--spacing-2) 0;
+  line-height: 1.6;
 }
 
 .dropZoneSubtext {
-  font-size: var(--font-size-3);
-  color: var(--global-mute-text);
-  margin: 0;
+  font-size: var(--font-size-5);
+  color: var(--overlay-60);
+  margin: 0 0 var(--spacing-4) 0;
+  line-height: 1.6;
 }
 
 .selectFileButton {
-  min-width: var(--spacing-30);
+  height: var(--spacing-8);
+  padding: 0 var(--spacing-3);
+  font-size: var(--font-size-4);
+  font-weight: 500;
 }
 
 .selectedFile {
@@ -95,4 +107,132 @@
 
 .hiddenFileInput {
   display: none;
+}
+
+/* Icon container styles */
+.iconContainer {
+  position: relative;
+  margin-bottom: var(--spacing-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 134px;
+  height: 93px;
+  transition: all 0.3s ease;
+}
+
+.fileIcon {
+  width: 134px;
+  height: 119px;
+  color: var(--overlay-40);
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.dropZone:hover .fileIcon {
+  color: var(--overlay-60);
+  opacity: 1;
+}
+
+/* Back files animation */
+.fileIcon :global(.file-back-left) {
+  transform-origin: center bottom;
+  transition: all 0.3s ease;
+  transform: rotate(-10deg) translateX(8px) translateY(7px);
+  opacity: 0.7;
+}
+
+.fileIcon :global(.file-back-right) {
+  transform-origin: center bottom;
+  transition: all 0.3s ease;
+  transform: rotate(10deg) translateX(-8px) translateY(7px);
+  opacity: 0.7;
+}
+
+.fileIcon :global(.file-back-left-hover) {
+  transform: rotate(0deg) translateX(8px) translateY(7px);
+  opacity: 0;
+}
+
+.fileIcon :global(.file-back-right-hover) {
+  transform: rotate(0deg) translateX(-8px) translateY(7px);
+  opacity: 0;
+}
+
+/* Extension tags styles */
+.extensionTags {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.extensionTag {
+  position: absolute;
+  background-color: var(--primary-overlay-20);
+  color: var(--button-primary-background);
+  font-size: var(--font-size-2);
+  font-weight: 600;
+  font-family: 'IBM Plex Mono', monospace;
+  padding: var(--spacing-1) var(--spacing-1);
+  border-radius: var(--border-radius-smbase);
+  letter-spacing: -0.55px;
+  white-space: nowrap;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.3s ease;
+  line-height: 13px;
+  height: 21px;
+  display: flex;
+  align-items: center;
+}
+
+.dropZone:hover .extensionTag {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.extensionTag:nth-child(1) {
+  /* .sql */
+  top: 32px;
+  right: 4px;
+  transform: scale(0.8);
+  transition-delay: 0.05s;
+}
+
+.dropZone:hover .extensionTag:nth-child(1) {
+  transform: scale(1);
+}
+
+.extensionTag:nth-child(2) {
+  /* .rb */
+  top: -2px;
+  left: 48px;
+  transition-delay: 0.1s;
+}
+
+.extensionTag:nth-child(3) {
+  /* .prisma */
+  top: 7px;
+  left: 78px;
+  transition-delay: 0.15s;
+}
+
+.extensionTag:nth-child(4) {
+  /* .json */
+  top: 7px;
+  left: 6px;
+  transition-delay: 0.2s;
+}
+
+.extensionTag:nth-child(5) {
+  /* .yaml */
+  top: 32px;
+  left: 0;
+  transition-delay: 0.25s;
 }

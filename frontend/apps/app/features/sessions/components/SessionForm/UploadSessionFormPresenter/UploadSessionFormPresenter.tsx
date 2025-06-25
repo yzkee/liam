@@ -1,4 +1,5 @@
-import { Button, Check, X } from '@liam-hq/ui'
+import { Button, Check, X, AlertTriangle } from '@liam-hq/ui'
+import clsx from 'clsx'
 import {
   type ChangeEvent,
   type FC,
@@ -30,6 +31,7 @@ export const UploadSessionFormPresenter: FC<Props> = ({
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [selectedFormat, setSelectedFormat] = useState<FormatType>('postgres')
   const [textContent, setTextContent] = useState('')
+  const [isValidSchema, setIsValidSchema] = useState(true)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   
@@ -39,9 +41,13 @@ export const UploadSessionFormPresenter: FC<Props> = ({
   // File drag and drop for schema file
   const handleSchemaFileDrop = (files: FileList) => {
     const file = files[0]
-    if (file && isValidFileExtension(file.name)) {
+    if (file) {
+      const isValid = isValidFileExtension(file.name)
+      setIsValidSchema(isValid)
       setSelectedFile(file)
-      setSelectedFormat(getFileFormat(file.name))
+      if (isValid) {
+        setSelectedFormat(getFileFormat(file.name))
+      }
     }
   }
   
@@ -52,9 +58,13 @@ export const UploadSessionFormPresenter: FC<Props> = ({
 
   const handleSchemaFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file && isValidFileExtension(file.name)) {
+    if (file) {
+      const isValid = isValidFileExtension(file.name)
+      setIsValidSchema(isValid)
       setSelectedFile(file)
-      setSelectedFormat(getFileFormat(file.name))
+      if (isValid) {
+        setSelectedFormat(getFileFormat(file.name))
+      }
     }
   }
 
@@ -70,7 +80,12 @@ export const UploadSessionFormPresenter: FC<Props> = ({
   }
 
   return (
-    <div className={styles.container}>
+    <div className={clsx(
+      styles.container,
+      isPending && styles.pending,
+      formError && styles.error,
+      (attachmentDragActive || schemaDragActive) && styles.dragActive,
+    )}>
       <form action={formAction}>
         <input type="hidden" name="schemaFormat" value={selectedFormat} />
         <div className={styles.uploadSection}>
@@ -127,33 +142,49 @@ export const UploadSessionFormPresenter: FC<Props> = ({
               <div className={styles.validSchemaContainer}>
                 <div className={styles.validSchemaMessage}>
                   <div className={styles.fetchStatus}>
-                    <Check size={12} className={styles.checkIcon} />
-                    <span className={styles.validSchemaText}>Valid Schema</span>
+                    {isValidSchema ? (
+                      <>
+                        <Check size={12} className={styles.checkIcon} />
+                        <span className={styles.validSchemaText}>Valid Schema</span>
+                      </>
+                    ) : (
+                      <>
+                        <AlertTriangle size={12} className={styles.invalidIcon} />
+                        <span className={styles.invalidSchemaText}>Invalid Schema</span>
+                      </>
+                    )}
                   </div>
-                  <span className={styles.detectedText}>
-                    Detected as <span className={styles.formatName}>{getDisplayFormat(selectedFile.name)}</span> based on file extension.
-                  </span>
+                  {isValidSchema && (
+                    <span className={styles.detectedText}>
+                      Detected as <span className={styles.formatName}>{getDisplayFormat(selectedFile.name)}</span> based on file extension.
+                    </span>
+                  )}
                 </div>
-                <div className={styles.matchFiles}>
-                  <div className={styles.matchFileItem}>
-                    <div className={styles.uploadedFile}>
-                      <FormatIcon format={getFileFormat(selectedFile.name)} size={16} />
-                      <span className={styles.fileName}>{selectedFile.name}</span>
-                      <button
-                        type="button"
-                        className={styles.removeButton}
-                        onClick={() => setSelectedFile(null)}
-                        aria-label="Remove file"
-                      >
-                        <X size={10} />
-                      </button>
+                {isValidSchema && (
+                  <div className={styles.matchFiles}>
+                    <div className={styles.matchFileItem}>
+                      <div className={styles.uploadedFile}>
+                        <FormatIcon format={getFileFormat(selectedFile.name)} size={16} />
+                        <span className={styles.fileName}>{selectedFile.name}</span>
+                        <button
+                          type="button"
+                          className={styles.removeButton}
+                          onClick={() => {
+                            setSelectedFile(null)
+                            setIsValidSchema(true)
+                          }}
+                          aria-label="Remove file"
+                        >
+                          <X size={10} />
+                        </button>
+                      </div>
+                      <FormatSelectDropdown
+                        selectedFormat={selectedFormat}
+                        onFormatChange={setSelectedFormat}
+                      />
                     </div>
-                    <FormatSelectDropdown
-                      selectedFormat={selectedFormat}
-                      onFormatChange={setSelectedFormat}
-                    />
                   </div>
-                </div>
+                )}
               </div>
             )}
           </div>

@@ -32,6 +32,9 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Setup pnpm
+        uses: ./.github/actions/pnpm-setup
+
       - name: Run Claude PR Action
         uses: anthropics/claude-code-action@beta
         with:

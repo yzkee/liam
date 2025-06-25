@@ -43,12 +43,25 @@ jobs:
         with:
           persist-credentials: false
       
-      - name: Download ghalint
+      - name: Download and verify ghalint
         run: |
-          curl -L -o ghalint.tar.gz https://github.com/suzuki-shunsuke/ghalint/releases/download/v1.5.1/ghalint_1.5.1_linux_amd64.tar.gz
-          tar -xzf ghalint.tar.gz
-          chmod +x ghalint
-          sudo mv ghalint /usr/local/bin/
+          GHALINT_VERSION="1.5.1"
+          curl -L -o ghalint.tar.gz "https://github.com/suzuki-shunsuke/ghalint/releases/download/v${GHALINT_VERSION}/ghalint_${GHALINT_VERSION}_linux_amd64.tar.gz"
+          
+          # Verify checksum
+          hash=$(sha256sum ghalint.tar.gz | awk '{ print $1 }')
+          expected_hash="e791009d9361c8f0f0d2e2b9b67d428fe2dddc6694cbfec9954e2502a8e0e0ff"
+          
+          if [ "$hash" = "$expected_hash" ]; then
+            tar -xzf ghalint.tar.gz
+            chmod +x ghalint
+            sudo mv ghalint /usr/local/bin/
+          else
+            echo "Checksum verification failed!"
+            echo "Expected: $expected_hash"
+            echo "Got: $hash"
+            exit 1
+          fi
           
       - name: Run ghalint
         run: |

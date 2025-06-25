@@ -312,6 +312,9 @@ importers:
       '@liam-hq/db-structure':
         specifier: workspace:*
         version: link:../../packages/db-structure
+      '@liam-hq/pglite-server':
+        specifier: workspace:*
+        version: link:../../packages/pglite-server
       '@valibot/to-json-schema':
         specifier: 1.3.0
         version: 1.3.0(valibot@1.1.0(typescript@5.8.3))

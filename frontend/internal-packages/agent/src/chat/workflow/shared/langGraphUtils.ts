@@ -34,6 +34,8 @@ export const createAnnotations = () => {
     error: Annotation<string | undefined>,
     retryCount: Annotation<Record<string, number>>,
 
+    ddlStatements: Annotation<string | undefined>,
+
     // Repository dependencies for data access
     repositories: Annotation<Repositories>,
 

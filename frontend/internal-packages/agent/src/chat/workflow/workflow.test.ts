@@ -17,6 +17,17 @@ vi.mock('../../../utils/convertSchemaToText', () => ({
   convertSchemaToText: vi.fn(() => 'Mocked schema text'),
 }))
 
+// Mock the pglite-server
+vi.mock('@liam-hq/pglite-server', () => ({
+  executeQuery: vi.fn().mockResolvedValue([
+    {
+      success: true,
+      sql: 'CREATE TABLE test (id INTEGER);',
+      result: { rows: [], columns: [] },
+    },
+  ]),
+}))
+
 describe('Chat Workflow', () => {
   let mockSchemaData: Schema
   let mockAgent: {

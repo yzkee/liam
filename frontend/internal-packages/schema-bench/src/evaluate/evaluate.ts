@@ -11,7 +11,11 @@
  * The evaluation produces metrics including F1 scores, precision/recall, and all-correct rates
  * to assess the quality of schema prediction models or tools.
  */
-import type { PrimaryKeyConstraint, Schema, ForeignKeyConstraint } from '@liam-hq/db-structure'
+import type {
+  ForeignKeyConstraint,
+  PrimaryKeyConstraint,
+  Schema,
+} from '@liam-hq/db-structure'
 import { nameSimilarity } from '../nameSimilarity'
 import { wordOverlapMatch } from '../wordOverlapMatch'
 
@@ -162,7 +166,7 @@ const createForeignKeyMapping = (
   predictRelationships: Schema['relationships'],
 ): Mapping => {
   const foreignKeyMapping: Mapping = {}
-  
+
   for (const [refName, refRel] of Object.entries(referenceRelationships)) {
     for (const [predName, predRel] of Object.entries(predictRelationships)) {
       if (
@@ -176,7 +180,7 @@ const createForeignKeyMapping = (
       }
     }
   }
-  
+
   return foreignKeyMapping
 }
 
@@ -188,15 +192,18 @@ const calculateForeignKeyMetrics = (
   const referenceCount = Object.keys(referenceRelationships).length
   const predictCount = Object.keys(predictRelationships).length
   const matchedCount = Object.keys(foreignKeyMapping).length
-  
-  const foreignKeyPrecision = predictCount === 0 ? 0 : matchedCount / predictCount
-  const foreignKeyRecall = referenceCount === 0 ? 0 : matchedCount / referenceCount
+
+  const foreignKeyPrecision =
+    predictCount === 0 ? 0 : matchedCount / predictCount
+  const foreignKeyRecall =
+    referenceCount === 0 ? 0 : matchedCount / referenceCount
   const foreignKeyF1 =
     foreignKeyPrecision + foreignKeyRecall === 0
       ? 0
-      : (2 * foreignKeyPrecision * foreignKeyRecall) / (foreignKeyPrecision + foreignKeyRecall)
+      : (2 * foreignKeyPrecision * foreignKeyRecall) /
+        (foreignKeyPrecision + foreignKeyRecall)
   const foreignKeyAllCorrect = Math.abs(foreignKeyF1 - 1) < EPSILON ? 1 : 0
-  
+
   return { foreignKeyF1, foreignKeyAllCorrect }
 }
 
@@ -272,7 +279,7 @@ export const evaluate = async (
     reference.relationships,
     predict.relationships,
   )
-  
+
   const { foreignKeyF1, foreignKeyAllCorrect } = calculateForeignKeyMetrics(
     reference.relationships,
     predict.relationships,

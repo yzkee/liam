@@ -2,6 +2,7 @@
   "name": "@liam-hq/schema-bench",
   "private": true,
   "version": "0.1.0",
+  "type": "module",
   "main": "src/index.ts",
   "dependencies": {
     "@huggingface/transformers": "3.3.3",
@@ -14,9 +15,12 @@
     "vitest": "3.2.2"
   },
   "scripts": {
+    "benchmark": "pnpm setup-workspace && pnpm run-benchmark",
     "fmt": "concurrently \"pnpm:fmt:*\"",
     "fmt:biome": "biome check --write --unsafe .",
     "fmt:eslint": "eslint --fix .",
+    "run-benchmark": "node --experimental-strip-types src/workspace/benchmark.ts",
+    "setup-workspace": "node --experimental-strip-types src/workspace/setup.ts",
     "test": "vitest --watch=false --passWithNoTests"
   }
 }

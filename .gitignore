@@ -6,6 +6,7 @@ node_modules
 prism.wasm
 .cursor/mcp.json
 dist/
+benchmark-workspace/
 
 # Claude local settings
 .claude/settings.local.json

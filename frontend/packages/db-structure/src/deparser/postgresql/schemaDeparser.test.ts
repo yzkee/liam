@@ -48,7 +48,7 @@ describe('postgresqlSchemaDeparser', () => {
     expect(result.errors).toHaveLength(0)
     expect(result.value).toMatchInlineSnapshot(`
       "CREATE TABLE "users" (
-        "id" bigint NOT NULL,
+        "id" bigint PRIMARY KEY NOT NULL,
         "email" varchar(255) UNIQUE NOT NULL
       );"
     `)
@@ -91,7 +91,7 @@ describe('postgresqlSchemaDeparser', () => {
     expect(result.errors).toHaveLength(0)
     expect(result.value).toMatchInlineSnapshot(`
       "CREATE TABLE "products" (
-        "id" bigint NOT NULL
+        "id" bigint PRIMARY KEY NOT NULL
       );
 
       COMMENT ON TABLE "products" IS 'Product table';
@@ -163,7 +163,7 @@ describe('postgresqlSchemaDeparser', () => {
     expect(result.errors).toHaveLength(0)
     expect(result.value).toMatchInlineSnapshot(`
       "CREATE TABLE "settings" (
-        "id" bigint NOT NULL,
+        "id" bigint PRIMARY KEY NOT NULL,
         "enabled" boolean NOT NULL DEFAULT TRUE,
         "count" integer DEFAULT 0,
         "title" varchar(50) DEFAULT 'Default Title'
@@ -209,7 +209,7 @@ describe('postgresqlSchemaDeparser', () => {
     expect(result.value).toMatchInlineSnapshot(
       `
       "CREATE TABLE "test" (
-        "id" bigint NOT NULL
+        "id" bigint PRIMARY KEY NOT NULL
       );
 
       COMMENT ON TABLE "test" IS 'Table with ''quotes'' in comment';
@@ -287,11 +287,11 @@ describe('postgresqlSchemaDeparser', () => {
     expect(result.errors).toHaveLength(0)
     expect(result.value).toMatchInlineSnapshot(`
       "CREATE TABLE "users" (
-        "id" bigint NOT NULL
+        "id" bigint PRIMARY KEY NOT NULL
       );
 
       CREATE TABLE "products" (
-        "id" bigint NOT NULL,
+        "id" bigint PRIMARY KEY NOT NULL,
         "name" varchar(100) NOT NULL
       );"
     `)

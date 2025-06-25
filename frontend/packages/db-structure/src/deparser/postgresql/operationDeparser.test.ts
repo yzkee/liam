@@ -48,7 +48,7 @@ describe('postgresqlOperationDeparser', () => {
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
         "CREATE TABLE "users" (
-          "id" bigint NOT NULL,
+          "id" bigint PRIMARY KEY NOT NULL,
           "email" varchar(255) UNIQUE NOT NULL
         );
 
@@ -112,7 +112,7 @@ describe('postgresqlOperationDeparser', () => {
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
         "CREATE TABLE "settings" (
-          "id" bigint NOT NULL,
+          "id" bigint PRIMARY KEY NOT NULL,
           "enabled" boolean NOT NULL DEFAULT TRUE,
           "title" varchar(100) DEFAULT 'Default Title'
         );"

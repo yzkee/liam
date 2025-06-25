@@ -81,12 +81,32 @@ export function generateCreateTableStatement(table: Table): string {
   const tableName = table.name
 
   // Generate column definitions
-  const columnDefinitions = (Object.values(table.columns) as Column[])
-    .map((column) => generateColumnDefinition(column))
-    .join(',\n  ')
+  const columnDefinitions = (Object.values(table.columns) as Column[]).map(
+    (column) => generateColumnDefinition(column),
+  )
+
+  // Process PRIMARY KEY constraints inline
+  for (const constraint of Object.values(table.constraints)) {
+    if (constraint.type === 'PRIMARY KEY') {
+      // Add PRIMARY KEY directly to the column definition instead of as separate constraint
+      const colIndex = columnDefinitions.findIndex((def) =>
+        def.includes(escapeIdentifier(constraint.columnName)),
+      )
+      if (
+        colIndex !== -1 &&
+        columnDefinitions[colIndex] &&
+        !columnDefinitions[colIndex].includes('PRIMARY KEY')
+      ) {
+        columnDefinitions[colIndex] = columnDefinitions[colIndex].replace(
+          new RegExp(`(${escapeIdentifier(constraint.columnName)}\\s+\\S+)`),
+          '$1 PRIMARY KEY',
+        )
+      }
+    }
+  }
 
   // Basic CREATE TABLE statement
-  let ddl = `CREATE TABLE ${escapeIdentifier(tableName)} (\n  ${columnDefinitions}\n);`
+  let ddl = `CREATE TABLE ${escapeIdentifier(tableName)} (\n  ${columnDefinitions.join(',\n  ')}\n);`
 
   // Add table comment
   if (table.comment) {

@@ -1,6 +1,6 @@
 import { Search } from '@liam-hq/ui'
 import type { FC } from 'react'
-import { useCommandPalette } from '@/stores'
+import { useCommandPalette } from '../CommandPaletteProvider'
 import styles from './CommandPaletteTriggerButton.module.css'
 
 export const CommandPaletteTriggerButton: FC = () => {

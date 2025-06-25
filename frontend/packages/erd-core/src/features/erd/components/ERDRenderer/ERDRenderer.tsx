@@ -24,12 +24,7 @@ import '@/styles/globals.css'
 import { toggleLogEvent } from '@/features/gtm/utils'
 import { useIsTouchDevice } from '@/hooks'
 import { useVersion } from '@/providers'
-import {
-  CommandPaletteProvider,
-  SchemaProvider,
-  type SchemaProviderValue,
-  useSchema,
-} from '@/stores'
+import { SchemaProvider, type SchemaProviderValue, useSchema } from '@/stores'
 import { UserEditingProvider, useUserEditing } from '@/stores/userEditing'
 import {
   convertSchemaToNodes,
@@ -39,7 +34,7 @@ import {
 } from '../../utils'
 import { ERDContent } from '../ERDContent'
 import { CardinalityMarkers } from './CardinalityMarkers'
-import { CommandPalette } from './CommandPalette'
+import { CommandPalette, CommandPaletteProvider } from './CommandPalette'
 import { ErrorDisplay } from './ErrorDisplay'
 import { LeftPane } from './LeftPane'
 import { RelationshipEdgeParticleMarker } from './RelationshipEdgeParticleMarker'

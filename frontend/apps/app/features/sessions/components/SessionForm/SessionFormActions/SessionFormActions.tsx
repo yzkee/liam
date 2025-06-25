@@ -13,6 +13,7 @@ type Props = {
   hasContent?: boolean
   onMicClick?: () => void
   onAttachClick?: () => void
+  onFileSelect?: (files: FileList) => void
   onSubmit?: () => void
   onCancel?: () => void
 }
@@ -22,6 +23,7 @@ export const SessionFormActions: FC<Props> = ({
   hasContent = false,
   onMicClick,
   onAttachClick,
+  onFileSelect,
   onSubmit,
   onCancel,
 }) => {
@@ -39,6 +41,7 @@ export const SessionFormActions: FC<Props> = ({
       <MicButton onClick={onMicClick || (() => {})} disabled={isPending} />
       <AttachButton
         onClick={onAttachClick || (() => {})}
+        onFileSelect={onFileSelect}
         disabled={isPending}
       />
       <ActionButton

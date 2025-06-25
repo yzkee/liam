@@ -9,6 +9,10 @@
   align-items: center;
 }
 
+.container:focus-visible {
+  outline: 1px solid var(--button-primary-background);
+}
+
 .searchIcon {
   height: 12px;
   width: 12px;

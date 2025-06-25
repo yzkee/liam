@@ -11,7 +11,7 @@
  * The evaluation produces metrics including F1 scores, precision/recall, and all-correct rates
  * to assess the quality of schema prediction models or tools.
  */
-import type { PrimaryKeyConstraint, Schema } from '@liam-hq/db-structure'
+import type { PrimaryKeyConstraint, Schema, ForeignKeyConstraint } from '@liam-hq/db-structure'
 import { nameSimilarity } from '../nameSimilarity'
 import { wordOverlapMatch } from '../wordOverlapMatch'
 
@@ -37,6 +37,8 @@ type EvaluateResult = {
   columnAllCorrectRateAverage: number
   primaryKeyAccuracyAverage: number
   constraintAccuracy: number
+  foreignKeyF1Score: number
+  foreignKeyAllCorrectRate: number
   overallSchemaAccuracy: number
 }
 
@@ -155,6 +157,49 @@ const validateConstraints = (
   return referenceConstraintCount === predictConstraintCount
 }
 
+const createForeignKeyMapping = (
+  referenceRelationships: Schema['relationships'],
+  predictRelationships: Schema['relationships'],
+): Mapping => {
+  const foreignKeyMapping: Mapping = {}
+  
+  for (const [refName, refRel] of Object.entries(referenceRelationships)) {
+    for (const [predName, predRel] of Object.entries(predictRelationships)) {
+      if (
+        refRel.primaryTableName === predRel.primaryTableName &&
+        refRel.primaryColumnName === predRel.primaryColumnName &&
+        refRel.foreignTableName === predRel.foreignTableName &&
+        refRel.foreignColumnName === predRel.foreignColumnName
+      ) {
+        foreignKeyMapping[refName] = predName
+        break
+      }
+    }
+  }
+  
+  return foreignKeyMapping
+}
+
+const calculateForeignKeyMetrics = (
+  referenceRelationships: Schema['relationships'],
+  predictRelationships: Schema['relationships'],
+  foreignKeyMapping: Mapping,
+) => {
+  const referenceCount = Object.keys(referenceRelationships).length
+  const predictCount = Object.keys(predictRelationships).length
+  const matchedCount = Object.keys(foreignKeyMapping).length
+  
+  const foreignKeyPrecision = predictCount === 0 ? 0 : matchedCount / predictCount
+  const foreignKeyRecall = referenceCount === 0 ? 0 : matchedCount / referenceCount
+  const foreignKeyF1 =
+    foreignKeyPrecision + foreignKeyRecall === 0
+      ? 0
+      : (2 * foreignKeyPrecision * foreignKeyRecall) / (foreignKeyPrecision + foreignKeyRecall)
+  const foreignKeyAllCorrect = Math.abs(foreignKeyF1 - 1) < EPSILON ? 1 : 0
+  
+  return { foreignKeyF1, foreignKeyAllCorrect }
+}
+
 export const evaluate = async (
   reference: Schema,
   predict: Schema,
@@ -223,6 +268,17 @@ export const evaluate = async (
     totalConstraintCorrectCount += isConstraintCorrect ? 1 : 0
   }
 
+  const foreignKeyMapping = createForeignKeyMapping(
+    reference.relationships,
+    predict.relationships,
+  )
+  
+  const { foreignKeyF1, foreignKeyAllCorrect } = calculateForeignKeyMetrics(
+    reference.relationships,
+    predict.relationships,
+    foreignKeyMapping,
+  )
+
   // Calculate averages
   const totalTableCount = referenceTableNames.length
   const columnF1ScoreAverage = totalTableCount
@@ -253,6 +309,8 @@ export const evaluate = async (
     columnAllCorrectRateAverage,
     primaryKeyAccuracyAverage,
     constraintAccuracy,
+    foreignKeyF1Score: foreignKeyF1,
+    foreignKeyAllCorrectRate: foreignKeyAllCorrect,
     overallSchemaAccuracy,
   }
 }

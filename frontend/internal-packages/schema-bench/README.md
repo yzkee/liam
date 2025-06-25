@@ -198,6 +198,16 @@ Here's a complete example from an insurance company database schema:
           "unique": false,
           "notNull": false,
           "comment": "Customer contact phone"
+        },
+        "agent_id": {
+          "name": "agent_id",
+          "type": "VARCHAR(50)",
+          "default": null,
+          "check": null,
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "comment": "Reference to insurance agent"
         }
       },
       "comment": "Customer information",
@@ -212,6 +222,107 @@ Here's a complete example from an insurance company database schema:
           "type": "UNIQUE",
           "name": "uk_customer_id_card",
           "columnName": "id_card_number"
+        },
+        "fk_customer_agent": {
+          "type": "FOREIGN KEY",
+          "name": "fk_customer_agent",
+          "columnName": "agent_id",
+          "targetTableName": "insurance_agent",
+          "targetColumnName": "agent_id",
+          "updateConstraint": "CASCADE",
+          "deleteConstraint": "RESTRICT"
+        }
+      }
+    },
+    "policy": {
+      "name": "policy",
+      "columns": {
+        "policy_id": {
+          "name": "policy_id",
+          "type": "VARCHAR(50)",
+          "default": null,
+          "check": null,
+          "primary": true,
+          "unique": false,
+          "notNull": true,
+          "comment": "Unique identifier for policy"
+        },
+        "customer_id": {
+          "name": "customer_id",
+          "type": "VARCHAR(50)",
+          "default": null,
+          "check": null,
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "comment": "Reference to customer"
+        },
+        "agent_id": {
+          "name": "agent_id",
+          "type": "VARCHAR(50)",
+          "default": null,
+          "check": null,
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "comment": "Reference to insurance agent"
+        },
+        "policy_type": {
+          "name": "policy_type",
+          "type": "VARCHAR(50)",
+          "default": null,
+          "check": null,
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "comment": "Type of insurance policy"
+        },
+        "premium_amount": {
+          "name": "premium_amount",
+          "type": "DECIMAL(10,2)",
+          "default": null,
+          "check": null,
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "comment": "Monthly premium amount"
+        },
+        "start_date": {
+          "name": "start_date",
+          "type": "DATE",
+          "default": null,
+          "check": null,
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "comment": "Policy start date"
+        }
+      },
+      "comment": "Insurance policy information",
+      "indexes": {},
+      "constraints": {
+        "pk_policy": {
+          "type": "PRIMARY KEY",
+          "name": "pk_policy",
+          "columnName": "policy_id"
+        },
+        "fk_policy_customer": {
+          "type": "FOREIGN KEY",
+          "name": "fk_policy_customer",
+          "columnName": "customer_id",
+          "targetTableName": "customer",
+          "targetColumnName": "customer_id",
+          "updateConstraint": "CASCADE",
+          "deleteConstraint": "CASCADE"
+        },
+        "fk_policy_agent": {
+          "type": "FOREIGN KEY",
+          "name": "fk_policy_agent",
+          "columnName": "agent_id",
+          "targetTableName": "insurance_agent",
+          "targetColumnName": "agent_id",
+          "updateConstraint": "NO_ACTION",
+          "deleteConstraint": "RESTRICT"
         }
       }
     }

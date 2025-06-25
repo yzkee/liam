@@ -183,6 +183,8 @@ describe('evaluate', () => {
       expect(result.tableAllCorrectRate).toBe(1)
       expect(result.columnF1ScoreAverage).toBeCloseTo(1)
       expect(result.primaryKeyAccuracyAverage).toBeCloseTo(1)
+      expect(result.foreignKeyF1Score).toBe(0)
+      expect(result.foreignKeyAllCorrectRate).toBe(0)
       expect(result.overallSchemaAccuracy).toBe(1)
     },
     TIMEOUT,
@@ -351,6 +353,8 @@ describe('evaluate', () => {
 
       // Primary keys should partially match (different column names)
       expect(result.primaryKeyAccuracyAverage).toBeCloseTo(0.5, 3)
+      expect(result.foreignKeyF1Score).toBe(0)
+      expect(result.foreignKeyAllCorrectRate).toBe(0)
       expect(result.overallSchemaAccuracy).toBe(0)
     },
     TIMEOUT,
@@ -492,7 +496,749 @@ describe('evaluate', () => {
 
       // Primary key mismatch (customer_id vs id)
       expect(result.primaryKeyAccuracyAverage).toBe(1)
+      expect(result.foreignKeyF1Score).toBe(0)
+      expect(result.foreignKeyAllCorrectRate).toBe(0)
       expect(result.overallSchemaAccuracy).toBe(0)
+    },
+    TIMEOUT,
+  )
+
+  it(
+    'foreign key evaluation: perfect match',
+    async () => {
+      const reference: Schema = {
+        tables: {
+          users: {
+            name: 'users',
+            columns: {
+              id: {
+                name: 'id',
+                type: 'INTEGER',
+                default: null,
+                check: null,
+                primary: true,
+                unique: false,
+                notNull: true,
+                comment: null,
+              },
+            },
+            comment: null,
+            indexes: {},
+            constraints: {
+              pk_users: {
+                type: 'PRIMARY KEY',
+                name: 'pk_users',
+                columnName: 'id',
+              },
+            },
+          },
+          posts: {
+            name: 'posts',
+            columns: {
+              id: {
+                name: 'id',
+                type: 'INTEGER',
+                default: null,
+                check: null,
+                primary: true,
+                unique: false,
+                notNull: true,
+                comment: null,
+              },
+              user_id: {
+                name: 'user_id',
+                type: 'INTEGER',
+                default: null,
+                check: null,
+                primary: false,
+                unique: false,
+                notNull: true,
+                comment: null,
+              },
+            },
+            comment: null,
+            indexes: {},
+            constraints: {
+              pk_posts: {
+                type: 'PRIMARY KEY',
+                name: 'pk_posts',
+                columnName: 'id',
+              },
+              fk_posts_user_id: {
+                type: 'FOREIGN KEY',
+                name: 'fk_posts_user_id',
+                columnName: 'user_id',
+                targetTableName: 'users',
+                targetColumnName: 'id',
+                updateConstraint: 'NO_ACTION',
+                deleteConstraint: 'NO_ACTION',
+              },
+            },
+          },
+        },
+        relationships: {
+          fk_posts_user_id: {
+            name: 'fk_posts_user_id',
+            primaryTableName: 'users',
+            primaryColumnName: 'id',
+            foreignTableName: 'posts',
+            foreignColumnName: 'user_id',
+            cardinality: 'ONE_TO_MANY',
+            updateConstraint: 'NO_ACTION',
+            deleteConstraint: 'NO_ACTION',
+          },
+        },
+      }
+
+      const predict: Schema = {
+        tables: {
+          users: {
+            name: 'users',
+            columns: {
+              id: {
+                name: 'id',
+                type: 'INTEGER',
+                default: null,
+                check: null,
+                primary: true,
+                unique: false,
+                notNull: true,
+                comment: null,
+              },
+            },
+            comment: null,
+            indexes: {},
+            constraints: {
+              pk_users: {
+                type: 'PRIMARY KEY',
+                name: 'pk_users',
+                columnName: 'id',
+              },
+            },
+          },
+          posts: {
+            name: 'posts',
+            columns: {
+              id: {
+                name: 'id',
+                type: 'INTEGER',
+                default: null,
+                check: null,
+                primary: true,
+                unique: false,
+                notNull: true,
+                comment: null,
+              },
+              user_id: {
+                name: 'user_id',
+                type: 'INTEGER',
+                default: null,
+                check: null,
+                primary: false,
+                unique: false,
+                notNull: true,
+                comment: null,
+              },
+            },
+            comment: null,
+            indexes: {},
+            constraints: {
+              pk_posts: {
+                type: 'PRIMARY KEY',
+                name: 'pk_posts',
+                columnName: 'id',
+              },
+              fk_posts_user_id: {
+                type: 'FOREIGN KEY',
+                name: 'fk_posts_user_id',
+                columnName: 'user_id',
+                targetTableName: 'users',
+                targetColumnName: 'id',
+                updateConstraint: 'NO_ACTION',
+                deleteConstraint: 'NO_ACTION',
+              },
+            },
+          },
+        },
+        relationships: {
+          fk_posts_user_id: {
+            name: 'fk_posts_user_id',
+            primaryTableName: 'users',
+            primaryColumnName: 'id',
+            foreignTableName: 'posts',
+            foreignColumnName: 'user_id',
+            cardinality: 'ONE_TO_MANY',
+            updateConstraint: 'NO_ACTION',
+            deleteConstraint: 'NO_ACTION',
+          },
+        },
+      }
+
+      const result = await evaluate(reference, predict)
+
+      expect(result.foreignKeyF1Score).toBe(1)
+      expect(result.foreignKeyAllCorrectRate).toBe(1)
+    },
+    TIMEOUT,
+  )
+
+  it(
+    'foreign key evaluation: partial match with different names',
+    async () => {
+      const reference: Schema = {
+        tables: {
+          users: {
+            name: 'users',
+            columns: {
+              id: {
+                name: 'id',
+                type: 'INTEGER',
+                default: null,
+                check: null,
+                primary: true,
+                unique: false,
+                notNull: true,
+                comment: null,
+              },
+            },
+            comment: null,
+            indexes: {},
+            constraints: {
+              pk_users: {
+                type: 'PRIMARY KEY',
+                name: 'pk_users',
+                columnName: 'id',
+              },
+            },
+          },
+          posts: {
+            name: 'posts',
+            columns: {
+              id: {
+                name: 'id',
+                type: 'INTEGER',
+                default: null,
+                check: null,
+                primary: true,
+                unique: false,
+                notNull: true,
+                comment: null,
+              },
+              user_id: {
+                name: 'user_id',
+                type: 'INTEGER',
+                default: null,
+                check: null,
+                primary: false,
+                unique: false,
+                notNull: true,
+                comment: null,
+              },
+            },
+            comment: null,
+            indexes: {},
+            constraints: {
+              pk_posts: {
+                type: 'PRIMARY KEY',
+                name: 'pk_posts',
+                columnName: 'id',
+              },
+            },
+          },
+        },
+        relationships: {
+          users_id_to_posts_user_id: {
+            name: 'users_id_to_posts_user_id',
+            primaryTableName: 'users',
+            primaryColumnName: 'id',
+            foreignTableName: 'posts',
+            foreignColumnName: 'user_id',
+            cardinality: 'ONE_TO_MANY',
+            updateConstraint: 'NO_ACTION',
+            deleteConstraint: 'NO_ACTION',
+          },
+        },
+      }
+
+      const predict: Schema = {
+        tables: {
+          users: {
+            name: 'users',
+            columns: {
+              id: {
+                name: 'id',
+                type: 'INTEGER',
+                default: null,
+                check: null,
+                primary: true,
+                unique: false,
+                notNull: true,
+                comment: null,
+              },
+            },
+            comment: null,
+            indexes: {},
+            constraints: {
+              pk_users: {
+                type: 'PRIMARY KEY',
+                name: 'pk_users',
+                columnName: 'id',
+              },
+            },
+          },
+          posts: {
+            name: 'posts',
+            columns: {
+              id: {
+                name: 'id',
+                type: 'INTEGER',
+                default: null,
+                check: null,
+                primary: true,
+                unique: false,
+                notNull: true,
+                comment: null,
+              },
+              user_id: {
+                name: 'user_id',
+                type: 'INTEGER',
+                default: null,
+                check: null,
+                primary: false,
+                unique: false,
+                notNull: true,
+                comment: null,
+              },
+            },
+            comment: null,
+            indexes: {},
+            constraints: {
+              pk_posts: {
+                type: 'PRIMARY KEY',
+                name: 'pk_posts',
+                columnName: 'id',
+              },
+            },
+          },
+        },
+        relationships: {
+          fk_posts_user_id: {
+            name: 'fk_posts_user_id',
+            primaryTableName: 'users',
+            primaryColumnName: 'id',
+            foreignTableName: 'posts',
+            foreignColumnName: 'user_id',
+            cardinality: 'ONE_TO_MANY',
+            updateConstraint: 'NO_ACTION',
+            deleteConstraint: 'NO_ACTION',
+          },
+        },
+      }
+
+      const result = await evaluate(reference, predict)
+
+      expect(result.foreignKeyF1Score).toBe(1)
+      expect(result.foreignKeyAllCorrectRate).toBe(1)
+    },
+    TIMEOUT,
+  )
+
+  it(
+    'foreign key evaluation: partial match (F1 score between 0 and 1)',
+    async () => {
+      const reference: Schema = {
+        tables: {
+          users: {
+            name: 'users',
+            columns: {
+              id: {
+                name: 'id',
+                type: 'INTEGER',
+                default: null,
+                check: null,
+                primary: true,
+                unique: false,
+                notNull: true,
+                comment: null,
+              },
+            },
+            comment: null,
+            indexes: {},
+            constraints: {
+              pk_users: {
+                type: 'PRIMARY KEY',
+                name: 'pk_users',
+                columnName: 'id',
+              },
+            },
+          },
+          categories: {
+            name: 'categories',
+            columns: {
+              id: {
+                name: 'id',
+                type: 'INTEGER',
+                default: null,
+                check: null,
+                primary: true,
+                unique: false,
+                notNull: true,
+                comment: null,
+              },
+            },
+            comment: null,
+            indexes: {},
+            constraints: {
+              pk_categories: {
+                type: 'PRIMARY KEY',
+                name: 'pk_categories',
+                columnName: 'id',
+              },
+            },
+          },
+          posts: {
+            name: 'posts',
+            columns: {
+              id: {
+                name: 'id',
+                type: 'INTEGER',
+                default: null,
+                check: null,
+                primary: true,
+                unique: false,
+                notNull: true,
+                comment: null,
+              },
+              user_id: {
+                name: 'user_id',
+                type: 'INTEGER',
+                default: null,
+                check: null,
+                primary: false,
+                unique: false,
+                notNull: true,
+                comment: null,
+              },
+              category_id: {
+                name: 'category_id',
+                type: 'INTEGER',
+                default: null,
+                check: null,
+                primary: false,
+                unique: false,
+                notNull: true,
+                comment: null,
+              },
+            },
+            comment: null,
+            indexes: {},
+            constraints: {
+              pk_posts: {
+                type: 'PRIMARY KEY',
+                name: 'pk_posts',
+                columnName: 'id',
+              },
+            },
+          },
+        },
+        relationships: {
+          fk_posts_user_id: {
+            name: 'fk_posts_user_id',
+            primaryTableName: 'users',
+            primaryColumnName: 'id',
+            foreignTableName: 'posts',
+            foreignColumnName: 'user_id',
+            cardinality: 'ONE_TO_MANY',
+            updateConstraint: 'NO_ACTION',
+            deleteConstraint: 'NO_ACTION',
+          },
+          fk_posts_category_id: {
+            name: 'fk_posts_category_id',
+            primaryTableName: 'categories',
+            primaryColumnName: 'id',
+            foreignTableName: 'posts',
+            foreignColumnName: 'category_id',
+            cardinality: 'ONE_TO_MANY',
+            updateConstraint: 'NO_ACTION',
+            deleteConstraint: 'NO_ACTION',
+          },
+        },
+      }
+
+      const predict: Schema = {
+        tables: {
+          users: {
+            name: 'users',
+            columns: {
+              id: {
+                name: 'id',
+                type: 'INTEGER',
+                default: null,
+                check: null,
+                primary: true,
+                unique: false,
+                notNull: true,
+                comment: null,
+              },
+            },
+            comment: null,
+            indexes: {},
+            constraints: {
+              pk_users: {
+                type: 'PRIMARY KEY',
+                name: 'pk_users',
+                columnName: 'id',
+              },
+            },
+          },
+          categories: {
+            name: 'categories',
+            columns: {
+              id: {
+                name: 'id',
+                type: 'INTEGER',
+                default: null,
+                check: null,
+                primary: true,
+                unique: false,
+                notNull: true,
+                comment: null,
+              },
+            },
+            comment: null,
+            indexes: {},
+            constraints: {
+              pk_categories: {
+                type: 'PRIMARY KEY',
+                name: 'pk_categories',
+                columnName: 'id',
+              },
+            },
+          },
+          posts: {
+            name: 'posts',
+            columns: {
+              id: {
+                name: 'id',
+                type: 'INTEGER',
+                default: null,
+                check: null,
+                primary: true,
+                unique: false,
+                notNull: true,
+                comment: null,
+              },
+              user_id: {
+                name: 'user_id',
+                type: 'INTEGER',
+                default: null,
+                check: null,
+                primary: false,
+                unique: false,
+                notNull: true,
+                comment: null,
+              },
+              category_id: {
+                name: 'category_id',
+                type: 'INTEGER',
+                default: null,
+                check: null,
+                primary: false,
+                unique: false,
+                notNull: true,
+                comment: null,
+              },
+            },
+            comment: null,
+            indexes: {},
+            constraints: {
+              pk_posts: {
+                type: 'PRIMARY KEY',
+                name: 'pk_posts',
+                columnName: 'id',
+              },
+            },
+          },
+        },
+        relationships: {
+          fk_posts_user_id: {
+            name: 'fk_posts_user_id',
+            primaryTableName: 'users',
+            primaryColumnName: 'id',
+            foreignTableName: 'posts',
+            foreignColumnName: 'user_id',
+            cardinality: 'ONE_TO_MANY',
+            updateConstraint: 'NO_ACTION',
+            deleteConstraint: 'NO_ACTION',
+          },
+        },
+      }
+
+      const result = await evaluate(reference, predict)
+
+      expect(result.foreignKeyF1Score).toBeCloseTo(0.6666666666666666)
+      expect(result.foreignKeyAllCorrectRate).toBe(0)
+    },
+    TIMEOUT,
+  )
+
+  it(
+    'foreign key evaluation: no match',
+    async () => {
+      const reference: Schema = {
+        tables: {
+          users: {
+            name: 'users',
+            columns: {
+              id: {
+                name: 'id',
+                type: 'INTEGER',
+                default: null,
+                check: null,
+                primary: true,
+                unique: false,
+                notNull: true,
+                comment: null,
+              },
+            },
+            comment: null,
+            indexes: {},
+            constraints: {
+              pk_users: {
+                type: 'PRIMARY KEY',
+                name: 'pk_users',
+                columnName: 'id',
+              },
+            },
+          },
+          posts: {
+            name: 'posts',
+            columns: {
+              id: {
+                name: 'id',
+                type: 'INTEGER',
+                default: null,
+                check: null,
+                primary: true,
+                unique: false,
+                notNull: true,
+                comment: null,
+              },
+              user_id: {
+                name: 'user_id',
+                type: 'INTEGER',
+                default: null,
+                check: null,
+                primary: false,
+                unique: false,
+                notNull: true,
+                comment: null,
+              },
+            },
+            comment: null,
+            indexes: {},
+            constraints: {
+              pk_posts: {
+                type: 'PRIMARY KEY',
+                name: 'pk_posts',
+                columnName: 'id',
+              },
+            },
+          },
+        },
+        relationships: {
+          users_id_to_posts_user_id: {
+            name: 'users_id_to_posts_user_id',
+            primaryTableName: 'users',
+            primaryColumnName: 'id',
+            foreignTableName: 'posts',
+            foreignColumnName: 'user_id',
+            cardinality: 'ONE_TO_MANY',
+            updateConstraint: 'NO_ACTION',
+            deleteConstraint: 'NO_ACTION',
+          },
+        },
+      }
+
+      const predict: Schema = {
+        tables: {
+          users: {
+            name: 'users',
+            columns: {
+              id: {
+                name: 'id',
+                type: 'INTEGER',
+                default: null,
+                check: null,
+                primary: true,
+                unique: false,
+                notNull: true,
+                comment: null,
+              },
+            },
+            comment: null,
+            indexes: {},
+            constraints: {
+              pk_users: {
+                type: 'PRIMARY KEY',
+                name: 'pk_users',
+                columnName: 'id',
+              },
+            },
+          },
+          posts: {
+            name: 'posts',
+            columns: {
+              id: {
+                name: 'id',
+                type: 'INTEGER',
+                default: null,
+                check: null,
+                primary: true,
+                unique: false,
+                notNull: true,
+                comment: null,
+              },
+              author_id: {
+                name: 'author_id',
+                type: 'INTEGER',
+                default: null,
+                check: null,
+                primary: false,
+                unique: false,
+                notNull: true,
+                comment: null,
+              },
+            },
+            comment: null,
+            indexes: {},
+            constraints: {
+              pk_posts: {
+                type: 'PRIMARY KEY',
+                name: 'pk_posts',
+                columnName: 'id',
+              },
+            },
+          },
+        },
+        relationships: {
+          fk_posts_author_id: {
+            name: 'fk_posts_author_id',
+            primaryTableName: 'users',
+            primaryColumnName: 'id',
+            foreignTableName: 'posts',
+            foreignColumnName: 'author_id',
+            cardinality: 'ONE_TO_MANY',
+            updateConstraint: 'NO_ACTION',
+            deleteConstraint: 'NO_ACTION',
+          },
+        },
+      }
+
+      const result = await evaluate(reference, predict)
+
+      expect(result.foreignKeyF1Score).toBe(0)
+      expect(result.foreignKeyAllCorrectRate).toBe(0)
     },
     TIMEOUT,
   )

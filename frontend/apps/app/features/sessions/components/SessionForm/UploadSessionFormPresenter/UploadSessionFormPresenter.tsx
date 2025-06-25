@@ -24,7 +24,9 @@ export const UploadSessionFormPresenter: FC<Props> = ({
   const [dragActive, setDragActive] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [textContent, setTextContent] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const handleDrag = (e: DragEvent) => {
     e.preventDefault()
@@ -56,11 +58,18 @@ export const UploadSessionFormPresenter: FC<Props> = ({
     fileInputRef.current?.click()
   }
 
+  const handleTextareaChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    const textarea = e.target
+    textarea.style.height = 'auto'
+    textarea.style.height = `${textarea.scrollHeight}px`
+    setTextContent(textarea.value)
+  }
+
   return (
     <div className={styles.container}>
       <form action={formAction}>
-        <div className={styles.formContent}>
-          <div className={styles.formGroup}>
+        <div className={styles.uploadSection}>
+          <div className={styles.uploadContainer}>
             <div
               className={`${styles.dropZone} ${dragActive ? styles.dropZoneActive : ''}`}
               onDragEnter={handleDrag}
@@ -110,16 +119,30 @@ export const UploadSessionFormPresenter: FC<Props> = ({
                 className={styles.hiddenFileInput}
               />
             </div>
-            {formError && <p className={styles.error}>{formError}</p>}
           </div>
         </div>
         <div className={styles.divider} />
-        <div className={styles.buttonContainer}>
-          <SessionFormActions
-            isPending={isPending}
-            hasContent={!!selectedFile}
-            onCancel={() => window.location.reload()}
-          />
+        <div className={styles.inputSection}>
+          <div className={styles.textareaWrapper}>
+            <textarea
+              ref={textareaRef}
+              name="message"
+              placeholder="Enter your database design instructions. For example: Design a database for an e-commerce site that manages users, products, and orders..."
+              value={textContent}
+              onChange={handleTextareaChange}
+              className={styles.textarea}
+              disabled={isPending}
+              rows={4}
+            />
+            {formError && <p className={styles.error}>{formError}</p>}
+          </div>
+          <div className={styles.buttonContainer}>
+            <SessionFormActions
+              isPending={isPending}
+              hasContent={!!selectedFile || textContent.trim().length > 0}
+              onCancel={() => window.location.reload()}
+            />
+          </div>
         </div>
       </form>
     </div>

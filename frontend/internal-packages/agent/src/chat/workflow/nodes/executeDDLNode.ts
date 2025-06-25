@@ -11,53 +11,43 @@ const NODE_NAME = 'executeDDLNode'
 export async function executeDDLNode(
   state: WorkflowState,
 ): Promise<WorkflowState> {
-  try {
-    state.logger.log(`[${NODE_NAME}] Started`)
+  state.logger.log(`[${NODE_NAME}] Started`)
 
-    if (!state.ddlStatements || !state.ddlStatements.trim()) {
-      state.logger.log(`[${NODE_NAME}] No DDL statements to execute`)
-      state.logger.log(`[${NODE_NAME}] Completed`)
-      return {
-        ...state,
-      }
-    }
-
-    const results: SqlResult[] = await executeQuery(
-      state.designSessionId,
-      state.ddlStatements,
-    )
-
-    const hasErrors = results.some((result: SqlResult) => !result.success)
-
-    if (hasErrors) {
-      const errorMessages = results
-        .filter((result: SqlResult) => !result.success)
-        .map(
-          (result: SqlResult) =>
-            `SQL: ${result.sql}, Error: ${JSON.stringify(result.result)}`,
-        )
-        .join('; ')
-
-      state.logger.log(`[${NODE_NAME}] DDL execution failed: ${errorMessages}`)
-      state.logger.log(`[${NODE_NAME}] Completed`)
-      return {
-        ...state,
-      }
-    }
-
-    state.logger.log(`[${NODE_NAME}] DDL executed successfully`)
+  if (!state.ddlStatements || !state.ddlStatements.trim()) {
+    state.logger.log(`[${NODE_NAME}] No DDL statements to execute`)
     state.logger.log(`[${NODE_NAME}] Completed`)
-
     return {
       ...state,
     }
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error)
-    state.logger.log(`[${NODE_NAME}] Failed: ${errorMessage}`)
-    state.logger.log(`[${NODE_NAME}] Completed`)
+  }
 
+  const results: SqlResult[] = await executeQuery(
+    state.designSessionId,
+    state.ddlStatements,
+  )
+
+  const hasErrors = results.some((result: SqlResult) => !result.success)
+
+  if (hasErrors) {
+    const errorMessages = results
+      .filter((result: SqlResult) => !result.success)
+      .map(
+        (result: SqlResult) =>
+          `SQL: ${result.sql}, Error: ${JSON.stringify(result.result)}`,
+      )
+      .join('; ')
+
+    state.logger.log(`[${NODE_NAME}] DDL execution failed: ${errorMessages}`)
+    state.logger.log(`[${NODE_NAME}] Completed`)
     return {
       ...state,
     }
+  }
+
+  state.logger.log(`[${NODE_NAME}] DDL executed successfully`)
+  state.logger.log(`[${NODE_NAME}] Completed`)
+
+  return {
+    ...state,
   }
 }

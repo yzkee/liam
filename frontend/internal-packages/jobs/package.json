@@ -40,7 +40,7 @@
     "lint:biome": "biome check .",
     "lint:eslint": "eslint .",
     "lint:tsc": "tsc --noEmit",
-    "postinstall": "[ -f ../../packages/db-structure/node_modules/@ruby/prism/src/prism.wasm ] && cp ../../packages/db-structure/node_modules/@ruby/prism/src/prism.wasm prism.wasm || echo 'prism.wasm not found, skipping'; [ -f ../../packages/pglite-server/node_modules/@electric-sql/pglite/dist/pglite.data ] && cp ../../packages/pglite-server/node_modules/@electric-sql/pglite/dist/pglite.data . || echo 'pglite.data not found, skipping'; [ -f ../../packages/pglite-server/node_modules/@electric-sql/pglite/dist/pglite.wasm ] && cp ../../packages/pglite-server/node_modules/@electric-sql/pglite/dist/pglite.wasm . || echo 'pglite.wasm not found, skipping'",
+    "postinstall": "bash setup.sh",
     "test": "vitest --watch=false --passWithNoTests",
     "trigger:dev": "trigger dev"
   }

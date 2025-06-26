@@ -28,7 +28,7 @@
   color: var(--button-primary-foreground);
 }
 
-.container.error .selectFileButton[data-variant="outline-secondary"] {
+.container.error .selectFileButton[data-variant='outline-secondary'] {
   color: var(--button-secondary-foreground);
 }
 
@@ -208,25 +208,27 @@
   border: 1px solid var(--button-primary-background);
 }
 
-.selectFileButton[data-variant="outline-secondary"] {
+.selectFileButton[data-variant='outline-secondary'] {
   background-color: transparent;
   color: var(--button-secondary-foreground);
   border: 1px solid var(--button-border);
 }
 
-.selectFileButton[data-disabled="true"] {
+.selectFileButton[data-disabled='true'] {
   color: var(--button-disabled-foreground);
   background-color: var(--button-disabled-background);
   border: 1px solid var(--button-border);
   cursor: not-allowed;
 }
 
-.selectFileButton:hover:not([data-disabled="true"]) {
+.selectFileButton:hover:not([data-disabled='true']) {
   background-color: var(--button-primary-background-hover);
   border-color: var(--button-primary-background-hover);
 }
 
-.selectFileButton[data-variant="outline-secondary"]:hover:not([data-disabled="true"]) {
+.selectFileButton[data-variant='outline-secondary']:hover:not(
+    [data-disabled='true']
+  ) {
   background-color: var(--button-background-hover);
 }
 

@@ -4,12 +4,12 @@ const getFileExtension = (fileName: string): string => {
   if (!fileName || typeof fileName !== 'string') {
     return ''
   }
-  
+
   const lastDotIndex = fileName.lastIndexOf('.')
   if (lastDotIndex > 0 && lastDotIndex < fileName.length - 1) {
     return fileName.slice(lastDotIndex + 1).toLowerCase()
   }
-  
+
   return ''
 }
 

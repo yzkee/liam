@@ -28,11 +28,13 @@ export const useFileAttachments = () => {
   }, [])
 
   const clearAttachments = useCallback(() => {
-    attachments.forEach((attachment) => {
-      URL.revokeObjectURL(attachment.url)
+    setAttachments((prev) => {
+      prev.forEach((attachment) => {
+        URL.revokeObjectURL(attachment.url)
+      })
+      return []
     })
-    setAttachments([])
-  }, [attachments])
+  }, [])
 
   return {
     attachments,

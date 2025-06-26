@@ -1,7 +1,20 @@
-import type { FormatType } from '../../../../../../components/FormatIcon/FormatIcon'
+import type { FormatType } from '@/components/FormatIcon/FormatIcon'
+
+const getFileExtension = (fileName: string): string => {
+  if (!fileName || typeof fileName !== 'string') {
+    return ''
+  }
+  
+  const lastDotIndex = fileName.lastIndexOf('.')
+  if (lastDotIndex > 0 && lastDotIndex < fileName.length - 1) {
+    return fileName.slice(lastDotIndex + 1).toLowerCase()
+  }
+  
+  return ''
+}
 
 export const getFileFormat = (fileName: string): FormatType => {
-  const extension = fileName.split('.').pop()?.toLowerCase()
+  const extension = getFileExtension(fileName)
 
   const formatMap: Record<string, FormatType> = {
     sql: 'postgres',
@@ -12,11 +25,11 @@ export const getFileFormat = (fileName: string): FormatType => {
     yml: 'yaml',
   }
 
-  return formatMap[extension || ''] || 'postgres'
+  return formatMap[extension] || 'postgres'
 }
 
 export const getDisplayFormat = (fileName: string): string => {
-  const extension = fileName.split('.').pop()?.toLowerCase()
+  const extension = getFileExtension(fileName)
 
   const displayMap: Record<string, string> = {
     sql: 'postgresql',
@@ -27,11 +40,11 @@ export const getDisplayFormat = (fileName: string): string => {
     yml: 'yaml',
   }
 
-  return displayMap[extension || ''] || 'postgresql'
+  return displayMap[extension] || 'postgresql'
 }
 
 export const isValidFileExtension = (fileName: string): boolean => {
-  const extension = fileName.split('.').pop()?.toLowerCase()
+  const extension = getFileExtension(fileName)
   const validExtensions = ['sql', 'rb', 'prisma', 'json', 'yaml', 'yml']
-  return validExtensions.includes(extension || '')
+  return validExtensions.includes(extension)
 }

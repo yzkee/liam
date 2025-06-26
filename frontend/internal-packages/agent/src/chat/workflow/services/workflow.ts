@@ -9,6 +9,7 @@ import {
   generateUsecaseNode,
   prepareDMLNode,
   reviewDeliverablesNode,
+  saveUserMessageNode,
   validateSchemaNode,
 } from '../nodes'
 import {
@@ -32,6 +33,9 @@ const createGraph = () => {
   const graph = new StateGraph(ChatStateAnnotation)
 
   graph
+    .addNode('saveUserMessage', saveUserMessageNode, {
+      retryPolicy: RETRY_POLICY,
+    })
     .addNode('analyzeRequirements', analyzeRequirementsNode, {
       retryPolicy: RETRY_POLICY,
     })
@@ -60,13 +64,18 @@ const createGraph = () => {
       retryPolicy: RETRY_POLICY,
     })
 
-    .addEdge(START, 'analyzeRequirements')
+    .addEdge(START, 'saveUserMessage')
     .addEdge('analyzeRequirements', 'designSchema')
     .addEdge('generateDDL', 'executeDDL')
     .addEdge('executeDDL', 'generateUsecase')
     .addEdge('generateUsecase', 'prepareDML')
     .addEdge('prepareDML', 'validateSchema')
     .addEdge('finalizeArtifacts', END)
+
+    // Conditional edge for saveUserMessage - skip to finalizeArtifacts if error
+    .addConditionalEdges('saveUserMessage', (state) => {
+      return state.error ? 'finalizeArtifacts' : 'analyzeRequirements'
+    })
 
     // Conditional edge for designSchema - skip to finalizeArtifacts if error
     .addConditionalEdges('designSchema', (state) => {

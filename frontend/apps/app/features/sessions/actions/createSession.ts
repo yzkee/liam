@@ -1,11 +1,14 @@
 'use server'
 
+import { createHash } from 'node:crypto'
 import path from 'node:path'
 import type { SupabaseClientType } from '@liam-hq/db'
 import type { TablesInsert } from '@liam-hq/db/supabase/database.types'
 import type { Schema } from '@liam-hq/db-structure'
 import { parse, setPrismWasmUrl } from '@liam-hq/db-structure/parser'
 import { getFileContent } from '@liam-hq/github'
+import { processChatTask } from '@liam-hq/jobs'
+import { idempotencyKeys } from '@trigger.dev/sdk'
 import { redirect } from 'next/navigation'
 import * as v from 'valibot'
 import { getOrganizationId } from '@/features/organizations/services/getOrganizationId'
@@ -181,38 +184,6 @@ async function processSchema(
   }
 }
 
-async function saveInitialMessage(
-  supabase: SupabaseClientType,
-  designSessionId: string,
-  organizationId: string,
-  content: string,
-  userId: string,
-): Promise<CreateSessionState | { success: true }> {
-  const now = new Date().toISOString()
-
-  const timelineItemData: TablesInsert<'timeline_items'> = {
-    design_session_id: designSessionId,
-    content,
-    type: 'user',
-    user_id: userId,
-    updated_at: now,
-    organization_id: organizationId,
-  }
-
-  const { error } = await supabase
-    .from('timeline_items')
-    .insert(timelineItemData)
-    .select()
-    .single()
-
-  if (error) {
-    console.error('Failed to save initial timeline item:', error)
-    return { success: false, error: 'Failed to save initial timeline item' }
-  }
-
-  return { success: true }
-}
-
 export async function createSession(
   _prevState: CreateSessionState,
   formData: FormData,
@@ -269,7 +240,7 @@ export async function createSession(
   }
   const { schema, schemaFilePath } = schemaResult
 
-  const { error: buildingSchemaError } = await supabase
+  const { data: buildingSchema, error: buildingSchemaError } = await supabase
     .from('building_schemas')
     .insert({
       design_session_id: designSession.id,
@@ -282,21 +253,35 @@ export async function createSession(
     .select()
     .single()
 
-  if (buildingSchemaError) {
+  if (buildingSchemaError || !buildingSchema) {
     console.error('Error creating building schema:', buildingSchemaError)
     return { success: false, error: 'Failed to create building schema' }
   }
 
-  const saveMessageResult = await saveInitialMessage(
-    supabase,
-    designSession.id,
+  // Trigger the chat processing job for the initial message
+  const chatPayload = {
+    message: initialMessage,
+    history: [] as [string, string][],
     organizationId,
-    initialMessage,
-    currentUserId,
-  )
-  if (!saveMessageResult.success) {
-    return saveMessageResult
+    buildingSchemaId: buildingSchema.id,
+    latestVersionNumber: 0,
+    designSessionId: designSession.id,
+    userId: currentUserId,
   }
+
+  // Generate idempotency key based on the payload
+  const payloadHash = createHash('sha256')
+    .update(JSON.stringify(chatPayload))
+    .digest('hex')
+
+  const idempotencyKey = await idempotencyKeys.create(
+    `chat-${designSession.id}-${payloadHash}`,
+  )
+
+  // Trigger the chat processing job with idempotency key
+  await processChatTask.trigger(chatPayload, {
+    idempotencyKey,
+  })
 
   // Redirect to the session page on successful creation
   redirect(`/app/design_sessions/${designSession.id}`)

@@ -41,15 +41,8 @@ export const TimelineItem: FC<TimelineItemProps> = (props) => {
   }
 
   // Destructure props for regular messages
-  const {
-    content,
-    role,
-    timestamp,
-    avatarSrc,
-    avatarAlt,
-    initial,
-    children,
-  } = props
+  const { content, role, timestamp, avatarSrc, avatarAlt, initial, children } =
+    props
 
   // Only format and display timestamp if it exists
   const formattedTime = timestamp

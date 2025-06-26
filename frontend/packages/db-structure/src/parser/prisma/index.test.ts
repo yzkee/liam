@@ -16,7 +16,6 @@ describe(_processor, () => {
               type: 'bigserial',
               default: 'autoincrement()',
               notNull: true,
-              primary: true,
             }),
             ...override?.columns,
           },
@@ -437,7 +436,6 @@ describe(_processor, () => {
                 type: 'bigserial',
                 default: 'autoincrement()',
                 notNull: true,
-                primary: true,
               }),
               raw_email_address: aColumn({
                 name: 'raw_email_address',
@@ -478,7 +476,6 @@ describe(_processor, () => {
                 type: 'bigserial',
                 default: 'autoincrement()',
                 notNull: true,
-                primary: true,
               }),
               raw_user_id: aColumn({
                 name: 'raw_user_id',
@@ -522,15 +519,15 @@ describe(_processor, () => {
           posts Post[]
           email String  @unique @map("raw_email_address")
           role  Role    @default(USER)
-    
+
           @@map("users")
         }
-    
+
         model Post {
           id     Int   @id @default(autoincrement())
           user   User  @relation(fields: [user_id], references: [id])
           user_id Int   @map("raw_user_id")
-    
+
           @@map("posts")
         }
 
@@ -550,7 +547,6 @@ describe(_processor, () => {
                 type: 'serial',
                 default: 'autoincrement()',
                 notNull: true,
-                primary: true,
               }),
               raw_email_address: aColumn({
                 name: 'raw_email_address',
@@ -597,7 +593,6 @@ describe(_processor, () => {
                 type: 'serial',
                 default: 'autoincrement()',
                 notNull: true,
-                primary: true,
               }),
               raw_user_id: aColumn({
                 name: 'raw_user_id',
@@ -659,7 +654,6 @@ describe(_processor, () => {
                 type: 'serial',
                 default: 'autoincrement()',
                 notNull: true,
-                primary: true,
               }),
               title: aColumn({
                 name: 'title',
@@ -690,7 +684,6 @@ describe(_processor, () => {
                 type: 'serial',
                 default: 'autoincrement()',
                 notNull: true,
-                primary: true,
               }),
               name: aColumn({
                 name: 'name',

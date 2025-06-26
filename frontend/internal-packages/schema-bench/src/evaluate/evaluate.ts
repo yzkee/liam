@@ -180,7 +180,7 @@ const createForeignKeyMapping = (
       table.constraints,
     )) {
       const result = v.safeParse(foreignKeyConstraintSchema, constraint)
-      if (result.success) {
+      if (result.success && result.output) {
         referenceForeignKeys.push({
           name: constraintName,
           constraint: result.output,
@@ -201,7 +201,7 @@ const createForeignKeyMapping = (
       table.constraints,
     )) {
       const result = v.safeParse(foreignKeyConstraintSchema, constraint)
-      if (result.success) {
+      if (result.success && result.output) {
         predictForeignKeys.push({
           name: constraintName,
           constraint: result.output,

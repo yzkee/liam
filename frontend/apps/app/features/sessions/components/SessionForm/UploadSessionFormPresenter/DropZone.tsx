@@ -8,13 +8,13 @@ type Props = {
   isPending: boolean
   schemaDragActive: boolean
   isHovered: boolean
-  onSelectFile: () => void
+  onSelectFile?: () => void
   onDragEnter?: (e: DragEvent) => void
   onDragLeave?: (e: DragEvent) => void
   onDragOver?: (e: DragEvent) => void
   onDrop?: (e: DragEvent) => void
-  onMouseEnter: () => void
-  onMouseLeave: () => void
+  onMouseEnter?: () => void
+  onMouseLeave?: () => void
   hasSelectedFile: boolean
   isValidSchema: boolean
 }
@@ -36,7 +36,7 @@ export const DropZone: FC<Props> = ({
   const handleKeyDown = (e: KeyboardEvent) => {
     if (!isPending && (e.key === 'Enter' || e.key === ' ')) {
       e.preventDefault()
-      onSelectFile()
+      onSelectFile?.()
     }
   }
 
@@ -48,12 +48,12 @@ export const DropZone: FC<Props> = ({
         schemaDragActive && styles.dropZoneActive,
         isPending && styles.dropZoneDisabled,
       )}
-      onClick={isPending ? undefined : onSelectFile}
+      onClick={isPending || !onSelectFile ? undefined : onSelectFile}
       onKeyDown={handleKeyDown}
-      onDragEnter={isPending ? undefined : onDragEnter}
-      onDragLeave={isPending ? undefined : onDragLeave}
-      onDragOver={isPending ? undefined : onDragOver}
-      onDrop={isPending ? undefined : onDrop}
+      onDragEnter={isPending || !onDragEnter ? undefined : onDragEnter}
+      onDragLeave={isPending || !onDragLeave ? undefined : onDragLeave}
+      onDragOver={isPending || !onDragOver ? undefined : onDragOver}
+      onDrop={isPending || !onDrop ? undefined : onDrop}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       disabled={isPending}

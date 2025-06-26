@@ -17,11 +17,6 @@ export type TimelineItemProps =
       avatarAlt?: string
       initial?: string
       /**
-       * Whether the bot is generating a response
-       * @default false
-       */
-      isGenerating?: boolean
-      /**
        * Optional children to render below the message content
        */
       children?: ReactNode
@@ -53,7 +48,6 @@ export const TimelineItem: FC<TimelineItemProps> = (props) => {
     avatarSrc,
     avatarAlt,
     initial,
-    isGenerating = false,
     children,
   } = props
 
@@ -77,7 +71,7 @@ export const TimelineItem: FC<TimelineItemProps> = (props) => {
         />
       ) : (
         <AgentMessage
-          state={isGenerating ? 'generating' : 'default'}
+          state="default"
           message={content}
           time={formattedTime || ''}
         >

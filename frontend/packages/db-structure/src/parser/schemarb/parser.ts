@@ -188,7 +188,17 @@ function processCallNode(
   if (column.name) {
     columns.push(column)
 
-    // Check if column has unique option and create UNIQUE constraint
+    // TODO: Current implementation handles `t.text "mention", unique: true` syntax,
+    // but this is not valid Rails syntax. The correct Rails syntax is:
+    // - `t.text "mention", index: { unique: true }`
+    // - `t.text "mention"` followed by `t.index :mention, unique: true`
+    //
+    // This should be refactored to:
+    // 1. Parse `index: { unique: true }` option to create a unique index
+    // 2. Remove support for direct `unique: true` on column definitions
+    // 3. Handle `t.index` method calls to create indexes
+    //
+    // For now, we convert `unique: true` to a UNIQUE constraint for compatibility
     const argNodes = node.arguments_?.compactChildNodes() || []
     for (const argNode of argNodes) {
       if (argNode instanceof KeywordHashNode) {

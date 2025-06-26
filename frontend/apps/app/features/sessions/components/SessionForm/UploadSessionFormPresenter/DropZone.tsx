@@ -1,4 +1,3 @@
-import { Button } from '@liam-hq/ui'
 import clsx from 'clsx'
 import type { DragEvent, FC, KeyboardEvent } from 'react'
 import { FileIcon } from './FileIcon'
@@ -80,22 +79,17 @@ export const DropZone: FC<Props> = ({
         <p className={styles.dropZoneSubtext}>
           Supported formats: .sql, .rb, .prisma, .json, .yaml
         </p>
-        <Button
-          type="button"
-          variant={
+        <span
+          className={styles.selectFileButton}
+          data-variant={
             hasSelectedFile && isValidSchema
               ? 'outline-secondary'
               : 'solid-primary'
           }
-          onClick={(e) => {
-            e.stopPropagation()
-            onSelectFile()
-          }}
-          className={styles.selectFileButton}
-          disabled={isPending}
+          data-disabled={isPending}
         >
           Select File
-        </Button>
+        </span>
       </div>
     </button>
   )

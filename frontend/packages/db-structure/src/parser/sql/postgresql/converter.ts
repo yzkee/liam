@@ -285,7 +285,6 @@ export const convertToSchema = (
     default: string | number | boolean | null
     check: string | null
     primary: boolean
-    unique: boolean
     notNull: boolean
     comment: string | null
   }
@@ -358,7 +357,6 @@ export const convertToSchema = (
             default: null,
             check: null,
             primary: false,
-            unique: false,
             notNull: false,
             comment: null,
           },
@@ -381,7 +379,6 @@ export const convertToSchema = (
       default: extractDefaultValueFromConstraints(colDef.constraints) || null,
       check: null, // TODO
       primary: isPrimaryKey(colDef.constraints),
-      unique: isUnique(colDef.constraints),
       notNull: isNotNull(colDef.constraints),
       comment: null, // TODO
     }
@@ -393,7 +390,10 @@ export const convertToSchema = (
         type: 'PRIMARY KEY',
         columnName,
       })
-    } else if (isUnique(colDef.constraints)) {
+    }
+
+    // Create UNIQUE constraint if column has unique constraint but is not primary key
+    if (isUnique(colDef.constraints) && !isPrimaryKey(colDef.constraints)) {
       const constraintName = `UNIQUE_${columnName}`
       constraints.push({
         name: constraintName,

@@ -11,9 +11,7 @@ function generateColumnDefinition(column: Column): string {
     definition += ' PRIMARY KEY'
   }
 
-  if (column.unique && !column.primary) {
-    definition += ' UNIQUE'
-  }
+  // Don't add inline UNIQUE constraint - it should be added as a separate constraint
 
   if (column.notNull && !column.primary) {
     // PRIMARY KEY is automatically NOT NULL, so only add for non-primary columns

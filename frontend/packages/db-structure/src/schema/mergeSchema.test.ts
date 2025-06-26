@@ -9,7 +9,6 @@ describe('mergeSchemas', () => {
     default: null,
     check: null,
     primary: false,
-    unique: false,
     notNull: true,
     comment: null,
     ...overrides,
@@ -199,8 +198,7 @@ describe('mergeSchemas', () => {
               email: createColumn({
                 name: 'email',
                 type: 'string',
-                unique: true,
-              }), // added unique
+              }), // type changed
               updated_at: createColumn({
                 name: 'updated_at',
                 type: 'timestamp',
@@ -220,7 +218,7 @@ describe('mergeSchemas', () => {
       expect(userColumns).toHaveProperty('updated_at')
       expect(userColumns).toHaveProperty('created_at') // Should be preserved from before
       expect(userColumns).toHaveProperty('name') // Should be preserved as removed column from before
-      expect(userColumns?.['email']?.unique).toBe(true) // Should use after schema properties
+      expect(userColumns?.['email']?.type).toBe('string') // Should use after schema properties
     })
   })
 })

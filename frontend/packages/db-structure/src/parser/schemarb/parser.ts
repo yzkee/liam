@@ -101,7 +101,6 @@ function extractIdColumnAndConstraint(
     type: '',
     notNull: true,
     primary: true,
-    unique: true,
   })
   const idPrimaryKeyConstraint: PrimaryKeyConstraint = {
     type: 'PRIMARY KEY',
@@ -188,6 +187,30 @@ function processCallNode(
   const column = extractColumnDetails(node)
   if (column.name) {
     columns.push(column)
+
+    // Check if column has unique option and create UNIQUE constraint
+    const argNodes = node.arguments_?.compactChildNodes() || []
+    for (const argNode of argNodes) {
+      if (argNode instanceof KeywordHashNode) {
+        for (const argElement of argNode.elements) {
+          if (argElement instanceof AssocNode) {
+            // @ts-expect-error: unescaped is defined as string but it is actually object
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            const key = argElement.key.unescaped.value
+            const value = argElement.value
+
+            if (key === 'unique' && value instanceof TrueNode) {
+              const uniqueConstraint: UniqueConstraint = {
+                type: 'UNIQUE',
+                name: `UNIQUE_${column.name}`,
+                columnName: column.name,
+              }
+              constraints.push(uniqueConstraint)
+            }
+          }
+        }
+      }
+    }
   }
 }
 
@@ -295,7 +318,7 @@ function extractColumnOptions(hashNode: KeywordHashNode, column: Column): void {
         }
         break
       case 'unique':
-        column.unique = value instanceof TrueNode
+        // Handle unique constraint creation in processCallNode instead
         break
       case 'comment':
         // @ts-expect-error: unescaped is defined as string but it is actually object

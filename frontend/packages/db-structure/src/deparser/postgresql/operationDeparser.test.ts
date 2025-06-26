@@ -43,14 +43,14 @@ describe('postgresqlOperationDeparser', () => {
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
-        "CREATE TABLE \"users\" (
-          \"id\" bigint PRIMARY KEY,
-          \"email\" varchar(255) UNIQUE NOT NULL
+        "CREATE TABLE "users" (
+          "id" bigint PRIMARY KEY,
+          "email" varchar(255) NOT NULL
         );
 
-        COMMENT ON TABLE \"users\" IS 'User table';
-        COMMENT ON COLUMN \"users\".\"id\" IS 'User ID';
-        COMMENT ON COLUMN \"users\".\"email\" IS 'User email';"
+        COMMENT ON TABLE "users" IS 'User table';
+        COMMENT ON COLUMN "users"."id" IS 'User ID';
+        COMMENT ON COLUMN "users"."email" IS 'User email';"
       `)
 
       await expectGeneratedSQLToBeParseable(result.value)

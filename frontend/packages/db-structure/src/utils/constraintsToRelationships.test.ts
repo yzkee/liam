@@ -91,7 +91,6 @@ describe('constraintsToRelationships', () => {
           user_id: aColumn({
             name: 'user_id',
             type: 'bigint',
-            unique: true, // unique column
             notNull: true,
           }),
         },
@@ -104,6 +103,11 @@ describe('constraintsToRelationships', () => {
             targetColumnName: 'id',
             updateConstraint: 'CASCADE',
             deleteConstraint: 'CASCADE',
+          },
+          uk_user_id: {
+            type: 'UNIQUE',
+            name: 'uk_user_id',
+            columnName: 'user_id',
           },
         },
       }),
@@ -255,7 +259,6 @@ describe('constraintsToRelationships', () => {
           email: aColumn({
             name: 'email',
             type: 'varchar',
-            unique: true,
             notNull: true,
           }),
           age: aColumn({

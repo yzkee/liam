@@ -69,13 +69,6 @@ const determineCardinality = (
     return 'ONE_TO_MANY'
   }
 
-  const column = table.columns[columnName]
-
-  // Check if column has unique constraint
-  if (column?.unique) {
-    return 'ONE_TO_ONE'
-  }
-
   // Check for UNIQUE constraint in table constraints
   for (const constraint of Object.values(table.constraints)) {
     if (constraint.type === 'UNIQUE' && constraint.columnName === columnName) {

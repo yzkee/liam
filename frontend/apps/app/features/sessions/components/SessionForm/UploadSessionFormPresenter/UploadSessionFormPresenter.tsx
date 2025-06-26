@@ -50,7 +50,7 @@ export const UploadSessionFormPresenter: FC<Props> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   // File attachments hook
-  const { attachments, handleFileSelect, handleRemoveAttachment } =
+  const { attachments, handleFileSelect, handleRemoveAttachment, clearAttachments } =
     useFileAttachments()
 
   // File drag and drop for schema file
@@ -90,6 +90,20 @@ export const UploadSessionFormPresenter: FC<Props> = ({
     textarea.style.height = 'auto'
     textarea.style.height = `${textarea.scrollHeight}px`
     setTextContent(textarea.value)
+  }
+
+  const handleReset = () => {
+    setSelectedFile(null)
+    setSelectedFormat('postgres')
+    setTextContent('')
+    setIsValidSchema(true)
+    clearAttachments()
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto'
+    }
   }
 
   return (
@@ -172,7 +186,7 @@ export const UploadSessionFormPresenter: FC<Props> = ({
               isPending={isPending}
               hasContent={!!selectedFile || textContent.trim().length > 0}
               onFileSelect={handleFileSelect}
-              onCancel={() => window.location.reload()}
+              onCancel={handleReset}
             />
           </div>
         </div>

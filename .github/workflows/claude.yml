@@ -21,7 +21,7 @@ jobs:
         (github.event_name == 'issues' && contains(github.event.issue.body, '@claude'))
       )
     runs-on: ubuntu-latest
-    timeout-minutes: "60"
+    timeout-minutes: 60
     permissions:
       contents: write
       pull-requests: write
@@ -41,5 +41,4 @@ jobs:
         uses: anthropics/claude-code-action@8c08381496931f68f7918d3788c75ec258f2698b # beta
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          timeout_minutes: "60"
           allowed_tools: "Bash(pnpm fmt:*),Bash(pnpm install),Bash(pnpm lint:*),Bash(pnpm test:*)"

@@ -74,7 +74,7 @@ export const DropZone: FC<Props> = ({
           Drag & drop your schema file or click to upload
         </p>
         <p className={styles.dropZoneSubtext}>
-          Supported formats: .sql, .rb, .prisma, .json, .yaml
+          Supported formats: {DISPLAY_EXTENSIONS.map((ext) => `.${ext}`).join(', ')}
         </p>
         <span
           className={clsx(

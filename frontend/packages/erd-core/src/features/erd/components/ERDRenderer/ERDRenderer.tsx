@@ -1,5 +1,4 @@
 import '@xyflow/react/dist/style.css'
-import type { TableGroup } from '@liam-hq/db-structure'
 import {
   type ImperativePanelHandle,
   ResizableHandle,
@@ -46,8 +45,6 @@ type Props = {
   errorObjects?: ComponentProps<typeof ErrorDisplay>['errors']
   defaultPanelSizes?: number[]
   withAppBar?: boolean
-  tableGroups?: Record<string, TableGroup>
-  onAddTableGroup?: ((params: TableGroup) => void) | undefined
 }
 
 const SIDEBAR_COOKIE_NAME = 'sidebar:state'
@@ -59,8 +56,6 @@ export const ERDRenderer: FC<Props> = ({
   errorObjects = [],
   defaultPanelSizes = [20, 80],
   withAppBar = false,
-  tableGroups = {},
-  onAddTableGroup,
 }) => {
   const [open, setOpen] = useState(defaultSidebarOpen)
   const [isResizing, setIsResizing] = useState(false)
@@ -80,7 +75,6 @@ export const ERDRenderer: FC<Props> = ({
   const { nodes, edges } = convertSchemaToNodes({
     schema,
     showMode,
-    tableGroups,
   })
 
   const leftPanelRef = createRef<ImperativePanelHandle>()
@@ -171,7 +165,6 @@ export const ERDRenderer: FC<Props> = ({
                         nodes={nodes}
                         edges={edges}
                         displayArea="main"
-                        onAddTableGroup={onAddTableGroup}
                       />
                       <TableDetailDrawer />
                     </>
@@ -179,7 +172,7 @@ export const ERDRenderer: FC<Props> = ({
                 </TableDetailDrawerRoot>
                 {errorObjects.length === 0 && (
                   <div className={styles.toolbarWrapper}>
-                    <Toolbar withGroupButton={!!onAddTableGroup} />
+                    <Toolbar />
                   </div>
                 )}
               </main>

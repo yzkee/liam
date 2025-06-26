@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import type { Operation } from '../../operation/schema/index.js'
 import { postgresqlOperationDeparser } from './operationDeparser.js'
+import { expectGeneratedSQLToBeParseable } from './testUtils.js'
 
 describe('postgresqlOperationDeparser', () => {
   describe('table operations', () => {
-    it('should generate CREATE TABLE statement from add operation', () => {
+    it('should generate CREATE TABLE statement from add operation', async () => {
       const operation: Operation = {
         op: 'add',
         path: '/tables/users',
@@ -14,9 +15,7 @@ describe('postgresqlOperationDeparser', () => {
             id: {
               name: 'id',
               type: 'bigint',
-              primary: true,
               notNull: true,
-              unique: false,
               default: null,
               check: null,
               comment: 'User ID',
@@ -24,9 +23,7 @@ describe('postgresqlOperationDeparser', () => {
             email: {
               name: 'email',
               type: 'varchar(255)',
-              primary: false,
               notNull: true,
-              unique: true,
               default: null,
               check: null,
               comment: 'User email',
@@ -34,7 +31,13 @@ describe('postgresqlOperationDeparser', () => {
           },
           comment: 'User table',
           indexes: {},
-          constraints: {},
+          constraints: {
+            users_pkey: {
+              type: 'PRIMARY KEY',
+              name: 'users_pkey',
+              columnName: 'id',
+            },
+          },
         },
       }
 
@@ -42,18 +45,22 @@ describe('postgresqlOperationDeparser', () => {
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
-        "CREATE TABLE \"users\" (
-          \"id\" bigint PRIMARY KEY,
-          \"email\" varchar(255) UNIQUE NOT NULL
+        "CREATE TABLE "users" (
+          "id" bigint NOT NULL,
+          "email" varchar(255) NOT NULL
         );
 
-        COMMENT ON TABLE \"users\" IS 'User table';
-        COMMENT ON COLUMN \"users\".\"id\" IS 'User ID';
-        COMMENT ON COLUMN \"users\".\"email\" IS 'User email';"
+        COMMENT ON TABLE "users" IS 'User table';
+        COMMENT ON COLUMN "users"."id" IS 'User ID';
+        COMMENT ON COLUMN "users"."email" IS 'User email';
+
+        ALTER TABLE "users" ADD CONSTRAINT "users_pkey" PRIMARY KEY ("id");"
       `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
     })
 
-    it('should generate CREATE TABLE with default values', () => {
+    it('should generate CREATE TABLE with default values', async () => {
       const operation: Operation = {
         op: 'add',
         path: '/tables/settings',
@@ -63,9 +70,7 @@ describe('postgresqlOperationDeparser', () => {
             id: {
               name: 'id',
               type: 'bigint',
-              primary: true,
               notNull: true,
-              unique: false,
               default: null,
               check: null,
               comment: null,
@@ -73,9 +78,7 @@ describe('postgresqlOperationDeparser', () => {
             enabled: {
               name: 'enabled',
               type: 'boolean',
-              primary: false,
               notNull: true,
-              unique: false,
               default: true,
               check: null,
               comment: null,
@@ -83,9 +86,7 @@ describe('postgresqlOperationDeparser', () => {
             title: {
               name: 'title',
               type: 'varchar(100)',
-              primary: false,
               notNull: false,
-              unique: false,
               default: 'Default Title',
               check: null,
               comment: null,
@@ -93,7 +94,13 @@ describe('postgresqlOperationDeparser', () => {
           },
           comment: null,
           indexes: {},
-          constraints: {},
+          constraints: {
+            settings_pkey: {
+              type: 'PRIMARY KEY',
+              name: 'settings_pkey',
+              columnName: 'id',
+            },
+          },
         },
       }
 
@@ -101,15 +108,19 @@ describe('postgresqlOperationDeparser', () => {
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
-        "CREATE TABLE \"settings\" (
-          \"id\" bigint PRIMARY KEY,
-          \"enabled\" boolean NOT NULL DEFAULT TRUE,
-          \"title\" varchar(100) DEFAULT 'Default Title'
-        );"
+        "CREATE TABLE "settings" (
+          "id" bigint NOT NULL,
+          "enabled" boolean NOT NULL DEFAULT TRUE,
+          "title" varchar(100) DEFAULT 'Default Title'
+        );
+
+        ALTER TABLE "settings" ADD CONSTRAINT "settings_pkey" PRIMARY KEY ("id");"
       `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
     })
 
-    it('should generate DROP TABLE statement from remove operation', () => {
+    it('should generate DROP TABLE statement from remove operation', async () => {
       const operation: Operation = {
         op: 'remove',
         path: '/tables/users',
@@ -121,9 +132,11 @@ describe('postgresqlOperationDeparser', () => {
       expect(result.value).toMatchInlineSnapshot(`
         "DROP TABLE \"users\";"
       `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
     })
 
-    it('should generate RENAME TABLE statement from replace operation', () => {
+    it('should generate RENAME TABLE statement from replace operation', async () => {
       const operation: Operation = {
         op: 'replace',
         path: '/tables/users/name',
@@ -136,18 +149,19 @@ describe('postgresqlOperationDeparser', () => {
       expect(result.value).toMatchInlineSnapshot(`
         "ALTER TABLE \"users\" RENAME TO \"user_accounts\";"
       `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
     })
   })
 
   describe('column operations', () => {
-    it('should generate ADD COLUMN statement from add operation', () => {
+    it('should generate ADD COLUMN statement from add operation', async () => {
       const operation: Operation = {
         op: 'add',
         path: '/tables/users/columns/age',
         value: {
           name: 'age',
           type: 'integer',
-          primary: false,
           notNull: false,
           unique: false,
           default: null,
@@ -164,16 +178,17 @@ describe('postgresqlOperationDeparser', () => {
 
         COMMENT ON COLUMN \"users\".\"age\" IS 'User age';"
       `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
     })
 
-    it('should generate ADD COLUMN with constraints', () => {
+    it('should generate ADD COLUMN with constraints', async () => {
       const operation: Operation = {
         op: 'add',
         path: '/tables/products/columns/price',
         value: {
           name: 'price',
           type: 'decimal(10,2)',
-          primary: false,
           notNull: true,
           unique: false,
           default: 0.0,
@@ -188,9 +203,11 @@ describe('postgresqlOperationDeparser', () => {
       expect(result.value).toMatchInlineSnapshot(`
         "ALTER TABLE \"products\" ADD COLUMN \"price\" decimal(10,2) NOT NULL DEFAULT 0;"
       `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
     })
 
-    it('should generate DROP COLUMN statement from remove operation', () => {
+    it('should generate DROP COLUMN statement from remove operation', async () => {
       const operation: Operation = {
         op: 'remove',
         path: '/tables/users/columns/age',
@@ -202,9 +219,11 @@ describe('postgresqlOperationDeparser', () => {
       expect(result.value).toMatchInlineSnapshot(`
         "ALTER TABLE \"users\" DROP COLUMN \"age\";"
       `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
     })
 
-    it('should generate RENAME COLUMN statement from replace operation', () => {
+    it('should generate RENAME COLUMN statement from replace operation', async () => {
       const operation: Operation = {
         op: 'replace',
         path: '/tables/users/columns/email/name',
@@ -217,9 +236,11 @@ describe('postgresqlOperationDeparser', () => {
       expect(result.value).toMatchInlineSnapshot(`
         "ALTER TABLE \"users\" RENAME COLUMN \"email\" TO \"email_address\";"
       `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
     })
 
-    it('should generate RENAME COLUMN for complex table and column names', () => {
+    it('should generate RENAME COLUMN for complex table and column names', async () => {
       const operation: Operation = {
         op: 'replace',
         path: '/tables/user_profiles/columns/first_name/name',
@@ -232,11 +253,13 @@ describe('postgresqlOperationDeparser', () => {
       expect(result.value).toMatchInlineSnapshot(`
         "ALTER TABLE \"user_profiles\" RENAME COLUMN \"first_name\" TO \"given_name\";"
       `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
     })
   })
 
   describe('index operations', () => {
-    it('should generate CREATE INDEX statement from add operation', () => {
+    it('should generate CREATE INDEX statement from add operation', async () => {
       const operation: Operation = {
         op: 'add',
         path: '/tables/users/indexes/idx_users_email',
@@ -254,9 +277,11 @@ describe('postgresqlOperationDeparser', () => {
       expect(result.value).toMatchInlineSnapshot(`
         "CREATE INDEX \"idx_users_email\" ON \"users\" USING BTREE (\"email\");"
       `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
     })
 
-    it('should generate CREATE UNIQUE INDEX statement', () => {
+    it('should generate CREATE UNIQUE INDEX statement', async () => {
       const operation: Operation = {
         op: 'add',
         path: '/tables/users/indexes/idx_users_username_unique',
@@ -274,9 +299,11 @@ describe('postgresqlOperationDeparser', () => {
       expect(result.value).toMatchInlineSnapshot(`
         "CREATE UNIQUE INDEX \"idx_users_username_unique\" ON \"users\" USING BTREE (\"username\");"
       `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
     })
 
-    it('should generate CREATE INDEX with multiple columns', () => {
+    it('should generate CREATE INDEX with multiple columns', async () => {
       const operation: Operation = {
         op: 'add',
         path: '/tables/orders/indexes/idx_orders_user_date',
@@ -294,9 +321,11 @@ describe('postgresqlOperationDeparser', () => {
       expect(result.value).toMatchInlineSnapshot(`
         "CREATE INDEX \"idx_orders_user_date\" ON \"orders\" USING BTREE (\"user_id\", \"created_at\");"
       `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
     })
 
-    it('should generate CREATE INDEX without index type', () => {
+    it('should generate CREATE INDEX without index type', async () => {
       const operation: Operation = {
         op: 'add',
         path: '/tables/products/indexes/idx_products_category',
@@ -314,9 +343,11 @@ describe('postgresqlOperationDeparser', () => {
       expect(result.value).toMatchInlineSnapshot(`
         "CREATE INDEX \"idx_products_category\" ON \"products\" (\"category_id\");"
       `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
     })
 
-    it('should generate DROP INDEX statement from remove operation', () => {
+    it('should generate DROP INDEX statement from remove operation', async () => {
       const operation: Operation = {
         op: 'remove',
         path: '/tables/users/indexes/idx_users_email',
@@ -328,9 +359,11 @@ describe('postgresqlOperationDeparser', () => {
       expect(result.value).toMatchInlineSnapshot(`
         "DROP INDEX \"idx_users_email\";"
       `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
     })
 
-    it('should generate DROP INDEX for complex index name', () => {
+    it('should generate DROP INDEX for complex index name', async () => {
       const operation: Operation = {
         op: 'remove',
         path: '/tables/user_profiles/indexes/idx_user_profiles_email_unique',
@@ -342,6 +375,146 @@ describe('postgresqlOperationDeparser', () => {
       expect(result.value).toMatchInlineSnapshot(`
         "DROP INDEX \"idx_user_profiles_email_unique\";"
       `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
+    })
+  })
+
+  describe('constraint operations', () => {
+    it('should generate ADD CONSTRAINT PRIMARY KEY statement', async () => {
+      const operation: Operation = {
+        op: 'add',
+        path: '/tables/users/constraints/pk_users_id',
+        value: {
+          type: 'PRIMARY KEY',
+          name: 'pk_users_id',
+          columnName: 'id',
+        },
+      }
+
+      const result = postgresqlOperationDeparser(operation)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "ALTER TABLE \"users\" ADD CONSTRAINT \"pk_users_id\" PRIMARY KEY (\"id\");"
+      `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
+    })
+
+    it('should generate ADD CONSTRAINT FOREIGN KEY statement', async () => {
+      const operation: Operation = {
+        op: 'add',
+        path: '/tables/orders/constraints/fk_orders_user_id',
+        value: {
+          type: 'FOREIGN KEY',
+          name: 'fk_orders_user_id',
+          columnName: 'user_id',
+          targetTableName: 'users',
+          targetColumnName: 'id',
+          updateConstraint: 'CASCADE',
+          deleteConstraint: 'SET_NULL',
+        },
+      }
+
+      const result = postgresqlOperationDeparser(operation)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "ALTER TABLE \"orders\" ADD CONSTRAINT \"fk_orders_user_id\" FOREIGN KEY (\"user_id\") REFERENCES \"users\" (\"id\") ON UPDATE CASCADE ON DELETE SET NULL;"
+      `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
+    })
+
+    it('should generate ADD CONSTRAINT UNIQUE statement', async () => {
+      const operation: Operation = {
+        op: 'add',
+        path: '/tables/users/constraints/uk_users_email',
+        value: {
+          type: 'UNIQUE',
+          name: 'uk_users_email',
+          columnName: 'email',
+        },
+      }
+
+      const result = postgresqlOperationDeparser(operation)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "ALTER TABLE \"users\" ADD CONSTRAINT \"uk_users_email\" UNIQUE (\"email\");"
+      `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
+    })
+
+    it('should generate ADD CONSTRAINT CHECK statement', async () => {
+      const operation: Operation = {
+        op: 'add',
+        path: '/tables/products/constraints/ck_products_price_positive',
+        value: {
+          type: 'CHECK',
+          name: 'ck_products_price_positive',
+          detail: 'price > 0',
+        },
+      }
+
+      const result = postgresqlOperationDeparser(operation)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "ALTER TABLE \"products\" ADD CONSTRAINT \"ck_products_price_positive\" CHECK (price > 0);"
+      `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
+    })
+
+    it('should generate DROP CONSTRAINT statement', async () => {
+      const operation: Operation = {
+        op: 'remove',
+        path: '/tables/users/constraints/pk_users_id',
+      }
+
+      const result = postgresqlOperationDeparser(operation)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "ALTER TABLE \"users\" DROP CONSTRAINT \"pk_users_id\";"
+      `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
+    })
+
+    it('should generate DROP CONSTRAINT for complex constraint name', async () => {
+      const operation: Operation = {
+        op: 'remove',
+        path: '/tables/orders/constraints/fk_orders_user_id',
+      }
+
+      const result = postgresqlOperationDeparser(operation)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "ALTER TABLE \"orders\" DROP CONSTRAINT \"fk_orders_user_id\";"
+      `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
+    })
+
+    it('should generate DROP CONSTRAINT for table with complex name', async () => {
+      const operation: Operation = {
+        op: 'remove',
+        path: '/tables/user_profiles/constraints/uk_user_profiles_email',
+      }
+
+      const result = postgresqlOperationDeparser(operation)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "ALTER TABLE \"user_profiles\" DROP CONSTRAINT \"uk_user_profiles_email\";"
+      `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
     })
   })
 })

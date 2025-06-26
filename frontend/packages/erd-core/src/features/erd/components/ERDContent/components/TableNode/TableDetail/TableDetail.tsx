@@ -12,7 +12,7 @@ import { clickLogEvent, openRelatedTablesLogEvent } from '@/features/gtm/utils'
 import { useCustomReactflow } from '@/features/reactflow/hooks'
 import { useVersion } from '@/providers'
 import { useSchema, useUserEditing } from '@/stores'
-import { hasNonRelatedChildNodes, updateNodesHiddenState } from '../../../utils'
+import { updateNodesHiddenState } from '../../../utils'
 import { Columns } from './Columns'
 import { Comment } from './Comment'
 import { Constraints } from './Constraints'
@@ -57,7 +57,7 @@ export const TableDetail: FC<Props> = ({ table }) => {
     const updatedNodes = updateNodesHiddenState({
       nodes: mainPaneNodes,
       hiddenNodeIds,
-      shouldHideGroupNodeId: !hasNonRelatedChildNodes(nodes),
+      shouldHideGroupNodeId: true,
     })
 
     setHiddenNodeIds(hiddenNodeIds)
@@ -108,7 +108,7 @@ export const TableDetail: FC<Props> = ({ table }) => {
       </div>
       <div className={styles.body}>
         {table.comment && <Comment comment={table.comment} />}
-        <Columns columns={table.columns} />
+        <Columns columns={table.columns} constraints={table.constraints} />
         <Indexes indexes={table.indexes} />
         <Constraints constraints={table.constraints} />
         <div className={styles.relatedTables}>

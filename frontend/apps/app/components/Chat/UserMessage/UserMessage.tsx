@@ -2,6 +2,7 @@
 
 import { Avatar, AvatarWithImage } from '@liam-hq/ui'
 import type { FC } from 'react'
+import { MarkdownContent } from '../../MarkdownContent'
 import styles from './UserMessage.module.css'
 
 export interface UserMessageProps {
@@ -21,11 +22,13 @@ export const UserMessage: FC<UserMessageProps> = ({
   timestamp,
   userName,
 }) => {
-  // Format timestamp if it exists
+  // Format timestamp if it exists - use explicit locale and timezone for consistency
   const formattedTime = timestamp
-    ? timestamp.toLocaleTimeString([], {
+    ? timestamp.toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit',
+        hour12: false,
+        timeZone: 'UTC',
       })
     : null
 
@@ -45,7 +48,9 @@ export const UserMessage: FC<UserMessageProps> = ({
       <div className={styles.contentContainer}>
         <div className={styles.messageWrapper}>
           <div className={styles.messageContent}>
-            <div className={styles.messageText}>{content}</div>
+            <div className={styles.messageText}>
+              <MarkdownContent content={content} />
+            </div>
           </div>
         </div>
       </div>

@@ -22,8 +22,6 @@ describe('buildTableCommentDiffItem', () => {
         constraints: {},
       },
     },
-    relationships: {},
-    tableGroups: {},
   }
 
   // Base test schema with existence checks

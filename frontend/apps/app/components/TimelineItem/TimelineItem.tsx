@@ -5,7 +5,6 @@ import type { FC, ReactNode } from 'react'
 import { AgentMessage } from '@/components/Chat/AgentMessage'
 import { UserMessage } from '@/components/Chat/UserMessage'
 import { VersionMessage } from '@/components/Chat/VersionMessage'
-import { MarkdownContent } from '@/components/MarkdownContent'
 import styles from './TimelineItem.module.css'
 
 // TODO: Modify to use what is inferred from the valibot schema
@@ -26,14 +25,6 @@ export type TimelineItemProps =
        * Optional children to render below the message content
        */
       children?: ReactNode
-      /**
-       * Progress messages to display above the main message
-       */
-      progressMessages?: string[]
-      /**
-       * Whether to show progress messages
-       */
-      showProgress?: boolean
     }
   | {
       id: string
@@ -64,8 +55,6 @@ export const TimelineItem: FC<TimelineItemProps> = (props) => {
     initial,
     isGenerating = false,
     children,
-    progressMessages,
-    showProgress,
   } = props
 
   // Only format and display timestamp if it exists
@@ -75,10 +64,6 @@ export const TimelineItem: FC<TimelineItemProps> = (props) => {
         minute: '2-digit',
       })
     : null
-
-  // For bot messages, we'll render the markdown content with syntax highlighting
-  const markdownContent =
-    role !== 'user' ? <MarkdownContent content={content} /> : null
 
   return (
     <div className={styles.messageContainer}>
@@ -93,10 +78,8 @@ export const TimelineItem: FC<TimelineItemProps> = (props) => {
       ) : (
         <AgentMessage
           state={isGenerating ? 'generating' : 'default'}
-          message={markdownContent}
+          message={content}
           time={formattedTime || ''}
-          progressMessages={progressMessages}
-          showProgress={showProgress}
         >
           {children}
         </AgentMessage>

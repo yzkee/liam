@@ -1,9 +1,5 @@
-import { syntaxCodeTagProps, syntaxCustomStyle, syntaxTheme } from '@liam-hq/ui'
 import type { Meta, StoryObj } from '@storybook/react'
-import type { ComponentProps, ReactNode } from 'react'
-import ReactMarkdown from 'react-markdown'
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import remarkGfm from 'remark-gfm'
+import type { ComponentProps } from 'react'
 import {
   type MessageOption,
   MessageOptionButtons,
@@ -13,14 +9,6 @@ import { AgentMessage } from './AgentMessage'
 
 // Define the component props type
 type AgentMessageProps = ComponentProps<typeof AgentMessage>
-
-// Define CodeProps interface for markdown code blocks
-type CodeProps = ComponentProps<'code'> & {
-  node?: unknown
-  inline?: boolean
-  className?: string
-  children?: ReactNode
-}
 
 const meta = {
   component: AgentMessage,
@@ -414,36 +402,7 @@ model Attachment {
 export const BuildWithMarkdown: Story = {
   args: {
     state: 'default',
-    message: (
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        components={{
-          code(props: CodeProps) {
-            const { children, className, ...rest } = props
-            const match = /language-(\w+)/.exec(className || '')
-            const isInline = !match && !className
-
-            return !isInline && match ? (
-              <SyntaxHighlighter
-                style={syntaxTheme}
-                language={match[1]}
-                PreTag="div"
-                customStyle={syntaxCustomStyle}
-                codeTagProps={syntaxCodeTagProps}
-              >
-                {String(children).replace(/\n$/, '')}
-              </SyntaxHighlighter>
-            ) : (
-              <code className={className} {...rest}>
-                {children}
-              </code>
-            )
-          },
-        }}
-      >
-        {markdownContent}
-      </ReactMarkdown>
-    ),
+    message: markdownContent,
     time: '12:15',
   },
 }

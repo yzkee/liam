@@ -1,22 +1,17 @@
-import type { Column, Index, Table } from '../../schema/index.js'
+import type { Column, Constraint, Index, Table } from '../../schema/index.js'
 
 /**
  * Generate column definition as DDL string
  */
-function generateColumnDefinition(column: Column): string {
+function generateColumnDefinition(
+  column: Column,
+  isPrimaryKey = false,
+): string {
   let definition = `${escapeIdentifier(column.name)} ${column.type}`
 
   // Add constraints (following PostgreSQL common order)
-  if (column.primary) {
-    definition += ' PRIMARY KEY'
-  }
-
-  if (column.unique && !column.primary) {
-    definition += ' UNIQUE'
-  }
-
-  if (column.notNull && !column.primary) {
-    // PRIMARY KEY is automatically NOT NULL, so only add for non-primary columns
+  // Don't add NOT NULL if this will be a PRIMARY KEY
+  if (column.notNull && !isPrimaryKey) {
     definition += ' NOT NULL'
   }
 
@@ -86,12 +81,15 @@ export function generateCreateTableStatement(table: Table): string {
   const tableName = table.name
 
   // Generate column definitions
-  const columnDefinitions = (Object.values(table.columns) as Column[])
-    .map((column) => generateColumnDefinition(column))
-    .join(',\n  ')
+  const columnDefinitions = (Object.values(table.columns) as Column[]).map(
+    (column) => {
+      const definition = generateColumnDefinition(column, false)
+      return definition
+    },
+  )
 
   // Basic CREATE TABLE statement
-  let ddl = `CREATE TABLE ${escapeIdentifier(tableName)} (\n  ${columnDefinitions}\n);`
+  let ddl = `CREATE TABLE ${escapeIdentifier(tableName)} (\n  ${columnDefinitions.join(',\n  ')}\n);`
 
   // Add table comment
   if (table.comment) {
@@ -183,4 +181,46 @@ export function generateCreateIndexStatement(
  */
 export function generateRemoveIndexStatement(indexName: string): string {
   return `DROP INDEX ${escapeIdentifier(indexName)};`
+}
+
+/**
+ * Generate ADD CONSTRAINT statement for a constraint
+ */
+export function generateAddConstraintStatement(
+  tableName: string,
+  constraint: Constraint,
+): string {
+  const constraintName = escapeIdentifier(constraint.name)
+  const tableNameEscaped = escapeIdentifier(tableName)
+
+  switch (constraint.type) {
+    case 'PRIMARY KEY':
+      return `ALTER TABLE ${tableNameEscaped} ADD CONSTRAINT ${constraintName} PRIMARY KEY (${escapeIdentifier(constraint.columnName)});`
+
+    case 'FOREIGN KEY':
+      // TODO: Consider changing the internal representation of foreign key constraints
+      // from underscore format (SET_NULL, SET_DEFAULT, NO_ACTION) to space format
+      // (SET NULL, SET DEFAULT, NO ACTION) to match PostgreSQL syntax directly.
+      // This would be a breaking change requiring updates to all parsers and tests.
+      return `ALTER TABLE ${tableNameEscaped} ADD CONSTRAINT ${constraintName} FOREIGN KEY (${escapeIdentifier(constraint.columnName)}) REFERENCES ${escapeIdentifier(constraint.targetTableName)} (${escapeIdentifier(constraint.targetColumnName)}) ON UPDATE ${constraint.updateConstraint.replace('_', ' ')} ON DELETE ${constraint.deleteConstraint.replace('_', ' ')};`
+
+    case 'UNIQUE':
+      return `ALTER TABLE ${tableNameEscaped} ADD CONSTRAINT ${constraintName} UNIQUE (${escapeIdentifier(constraint.columnName)});`
+
+    case 'CHECK':
+      return `ALTER TABLE ${tableNameEscaped} ADD CONSTRAINT ${constraintName} CHECK (${constraint.detail});`
+
+    default:
+      return constraint satisfies never
+  }
+}
+
+/**
+ * Generate DROP CONSTRAINT statement
+ */
+export function generateRemoveConstraintStatement(
+  tableName: string,
+  constraintName: string,
+): string {
+  return `ALTER TABLE ${escapeIdentifier(tableName)} DROP CONSTRAINT ${escapeIdentifier(constraintName)};`
 }

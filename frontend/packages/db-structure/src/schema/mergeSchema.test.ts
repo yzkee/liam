@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { mergeSchemas } from './mergeSchema.js'
-import type { Column, Relationship, Schema, Table } from './schema.js'
+import type { Column, Schema, Table } from './schema.js'
 
 describe('mergeSchemas', () => {
   const createColumn = (overrides: Partial<Column> = {}): Column => ({
@@ -8,8 +8,6 @@ describe('mergeSchemas', () => {
     type: 'integer',
     default: null,
     check: null,
-    primary: false,
-    unique: false,
     notNull: true,
     comment: null,
     ...overrides,
@@ -18,32 +16,22 @@ describe('mergeSchemas', () => {
   const createTable = (overrides: Partial<Table> = {}): Table => ({
     name: 'users',
     columns: {
-      id: createColumn({ name: 'id', primary: true }),
+      id: createColumn({ name: 'id' }),
     },
     comment: null,
     indexes: {},
-    constraints: {},
-    ...overrides,
-  })
-
-  const createRelationship = (
-    overrides: Partial<Relationship> = {},
-  ): Relationship => ({
-    name: 'users_posts',
-    primaryTableName: 'users',
-    primaryColumnName: 'id',
-    foreignTableName: 'posts',
-    foreignColumnName: 'user_id',
-    cardinality: 'ONE_TO_MANY',
-    updateConstraint: 'CASCADE',
-    deleteConstraint: 'CASCADE',
+    constraints: {
+      users_pkey: {
+        type: 'PRIMARY KEY',
+        name: 'users_pkey',
+        columnName: 'id',
+      },
+    },
     ...overrides,
   })
 
   const createSchema = (overrides: Partial<Schema> = {}): Schema => ({
     tables: {},
-    relationships: {},
-    tableGroups: {},
     ...overrides,
   })
 
@@ -73,7 +61,7 @@ describe('mergeSchemas', () => {
           users: createTable({
             name: 'users',
             columns: {
-              id: createColumn({ name: 'id', primary: true }),
+              id: createColumn({ name: 'id' }),
               name: createColumn({ name: 'name', type: 'string' }),
               email: createColumn({ name: 'email', type: 'string' }),
             },
@@ -86,7 +74,7 @@ describe('mergeSchemas', () => {
           users: createTable({
             name: 'users',
             columns: {
-              id: createColumn({ name: 'id', primary: true }),
+              id: createColumn({ name: 'id' }),
               name: createColumn({ name: 'name', type: 'string' }),
               // email column is removed
             },
@@ -147,90 +135,6 @@ describe('mergeSchemas', () => {
     })
   })
 
-  describe('relationship merging', () => {
-    it('should use relationships from after schema only', () => {
-      const beforeSchema = createSchema({
-        relationships: {
-          old_rel: createRelationship({ name: 'old_rel' }),
-          updated_rel: createRelationship({
-            name: 'updated_rel',
-            cardinality: 'ONE_TO_ONE',
-          }),
-        },
-      })
-
-      const afterSchema = createSchema({
-        relationships: {
-          updated_rel: createRelationship({
-            name: 'updated_rel',
-            cardinality: 'ONE_TO_MANY',
-          }),
-          new_rel: createRelationship({ name: 'new_rel' }),
-        },
-      })
-
-      const result = mergeSchemas(beforeSchema, afterSchema)
-
-      expect(result.relationships).not.toHaveProperty('old_rel')
-      expect(result.relationships).toHaveProperty('updated_rel')
-      expect(result.relationships).toHaveProperty('new_rel')
-      expect(result.relationships['updated_rel']?.cardinality).toBe(
-        'ONE_TO_MANY',
-      )
-    })
-
-    it('should handle empty relationships', () => {
-      const beforeSchema = createSchema({
-        relationships: {
-          rel1: createRelationship({ name: 'rel1' }),
-        },
-      })
-
-      const afterSchema = createSchema({
-        relationships: {},
-      })
-
-      const result = mergeSchemas(beforeSchema, afterSchema)
-
-      expect(Object.keys(result.relationships)).toHaveLength(0)
-    })
-  })
-
-  describe('table groups merging', () => {
-    it('should use table groups from after schema', () => {
-      const beforeSchema = createSchema({
-        tableGroups: {
-          group1: {
-            name: 'group1',
-            tables: ['users'],
-            comment: 'Old group',
-          },
-        },
-      })
-
-      const afterSchema = createSchema({
-        tableGroups: {
-          group1: {
-            name: 'group1',
-            tables: ['users', 'posts'],
-            comment: 'New group',
-          },
-          group2: {
-            name: 'group2',
-            tables: ['categories'],
-            comment: null,
-          },
-        },
-      })
-
-      const result = mergeSchemas(beforeSchema, afterSchema)
-
-      expect(result.tableGroups['group1']?.tables).toEqual(['users', 'posts'])
-      expect(result.tableGroups['group1']?.comment).toBe('New group')
-      expect(result.tableGroups).toHaveProperty('group2')
-    })
-  })
-
   describe('edge cases', () => {
     it('should handle empty schemas', () => {
       const beforeSchema = createSchema()
@@ -239,17 +143,12 @@ describe('mergeSchemas', () => {
       const result = mergeSchemas(beforeSchema, afterSchema)
 
       expect(result.tables).toEqual({})
-      expect(result.relationships).toEqual({})
-      expect(result.tableGroups).toEqual({})
     })
 
     it('should handle schema with only before data', () => {
       const beforeSchema = createSchema({
         tables: {
           users: createTable({ name: 'users' }),
-        },
-        relationships: {
-          rel1: createRelationship({ name: 'rel1' }),
         },
       })
 
@@ -258,7 +157,6 @@ describe('mergeSchemas', () => {
       const result = mergeSchemas(beforeSchema, afterSchema)
 
       expect(result.tables).toHaveProperty('users')
-      expect(result.relationships).toEqual({}) // Relationships come from after only
     })
 
     it('should handle schema with only after data', () => {
@@ -268,23 +166,11 @@ describe('mergeSchemas', () => {
         tables: {
           users: createTable({ name: 'users' }),
         },
-        relationships: {
-          rel1: createRelationship({ name: 'rel1' }),
-        },
-        tableGroups: {
-          group1: {
-            name: 'group1',
-            tables: ['users'],
-            comment: null,
-          },
-        },
       })
 
       const result = mergeSchemas(beforeSchema, afterSchema)
 
       expect(result.tables).toHaveProperty('users')
-      expect(result.relationships).toHaveProperty('rel1')
-      expect(result.tableGroups).toHaveProperty('group1')
     })
   })
 
@@ -295,7 +181,7 @@ describe('mergeSchemas', () => {
           users: createTable({
             name: 'users',
             columns: {
-              id: createColumn({ name: 'id', primary: true }),
+              id: createColumn({ name: 'id' }),
               name: createColumn({ name: 'name', type: 'string' }),
               email: createColumn({ name: 'email', type: 'string' }),
               created_at: createColumn({
@@ -312,13 +198,12 @@ describe('mergeSchemas', () => {
           users: createTable({
             name: 'users',
             columns: {
-              id: createColumn({ name: 'id', primary: true }),
+              id: createColumn({ name: 'id' }),
               full_name: createColumn({ name: 'full_name', type: 'string' }), // renamed from name
               email: createColumn({
                 name: 'email',
-                type: 'string',
-                unique: true,
-              }), // added unique
+                type: 'text',
+              }), // type changed from string to text
               updated_at: createColumn({
                 name: 'updated_at',
                 type: 'timestamp',
@@ -338,7 +223,7 @@ describe('mergeSchemas', () => {
       expect(userColumns).toHaveProperty('updated_at')
       expect(userColumns).toHaveProperty('created_at') // Should be preserved from before
       expect(userColumns).toHaveProperty('name') // Should be preserved as removed column from before
-      expect(userColumns?.['email']?.unique).toBe(true) // Should use after schema properties
+      expect(userColumns?.['email']?.type).toBe('text') // Should use after schema properties
     })
   })
 })

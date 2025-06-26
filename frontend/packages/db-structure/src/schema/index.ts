@@ -4,19 +4,12 @@ export {
   aForeignKeyConstraint,
   anIndex,
   aPrimaryKeyConstraint,
-  aRelationship,
   aSchema,
   aTable,
   aUniqueConstraint,
 } from './factories.js'
 export { mergeSchemas } from './mergeSchema.js'
-export type { SchemaOverride } from './overrideSchema.js'
-export {
-  overrideSchema,
-  schemaOverrideSchema,
-} from './overrideSchema.js'
 export type {
-  Cardinality,
   CheckConstraint,
   Column,
   Columns,
@@ -27,12 +20,8 @@ export type {
   Index,
   Indexes,
   PrimaryKeyConstraint,
-  Relationship,
-  Relationships,
   Schema,
   Table,
-  TableGroup,
-  TableGroups,
   Tables,
   UniqueConstraint,
 } from './schema.js'
@@ -42,21 +31,18 @@ export {
   columnDefaultSchema,
   columnNameSchema,
   columnNotNullSchema,
-  columnPrimarySchema,
   columnSchema,
-  columnUniqueSchema,
   commentSchema,
   constraintNameSchema,
   constraintSchema,
   foreignKeyConstraintReferenceOptionSchema,
+  foreignKeyConstraintSchema,
   indexColumnsSchema,
   indexNameSchema,
   indexSchema,
   indexTypeSchema,
   indexUniqueSchema,
   schemaSchema,
-  tableGroupSchema,
-  tableGroupsSchema,
   tableNameSchema,
   tableSchema,
 } from './schema.js'

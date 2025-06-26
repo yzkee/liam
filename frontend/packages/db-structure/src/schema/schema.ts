@@ -1,11 +1,7 @@
 import * as v from 'valibot'
 
 // Export these schema definitions
-export const tableGroupNameSchema = v.string()
-
 export const columnNameSchema = v.string()
-
-export const columnPrimarySchema = v.boolean()
 
 export const columnDefaultSchema = v.nullable(
   v.union([v.string(), v.number(), v.boolean()]),
@@ -13,15 +9,11 @@ export const columnDefaultSchema = v.nullable(
 
 export const columnCheckSchema = v.nullable(v.string())
 
-export const columnUniqueSchema = v.boolean()
-
 export const columnNotNullSchema = v.boolean()
 
 export const tableNameSchema = v.string()
 
 export const commentSchema = v.nullable(v.string())
-
-const relationshipNameSchema = v.string()
 
 export const constraintNameSchema = v.string()
 
@@ -30,8 +22,6 @@ export const columnSchema = v.object({
   type: v.string(),
   default: columnDefaultSchema,
   check: columnCheckSchema,
-  primary: columnPrimarySchema,
-  unique: columnUniqueSchema,
   notNull: columnNotNullSchema,
   comment: commentSchema,
 })
@@ -79,7 +69,7 @@ export type PrimaryKeyConstraint = v.InferOutput<
   typeof primaryKeyConstraintSchema
 >
 
-const foreignKeyConstraintSchema = v.object({
+export const foreignKeyConstraintSchema = v.object({
   type: v.literal('FOREIGN KEY'),
   name: constraintNameSchema,
   columnName: columnNameSchema,
@@ -128,47 +118,12 @@ export const tableSchema = v.object({
 })
 export type Table = v.InferOutput<typeof tableSchema>
 
-const cardinalitySchema = v.picklist(['ONE_TO_ONE', 'ONE_TO_MANY'])
-export type Cardinality = v.InferOutput<typeof cardinalitySchema>
-
-const relationshipSchema = v.object({
-  name: relationshipNameSchema,
-  primaryTableName: tableNameSchema,
-  primaryColumnName: columnNameSchema,
-  foreignTableName: tableNameSchema,
-  foreignColumnName: columnNameSchema,
-  cardinality: cardinalitySchema,
-  updateConstraint: foreignKeyConstraintReferenceOptionSchema,
-  deleteConstraint: foreignKeyConstraintReferenceOptionSchema,
-})
-export type Relationship = v.InferOutput<typeof relationshipSchema>
-
 const tablesSchema = v.record(tableNameSchema, tableSchema)
 export type Tables = v.InferOutput<typeof tablesSchema>
-
-const relationshipsSchema = v.record(relationshipNameSchema, relationshipSchema)
-export type Relationships = v.InferOutput<typeof relationshipsSchema>
-
-// Schema for table group
-export const tableGroupSchema = v.object({
-  name: v.string(),
-  tables: v.array(tableNameSchema),
-  comment: v.optional(v.nullable(v.string()), ''),
-})
-
-export type TableGroup = v.InferOutput<typeof tableGroupSchema>
-
-export const tableGroupsSchema = v.record(
-  tableGroupNameSchema,
-  tableGroupSchema,
-)
-export type TableGroups = v.InferOutput<typeof tableGroupsSchema>
 
 // Schema definition for the entire database structure
 export const schemaSchema = v.object({
   tables: tablesSchema,
-  relationships: relationshipsSchema,
-  tableGroups: tableGroupsSchema,
 })
 
 export type Schema = v.InferOutput<typeof schemaSchema>

@@ -8,12 +8,24 @@ import type { WorkflowState } from './types'
 // Mock the agents
 vi.mock('../../langchain/agents', () => ({
   DatabaseSchemaBuildAgent: vi.fn(),
+  QAGenerateUsecaseAgent: vi.fn(),
   PMAnalysisAgent: vi.fn(),
 }))
 
 // Mock the schema converter
 vi.mock('../../../utils/convertSchemaToText', () => ({
   convertSchemaToText: vi.fn(() => 'Mocked schema text'),
+}))
+
+// Mock the pglite-server
+vi.mock('@liam-hq/pglite-server', () => ({
+  executeQuery: vi.fn().mockResolvedValue([
+    {
+      success: true,
+      sql: 'CREATE TABLE test (id INTEGER);',
+      result: { rows: [], columns: [] },
+    },
+  ]),
 }))
 
 describe('Chat Workflow', () => {
@@ -25,6 +37,7 @@ describe('Chat Workflow', () => {
     analyzeRequirements: ReturnType<typeof vi.fn>
   }
   let MockDatabaseSchemaBuildAgent: ReturnType<typeof vi.fn>
+  let MockQAGenerateUsecaseAgent: ReturnType<typeof vi.fn>
   let MockPMAnalysisAgent: ReturnType<typeof vi.fn>
   let mockRepositories: Repositories
   let mockSchemaRepository: SchemaRepository
@@ -41,8 +54,6 @@ describe('Chat Workflow', () => {
             type: 'integer',
             default: null,
             check: null,
-            primary: true,
-            unique: false,
             notNull: true,
             comment: null,
           },
@@ -51,8 +62,6 @@ describe('Chat Workflow', () => {
             type: 'varchar',
             default: null,
             check: null,
-            primary: false,
-            unique: false,
             notNull: true,
             comment: null,
           },
@@ -61,19 +70,21 @@ describe('Chat Workflow', () => {
             type: 'varchar',
             default: null,
             check: null,
-            primary: false,
-            unique: false,
             notNull: false,
             comment: null,
           },
         },
         comment: null,
         indexes: {},
-        constraints: {},
+        constraints: {
+          users_pkey: {
+            type: 'PRIMARY KEY',
+            name: 'users_pkey',
+            columnName: 'id',
+          },
+        },
       },
     },
-    relationships: {},
-    tableGroups: {},
   })
 
   // Helper function to create base workflow state
@@ -117,6 +128,7 @@ describe('Chat Workflow', () => {
       agentsModule.DatabaseSchemaBuildAgent,
     )
     MockPMAnalysisAgent = vi.mocked(agentsModule.PMAnalysisAgent)
+    MockQAGenerateUsecaseAgent = vi.mocked(agentsModule.QAGenerateUsecaseAgent)
 
     // Create mock repositories
     mockSchemaRepository = {
@@ -152,22 +164,33 @@ describe('Chat Workflow', () => {
 
     // Mock PM Analysis agent
     mockPMAnalysisAgent = {
-      analyzeRequirements: vi.fn().mockResolvedValue(
-        JSON.stringify({
-          businessRequirement: 'Mocked BRD',
-          functionalRequirements: {
-            'Test Category': ['Mocked functional requirement'],
-          },
-          nonFunctionalRequirements: {
-            Performance: ['Mocked non-functional requirement'],
-          },
-        }),
-      ),
+      analyzeRequirements: vi.fn().mockResolvedValue({
+        businessRequirement: 'Mocked BRD',
+        functionalRequirements: {
+          'Test Category': ['Mocked functional requirement'],
+        },
+        nonFunctionalRequirements: {
+          Performance: ['Mocked non-functional requirement'],
+        },
+      }),
     }
 
     // Setup agent mocks
     MockDatabaseSchemaBuildAgent.mockImplementation(() => mockAgent)
     MockPMAnalysisAgent.mockImplementation(() => mockPMAnalysisAgent)
+    MockQAGenerateUsecaseAgent.mockImplementation(() => ({
+      generate: vi.fn().mockResolvedValue({
+        usecases: [
+          {
+            requirementType: 'functional',
+            requirementCategory: 'Test Category',
+            requirement: 'Mocked functional requirement',
+            title: 'Mocked Use Case',
+            description: 'Mocked use case description',
+          },
+        ],
+      }),
+    }))
 
     // Setup createVersion mock
     vi.mocked(mockSchemaRepository.createVersion).mockResolvedValue({

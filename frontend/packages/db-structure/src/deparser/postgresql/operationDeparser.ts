@@ -9,6 +9,14 @@ import {
   isRemoveColumnOperation,
   isRenameColumnOperation,
 } from '../../operation/schema/column.js'
+import type {
+  AddConstraintOperation,
+  RemoveConstraintOperation,
+} from '../../operation/schema/constraint.js'
+import {
+  isAddConstraintOperation,
+  isRemoveConstraintOperation,
+} from '../../operation/schema/constraint.js'
 import type { Operation } from '../../operation/schema/index.js'
 import type {
   AddIndexOperation,
@@ -31,9 +39,11 @@ import {
 import type { OperationDeparser } from '../type.js'
 import {
   generateAddColumnStatement,
+  generateAddConstraintStatement,
   generateCreateIndexStatement,
   generateCreateTableStatement,
   generateRemoveColumnStatement,
+  generateRemoveConstraintStatement,
   generateRemoveIndexStatement,
   generateRemoveTableStatement,
   generateRenameColumnStatement,
@@ -105,6 +115,22 @@ function extractTableAndIndexNameFromPath(
 }
 
 /**
+ * Extract table name and constraint name from constraint operation path
+ */
+function extractTableAndConstraintNameFromPath(
+  path: string,
+): { tableName: string; constraintName: string } | null {
+  const match = path.match(PATH_PATTERNS.CONSTRAINT_BASE)
+  if (!match || !match[1] || !match[2]) {
+    return null
+  }
+  return {
+    tableName: match[1],
+    constraintName: match[2],
+  }
+}
+
+/**
  * Generate CREATE TABLE DDL from table creation operation
  */
 function generateCreateTableFromOperation(
@@ -115,7 +141,18 @@ function generateCreateTableFromOperation(
     throw new Error(`Invalid table path: ${operation.path}`)
   }
 
-  return generateCreateTableStatement(operation.value)
+  const table = operation.value
+  const ddlStatements: string[] = []
+
+  // 1. Generate CREATE TABLE statement (includes comments)
+  ddlStatements.push(generateCreateTableStatement(table))
+
+  // 2. Generate ADD CONSTRAINT statements
+  for (const constraint of Object.values(table.constraints)) {
+    ddlStatements.push(generateAddConstraintStatement(table.name, constraint))
+  }
+
+  return ddlStatements.join('\n\n')
 }
 
 /**
@@ -218,6 +255,37 @@ function generateRemoveIndexFromOperation(
   return generateRemoveIndexStatement(pathInfo.indexName)
 }
 
+/**
+ * Generate ADD CONSTRAINT DDL from constraint creation operation
+ */
+function generateAddConstraintFromOperation(
+  operation: AddConstraintOperation,
+): string {
+  const pathInfo = extractTableAndConstraintNameFromPath(operation.path)
+  if (!pathInfo) {
+    throw new Error(`Invalid constraint path: ${operation.path}`)
+  }
+
+  return generateAddConstraintStatement(pathInfo.tableName, operation.value)
+}
+
+/**
+ * Generate DROP CONSTRAINT DDL from constraint removal operation
+ */
+function generateRemoveConstraintFromOperation(
+  operation: RemoveConstraintOperation,
+): string {
+  const pathInfo = extractTableAndConstraintNameFromPath(operation.path)
+  if (!pathInfo) {
+    throw new Error(`Invalid constraint path: ${operation.path}`)
+  }
+
+  return generateRemoveConstraintStatement(
+    pathInfo.tableName,
+    pathInfo.constraintName,
+  )
+}
+
 export const postgresqlOperationDeparser: OperationDeparser = (
   operation: Operation,
 ) => {
@@ -260,6 +328,16 @@ export const postgresqlOperationDeparser: OperationDeparser = (
 
   if (isRemoveIndexOperation(operation)) {
     const value = generateRemoveIndexFromOperation(operation)
+    return { value, errors }
+  }
+
+  if (isAddConstraintOperation(operation)) {
+    const value = generateAddConstraintFromOperation(operation)
+    return { value, errors }
+  }
+
+  if (isRemoveConstraintOperation(operation)) {
+    const value = generateRemoveConstraintFromOperation(operation)
     return { value, errors }
   }
 

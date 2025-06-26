@@ -1,22 +1,13 @@
-import type {
-  Column,
-  Relationships,
-  Schema,
-  Table,
-  TableGroups,
-  Tables,
+import {
+  type Column,
+  constraintsToRelationships,
+  isPrimaryKey,
+  type Relationships,
+  type Schema,
+  type Table,
+  type Tables,
 } from '@liam-hq/db-structure'
 import type { MentionItem } from '../../../types'
-
-// Function to generate table group candidates
-const getTableGroupCandidates = (tableGroups?: TableGroups): MentionItem[] => {
-  if (!tableGroups) return []
-  return Object.values(tableGroups).map((g) => ({
-    id: `group:${g.name}`,
-    label: g.name,
-    type: 'group',
-  }))
-}
 
 // Function to generate table candidates
 const getTableCandidates = (tables?: Tables): MentionItem[] => {
@@ -57,7 +48,7 @@ const getColumnProperties = (
     )?.cardinality
 
   // Explicitly set the column type
-  const columnType = column.primary
+  const columnType = isPrimaryKey(column.name, table.constraints || {})
     ? 'primary'
     : isSource || !!targetCardinality
       ? 'foreign'
@@ -106,10 +97,12 @@ const getRelationshipCandidates = (
 
 // Function to combine all candidates
 export const getAllMentionCandidates = (schema: Schema): MentionItem[] => {
+  const relationships = schema?.tables
+    ? constraintsToRelationships(schema.tables)
+    : undefined
   return [
-    ...getTableGroupCandidates(schema?.tableGroups),
     ...getTableCandidates(schema?.tables),
-    ...getColumnCandidates(schema?.tables, schema?.relationships),
-    ...getRelationshipCandidates(schema?.relationships),
+    ...getColumnCandidates(schema?.tables, relationships),
+    ...getRelationshipCandidates(relationships),
   ]
 }

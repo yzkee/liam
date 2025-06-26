@@ -2,9 +2,6 @@ import type { Meta } from '@storybook/react'
 import { ChatInput } from './ChatInput'
 
 const dummySchema = {
-  tableGroups: {
-    group1: { name: 'UserGroup' },
-  },
   tables: {
     users: {
       name: 'users',
@@ -20,9 +17,6 @@ const dummySchema = {
         user_id: { name: 'user_id' },
       },
     },
-  },
-  relationships: {
-    rel1: { name: 'user_posts' },
   },
 }
 

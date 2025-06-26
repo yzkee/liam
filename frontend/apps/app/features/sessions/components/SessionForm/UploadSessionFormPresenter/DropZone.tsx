@@ -61,7 +61,6 @@ export const DropZone: FC<Props> = ({
       <div className={styles.dropZoneContent}>
         <div className={styles.iconContainer}>
           <FileIcon
-            className={styles.fileIcon}
             isHovered={isHovered}
             isDragActive={schemaDragActive}
           />

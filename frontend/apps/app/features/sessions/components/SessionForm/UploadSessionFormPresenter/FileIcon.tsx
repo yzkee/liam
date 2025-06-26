@@ -1,19 +1,19 @@
+import clsx from 'clsx'
 import type { FC } from 'react'
+import styles from './FileIcon.module.css'
 
 type Props = {
-  className?: string
   isHovered?: boolean
   isDragActive?: boolean
 }
 
 export const FileIcon: FC<Props> = ({
-  className,
   isHovered = false,
   isDragActive = false,
 }) => {
   return (
     <svg
-      className={className}
+      className={clsx(styles.fileIcon, (isHovered || isDragActive) && styles.fileIconHovered)}
       viewBox="0 0 134 120"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import type { DragEvent, FC, KeyboardEvent } from 'react'
 import { FileIcon } from './FileIcon'
-import styles from './UploadSessionFormPresenter.module.css'
+import styles from './DropZone.module.css'
 
 type Props = {
   isPending: boolean

@@ -50,8 +50,12 @@ export const UploadSessionFormPresenter: FC<Props> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   // File attachments hook
-  const { attachments, handleFileSelect, handleRemoveAttachment, clearAttachments } =
-    useFileAttachments()
+  const {
+    attachments,
+    handleFileSelect,
+    handleRemoveAttachment,
+    clearAttachments,
+  } = useFileAttachments()
 
   // File drag and drop for schema file
   const handleSchemaFileDrop = (files: FileList) => {
@@ -184,7 +188,7 @@ export const UploadSessionFormPresenter: FC<Props> = ({
           <div className={styles.buttonContainer}>
             <SessionFormActions
               isPending={isPending}
-              hasContent={!!selectedFile || textContent.trim().length > 0}
+              hasContent={!!selectedFile || textContent.trim().length > 0 || attachments.length > 0}
               onFileSelect={handleFileSelect}
               onCancel={handleReset}
             />

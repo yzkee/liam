@@ -43,8 +43,14 @@ export const getDisplayFormat = (fileName: string): string => {
   return displayMap[extension] || 'postgresql'
 }
 
-export const VALID_EXTENSIONS = ['sql', 'rb', 'prisma', 'json', 'yaml', 'yml'] as const
-export const DISPLAY_EXTENSIONS = ['sql', 'rb', 'prisma', 'json', 'yaml'] as const
+const VALID_EXTENSIONS = ['sql', 'rb', 'prisma', 'json', 'yaml', 'yml'] as const
+export const DISPLAY_EXTENSIONS = [
+  'sql',
+  'rb',
+  'prisma',
+  'json',
+  'yaml',
+] as const
 
 export const isValidFileExtension = (fileName: string): boolean => {
   const extension = getFileExtension(fileName)

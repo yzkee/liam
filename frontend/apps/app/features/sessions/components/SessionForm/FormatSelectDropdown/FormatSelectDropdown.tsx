@@ -1,11 +1,17 @@
-import { ChevronDown } from '@liam-hq/ui'
-import { type FC, useEffect, useRef, useState } from 'react'
+import {
+  Check,
+  ChevronDown,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuRoot,
+  DropdownMenuTrigger,
+} from '@liam-hq/ui'
+import type { FC } from 'react'
 import {
   FormatIcon,
   type FormatType,
 } from '../../../../../components/FormatIcon/FormatIcon'
 import styles from './FormatSelectDropdown.module.css'
-import { FormatSelectDropdownMenuItem } from './FormatSelectDropdownMenuItem'
 
 interface FormatOption {
   format: FormatType
@@ -30,64 +36,41 @@ export const FormatSelectDropdown: FC<FormatSelectDropdownProps> = ({
   selectedFormat,
   onFormatChange,
 }) => {
-  const [isOpen, setIsOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-
   const selectedOption =
     formatOptions.find((option) => option.format === selectedFormat) ||
     formatOptions[0]
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
   const handleSelectFormat = (format: FormatType) => {
     onFormatChange(format)
-    setIsOpen(false)
   }
 
   return (
-    <div className={styles.container} ref={dropdownRef}>
-      <button
-        type="button"
-        className={styles.trigger}
-        onClick={() => setIsOpen(!isOpen)}
-        aria-expanded={isOpen}
-        aria-haspopup="listbox"
-      >
-        <FormatIcon format={selectedOption.format} size={16} />
-        <span className={styles.label}>{selectedOption.label}</span>
-        <ChevronDown
-          size={12}
-          className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ''}`}
-        />
-      </button>
+    <DropdownMenuRoot>
+      <DropdownMenuTrigger asChild>
+        <button type="button" className={styles.trigger}>
+          <FormatIcon format={selectedOption.format} size={16} />
+          <span className={styles.label}>{selectedOption.label}</span>
+          <ChevronDown size={12} className={styles.chevron} />
+        </button>
+      </DropdownMenuTrigger>
 
-      {isOpen && (
-        <div className={styles.dropdown}>
-          <div className={styles.dropdownContent}>
-            {formatOptions.map((option) => (
-              <FormatSelectDropdownMenuItem
-                key={option.format}
-                format={option.format}
-                label={option.label}
-                isSelected={option.format === selectedFormat}
-                onClick={() => handleSelectFormat(option.format)}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
+      <DropdownMenuContent className={styles.dropdown} align="start">
+        {formatOptions.map((option) => (
+          <DropdownMenuItem
+            key={option.format}
+            onClick={() => handleSelectFormat(option.format)}
+            className={styles.menuItem}
+          >
+            <div className={styles.menuContent}>
+              <FormatIcon format={option.format} size={16} />
+              <span className={styles.menuLabel}>{option.label}</span>
+            </div>
+            {option.format === selectedFormat && (
+              <Check size={10} className={styles.checkIcon} />
+            )}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenuRoot>
   )
 }

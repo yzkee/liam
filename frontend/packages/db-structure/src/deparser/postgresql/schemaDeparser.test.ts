@@ -1,42 +1,40 @@
 import { describe, expect, it } from 'vitest'
-import type { Schema } from '../../schema/index.js'
+import {
+  aCheckConstraint,
+  aColumn,
+  aForeignKeyConstraint,
+  anIndex,
+  aPrimaryKeyConstraint,
+  aSchema,
+  aTable,
+  aUniqueConstraint,
+} from '../../schema/factories.js'
 import { postgresqlSchemaDeparser } from './schemaDeparser.js'
 import { expectGeneratedSQLToBeParseable } from './testUtils.js'
 
 describe('postgresqlSchemaDeparser', () => {
   it('should generate basic CREATE TABLE statement', async () => {
-    const schema: Schema = {
+    const schema = aSchema({
       tables: {
-        users: {
+        users: aTable({
           name: 'users',
           columns: {
-            id: {
+            id: aColumn({
               name: 'id',
               type: 'bigint',
               primary: true,
               notNull: true,
-              unique: false,
-              default: null,
-              check: null,
-              comment: null,
-            },
-            email: {
+            }),
+            email: aColumn({
               name: 'email',
               type: 'varchar(255)',
-              primary: false,
               notNull: true,
               unique: true,
-              default: null,
-              check: null,
-              comment: null,
-            },
+            }),
           },
-          comment: null,
-          indexes: {},
-          constraints: {},
-        },
+        }),
       },
-    }
+    })
 
     const result = postgresqlSchemaDeparser(schema)
 
@@ -52,28 +50,23 @@ describe('postgresqlSchemaDeparser', () => {
   })
 
   it('should generate CREATE TABLE with comments', async () => {
-    const schema: Schema = {
+    const schema = aSchema({
       tables: {
-        products: {
+        products: aTable({
           name: 'products',
+          comment: 'Product table',
           columns: {
-            id: {
+            id: aColumn({
               name: 'id',
               type: 'bigint',
               primary: true,
               notNull: true,
-              unique: false,
-              default: null,
-              check: null,
               comment: 'Product ID',
-            },
+            }),
           },
-          comment: 'Product table',
-          indexes: {},
-          constraints: {},
-        },
+        }),
       },
-    }
+    })
 
     const result = postgresqlSchemaDeparser(schema)
 
@@ -91,58 +84,33 @@ describe('postgresqlSchemaDeparser', () => {
   })
 
   it('should generate CREATE TABLE with default values', async () => {
-    const schema: Schema = {
+    const schema = aSchema({
       tables: {
-        settings: {
+        settings: aTable({
           name: 'settings',
           columns: {
-            id: {
+            id: aColumn({
               name: 'id',
               type: 'bigint',
               primary: true,
               notNull: true,
-              unique: false,
-              default: null,
-              check: null,
-              comment: null,
-            },
-            enabled: {
+            }),
+            enabled: aColumn({
               name: 'enabled',
               type: 'boolean',
-              primary: false,
               notNull: true,
-              unique: false,
               default: true,
-              check: null,
-              comment: null,
-            },
-            count: {
-              name: 'count',
-              type: 'integer',
-              primary: false,
-              notNull: false,
-              unique: false,
-              default: 0,
-              check: null,
-              comment: null,
-            },
-            title: {
+            }),
+            count: aColumn({ name: 'count', type: 'integer', default: 0 }),
+            title: aColumn({
               name: 'title',
               type: 'varchar(50)',
-              primary: false,
-              notNull: false,
-              unique: false,
               default: 'Default Title',
-              check: null,
-              comment: null,
-            },
+            }),
           },
-          comment: null,
-          indexes: {},
-          constraints: {},
-        },
+        }),
       },
-    }
+    })
 
     const result = postgresqlSchemaDeparser(schema)
 
@@ -160,28 +128,23 @@ describe('postgresqlSchemaDeparser', () => {
   })
 
   it('should handle string escaping in comments', async () => {
-    const schema: Schema = {
+    const schema = aSchema({
       tables: {
-        test: {
+        test: aTable({
           name: 'test',
+          comment: "Table with 'quotes' in comment",
           columns: {
-            id: {
+            id: aColumn({
               name: 'id',
               type: 'bigint',
               primary: true,
               notNull: true,
-              unique: false,
-              default: null,
-              check: null,
               comment: "Column with 'quotes' in comment",
-            },
+            }),
           },
-          comment: "Table with 'quotes' in comment",
-          indexes: {},
-          constraints: {},
-        },
+        }),
       },
-    }
+    })
 
     const result = postgresqlSchemaDeparser(schema)
 
@@ -201,56 +164,37 @@ describe('postgresqlSchemaDeparser', () => {
   })
 
   it('should handle multiple tables', async () => {
-    const schema: Schema = {
+    const schema = aSchema({
       tables: {
-        users: {
+        users: aTable({
           name: 'users',
           columns: {
-            id: {
+            id: aColumn({
               name: 'id',
               type: 'bigint',
               primary: true,
               notNull: true,
-              unique: false,
-              default: null,
-              check: null,
-              comment: null,
-            },
+            }),
           },
-          comment: null,
-          indexes: {},
-          constraints: {},
-        },
-        products: {
+        }),
+        products: aTable({
           name: 'products',
           columns: {
-            id: {
+            id: aColumn({
               name: 'id',
               type: 'bigint',
               primary: true,
               notNull: true,
-              unique: false,
-              default: null,
-              check: null,
-              comment: null,
-            },
-            name: {
+            }),
+            name: aColumn({
               name: 'name',
               type: 'varchar(100)',
-              primary: false,
               notNull: true,
-              unique: false,
-              default: null,
-              check: null,
-              comment: null,
-            },
+            }),
           },
-          comment: null,
-          indexes: {},
-          constraints: {},
-        },
+        }),
       },
-    }
+    })
 
     const result = postgresqlSchemaDeparser(schema)
 
@@ -270,9 +214,7 @@ describe('postgresqlSchemaDeparser', () => {
   })
 
   it('should handle empty schema', async () => {
-    const schema: Schema = {
-      tables: {},
-    }
+    const schema = aSchema({ tables: {} })
 
     const result = postgresqlSchemaDeparser(schema)
 
@@ -284,45 +226,33 @@ describe('postgresqlSchemaDeparser', () => {
 
   describe('index generation', () => {
     it('should generate CREATE INDEX statements', async () => {
-      const schema: Schema = {
+      const schema = aSchema({
         tables: {
-          users: {
+          users: aTable({
             name: 'users',
             columns: {
-              id: {
+              id: aColumn({
                 name: 'id',
                 type: 'bigint',
                 primary: true,
                 notNull: true,
-                unique: false,
-                default: null,
-                check: null,
-                comment: null,
-              },
-              email: {
+              }),
+              email: aColumn({
                 name: 'email',
                 type: 'varchar(255)',
-                primary: false,
                 notNull: true,
-                unique: false,
-                default: null,
-                check: null,
-                comment: null,
-              },
+              }),
             },
-            comment: null,
             indexes: {
-              idx_users_email: {
+              idx_users_email: anIndex({
                 name: 'idx_users_email',
-                unique: false,
                 columns: ['email'],
                 type: 'BTREE',
-              },
+              }),
             },
-            constraints: {},
-          },
+          }),
         },
-      }
+      })
 
       const result = postgresqlSchemaDeparser(schema)
 
@@ -340,45 +270,34 @@ describe('postgresqlSchemaDeparser', () => {
     })
 
     it('should generate UNIQUE INDEX statements', async () => {
-      const schema: Schema = {
+      const schema = aSchema({
         tables: {
-          users: {
+          users: aTable({
             name: 'users',
             columns: {
-              id: {
+              id: aColumn({
                 name: 'id',
                 type: 'bigint',
                 primary: true,
                 notNull: true,
-                unique: false,
-                default: null,
-                check: null,
-                comment: null,
-              },
-              username: {
+              }),
+              username: aColumn({
                 name: 'username',
                 type: 'varchar(50)',
-                primary: false,
                 notNull: true,
-                unique: false,
-                default: null,
-                check: null,
-                comment: null,
-              },
+              }),
             },
-            comment: null,
             indexes: {
-              idx_users_username_unique: {
+              idx_users_username_unique: anIndex({
                 name: 'idx_users_username_unique',
                 unique: true,
                 columns: ['username'],
                 type: 'BTREE',
-              },
+              }),
             },
-            constraints: {},
-          },
+          }),
         },
-      }
+      })
 
       const result = postgresqlSchemaDeparser(schema)
 
@@ -396,55 +315,38 @@ describe('postgresqlSchemaDeparser', () => {
     })
 
     it('should generate composite INDEX statements', async () => {
-      const schema: Schema = {
+      const schema = aSchema({
         tables: {
-          orders: {
+          orders: aTable({
             name: 'orders',
             columns: {
-              id: {
+              id: aColumn({
                 name: 'id',
                 type: 'bigint',
                 primary: true,
                 notNull: true,
-                unique: false,
-                default: null,
-                check: null,
-                comment: null,
-              },
-              user_id: {
+              }),
+              user_id: aColumn({
                 name: 'user_id',
                 type: 'bigint',
-                primary: false,
                 notNull: true,
-                unique: false,
-                default: null,
-                check: null,
-                comment: null,
-              },
-              created_at: {
+              }),
+              created_at: aColumn({
                 name: 'created_at',
                 type: 'timestamp',
-                primary: false,
                 notNull: true,
-                unique: false,
-                default: null,
-                check: null,
-                comment: null,
-              },
+              }),
             },
-            comment: null,
             indexes: {
-              idx_orders_user_date: {
+              idx_orders_user_date: anIndex({
                 name: 'idx_orders_user_date',
-                unique: false,
                 columns: ['user_id', 'created_at'],
                 type: 'BTREE',
-              },
+              }),
             },
-            constraints: {},
-          },
+          }),
         },
-      }
+      })
 
       const result = postgresqlSchemaDeparser(schema)
 
@@ -463,45 +365,28 @@ describe('postgresqlSchemaDeparser', () => {
     })
 
     it('should handle indexes without type specified', async () => {
-      const schema: Schema = {
+      const schema = aSchema({
         tables: {
-          products: {
+          products: aTable({
             name: 'products',
             columns: {
-              id: {
+              id: aColumn({
                 name: 'id',
                 type: 'bigint',
                 primary: true,
                 notNull: true,
-                unique: false,
-                default: null,
-                check: null,
-                comment: null,
-              },
-              category_id: {
-                name: 'category_id',
-                type: 'bigint',
-                primary: false,
-                notNull: false,
-                unique: false,
-                default: null,
-                check: null,
-                comment: null,
-              },
+              }),
+              category_id: aColumn({ name: 'category_id', type: 'bigint' }),
             },
-            comment: null,
             indexes: {
-              idx_products_category: {
+              idx_products_category: anIndex({
                 name: 'idx_products_category',
-                unique: false,
                 columns: ['category_id'],
-                type: '',
-              },
+              }),
             },
-            constraints: {},
-          },
+          }),
         },
-      }
+      })
 
       const result = postgresqlSchemaDeparser(schema)
 
@@ -521,34 +406,22 @@ describe('postgresqlSchemaDeparser', () => {
 
   describe('constraint generation', () => {
     it('should generate PRIMARY KEY constraints', async () => {
-      const schema: Schema = {
+      const schema = aSchema({
         tables: {
-          users: {
+          users: aTable({
             name: 'users',
             columns: {
-              id: {
-                name: 'id',
-                type: 'bigint',
-                primary: false,
-                notNull: true,
-                unique: false,
-                default: null,
-                check: null,
-                comment: null,
-              },
+              id: aColumn({ name: 'id', type: 'bigint', notNull: true }),
             },
-            comment: null,
-            indexes: {},
             constraints: {
-              pk_users_id: {
-                type: 'PRIMARY KEY',
+              pk_users_id: aPrimaryKeyConstraint({
                 name: 'pk_users_id',
                 columnName: 'id',
-              },
+              }),
             },
-          },
+          }),
         },
-      }
+      })
 
       const result = postgresqlSchemaDeparser(schema)
 
@@ -565,66 +438,47 @@ describe('postgresqlSchemaDeparser', () => {
     })
 
     it('should generate FOREIGN KEY constraints', async () => {
-      const schema: Schema = {
+      const schema = aSchema({
         tables: {
-          users: {
+          users: aTable({
             name: 'users',
             columns: {
-              id: {
+              id: aColumn({
                 name: 'id',
                 type: 'bigint',
                 primary: true,
                 notNull: true,
-                unique: false,
-                default: null,
-                check: null,
-                comment: null,
-              },
+              }),
             },
-            comment: null,
-            indexes: {},
-            constraints: {},
-          },
-          orders: {
+          }),
+          orders: aTable({
             name: 'orders',
             columns: {
-              id: {
+              id: aColumn({
                 name: 'id',
                 type: 'bigint',
                 primary: true,
                 notNull: true,
-                unique: false,
-                default: null,
-                check: null,
-                comment: null,
-              },
-              user_id: {
+              }),
+              user_id: aColumn({
                 name: 'user_id',
                 type: 'bigint',
-                primary: false,
                 notNull: true,
-                unique: false,
-                default: null,
-                check: null,
-                comment: null,
-              },
+              }),
             },
-            comment: null,
-            indexes: {},
             constraints: {
-              fk_orders_user_id: {
-                type: 'FOREIGN KEY',
+              fk_orders_user_id: aForeignKeyConstraint({
                 name: 'fk_orders_user_id',
                 columnName: 'user_id',
                 targetTableName: 'users',
                 targetColumnName: 'id',
                 updateConstraint: 'CASCADE',
                 deleteConstraint: 'SET_NULL',
-              },
+              }),
             },
-          },
+          }),
         },
-      }
+      })
 
       const result = postgresqlSchemaDeparser(schema)
 
@@ -646,44 +500,32 @@ describe('postgresqlSchemaDeparser', () => {
     })
 
     it('should generate UNIQUE constraints', async () => {
-      const schema: Schema = {
+      const schema = aSchema({
         tables: {
-          users: {
+          users: aTable({
             name: 'users',
             columns: {
-              id: {
+              id: aColumn({
                 name: 'id',
                 type: 'bigint',
                 primary: true,
                 notNull: true,
-                unique: false,
-                default: null,
-                check: null,
-                comment: null,
-              },
-              email: {
+              }),
+              email: aColumn({
                 name: 'email',
                 type: 'varchar(255)',
-                primary: false,
                 notNull: true,
-                unique: false,
-                default: null,
-                check: null,
-                comment: null,
-              },
+              }),
             },
-            comment: null,
-            indexes: {},
             constraints: {
-              uk_users_email: {
-                type: 'UNIQUE',
+              uk_users_email: aUniqueConstraint({
                 name: 'uk_users_email',
                 columnName: 'email',
-              },
+              }),
             },
-          },
+          }),
         },
-      }
+      })
 
       const result = postgresqlSchemaDeparser(schema)
 
@@ -701,44 +543,32 @@ describe('postgresqlSchemaDeparser', () => {
     })
 
     it('should generate CHECK constraints', async () => {
-      const schema: Schema = {
+      const schema = aSchema({
         tables: {
-          products: {
+          products: aTable({
             name: 'products',
             columns: {
-              id: {
+              id: aColumn({
                 name: 'id',
                 type: 'bigint',
                 primary: true,
                 notNull: true,
-                unique: false,
-                default: null,
-                check: null,
-                comment: null,
-              },
-              price: {
+              }),
+              price: aColumn({
                 name: 'price',
                 type: 'decimal(10,2)',
-                primary: false,
                 notNull: true,
-                unique: false,
-                default: null,
-                check: null,
-                comment: null,
-              },
+              }),
             },
-            comment: null,
-            indexes: {},
             constraints: {
-              ck_products_price_positive: {
-                type: 'CHECK',
+              ck_products_price_positive: aCheckConstraint({
                 name: 'ck_products_price_positive',
                 detail: 'price > 0',
-              },
+              }),
             },
-          },
+          }),
         },
-      }
+      })
 
       const result = postgresqlSchemaDeparser(schema)
 
@@ -758,180 +588,128 @@ describe('postgresqlSchemaDeparser', () => {
 
   describe('complex schemas', () => {
     it('should handle schema with multiple tables, indexes, and constraints', async () => {
-      const schema: Schema = {
+      const schema = aSchema({
         tables: {
-          users: {
+          users: aTable({
             name: 'users',
+            comment: 'Users table',
             columns: {
-              id: {
+              id: aColumn({
                 name: 'id',
                 type: 'bigint',
                 primary: true,
                 notNull: true,
-                unique: false,
-                default: null,
-                check: null,
                 comment: 'User ID',
-              },
-              email: {
+              }),
+              email: aColumn({
                 name: 'email',
                 type: 'varchar(255)',
-                primary: false,
                 notNull: true,
-                unique: false,
-                default: null,
-                check: null,
-                comment: null,
-              },
-              created_at: {
+              }),
+              created_at: aColumn({
                 name: 'created_at',
                 type: 'timestamp',
-                primary: false,
                 notNull: true,
-                unique: false,
                 default: 'CURRENT_TIMESTAMP',
-                check: null,
-                comment: null,
-              },
+              }),
             },
-            comment: 'Users table',
             indexes: {
-              idx_users_email: {
+              idx_users_email: anIndex({
                 name: 'idx_users_email',
                 unique: true,
                 columns: ['email'],
                 type: 'BTREE',
-              },
+              }),
             },
-            constraints: {},
-          },
-          products: {
+          }),
+          products: aTable({
             name: 'products',
             columns: {
-              id: {
+              id: aColumn({
                 name: 'id',
                 type: 'bigint',
                 primary: true,
                 notNull: true,
-                unique: false,
-                default: null,
-                check: null,
-                comment: null,
-              },
-              name: {
+              }),
+              name: aColumn({
                 name: 'name',
                 type: 'varchar(100)',
-                primary: false,
                 notNull: true,
-                unique: false,
-                default: null,
-                check: null,
-                comment: null,
-              },
-              price: {
+              }),
+              price: aColumn({
                 name: 'price',
                 type: 'decimal(10,2)',
-                primary: false,
                 notNull: true,
-                unique: false,
                 default: 0,
-                check: null,
-                comment: null,
-              },
+              }),
             },
-            comment: null,
             indexes: {
-              idx_products_name: {
+              idx_products_name: anIndex({
                 name: 'idx_products_name',
-                unique: false,
                 columns: ['name'],
-                type: '',
-              },
+              }),
             },
             constraints: {
-              ck_products_price: {
-                type: 'CHECK',
+              ck_products_price: aCheckConstraint({
                 name: 'ck_products_price',
                 detail: 'price >= 0',
-              },
+              }),
             },
-          },
-          orders: {
+          }),
+          orders: aTable({
             name: 'orders',
             columns: {
-              id: {
+              id: aColumn({
                 name: 'id',
                 type: 'bigint',
                 primary: true,
                 notNull: true,
-                unique: false,
-                default: null,
-                check: null,
-                comment: null,
-              },
-              user_id: {
+              }),
+              user_id: aColumn({
                 name: 'user_id',
                 type: 'bigint',
-                primary: false,
                 notNull: true,
-                unique: false,
-                default: null,
-                check: null,
-                comment: null,
-              },
-              product_id: {
+              }),
+              product_id: aColumn({
                 name: 'product_id',
                 type: 'bigint',
-                primary: false,
                 notNull: true,
-                unique: false,
-                default: null,
-                check: null,
-                comment: null,
-              },
-              quantity: {
+              }),
+              quantity: aColumn({
                 name: 'quantity',
                 type: 'integer',
-                primary: false,
                 notNull: true,
-                unique: false,
                 default: 1,
-                check: null,
-                comment: null,
-              },
+              }),
             },
-            comment: null,
             indexes: {
-              idx_orders_user_product: {
+              idx_orders_user_product: anIndex({
                 name: 'idx_orders_user_product',
-                unique: false,
                 columns: ['user_id', 'product_id'],
                 type: 'BTREE',
-              },
+              }),
             },
             constraints: {
-              fk_orders_user: {
-                type: 'FOREIGN KEY',
+              fk_orders_user: aForeignKeyConstraint({
                 name: 'fk_orders_user',
                 columnName: 'user_id',
                 targetTableName: 'users',
                 targetColumnName: 'id',
                 updateConstraint: 'CASCADE',
                 deleteConstraint: 'CASCADE',
-              },
-              fk_orders_product: {
-                type: 'FOREIGN KEY',
+              }),
+              fk_orders_product: aForeignKeyConstraint({
                 name: 'fk_orders_product',
                 columnName: 'product_id',
                 targetTableName: 'products',
                 targetColumnName: 'id',
                 updateConstraint: 'CASCADE',
                 deleteConstraint: 'RESTRICT',
-              },
+              }),
             },
-          },
+          }),
         },
-      }
+      })
 
       const result = postgresqlSchemaDeparser(schema)
 
@@ -976,106 +754,68 @@ describe('postgresqlSchemaDeparser', () => {
     })
 
     it('should handle circular foreign key references', async () => {
-      const schema: Schema = {
+      const schema = aSchema({
         tables: {
-          departments: {
+          departments: aTable({
             name: 'departments',
             columns: {
-              id: {
+              id: aColumn({
                 name: 'id',
                 type: 'bigint',
                 primary: true,
                 notNull: true,
-                unique: false,
-                default: null,
-                check: null,
-                comment: null,
-              },
-              name: {
+              }),
+              name: aColumn({
                 name: 'name',
                 type: 'varchar(100)',
-                primary: false,
                 notNull: true,
-                unique: false,
-                default: null,
-                check: null,
-                comment: null,
-              },
-              manager_id: {
-                name: 'manager_id',
-                type: 'bigint',
-                primary: false,
-                notNull: false,
-                unique: false,
-                default: null,
-                check: null,
-                comment: null,
-              },
+              }),
+              manager_id: aColumn({ name: 'manager_id', type: 'bigint' }),
             },
-            comment: null,
-            indexes: {},
             constraints: {
-              fk_departments_manager: {
-                type: 'FOREIGN KEY',
+              fk_departments_manager: aForeignKeyConstraint({
                 name: 'fk_departments_manager',
                 columnName: 'manager_id',
                 targetTableName: 'employees',
                 targetColumnName: 'id',
                 updateConstraint: 'CASCADE',
                 deleteConstraint: 'SET_NULL',
-              },
+              }),
             },
-          },
-          employees: {
+          }),
+          employees: aTable({
             name: 'employees',
             columns: {
-              id: {
+              id: aColumn({
                 name: 'id',
                 type: 'bigint',
                 primary: true,
                 notNull: true,
-                unique: false,
-                default: null,
-                check: null,
-                comment: null,
-              },
-              name: {
+              }),
+              name: aColumn({
                 name: 'name',
                 type: 'varchar(100)',
-                primary: false,
                 notNull: true,
-                unique: false,
-                default: null,
-                check: null,
-                comment: null,
-              },
-              department_id: {
+              }),
+              department_id: aColumn({
                 name: 'department_id',
                 type: 'bigint',
-                primary: false,
                 notNull: true,
-                unique: false,
-                default: null,
-                check: null,
-                comment: null,
-              },
+              }),
             },
-            comment: null,
-            indexes: {},
             constraints: {
-              fk_employees_department: {
-                type: 'FOREIGN KEY',
+              fk_employees_department: aForeignKeyConstraint({
                 name: 'fk_employees_department',
                 columnName: 'department_id',
                 targetTableName: 'departments',
                 targetColumnName: 'id',
                 updateConstraint: 'CASCADE',
                 deleteConstraint: 'RESTRICT',
-              },
+              }),
             },
-          },
+          }),
         },
-      }
+      })
 
       const result = postgresqlSchemaDeparser(schema)
 
@@ -1104,28 +844,21 @@ describe('postgresqlSchemaDeparser', () => {
 
   describe('error handling', () => {
     it('should handle empty table name', async () => {
-      const schema: Schema = {
+      const schema = aSchema({
         tables: {
-          '': {
+          '': aTable({
             name: '',
             columns: {
-              id: {
+              id: aColumn({
                 name: 'id',
                 type: 'bigint',
                 primary: true,
                 notNull: true,
-                unique: false,
-                default: null,
-                check: null,
-                comment: null,
-              },
+              }),
             },
-            comment: null,
-            indexes: {},
-            constraints: {},
-          },
+          }),
         },
-      }
+      })
 
       const result = postgresqlSchemaDeparser(schema)
 

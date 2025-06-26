@@ -259,9 +259,10 @@ export async function createSession(
   }
 
   // Trigger the chat processing job for the initial message
+  const history: [string, string][] = []
   const chatPayload = {
     message: initialMessage,
-    history: [] as [string, string][],
+    history,
     organizationId,
     buildingSchemaId: buildingSchema.id,
     latestVersionNumber: 0,

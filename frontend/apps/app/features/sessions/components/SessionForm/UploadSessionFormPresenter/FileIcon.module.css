@@ -15,7 +15,7 @@
 }
 
 /* Back files animation */
-.fileIcon :global(.file-back-left) {
+.fileBackLeft {
   transform-origin: center bottom;
   transition: all var(--default-animation-duration)
     var(--default-timing-function);
@@ -23,7 +23,7 @@
   opacity: var(--opacity-70);
 }
 
-.fileIcon :global(.file-back-right) {
+.fileBackRight {
   transform-origin: center bottom;
   transition: all var(--default-animation-duration)
     var(--default-timing-function);
@@ -31,12 +31,12 @@
   opacity: var(--opacity-70);
 }
 
-.fileIcon :global(.file-back-left-hover) {
+.fileBackLeftHover {
   transform: rotate(0deg) translateX(8px) translateY(7px);
   opacity: 0;
 }
 
-.fileIcon :global(.file-back-right-hover) {
+.fileBackRightHover {
   transform: rotate(0deg) translateX(-8px) translateY(7px);
   opacity: 0;
 }

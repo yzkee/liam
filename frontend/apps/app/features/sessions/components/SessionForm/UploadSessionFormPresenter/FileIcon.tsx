@@ -96,7 +96,10 @@ export const FileIcon: FC<Props> = ({
 
       {/* Back file - left */}
       <g
-        className={`file-back-left ${isHovered || isDragActive ? 'file-back-left-hover' : ''}`}
+        className={clsx(
+          styles.fileBackLeft,
+          (isHovered || isDragActive) && styles.fileBackLeftHover,
+        )}
       >
         <path
           d="M38 32H68L82 46V86C82 87.1046 81.1046 88 80 88H38C36.8954 88 36 87.1046 36 86V34C36 32.8954 36.8954 32 38 32Z"
@@ -108,7 +111,10 @@ export const FileIcon: FC<Props> = ({
 
       {/* Back file - right */}
       <g
-        className={`file-back-right ${isHovered || isDragActive ? 'file-back-right-hover' : ''}`}
+        className={clsx(
+          styles.fileBackRight,
+          (isHovered || isDragActive) && styles.fileBackRightHover,
+        )}
       >
         <path
           d="M52 32H82L96 46V86C96 87.1046 95.1046 88 94 88H52C50.8954 88 50 87.1046 50 86V34C50 32.8954 50.8954 32 52 32Z"
@@ -154,7 +160,7 @@ export const FileIcon: FC<Props> = ({
           />
         </g>
       ) : (
-        <g className="file-front">
+        <g>
           <path
             d="M46.0176 46.75H76.4463L90 60.582V100.732C90 101.847 89.0966 102.75 87.9824 102.75H46.0176C44.9034 102.75 44 101.847 44 100.732V48.7676C44 47.7229 44.7941 46.8639 45.8115 46.7607L46.0176 46.75Z"
             fill="#202222"

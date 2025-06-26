@@ -3,20 +3,15 @@ import type { Column, Constraint, Index, Table } from '../../schema/index.js'
 /**
  * Generate column definition as DDL string
  */
-function generateColumnDefinition(column: Column): string {
+function generateColumnDefinition(
+  column: Column,
+  isPrimaryKey = false,
+): string {
   let definition = `${escapeIdentifier(column.name)} ${column.type}`
 
   // Add constraints (following PostgreSQL common order)
-  if (column.primary) {
-    definition += ' PRIMARY KEY'
-  }
-
-  if (column.unique && !column.primary) {
-    definition += ' UNIQUE'
-  }
-
-  if (column.notNull && !column.primary) {
-    // PRIMARY KEY is automatically NOT NULL, so only add for non-primary columns
+  // Don't add NOT NULL if this will be a PRIMARY KEY
+  if (column.notNull && !isPrimaryKey) {
     definition += ' NOT NULL'
   }
 
@@ -85,13 +80,31 @@ export function generateAddColumnStatement(
 export function generateCreateTableStatement(table: Table): string {
   const tableName = table.name
 
+  // First, identify which columns are primary keys
+  const primaryKeyColumns = new Set<string>()
+  for (const constraint of Object.values(table.constraints)) {
+    if (constraint.type === 'PRIMARY KEY') {
+      primaryKeyColumns.add(constraint.columnName)
+    }
+  }
+
   // Generate column definitions
-  const columnDefinitions = (Object.values(table.columns) as Column[])
-    .map((column) => generateColumnDefinition(column))
-    .join(',\n  ')
+  const columnDefinitions = (Object.values(table.columns) as Column[]).map(
+    (column) => {
+      const isPrimaryKey = primaryKeyColumns.has(column.name)
+      let definition = generateColumnDefinition(column, isPrimaryKey)
+
+      // Add PRIMARY KEY inline if this column is a primary key
+      if (isPrimaryKey) {
+        definition += ' PRIMARY KEY'
+      }
+
+      return definition
+    },
+  )
 
   // Basic CREATE TABLE statement
-  let ddl = `CREATE TABLE ${escapeIdentifier(tableName)} (\n  ${columnDefinitions}\n);`
+  let ddl = `CREATE TABLE ${escapeIdentifier(tableName)} (\n  ${columnDefinitions.join(',\n  ')}\n);`
 
   // Add table comment
   if (table.comment) {

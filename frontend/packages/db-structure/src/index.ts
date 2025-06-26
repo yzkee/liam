@@ -46,3 +46,4 @@ export {
   type Relationship,
   type Relationships,
 } from './utils/constraintsToRelationships.js'
+export { isPrimaryKey } from './utils/isPrimaryKey.js'

@@ -1,11 +1,12 @@
-import type {
-  Column,
-  Relationships,
-  Schema,
-  Table,
-  Tables,
+import {
+  type Column,
+  constraintsToRelationships,
+  isPrimaryKey,
+  type Relationships,
+  type Schema,
+  type Table,
+  type Tables,
 } from '@liam-hq/db-structure'
-import { constraintsToRelationships } from '@liam-hq/db-structure'
 import type { MentionItem } from '../../../types'
 
 // Function to generate table candidates
@@ -47,7 +48,7 @@ const getColumnProperties = (
     )?.cardinality
 
   // Explicitly set the column type
-  const columnType = column.primary
+  const columnType = isPrimaryKey(column.name, table.constraints || {})
     ? 'primary'
     : isSource || !!targetCardinality
       ? 'foreign'

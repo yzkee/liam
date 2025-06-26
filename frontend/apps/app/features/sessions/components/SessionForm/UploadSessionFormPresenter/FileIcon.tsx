@@ -13,7 +13,10 @@ export const FileIcon: FC<Props> = ({
 }) => {
   return (
     <svg
-      className={clsx(styles.fileIcon, (isHovered || isDragActive) && styles.fileIconHovered)}
+      className={clsx(
+        styles.fileIcon,
+        (isHovered || isDragActive) && styles.fileIconHovered,
+      )}
       viewBox="0 0 134 120"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

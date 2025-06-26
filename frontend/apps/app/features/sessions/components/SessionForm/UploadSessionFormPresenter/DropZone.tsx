@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import type { DragEvent, FC, KeyboardEvent } from 'react'
-import { FileIcon } from './FileIcon'
 import styles from './DropZone.module.css'
+import { FileIcon } from './FileIcon'
 
 type Props = {
   isPending: boolean
@@ -60,10 +60,7 @@ export const DropZone: FC<Props> = ({
     >
       <div className={styles.dropZoneContent}>
         <div className={styles.iconContainer}>
-          <FileIcon
-            isHovered={isHovered}
-            isDragActive={schemaDragActive}
-          />
+          <FileIcon isHovered={isHovered} isDragActive={schemaDragActive} />
           <div className={styles.extensionTags}>
             <span className={styles.extensionTag}>.sql</span>
             <span className={styles.extensionTag}>.rb</span>

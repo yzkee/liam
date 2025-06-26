@@ -80,25 +80,10 @@ export function generateAddColumnStatement(
 export function generateCreateTableStatement(table: Table): string {
   const tableName = table.name
 
-  // First, identify which columns are primary keys
-  const primaryKeyColumns = new Set<string>()
-  for (const constraint of Object.values(table.constraints)) {
-    if (constraint.type === 'PRIMARY KEY') {
-      primaryKeyColumns.add(constraint.columnName)
-    }
-  }
-
   // Generate column definitions
   const columnDefinitions = (Object.values(table.columns) as Column[]).map(
     (column) => {
-      const isPrimaryKey = primaryKeyColumns.has(column.name)
-      let definition = generateColumnDefinition(column, isPrimaryKey)
-
-      // Add PRIMARY KEY inline if this column is a primary key
-      if (isPrimaryKey) {
-        definition += ' PRIMARY KEY'
-      }
-
+      const definition = generateColumnDefinition(column, false)
       return definition
     },
   )

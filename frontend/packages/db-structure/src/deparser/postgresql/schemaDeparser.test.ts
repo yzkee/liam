@@ -45,9 +45,11 @@ describe('postgresqlSchemaDeparser', () => {
     expect(result.errors).toHaveLength(0)
     expect(result.value).toMatchInlineSnapshot(`
       "CREATE TABLE "users" (
-        "id" bigint PRIMARY KEY,
+        "id" bigint NOT NULL,
         "email" varchar(255) NOT NULL
-      );"
+      );
+      
+      ALTER TABLE "users" ADD CONSTRAINT "users_pkey" PRIMARY KEY ("id");"
     `)
 
     await expectGeneratedSQLToBeParseable(result.value)
@@ -82,11 +84,13 @@ describe('postgresqlSchemaDeparser', () => {
     expect(result.errors).toHaveLength(0)
     expect(result.value).toMatchInlineSnapshot(`
       "CREATE TABLE "products" (
-        "id" bigint PRIMARY KEY
+        "id" bigint NOT NULL
       );
 
       COMMENT ON TABLE "products" IS 'Product table';
-      COMMENT ON COLUMN "products"."id" IS 'Product ID';"
+      COMMENT ON COLUMN "products"."id" IS 'Product ID';
+      
+      ALTER TABLE "products" ADD CONSTRAINT "products_pkey" PRIMARY KEY ("id");"
     `)
 
     await expectGeneratedSQLToBeParseable(result.value)
@@ -131,11 +135,13 @@ describe('postgresqlSchemaDeparser', () => {
     expect(result.errors).toHaveLength(0)
     expect(result.value).toMatchInlineSnapshot(`
       "CREATE TABLE "settings" (
-        "id" bigint PRIMARY KEY,
+        "id" bigint NOT NULL,
         "enabled" boolean NOT NULL DEFAULT TRUE,
         "count" integer DEFAULT 0,
         "title" varchar(50) DEFAULT 'Default Title'
-      );"
+      );
+      
+      ALTER TABLE "settings" ADD CONSTRAINT "settings_pkey" PRIMARY KEY ("id");"
     `)
 
     await expectGeneratedSQLToBeParseable(result.value)
@@ -171,11 +177,13 @@ describe('postgresqlSchemaDeparser', () => {
     expect(result.value).toMatchInlineSnapshot(
       `
       "CREATE TABLE "test" (
-        "id" bigint PRIMARY KEY
+        "id" bigint NOT NULL
       );
 
       COMMENT ON TABLE "test" IS 'Table with ''quotes'' in comment';
-      COMMENT ON COLUMN "test"."id" IS 'Column with ''quotes'' in comment';"
+      COMMENT ON COLUMN "test"."id" IS 'Column with ''quotes'' in comment';
+      
+      ALTER TABLE "test" ADD CONSTRAINT "test_pkey" PRIMARY KEY ("id");"
     `,
     )
 
@@ -230,13 +238,17 @@ describe('postgresqlSchemaDeparser', () => {
     expect(result.errors).toHaveLength(0)
     expect(result.value).toMatchInlineSnapshot(`
       "CREATE TABLE "users" (
-        "id" bigint PRIMARY KEY
+        "id" bigint NOT NULL
       );
 
       CREATE TABLE "products" (
-        "id" bigint PRIMARY KEY,
+        "id" bigint NOT NULL,
         "name" varchar(100) NOT NULL
-      );"
+      );
+      
+      ALTER TABLE "users" ADD CONSTRAINT "users_pkey" PRIMARY KEY ("id");
+      
+      ALTER TABLE "products" ADD CONSTRAINT "products_pkey" PRIMARY KEY ("id");"
     `)
 
     await expectGeneratedSQLToBeParseable(result.value)
@@ -287,7 +299,7 @@ describe('postgresqlSchemaDeparser', () => {
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
         "CREATE TABLE \"users\" (
-          \"id\" bigint PRIMARY KEY,
+          \"id\" bigint NOT NULL,
           \"email\" varchar(255) NOT NULL
         );
 
@@ -331,7 +343,7 @@ describe('postgresqlSchemaDeparser', () => {
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
         "CREATE TABLE \"users\" (
-          \"id\" bigint PRIMARY KEY,
+          \"id\" bigint NOT NULL,
           \"username\" varchar(50) NOT NULL
         );
 
@@ -379,7 +391,7 @@ describe('postgresqlSchemaDeparser', () => {
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
         "CREATE TABLE \"orders\" (
-          \"id\" bigint PRIMARY KEY,
+          \"id\" bigint NOT NULL,
           \"user_id\" bigint NOT NULL,
           \"created_at\" timestamp NOT NULL
         );
@@ -418,7 +430,7 @@ describe('postgresqlSchemaDeparser', () => {
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
         "CREATE TABLE \"products\" (
-          \"id\" bigint PRIMARY KEY,
+          \"id\" bigint NOT NULL,
           \"category_id\" bigint
         );
 
@@ -508,11 +520,11 @@ describe('postgresqlSchemaDeparser', () => {
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
         "CREATE TABLE \"users\" (
-          \"id\" bigint PRIMARY KEY
+          \"id\" bigint NOT NULL
         );
 
         CREATE TABLE \"orders\" (
-          \"id\" bigint PRIMARY KEY,
+          \"id\" bigint NOT NULL,
           \"user_id\" bigint NOT NULL
         );
 
@@ -554,7 +566,7 @@ describe('postgresqlSchemaDeparser', () => {
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
         "CREATE TABLE \"users\" (
-          \"id\" bigint PRIMARY KEY,
+          \"id\" bigint NOT NULL,
           \"email\" varchar(255) NOT NULL
         );
 
@@ -596,7 +608,7 @@ describe('postgresqlSchemaDeparser', () => {
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
         "CREATE TABLE \"products\" (
-          \"id\" bigint PRIMARY KEY,
+          \"id\" bigint NOT NULL,
           \"price\" decimal(10,2) NOT NULL
         );
 
@@ -734,7 +746,7 @@ describe('postgresqlSchemaDeparser', () => {
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
         "CREATE TABLE \"users\" (
-          \"id\" bigint PRIMARY KEY,
+          \"id\" bigint NOT NULL,
           \"email\" varchar(255) NOT NULL,
           \"created_at\" timestamp NOT NULL DEFAULT 'CURRENT_TIMESTAMP'
         );
@@ -743,13 +755,13 @@ describe('postgresqlSchemaDeparser', () => {
         COMMENT ON COLUMN \"users\".\"id\" IS 'User ID';
 
         CREATE TABLE \"products\" (
-          \"id\" bigint PRIMARY KEY,
+          \"id\" bigint NOT NULL,
           \"name\" varchar(100) NOT NULL,
           \"price\" decimal(10,2) NOT NULL DEFAULT 0
         );
 
         CREATE TABLE \"orders\" (
-          \"id\" bigint PRIMARY KEY,
+          \"id\" bigint NOT NULL,
           \"user_id\" bigint NOT NULL,
           \"product_id\" bigint NOT NULL,
           \"quantity\" integer NOT NULL DEFAULT 1
@@ -840,13 +852,13 @@ describe('postgresqlSchemaDeparser', () => {
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
         "CREATE TABLE \"departments\" (
-          \"id\" bigint PRIMARY KEY,
+          \"id\" bigint NOT NULL,
           \"name\" varchar(100) NOT NULL,
           \"manager_id\" bigint
         );
 
         CREATE TABLE \"employees\" (
-          \"id\" bigint PRIMARY KEY,
+          \"id\" bigint NOT NULL,
           \"name\" varchar(100) NOT NULL,
           \"department_id\" bigint NOT NULL
         );

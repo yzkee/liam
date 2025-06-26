@@ -1,6 +1,6 @@
 import type { WorkflowState } from '../types'
 
-const NODE_NAME = 'saveUserMessageNode'
+const NODE_NAME = 'saveUserMessage'
 
 /**
  * Save User Message Node - Saves the user's message to the database

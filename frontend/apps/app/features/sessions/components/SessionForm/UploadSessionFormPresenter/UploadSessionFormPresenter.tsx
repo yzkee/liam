@@ -188,7 +188,11 @@ export const UploadSessionFormPresenter: FC<Props> = ({
           <div className={styles.buttonContainer}>
             <SessionFormActions
               isPending={isPending}
-              hasContent={!!selectedFile || textContent.trim().length > 0 || attachments.length > 0}
+              hasContent={
+                !!selectedFile ||
+                textContent.trim().length > 0 ||
+                attachments.length > 0
+              }
               onFileSelect={handleFileSelect}
               onCancel={handleReset}
             />

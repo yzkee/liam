@@ -36,8 +36,6 @@ jobs:
           TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
           TRIGGER_PROJECT_ID: ${{ vars.TRIGGER_PROJECT_ID }}
         run: |
-          set -e
-          
           echo "Archiving trigger.dev preview for branch: ${{ github.head_ref }}"
           
           # Archive with retry logic

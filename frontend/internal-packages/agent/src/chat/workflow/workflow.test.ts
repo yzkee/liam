@@ -229,6 +229,7 @@ describe('Chat Workflow', () => {
           requirement_analysis: { business_requirement: '', requirements: [] },
         },
         created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       },
     })
 
@@ -242,6 +243,7 @@ describe('Chat Workflow', () => {
           requirement_analysis: { business_requirement: '', requirements: [] },
         },
         created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       },
     })
   })

@@ -114,7 +114,7 @@ Example with Foreign Key Constraint:
             "targetTableName": "users",
             "targetColumnName": "id",
             "updateConstraint": "NO_ACTION",
-            "deleteConstraint": "SET_NULL"
+            "deleteConstraint": "CASCADE"
           }}
         }}
       }}

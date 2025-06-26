@@ -280,9 +280,14 @@ export async function createSession(
   )
 
   // Trigger the chat processing job with idempotency key
-  await processChatTask.trigger(chatPayload, {
-    idempotencyKey,
-  })
+  try {
+    await processChatTask.trigger(chatPayload, {
+      idempotencyKey,
+    })
+  } catch (error) {
+    console.error('Error triggering chat processing job:', error)
+    return { success: false, error: 'Failed to trigger chat processing job' }
+  }
 
   // Redirect to the session page on successful creation
   redirect(`/app/design_sessions/${designSession.id}`)

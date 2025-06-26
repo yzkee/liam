@@ -22,14 +22,18 @@ describe('postgresqlSchemaDeparser', () => {
             id: aColumn({
               name: 'id',
               type: 'bigint',
-              primary: true,
               notNull: true,
             }),
             email: aColumn({
               name: 'email',
               type: 'varchar(255)',
               notNull: true,
-              unique: true,
+            }),
+          },
+          constraints: {
+            users_pkey: aPrimaryKeyConstraint({
+              name: 'users_pkey',
+              columnName: 'id',
             }),
           },
         }),
@@ -40,9 +44,9 @@ describe('postgresqlSchemaDeparser', () => {
 
     expect(result.errors).toHaveLength(0)
     expect(result.value).toMatchInlineSnapshot(`
-      "CREATE TABLE \"users\" (
-        \"id\" bigint PRIMARY KEY,
-        \"email\" varchar(255) UNIQUE NOT NULL
+      "CREATE TABLE "users" (
+        "id" bigint PRIMARY KEY,
+        "email" varchar(255) NOT NULL
       );"
     `)
 
@@ -59,9 +63,14 @@ describe('postgresqlSchemaDeparser', () => {
             id: aColumn({
               name: 'id',
               type: 'bigint',
-              primary: true,
               notNull: true,
               comment: 'Product ID',
+            }),
+          },
+          constraints: {
+            products_pkey: aPrimaryKeyConstraint({
+              name: 'products_pkey',
+              columnName: 'id',
             }),
           },
         }),
@@ -72,12 +81,12 @@ describe('postgresqlSchemaDeparser', () => {
 
     expect(result.errors).toHaveLength(0)
     expect(result.value).toMatchInlineSnapshot(`
-      "CREATE TABLE \"products\" (
-        \"id\" bigint PRIMARY KEY
+      "CREATE TABLE "products" (
+        "id" bigint PRIMARY KEY
       );
 
-      COMMENT ON TABLE \"products\" IS 'Product table';
-      COMMENT ON COLUMN \"products\".\"id\" IS 'Product ID';"
+      COMMENT ON TABLE "products" IS 'Product table';
+      COMMENT ON COLUMN "products"."id" IS 'Product ID';"
     `)
 
     await expectGeneratedSQLToBeParseable(result.value)
@@ -92,7 +101,6 @@ describe('postgresqlSchemaDeparser', () => {
             id: aColumn({
               name: 'id',
               type: 'bigint',
-              primary: true,
               notNull: true,
             }),
             enabled: aColumn({
@@ -108,6 +116,12 @@ describe('postgresqlSchemaDeparser', () => {
               default: 'Default Title',
             }),
           },
+          constraints: {
+            settings_pkey: aPrimaryKeyConstraint({
+              name: 'settings_pkey',
+              columnName: 'id',
+            }),
+          },
         }),
       },
     })
@@ -116,11 +130,11 @@ describe('postgresqlSchemaDeparser', () => {
 
     expect(result.errors).toHaveLength(0)
     expect(result.value).toMatchInlineSnapshot(`
-      "CREATE TABLE \"settings\" (
-        \"id\" bigint PRIMARY KEY,
-        \"enabled\" boolean NOT NULL DEFAULT TRUE,
-        \"count\" integer DEFAULT 0,
-        \"title\" varchar(50) DEFAULT 'Default Title'
+      "CREATE TABLE "settings" (
+        "id" bigint PRIMARY KEY,
+        "enabled" boolean NOT NULL DEFAULT TRUE,
+        "count" integer DEFAULT 0,
+        "title" varchar(50) DEFAULT 'Default Title'
       );"
     `)
 
@@ -137,9 +151,14 @@ describe('postgresqlSchemaDeparser', () => {
             id: aColumn({
               name: 'id',
               type: 'bigint',
-              primary: true,
               notNull: true,
               comment: "Column with 'quotes' in comment",
+            }),
+          },
+          constraints: {
+            test_pkey: aPrimaryKeyConstraint({
+              name: 'test_pkey',
+              columnName: 'id',
             }),
           },
         }),
@@ -151,12 +170,12 @@ describe('postgresqlSchemaDeparser', () => {
     expect(result.errors).toHaveLength(0)
     expect(result.value).toMatchInlineSnapshot(
       `
-      "CREATE TABLE \"test\" (
-        \"id\" bigint PRIMARY KEY
+      "CREATE TABLE "test" (
+        "id" bigint PRIMARY KEY
       );
 
-      COMMENT ON TABLE \"test\" IS 'Table with ''quotes'' in comment';
-      COMMENT ON COLUMN \"test\".\"id\" IS 'Column with ''quotes'' in comment';"
+      COMMENT ON TABLE "test" IS 'Table with ''quotes'' in comment';
+      COMMENT ON COLUMN "test"."id" IS 'Column with ''quotes'' in comment';"
     `,
     )
 
@@ -172,8 +191,13 @@ describe('postgresqlSchemaDeparser', () => {
             id: aColumn({
               name: 'id',
               type: 'bigint',
-              primary: true,
               notNull: true,
+            }),
+          },
+          constraints: {
+            users_pkey: aPrimaryKeyConstraint({
+              name: 'users_pkey',
+              columnName: 'id',
             }),
           },
         }),
@@ -183,13 +207,18 @@ describe('postgresqlSchemaDeparser', () => {
             id: aColumn({
               name: 'id',
               type: 'bigint',
-              primary: true,
               notNull: true,
             }),
             name: aColumn({
               name: 'name',
               type: 'varchar(100)',
               notNull: true,
+            }),
+          },
+          constraints: {
+            products_pkey: aPrimaryKeyConstraint({
+              name: 'products_pkey',
+              columnName: 'id',
             }),
           },
         }),
@@ -200,13 +229,13 @@ describe('postgresqlSchemaDeparser', () => {
 
     expect(result.errors).toHaveLength(0)
     expect(result.value).toMatchInlineSnapshot(`
-      "CREATE TABLE \"users\" (
-        \"id\" bigint PRIMARY KEY
+      "CREATE TABLE "users" (
+        "id" bigint PRIMARY KEY
       );
 
-      CREATE TABLE \"products\" (
-        \"id\" bigint PRIMARY KEY,
-        \"name\" varchar(100) NOT NULL
+      CREATE TABLE "products" (
+        "id" bigint PRIMARY KEY,
+        "name" varchar(100) NOT NULL
       );"
     `)
 
@@ -234,7 +263,6 @@ describe('postgresqlSchemaDeparser', () => {
               id: aColumn({
                 name: 'id',
                 type: 'bigint',
-                primary: true,
                 notNull: true,
               }),
               email: aColumn({
@@ -278,7 +306,6 @@ describe('postgresqlSchemaDeparser', () => {
               id: aColumn({
                 name: 'id',
                 type: 'bigint',
-                primary: true,
                 notNull: true,
               }),
               username: aColumn({
@@ -323,7 +350,6 @@ describe('postgresqlSchemaDeparser', () => {
               id: aColumn({
                 name: 'id',
                 type: 'bigint',
-                primary: true,
                 notNull: true,
               }),
               user_id: aColumn({
@@ -373,7 +399,6 @@ describe('postgresqlSchemaDeparser', () => {
               id: aColumn({
                 name: 'id',
                 type: 'bigint',
-                primary: true,
                 notNull: true,
               }),
               category_id: aColumn({ name: 'category_id', type: 'bigint' }),
@@ -446,7 +471,6 @@ describe('postgresqlSchemaDeparser', () => {
               id: aColumn({
                 name: 'id',
                 type: 'bigint',
-                primary: true,
                 notNull: true,
               }),
             },
@@ -457,7 +481,6 @@ describe('postgresqlSchemaDeparser', () => {
               id: aColumn({
                 name: 'id',
                 type: 'bigint',
-                primary: true,
                 notNull: true,
               }),
               user_id: aColumn({
@@ -508,7 +531,6 @@ describe('postgresqlSchemaDeparser', () => {
               id: aColumn({
                 name: 'id',
                 type: 'bigint',
-                primary: true,
                 notNull: true,
               }),
               email: aColumn({
@@ -551,7 +573,6 @@ describe('postgresqlSchemaDeparser', () => {
               id: aColumn({
                 name: 'id',
                 type: 'bigint',
-                primary: true,
                 notNull: true,
               }),
               price: aColumn({
@@ -597,7 +618,6 @@ describe('postgresqlSchemaDeparser', () => {
               id: aColumn({
                 name: 'id',
                 type: 'bigint',
-                primary: true,
                 notNull: true,
                 comment: 'User ID',
               }),
@@ -628,7 +648,6 @@ describe('postgresqlSchemaDeparser', () => {
               id: aColumn({
                 name: 'id',
                 type: 'bigint',
-                primary: true,
                 notNull: true,
               }),
               name: aColumn({
@@ -662,7 +681,6 @@ describe('postgresqlSchemaDeparser', () => {
               id: aColumn({
                 name: 'id',
                 type: 'bigint',
-                primary: true,
                 notNull: true,
               }),
               user_id: aColumn({
@@ -762,7 +780,7 @@ describe('postgresqlSchemaDeparser', () => {
               id: aColumn({
                 name: 'id',
                 type: 'bigint',
-                primary: true,
+
                 notNull: true,
               }),
               name: aColumn({
@@ -789,7 +807,7 @@ describe('postgresqlSchemaDeparser', () => {
               id: aColumn({
                 name: 'id',
                 type: 'bigint',
-                primary: true,
+
                 notNull: true,
               }),
               name: aColumn({
@@ -852,7 +870,7 @@ describe('postgresqlSchemaDeparser', () => {
               id: aColumn({
                 name: 'id',
                 type: 'bigint',
-                primary: true,
+
                 notNull: true,
               }),
             },

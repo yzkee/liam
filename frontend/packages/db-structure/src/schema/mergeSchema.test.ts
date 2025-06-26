@@ -8,8 +8,6 @@ describe('mergeSchemas', () => {
     type: 'integer',
     default: null,
     check: null,
-    primary: false,
-    unique: false,
     notNull: true,
     comment: null,
     ...overrides,
@@ -18,11 +16,17 @@ describe('mergeSchemas', () => {
   const createTable = (overrides: Partial<Table> = {}): Table => ({
     name: 'users',
     columns: {
-      id: createColumn({ name: 'id', primary: true }),
+      id: createColumn({ name: 'id' }),
     },
     comment: null,
     indexes: {},
-    constraints: {},
+    constraints: {
+      users_pkey: {
+        type: 'PRIMARY KEY',
+        name: 'users_pkey',
+        columnName: 'id',
+      },
+    },
     ...overrides,
   })
 
@@ -57,7 +61,7 @@ describe('mergeSchemas', () => {
           users: createTable({
             name: 'users',
             columns: {
-              id: createColumn({ name: 'id', primary: true }),
+              id: createColumn({ name: 'id' }),
               name: createColumn({ name: 'name', type: 'string' }),
               email: createColumn({ name: 'email', type: 'string' }),
             },
@@ -70,7 +74,7 @@ describe('mergeSchemas', () => {
           users: createTable({
             name: 'users',
             columns: {
-              id: createColumn({ name: 'id', primary: true }),
+              id: createColumn({ name: 'id' }),
               name: createColumn({ name: 'name', type: 'string' }),
               // email column is removed
             },
@@ -177,7 +181,7 @@ describe('mergeSchemas', () => {
           users: createTable({
             name: 'users',
             columns: {
-              id: createColumn({ name: 'id', primary: true }),
+              id: createColumn({ name: 'id' }),
               name: createColumn({ name: 'name', type: 'string' }),
               email: createColumn({ name: 'email', type: 'string' }),
               created_at: createColumn({
@@ -194,13 +198,12 @@ describe('mergeSchemas', () => {
           users: createTable({
             name: 'users',
             columns: {
-              id: createColumn({ name: 'id', primary: true }),
+              id: createColumn({ name: 'id' }),
               full_name: createColumn({ name: 'full_name', type: 'string' }), // renamed from name
               email: createColumn({
                 name: 'email',
-                type: 'string',
-                unique: true,
-              }), // added unique
+                type: 'text',
+              }), // type changed from string to text
               updated_at: createColumn({
                 name: 'updated_at',
                 type: 'timestamp',
@@ -220,7 +223,7 @@ describe('mergeSchemas', () => {
       expect(userColumns).toHaveProperty('updated_at')
       expect(userColumns).toHaveProperty('created_at') // Should be preserved from before
       expect(userColumns).toHaveProperty('name') // Should be preserved as removed column from before
-      expect(userColumns?.['email']?.unique).toBe(true) // Should use after schema properties
+      expect(userColumns?.['email']?.type).toBe('text') // Should use after schema properties
     })
   })
 })

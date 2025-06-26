@@ -18,10 +18,8 @@ describe('buildColumnDiffItem', () => {
     type: 'text',
     default: null,
     check: null,
-    primary: false,
     notNull: false,
     comment: null,
-    unique: false,
   }
 
   const createMockSchema = (

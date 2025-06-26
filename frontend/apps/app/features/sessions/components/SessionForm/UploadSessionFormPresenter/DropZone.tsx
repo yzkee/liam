@@ -80,13 +80,11 @@ export const DropZone: FC<Props> = ({
           Supported formats: .sql, .rb, .prisma, .json, .yaml
         </p>
         <span
-          className={styles.selectFileButton}
-          data-variant={
-            hasSelectedFile && isValidSchema
-              ? 'outline-secondary'
-              : 'solid-primary'
-          }
-          data-disabled={isPending}
+          className={clsx(
+            styles.selectFileButton,
+            hasSelectedFile && isValidSchema && styles.selectFileButtonOutline,
+            isPending && styles.selectFileButtonDisabled,
+          )}
         >
           Select File
         </span>

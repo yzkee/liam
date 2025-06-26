@@ -74,28 +74,26 @@
   border: 1px solid var(--button-primary-background);
 }
 
-.selectFileButton[data-variant='outline-secondary'] {
+.selectFileButton:hover:not(.selectFileButtonDisabled) {
+  background-color: var(--button-primary-background-hover);
+  border-color: var(--button-primary-background-hover);
+}
+
+.selectFileButtonOutline {
   background-color: transparent;
   color: var(--button-secondary-foreground);
   border: 1px solid var(--button-border);
 }
 
-.selectFileButton[data-disabled='true'] {
+.selectFileButtonOutline:hover:not(.selectFileButtonDisabled) {
+  background-color: var(--button-background-hover);
+}
+
+.selectFileButtonDisabled {
   color: var(--button-disabled-foreground);
   background-color: var(--button-disabled-background);
   border: 1px solid var(--button-border);
   cursor: not-allowed;
-}
-
-.selectFileButton:hover:not([data-disabled='true']) {
-  background-color: var(--button-primary-background-hover);
-  border-color: var(--button-primary-background-hover);
-}
-
-.selectFileButton[data-variant='outline-secondary']:hover:not(
-    [data-disabled='true']
-  ) {
-  background-color: var(--button-background-hover);
 }
 
 /* Icon container styles */

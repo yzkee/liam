@@ -11,34 +11,26 @@ export async function saveUserMessageNode(
 ): Promise<WorkflowState> {
   state.logger.log(`[${NODE_NAME}] Started`)
 
-  try {
-    // Save user message to database
-    const saveResult = await state.repositories.schema.createTimelineItem({
-      designSessionId: state.designSessionId,
-      content: state.userInput,
-      type: 'user',
-      userId: state.userId,
+  // Save user message to database
+  const saveResult = await state.repositories.schema.createTimelineItem({
+    designSessionId: state.designSessionId,
+    content: state.userInput,
+    type: 'user',
+    userId: state.userId,
+  })
+
+  if (!saveResult.success) {
+    state.logger.error(`[${NODE_NAME}] Failed to save user message:`, {
+      error: saveResult.error,
     })
-
-    if (!saveResult.success) {
-      state.logger.error(`[${NODE_NAME}] Failed to save user message:`, {
-        error: saveResult.error,
-      })
-      // Set error state to trigger transition to finalizeArtifacts
-      return {
-        ...state,
-        error: `Failed to save message: ${saveResult.error}`,
-      }
-    }
-
-    state.logger.log(`[${NODE_NAME}] Successfully saved user message`)
-
-    return state
-  } catch (error) {
-    state.logger.error(`[${NODE_NAME}] Unexpected error:`, { error })
+    // Set error state to trigger transition to finalizeArtifacts
     return {
       ...state,
-      error: `Unexpected error saving message: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      error: `Failed to save message: ${saveResult.error}`,
     }
   }
+
+  state.logger.log(`[${NODE_NAME}] Successfully saved user message`)
+
+  return state
 }

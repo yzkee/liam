@@ -24,6 +24,7 @@ jobs:
           private-key: ${{ secrets.CHANGESET_CI_TRIGGER_APP_PRIVATE_KEY }}
           permission-contents: write
           permission-pull-requests: write
+          permission-actions: write
 
       - name: Test token permissions
         run: |

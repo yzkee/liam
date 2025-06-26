@@ -7,7 +7,7 @@
   background-color: transparent;
   transition: all var(--default-animation-duration)
     var(--default-timing-function);
-  cursor: pointer;
+  cursor: inherit;
   min-height: 300px;
   display: flex;
   flex-direction: column;

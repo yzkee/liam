@@ -41,4 +41,4 @@ jobs:
         uses: anthropics/claude-code-action@8c08381496931f68f7918d3788c75ec258f2698b # beta
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          allowed_tools: "Bash(pnpm fmt:*),Bash(pnpm install),Bash(pnpm lint:*),Bash(pnpm test:*)"
+          allowed_tools: "Bash(pnpm fmt:*),Bash(pnpm install),Bash(pnpm lint:*),Bash(pnpm test:*),mcp__github__create_issue,mcp__github__add_issue_comment"

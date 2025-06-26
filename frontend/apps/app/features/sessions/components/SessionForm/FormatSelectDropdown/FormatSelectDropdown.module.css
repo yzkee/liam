@@ -58,6 +58,14 @@
   transition: background-color 0.2s ease;
 }
 
+.menuItem:hover {
+  background-color: var(--dropdown-background-hover);
+}
+
+.menuItemSelected {
+  background-color: var(--dropdown-background-active);
+}
+
 .menuContent {
   display: flex;
   align-items: center;

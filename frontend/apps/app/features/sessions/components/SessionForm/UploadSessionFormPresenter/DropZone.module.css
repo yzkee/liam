@@ -16,7 +16,8 @@
   position: relative;
 }
 
-.dropZone:hover {
+.dropZone:hover,
+.dropZone:focus-visible {
   background-color: var(--overlay-5);
 }
 
@@ -141,7 +142,8 @@
   align-items: center;
 }
 
-.dropZone:hover .extensionTag {
+.dropZone:hover .extensionTag,
+.dropZone:focus-visible .extensionTag {
   opacity: 1;
   transform: scale(1);
 }
@@ -154,7 +156,8 @@
   transition-delay: 0.05s;
 }
 
-.dropZone:hover .extensionTag:nth-child(1) {
+.dropZone:hover .extensionTag:nth-child(1),
+.dropZone:focus-visible .extensionTag:nth-child(1) {
   transform: scale(1);
 }
 

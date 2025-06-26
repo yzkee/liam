@@ -43,7 +43,11 @@ export const getDisplayFormat = (fileName: string): string => {
   return displayMap[extension] || 'postgresql'
 }
 
-const VALID_EXTENSIONS = ['sql', 'rb', 'prisma', 'json', 'yaml', 'yml'] as const
+// All file extensions that are accepted for upload (including both 'yaml' and 'yml')
+const ACCEPTED_FILE_EXTENSIONS = ['sql', 'rb', 'prisma', 'json', 'yaml', 'yml'] as const
+type AcceptedExtension = typeof ACCEPTED_FILE_EXTENSIONS[number]
+
+// Display-friendly extensions shown in the UI (normalized to show 'yaml' only)
 export const DISPLAY_EXTENSIONS = [
   'sql',
   'rb',
@@ -54,5 +58,5 @@ export const DISPLAY_EXTENSIONS = [
 
 export const isValidFileExtension = (fileName: string): boolean => {
   const extension = getFileExtension(fileName)
-  return (VALID_EXTENSIONS as readonly string[]).includes(extension)
+  return ACCEPTED_FILE_EXTENSIONS.some(ext => ext === extension)
 }

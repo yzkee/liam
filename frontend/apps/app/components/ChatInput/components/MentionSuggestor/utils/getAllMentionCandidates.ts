@@ -1,12 +1,12 @@
 import {
   type Column,
+  constraintsToRelationships,
   isPrimaryKey,
   type Relationships,
   type Schema,
   type Table,
   type Tables,
 } from '@liam-hq/db-structure'
-import { constraintsToRelationships } from '@liam-hq/db-structure'
 import type { MentionItem } from '../../../types'
 
 // Function to generate table candidates

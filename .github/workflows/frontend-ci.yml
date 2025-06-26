@@ -70,7 +70,7 @@ jobs:
         run: chmod +x ./scripts/extract-supabase-anon-key.sh ./scripts/extract-supabase-service-key.sh
       - run: ./scripts/extract-supabase-anon-key.sh
       - run: ./scripts/extract-supabase-service-key.sh
-      - run: pnpm test:turbo
+      - run: pnpm test
       - run: pnpm --filter @liam-hq/db supabase:gen
       - name: Check for diff in generated types and schema.sql
         env:

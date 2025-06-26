@@ -1,4 +1,8 @@
 import type { WorkflowState } from '../types'
+import {
+  createOrUpdateArtifact,
+  transformWorkflowStateToArtifact,
+} from '../utils/transformWorkflowStateToArtifact'
 
 const NODE_NAME = 'finalizeArtifactsNode'
 
@@ -10,6 +14,25 @@ export async function finalizeArtifactsNode(
   state: WorkflowState,
 ): Promise<WorkflowState> {
   state.logger.log(`[${NODE_NAME}] Started`)
+
+  // Save artifacts if we have the necessary data
+  if (state.analyzedRequirements || state.generatedUsecases) {
+    state.logger.log(`[${NODE_NAME}] Saving artifacts`)
+
+    const artifact = transformWorkflowStateToArtifact(state)
+    const artifactResult = await createOrUpdateArtifact(state, artifact)
+
+    if (artifactResult.success) {
+      state.logger.log(`[${NODE_NAME}] Artifacts saved successfully`)
+    } else {
+      state.logger.log(
+        `[${NODE_NAME}] Failed to save artifacts: ${artifactResult.error}`,
+      )
+      // Continue processing even if artifact saving fails
+    }
+  } else {
+    state.logger.log(`[${NODE_NAME}] No artifact data available to save`)
+  }
 
   let finalResponse: string
   let errorToReturn: string | undefined

@@ -101,7 +101,6 @@ function extractIdColumnAndConstraint(
     type: '',
     notNull: true,
     primary: true,
-    unique: true,
   })
   const idPrimaryKeyConstraint: PrimaryKeyConstraint = {
     type: 'PRIMARY KEY',
@@ -188,6 +187,8 @@ function processCallNode(
   const column = extractColumnDetails(node)
   if (column.name) {
     columns.push(column)
+    // TODO: Rails syntax like `t.text "mention", index: { unique: true }` should be supported
+    // to create unique indexes. Currently, only `t.index` method calls create indexes.
   }
 }
 
@@ -295,7 +296,7 @@ function extractColumnOptions(hashNode: KeywordHashNode, column: Column): void {
         }
         break
       case 'unique':
-        column.unique = value instanceof TrueNode
+        // Handle unique constraint creation in processCallNode instead
         break
       case 'comment':
         // @ts-expect-error: unescaped is defined as string but it is actually object

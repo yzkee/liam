@@ -11,10 +11,6 @@ function generateColumnDefinition(column: Column): string {
     definition += ' PRIMARY KEY'
   }
 
-  if (column.unique && !column.primary) {
-    definition += ' UNIQUE'
-  }
-
   if (column.notNull && !column.primary) {
     // PRIMARY KEY is automatically NOT NULL, so only add for non-primary columns
     definition += ' NOT NULL'

@@ -17,7 +17,6 @@ describe('postgresqlOperationDeparser', () => {
               type: 'bigint',
               primary: true,
               notNull: true,
-              unique: false,
               default: null,
               check: null,
               comment: 'User ID',
@@ -27,7 +26,6 @@ describe('postgresqlOperationDeparser', () => {
               type: 'varchar(255)',
               primary: false,
               notNull: true,
-              unique: true,
               default: null,
               check: null,
               comment: 'User email',
@@ -43,14 +41,14 @@ describe('postgresqlOperationDeparser', () => {
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
-        "CREATE TABLE \"users\" (
-          \"id\" bigint PRIMARY KEY,
-          \"email\" varchar(255) UNIQUE NOT NULL
+        "CREATE TABLE "users" (
+          "id" bigint PRIMARY KEY,
+          "email" varchar(255) NOT NULL
         );
 
-        COMMENT ON TABLE \"users\" IS 'User table';
-        COMMENT ON COLUMN \"users\".\"id\" IS 'User ID';
-        COMMENT ON COLUMN \"users\".\"email\" IS 'User email';"
+        COMMENT ON TABLE "users" IS 'User table';
+        COMMENT ON COLUMN "users"."id" IS 'User ID';
+        COMMENT ON COLUMN "users"."email" IS 'User email';"
       `)
 
       await expectGeneratedSQLToBeParseable(result.value)
@@ -68,7 +66,6 @@ describe('postgresqlOperationDeparser', () => {
               type: 'bigint',
               primary: true,
               notNull: true,
-              unique: false,
               default: null,
               check: null,
               comment: null,
@@ -78,7 +75,6 @@ describe('postgresqlOperationDeparser', () => {
               type: 'boolean',
               primary: false,
               notNull: true,
-              unique: false,
               default: true,
               check: null,
               comment: null,
@@ -88,7 +84,6 @@ describe('postgresqlOperationDeparser', () => {
               type: 'varchar(100)',
               primary: false,
               notNull: false,
-              unique: false,
               default: 'Default Title',
               check: null,
               comment: null,

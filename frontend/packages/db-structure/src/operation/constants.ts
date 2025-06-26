@@ -8,7 +8,6 @@ export const PATH_PATTERNS = {
   COLUMN_PRIMARY: /^\/tables\/([^/]+)\/columns\/([^/]+)\/primary$/,
   COLUMN_DEFAULT: /^\/tables\/([^/]+)\/columns\/([^/]+)\/default$/,
   COLUMN_CHECK: /^\/tables\/([^/]+)\/columns\/([^/]+)\/check$/,
-  COLUMN_UNIQUE: /^\/tables\/([^/]+)\/columns\/([^/]+)\/unique$/,
   COLUMN_NOT_NULL: /^\/tables\/([^/]+)\/columns\/([^/]+)\/notNull$/,
   INDEX_BASE: /^\/tables\/([^/]+)\/indexes\/([^/]+)$/,
   INDEX_NAME: /^\/tables\/([^/]+)\/indexes\/([^/]+)\/name$/,

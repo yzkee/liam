@@ -6,6 +6,7 @@ import {
   type Table,
   type Tables,
 } from '@liam-hq/db-structure'
+import { constraintsToRelationships } from '@liam-hq/db-structure'
 import type { MentionItem } from '../../../types'
 
 // Function to generate table candidates
@@ -96,9 +97,12 @@ const getRelationshipCandidates = (
 
 // Function to combine all candidates
 export const getAllMentionCandidates = (schema: Schema): MentionItem[] => {
+  const relationships = schema?.tables
+    ? constraintsToRelationships(schema.tables)
+    : undefined
   return [
     ...getTableCandidates(schema?.tables),
-    ...getColumnCandidates(schema?.tables, schema?.relationships),
-    ...getRelationshipCandidates(schema?.relationships),
+    ...getColumnCandidates(schema?.tables, relationships),
+    ...getRelationshipCandidates(relationships),
   ]
 }

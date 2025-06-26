@@ -5,7 +5,8 @@
   "main": "src/index.ts",
   "dependencies": {
     "@huggingface/transformers": "3.3.3",
-    "@liam-hq/db-structure": "workspace:*"
+    "@liam-hq/db-structure": "workspace:*",
+    "valibot": "1.1.0"
   },
   "devDependencies": {
     "@biomejs/biome": "2.0.0",

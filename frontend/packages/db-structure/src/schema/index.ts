@@ -4,14 +4,12 @@ export {
   aForeignKeyConstraint,
   anIndex,
   aPrimaryKeyConstraint,
-  aRelationship,
   aSchema,
   aTable,
   aUniqueConstraint,
 } from './factories.js'
 export { mergeSchemas } from './mergeSchema.js'
 export type {
-  Cardinality,
   CheckConstraint,
   Column,
   Columns,
@@ -22,8 +20,6 @@ export type {
   Index,
   Indexes,
   PrimaryKeyConstraint,
-  Relationship,
-  Relationships,
   Schema,
   Table,
   Tables,

@@ -174,19 +174,14 @@ describe(processor, () => {
     })
 
     // FIXME: `CONSTRAINT` statement is not supported yet
-    it.skip('foreign key (one-to-many)', async () => {
-      const keyName = 'fk_posts_user_id'
-      const { value } = await processor(/* sql */ `
+    it.skip('foreign key constraint in CREATE TABLE', async () => {
+      await processor(/* sql */ `
         CREATE TABLE posts (
           id BIGSERIAL PRIMARY KEY,
           user_id INT,
-          CONSTRAINT ${keyName} FOREIGN KEY (user_id) REFERENCES users(id)
+          CONSTRAINT fk_posts_user_id FOREIGN KEY (user_id) REFERENCES users(id)
         );
       `)
-
-      expect(value.relationships).toEqual(
-        parserTestCases['foreign key (one-to-many)'](keyName),
-      )
     })
 
     it('foreign key with omit key name', async () => {
@@ -197,11 +192,17 @@ describe(processor, () => {
         );
       `)
 
-      expect(value.relationships).toEqual(
-        parserTestCases['foreign key (one-to-many)'](
-          'users_id_to_posts_user_id',
-        ),
-      )
+      // TODO: This test demonstrates the current behavior where we use defaultRelationshipName
+      // instead of PostgreSQL's standard naming convention.
+      //
+      // Current behavior: 'users_id_to_posts_user_id' (using defaultRelationshipName)
+      // Ideal behavior: 'posts_user_id_fkey' (PostgreSQL standard)
+      //
+      // PostgreSQL automatically generates constraint names in the format:
+      // <table>_<column>_fkey when no explicit name is provided.
+      //
+      // We should consider migrating to PostgreSQL's standard naming convention
+      // in a future major version to better reflect actual database behavior.
       expect(value.tables['posts']?.constraints).toEqual({
         PRIMARY_id: {
           name: 'PRIMARY_id',
@@ -220,8 +221,7 @@ describe(processor, () => {
       })
     })
 
-    it('foreign key (one-to-one)', async () => {
-      const keyName = 'users_id_to_posts_user_id'
+    it('foreign key constraint (one-to-one)', async () => {
       const { value } = await processor(/* sql */ `
         CREATE TABLE posts (
           id BIGSERIAL PRIMARY KEY,
@@ -229,9 +229,6 @@ describe(processor, () => {
         );
       `)
 
-      expect(value.relationships).toEqual(
-        parserTestCases['foreign key (one-to-one)'](keyName),
-      )
       expect(value.tables['posts']?.constraints).toEqual({
         PRIMARY_id: {
           name: 'PRIMARY_id',
@@ -280,7 +277,7 @@ describe(processor, () => {
   })
 
   describe('should parse ALTER TABLE statement correctly', () => {
-    it('foreign key (one-to-many)', async () => {
+    it('foreign key constraint (one-to-many)', async () => {
       const keyName = 'fk_posts_user_id'
       const { value } = await processor(/* sql */ `
         CREATE TABLE posts (
@@ -292,9 +289,6 @@ describe(processor, () => {
         ADD CONSTRAINT ${keyName} FOREIGN KEY (user_id) REFERENCES users(id);
       `)
 
-      expect(value.relationships).toEqual(
-        parserTestCases['foreign key (one-to-many)'](keyName),
-      )
       expect(value.tables['posts']?.constraints).toEqual({
         PRIMARY_id: {
           name: 'PRIMARY_id',
@@ -313,8 +307,7 @@ describe(processor, () => {
       })
     })
 
-    it('foreign key (one-to-one)', async () => {
-      const keyName = 'users_id_to_posts_user_id'
+    it('foreign key constraint (one-to-one)', async () => {
       const { value } = await processor(/* sql */ `
         CREATE TABLE posts (
             id SERIAL PRIMARY KEY,
@@ -325,9 +318,6 @@ describe(processor, () => {
         ADD CONSTRAINT users_id_to_posts_user_id FOREIGN KEY (user_id) REFERENCES users(id);
       `)
 
-      expect(value.relationships).toEqual(
-        parserTestCases['foreign key (one-to-one)'](keyName),
-      )
       expect(value.tables['posts']?.constraints).toEqual({
         PRIMARY_id: {
           name: 'PRIMARY_id',
@@ -362,9 +352,6 @@ describe(processor, () => {
         ADD CONSTRAINT fk_posts_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON UPDATE RESTRICT ON DELETE CASCADE;
       `)
 
-      expect(value.relationships).toEqual(
-        parserTestCases['foreign key with action'],
-      )
       expect(value.tables['posts']?.constraints).toEqual({
         PRIMARY_id: {
           name: 'PRIMARY_id',
@@ -416,7 +403,7 @@ describe(processor, () => {
         CREATEe TABLE posts ();
       `)
 
-      const value = { tables: {}, relationships: {} }
+      const value = { tables: {} }
       const errors = [
         new UnexpectedTokenWarningError('syntax error at or near "CREATEe"'),
       ]

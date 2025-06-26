@@ -29,7 +29,6 @@ describe('buildColumnNotNullDiffItem', () => {
   ): Schema => {
     const schema: Schema = {
       tables: {},
-      relationships: {},
     }
 
     schema.tables[mockTableId] = {

@@ -22,11 +22,12 @@ export const UserMessage: FC<UserMessageProps> = ({
   timestamp,
   userName,
 }) => {
-  // Format timestamp if it exists
+  // Format timestamp if it exists - use explicit locale for consistency
   const formattedTime = timestamp
-    ? timestamp.toLocaleTimeString([], {
+    ? timestamp.toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit',
+        hour12: false,
       })
     : null
 

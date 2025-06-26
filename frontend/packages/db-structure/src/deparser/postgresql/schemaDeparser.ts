@@ -12,28 +12,16 @@ export const postgresqlSchemaDeparser: SchemaDeparser = (schema: Schema) => {
 
   // 1. Generate CREATE TABLE statements for each table
   for (const table of Object.values(schema.tables) as Table[]) {
-    try {
-      const createTableDDL = generateCreateTableStatement(table)
-      ddlStatements.push(createTableDDL)
-    } catch (error) {
-      errors.push({
-        message: `Failed to generate CREATE TABLE for ${table.name}: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      })
-    }
+    const createTableDDL = generateCreateTableStatement(table)
+    ddlStatements.push(createTableDDL)
   }
 
   // 2. Generate CREATE INDEX statements for all tables
   for (const table of Object.values(schema.tables) as Table[]) {
     const indexes = Object.values(table.indexes) as Index[]
     for (const index of indexes) {
-      try {
-        const createIndexDDL = generateCreateIndexStatement(table.name, index)
-        ddlStatements.push(createIndexDDL)
-      } catch (error) {
-        errors.push({
-          message: `Failed to generate CREATE INDEX for ${index.name} on table ${table.name}: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        })
-      }
+      const createIndexDDL = generateCreateIndexStatement(table.name, index)
+      ddlStatements.push(createIndexDDL)
     }
   }
 
@@ -44,22 +32,16 @@ export const postgresqlSchemaDeparser: SchemaDeparser = (schema: Schema) => {
   for (const table of Object.values(schema.tables) as Table[]) {
     const constraints = Object.values(table.constraints)
     for (const constraint of constraints) {
-      try {
-        const addConstraintDDL = generateAddConstraintStatement(
-          table.name,
-          constraint,
-        )
+      const addConstraintDDL = generateAddConstraintStatement(
+        table.name,
+        constraint,
+      )
 
-        // Separate foreign key constraints to add them last
-        if (constraint.type === 'FOREIGN KEY') {
-          foreignKeyStatements.push(addConstraintDDL)
-        } else {
-          ddlStatements.push(addConstraintDDL)
-        }
-      } catch (error) {
-        errors.push({
-          message: `Failed to generate ADD CONSTRAINT for ${constraint.name} on table ${table.name}: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        })
+      // Separate foreign key constraints to add them last
+      if (constraint.type === 'FOREIGN KEY') {
+        foreignKeyStatements.push(addConstraintDDL)
+      } else {
+        ddlStatements.push(addConstraintDDL)
       }
     }
   }

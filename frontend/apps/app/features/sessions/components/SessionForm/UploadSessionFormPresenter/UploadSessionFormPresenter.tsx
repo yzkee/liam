@@ -43,7 +43,7 @@ export const UploadSessionFormPresenter: FC<Props> = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [selectedFormat, setSelectedFormat] = useState<FormatType>('postgres')
+  const [selectedFormat, setSelectedFormat] = useState<FormatType | null>(null)
   const [textContent, setTextContent] = useState('')
   const [isValidSchema, setIsValidSchema] = useState(true)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -98,7 +98,7 @@ export const UploadSessionFormPresenter: FC<Props> = ({
 
   const handleReset = () => {
     setSelectedFile(null)
-    setSelectedFormat('postgres')
+    setSelectedFormat(null)
     setTextContent('')
     setIsValidSchema(true)
     clearAttachments()
@@ -120,7 +120,9 @@ export const UploadSessionFormPresenter: FC<Props> = ({
       )}
     >
       <form action={formAction}>
-        <input type="hidden" name="schemaFormat" value={selectedFormat} />
+        {selectedFile && isValidSchema && selectedFormat && (
+          <input type="hidden" name="schemaFormat" value={selectedFormat} />
+        )}
         <div className={styles.uploadSection}>
           <div className={styles.uploadContainer}>
             <DropZone
@@ -146,7 +148,7 @@ export const UploadSessionFormPresenter: FC<Props> = ({
               className={styles.hiddenFileInput}
               disabled={isPending}
             />
-            {selectedFile && (
+            {selectedFile && selectedFormat && (
               <SchemaFileSection
                 selectedFile={selectedFile}
                 isValidSchema={isValidSchema}
@@ -155,6 +157,7 @@ export const UploadSessionFormPresenter: FC<Props> = ({
                 onRemoveFile={() => {
                   setSelectedFile(null)
                   setIsValidSchema(true)
+                  setSelectedFormat(null)
                 }}
               />
             )}

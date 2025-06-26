@@ -1,3 +1,4 @@
+import { nanoid } from 'nanoid'
 import { useCallback, useState } from 'react'
 
 export interface FileAttachment {
@@ -11,7 +12,7 @@ export const useFileAttachments = () => {
 
   const handleFileSelect = useCallback((files: FileList) => {
     const newAttachments = Array.from(files).map((file) => ({
-      id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      id: nanoid(),
       url: URL.createObjectURL(file),
       name: file.name,
     }))

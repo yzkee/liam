@@ -1,0 +1,33 @@
+name: Debug GitHub App Token
+on:
+  push:
+    branches:
+      - fix-release-workflwo
+
+permissions:
+  actions: write
+  id-token: write
+  contents: write
+  packages: write
+  pull-requests: write
+  issues: read
+
+jobs:
+  test-app-token:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create GitHub App Token
+        uses: actions/create-github-app-token@df432ceedc7162793a195dd1713ff69aefc7379e # v2.0.6
+        id: app-token
+        with:
+          app-id: ${{ vars.CHANGESET_CI_TRIGGER_APP_ID }}
+          private-key: ${{ secrets.CHANGESET_CI_TRIGGER_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+          permission-actions: write
+
+      - name: Test token permissions
+        run: |
+          echo "Token created successfully"
+          echo "Token: ${{ steps.app-token.outputs.token }}" | head -c 20
+          echo "..."

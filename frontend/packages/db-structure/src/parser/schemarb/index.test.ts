@@ -149,16 +149,6 @@ describe(processor, () => {
       expect(value).toEqual(expected)
     })
 
-    it('unique', async () => {
-      const { value } = await processor(/* Ruby */ `
-        create_table "users" do |t|
-          t.text "mention", unique: true
-        end
-      `)
-
-      expect(value).toEqual(parserTestCases.unique)
-    })
-
     it('primary key as args', async () => {
       const { value } = await processor(/* Ruby */ `
         create_table "users", id: :bigint

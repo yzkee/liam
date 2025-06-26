@@ -187,40 +187,8 @@ function processCallNode(
   const column = extractColumnDetails(node)
   if (column.name) {
     columns.push(column)
-
-    // TODO: Current implementation handles `t.text "mention", unique: true` syntax,
-    // but this is not valid Rails syntax. The correct Rails syntax is:
-    // - `t.text "mention", index: { unique: true }`
-    // - `t.text "mention"` followed by `t.index :mention, unique: true`
-    //
-    // This should be refactored to:
-    // 1. Parse `index: { unique: true }` option to create a unique index
-    // 2. Remove support for direct `unique: true` on column definitions
-    // 3. Handle `t.index` method calls to create indexes
-    //
-    // For now, we convert `unique: true` to a UNIQUE constraint for compatibility
-    const argNodes = node.arguments_?.compactChildNodes() || []
-    for (const argNode of argNodes) {
-      if (argNode instanceof KeywordHashNode) {
-        for (const argElement of argNode.elements) {
-          if (argElement instanceof AssocNode) {
-            // @ts-expect-error: unescaped is defined as string but it is actually object
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            const key = argElement.key.unescaped.value
-            const value = argElement.value
-
-            if (key === 'unique' && value instanceof TrueNode) {
-              const uniqueConstraint: UniqueConstraint = {
-                type: 'UNIQUE',
-                name: `UNIQUE_${column.name}`,
-                columnName: column.name,
-              }
-              constraints.push(uniqueConstraint)
-            }
-          }
-        }
-      }
-    }
+    // TODO: Rails syntax like `t.text "mention", index: { unique: true }` should be supported
+    // to create unique indexes. Currently, only `t.index` method calls create indexes.
   }
 }
 

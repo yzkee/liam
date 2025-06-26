@@ -14,7 +14,6 @@ import {
   columnNameSchema,
   columnNotNullSchema,
   columnSchema,
-  columnUniqueSchema,
   commentSchema,
   constraintNameSchema,
   constraintSchema,
@@ -107,16 +106,6 @@ const columnCheckDiffItemSchema = object({
   columnId: string(),
 })
 export type ColumnCheckDiffItem = InferOutput<typeof columnCheckDiffItemSchema>
-
-const columnUniqueDiffItemSchema = object({
-  ...baseSchemaDiffItemSchema.entries,
-  kind: literal('column-unique'),
-  data: columnUniqueSchema,
-  columnId: string(),
-})
-export type ColumnUniqueDiffItem = InferOutput<
-  typeof columnUniqueDiffItemSchema
->
 
 const columnNotNullDiffItemSchema = object({
   ...baseSchemaDiffItemSchema.entries,
@@ -263,7 +252,6 @@ export const columnRelatedDiffItemSchema = union([
   columnCommentDiffItemSchema,
   columnDefaultDiffItemSchema,
   columnCheckDiffItemSchema,
-  columnUniqueDiffItemSchema,
   columnNotNullDiffItemSchema,
 ])
 export type ColumnRelatedDiffItem = InferOutput<

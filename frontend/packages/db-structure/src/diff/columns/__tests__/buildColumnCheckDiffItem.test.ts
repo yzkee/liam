@@ -25,7 +25,6 @@ describe('buildColumnCheckDiffItem', () => {
             check: null,
             notNull: false,
             comment: null,
-            unique: false,
           },
         },
         comment: null,

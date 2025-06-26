@@ -24,7 +24,6 @@ describe(processor, () => {
               name: 'id',
               type: 'bigserial',
               notNull: true,
-              unique: true,
             }),
             ...override?.columns,
           },
@@ -149,16 +148,6 @@ describe(processor, () => {
       expect(value).toEqual(expected)
     })
 
-    it('unique', async () => {
-      const { value } = await processor(/* Ruby */ `
-        create_table "users" do |t|
-          t.text "mention", unique: true
-        end
-      `)
-
-      expect(value).toEqual(parserTestCases.unique)
-    })
-
     it('primary key as args', async () => {
       const { value } = await processor(/* Ruby */ `
         create_table "users", id: :bigint
@@ -170,7 +159,6 @@ describe(processor, () => {
             name: 'id',
             type: 'bigint',
             notNull: true,
-            unique: true,
           }),
         },
       })
@@ -233,7 +221,6 @@ describe(processor, () => {
                 name: 'id',
                 type: 'bigserial',
                 notNull: true,
-                unique: true,
               }),
               email: aColumn({
                 name: 'email',

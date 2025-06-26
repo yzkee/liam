@@ -54,7 +54,6 @@ describe('Chat Workflow', () => {
             type: 'integer',
             default: null,
             check: null,
-            unique: false,
             notNull: true,
             comment: null,
           },
@@ -63,7 +62,6 @@ describe('Chat Workflow', () => {
             type: 'varchar',
             default: null,
             check: null,
-            unique: false,
             notNull: true,
             comment: null,
           },
@@ -72,7 +70,6 @@ describe('Chat Workflow', () => {
             type: 'varchar',
             default: null,
             check: null,
-            unique: false,
             notNull: false,
             comment: null,
           },
@@ -292,7 +289,7 @@ describe('Chat Workflow', () => {
       expect(mockSchemaRepository.createVersion).not.toHaveBeenCalled()
     })
 
-    it.skip('should handle schema update failure', async () => {
+    it('should handle schema update failure', async () => {
       const structuredResponse = {
         message: 'Attempted to add created_at column',
         schemaChanges: [

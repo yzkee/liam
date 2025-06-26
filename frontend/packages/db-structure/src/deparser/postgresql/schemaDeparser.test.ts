@@ -14,7 +14,6 @@ describe('postgresqlSchemaDeparser', () => {
               name: 'id',
               type: 'bigint',
               notNull: true,
-              unique: false,
               default: null,
               check: null,
               comment: null,
@@ -23,7 +22,6 @@ describe('postgresqlSchemaDeparser', () => {
               name: 'email',
               type: 'varchar(255)',
               notNull: true,
-              unique: true,
               default: null,
               check: null,
               comment: null,
@@ -48,7 +46,7 @@ describe('postgresqlSchemaDeparser', () => {
     expect(result.value).toMatchInlineSnapshot(`
       "CREATE TABLE "users" (
         "id" bigint PRIMARY KEY,
-        "email" varchar(255) UNIQUE NOT NULL
+        "email" varchar(255) NOT NULL
       );"
     `)
 
@@ -65,7 +63,6 @@ describe('postgresqlSchemaDeparser', () => {
               name: 'id',
               type: 'bigint',
               notNull: true,
-              unique: false,
               default: null,
               check: null,
               comment: 'Product ID',
@@ -109,7 +106,6 @@ describe('postgresqlSchemaDeparser', () => {
               name: 'id',
               type: 'bigint',
               notNull: true,
-              unique: false,
               default: null,
               check: null,
               comment: null,
@@ -118,7 +114,6 @@ describe('postgresqlSchemaDeparser', () => {
               name: 'enabled',
               type: 'boolean',
               notNull: true,
-              unique: false,
               default: true,
               check: null,
               comment: null,
@@ -127,7 +122,6 @@ describe('postgresqlSchemaDeparser', () => {
               name: 'count',
               type: 'integer',
               notNull: false,
-              unique: false,
               default: 0,
               check: null,
               comment: null,
@@ -136,7 +130,6 @@ describe('postgresqlSchemaDeparser', () => {
               name: 'title',
               type: 'varchar(50)',
               notNull: false,
-              unique: false,
               default: 'Default Title',
               check: null,
               comment: null,
@@ -180,7 +173,6 @@ describe('postgresqlSchemaDeparser', () => {
               name: 'id',
               type: 'bigint',
               notNull: true,
-              unique: false,
               default: null,
               check: null,
               comment: "Column with 'quotes' in comment",
@@ -226,7 +218,6 @@ describe('postgresqlSchemaDeparser', () => {
               name: 'id',
               type: 'bigint',
               notNull: true,
-              unique: false,
               default: null,
               check: null,
               comment: null,
@@ -249,7 +240,6 @@ describe('postgresqlSchemaDeparser', () => {
               name: 'id',
               type: 'bigint',
               notNull: true,
-              unique: false,
               default: null,
               check: null,
               comment: null,
@@ -258,7 +248,6 @@ describe('postgresqlSchemaDeparser', () => {
               name: 'name',
               type: 'varchar(100)',
               notNull: true,
-              unique: false,
               default: null,
               check: null,
               comment: null,

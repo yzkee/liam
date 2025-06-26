@@ -16,7 +16,6 @@ describe('postgresqlOperationDeparser', () => {
               name: 'id',
               type: 'bigint',
               notNull: true,
-              unique: false,
               default: null,
               check: null,
               comment: 'User ID',
@@ -25,7 +24,6 @@ describe('postgresqlOperationDeparser', () => {
               name: 'email',
               type: 'varchar(255)',
               notNull: true,
-              unique: true,
               default: null,
               check: null,
               comment: 'User email',
@@ -49,7 +47,7 @@ describe('postgresqlOperationDeparser', () => {
       expect(result.value).toMatchInlineSnapshot(`
         "CREATE TABLE "users" (
           "id" bigint PRIMARY KEY,
-          "email" varchar(255) UNIQUE NOT NULL
+          "email" varchar(255) NOT NULL
         );
 
         COMMENT ON TABLE "users" IS 'User table';
@@ -71,7 +69,6 @@ describe('postgresqlOperationDeparser', () => {
               name: 'id',
               type: 'bigint',
               notNull: true,
-              unique: false,
               default: null,
               check: null,
               comment: null,
@@ -80,7 +77,6 @@ describe('postgresqlOperationDeparser', () => {
               name: 'enabled',
               type: 'boolean',
               notNull: true,
-              unique: false,
               default: true,
               check: null,
               comment: null,
@@ -89,7 +85,6 @@ describe('postgresqlOperationDeparser', () => {
               name: 'title',
               type: 'varchar(100)',
               notNull: false,
-              unique: false,
               default: 'Default Title',
               check: null,
               comment: null,

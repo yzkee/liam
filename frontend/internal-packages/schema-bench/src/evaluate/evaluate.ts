@@ -18,8 +18,8 @@ import type {
 } from '@liam-hq/db-structure'
 import { foreignKeyConstraintSchema } from '@liam-hq/db-structure'
 import * as v from 'valibot'
-import { nameSimilarity } from '../nameSimilarity'
-import { wordOverlapMatch } from '../wordOverlapMatch'
+import { nameSimilarity } from '../nameSimilarity/nameSimilarity.ts'
+import { wordOverlapMatch } from '../wordOverlapMatch/wordOverlapMatch.ts'
 
 // Small epsilon value for numerical comparisons
 const EPSILON = 1e-5

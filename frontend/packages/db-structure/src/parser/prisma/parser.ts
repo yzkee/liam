@@ -79,7 +79,6 @@ function processModelField(
     ),
     default: defaultValue,
     notNull: field.isRequired,
-    unique: field.isId || field.isUnique,
     comment: field.documentation ?? null,
     check: null,
   }
@@ -541,7 +540,6 @@ function createManyToManyJoinTable(
         type: table_A_ColumnType,
         default: null,
         notNull: true,
-        unique: false,
         comment: null,
         check: null,
       },
@@ -550,7 +548,6 @@ function createManyToManyJoinTable(
         type: table_B_ColumnType,
         default: null,
         notNull: true,
-        unique: false,
         comment: null,
         check: null,
       },

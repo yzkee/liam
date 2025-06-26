@@ -16,15 +16,14 @@ describe(_processor, () => {
               type: 'bigserial',
               default: 'autoincrement()',
               notNull: true,
-              unique: true,
             }),
             ...override?.columns,
           },
           indexes: {
             users_pkey: anIndex({
               name: 'users_pkey',
-              unique: true,
               columns: ['id'],
+              unique: true,
             }),
             ...override?.indexes,
           },
@@ -196,24 +195,23 @@ describe(_processor, () => {
             name: 'mention',
             type: 'text',
             notNull: false,
-            unique: true,
           }),
         },
         indexes: {
           users_pkey: anIndex({
             name: 'users_pkey',
-            unique: true,
             columns: ['id'],
+            unique: true,
           }),
           users_id_mention_key: anIndex({
             name: 'users_id_mention_key',
-            unique: true,
             columns: ['id', 'mention'],
+            unique: true,
           }),
           users_mention_key: anIndex({
             name: 'users_mention_key',
-            unique: true,
             columns: ['mention'],
+            unique: true,
           }),
         },
         constraints: {
@@ -363,14 +361,13 @@ describe(_processor, () => {
             name: 'email',
             type: 'text',
             notNull: true,
-            unique: true,
           }),
         },
         indexes: {
           users_email_key: anIndex({
             name: 'users_email_key',
-            unique: true,
             columns: ['email'],
+            unique: true,
           }),
         },
         constraints: {
@@ -399,7 +396,6 @@ describe(_processor, () => {
             name: 'email',
             type: 'text',
             notNull: true,
-            unique: false,
           }),
         },
         constraints: {
@@ -440,13 +436,11 @@ describe(_processor, () => {
                 type: 'bigserial',
                 default: 'autoincrement()',
                 notNull: true,
-                unique: true,
               }),
               raw_email_address: aColumn({
                 name: 'raw_email_address',
                 type: 'text',
                 notNull: true,
-                unique: true,
               }),
             },
             indexes: {
@@ -455,12 +449,11 @@ describe(_processor, () => {
                 columns: ['_id'],
                 unique: true,
               }),
-              users_raw_email_address_key: {
+              users_raw_email_address_key: anIndex({
                 name: 'users_raw_email_address_key',
                 columns: ['raw_email_address'],
                 unique: true,
-                type: '',
-              },
+              }),
             },
             constraints: {
               PRIMARY__id: {
@@ -483,20 +476,18 @@ describe(_processor, () => {
                 type: 'bigserial',
                 default: 'autoincrement()',
                 notNull: true,
-                unique: true,
               }),
               raw_user_id: aColumn({
                 name: 'raw_user_id',
                 type: 'bigint',
                 notNull: true,
-                unique: false,
               }),
             },
             indexes: {
               posts_pkey: anIndex({
                 name: 'posts_pkey',
-                unique: true,
                 columns: ['id'],
+                unique: true,
               }),
             },
             constraints: {
@@ -528,15 +519,15 @@ describe(_processor, () => {
           posts Post[]
           email String  @unique @map("raw_email_address")
           role  Role    @default(USER)
-    
+
           @@map("users")
         }
-    
+
         model Post {
           id     Int   @id @default(autoincrement())
           user   User  @relation(fields: [user_id], references: [id])
           user_id Int   @map("raw_user_id")
-    
+
           @@map("posts")
         }
 
@@ -556,13 +547,11 @@ describe(_processor, () => {
                 type: 'serial',
                 default: 'autoincrement()',
                 notNull: true,
-                unique: true,
               }),
               raw_email_address: aColumn({
                 name: 'raw_email_address',
                 type: 'text',
                 notNull: true,
-                unique: true,
               }),
               role: aColumn({
                 name: 'role',
@@ -604,13 +593,11 @@ describe(_processor, () => {
                 type: 'serial',
                 default: 'autoincrement()',
                 notNull: true,
-                unique: true,
               }),
               raw_user_id: aColumn({
                 name: 'raw_user_id',
                 type: 'integer',
                 notNull: true,
-                unique: false,
               }),
             },
             indexes: {
@@ -667,7 +654,6 @@ describe(_processor, () => {
                 type: 'serial',
                 default: 'autoincrement()',
                 notNull: true,
-                unique: true,
               }),
               title: aColumn({
                 name: 'title',
@@ -698,7 +684,6 @@ describe(_processor, () => {
                 type: 'serial',
                 default: 'autoincrement()',
                 notNull: true,
-                unique: true,
               }),
               name: aColumn({
                 name: 'name',

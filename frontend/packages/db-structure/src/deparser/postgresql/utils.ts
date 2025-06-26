@@ -10,10 +10,6 @@ function generateColumnDefinition(
   let definition = `${escapeIdentifier(column.name)} ${column.type}`
 
   // Add constraints (following PostgreSQL common order)
-  if (column.unique) {
-    definition += ' UNIQUE'
-  }
-
   // Don't add NOT NULL if this will be a PRIMARY KEY
   if (column.notNull && !isPrimaryKey) {
     definition += ' NOT NULL'

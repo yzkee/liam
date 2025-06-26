@@ -9,8 +9,6 @@ export const columnDefaultSchema = v.nullable(
 
 export const columnCheckSchema = v.nullable(v.string())
 
-export const columnUniqueSchema = v.boolean()
-
 export const columnNotNullSchema = v.boolean()
 
 export const tableNameSchema = v.string()
@@ -24,7 +22,6 @@ export const columnSchema = v.object({
   type: v.string(),
   default: columnDefaultSchema,
   check: columnCheckSchema,
-  unique: columnUniqueSchema,
   notNull: columnNotNullSchema,
   comment: commentSchema,
 })

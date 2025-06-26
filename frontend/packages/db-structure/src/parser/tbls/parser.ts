@@ -102,7 +102,7 @@ function processColumns(
     default?: string | null
     comment?: string | null
   }>,
-  uniqueColumnNames: Set<string>,
+  _uniqueColumnNames: Set<string>,
 ): Columns {
   const columns: Columns = {}
 
@@ -115,7 +115,6 @@ function processColumns(
       notNull: !tblsColumn.nullable,
       default: defaultValue,
       comment: tblsColumn.comment ?? null,
-      unique: uniqueColumnNames.has(tblsColumn.name),
     })
   }
 

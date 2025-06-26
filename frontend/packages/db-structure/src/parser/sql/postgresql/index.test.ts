@@ -16,7 +16,6 @@ describe(processor, () => {
               name: 'id',
               type: 'bigserial',
               notNull: true,
-              unique: true,
             }),
             ...override?.columns,
           },
@@ -130,7 +129,6 @@ describe(processor, () => {
             mention: aColumn({
               name: 'mention',
               type: 'text',
-              unique: true,
             }),
           },
           constraints: {

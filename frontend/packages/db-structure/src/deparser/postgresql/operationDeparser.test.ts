@@ -46,13 +46,15 @@ describe('postgresqlOperationDeparser', () => {
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
         "CREATE TABLE "users" (
-          "id" bigint PRIMARY KEY,
+          "id" bigint NOT NULL,
           "email" varchar(255) NOT NULL
         );
 
         COMMENT ON TABLE "users" IS 'User table';
         COMMENT ON COLUMN "users"."id" IS 'User ID';
-        COMMENT ON COLUMN "users"."email" IS 'User email';"
+        COMMENT ON COLUMN "users"."email" IS 'User email';
+
+        ALTER TABLE "users" ADD CONSTRAINT "users_pkey" PRIMARY KEY ("id");"
       `)
 
       await expectGeneratedSQLToBeParseable(result.value)
@@ -107,10 +109,12 @@ describe('postgresqlOperationDeparser', () => {
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
         "CREATE TABLE "settings" (
-          "id" bigint PRIMARY KEY,
+          "id" bigint NOT NULL,
           "enabled" boolean NOT NULL DEFAULT TRUE,
           "title" varchar(100) DEFAULT 'Default Title'
-        );"
+        );
+
+        ALTER TABLE "settings" ADD CONSTRAINT "settings_pkey" PRIMARY KEY ("id");"
       `)
 
       await expectGeneratedSQLToBeParseable(result.value)

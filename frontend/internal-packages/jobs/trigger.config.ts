@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { sentryEsbuildPlugin } from '@sentry/esbuild-plugin'
@@ -49,8 +50,51 @@ const findPrismaWasmFiles = () => {
   return files
 }
 
+// Find PGLite files using glob patterns relative to the project root
+const findPgliteFiles = () => {
+  const patterns = [
+    // Look for locally copied files first (from postinstall script)
+    'frontend/internal-packages/jobs/pglite.data',
+    'frontend/internal-packages/jobs/pglite.wasm',
+    // Look in workspace packages
+    'frontend/packages/pglite-server/node_modules/@electric-sql/pglite/dist/pglite.data',
+    'frontend/packages/pglite-server/node_modules/@electric-sql/pglite/dist/pglite.wasm',
+  ]
+
+  const files: string[] = []
+
+  for (const pattern of patterns) {
+    const found = globSync(pattern, { cwd: rootDir, absolute: true })
+    files.push(...found)
+  }
+
+  console.info('Found PGLite files:', files)
+
+  // If no files found, try to find them in the current jobs directory
+  if (files.length === 0) {
+    const localFiles = [
+      resolve(__dirname, 'pglite.data'),
+      resolve(__dirname, 'pglite.wasm'),
+    ]
+
+    // Use synchronous fs check
+    for (const file of localFiles) {
+      try {
+        if (existsSync(file)) {
+          files.push(file)
+        }
+      } catch (error) {
+        console.warn(`Could not check file existence: ${file}`, error)
+      }
+    }
+  }
+
+  return files
+}
+
 // Find all WASM files and make paths relative for additionalFiles
 const prismaWasmFiles = findPrismaWasmFiles()
+const pgliteFiles = findPgliteFiles()
 
 export default defineConfig({
   project: triggerProjectId,
@@ -80,13 +124,13 @@ export default defineConfig({
         }),
         { placement: 'last', target: 'deploy' },
       ),
-      // Add all necessary WASM files
+      // Add all necessary WASM files and PGLite files
       additionalFiles({
-        files: ['prism.wasm', ...prismaWasmFiles],
+        files: ['prism.wasm', ...prismaWasmFiles, ...pgliteFiles],
       }),
       // Sync Vercel environment variables
       syncVercelEnvVars({
-        accessToken: process.env.VERCEL_ACCESS_TOKEN,
+        vercelAccessToken: process.env.VERCEL_ACCESS_TOKEN,
         projectId: process.env.VERCEL_PROJECT_ID,
       }),
     ],
@@ -101,6 +145,7 @@ export default defineConfig({
       '@prisma/internals',
       '@prisma/prisma-schema-wasm',
       '@prisma/schema-files-loader',
+      '@electric-sql/pglite',
     ],
   },
   init: async () => {
@@ -118,7 +163,7 @@ export default defineConfig({
     Sentry.captureException(error, {
       extra: {
         taskId: task,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       },
     })
   },

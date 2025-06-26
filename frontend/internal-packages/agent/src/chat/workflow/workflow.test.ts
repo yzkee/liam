@@ -17,6 +17,17 @@ vi.mock('../../../utils/convertSchemaToText', () => ({
   convertSchemaToText: vi.fn(() => 'Mocked schema text'),
 }))
 
+// Mock the pglite-server
+vi.mock('@liam-hq/pglite-server', () => ({
+  executeQuery: vi.fn().mockResolvedValue([
+    {
+      success: true,
+      sql: 'CREATE TABLE test (id INTEGER);',
+      result: { rows: [], columns: [] },
+    },
+  ]),
+}))
+
 describe('Chat Workflow', () => {
   let mockSchemaData: Schema
   let mockAgent: {
@@ -74,7 +85,6 @@ describe('Chat Workflow', () => {
         constraints: {},
       },
     },
-    relationships: {},
   })
 
   // Helper function to create base workflow state
@@ -279,7 +289,7 @@ describe('Chat Workflow', () => {
       expect(mockSchemaRepository.createVersion).not.toHaveBeenCalled()
     })
 
-    it.skip('should handle schema update failure', async () => {
+    it('should handle schema update failure', async () => {
       const structuredResponse = {
         message: 'Attempted to add created_at column',
         schemaChanges: [

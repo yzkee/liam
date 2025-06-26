@@ -19,8 +19,6 @@ export const tableNameSchema = v.string()
 
 export const commentSchema = v.nullable(v.string())
 
-const relationshipNameSchema = v.string()
-
 export const constraintNameSchema = v.string()
 
 export const columnSchema = v.object({
@@ -77,7 +75,7 @@ export type PrimaryKeyConstraint = v.InferOutput<
   typeof primaryKeyConstraintSchema
 >
 
-const foreignKeyConstraintSchema = v.object({
+export const foreignKeyConstraintSchema = v.object({
   type: v.literal('FOREIGN KEY'),
   name: constraintNameSchema,
   columnName: columnNameSchema,
@@ -126,31 +124,12 @@ export const tableSchema = v.object({
 })
 export type Table = v.InferOutput<typeof tableSchema>
 
-const cardinalitySchema = v.picklist(['ONE_TO_ONE', 'ONE_TO_MANY'])
-export type Cardinality = v.InferOutput<typeof cardinalitySchema>
-
-const relationshipSchema = v.object({
-  name: relationshipNameSchema,
-  primaryTableName: tableNameSchema,
-  primaryColumnName: columnNameSchema,
-  foreignTableName: tableNameSchema,
-  foreignColumnName: columnNameSchema,
-  cardinality: cardinalitySchema,
-  updateConstraint: foreignKeyConstraintReferenceOptionSchema,
-  deleteConstraint: foreignKeyConstraintReferenceOptionSchema,
-})
-export type Relationship = v.InferOutput<typeof relationshipSchema>
-
 const tablesSchema = v.record(tableNameSchema, tableSchema)
 export type Tables = v.InferOutput<typeof tablesSchema>
-
-const relationshipsSchema = v.record(relationshipNameSchema, relationshipSchema)
-export type Relationships = v.InferOutput<typeof relationshipsSchema>
 
 // Schema definition for the entire database structure
 export const schemaSchema = v.object({
   tables: tablesSchema,
-  relationships: relationshipsSchema,
 })
 
 export type Schema = v.InferOutput<typeof schemaSchema>

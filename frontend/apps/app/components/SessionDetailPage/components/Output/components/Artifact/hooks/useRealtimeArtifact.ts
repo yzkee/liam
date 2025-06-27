@@ -41,9 +41,6 @@ export function useRealtimeArtifact(designSessionId: string) {
       setLoading(false)
       return
     }
-    // …rest of the logic
-  }, [designSessionId, handleError])
-    }
 
     if (!data) {
       setArtifact(null)

@@ -23,7 +23,6 @@ describe('buildColumnCommentDiffItem', () => {
             type: 'text',
             default: null,
             check: null,
-            primary: false,
             notNull: false,
             comment: null,
           },

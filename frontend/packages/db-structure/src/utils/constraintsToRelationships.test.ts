@@ -11,7 +11,6 @@ describe('constraintsToRelationships', () => {
           id: aColumn({
             name: 'id',
             type: 'bigint',
-            primary: true,
             notNull: true,
           }),
           name: aColumn({
@@ -27,7 +26,6 @@ describe('constraintsToRelationships', () => {
           id: aColumn({
             name: 'id',
             type: 'bigint',
-            primary: true,
             notNull: true,
           }),
           user_id: aColumn({
@@ -74,7 +72,6 @@ describe('constraintsToRelationships', () => {
           id: aColumn({
             name: 'id',
             type: 'bigint',
-            primary: true,
             notNull: true,
           }),
         },
@@ -85,7 +82,6 @@ describe('constraintsToRelationships', () => {
           id: aColumn({
             name: 'id',
             type: 'bigint',
-            primary: true,
             notNull: true,
           }),
           user_id: aColumn({
@@ -126,7 +122,6 @@ describe('constraintsToRelationships', () => {
           id: aColumn({
             name: 'id',
             type: 'bigint',
-            primary: true,
             notNull: true,
           }),
         },
@@ -137,7 +132,6 @@ describe('constraintsToRelationships', () => {
           id: aColumn({
             name: 'id',
             type: 'bigint',
-            primary: true,
             notNull: true,
           }),
           user_id: aColumn({
@@ -178,7 +172,6 @@ describe('constraintsToRelationships', () => {
           id: aColumn({
             name: 'id',
             type: 'bigint',
-            primary: true,
             notNull: true,
           }),
         },
@@ -189,7 +182,6 @@ describe('constraintsToRelationships', () => {
           id: aColumn({
             name: 'id',
             type: 'bigint',
-            primary: true,
             notNull: true,
           }),
         },
@@ -200,7 +192,6 @@ describe('constraintsToRelationships', () => {
           id: aColumn({
             name: 'id',
             type: 'bigint',
-            primary: true,
             notNull: true,
           }),
           user_id: aColumn({
@@ -253,7 +244,6 @@ describe('constraintsToRelationships', () => {
           id: aColumn({
             name: 'id',
             type: 'bigint',
-            primary: true,
             notNull: true,
           }),
           email: aColumn({

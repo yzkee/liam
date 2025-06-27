@@ -8,7 +8,6 @@ describe('mergeSchemas', () => {
     type: 'integer',
     default: null,
     check: null,
-    primary: false,
     notNull: true,
     comment: null,
     ...overrides,
@@ -17,11 +16,17 @@ describe('mergeSchemas', () => {
   const createTable = (overrides: Partial<Table> = {}): Table => ({
     name: 'users',
     columns: {
-      id: createColumn({ name: 'id', primary: true }),
+      id: createColumn({ name: 'id' }),
     },
     comment: null,
     indexes: {},
-    constraints: {},
+    constraints: {
+      users_pkey: {
+        type: 'PRIMARY KEY',
+        name: 'users_pkey',
+        columnName: 'id',
+      },
+    },
     ...overrides,
   })
 
@@ -56,7 +61,7 @@ describe('mergeSchemas', () => {
           users: createTable({
             name: 'users',
             columns: {
-              id: createColumn({ name: 'id', primary: true }),
+              id: createColumn({ name: 'id' }),
               name: createColumn({ name: 'name', type: 'string' }),
               email: createColumn({ name: 'email', type: 'string' }),
             },
@@ -69,7 +74,7 @@ describe('mergeSchemas', () => {
           users: createTable({
             name: 'users',
             columns: {
-              id: createColumn({ name: 'id', primary: true }),
+              id: createColumn({ name: 'id' }),
               name: createColumn({ name: 'name', type: 'string' }),
               // email column is removed
             },
@@ -176,7 +181,7 @@ describe('mergeSchemas', () => {
           users: createTable({
             name: 'users',
             columns: {
-              id: createColumn({ name: 'id', primary: true }),
+              id: createColumn({ name: 'id' }),
               name: createColumn({ name: 'name', type: 'string' }),
               email: createColumn({ name: 'email', type: 'string' }),
               created_at: createColumn({
@@ -193,7 +198,7 @@ describe('mergeSchemas', () => {
           users: createTable({
             name: 'users',
             columns: {
-              id: createColumn({ name: 'id', primary: true }),
+              id: createColumn({ name: 'id' }),
               full_name: createColumn({ name: 'full_name', type: 'string' }), // renamed from name
               email: createColumn({
                 name: 'email',

@@ -54,7 +54,6 @@ describe('Chat Workflow', () => {
             type: 'integer',
             default: null,
             check: null,
-            primary: true,
             notNull: true,
             comment: null,
           },
@@ -63,7 +62,6 @@ describe('Chat Workflow', () => {
             type: 'varchar',
             default: null,
             check: null,
-            primary: false,
             notNull: true,
             comment: null,
           },
@@ -72,14 +70,19 @@ describe('Chat Workflow', () => {
             type: 'varchar',
             default: null,
             check: null,
-            primary: false,
             notNull: false,
             comment: null,
           },
         },
         comment: null,
         indexes: {},
-        constraints: {},
+        constraints: {
+          users_pkey: {
+            type: 'PRIMARY KEY',
+            name: 'users_pkey',
+            columnName: 'id',
+          },
+        },
       },
     },
   })
@@ -136,6 +139,7 @@ describe('Chat Workflow', () => {
       createArtifact: vi.fn(),
       updateArtifact: vi.fn(),
       getArtifact: vi.fn(),
+      updateTimelineItem: vi.fn(),
     } as SchemaRepository
 
     mockRepositories = {
@@ -210,6 +214,7 @@ describe('Chat Workflow', () => {
         organization_id: 'test-org-id',
         design_session_id: 'test-design-session-id',
         building_schema_version_id: null,
+        progress: null,
       },
     })
 

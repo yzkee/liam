@@ -13,7 +13,6 @@ import {
   columnDefaultSchema,
   columnNameSchema,
   columnNotNullSchema,
-  columnPrimarySchema,
   columnSchema,
   commentSchema,
   constraintNameSchema,
@@ -88,16 +87,6 @@ const columnCommentDiffItemSchema = object({
 })
 export type ColumnCommentDiffItem = InferOutput<
   typeof columnCommentDiffItemSchema
->
-
-const columnPrimaryDiffItemSchema = object({
-  ...baseSchemaDiffItemSchema.entries,
-  kind: literal('column-primary'),
-  data: columnPrimarySchema,
-  columnId: string(),
-})
-export type ColumnPrimaryDiffItem = InferOutput<
-  typeof columnPrimaryDiffItemSchema
 >
 
 const columnDefaultDiffItemSchema = object({
@@ -261,7 +250,6 @@ export const columnRelatedDiffItemSchema = union([
   columnDiffItemSchema,
   columnNameDiffItemSchema,
   columnCommentDiffItemSchema,
-  columnPrimaryDiffItemSchema,
   columnDefaultDiffItemSchema,
   columnCheckDiffItemSchema,
   columnNotNullDiffItemSchema,

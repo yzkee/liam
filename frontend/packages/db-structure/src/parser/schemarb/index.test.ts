@@ -24,7 +24,6 @@ describe(processor, () => {
               name: 'id',
               type: 'bigserial',
               notNull: true,
-              primary: true,
             }),
             ...override?.columns,
           },
@@ -160,7 +159,6 @@ describe(processor, () => {
             name: 'id',
             type: 'bigint',
             notNull: true,
-            primary: true,
           }),
         },
       })
@@ -222,7 +220,6 @@ describe(processor, () => {
               id: aColumn({
                 name: 'id',
                 type: 'bigserial',
-                primary: true,
                 notNull: true,
               }),
               email: aColumn({

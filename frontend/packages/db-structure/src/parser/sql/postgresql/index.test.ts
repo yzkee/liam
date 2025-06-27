@@ -16,7 +16,6 @@ describe(processor, () => {
               name: 'id',
               type: 'bigserial',
               notNull: true,
-              primary: true,
             }),
             ...override?.columns,
           },

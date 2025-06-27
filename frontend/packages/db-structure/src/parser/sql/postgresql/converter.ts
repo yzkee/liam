@@ -381,7 +381,7 @@ export const convertToSchema = (
     }
 
     if (isPrimaryKey(colDef.constraints)) {
-      const constraintName = `PRIMARY_${columnName}`
+      const constraintName = `${tableName}_pkey`
       constraints.push({
         name: constraintName,
         type: 'PRIMARY KEY',
@@ -428,7 +428,12 @@ export const convertToSchema = (
           .filter((name): name is string => name !== undefined) || []
 
       for (const columnName of columnNames) {
-        const constraintName = constraint.conname ?? `PRIMARY_${columnName}`
+        // Use explicit constraint name if provided, otherwise follow PostgreSQL naming convention
+        const constraintName =
+          constraint.conname ??
+          (columnNames.length === 1
+            ? `${tableName}_pkey`
+            : `${tableName}_pkey_${columnName}`)
         constraints.push({
           name: constraintName,
           type: 'PRIMARY KEY',

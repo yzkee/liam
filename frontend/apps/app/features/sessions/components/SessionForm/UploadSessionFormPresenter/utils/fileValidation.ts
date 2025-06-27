@@ -21,8 +21,6 @@ export const getFileFormat = (fileName: string): FormatType => {
     rb: 'schemarb',
     prisma: 'prisma',
     json: 'tbls',
-    yaml: 'tbls',
-    yml: 'tbls',
   }
 
   return formatMap[extension] || 'postgres'
@@ -36,8 +34,6 @@ export const getDisplayFormat = (fileName: string): string => {
     rb: 'ruby',
     prisma: 'prisma',
     json: 'tbls',
-    yaml: 'tbls',
-    yml: 'tbls',
   }
 
   return displayMap[extension] || 'postgresql'

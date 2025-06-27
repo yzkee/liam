@@ -14,7 +14,7 @@ export const transformWorkflowStateToArtifact = (
   state: WorkflowState,
 ): Artifact => {
   const businessRequirement =
-    state.analyzedRequirements?.businessRequirement || ''
+    state.analyzedRequirements?.businessRequirement ?? ''
   const usecases = state.generatedUsecases || []
 
   // Group use cases by requirement category and type

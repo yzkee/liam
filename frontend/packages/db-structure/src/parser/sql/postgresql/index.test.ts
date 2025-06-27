@@ -25,8 +25,8 @@ describe(processor, () => {
           comment: override?.comment ?? null,
           constraints: {
             ...override?.constraints,
-            users_pkey: {
-              name: 'users_pkey',
+            PRIMARY_id: {
+              name: 'PRIMARY_id',
               type: 'PRIMARY KEY',
               columnName: 'id',
             },
@@ -199,13 +199,13 @@ describe(processor, () => {
       `)
 
       expect(value.tables['foo_bar']?.constraints).toEqual({
-        foo_bar_pkey_foo_id: {
-          name: 'foo_bar_pkey_foo_id',
+        PRIMARY_foo_id: {
+          name: 'PRIMARY_foo_id',
           type: 'PRIMARY KEY',
           columnName: 'foo_id',
         },
-        foo_bar_pkey_bar_id: {
-          name: 'foo_bar_pkey_bar_id',
+        PRIMARY_bar_id: {
+          name: 'PRIMARY_bar_id',
           type: 'PRIMARY KEY',
           columnName: 'bar_id',
         },
@@ -222,8 +222,8 @@ describe(processor, () => {
       `)
 
       expect(value.tables['baz']?.constraints).toEqual({
-        baz_pkey: {
-          name: 'baz_pkey',
+        PRIMARY_baz_id: {
+          name: 'PRIMARY_baz_id',
           type: 'PRIMARY KEY',
           columnName: 'baz_id',
         },
@@ -240,8 +240,8 @@ describe(processor, () => {
       `)
 
       expect(value.tables['posts']?.constraints).toEqual({
-        posts_pkey: {
-          name: 'posts_pkey',
+        PRIMARY_id: {
+          name: 'PRIMARY_id',
           type: 'PRIMARY KEY',
           columnName: 'id',
         },
@@ -277,8 +277,8 @@ describe(processor, () => {
       // We should consider migrating to PostgreSQL's standard naming convention
       // in a future major version to better reflect actual database behavior.
       expect(value.tables['posts']?.constraints).toEqual({
-        posts_pkey: {
-          name: 'posts_pkey',
+        PRIMARY_id: {
+          name: 'PRIMARY_id',
           type: 'PRIMARY KEY',
           columnName: 'id',
         },
@@ -303,8 +303,8 @@ describe(processor, () => {
       `)
 
       expect(value.tables['posts']?.constraints).toEqual({
-        posts_pkey: {
-          name: 'posts_pkey',
+        PRIMARY_id: {
+          name: 'PRIMARY_id',
           type: 'PRIMARY KEY',
           columnName: 'id',
         },
@@ -335,8 +335,8 @@ describe(processor, () => {
       `)
 
       expect(value.tables['products']?.constraints).toEqual({
-        products_pkey: {
-          name: 'products_pkey',
+        PRIMARY_id: {
+          name: 'PRIMARY_id',
           type: 'PRIMARY KEY',
           columnName: 'id',
         },
@@ -363,8 +363,8 @@ describe(processor, () => {
       `)
 
       expect(value.tables['posts']?.constraints).toEqual({
-        posts_pkey: {
-          name: 'posts_pkey',
+        PRIMARY_id: {
+          name: 'PRIMARY_id',
           type: 'PRIMARY KEY',
           columnName: 'id',
         },
@@ -392,8 +392,8 @@ describe(processor, () => {
       `)
 
       expect(value.tables['posts']?.constraints).toEqual({
-        posts_pkey: {
-          name: 'posts_pkey',
+        PRIMARY_id: {
+          name: 'PRIMARY_id',
           type: 'PRIMARY KEY',
           columnName: 'id',
         },
@@ -426,8 +426,8 @@ describe(processor, () => {
       `)
 
       expect(value.tables['posts']?.constraints).toEqual({
-        posts_pkey: {
-          name: 'posts_pkey',
+        PRIMARY_id: {
+          name: 'PRIMARY_id',
           type: 'PRIMARY KEY',
           columnName: 'id',
         },
@@ -456,8 +456,8 @@ describe(processor, () => {
       `)
 
       expect(value.tables['products']?.constraints).toEqual({
-        products_pkey: {
-          name: 'products_pkey',
+        PRIMARY_id: {
+          name: 'PRIMARY_id',
           type: 'PRIMARY KEY',
           columnName: 'id',
         },

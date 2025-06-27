@@ -27,35 +27,36 @@ export function useRealtimeArtifact(designSessionId: string) {
 
   // Fetch artifact data
   const fetchArtifact = useCallback(async () => {
-    try {
-      const supabase = createClient()
-      const { data, error: fetchError } = await supabase
-        .from('artifacts')
-        .select('*')
-        .eq('design_session_id', designSessionId)
-        .maybeSingle()
+    const supabase = createClient()
+    const { data, error: fetchError } = await supabase
+      .from('artifacts')
+      .select('*')
+      .eq('design_session_id', designSessionId)
+      .maybeSingle()
 
-      if (fetchError) {
-        throw fetchError
-      }
-
-      if (!data) {
-        setArtifact(null)
-        return
-      }
-
-      // Validate artifact content
-      const artifactContent = v.safeParse(artifactSchema, data.artifact)
-      if (artifactContent.success) {
-        setArtifact(artifactContent.output)
-      } else {
-        throw new Error('Invalid artifact schema')
-      }
-    } catch (err) {
-      handleError(err)
-    } finally {
+    if (fetchError) {
+      console.error('Error fetching artifact:', fetchError)
+      handleError(fetchError)
       setLoading(false)
+      return
     }
+
+    if (!data) {
+      setArtifact(null)
+      setLoading(false)
+      return
+    }
+
+    // Validate artifact content
+    const artifactContent = v.safeParse(artifactSchema, data.artifact)
+    if (artifactContent.success) {
+      setArtifact(artifactContent.output)
+    } else {
+      console.error('Invalid artifact schema:', artifactContent.issues)
+      handleError(new Error('Invalid artifact schema'))
+    }
+
+    setLoading(false)
   }, [designSessionId, handleError])
 
   // Initial fetch

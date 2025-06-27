@@ -27,6 +27,7 @@ export function useRealtimeArtifact(designSessionId: string) {
 
   // Fetch artifact data
   const fetchArtifact = useCallback(async () => {
+    setError(null) // Clear previous errors
     const supabase = createClient()
     const { data, error: fetchError } = await supabase
       .from('artifacts')
@@ -39,6 +40,9 @@ export function useRealtimeArtifact(designSessionId: string) {
       handleError(fetchError)
       setLoading(false)
       return
+    }
+    // …rest of the logic
+  }, [designSessionId, handleError])
     }
 
     if (!data) {

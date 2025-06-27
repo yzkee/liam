@@ -422,8 +422,10 @@ export const convertToSchema = (
     if (constraint.contype === 'CONSTR_PRIMARY') {
       // Handle table-level primary key constraint
       const columnNames =
-        constraint.keys?.filter(isStringNode).map((node) => node.String.sval) ||
-        []
+        constraint.keys
+          ?.filter(isStringNode)
+          .map((node) => node.String.sval)
+          .filter((name): name is string => name !== undefined) || []
 
       for (const columnName of columnNames) {
         const constraintName = constraint.conname ?? `PRIMARY_${columnName}`
@@ -469,8 +471,10 @@ export const convertToSchema = (
     } else if (constraint.contype === 'CONSTR_UNIQUE') {
       // Handle table-level unique constraint
       const columnNames =
-        constraint.keys?.filter(isStringNode).map((node) => node.String.sval) ||
-        []
+        constraint.keys
+          ?.filter(isStringNode)
+          .map((node) => node.String.sval)
+          .filter((name): name is string => name !== undefined) || []
 
       for (const columnName of columnNames) {
         const constraintName = constraint.conname ?? `UNIQUE_${columnName}`

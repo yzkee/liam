@@ -111,6 +111,12 @@ export const createOrUpdateArtifact = async (
     }
     return { success: false, error: updateResult.error }
   }
+
+  // Check if the failure is due to "not found" vs actual error
+  if (existingResult.error !== 'Artifact not found') {
+    return { success: false, error: existingResult.error }
+  }
+
   // Artifact doesn't exist, create new one
   const createResult = await state.repositories.schema.createArtifact({
     designSessionId: state.designSessionId,

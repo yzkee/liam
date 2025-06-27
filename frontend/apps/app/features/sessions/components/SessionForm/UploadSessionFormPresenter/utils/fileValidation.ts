@@ -20,9 +20,9 @@ export const getFileFormat = (fileName: string): FormatType => {
     sql: 'postgres',
     rb: 'schemarb',
     prisma: 'prisma',
-    json: 'json',
-    yaml: 'yaml',
-    yml: 'yaml',
+    json: 'tbls',
+    yaml: 'tbls',
+    yml: 'tbls',
   }
 
   return formatMap[extension] || 'postgres'
@@ -35,32 +35,29 @@ export const getDisplayFormat = (fileName: string): string => {
     sql: 'postgresql',
     rb: 'ruby',
     prisma: 'prisma',
-    json: 'json',
-    yaml: 'yaml',
-    yml: 'yaml',
+    json: 'tbls',
+    yaml: 'tbls',
+    yml: 'tbls',
   }
 
   return displayMap[extension] || 'postgresql'
 }
 
-// All file extensions that are accepted for upload (including both 'yaml' and 'yml')
+// All file extensions that are accepted for upload
 const ACCEPTED_FILE_EXTENSIONS = [
   'sql',
   'rb',
   'prisma',
-  'json',
-  'yaml',
-  'yml',
+  'json', // tbls format
 ] as const
 type AcceptedExtension = (typeof ACCEPTED_FILE_EXTENSIONS)[number]
 
-// Display-friendly extensions shown in the UI (normalized to show 'yaml' only)
+// Display-friendly extensions shown in the UI
 export const DISPLAY_EXTENSIONS = [
   'sql',
   'rb',
   'prisma',
-  'json',
-  'yaml',
+  'json', // tbls format
 ] as const
 
 export const isValidFileExtension = (fileName: string): boolean => {

@@ -2,7 +2,6 @@ import clsx from 'clsx'
 import type { DragEvent, FC, KeyboardEvent } from 'react'
 import styles from './DropZone.module.css'
 import { FileIcon } from './FileIcon'
-import { DISPLAY_EXTENSIONS } from './utils/fileValidation'
 
 type Props = {
   isPending: boolean
@@ -63,19 +62,17 @@ export const DropZone: FC<Props> = ({
         <div className={styles.iconContainer}>
           <FileIcon isHovered={isHovered} isDragActive={schemaDragActive} />
           <div className={styles.extensionTags}>
-            {DISPLAY_EXTENSIONS.map((ext) => (
-              <span key={ext} className={styles.extensionTag}>
-                .{ext}
-              </span>
-            ))}
+            <span className={styles.extensionTag}>.sql</span>
+            <span className={styles.extensionTag}>.rb</span>
+            <span className={styles.extensionTag}>.prisma</span>
+            <span className={styles.extensionTag}>.json</span>
           </div>
         </div>
         <p className={styles.dropZoneText}>
           Drag & drop your schema file or click to upload
         </p>
         <p className={styles.dropZoneSubtext}>
-          Supported formats:{' '}
-          {DISPLAY_EXTENSIONS.map((ext) => `.${ext}`).join(', ')}
+          Supported formats: .sql, .rb, .prisma, .json (tbls)
         </p>
         <span
           className={clsx(

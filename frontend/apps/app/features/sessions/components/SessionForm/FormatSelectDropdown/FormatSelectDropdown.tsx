@@ -28,8 +28,6 @@ const formatOptions: FormatOption[] = [
   { format: 'prisma', label: 'prisma' },
   { format: 'schemarb', label: 'schemarb' },
   { format: 'tbls', label: 'tbls' },
-  { format: 'json', label: 'json' },
-  { format: 'yaml', label: 'yaml' },
 ]
 
 export const FormatSelectDropdown: FC<FormatSelectDropdownProps> = ({

@@ -47,8 +47,8 @@ export const SchemaFileSection: FC<Props> = ({
           </span>
         ) : (
           <span className={styles.detectedText}>
-            Unsupported file type. Please upload .sql, .rb, .prisma, .json, or
-            .yaml files.
+            Unsupported file type. Please upload .sql, .rb, .prisma, or .json
+            (tbls) files.
           </span>
         )}
       </div>

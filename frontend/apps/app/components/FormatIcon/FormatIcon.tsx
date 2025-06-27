@@ -1,4 +1,3 @@
-import { FileCode, FileJson } from '@liam-hq/ui'
 import type { FC } from 'react'
 import { match } from 'ts-pattern'
 import {
@@ -17,8 +16,6 @@ export type FormatType =
   | 'prisma'
   | 'schemarb'
   | 'tbls'
-  | 'json'
-  | 'yaml'
 
 /**
  * Props for the FormatIcon component
@@ -39,7 +36,5 @@ export const FormatIcon: FC<FormatIconProps> = ({ format, size = 16 }) => {
     .with('prisma', () => <PrismaIcon size={size} />)
     .with('schemarb', () => <SchemaRbIcon size={size} />)
     .with('tbls', () => <TblsIcon size={size} />)
-    .with('json', () => <FileJson size={size} color="var(--overlay-40)" />)
-    .with('yaml', () => <FileCode size={size} color="var(--overlay-40)" />)
     .otherwise(() => <PostgresIcon size={size} />)
 }

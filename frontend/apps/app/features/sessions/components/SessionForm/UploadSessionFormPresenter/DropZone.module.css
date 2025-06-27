@@ -150,8 +150,8 @@
 
 .extensionTag:nth-child(1) {
   /* .sql */
-  top: 32px;
-  right: 4px;
+  top: 25px;
+  right: -3px;
   transform: scale(0.8);
   transition-delay: 0.05s;
 }
@@ -163,22 +163,22 @@
 
 .extensionTag:nth-child(2) {
   /* .rb */
-  top: -2px;
-  left: 48px;
+  top: 0px;
+  left: 17px;
   transition-delay: 0.1s;
 }
 
 .extensionTag:nth-child(3) {
   /* .prisma */
-  top: 7px;
-  left: 78px;
+  top: -4px;
+  left: 55px;
   transition-delay: 0.15s;
 }
 
 .extensionTag:nth-child(4) {
   /* .json */
-  top: 7px;
-  left: 6px;
+  top: 27px;
+  left: -15px;
   transition-delay: 0.2s;
 }
 

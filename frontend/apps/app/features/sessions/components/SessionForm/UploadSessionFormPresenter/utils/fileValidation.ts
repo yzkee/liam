@@ -48,14 +48,6 @@ const ACCEPTED_FILE_EXTENSIONS = [
 ] as const
 type AcceptedExtension = (typeof ACCEPTED_FILE_EXTENSIONS)[number]
 
-// Display-friendly extensions shown in the UI
-export const DISPLAY_EXTENSIONS = [
-  'sql',
-  'rb',
-  'prisma',
-  'json', // tbls format
-] as const
-
 export const isValidFileExtension = (fileName: string): boolean => {
   const extension = getFileExtension(fileName)
   return ACCEPTED_FILE_EXTENSIONS.some((ext) => ext === extension)

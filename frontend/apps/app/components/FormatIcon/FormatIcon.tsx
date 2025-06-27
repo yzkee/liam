@@ -11,11 +11,7 @@ import {
 /**
  * Supported database schema format types
  */
-export type FormatType =
-  | 'postgres'
-  | 'prisma'
-  | 'schemarb'
-  | 'tbls'
+export type FormatType = 'postgres' | 'prisma' | 'schemarb' | 'tbls'
 
 /**
  * Props for the FormatIcon component

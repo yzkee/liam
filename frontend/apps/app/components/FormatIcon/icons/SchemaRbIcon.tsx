@@ -7,7 +7,7 @@ export const SchemaRbIcon: FC<IconProps> = ({ size = 16 }) => {
   return (
     <Image
       src={schemaRbIcon}
-      alt="SchemaRb"
+      alt="schema.rb icon"
       width={size}
       height={size}
       style={{ objectFit: 'contain' }}

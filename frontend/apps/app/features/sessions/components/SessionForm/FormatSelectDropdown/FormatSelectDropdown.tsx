@@ -10,7 +10,7 @@ import type { FC } from 'react'
 import {
   FormatIcon,
   type FormatType,
-} from '../../../../../components/FormatIcon/FormatIcon'
+} from '@/components/FormatIcon/FormatIcon'
 import styles from './FormatSelectDropdown.module.css'
 
 interface FormatOption {

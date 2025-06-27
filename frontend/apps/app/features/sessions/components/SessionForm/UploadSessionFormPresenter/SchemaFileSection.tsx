@@ -1,8 +1,8 @@
 import { AlertTriangle, Check, X } from '@liam-hq/ui'
 import type { FC } from 'react'
-import type { FormatType } from '../../../../../components/FormatIcon/FormatIcon'
-import { FormatIcon } from '../../../../../components/FormatIcon/FormatIcon'
-import { FormatSelectDropdown } from '../FormatSelectDropdown'
+import type { FormatType } from '@/components/FormatIcon/FormatIcon'
+import { FormatIcon } from '@/components/FormatIcon/FormatIcon'
+import { FormatSelectDropdown } from '@/features/sessions/components/SessionForm/FormatSelectDropdown'
 import styles from './UploadSessionFormPresenter.module.css'
 import { getDisplayFormat, getFileFormat } from './utils/fileValidation'
 

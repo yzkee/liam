@@ -64,7 +64,10 @@ export const CommandPalette: FC = () => {
       <div className={styles.searchContainer}>
         <div className={styles.searchFormWithIcon}>
           <Search className={styles.searchIcon} />
-          <Command.Input placeholder="Search" />
+          <Command.Input
+            placeholder="Search"
+            onValueChange={() => setFocusedTableName(null)}
+          />
         </div>
         <DialogClose asChild>
           <Button size="xs" variant="outline-secondary">

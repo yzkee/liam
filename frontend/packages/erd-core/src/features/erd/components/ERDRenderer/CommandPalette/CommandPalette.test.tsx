@@ -265,6 +265,25 @@ describe('focus on options by single click', () => {
     await user.hover(usersOption)
     expect(within(preview).getByText('posts')).toBeInTheDocument()
   })
+
+  it('removes focus when combobox value is updated', async () => {
+    const {
+      user,
+      elements: { dialog, searchCombobox, preview },
+    } = await prepareCommandPalette()
+
+    const followsOption = within(dialog).getByRole('option', {
+      name: 'follows',
+    })
+
+    // focuses on "follows" option and displays a preview of the "follows" table
+    await user.click(followsOption.firstChild as Element)
+    expect(within(preview).getByText('follows')).toBeInTheDocument()
+
+    // focuses on "posts" option and displays a preview of the "posts" table
+    await user.type(searchCombobox, 'posts')
+    expect(within(preview).getByText('posts')).toBeInTheDocument()
+  })
 })
 
 describe('go to ERD with option select', () => {

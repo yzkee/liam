@@ -64,6 +64,11 @@
 .searchFormWithIcon [cmdk-input] {
   padding: var(--spacing-2) 0 var(--spacing-2) var(--spacing-6);
   width: 100%;
+  border-radius: var(--border-radius-smbase);
+}
+
+.searchFormWithIcon [cmdk-input]:focus-visible {
+  outline: 1px solid var(--button-primary-background);
 }
 
 .searchIcon {

@@ -1,7 +1,11 @@
 'use client'
 
-import { Search, Table2 } from '@liam-hq/ui'
-import { DialogDescription, DialogTitle } from '@radix-ui/react-dialog'
+import { Button, Search, Table2 } from '@liam-hq/ui'
+import {
+  DialogClose,
+  DialogDescription,
+  DialogTitle,
+} from '@radix-ui/react-dialog'
 import { Command } from 'cmdk'
 import { type FC, useCallback, useEffect, useState } from 'react'
 import { useTableSelection } from '@/features/erd/hooks'
@@ -62,7 +66,11 @@ export const CommandPalette: FC = () => {
           <Search className={styles.searchIcon} />
           <Command.Input placeholder="Search" />
         </div>
-        <span className={styles.escapeSign}>ESC</span>
+        <DialogClose asChild>
+          <Button size="xs" variant="outline-secondary">
+            ESC
+          </Button>
+        </DialogClose>
       </div>
       <div className={styles.main}>
         <Command.List>

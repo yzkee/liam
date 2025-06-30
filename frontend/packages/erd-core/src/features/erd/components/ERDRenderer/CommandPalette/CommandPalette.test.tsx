@@ -131,6 +131,19 @@ describe('dialog opening interactions', () => {
   })
 })
 
+describe('dialog closing interaction', () => {
+  it('closes dialog by clicking ESC button', async () => {
+    const {
+      user,
+      elements: { dialog },
+    } = await prepareCommandPalette()
+
+    await user.click(within(dialog).getByRole('button', { name: 'ESC' }))
+
+    expect(dialog).not.toBeInTheDocument()
+  })
+})
+
 describe('options and combobox interactions', () => {
   it('renders options with table name', async () => {
     const {

@@ -3,6 +3,7 @@ import {
   AssocNode,
   CallNode,
   FalseNode,
+  HashNode,
   IntegerNode,
   KeywordHashNode,
   LocalVariableReadNode,
@@ -365,7 +366,7 @@ function extractInlineIndexOptions(
     return index
   }
 
-  if (value instanceof KeywordHashNode) {
+  if (value instanceof KeywordHashNode || value instanceof HashNode) {
     // Hash options: index: { unique: true, name: "custom_name" }
     for (const argElement of value.elements) {
       if (!(argElement instanceof AssocNode)) continue

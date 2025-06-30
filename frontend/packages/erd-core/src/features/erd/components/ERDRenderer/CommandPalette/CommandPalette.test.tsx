@@ -280,8 +280,10 @@ describe('focus on options by single click', () => {
     await user.click(followsOption.firstChild as Element)
     expect(within(preview).getByText('follows')).toBeInTheDocument()
 
+    expect(searchCombobox).toHaveFocus()
+
     // focuses on "posts" option and displays a preview of the "posts" table
-    await user.type(searchCombobox, 'posts')
+    await user.keyboard('posts')
     expect(within(preview).getByText('posts')).toBeInTheDocument()
   })
 })

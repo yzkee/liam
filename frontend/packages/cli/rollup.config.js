@@ -21,5 +21,11 @@ export default {
     }),
     execute('chmod +x dist-cli/bin/cli.js'),
   ],
-  external: ['commander', 'inquirer', '@prisma/internals', 'glob'],
+  external: [
+    'commander',
+    'inquirer',
+    '@prisma/internals',
+    'glob',
+    'typescript',
+  ],
 }

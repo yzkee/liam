@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from '@radix-ui/react-dialog'
 import { Command } from 'cmdk'
-import { createRef, type FC, useCallback, useEffect, useState } from 'react'
+import { type FC, useCallback, useEffect, useRef, useState } from 'react'
 import { useTableSelection } from '@/features/erd/hooks'
 import { useSchema } from '@/stores'
 import { TableNode } from '../../ERDContent/components'
@@ -15,7 +15,7 @@ import styles from './CommandPalette.module.css'
 import { useCommandPalette } from './CommandPaletteProvider'
 
 export const CommandPalette: FC = () => {
-  const closeButtonRef = createRef<HTMLButtonElement>()
+  const closeButtonRef = useRef<HTMLButtonElement>(null)
 
   const { open, setOpen, toggleOpen } = useCommandPalette()
 

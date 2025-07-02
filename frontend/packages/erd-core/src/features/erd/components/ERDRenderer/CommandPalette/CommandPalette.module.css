@@ -104,6 +104,7 @@
 }
 
 .main [cmdk-item] .itemInner .itemText {
+  font-size: var(--font-size-5);
   overflow-x: hidden;
   text-overflow: ellipsis;
 }

@@ -1,4 +1,4 @@
-import { remarkInstall } from 'fumadocs-docgen'
+// import { remarkInstall } from 'fumadocs-docgen/dist/index.js' // Temporarily disabled due to export issues
 import { defineConfig, defineDocs } from 'fumadocs-mdx/config'
 
 export const { docs, meta } = defineDocs({
@@ -13,6 +13,6 @@ export default defineConfig({
         dark: 'github-dark-high-contrast',
       },
     },
-    remarkPlugins: [remarkInstall],
+    remarkPlugins: [],
   },
 })

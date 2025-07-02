@@ -57,16 +57,6 @@ const runEvaluateSchema = async (): Promise<void> => {
     console.error('❌ Schema evaluation failed:', formatError(result.error))
     process.exit(1)
   }
-
-  const evaluationResults = result.value
-
-  if (evaluationResults.length > 0) {
-    const avgAccuracy =
-      evaluationResults.reduce(
-        (sum, r) => sum + r.metrics.overallSchemaAccuracy,
-        0,
-      ) / evaluationResults.length
-  }
 }
 
 runEvaluateSchema()

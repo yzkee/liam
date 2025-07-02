@@ -570,6 +570,9 @@ importers:
       '@liam-hq/db-structure':
         specifier: workspace:*
         version: link:../../packages/db-structure
+      neverthrow:
+        specifier: 8.2.0
+        version: 8.2.0
       valibot:
         specifier: 1.1.0
         version: 1.1.0(typescript@5.8.3)

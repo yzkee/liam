@@ -107,6 +107,7 @@
   font-size: var(--font-size-5);
   overflow-x: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .main [cmdk-item] .itemInner .itemIcon {

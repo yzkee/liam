@@ -745,39 +745,39 @@ describe('postgresqlSchemaDeparser', () => {
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
-        "CREATE TABLE \"users\" (
-          \"id\" bigint NOT NULL,
-          \"email\" varchar(255) NOT NULL,
-          \"created_at\" timestamp NOT NULL DEFAULT 'CURRENT_TIMESTAMP'
+        "CREATE TABLE "users" (
+          "id" bigint NOT NULL,
+          "email" varchar(255) NOT NULL,
+          "created_at" timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
 
-        COMMENT ON TABLE \"users\" IS 'Users table';
-        COMMENT ON COLUMN \"users\".\"id\" IS 'User ID';
+        COMMENT ON TABLE "users" IS 'Users table';
+        COMMENT ON COLUMN "users"."id" IS 'User ID';
 
-        CREATE TABLE \"products\" (
-          \"id\" bigint NOT NULL,
-          \"name\" varchar(100) NOT NULL,
-          \"price\" decimal(10,2) NOT NULL DEFAULT 0
+        CREATE TABLE "products" (
+          "id" bigint NOT NULL,
+          "name" varchar(100) NOT NULL,
+          "price" decimal(10,2) NOT NULL DEFAULT 0
         );
 
-        CREATE TABLE \"orders\" (
-          \"id\" bigint NOT NULL,
-          \"user_id\" bigint NOT NULL,
-          \"product_id\" bigint NOT NULL,
-          \"quantity\" integer NOT NULL DEFAULT 1
+        CREATE TABLE "orders" (
+          "id" bigint NOT NULL,
+          "user_id" bigint NOT NULL,
+          "product_id" bigint NOT NULL,
+          "quantity" integer NOT NULL DEFAULT 1
         );
 
-        CREATE UNIQUE INDEX \"idx_users_email\" ON \"users\" USING BTREE (\"email\");
+        CREATE UNIQUE INDEX "idx_users_email" ON "users" USING BTREE ("email");
 
-        CREATE INDEX \"idx_products_name\" ON \"products\" (\"name\");
+        CREATE INDEX "idx_products_name" ON "products" ("name");
 
-        CREATE INDEX \"idx_orders_user_product\" ON \"orders\" USING BTREE (\"user_id\", \"product_id\");
+        CREATE INDEX "idx_orders_user_product" ON "orders" USING BTREE ("user_id", "product_id");
 
-        ALTER TABLE \"products\" ADD CONSTRAINT \"ck_products_price\" CHECK (price >= 0);
+        ALTER TABLE "products" ADD CONSTRAINT "ck_products_price" CHECK (price >= 0);
 
-        ALTER TABLE \"orders\" ADD CONSTRAINT \"fk_orders_user\" FOREIGN KEY (\"user_id\") REFERENCES \"users\" (\"id\") ON UPDATE CASCADE ON DELETE CASCADE;
+        ALTER TABLE "orders" ADD CONSTRAINT "fk_orders_user" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON UPDATE CASCADE ON DELETE CASCADE;
 
-        ALTER TABLE \"orders\" ADD CONSTRAINT \"fk_orders_product\" FOREIGN KEY (\"product_id\") REFERENCES \"products\" (\"id\") ON UPDATE CASCADE ON DELETE RESTRICT;"
+        ALTER TABLE "orders" ADD CONSTRAINT "fk_orders_product" FOREIGN KEY ("product_id") REFERENCES "products" ("id") ON UPDATE CASCADE ON DELETE RESTRICT;"
       `)
 
       await expectGeneratedSQLToBeParseable(result.value)

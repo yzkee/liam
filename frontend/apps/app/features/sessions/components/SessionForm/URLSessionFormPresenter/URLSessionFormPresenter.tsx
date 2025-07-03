@@ -38,8 +38,12 @@ export const URLSessionFormPresenter: FC<Props> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   // File attachments hook
-  const { attachments, handleFileSelect, handleRemoveAttachment } =
-    useFileAttachments()
+  const {
+    attachments,
+    handleFileSelect,
+    handleRemoveAttachment,
+    clearAttachments,
+  } = useFileAttachments()
 
   // File drag and drop for attachments
   const {
@@ -73,11 +77,7 @@ export const URLSessionFormPresenter: FC<Props> = ({
     setSchemaError(null)
     setSchemaErrorDetails([])
     // Reset file attachments through the hook
-    if (attachments.length > 0) {
-      attachments.forEach((_, index) => {
-        handleRemoveAttachment(index)
-      })
-    }
+    clearAttachments()
   }
 
   // Helper function for URL validation

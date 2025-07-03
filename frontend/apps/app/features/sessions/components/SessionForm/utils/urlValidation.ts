@@ -22,13 +22,23 @@ export const isValidSchemaUrl = (url: string): boolean => {
     return false
   }
 
-  // Check domain whitelist
+  // Check domain whitelist with stricter validation
   const allowedDomains = parseAllowedDomains()
-  const isAllowedDomain = allowedDomains.some(
-    (domain) =>
-      parsedUrl.hostname === domain ||
-      parsedUrl.hostname.endsWith(`.${domain}`),
-  )
+  const isAllowedDomain = allowedDomains.some((domain) => {
+    // Exact match
+    if (parsedUrl.hostname === domain) return true
+
+    // Subdomain match - ensure it's a legitimate subdomain, not a look-alike domain
+    if (parsedUrl.hostname.endsWith(`.${domain}`)) {
+      // Additional check: ensure it's not a domain like "evil-github.com" when "github.com" is allowed
+      const beforeDomain = parsedUrl.hostname.slice(0, -(domain.length + 1))
+      // Reject if there's a hyphen right before the allowed domain (potential look-alike)
+      if (beforeDomain.endsWith('-')) return false
+      return true
+    }
+
+    return false
+  })
 
   if (!isAllowedDomain) {
     return false
@@ -216,14 +226,21 @@ export const fetchSchemaFromUrl = async (
   const sanitizedUrl = `${parsedUrl.protocol}//${parsedUrl.host}${parsedUrl.pathname}`
 
   try {
+    // Create AbortController for timeout
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 seconds timeout
+
     // In production, make a secure API call to fetch the schema
     const response = await fetch(sanitizedUrl, {
       method: 'GET',
       headers: {
         Accept: 'text/plain',
+        'User-Agent': 'liam-schema-fetcher/1.0',
       },
-      // Add security headers and timeout as needed
+      signal: controller.signal,
     })
+
+    clearTimeout(timeoutId)
 
     if (!response.ok) {
       return {
@@ -232,12 +249,70 @@ export const fetchSchemaFromUrl = async (
       }
     }
 
-    const content = await response.text()
+    // Check content length to prevent memory exhaustion
+    const contentLength = response.headers.get('content-length')
+    const maxSize = 5 * 1024 * 1024 // 5MB limit
+
+    if (contentLength && Number.parseInt(contentLength) > maxSize) {
+      return {
+        success: false,
+        error: 'File too large. Maximum allowed size is 5MB.',
+      }
+    }
+
+    // Stream reading with size limit for safety
+    const reader = response.body?.getReader()
+    if (!reader) {
+      return {
+        success: false,
+        error: 'Unable to read response stream',
+      }
+    }
+
+    const chunks: Uint8Array[] = []
+    let totalSize = 0
+
+    while (true) {
+      const { done, value } = await reader.read()
+
+      if (done) break
+
+      if (value) {
+        totalSize += value.length
+        if (totalSize > maxSize) {
+          return {
+            success: false,
+            error: 'File too large. Maximum allowed size is 5MB.',
+          }
+        }
+        chunks.push(value)
+      }
+    }
+
+    // Combine all chunks into a single Uint8Array
+    const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0)
+    const result = new Uint8Array(totalLength)
+    let offset = 0
+    for (const chunk of chunks) {
+      result.set(chunk, offset)
+      offset += chunk.length
+    }
+
+    const content = new TextDecoder().decode(result)
+
     return {
       success: true,
       content,
     }
   } catch (error) {
+    // Handle timeout specifically
+    if (error instanceof Error && error.name === 'AbortError') {
+      return {
+        success: false,
+        error: 'Request timed out. Please try again or check the URL.',
+      }
+    }
+
     return {
       success: false,
       error: `Failed to fetch schema: ${error instanceof Error ? error.message : 'Unknown error'}`,

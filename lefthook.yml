@@ -8,4 +8,4 @@ pre-commit:
       skip:
         - merge
         - rebase
-      fail_text: "Lint failed. Fix the issues or use 'git commit --no-verify' to skip."
+      fail_text: "Lint failed. For AI Agents: Please fix all linting errors before committing."

@@ -2,10 +2,10 @@
  * Convert Drizzle column types to PostgreSQL column types
  * ref: https://orm.drizzle.team/docs/column-types/pg
  */
-export function convertDrizzleTypeToPgType(
+export const convertDrizzleTypeToPgType = (
   drizzleType: string,
   options?: Record<string, unknown>,
-): string {
+): string => {
   switch (drizzleType) {
     // Integer types
     case 'serial':
@@ -108,10 +108,10 @@ export function convertDrizzleTypeToPgType(
 /**
  * Convert default values from Drizzle to PostgreSQL format
  */
-export function convertDefaultValue(
+export const convertDefaultValue = (
   value: unknown,
   _drizzleType: string,
-): string | number | boolean | null {
+): string | number | boolean | null => {
   if (value === undefined || value === null) {
     return null
   }
@@ -144,9 +144,9 @@ export function convertDefaultValue(
 /**
  * Convert constraint reference options from Drizzle to PostgreSQL format
  */
-export function convertReferenceOption(
+export const convertReferenceOption = (
   option: string,
-): 'CASCADE' | 'RESTRICT' | 'SET_NULL' | 'SET_DEFAULT' | 'NO_ACTION' {
+): 'CASCADE' | 'RESTRICT' | 'SET_NULL' | 'SET_DEFAULT' | 'NO_ACTION' => {
   switch (option.toLowerCase()) {
     case 'cascade':
       return 'CASCADE'

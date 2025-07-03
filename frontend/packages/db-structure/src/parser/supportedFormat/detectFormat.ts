@@ -9,13 +9,15 @@ const nameToFormatMap: Record<string, SupportedFormat> = {
   'prisma.schema': 'prisma',
   'schema.json': 'tbls',
   'schema.ts': 'drizzle',
+  'db.ts': 'drizzle',
+  'database.ts': 'drizzle',
+  'drizzle.ts': 'drizzle',
 }
 
 const extensionToFormatMap: Record<string, SupportedFormat> = {
   rb: 'schemarb',
   sql: 'postgres',
   prisma: 'prisma',
-  ts: 'drizzle',
 }
 
 export const detectFormat = (

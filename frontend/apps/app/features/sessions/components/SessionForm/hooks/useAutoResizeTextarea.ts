@@ -21,7 +21,7 @@ export const useAutoResizeTextarea = (
       (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         onChange(e)
         // Trigger height adjustment after state update
-        setTimeout(adjustHeight, 0)
+        requestAnimationFrame(adjustHeight)
       },
     [adjustHeight],
   )

@@ -22,13 +22,25 @@ export const isValidSchemaUrl = (url: string): boolean => {
     return false
   }
 
+  // Check domain whitelist
+  const allowedDomains = parseAllowedDomains()
+  const isAllowedDomain = allowedDomains.some(
+    (domain) =>
+      parsedUrl.hostname === domain ||
+      parsedUrl.hostname.endsWith(`.${domain}`),
+  )
+
+  if (!isAllowedDomain) {
+    return false
+  }
+
   // Sanitize pathname to prevent path traversal
   const pathname = parsedUrl.pathname
   if (pathname.includes('..') || pathname.includes('//')) {
     return false
   }
 
-  // Check for valid schema file extensions
+  // Check for valid schema file extensions (check pathname, not full URL to prevent querystring bypass)
   const validExtensions = ['.sql', '.rb', '.prisma', '.json']
   const hasValidExtension = validExtensions.some((ext) =>
     pathname.toLowerCase().endsWith(ext),

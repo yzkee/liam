@@ -65,6 +65,9 @@ describe('generateDDLNode', () => {
     expect(result.ddlStatements).toContain('"name" VARCHAR NOT NULL')
     expect(result.ddlStatements).toContain('PRIMARY KEY ("id")')
     expect(mockLogger.log).toHaveBeenCalledWith('[generateDDLNode] Started')
+    expect(mockLogger.log).toHaveBeenCalledWith(
+      expect.stringContaining('[generateDDLNode] Generated DDL for 1 tables'),
+    )
     expect(mockLogger.log).toHaveBeenCalledWith('[generateDDLNode] Completed')
   })
 
@@ -78,6 +81,9 @@ describe('generateDDLNode', () => {
 
     expect(result.ddlStatements).toBe('')
     expect(mockLogger.log).toHaveBeenCalledWith('[generateDDLNode] Started')
+    expect(mockLogger.log).toHaveBeenCalledWith(
+      '[generateDDLNode] Generated DDL for 0 tables (0 characters)',
+    )
     expect(mockLogger.log).toHaveBeenCalledWith('[generateDDLNode] Completed')
   })
 

@@ -13,7 +13,7 @@ All tests should maximize:
 
 ## Core Principle: Test Observable Behavior
 
-Per Khorikkov's "observable behavior" principle:
+Per Khorikov's "observable behavior" principle:
 
 - Test what consumers can see and use
 - Test the contract, not the implementation

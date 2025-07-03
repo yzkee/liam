@@ -100,80 +100,71 @@ const parseDrizzleSchema = (
   enums: Record<string, DrizzleEnumDefinition>
   relations: DrizzleRelationDefinition[]
 } => {
-  try {
-    // Use appropriate TypeScript target
-    const scriptTarget = getScriptTarget()
-    const sourceFile = ts.createSourceFile(
-      'schema.ts',
-      sourceCode,
-      scriptTarget,
-      true,
-    )
+  // Use appropriate TypeScript target
+  const scriptTarget = getScriptTarget()
+  const sourceFile = ts.createSourceFile(
+    'schema.ts',
+    sourceCode,
+    scriptTarget,
+    true,
+  )
 
-    const tables: Record<string, DrizzleTableDefinition> = {}
-    const enums: Record<string, DrizzleEnumDefinition> = {}
-    const relations: DrizzleRelationDefinition[] = []
+  const tables: Record<string, DrizzleTableDefinition> = {}
+  const enums: Record<string, DrizzleEnumDefinition> = {}
+  const relations: DrizzleRelationDefinition[] = []
 
-    const visit = (node: ts.Node) => {
-      // Parse pgTable definitions
-      if (ts.isVariableStatement(node)) {
-        const declaration = node.declarationList.declarations[0]
-        if (declaration?.initializer) {
-          // Find the pgTable call in the expression chain
-          const pgTableCall = findPgTableCall(declaration.initializer)
-          if (pgTableCall) {
-            const tableDefinition = parsePgTableCall(declaration, pgTableCall)
-            if (tableDefinition) {
-              tables[tableDefinition.name] = tableDefinition
+  const visit = (node: ts.Node) => {
+    // Parse pgTable definitions
+    if (ts.isVariableStatement(node)) {
+      const declaration = node.declarationList.declarations[0]
+      if (declaration?.initializer) {
+        // Find the pgTable call in the expression chain
+        const pgTableCall = findPgTableCall(declaration.initializer)
+        if (pgTableCall) {
+          const tableDefinition = parsePgTableCall(declaration, pgTableCall)
+          if (tableDefinition) {
+            tables[tableDefinition.name] = tableDefinition
+          }
+        }
+
+        // Check for other call expressions
+        if (ts.isCallExpression(declaration.initializer)) {
+          const callExpr = declaration.initializer
+
+          // Check if it's a pgEnum call
+          if (
+            ts.isIdentifier(callExpr.expression) &&
+            callExpr.expression.text === 'pgEnum'
+          ) {
+            const enumDefinition = parsePgEnumCall(declaration, callExpr)
+            if (
+              enumDefinition &&
+              declaration.name &&
+              ts.isIdentifier(declaration.name)
+            ) {
+              // Use the variable name as the key for mapping
+              const enumVarName = declaration.name.text
+              enums[enumVarName] = enumDefinition
             }
           }
 
-          // Check for other call expressions
-          if (ts.isCallExpression(declaration.initializer)) {
-            const callExpr = declaration.initializer
-
-            // Check if it's a pgEnum call
-            if (
-              ts.isIdentifier(callExpr.expression) &&
-              callExpr.expression.text === 'pgEnum'
-            ) {
-              const enumDefinition = parsePgEnumCall(declaration, callExpr)
-              if (
-                enumDefinition &&
-                declaration.name &&
-                ts.isIdentifier(declaration.name)
-              ) {
-                // Use the variable name as the key for mapping
-                const enumVarName = declaration.name.text
-                enums[enumVarName] = enumDefinition
-              }
-            }
-
-            // Check if it's a relations call
-            if (
-              ts.isIdentifier(callExpr.expression) &&
-              callExpr.expression.text === 'relations'
-            ) {
-              const relationDefinitions = parseRelationsCall(callExpr)
-              relations.push(...relationDefinitions)
-            }
+          // Check if it's a relations call
+          if (
+            ts.isIdentifier(callExpr.expression) &&
+            callExpr.expression.text === 'relations'
+          ) {
+            const relationDefinitions = parseRelationsCall(callExpr)
+            relations.push(...relationDefinitions)
           }
         }
       }
-
-      ts.forEachChild(node, visit)
     }
 
-    visit(sourceFile)
-    return { tables, enums, relations }
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error)
-    const detailedError = new Error(
-      `Failed to parse Drizzle schema: ${errorMessage}`,
-    )
-    console.error('Error in parseDrizzleSchema:', detailedError)
-    throw detailedError
+    ts.forEachChild(node, visit)
   }
+
+  visit(sourceFile)
+  return { tables, enums, relations }
 }
 
 /**
@@ -206,150 +197,137 @@ const parsePgTableCall = (
   declaration: ts.VariableDeclaration,
   callExpr: ts.CallExpression,
 ): DrizzleTableDefinition | null => {
-  try {
-    if (callExpr.arguments.length < 2) return null
+  if (callExpr.arguments.length < 2) return null
 
-    const tableNameArg = callExpr.arguments[0]
-    const columnsArg = callExpr.arguments[1]
-    const indexesArg = callExpr.arguments[2]
+  const tableNameArg = callExpr.arguments[0]
+  const columnsArg = callExpr.arguments[1]
+  const indexesArg = callExpr.arguments[2]
 
-    if (
-      !tableNameArg ||
-      !columnsArg ||
-      !ts.isStringLiteral(tableNameArg) ||
-      !ts.isObjectLiteralExpression(columnsArg)
-    ) {
-      return null
-    }
-
-    const tableName = tableNameArg.text
-    const columns: Record<string, DrizzleColumnDefinition> = {}
-    const indexes: Record<string, DrizzleIndexDefinition> = {}
-    let compositePrimaryKey: CompositePrimaryKeyDefinition | undefined
-
-    // Parse columns
-    for (const property of columnsArg.properties) {
-      if (
-        ts.isPropertyAssignment(property) &&
-        property.name &&
-        ts.isIdentifier(property.name) &&
-        property.initializer
-      ) {
-        const jsColumnName = property.name.text
-        const columnDef = parseColumnDefinition(property.initializer)
-        if (columnDef) {
-          // Extract actual column name from the first argument of the type call
-          const actualColumnName =
-            extractColumnNameFromTypeCall(property.initializer) || jsColumnName
-          columns[jsColumnName] = { ...columnDef, name: actualColumnName }
-        }
-      }
-    }
-
-    // Parse indexes if provided
-    if (indexesArg && ts.isArrowFunction(indexesArg)) {
-      const returnExpr = indexesArg.body
-
-      // Handle both direct object literal and parenthesized expression
-      let objectExpr: ts.ObjectLiteralExpression | null = null
-      if (returnExpr && ts.isObjectLiteralExpression(returnExpr)) {
-        objectExpr = returnExpr
-      } else if (
-        returnExpr &&
-        ts.isParenthesizedExpression(returnExpr) &&
-        returnExpr.expression &&
-        ts.isObjectLiteralExpression(returnExpr.expression)
-      ) {
-        objectExpr = returnExpr.expression
-      }
-
-      if (objectExpr) {
-        for (const property of objectExpr.properties) {
-          if (
-            ts.isPropertyAssignment(property) &&
-            property.name &&
-            ts.isIdentifier(property.name) &&
-            property.initializer
-          ) {
-            const propertyName = property.name.text
-
-            // Parse composite primary key definitions
-            if (
-              propertyName === 'pk' &&
-              ts.isCallExpression(property.initializer)
-            ) {
-              const pkDef = parseCompositePrimaryKey(property.initializer)
-              if (pkDef) {
-                compositePrimaryKey = pkDef
-              }
-              continue
-            }
-
-            const indexDef = parseIndexDefinition(property.initializer)
-            if (indexDef) {
-              // Use the actual index name from the definition, not the property name
-              const actualIndexName = indexDef.name || property.name.text
-              indexes[actualIndexName] = { ...indexDef, name: actualIndexName }
-            }
-          }
-        }
-      }
-    }
-
-    // Check for table comment - look at the original declaration's initializer
-    let comment: string | undefined
-    if (
-      declaration.initializer &&
-      ts.isCallExpression(declaration.initializer)
-    ) {
-      let currentExpr: ts.Expression = declaration.initializer
-
-      // Look for method chaining like .$comment('...')
-      while (ts.isCallExpression(currentExpr)) {
-        if (
-          ts.isPropertyAccessExpression(currentExpr.expression) &&
-          currentExpr.expression.name &&
-          ts.isIdentifier(currentExpr.expression.name) &&
-          currentExpr.expression.name.text === '$comment'
-        ) {
-          const commentArg = currentExpr.arguments[0]
-          if (commentArg && ts.isStringLiteral(commentArg)) {
-            comment = commentArg.text
-          }
-          break
-        }
-        if (
-          ts.isPropertyAccessExpression(currentExpr.expression) &&
-          currentExpr.expression.expression
-        ) {
-          currentExpr = currentExpr.expression.expression
-        } else {
-          break
-        }
-      }
-    }
-
-    const result: DrizzleTableDefinition = {
-      name: tableName,
-      columns,
-      indexes,
-      comment,
-    }
-
-    if (compositePrimaryKey) {
-      result.compositePrimaryKey = compositePrimaryKey
-    }
-
-    return result
-  } catch (error) {
-    const tableName =
-      callExpr.arguments[0] && ts.isStringLiteral(callExpr.arguments[0])
-        ? callExpr.arguments[0].text
-        : 'unknown'
-    throw new Error(
-      `Error parsing table '${tableName}': ${error instanceof Error ? error.message : String(error)}`,
-    )
+  if (
+    !tableNameArg ||
+    !columnsArg ||
+    !ts.isStringLiteral(tableNameArg) ||
+    !ts.isObjectLiteralExpression(columnsArg)
+  ) {
+    return null
   }
+
+  const tableName = tableNameArg.text
+  const columns: Record<string, DrizzleColumnDefinition> = {}
+  const indexes: Record<string, DrizzleIndexDefinition> = {}
+  let compositePrimaryKey: CompositePrimaryKeyDefinition | undefined
+
+  // Parse columns
+  for (const property of columnsArg.properties) {
+    if (
+      ts.isPropertyAssignment(property) &&
+      property.name &&
+      ts.isIdentifier(property.name) &&
+      property.initializer
+    ) {
+      const jsColumnName = property.name.text
+      const columnDef = parseColumnDefinition(property.initializer)
+      if (columnDef) {
+        // Extract actual column name from the first argument of the type call
+        const actualColumnName =
+          extractColumnNameFromTypeCall(property.initializer) || jsColumnName
+        columns[jsColumnName] = { ...columnDef, name: actualColumnName }
+      }
+    }
+  }
+
+  // Parse indexes if provided
+  if (indexesArg && ts.isArrowFunction(indexesArg)) {
+    const returnExpr = indexesArg.body
+
+    // Handle both direct object literal and parenthesized expression
+    let objectExpr: ts.ObjectLiteralExpression | null = null
+    if (returnExpr && ts.isObjectLiteralExpression(returnExpr)) {
+      objectExpr = returnExpr
+    } else if (
+      returnExpr &&
+      ts.isParenthesizedExpression(returnExpr) &&
+      returnExpr.expression &&
+      ts.isObjectLiteralExpression(returnExpr.expression)
+    ) {
+      objectExpr = returnExpr.expression
+    }
+
+    if (objectExpr) {
+      for (const property of objectExpr.properties) {
+        if (
+          ts.isPropertyAssignment(property) &&
+          property.name &&
+          ts.isIdentifier(property.name) &&
+          property.initializer
+        ) {
+          const propertyName = property.name.text
+
+          // Parse composite primary key definitions
+          if (
+            propertyName === 'pk' &&
+            ts.isCallExpression(property.initializer)
+          ) {
+            const pkDef = parseCompositePrimaryKey(property.initializer)
+            if (pkDef) {
+              compositePrimaryKey = pkDef
+            }
+            continue
+          }
+
+          const indexDef = parseIndexDefinition(property.initializer)
+          if (indexDef) {
+            // Use the actual index name from the definition, not the property name
+            const actualIndexName = indexDef.name || property.name.text
+            indexes[actualIndexName] = { ...indexDef, name: actualIndexName }
+          }
+        }
+      }
+    }
+  }
+
+  // Check for table comment - look at the original declaration's initializer
+  let comment: string | undefined
+  if (declaration.initializer && ts.isCallExpression(declaration.initializer)) {
+    let currentExpr: ts.Expression = declaration.initializer
+
+    // Look for method chaining like .$comment('...')
+    while (ts.isCallExpression(currentExpr)) {
+      if (
+        ts.isPropertyAccessExpression(currentExpr.expression) &&
+        currentExpr.expression.name &&
+        ts.isIdentifier(currentExpr.expression.name) &&
+        currentExpr.expression.name.text === '$comment'
+      ) {
+        const commentArg = currentExpr.arguments[0]
+        if (commentArg && ts.isStringLiteral(commentArg)) {
+          comment = commentArg.text
+        }
+        break
+      }
+      if (
+        ts.isPropertyAccessExpression(currentExpr.expression) &&
+        currentExpr.expression.expression
+      ) {
+        currentExpr = currentExpr.expression.expression
+      } else {
+        break
+      }
+    }
+  }
+
+  const result: DrizzleTableDefinition = {
+    name: tableName,
+    columns,
+    indexes,
+    comment,
+  }
+
+  if (compositePrimaryKey) {
+    result.compositePrimaryKey = compositePrimaryKey
+  }
+
+  return result
 }
 
 /**
@@ -499,78 +477,72 @@ const parseMethodChain = (
 const parseColumnDefinition = (
   expr: ts.Expression,
 ): DrizzleColumnDefinition | null => {
-  try {
-    const { methods, baseType, typeOptions } = parseMethodChain(expr)
+  const { methods, baseType, typeOptions } = parseMethodChain(expr)
 
-    if (!baseType) return null
+  if (!baseType) return null
 
-    let notNull = false
-    let primaryKey = false
-    let unique = false
-    let defaultValue: unknown
-    let comment: string | undefined
-    let references: DrizzleColumnDefinition['references']
+  let notNull = false
+  let primaryKey = false
+  let unique = false
+  let defaultValue: unknown
+  let comment: string | undefined
+  let references: DrizzleColumnDefinition['references']
 
-    // Process methods in a single pass
-    for (const method of methods) {
-      switch (method.name) {
-        case 'notNull':
-          notNull = true
-          break
-        case 'primaryKey':
-          primaryKey = true
-          notNull = true
-          break
-        case 'unique':
-          unique = true
-          break
-        case 'default':
-          if (method.args[0]) {
-            defaultValue = extractLiteralValue(method.args[0])
-          }
-          break
-        case 'defaultNow':
-          defaultValue = 'defaultNow'
-          break
-        case 'defaultRandom':
-          defaultValue = 'defaultRandom'
-          break
-        case '$comment':
-          if (method.args[0] && ts.isStringLiteral(method.args[0])) {
-            comment = method.args[0].text
-          }
-          break
-        case 'references':
-          if (method.args.length > 0) {
-            references = parseReferencesFromArgs(method.args)
-          }
-          break
-      }
+  // Process methods in a single pass
+  for (const method of methods) {
+    switch (method.name) {
+      case 'notNull':
+        notNull = true
+        break
+      case 'primaryKey':
+        primaryKey = true
+        notNull = true
+        break
+      case 'unique':
+        unique = true
+        break
+      case 'default':
+        if (method.args[0]) {
+          defaultValue = extractLiteralValue(method.args[0])
+        }
+        break
+      case 'defaultNow':
+        defaultValue = 'defaultNow'
+        break
+      case 'defaultRandom':
+        defaultValue = 'defaultRandom'
+        break
+      case '$comment':
+        if (method.args[0] && ts.isStringLiteral(method.args[0])) {
+          comment = method.args[0].text
+        }
+        break
+      case 'references':
+        if (method.args.length > 0) {
+          references = parseReferencesFromArgs(method.args)
+        }
+        break
     }
+  }
 
-    // Set default value for serial types
-    if (
-      ['serial', 'bigserial', 'smallserial'].includes(baseType) &&
-      defaultValue === undefined
-    ) {
-      defaultValue = 'autoincrement'
-    }
+  // Set default value for serial types
+  if (
+    ['serial', 'bigserial', 'smallserial'].includes(baseType) &&
+    defaultValue === undefined
+  ) {
+    defaultValue = 'autoincrement'
+  }
 
-    return {
-      name: '',
-      type: baseType,
-      typeOptions,
-      notNull: notNull || unique,
-      primaryKey,
-      unique,
-      default: defaultValue,
-      comment,
-      references,
-    }
-  } catch (error) {
-    throw new Error(
-      `Error parsing column definition: ${error instanceof Error ? error.message : String(error)}`,
-    )
+  return {
+    name: '',
+    type: baseType,
+    typeOptions,
+    notNull: notNull || unique,
+    primaryKey,
+    unique,
+    default: defaultValue,
+    comment,
+    references,
   }
 }
 

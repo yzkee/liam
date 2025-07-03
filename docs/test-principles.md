@@ -2,7 +2,7 @@
 
 Core testing principles that apply to all tests - whether adding regression tests to existing code or writing tests for new features.
 
-## The Four Pillars of Good Tests (Khorikkov)
+## The Four Pillars of Good Tests (Vladimir Khorikov)
 
 All tests should maximize:
 

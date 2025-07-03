@@ -600,7 +600,7 @@ function parseReferencesFromArgs(
   if (body && ts.isPropertyAccessExpression(body)) {
     // Get table name - could be simple identifier (users) or property access (schema.users)
     if (body.expression && ts.isIdentifier(body.expression)) {
-      table = body.expression.escapedText as string
+      table = String(body.expression.escapedText)
     } else if (
       body.expression &&
       ts.isPropertyAccessExpression(body.expression) &&
@@ -612,7 +612,7 @@ function parseReferencesFromArgs(
 
     // Get column name
     if (body.name && ts.isIdentifier(body.name)) {
-      column = body.name.escapedText as string
+      column = String(body.name.escapedText)
     }
   }
 
@@ -872,11 +872,21 @@ function parseRelationsCall(
               ts.isObjectLiteralExpression(relationCall.arguments[1])
             ) {
               const options = parseObjectLiteral(relationCall.arguments[1])
-              if (Array.isArray(options['fields'])) {
-                fields = options['fields'] as string[]
+              if (
+                Array.isArray(options['fields']) &&
+                options['fields'].every(
+                  (item): item is string => typeof item === 'string',
+                )
+              ) {
+                fields = options['fields']
               }
-              if (Array.isArray(options['references'])) {
-                references = options['references'] as string[]
+              if (
+                Array.isArray(options['references']) &&
+                options['references'].every(
+                  (item): item is string => typeof item === 'string',
+                )
+              ) {
+                references = options['references']
               }
             }
 

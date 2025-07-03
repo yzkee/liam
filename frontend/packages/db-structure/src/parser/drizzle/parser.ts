@@ -80,7 +80,7 @@ const TS_SCRIPT_TARGETS = {
 /**
  * Get the appropriate TypeScript script target
  */
-function getScriptTarget(): ts.ScriptTarget {
+const getScriptTarget = (): ts.ScriptTarget => {
   if (TS_SCRIPT_TARGETS.PREFERRED !== undefined) {
     return TS_SCRIPT_TARGETS.PREFERRED
   }
@@ -93,11 +93,13 @@ function getScriptTarget(): ts.ScriptTarget {
 /**
  * Parse Drizzle TypeScript schema to extract table definitions
  */
-function parseDrizzleSchema(sourceCode: string): {
+const parseDrizzleSchema = (
+  sourceCode: string,
+): {
   tables: Record<string, DrizzleTableDefinition>
   enums: Record<string, DrizzleEnumDefinition>
   relations: DrizzleRelationDefinition[]
-} {
+} => {
   try {
     // Check if TypeScript is available
     if (!ts || typeof ts.createSourceFile !== 'function') {
@@ -184,7 +186,7 @@ function parseDrizzleSchema(sourceCode: string): {
 /**
  * Find pgTable call in an expression chain (handles method chaining)
  */
-function findPgTableCall(expr: ts.Expression): ts.CallExpression | null {
+const findPgTableCall = (expr: ts.Expression): ts.CallExpression | null => {
   if (ts.isCallExpression(expr)) {
     // Check if this is a direct pgTable call
     if (
@@ -207,10 +209,10 @@ function findPgTableCall(expr: ts.Expression): ts.CallExpression | null {
 /**
  * Parse pgTable call expression
  */
-function parsePgTableCall(
+const parsePgTableCall = (
   declaration: ts.VariableDeclaration,
   callExpr: ts.CallExpression,
-): DrizzleTableDefinition | null {
+): DrizzleTableDefinition | null => {
   try {
     if (callExpr.arguments.length < 2) return null
 
@@ -444,11 +446,13 @@ const isDrizzleTypeFunction = (name: string): boolean => {
 /**
  * Parse method chain from expression - optimized version
  */
-function parseMethodChain(expr: ts.Expression): {
+const parseMethodChain = (
+  expr: ts.Expression,
+): {
   methods: MethodCall[]
   baseType: string
   typeOptions: Record<string, unknown>
-} {
+} => {
   const methods: MethodCall[] = []
   let currentExpr = expr
   let baseType = ''
@@ -499,9 +503,9 @@ function parseMethodChain(expr: ts.Expression): {
 /**
  * Parse column definition from method chaining - optimized version
  */
-function parseColumnDefinition(
+const parseColumnDefinition = (
   expr: ts.Expression,
-): DrizzleColumnDefinition | null {
+): DrizzleColumnDefinition | null => {
   try {
     const { methods, baseType, typeOptions } = parseMethodChain(expr)
 
@@ -580,9 +584,9 @@ function parseColumnDefinition(
 /**
  * Parse references from method arguments
  */
-function parseReferencesFromArgs(
+const parseReferencesFromArgs = (
   args: ts.Expression[],
-): DrizzleColumnDefinition['references'] | undefined {
+): DrizzleColumnDefinition['references'] | undefined => {
   if (args.length === 0) return undefined
 
   // First argument should be an arrow function returning the referenced column
@@ -645,9 +649,9 @@ function parseReferencesFromArgs(
 /**
  * Parse index definition
  */
-function parseIndexDefinition(
+const parseIndexDefinition = (
   expr: ts.Expression,
-): DrizzleIndexDefinition | null {
+): DrizzleIndexDefinition | null => {
   if (!ts.isCallExpression(expr)) return null
 
   let unique = false
@@ -723,9 +727,9 @@ function parseIndexDefinition(
  * Extract column name from property access (e.g., table.firstName -> first_name)
  * This needs to map JS property names to actual column names
  */
-function extractColumnNameFromPropertyAccess(
+const extractColumnNameFromPropertyAccess = (
   expr: ts.PropertyAccessExpression,
-): string | null {
+): string | null => {
   if (expr.name && ts.isIdentifier(expr.name)) {
     const jsPropertyName = expr.name.text
     // Return the JS property name - the actual column name mapping will be handled later
@@ -737,9 +741,9 @@ function extractColumnNameFromPropertyAccess(
 /**
  * Parse composite primary key definition
  */
-function parseCompositePrimaryKey(
+const parseCompositePrimaryKey = (
   callExpr: ts.CallExpression,
-): CompositePrimaryKeyDefinition | null {
+): CompositePrimaryKeyDefinition | null => {
   if (
     !callExpr.arguments[0] ||
     !ts.isObjectLiteralExpression(callExpr.arguments[0])
@@ -777,10 +781,10 @@ function parseCompositePrimaryKey(
 /**
  * Parse pgEnum call
  */
-function parsePgEnumCall(
+const parsePgEnumCall = (
   _declaration: ts.VariableDeclaration,
   callExpr: ts.CallExpression,
-): DrizzleEnumDefinition | null {
+): DrizzleEnumDefinition | null => {
   if (callExpr.arguments.length < 2) return null
 
   const enumNameArg = callExpr.arguments[0]
@@ -810,9 +814,9 @@ function parsePgEnumCall(
 /**
  * Parse relations call
  */
-function parseRelationsCall(
+const parseRelationsCall = (
   callExpr: ts.CallExpression,
-): DrizzleRelationDefinition[] {
+): DrizzleRelationDefinition[] => {
   const relations: DrizzleRelationDefinition[] = []
 
   if (callExpr.arguments.length < 2) return relations
@@ -916,7 +920,7 @@ function parseRelationsCall(
 /**
  * Extract literal value from TypeScript expression
  */
-function extractLiteralValue(expr: ts.Expression): unknown {
+const extractLiteralValue = (expr: ts.Expression): unknown => {
   if (ts.isStringLiteral(expr)) {
     return expr.text
   }
@@ -938,9 +942,9 @@ function extractLiteralValue(expr: ts.Expression): unknown {
 /**
  * Parse object literal expression to a plain object
  */
-function parseObjectLiteral(
+const parseObjectLiteral = (
   expr: ts.ObjectLiteralExpression,
-): Record<string, unknown> {
+): Record<string, unknown> => {
   const result: Record<string, unknown> = {}
 
   for (const property of expr.properties) {
@@ -964,10 +968,10 @@ function parseObjectLiteral(
 /**
  * Convert Drizzle table definition to internal Table format
  */
-function convertToTable(
+const convertToTable = (
   tableDef: DrizzleTableDefinition,
   enums: Record<string, DrizzleEnumDefinition> = {},
-): Table {
+): Table => {
   const columns: Columns = {}
   const constraints: Constraints = {}
   const indexes: Record<string, Index> = {}

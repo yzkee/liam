@@ -2,6 +2,33 @@ name: trigger_dev_preview
 on:
   pull_request:
     types: [opened, synchronize, reopened, closed]
+    paths:
+      # Workflow itself
+      - '.github/workflows/trigger_dev_preview.yml'
+      # Main app that depends on the jobs backend
+      - 'frontend/apps/app/**'
+      # Jobs package that gets deployed
+      - 'frontend/internal-packages/jobs/**'
+      # Internal packages that app depends on
+      - 'frontend/internal-packages/agent/**'
+      - 'frontend/internal-packages/db/**'
+      - 'frontend/internal-packages/github/**'
+      # Shared packages that app depends on
+      - 'frontend/packages/db-structure/**'
+      - 'frontend/packages/erd-core/**'
+      - 'frontend/packages/pglite-server/**'
+      - 'frontend/packages/ui/**'
+      - 'frontend/packages/configs/**'
+      # User's original suggestions
+      - 'internal-packages/**'
+      - 'packages/**'
+      # Workspace and build configuration
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'turbo.json'
+      - 'biome.jsonc'
+      - '.syncpackrc'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

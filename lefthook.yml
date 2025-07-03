@@ -1,0 +1,19 @@
+pre-commit:
+  parallel: true
+  commands:
+    lint:
+      glob: "*.{js,jsx,ts,tsx,json,md,mdx,yml,yaml}"
+      run: pnpm lint:staged
+      stage_fixed: true
+      skip:
+        - merge
+        - rebase
+      fail_text: "Lint failed. Fix the issues or use 'git commit --no-verify' to skip."
+
+pre-push:
+  commands:
+    protected-branches:
+      run: echo "Pushing to remote..."
+      skip:
+        - ref=refs/heads/main
+        - ref=refs/heads/master

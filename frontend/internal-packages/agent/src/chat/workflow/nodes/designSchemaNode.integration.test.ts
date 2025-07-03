@@ -1,11 +1,5 @@
 import type { Schema } from '@liam-hq/db-structure'
-import {
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { WorkflowState } from '../types'
 import { designSchemaNode } from './designSchemaNode'
 import { generateDDLNode } from './generateDDLNode'
@@ -93,9 +87,12 @@ describe('designSchemaNode -> generateDDLNode integration', () => {
       ],
     })
 
-    vi.mocked(DatabaseSchemaBuildAgent).mockImplementation(() => ({
-      generate: mockGenerate,
-    }) as never)
+    vi.mocked(DatabaseSchemaBuildAgent).mockImplementation(
+      () =>
+        ({
+          generate: mockGenerate,
+        }) as never,
+    )
 
     // Mock successful repository operation
     mockRepository.schema.createVersion.mockResolvedValue({
@@ -142,7 +139,6 @@ describe('designSchemaNode -> generateDDLNode integration', () => {
     const { DatabaseSchemaBuildAgent } = await import(
       '../../../langchain/agents'
     )
-    const MockAgent = DatabaseSchemaBuildAgent as any
     const mockGenerate = vi.fn().mockResolvedValue({
       message: 'Invalid patch operation',
       schemaChanges: [
@@ -154,9 +150,12 @@ describe('designSchemaNode -> generateDDLNode integration', () => {
       ],
     })
 
-    MockAgent.mockImplementation(() => ({
-      generate: mockGenerate,
-    }))
+    vi.mocked(DatabaseSchemaBuildAgent).mockImplementation(
+      () =>
+        ({
+          generate: mockGenerate,
+        }) as never,
+    )
 
     // Mock successful repository operation (but patch application will fail)
     mockRepository.schema.createVersion.mockResolvedValue({
@@ -189,7 +188,6 @@ describe('designSchemaNode -> generateDDLNode integration', () => {
     const { DatabaseSchemaBuildAgent } = await import(
       '../../../langchain/agents'
     )
-    const MockAgent = DatabaseSchemaBuildAgent as any
     const mockGenerate = vi.fn().mockResolvedValue({
       message: 'Repository will fail',
       schemaChanges: [
@@ -207,9 +205,12 @@ describe('designSchemaNode -> generateDDLNode integration', () => {
       ],
     })
 
-    MockAgent.mockImplementation(() => ({
-      generate: mockGenerate,
-    }))
+    vi.mocked(DatabaseSchemaBuildAgent).mockImplementation(
+      () =>
+        ({
+          generate: mockGenerate,
+        }) as never,
+    )
 
     // Mock repository failure
     mockRepository.schema.createVersion.mockResolvedValue({

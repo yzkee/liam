@@ -24,7 +24,7 @@ export async function generateDDLNode(
     const result = postgresqlSchemaDeparser(state.schemaData)
     const ddlStatements = result.value
 
-    state.logger.log(`[${NODE_NAME}] Completed ${ddlStatements}`)
+    state.logger.log(`[${NODE_NAME}] Completed`)
 
     return {
       ...state,

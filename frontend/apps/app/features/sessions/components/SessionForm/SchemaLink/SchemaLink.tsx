@@ -32,6 +32,8 @@ export const SchemaLink: FC<Props> = ({
       onClick={handleClick}
       target="_blank"
       rel="noopener noreferrer"
+      aria-label={`View ${schemaName} schema (opens in new tab)`}
+      tabIndex={0}
     >
       <FormatIcon format={format} size={16} />
       <span className={styles.schemaName}>{schemaName}</span>

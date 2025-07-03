@@ -101,13 +101,6 @@ const parseDrizzleSchema = (
   relations: DrizzleRelationDefinition[]
 } => {
   try {
-    // Check if TypeScript is available
-    if (!ts || typeof ts.createSourceFile !== 'function') {
-      throw new Error(
-        'TypeScript is not available. Please ensure TypeScript is installed.',
-      )
-    }
-
     // Use appropriate TypeScript target
     const scriptTarget = getScriptTarget()
     const sourceFile = ts.createSourceFile(

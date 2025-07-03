@@ -40,13 +40,12 @@ describe(_processor, () => {
       },
     })
 
-  const processor = async (schema: string) => _processor(schema)
 
   const parserTestCases = createParserTestCases(userTable)
 
   describe('should parse drizzle schema correctly', () => {
     it('basic table with columns', async () => {
-      const { value } = await processor(`
+      const { value } = await _processor(`
         import { pgTable, serial, varchar } from 'drizzle-orm/pg-core';
 
         export const users = pgTable('users', {
@@ -69,7 +68,7 @@ describe(_processor, () => {
     })
 
     it('nullable column', async () => {
-      const { value } = await processor(`
+      const { value } = await _processor(`
         import { pgTable, serial, text } from 'drizzle-orm/pg-core';
 
         export const users = pgTable('users', {
@@ -82,7 +81,7 @@ describe(_processor, () => {
     })
 
     it('default value as string', async () => {
-      const { value } = await processor(`
+      const { value } = await _processor(`
         import { pgTable, serial, text } from 'drizzle-orm/pg-core';
 
         export const users = pgTable('users', {
@@ -95,7 +94,7 @@ describe(_processor, () => {
     })
 
     it('default value as integer', async () => {
-      const { value } = await processor(`
+      const { value } = await _processor(`
         import { pgTable, serial, integer } from 'drizzle-orm/pg-core';
 
         export const users = pgTable('users', {
@@ -119,7 +118,7 @@ describe(_processor, () => {
     })
 
     it('default value as boolean', async () => {
-      const { value } = await processor(`
+      const { value } = await _processor(`
         import { pgTable, serial, boolean } from 'drizzle-orm/pg-core';
 
         export const users = pgTable('users', {
@@ -143,7 +142,7 @@ describe(_processor, () => {
     })
 
     it('column comment', async () => {
-      const { value } = await processor(`
+      const { value } = await _processor(`
         import { pgTable, serial, text } from 'drizzle-orm/pg-core';
 
         export const users = pgTable('users', {
@@ -156,7 +155,7 @@ describe(_processor, () => {
     })
 
     it('table comment', async () => {
-      const { value } = await processor(`
+      const { value } = await _processor(`
         import { pgTable, serial } from 'drizzle-orm/pg-core';
 
         export const users = pgTable('users', {
@@ -168,7 +167,7 @@ describe(_processor, () => {
     })
 
     it('unique constraint', async () => {
-      const { value } = await processor(`
+      const { value } = await _processor(`
         import { pgTable, serial, varchar, unique } from 'drizzle-orm/pg-core';
 
         export const users = pgTable('users', {
@@ -205,7 +204,7 @@ describe(_processor, () => {
     })
 
     it('foreign key constraint (one-to-many)', async () => {
-      const { value } = await processor(`
+      const { value } = await _processor(`
         import { pgTable, serial, integer, varchar } from 'drizzle-orm/pg-core';
         import { relations } from 'drizzle-orm';
 
@@ -249,7 +248,7 @@ describe(_processor, () => {
     })
 
     it('foreign key constraint (one-to-one)', async () => {
-      const { value } = await processor(`
+      const { value } = await _processor(`
         import { pgTable, serial, integer, varchar } from 'drizzle-orm/pg-core';
         import { relations } from 'drizzle-orm';
 
@@ -319,7 +318,7 @@ describe(_processor, () => {
     })
 
     it('foreign key constraint with cascade actions', async () => {
-      const { value } = await processor(`
+      const { value } = await _processor(`
         import { pgTable, serial, integer, varchar } from 'drizzle-orm/pg-core';
 
         export const users = pgTable('users', {
@@ -351,7 +350,7 @@ describe(_processor, () => {
     })
 
     it('many-to-many relationship with junction table', async () => {
-      const { value } = await processor(`
+      const { value } = await _processor(`
         import { pgTable, serial, integer, varchar, primaryKey } from 'drizzle-orm/pg-core';
         import { relations } from 'drizzle-orm';
 
@@ -457,7 +456,7 @@ describe(_processor, () => {
     })
 
     it('composite index', async () => {
-      const { value } = await processor(`
+      const { value } = await _processor(`
         import { pgTable, serial, varchar, index } from 'drizzle-orm/pg-core';
 
         export const users = pgTable('users', {
@@ -482,7 +481,7 @@ describe(_processor, () => {
     })
 
     it('unique index', async () => {
-      const { value } = await processor(`
+      const { value } = await _processor(`
         import { pgTable, serial, varchar, uniqueIndex } from 'drizzle-orm/pg-core';
 
         export const users = pgTable('users', {
@@ -503,7 +502,7 @@ describe(_processor, () => {
     })
 
     it('multiple data types', async () => {
-      const { value } = await processor(`
+      const { value } = await _processor(`
         import { 
           pgTable, 
           serial, 
@@ -581,7 +580,7 @@ describe(_processor, () => {
     })
 
     it('enum type', async () => {
-      const { value } = await processor(`
+      const { value } = await _processor(`
         import { pgTable, serial, varchar, pgEnum } from 'drizzle-orm/pg-core';
 
         export const roleEnum = pgEnum('role', ['user', 'admin']);
@@ -613,7 +612,7 @@ describe(_processor, () => {
     })
 
     it('one-to-one relation without explicit fields/references', async () => {
-      const { value } = await processor(`
+      const { value } = await _processor(`
         import { pgTable, serial, integer, varchar } from 'drizzle-orm/pg-core';
         import { relations } from 'drizzle-orm';
 
@@ -676,7 +675,7 @@ describe(_processor, () => {
     })
 
     it('test actual schema from test_schema.ts pattern', async () => {
-      const { value } = await processor(`
+      const { value } = await _processor(`
         import {
           pgTable,
           pgEnum,

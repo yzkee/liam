@@ -39,8 +39,7 @@
       },
       "suspicious": {
         "noConsole": { "level": "error", "options": { "allow": ["warn", "error", "info", "debug"] } },
-        // TODO: Re-enable noDuplicateProperties after fixing duplicate property issues
-        "noDuplicateProperties": "off",
+        "noDuplicateProperties": "error",
         "noDocumentCookie": "error"
       },
       "a11y": {

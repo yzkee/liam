@@ -1,6 +1,10 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
 
+  // Disable lefthook plugin to avoid git worktree errors
+  // This is a workaround for: https://github.com/webpro-nl/knip/issues/990
+  "lefthook": false,
+
   // Files to ignore when analyzing
   "ignore": [
     // - config files

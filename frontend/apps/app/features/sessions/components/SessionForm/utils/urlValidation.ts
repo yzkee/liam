@@ -2,11 +2,17 @@ import type { FormatType } from '../../../../../components/FormatIcon/FormatIcon
 
 // Parse allowed domains from environment variable
 const parseAllowedDomains = (): string[] => {
-  const envDomains = process.env.NEXT_PUBLIC_ALLOWED_DOMAINS || ''
-  if (!envDomains) {
-    // Default allowed domains if env var is not set
-    return ['raw.githubusercontent.com', 'github.com', 'gitlab.com']
+  const envDomains = process.env.NEXT_PUBLIC_ALLOWED_DOMAINS
+
+  // If env var is not set or is empty string, return no allowed domains for security
+  // This prevents accidental exposure when NEXT_PUBLIC_ALLOWED_DOMAINS is not properly configured
+  if (!envDomains || envDomains.trim() === '') {
+    console.warn(
+      'NEXT_PUBLIC_ALLOWED_DOMAINS is not configured. No external domains will be allowed.',
+    )
+    return []
   }
+
   return envDomains
     .split(',')
     .map((domain) => domain.trim())

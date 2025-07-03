@@ -20,7 +20,6 @@ const isValidFileExtensionType = (
 ): extension is FileExtension => {
   return ['sql', 'rb', 'prisma', 'json'].includes(extension)
 }
-
 export const getFileFormat = (fileName: string): FormatType => {
   const extension = getFileExtension(fileName)
 

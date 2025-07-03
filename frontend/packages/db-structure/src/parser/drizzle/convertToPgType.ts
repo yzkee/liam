@@ -1,5 +1,6 @@
 /**
  * Convert Drizzle column types to PostgreSQL column types
+ * ref: https://orm.drizzle.team/docs/column-types/pg
  */
 export function convertDrizzleTypeToPgType(
   drizzleType: string,
@@ -82,14 +83,6 @@ export function convertDrizzleTypeToPgType(
     case 'defaultRandom':
       return 'uuid'
 
-    // Array types
-    case 'array':
-      return 'array'
-
-    // Binary types
-    case 'bytea':
-      return 'bytea'
-
     // Network types
     case 'inet':
       return 'inet'
@@ -97,36 +90,14 @@ export function convertDrizzleTypeToPgType(
       return 'cidr'
     case 'macaddr':
       return 'macaddr'
+    case 'macaddr8':
+      return 'macaddr8'
 
     // Geometric types
     case 'point':
       return 'point'
     case 'line':
       return 'line'
-    case 'lseg':
-      return 'lseg'
-    case 'box':
-      return 'box'
-    case 'path':
-      return 'path'
-    case 'polygon':
-      return 'polygon'
-    case 'circle':
-      return 'circle'
-
-    // Range types
-    case 'int4range':
-      return 'int4range'
-    case 'int8range':
-      return 'int8range'
-    case 'numrange':
-      return 'numrange'
-    case 'tsrange':
-      return 'tsrange'
-    case 'tstzrange':
-      return 'tstzrange'
-    case 'daterange':
-      return 'daterange'
 
     // Default case for custom types (enums, etc.)
     default:

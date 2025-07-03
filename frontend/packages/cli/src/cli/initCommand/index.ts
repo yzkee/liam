@@ -20,7 +20,7 @@ const formatMap: Record<string, string> = {
   PostgreSQL: 'postgres',
   'Ruby on Rails (schema.rb)': 'schemarb',
   'Prisma (schema.prisma)': 'prisma',
-  Drizzle: 'postgres', // Drizzle also uses --format postgres
+  'Drizzle (schema.ts)': 'drizzle',
   'MySQL (via tbls)': 'tbls',
   'SQLite (via tbls)': 'tbls',
   'BigQuery (via tbls)': 'tbls',

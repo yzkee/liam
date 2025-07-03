@@ -397,48 +397,46 @@ function extractColumnNameFromTypeCall(expr: ts.Expression): string | null {
 
 /**
  * Check if a function name is a known Drizzle type function
+ * Based on: https://github.com/drizzle-team/drizzle-orm/blob/main/drizzle-orm/src/pg-core/columns/index.ts
  */
 function isDrizzleTypeFunction(name: string): boolean {
   const drizzleTypes = [
+    // Integer types
     'serial',
     'bigserial',
     'smallserial',
     'integer',
     'bigint',
     'smallint',
+    // Text types
     'text',
     'varchar',
     'char',
+    // Boolean type
     'boolean',
+    // Date/Time types
     'timestamp',
     'date',
     'time',
+    'interval',
+    // Numeric types
     'numeric',
     'decimal',
     'real',
     'doublePrecision',
+    // JSON types
     'json',
     'jsonb',
+    // UUID type
     'uuid',
-    'bytea',
-    'interval',
-    'point',
-    'line',
-    'lseg',
-    'box',
-    'path',
-    'polygon',
-    'circle',
+    // Network types
     'cidr',
     'inet',
     'macaddr',
     'macaddr8',
-    'bit',
-    'varbit',
-    'tsvector',
-    'tsquery',
-    'xml',
-    'money',
+    // Geometric types
+    'point',
+    'line',
   ]
   return drizzleTypes.includes(name)
 }

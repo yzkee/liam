@@ -8,6 +8,7 @@ const nameToFormatMap: Record<string, SupportedFormat> = {
   schemafile: 'schemarb',
   'prisma.schema': 'prisma',
   'schema.json': 'tbls',
+  'schema.ts': 'drizzle',
 }
 
 const extensionToFormatMap: Record<string, SupportedFormat> = {

@@ -130,8 +130,6 @@ export const SchemaInfoSection: FC<Props> = ({
                 {showRemoveButton && onRemove && (
                   <RemoveButton
                     onClick={onRemove}
-                    variant="solid"
-                    size="sm"
                     className={styles.removeButton}
                     aria-label="Remove schema"
                   />

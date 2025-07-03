@@ -119,7 +119,7 @@ function parseDrizzleSchema(sourceCode: string): {
     const enums: Record<string, DrizzleEnumDefinition> = {}
     const relations: DrizzleRelationDefinition[] = []
 
-    function visit(node: ts.Node) {
+    const visit = (node: ts.Node) => {
       // Parse pgTable definitions
       if (ts.isVariableStatement(node)) {
         const declaration = node.declarationList.declarations[0]

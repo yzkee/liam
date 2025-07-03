@@ -3,7 +3,7 @@ pre-commit:
   commands:
     lint:
       glob: "*.{js,jsx,ts,tsx,json,md,mdx,yml,yaml}"
-      run: pnpm lint:staged
+      run: pnpm lint
       stage_fixed: true
       skip:
         - merge

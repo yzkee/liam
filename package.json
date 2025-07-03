@@ -29,7 +29,6 @@
     "gen:turbo": "turbo gen",
     "lint": "pnpm lint:turbo && pnpm lint:syncpack && pnpm lint:knip",
     "lint:knip": "knip --treat-config-hints-as-errors",
-    "lint:staged": "turbo lint --filter='[HEAD^1]' && pnpm lint:syncpack && pnpm lint:knip",
     "lint:syncpack": "syncpack lint",
     "lint:turbo": "turbo lint",
     "prebuild": "pnpm create-env-files",

@@ -95,7 +95,8 @@
   background-color: var(--overlay-5);
   border: 1px solid var(--overlay-5);
   border-radius: var(--border-radius-base);
-  padding: var(--spacing-1half) var(--spacing-1half);
+  padding: var(--spacing-1half);
+  padding-right: calc(var(--spacing-1half) + 14px + var(--spacing-1half)); /* RemoveButton幅 + gap */
   position: relative;
 }
 
@@ -106,11 +107,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  flex: 1;
 }
 
 .removeButton {
   position: absolute;
-  right: var(--spacing-1);
+  right: var(--spacing-1half);
   top: 50%;
   transform: translateY(-50%);
 }

@@ -74,8 +74,8 @@ export const URLSessionFormPresenter: FC<Props> = ({
     setSchemaErrorDetails([])
     // Reset file attachments through the hook
     if (attachments.length > 0) {
-      attachments.forEach((attachment) => {
-        handleRemoveAttachment(attachment.id)
+      attachments.forEach((_, index) => {
+        handleRemoveAttachment(index)
       })
     }
   }

@@ -485,7 +485,7 @@ describe(processor, () => {
     })
   })
 
-  describe('Long "create table" statement (surpassing CHUNK_SIZE)', () => {
+  describe('Long "create table" statement (surpassing CHUNK_SIZE). regression test for liam-hq/liam#874', () => {
     // Use smaller chunkSize for faster testing
     const testChunkSize = 10
 
@@ -507,7 +507,7 @@ describe(processor, () => {
     })
   })
 
-  describe('Long "create function" statement (surpassing CHUNK_SIZE)', () => {
+  describe('Long "create function" statement (surpassing CHUNK_SIZE). regression test for liam-hq/liam#874', () => {
     // Use smaller chunkSize for faster testing
     const testChunkSize = 10
 

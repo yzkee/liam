@@ -1,4 +1,11 @@
-import { AlertTriangle, Check, Code, RemoveButton, Spinner } from '@liam-hq/ui'
+import {
+  AlertTriangle,
+  Check,
+  Code,
+  RemoveButton,
+  type SchemaStatus,
+  Spinner,
+} from '@liam-hq/ui'
 import type { FC, ReactNode } from 'react'
 import type { FormatType } from '../../../../../components/FormatIcon/FormatIcon'
 import { FormatIcon } from '../../../../../components/FormatIcon/FormatIcon'
@@ -6,8 +13,6 @@ import { FormatSelectDropdown } from '../FormatSelectDropdown'
 import { SchemaLink } from '../SchemaLink'
 import { type ErrorInfo, ViewErrorsCollapsible } from '../ViewErrorsCollapsible'
 import styles from './SchemaInfoSection.module.css'
-
-export type SchemaStatus = 'idle' | 'validating' | 'valid' | 'invalid'
 
 // Helper function to parse error message and wrap code in backticks with Code component
 const parseErrorMessage = (message: string): ReactNode => {

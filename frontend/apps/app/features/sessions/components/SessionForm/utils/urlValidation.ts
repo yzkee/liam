@@ -203,10 +203,18 @@ export const fetchSchemaFromUrl = async (
     }
   }
 
-  // Check if domain is in the allowed list (applies to all environments)
-  const isDomainAllowed = allowedDomains.some(
-    (domain) => hostname === domain || hostname.endsWith(`.${domain}`),
-  )
+  // Check if domain is in the allowed list with look-alike protection
+  const isDomainAllowed = allowedDomains.some((domain) => {
+    if (hostname === domain) return true
+
+    if (hostname.endsWith(`.${domain}`)) {
+      const beforeDomain = hostname.slice(0, -(domain.length + 1))
+      if (beforeDomain.endsWith('-')) return false // Block evil-github.com
+      return true
+    }
+
+    return false
+  })
 
   // In development, also allow localhost with the additional checks above
   const isLocalhostAllowed =

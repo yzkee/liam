@@ -69,7 +69,7 @@ export const isValidSchemaUrl = (url: string): boolean => {
     /%00/, // URL-encoded null bytes
   ]
 
-  if (suspiciousPatterns.some((pattern) => pattern.test(url))) {
+  if (suspiciousPatterns.some((pattern) => pattern.test(pathname))) {
     return false
   }
 

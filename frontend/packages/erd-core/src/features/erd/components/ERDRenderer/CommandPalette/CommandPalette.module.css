@@ -136,6 +136,7 @@
   overflow-x: hidden;
   overflow-y: scroll;
   scrollbar-color: var(--overlay-20) transparent;
+  border-radius: var(--border-radius-lg-plus);
 }
 
 /* Empty search result display */

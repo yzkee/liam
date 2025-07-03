@@ -12,3 +12,6 @@ benchmark-workspace/
 
 # Claude local settings
 .claude/settings.local.json
+
+# Lefthook local config
+lefthook-local.yml

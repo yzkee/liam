@@ -125,7 +125,6 @@ describe('designSchemaNode -> generateDDLNode integration', () => {
     expect(afterDDL.ddlStatements).toContain('CREATE TABLE "users"')
     expect(afterDDL.ddlStatements).toContain('"id" INTEGER NOT NULL')
     expect(afterDDL.ddlStatements).toContain('"name" VARCHAR NOT NULL')
-
   })
 
   it('should handle JSON patch operation errors gracefully', async () => {

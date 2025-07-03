@@ -41,7 +41,7 @@ describe('DDL Function Syntax', () => {
       const result = postgresqlSchemaDeparser(schema)
 
       expect(result.errors).toHaveLength(0)
-      
+
       // Function calls should not be quoted
       expect(result.value).toContain('DEFAULT gen_random_uuid()')
       expect(result.value).not.toContain("DEFAULT 'gen_random_uuid()'")
@@ -79,7 +79,7 @@ describe('DDL Function Syntax', () => {
       const result = postgresqlSchemaDeparser(schema)
 
       expect(result.errors).toHaveLength(0)
-      
+
       // String literals should still be quoted
       expect(result.value).toContain("DEFAULT 'active'")
       expect(result.value).toContain("DEFAULT 'user'")
@@ -111,7 +111,7 @@ describe('DDL Function Syntax', () => {
       const result = postgresqlSchemaDeparser(schema)
 
       expect(result.errors).toHaveLength(0)
-      
+
       // Boolean and numeric defaults should not be quoted
       expect(result.value).toContain('DEFAULT FALSE')
       expect(result.value).toContain('DEFAULT 0')
@@ -151,7 +151,7 @@ describe('DDL Function Syntax', () => {
       const result = postgresqlSchemaDeparser(schema)
 
       expect(result.errors).toHaveLength(0)
-      
+
       // Function calls should not be quoted
       expect(result.value).toContain('DEFAULT current_timestamp')
       expect(result.value).toContain('DEFAULT random()')
@@ -185,7 +185,7 @@ describe('DDL Function Syntax', () => {
                 name: 'truncated_date',
                 type: 'date',
                 notNull: true,
-                default: 'date_trunc(\'day\', now())', // Function with quoted argument
+                default: "date_trunc('day', now())", // Function with quoted argument
               }),
             },
           }),
@@ -195,16 +195,18 @@ describe('DDL Function Syntax', () => {
       const result = postgresqlSchemaDeparser(schema)
 
       expect(result.errors).toHaveLength(0)
-      
+
       // Complex function calls should not be quoted
       expect(result.value).toContain('DEFAULT extract(epoch from now())')
       expect(result.value).toContain('DEFAULT age(current_date)')
-      expect(result.value).toContain('DEFAULT date_trunc(\'day\', now())')
+      expect(result.value).toContain("DEFAULT date_trunc('day', now())")
 
       // Should not contain quoted versions
       expect(result.value).not.toContain("DEFAULT 'extract(epoch from now())'")
       expect(result.value).not.toContain("DEFAULT 'age(current_date)'")
-      expect(result.value).not.toContain("DEFAULT 'date_trunc(\\'day\\', now())'")
+      expect(result.value).not.toContain(
+        "DEFAULT 'date_trunc(\\'day\\', now())'",
+      )
     })
 
     it('should handle UUID generation functions correctly', () => {
@@ -239,7 +241,7 @@ describe('DDL Function Syntax', () => {
       const result = postgresqlSchemaDeparser(schema)
 
       expect(result.errors).toHaveLength(0)
-      
+
       // UUID functions should not be quoted
       expect(result.value).toContain('DEFAULT uuid_generate_v4()')
       expect(result.value).toContain('DEFAULT uuid_generate_v1()')
@@ -289,7 +291,7 @@ describe('DDL Function Syntax', () => {
       const result = postgresqlSchemaDeparser(schema)
 
       expect(result.errors).toHaveLength(0)
-      
+
       // Mathematical functions should not be quoted
       expect(result.value).toContain('DEFAULT random()')
       expect(result.value).toContain('DEFAULT floor(random() * 100)')
@@ -347,18 +349,18 @@ describe('DDL Function Syntax', () => {
       const result = postgresqlSchemaDeparser(schema)
 
       expect(result.errors).toHaveLength(0)
-      
+
       // Functions should not be quoted
       expect(result.value).toContain('DEFAULT gen_random_uuid()')
       expect(result.value).toContain('DEFAULT now()')
-      
+
       // String literals should be quoted
       expect(result.value).toContain("DEFAULT 'pending'")
-      
+
       // Boolean and numeric values should not be quoted
       expect(result.value).toContain('DEFAULT TRUE')
       expect(result.value).toContain('DEFAULT 0')
-      
+
       // Ensure functions are not quoted
       expect(result.value).not.toContain("DEFAULT 'gen_random_uuid()'")
       expect(result.value).not.toContain("DEFAULT 'now()'")

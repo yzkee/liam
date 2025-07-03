@@ -360,11 +360,11 @@ function parsePgTableCall(
 /**
  * Extract column name from type call (first argument)
  */
-function extractColumnNameFromTypeCall(expr: ts.Expression): string | null {
+const extractColumnNameFromTypeCall = (expr: ts.Expression): string | null => {
   // For method chains like integer('user_id').notNull().unique().references(...)
   // we need to find the base type call (integer) and get its first argument
 
-  function findBaseTypeCall(expr: ts.Expression): ts.CallExpression | null {
+  const findBaseTypeCall = (expr: ts.Expression): ts.CallExpression | null => {
     if (ts.isCallExpression(expr)) {
       if (ts.isIdentifier(expr.expression)) {
         // This is a direct function call like integer('user_id')
@@ -399,7 +399,7 @@ function extractColumnNameFromTypeCall(expr: ts.Expression): string | null {
  * Check if a function name is a known Drizzle type function
  * Based on: https://github.com/drizzle-team/drizzle-orm/blob/main/drizzle-orm/src/pg-core/columns/index.ts
  */
-function isDrizzleTypeFunction(name: string): boolean {
+const isDrizzleTypeFunction = (name: string): boolean => {
   const drizzleTypes = [
     // Integer types
     'serial',

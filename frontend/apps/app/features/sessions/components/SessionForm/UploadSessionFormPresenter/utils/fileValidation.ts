@@ -15,6 +15,12 @@ const getFileExtension = (fileName: string): string => {
 
 type FileExtension = 'sql' | 'rb' | 'prisma' | 'json'
 
+const isValidFileExtensionType = (
+  extension: string,
+): extension is FileExtension => {
+  return ['sql', 'rb', 'prisma', 'json'].includes(extension)
+}
+
 export const getFileFormat = (fileName: string): FormatType => {
   const extension = getFileExtension(fileName)
 
@@ -25,8 +31,8 @@ export const getFileFormat = (fileName: string): FormatType => {
     json: 'tbls',
   }
 
-  if (extension && extension in formatMap) {
-    return formatMap[extension as keyof typeof formatMap]
+  if (extension && isValidFileExtensionType(extension)) {
+    return formatMap[extension]
   }
   return 'postgres'
 }

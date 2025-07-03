@@ -25,6 +25,7 @@ export async function generateDDLNode(
     const ddlStatements = result.value
 
     // Log detailed information about what was generated
+    // TODO: Remove this detailed logging once the feature is stable and working properly
     const tableCount = Object.keys(state.schemaData.tables).length
     const ddlLength = ddlStatements.length
 

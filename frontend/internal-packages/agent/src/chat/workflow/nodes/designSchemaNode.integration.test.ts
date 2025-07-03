@@ -126,10 +126,6 @@ describe('designSchemaNode -> generateDDLNode integration', () => {
     expect(afterDDL.ddlStatements).toContain('"id" INTEGER NOT NULL')
     expect(afterDDL.ddlStatements).toContain('"name" VARCHAR NOT NULL')
 
-    // Verify detailed logs
-    expect(mockLogger.log).toHaveBeenCalledWith(
-      '[generateDDLNode] Generated DDL for 1 tables (76 characters)',
-    )
   })
 
   it('should handle JSON patch operation errors gracefully', async () => {

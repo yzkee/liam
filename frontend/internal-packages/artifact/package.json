@@ -1,28 +1,14 @@
 {
   "name": "@liam-hq/artifact",
-  "description": "Artifact types and utilities for Liam ERD",
-  "keywords": [
-    "artifact",
-    "erd",
-    "types"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/liam-hq/liam",
-    "directory": "frontend/internal-packages/artifact"
-  },
   "license": "Apache-2.0",
   "version": "0.0.0",
   "type": "module",
   "publishConfig": {
     "access": "restricted"
   },
-  "main": "./src/index.ts",
+  "main": "src/index.ts",
   "exports": {
-    ".": {
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
-    }
+    ".": "./src/index.ts"
   },
   "dependencies": {
     "valibot": "1.1.0"
@@ -34,13 +20,8 @@
     "typescript": "5.8.3"
   },
   "scripts": {
-    "dev": "tsc --watch",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "lint:tsc": "tsc --noEmit"
-  },
-  "files": [
-    "src"
-  ],
-  "types": "./src/index.ts"
+  }
 }

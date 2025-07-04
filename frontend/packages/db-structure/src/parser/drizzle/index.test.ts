@@ -40,7 +40,6 @@ describe(_processor, () => {
       },
     })
 
-
   const parserTestCases = createParserTestCases(userTable)
 
   describe('should parse drizzle schema correctly', () => {

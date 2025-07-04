@@ -3,4 +3,4 @@
 "@liam-hq/cli": patch
 ---
 
-✨ Add Drizzle ORM schema parser support
+✨ [Experimental]Add Drizzle ORM schema parser support

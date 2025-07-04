@@ -1,3 +1,4 @@
+import commonjs from '@rollup/plugin-commonjs'
 import resolve from '@rollup/plugin-node-resolve'
 import execute from 'rollup-plugin-execute'
 import { swc } from 'rollup-plugin-swc3'
@@ -24,6 +25,7 @@ export default {
       },
     }),
     execute('chmod +x dist-cli/bin/cli.js'),
+    commonjs(),
   ],
-  external: ['commander', 'inquirer', '@prisma/internals', 'glob', '@swc/core'],
+  external: ['commander', 'inquirer', '@prisma/internals', 'glob', '@swc/core', 'ink'],
 }

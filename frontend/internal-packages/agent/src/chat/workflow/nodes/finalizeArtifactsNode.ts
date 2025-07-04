@@ -82,10 +82,14 @@ export async function finalizeArtifactsNode(
 ): Promise<WorkflowState> {
   state.logger.log(`[${NODE_NAME}] Started`)
 
-  if (state.onNodeProgress) {
-    await state.onNodeProgress(
-      'finalizeArtifacts',
-      getWorkflowNodeProgress('finalizeArtifacts'),
+  // Update progress message if available
+  if (state.progressTimelineItemId) {
+    await state.repositories.schema.updateTimelineItem(
+      state.progressTimelineItemId,
+      {
+        content: 'Processing: finalizeArtifacts',
+        progress: getWorkflowNodeProgress('finalizeArtifacts'),
+      },
     )
   }
 

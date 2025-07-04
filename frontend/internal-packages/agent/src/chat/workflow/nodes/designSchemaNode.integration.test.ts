@@ -2,7 +2,7 @@ import type { Schema } from '@liam-hq/db-structure'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { WorkflowState } from '../types'
 import { designSchemaNode } from './designSchemaNode'
-import { generateDDLNode } from './generateDDLNode'
+import { executeDDLNode } from './executeDDLNode'
 
 // Mock the database schema build agent
 vi.mock('../../../langchain/agents', () => ({
@@ -11,7 +11,12 @@ vi.mock('../../../langchain/agents', () => ({
   })),
 }))
 
-describe('designSchemaNode -> generateDDLNode integration', () => {
+// Mock executeQuery for DDL execution
+vi.mock('@liam-hq/pglite-server', () => ({
+  executeQuery: vi.fn(),
+}))
+
+describe('designSchemaNode -> executeDDLNode integration', () => {
   const mockLogger = {
     log: vi.fn(),
     debug: vi.fn(),
@@ -45,7 +50,7 @@ describe('designSchemaNode -> generateDDLNode integration', () => {
     vi.clearAllMocks()
   })
 
-  it('should update schemaData and pass it to generateDDLNode', async () => {
+  it('should update schemaData and execute DDL in executeDDLNode', async () => {
     // Mock empty initial schema
     const initialSchema: Schema = { tables: {} }
 
@@ -118,13 +123,33 @@ describe('designSchemaNode -> generateDDLNode integration', () => {
       '[designSchemaNode] Applied 1 schema changes successfully (1 tables)',
     )
 
-    // Step 2: Generate DDL (should now work with updated schema)
-    const afterDDL = await generateDDLNode(afterDesign)
+    // Mock successful DDL execution
+    const { executeQuery } = await import('@liam-hq/pglite-server')
+    vi.mocked(executeQuery).mockResolvedValue([
+      {
+        success: true,
+        sql: 'CREATE TABLE "users"...',
+        result: {},
+        id: 'test-result-id',
+        metadata: {
+          executionTime: 10,
+          timestamp: new Date().toISOString(),
+          affectedRows: 0,
+        },
+      },
+    ])
 
-    // Verify DDL generation worked
+    // Step 2: Execute DDL (should generate DDL and execute it)
+    const afterDDL = await executeDDLNode(afterDesign)
+
+    // Verify DDL generation and execution worked
     expect(afterDDL.ddlStatements).toContain('CREATE TABLE "users"')
     expect(afterDDL.ddlStatements).toContain('"id" INTEGER NOT NULL')
     expect(afterDDL.ddlStatements).toContain('"name" VARCHAR NOT NULL')
+    expect(executeQuery).toHaveBeenCalledWith(
+      'test-session',
+      expect.stringContaining('CREATE TABLE "users"'),
+    )
   })
 
   it('should handle JSON patch operation errors gracefully', async () => {

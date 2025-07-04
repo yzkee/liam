@@ -5,7 +5,6 @@ import {
   designSchemaNode,
   executeDDLNode,
   finalizeArtifactsNode,
-  generateDDLNode,
   generateUsecaseNode,
   prepareDMLNode,
   reviewDeliverablesNode,
@@ -42,9 +41,6 @@ const createGraph = () => {
     .addNode('designSchema', designSchemaNode, {
       retryPolicy: RETRY_POLICY,
     })
-    .addNode('generateDDL', generateDDLNode, {
-      retryPolicy: RETRY_POLICY,
-    })
     .addNode('executeDDL', executeDDLNode, {
       retryPolicy: RETRY_POLICY,
     })
@@ -66,7 +62,6 @@ const createGraph = () => {
 
     .addEdge(START, 'saveUserMessage')
     .addEdge('analyzeRequirements', 'designSchema')
-    .addEdge('generateDDL', 'executeDDL')
     .addEdge('executeDDL', 'generateUsecase')
     .addEdge('generateUsecase', 'prepareDML')
     .addEdge('prepareDML', 'validateSchema')
@@ -79,7 +74,7 @@ const createGraph = () => {
 
     // Conditional edge for designSchema - skip to finalizeArtifacts if error
     .addConditionalEdges('designSchema', (state) => {
-      return state.error ? 'finalizeArtifacts' : 'generateDDL'
+      return state.error ? 'finalizeArtifacts' : 'executeDDL'
     })
 
     // Conditional edges for validation results

@@ -27,5 +27,12 @@ export default {
     execute('chmod +x dist-cli/bin/cli.js'),
     commonjs(),
   ],
-  external: ['commander', 'inquirer', '@prisma/internals', 'glob', '@swc/core', 'ink'],
+  external: [
+    'commander',
+    'inquirer',
+    '@prisma/internals',
+    'glob',
+    '@swc/core',
+    'ink',
+  ],
 }

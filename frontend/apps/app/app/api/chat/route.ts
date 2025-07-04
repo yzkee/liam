@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { processChatTask } from '@liam-hq/jobs'
+import { deepModelingWorkflowTask } from '@liam-hq/jobs'
 import { idempotencyKeys } from '@trigger.dev/sdk'
 import { NextResponse } from 'next/server'
 import * as v from 'valibot'
@@ -59,8 +59,8 @@ export async function POST(request: Request) {
     `chat-${validationResult.output.designSessionId}-${payloadHash}`,
   )
 
-  // Trigger the chat processing job with idempotency key
-  await processChatTask.trigger(jobPayload, {
+  // Trigger the Deep Modeling workflow with idempotency key
+  await deepModelingWorkflowTask.trigger(jobPayload, {
     idempotencyKey,
   })
 

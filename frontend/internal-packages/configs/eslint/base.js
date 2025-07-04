@@ -42,7 +42,10 @@ export function createBaseConfig(options = {}) {
         'require-use-server/require-use-server': 'error',
         'no-non-english/no-non-english-characters': 'error',
         'no-restricted-exports': ['error', {
-          'restrictedNamedExports': ['*']
+          'restrictedNamedExports': ['*'],
+          'restrictDefaultExports': {
+            'namedFrom': true
+          }
         }],
       },
     },

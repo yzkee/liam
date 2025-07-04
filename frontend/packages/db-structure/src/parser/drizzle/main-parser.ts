@@ -116,7 +116,7 @@ const visitVariableDeclarator = (
 /**
  * Main processor function for Drizzle schemas
  */
-const parseDrizzleSchemaString = async (
+const parseDrizzleSchemaString = (
   schemaString: string,
 ): Promise<ProcessResult> => {
   try {
@@ -126,19 +126,19 @@ const parseDrizzleSchemaString = async (
       enums,
     )
 
-    return {
+    return Promise.resolve({
       value: { tables },
       errors,
-    }
+    })
   } catch (error) {
-    return {
+    return Promise.resolve({
       value: { tables: {} },
       errors: [
         new Error(
           `Error parsing Drizzle schema: ${error instanceof Error ? error.message : String(error)}`,
         ),
       ],
-    }
+    })
   }
 }
 

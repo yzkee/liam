@@ -97,26 +97,24 @@ const handleDrizzlePrompts = async (): Promise<{
   inputFilePath: string
   cannotSupportNow: boolean
 }> => {
-  const { usePostgres } = await inquirer.prompt<{ usePostgres: boolean }>([
+  const { schemaFilePath } = await inquirer.prompt<{
+    schemaFilePath: string
+  }>([
     {
-      type: 'confirm',
-      name: 'usePostgres',
-      message: 'Using PostgreSQL?',
-      default: false,
+      type: 'input',
+      name: 'schemaFilePath',
+      message: 'What is the path to your Drizzle schema file?',
+      default: 'src/db/schema.ts',
     },
   ])
 
-  if (usePostgres) {
-    // Show Drizzle-specific guidance
-    console.info(`
+  console.info(`
 ${yocto.yellow(
-  `For Drizzle, please run your DB migrations, then use 'pg_dump --schema-only' to generate a dump file. You can then use it with --format postgres.`,
+  'Note: Drizzle support is experimental. Please let us know if you encounter any issues.',
 )}
 `)
-    return { inputFilePath: '', cannotSupportNow: false }
-  }
 
-  return { inputFilePath: '', cannotSupportNow: true }
+  return { inputFilePath: schemaFilePath, cannotSupportNow: false }
 }
 
 /**

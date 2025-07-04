@@ -58,8 +58,7 @@
         // TODO: Re-enable noUselessUndefinedInitialization after fixing undefined initialization issues
         "noUselessUndefinedInitialization": "off",
         "useDateNow": "error",
-        // TODO: Re-enable noUselessFragments after removing unnecessary fragments
-        "noUselessFragments": "off"
+        "noUselessFragments": "error"
       },
       "style": {
         "noParameterAssign": "error",

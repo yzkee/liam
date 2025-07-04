@@ -196,7 +196,7 @@ export const deepModeling = async (
       success: true,
     }
   } catch (error) {
-    console.error(WORKFLOW_ERROR_MESSAGES.LANGGRAPH_FAILED, error)
+    logger.error(WORKFLOW_ERROR_MESSAGES.LANGGRAPH_FAILED, error)
 
     // Even with LangGraph execution failure, go through finalizeArtifactsNode to ensure proper response
     const errorMessage =

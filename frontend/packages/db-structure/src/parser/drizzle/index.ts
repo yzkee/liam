@@ -1,1 +1,1 @@
-export { processor } from './parser.js'
+export { processor } from './main-parser.js'

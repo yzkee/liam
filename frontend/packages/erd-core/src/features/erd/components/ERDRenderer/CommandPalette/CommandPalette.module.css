@@ -57,15 +57,22 @@
 .searchFormWithIcon {
   display: flex;
   flex-grow: 1;
-  padding: var(--spacing-2) 0;
-  gap: var(--spacing-2);
+  position: relative;
+  align-items: center;
 }
 
 .searchFormWithIcon [cmdk-input] {
+  padding: var(--spacing-2) 0 var(--spacing-2) var(--spacing-6);
   width: 100%;
+  border-radius: var(--border-radius-smbase);
+}
+
+.searchFormWithIcon [cmdk-input]:focus-visible {
+  outline: 1px solid var(--button-primary-background);
 }
 
 .searchIcon {
+  position: absolute;
   width: 16px;
   height: 16px;
   color: var(--overlay-60);
@@ -78,7 +85,6 @@
 }
 
 .main [cmdk-list] {
-  overflow-x: hidden;
   overflow-y: scroll;
   height: 100%;
   width: 300px;
@@ -95,6 +101,13 @@
   padding: var(--spacing-2);
   align-items: center;
   line-height: 24px;
+}
+
+.main [cmdk-item] .itemInner .itemText {
+  font-size: var(--font-size-5);
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .main [cmdk-item] .itemInner .itemIcon {
@@ -129,6 +142,7 @@
   overflow-x: hidden;
   overflow-y: scroll;
   scrollbar-color: var(--overlay-20) transparent;
+  border-radius: var(--border-radius-lg-plus);
 }
 
 /* Empty search result display */

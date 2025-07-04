@@ -37,6 +37,8 @@ const nextConfig: NextConfig = {
         '@prisma/internals',
         '@prisma/prisma-schema-wasm',
         '@prisma/schema-files-loader',
+        '@swc/core',
+        '@swc/wasm',
       )
     } else {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -63,6 +65,10 @@ const nextConfig: NextConfig = {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       config.externals['@prisma/schema-files-loader'] =
         '@prisma/schema-files-loader'
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      config.externals['@swc/core'] = '@swc/core'
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      config.externals['@swc/wasm'] = '@swc/wasm'
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access

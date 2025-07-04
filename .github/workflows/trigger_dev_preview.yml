@@ -15,7 +15,7 @@ jobs:
       contents: read
       pull-requests: read
     outputs:
-      has-changes: ${{ steps.changes.outputs.has-changes }}
+      should-deploy-preview: ${{ steps.changes.outputs.should-deploy-preview }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -24,7 +24,7 @@ jobs:
         id: changes
         with:
           filters: |
-            has-changes:
+            should-deploy-preview:
               - '.github/workflows/trigger_dev_preview.yml'
               - 'frontend/apps/app/**'
               - 'frontend/internal-packages/**'
@@ -38,7 +38,7 @@ jobs:
 
   trigger_dev:
     needs: [setup-job]
-    if: ${{ github.event.action != 'closed' && needs.setup-job.outputs.has-changes == 'true' }}
+    if: ${{ github.event.action != 'closed' && needs.setup-job.outputs.should-deploy-preview == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -116,6 +116,7 @@ jobs:
           done
 
   cleanup_stale:
+    needs: [archive_preview]
     if: github.event.action == 'closed' && always()
     runs-on: ubuntu-latest
     timeout-minutes: 15

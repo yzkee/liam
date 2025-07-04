@@ -118,7 +118,7 @@ export const executeWorkflow = async (
       recursionLimit,
     })
 
-    return result as WorkflowState
+    return result
   } catch (error) {
     console.error(WORKFLOW_ERROR_MESSAGES.LANGGRAPH_FAILED, error)
 

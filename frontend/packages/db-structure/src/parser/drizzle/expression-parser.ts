@@ -103,7 +103,7 @@ const parseUnknownValue = (value: unknown): unknown => {
 /**
  * Parse property value (including arrays)
  */
-export const parsePropertyValue = (expr: unknown): unknown => {
+const parsePropertyValue = (expr: unknown): unknown => {
   if (isArrayExpression(expr)) {
     const result: unknown[] = []
     for (const element of expr.elements) {

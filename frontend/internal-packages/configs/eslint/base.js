@@ -41,6 +41,15 @@ export function createBaseConfig(options = {}) {
         '@typescript-eslint/no-unsafe-member-access': 'error',
         'require-use-server/require-use-server': 'error',
         'no-non-english/no-non-english-characters': 'error',
+        'no-restricted-exports': ['error', {
+          'restrictedNamedExports': ['*']
+        }],
+      },
+    },
+    {
+      files: ['index.ts', '**/index.ts'],
+      rules: {
+        'no-restricted-exports': 'off',
       },
     },
     {

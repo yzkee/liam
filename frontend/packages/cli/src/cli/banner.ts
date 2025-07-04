@@ -36,7 +36,7 @@ const shortAsciiArt = `
 
 const Banner = () => {
   const asciiArt =
-    process.stdout.columns > longAsciiArtSafeWidth
+    (process.stdout.columns || 80) > longAsciiArtSafeWidth
       ? longAsciiArt
       : shortAsciiArt
   return React.createElement(Gradient, {

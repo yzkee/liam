@@ -20,7 +20,7 @@ const formatMap: Record<string, string> = {
   PostgreSQL: 'postgres',
   'Ruby on Rails (schema.rb)': 'schemarb',
   'Prisma (schema.prisma)': 'prisma',
-  'Drizzle (schema.ts)': 'drizzle',
+  'Drizzle (schema.ts) [Experimental]': 'drizzle',
   'MySQL (via tbls)': 'tbls',
   'SQLite (via tbls)': 'tbls',
   'BigQuery (via tbls)': 'tbls',
@@ -225,7 +225,10 @@ const displayNextSteps = (
         '   $ npx @liam-hq/cli erd build --input schema.json --format tbls',
       ),
     )
-  } else if (dbOrOrm === 'Drizzle' && !inputFilePath) {
+  } else if (
+    dbOrOrm === 'Drizzle (schema.ts) [Experimental]' &&
+    !inputFilePath
+  ) {
     // If user is using Drizzle but didn't specify any input file,
     // advise them to eventually produce a dump file.
     console.info(
@@ -349,7 +352,7 @@ initCommand.action(async () => {
         'PostgreSQL',
         'Ruby on Rails (schema.rb)',
         'Prisma (schema.prisma)',
-        'Drizzle',
+        'Drizzle (schema.ts) [Experimental]',
         'tbls',
         'MySQL (via tbls)',
         'SQLite (via tbls)',
@@ -366,7 +369,7 @@ initCommand.action(async () => {
 
   if (dbOrOrm === 'PostgreSQL') {
     inputFilePath = await handlePostgresPrompts()
-  } else if (dbOrOrm === 'Drizzle') {
+  } else if (dbOrOrm === 'Drizzle (schema.ts) [Experimental]') {
     const result = await handleDrizzlePrompts()
     inputFilePath = result.inputFilePath
     cannotSupportNow = result.cannotSupportNow

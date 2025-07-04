@@ -47,6 +47,15 @@ export type DeepModelingResult =
     }
 
 /**
+ * Format chat history array into a string
+ * @param history - Array of formatted chat history strings
+ * @returns Formatted chat history string or default message if empty
+ */
+const formatChatHistory = (history: string[]): string => {
+  return history.length > 0 ? history.join('\n') : 'No previous conversation.'
+}
+
+/**
  * Retry policy configuration for all nodes
  */
 const RETRY_POLICY = {
@@ -157,11 +166,6 @@ export const deepModeling = async (
     return `${prefix}: ${content}`
   })
 
-  // Format chat history
-  const formatChatHistory = (history: string[]): string => {
-    return history.length > 0 ? history.join('\n') : 'No previous conversation.'
-  }
-
   // Create workflow state
   const workflowState: WorkflowState = {
     userInput: userInput,
@@ -196,7 +200,7 @@ export const deepModeling = async (
       success: true,
     }
   } catch (error) {
-    logger.error(WORKFLOW_ERROR_MESSAGES.LANGGRAPH_FAILED, error)
+    logger.error(WORKFLOW_ERROR_MESSAGES.LANGGRAPH_FAILED, { error })
 
     // Even with LangGraph execution failure, go through finalizeArtifactsNode to ensure proper response
     const errorMessage =

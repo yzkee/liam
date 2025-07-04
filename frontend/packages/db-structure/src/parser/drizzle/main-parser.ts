@@ -116,9 +116,9 @@ const visitVariableDeclarator = (
 /**
  * Main processor function for Drizzle schemas
  */
-async function parseDrizzleSchemaString(
+const parseDrizzleSchemaString = async (
   schemaString: string,
-): Promise<ProcessResult> {
+): Promise<ProcessResult> => {
   try {
     const { tables: drizzleTables, enums } = parseDrizzleSchema(schemaString)
     const { tables, errors } = convertDrizzleTablesToInternal(

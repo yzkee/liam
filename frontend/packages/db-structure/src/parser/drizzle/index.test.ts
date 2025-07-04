@@ -180,7 +180,7 @@ describe(_processor, () => {
           email: aColumn({
             name: 'email',
             type: 'varchar(255)',
-            notNull: true,
+            notNull: false,
           }),
         },
         indexes: {

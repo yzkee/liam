@@ -94,7 +94,6 @@ export const parseColumnFromProperty = (
         break
       case 'unique':
         column.unique = true
-        column.notNull = true
         break
       case 'default':
         if (method.args.length > 0) {

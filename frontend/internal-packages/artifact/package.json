@@ -15,7 +15,7 @@
   "version": "0.0.0",
   "type": "module",
   "publishConfig": {
-    "access": "public"
+    "access": "restricted"
   },
   "main": "./src/index.ts",
   "exports": {

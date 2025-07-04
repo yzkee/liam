@@ -3,10 +3,10 @@ import { createSupabaseRepositories, deepModeling } from '@liam-hq/agent'
 import { logger, task } from '@trigger.dev/sdk'
 import { createClient } from '../libs/supabase'
 
-// Define type excluding repositories and schemaData
+// Define type excluding repositories, schemaData, and logger
 type DeepModelingPayload = Omit<
   DeepModelingParams,
-  'repositories' | 'schemaData'
+  'repositories' | 'schemaData' | 'logger'
 >
 
 function createWorkflowLogger(): NodeLogger {
@@ -34,7 +34,7 @@ export const deepModelingWorkflowTask = task({
   run: async (payload: DeepModelingPayload) => {
     logger.log('Starting Deep Modeling workflow:', {
       buildingSchemaId: payload.buildingSchemaId,
-      messageLength: payload.message.length,
+      messageLength: payload.userInput.length,
       timestamp: new Date().toISOString(),
     })
 
@@ -51,15 +51,16 @@ export const deepModelingWorkflowTask = task({
       throw new Error(`Failed to fetch schema data: ${schemaResult.error}`)
     }
 
+    const workflowLogger = createWorkflowLogger()
+
     const deepModelingParams: DeepModelingParams = {
       ...payload,
       repositories,
       schemaData: schemaResult.data.schema,
+      logger: workflowLogger,
     }
 
-    const workflowLogger = createWorkflowLogger()
-
-    const result = await deepModeling(deepModelingParams, workflowLogger)
+    const result = await deepModeling(deepModelingParams)
 
     logger.log('Deep Modeling workflow completed:', {
       success: result.success,

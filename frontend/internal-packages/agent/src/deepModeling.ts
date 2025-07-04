@@ -23,7 +23,7 @@ import type { Repositories } from './repositories'
 import type { NodeLogger } from './utils/nodeLogger'
 
 export interface DeepModelingParams {
-  message: string
+  userInput: string
   schemaData: Schema
   history: [string, string][]
   organizationId?: string
@@ -32,6 +32,8 @@ export interface DeepModelingParams {
   repositories: Repositories
   designSessionId: string
   userId: string
+  logger: NodeLogger
+  recursionLimit?: number
 }
 
 export type DeepModelingResult =
@@ -134,10 +136,9 @@ const createGraph = () => {
  */
 export const deepModeling = async (
   params: DeepModelingParams,
-  logger: NodeLogger,
 ): Promise<DeepModelingResult> => {
   const {
-    message,
+    userInput,
     schemaData,
     history,
     organizationId,
@@ -146,6 +147,8 @@ export const deepModeling = async (
     repositories,
     designSessionId,
     userId,
+    logger,
+    recursionLimit = DEFAULT_RECURSION_LIMIT,
   } = params
 
   // Convert history format with role prefix
@@ -161,7 +164,7 @@ export const deepModeling = async (
 
   // Create workflow state
   const workflowState: WorkflowState = {
-    userInput: message,
+    userInput: userInput,
     formattedHistory: formatChatHistory(historyArray),
     schemaData,
     organizationId,
@@ -178,7 +181,7 @@ export const deepModeling = async (
     const compiled = createGraph()
 
     const result = await compiled.invoke(workflowState, {
-      recursionLimit: DEFAULT_RECURSION_LIMIT,
+      recursionLimit,
     })
 
     if (result.error) {

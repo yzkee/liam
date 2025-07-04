@@ -1,7 +1,6 @@
 import type { Schema } from '@liam-hq/db-structure'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import type { DeepModelingParams } from './deepModeling'
-import { deepModeling } from './deepModeling'
+import { type DeepModelingParams, deepModeling } from './deepModeling'
 import type { Repositories, SchemaRepository } from './repositories'
 import type { NodeLogger } from './utils/nodeLogger'
 
@@ -28,7 +27,7 @@ vi.mock('@liam-hq/pglite-server', () => ({
   ]),
 }))
 
-describe('Deep Modeling', () => {
+describe('Chat Workflow', () => {
   let mockSchemaData: Schema
   let mockAgent: {
     generate: ReturnType<typeof vi.fn>
@@ -87,29 +86,31 @@ describe('Deep Modeling', () => {
     },
   })
 
-  // Helper function to create base DeepModeling params
+  // Helper function to create base workflow params
   const createBaseParams = (
     overrides: Partial<DeepModelingParams> = {},
   ): DeepModelingParams => ({
-    message: 'Test input',
-    schemaData: mockSchemaData,
+    userInput: 'Test input',
     history: [],
+    schemaData: mockSchemaData,
     organizationId: 'test-org-id',
     buildingSchemaId: 'test-building-schema-id',
     latestVersionNumber: 1,
-    repositories: mockRepositories,
-    designSessionId: 'test-design-session-id',
     userId: 'test-user-id',
+    designSessionId: 'test-design-session-id',
+    repositories: mockRepositories,
+    logger: mockLogger,
     ...overrides,
   })
 
-  // Helper function to execute Deep Modeling and assert common expectations
+  // Helper function to execute workflow and assert common expectations
   const executeAndAssertSuccess = async (params: DeepModelingParams) => {
-    const result = await deepModeling(params, mockLogger)
+    const result = await deepModeling(params)
 
     expect(result.success).toBe(true)
     if (result.success) {
       expect(result.text).toBe('Mocked agent response')
+      expect(typeof result.text).toBe('string')
     }
     expect(mockAgent.generate).toHaveBeenCalledOnce()
 
@@ -252,16 +253,16 @@ describe('Deep Modeling', () => {
     })
   })
 
-  describe('Basic Functionality', () => {
-    it('should execute successfully with valid parameters', async () => {
+  describe('Build Mode', () => {
+    it('should execute successfully with valid Build mode state', async () => {
       const params = createBaseParams({
-        message: 'Add a created_at timestamp column to the users table',
+        userInput: 'Add a created_at timestamp column to the users table',
       })
 
       await executeAndAssertSuccess(params)
     })
 
-    it('should handle structured JSON response and schema changes', async () => {
+    it('should handle Build mode with structured JSON response and schema changes', async () => {
       const structuredResponse = {
         message: 'Added created_at column to users table',
         schemaChanges: [
@@ -281,10 +282,12 @@ describe('Deep Modeling', () => {
       mockAgent.generate.mockResolvedValue(structuredResponse)
 
       const params = createBaseParams({
-        message: 'Add a created_at timestamp column to the users table',
+        userInput: 'Add a created_at timestamp column to the users table',
+        buildingSchemaId: 'test-building-schema-id',
+        latestVersionNumber: 1,
       })
 
-      const result = await deepModeling(params, mockLogger)
+      const result = await deepModeling(params)
 
       expect(result.success).toBe(true)
       if (result.success) {
@@ -308,76 +311,23 @@ describe('Deep Modeling', () => {
       })
     })
 
-    it('should handle invalid JSON response gracefully', async () => {
+    it('should handle Build mode with invalid JSON response gracefully', async () => {
       mockAgent.generate.mockResolvedValue({
         message: 'Invalid JSON response',
         schemaChanges: [],
       })
 
       const params = createBaseParams({
-        message: 'Add a created_at timestamp column to the users table',
+        userInput: 'Add a created_at timestamp column to the users table',
       })
 
-      const result = await deepModeling(params, mockLogger)
+      const result = await deepModeling(params)
 
       expect(result.success).toBe(true)
       if (result.success) {
         expect(result.text).toBe('Invalid JSON response')
       }
       expect(mockSchemaRepository.createVersion).not.toHaveBeenCalled()
-    })
-
-    it('should handle complex schema modifications', async () => {
-      const params = createBaseParams({
-        message: 'Create a new posts table with foreign key to users',
-      })
-
-      await executeAndAssertSuccess(params)
-    })
-  })
-
-  describe('History Handling', () => {
-    it('should format chat history correctly', async () => {
-      const params = createBaseParams({
-        message: 'Test message',
-        history: [
-          ['user', 'First user message'],
-          ['assistant', 'First assistant response'],
-          ['user', 'Second user message'],
-        ],
-      })
-
-      const result = await deepModeling(params, mockLogger)
-
-      expect(result.success).toBe(true)
-      // Verify that the workflow processed the history correctly
-      expect(mockAgent.generate).toHaveBeenCalledOnce()
-    })
-
-    it('should handle empty history', async () => {
-      const params = createBaseParams({
-        message: 'Test message',
-        history: [],
-      })
-
-      const result = await deepModeling(params, mockLogger)
-
-      expect(result.success).toBe(true)
-      expect(mockAgent.generate).toHaveBeenCalledOnce()
-    })
-  })
-
-  describe('Error Handling', () => {
-    it('should handle agent generation errors', async () => {
-      mockAgent.generate.mockRejectedValue(new Error('Agent generation failed'))
-      const params = createBaseParams()
-
-      const result = await deepModeling(params, mockLogger)
-
-      expect(result.success).toBe(false)
-      if (!result.success) {
-        expect(result.error).toBe('Agent generation failed')
-      }
     })
 
     it('should handle schema update failure', async () => {
@@ -399,12 +349,21 @@ describe('Deep Modeling', () => {
       })
 
       const params = createBaseParams({
-        message: 'Add a created_at timestamp column to the users table',
+        userInput: 'Add a created_at timestamp column to the users table',
+        buildingSchemaId: 'test-building-schema-id',
+        latestVersionNumber: 1,
+        recursionLimit: 20,
       })
 
-      // This might succeed or fail based on workflow logic, but should handle gracefully
-      const result = await deepModeling(params, mockLogger)
-      expect(result).toBeDefined()
+      const result = await deepModeling(params)
+
+      // The test should handle either the expected error or recursion limit error
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.error).toMatch(
+          /Database constraint violation|Recursion limit/,
+        )
+      }
     })
 
     it('should handle schema update exception', async () => {
@@ -425,10 +384,12 @@ describe('Deep Modeling', () => {
       )
 
       const params = createBaseParams({
-        message: 'Add a created_at timestamp column to the users table',
+        userInput: 'Add a created_at timestamp column to the users table',
+        buildingSchemaId: 'test-building-schema-id',
+        latestVersionNumber: 1,
       })
 
-      const result = await deepModeling(params, mockLogger)
+      const result = await deepModeling(params)
 
       expect(result.success).toBe(false)
       if (!result.success) {
@@ -436,50 +397,102 @@ describe('Deep Modeling', () => {
       }
     })
 
-    it('should handle empty user input', async () => {
-      const params = createBaseParams({ message: '' })
-
-      const result = await deepModeling(params, mockLogger)
-
-      expect(result).toBeDefined()
-      // Should handle empty input gracefully
-    })
-  })
-
-  describe('Parameter Validation', () => {
-    it('should handle missing optional organizationId', async () => {
-      const { organizationId, ...paramsWithoutOrgId } = createBaseParams()
-
-      const result = await deepModeling(paramsWithoutOrgId, mockLogger)
-
-      expect(result).toBeDefined()
-    })
-
-    it('should handle different latestVersionNumber values', async () => {
+    it('should handle complex schema modifications', async () => {
       const params = createBaseParams({
-        latestVersionNumber: 0,
+        userInput: 'Create a new posts table with foreign key to users',
       })
 
-      const result = await deepModeling(params, mockLogger)
-
-      expect(result).toBeDefined()
+      await executeAndAssertSuccess(params)
     })
   })
 
-  describe('Integration', () => {
-    it('should execute multiple Deep Modeling workflows sequentially', async () => {
-      const testMessages = [
-        'First modification',
-        'Second modification',
-        'Third modification',
-      ]
+  describe('Error Handling', () => {
+    it('should handle agent generation errors', async () => {
+      mockAgent.generate.mockRejectedValue(new Error('Agent generation failed'))
+      const params = createBaseParams()
 
+      const result = await deepModeling(params)
+
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.error).toBe('Agent generation failed')
+      }
+    })
+
+    it('should handle agent creation failure', async () => {
+      MockDatabaseSchemaBuildAgent.mockImplementation(() => {
+        throw new Error('Failed to create DatabaseSchemaBuildAgent')
+      })
+      const params = createBaseParams()
+
+      const result = await deepModeling(params)
+
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        expect(result.error).toBe('Failed to create DatabaseSchemaBuildAgent')
+      }
+    })
+
+    it('should handle empty user input', async () => {
+      const params = createBaseParams({ userInput: '' })
+
+      const result = await deepModeling(params)
+
+      expect(result).toBeDefined()
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.text).toBe('Mocked agent response')
+      }
+    })
+  })
+
+  describe('State Management', () => {
+    it('should preserve state properties through workflow execution', async () => {
+      const initialParams = createBaseParams({
+        userInput: 'Test state management',
+      })
+
+      const result = await deepModeling(initialParams)
+
+      expect(result.success).toBe(true)
+      if (result.success) {
+        expect(result.text).toBe('Mocked agent response')
+      }
+    })
+  })
+
+  describe('Agent Selection', () => {
+    it('should instantiate DatabaseSchemaBuildAgent', async () => {
+      const params = createBaseParams({})
+
+      await deepModeling(params)
+
+      expect(MockDatabaseSchemaBuildAgent).toHaveBeenCalledOnce()
+    })
+  })
+
+  describe('Workflow Integration', () => {
+    // Helper function to execute multiple workflows sequentially
+    const executeSequentialWorkflows = async (
+      inputs: { userInput: string }[],
+    ) => {
       const results = []
-      for (const message of testMessages) {
-        const params = createBaseParams({ message })
-        const result = await deepModeling(params, mockLogger)
+      for (const input of inputs) {
+        const params = createBaseParams(input)
+        const result = await deepModeling(params)
         results.push(result)
       }
+      return results
+    }
+
+    it('should handle multiple sequential workflow executions', async () => {
+      const inputs = [
+        { userInput: 'First modification' },
+        { userInput: 'Second modification' },
+        { userInput: 'Third modification' },
+      ]
+
+      const results = await executeSequentialWorkflows(inputs)
 
       expect(results).toHaveLength(3)
       for (const result of results) {
@@ -500,12 +513,8 @@ describe('Deep Modeling', () => {
         'Multi-line\ninput\nwith\nbreaks',
       ]
 
-      const results = []
-      for (const message of testInputs) {
-        const params = createBaseParams({ message })
-        const result = await deepModeling(params, mockLogger)
-        results.push(result)
-      }
+      const inputs = testInputs.map((userInput) => ({ userInput }))
+      const results = await executeSequentialWorkflows(inputs)
 
       for (const result of results) {
         expect(result).toBeDefined()

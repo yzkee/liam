@@ -6,7 +6,7 @@ import * as v from 'valibot'
 import { createClient } from '@/libs/db/server'
 
 const chatRequestSchema = v.object({
-  message: v.pipe(v.string(), v.minLength(1, 'Message is required')),
+  userInput: v.pipe(v.string(), v.minLength(1, 'Message is required')),
   history: v.array(v.tuple([v.string(), v.string()])),
   organizationId: v.string(),
   buildingSchemaId: v.string(),

@@ -59,6 +59,7 @@
         "noUselessUndefinedInitialization": "off",
         // TODO: Re-enable useDateNow after replacing new Date().getTime() with Date.now()
         "useDateNow": "off",
+        "noUselessFragments": "error",
       },
       "style": {
         "noParameterAssign": "error",

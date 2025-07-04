@@ -7,21 +7,7 @@ export const convertDrizzleTypeToPgType = (
   options?: Record<string, unknown>,
 ): string => {
   switch (drizzleType) {
-    // Integer types
-    case 'serial':
-      return 'serial'
-    case 'smallserial':
-      return 'smallserial'
-    case 'bigserial':
-      return 'bigserial'
-    case 'integer':
-      return 'integer'
-    case 'smallint':
-      return 'smallint'
-    case 'bigint':
-      return 'bigint'
-
-    // String types
+    // String types with length options
     case 'varchar':
       if (options?.['length']) {
         return `varchar(${options['length']})`
@@ -32,10 +18,8 @@ export const convertDrizzleTypeToPgType = (
         return `char(${options['length']})`
       }
       return 'char'
-    case 'text':
-      return 'text'
 
-    // Numeric types
+    // Numeric types with precision/scale
     case 'decimal':
     case 'numeric':
       if (options?.['precision'] && options?.['scale']) {
@@ -45,61 +29,23 @@ export const convertDrizzleTypeToPgType = (
         return `decimal(${options['precision']})`
       }
       return 'decimal'
-    case 'real':
-      return 'real'
-    case 'doublePrecision':
-      return 'double precision'
 
-    // Boolean type
-    case 'boolean':
-      return 'boolean'
-
-    // Date/Time types
+    // Timestamp with timezone option
     case 'timestamp':
       if (options?.['withTimezone']) {
         return 'timestamp with time zone'
       }
       return 'timestamp'
+
+    // Type mapping for different names
+    case 'doublePrecision':
+      return 'double precision'
     case 'timestamptz':
       return 'timestamp with time zone'
-    case 'date':
-      return 'date'
-    case 'time':
-      return 'time'
-    case 'interval':
-      return 'interval'
-
-    // JSON types
-    case 'json':
-      return 'json'
-    case 'jsonb':
-      return 'jsonb'
-
-    // UUID type
-    case 'uuid':
-      return 'uuid'
-
-    // Handle default random for UUID
     case 'defaultRandom':
       return 'uuid'
 
-    // Network types
-    case 'inet':
-      return 'inet'
-    case 'cidr':
-      return 'cidr'
-    case 'macaddr':
-      return 'macaddr'
-    case 'macaddr8':
-      return 'macaddr8'
-
-    // Geometric types
-    case 'point':
-      return 'point'
-    case 'line':
-      return 'line'
-
-    // Default case for custom types (enums, etc.)
+    // Default case: return type name as-is (works for most types)
     default:
       return drizzleType
   }

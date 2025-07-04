@@ -30,10 +30,9 @@ jobs:
         with:
           app-id: ${{ secrets.AUTO_DEV_APP_ID }}
           private-key: ${{ secrets.AUTO_DEV_APP_PRIVATE_KEY }}
-          permissions: >
-            contents:write,
-            pull-requests:write,
-            issues:write
+          permission-contents: write
+          permission-pull-requests: write
+          permission-issues: write
 
       - name: Run Claude Code Action
         uses: anthropics/claude-code-action@91c510a769db0f9b79df0efbdded0c29c033f846 # beta

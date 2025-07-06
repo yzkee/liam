@@ -102,9 +102,11 @@ export const CommandPalette: FC = () => {
                 <a
                   href={`?active=${table.name}`}
                   onClick={(event) => {
+                    // Do not call preventDefault to allow the default link behavior when ⌘ key is pressed
                     if (event.ctrlKey || event.metaKey) {
                       return
                     }
+
                     event.preventDefault()
                     goToERD(table.name)
                   }}

@@ -24,8 +24,6 @@ export const CommandPalette: FC = () => {
   const table = schema.current.tables[tableName ?? '']
   const { selectTable } = useTableSelection()
 
-  const [focusedTableName, setFocusedTableName] = useState<string | null>(null)
-
   const goToERD = useCallback(
     (tableName: string) => {
       selectTable({ tableId: tableName, displayArea: 'main' })
@@ -53,10 +51,7 @@ export const CommandPalette: FC = () => {
       onOpenChange={setOpen}
       contentClassName={styles.content}
       value={tableName ?? ''}
-      onValueChange={(v) => {
-        if (focusedTableName) return
-        setTableName(v)
-      }}
+      onValueChange={(v) => setTableName(v)}
     >
       <DialogTitle hidden>Command Palette</DialogTitle>
       <DialogDescription hidden>
@@ -68,7 +63,6 @@ export const CommandPalette: FC = () => {
           <Search className={styles.searchIcon} />
           <Command.Input
             placeholder="Search"
-            onValueChange={() => setFocusedTableName(null)}
             onBlur={(event) => {
               if (event.relatedTarget === closeButtonRef.current) return
               event.target.focus()
@@ -86,12 +80,7 @@ export const CommandPalette: FC = () => {
           <Command.Empty>No results found.</Command.Empty>
           <Command.Group heading="Suggestions">
             {Object.values(schema.current.tables).map((table) => (
-              <Command.Item
-                key={table.name}
-                value={table.name}
-                data-focused={focusedTableName === table.name}
-                asChild
-              >
+              <Command.Item key={table.name} value={table.name} asChild>
                 <a
                   href={`?active=${table.name}`}
                   onClick={(event) => {

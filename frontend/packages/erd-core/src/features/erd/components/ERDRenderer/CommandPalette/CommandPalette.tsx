@@ -89,24 +89,22 @@ export const CommandPalette: FC = () => {
               <Command.Item
                 key={table.name}
                 value={table.name}
-                onSelect={() => goToERD(table.name)}
                 data-focused={focusedTableName === table.name}
+                asChild
               >
-                {/** biome-ignore lint/a11y/useKeyWithClickEvents: Keyboard interaction is implemented in the parent Command.Item component's onSelect handler. */}
-                <div
-                  className={styles.itemInner}
+                <a
+                  href={`?active=${table.name}`}
                   onClick={(event) => {
-                    event.stopPropagation()
-                    setTableName(table.name)
-                    setFocusedTableName((prev) =>
-                      prev === table.name ? null : table.name,
-                    )
+                    if (event.ctrlKey || event.metaKey) {
+                      return
+                    }
+                    event.preventDefault()
+                    goToERD(table.name)
                   }}
-                  onDoubleClick={() => goToERD(table.name)}
                 >
                   <Table2 className={styles.itemIcon} />
                   <span className={styles.itemText}>{table.name}</span>
-                </div>
+                </a>
               </Command.Item>
             ))}
           </Command.Group>

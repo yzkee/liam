@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { ReactFlowProvider } from '@xyflow/react'
 import { NuqsTestingAdapter } from 'nuqs/adapters/testing'
 import { type FC, type ReactNode, useContext } from 'react'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   SchemaProvider,
   type SchemaProviderValue,
@@ -239,7 +239,7 @@ describe('go to ERD with option select', () => {
     expect(activeTableNameDisplay).toHaveTextContent(/^follows$/)
   })
 
-  it.skip('go to the table of selected option by typing Enter key and close dialog', async () => {
+  it('go to the table of selected option by typing Enter key and close dialog', async () => {
     const {
       user,
       elements: { dialog, preview },
@@ -255,5 +255,26 @@ describe('go to ERD with option select', () => {
 
     expect(dialog).not.toBeInTheDocument()
     expect(activeTableNameDisplay).toHaveTextContent(/^posts$/)
+  })
+})
+
+describe('opens table in a new tab when selecting option with ⌘ key', () => {
+  // It's impossible to check this behavior with vitest
+  it.skip('opens the table of selected option by ⌘+click')
+
+  it('opens the table of selected option by ⌘+Enter', async () => {
+    const spyWindowOpen = vi.spyOn(window, 'open')
+
+    const {
+      user,
+      elements: { preview },
+    } = await prepareCommandPalette()
+
+    // select "posts" option by typing ⌘+Enter
+    await user.keyboard('{ArrowDown}')
+    expect(within(preview).getByText('posts')).toBeInTheDocument()
+    await user.keyboard('{Meta>}{Enter}{/Meta}')
+
+    expect(spyWindowOpen).toHaveBeenCalledWith('?active=posts')
   })
 })

@@ -45,6 +45,24 @@ export const CommandPalette: FC = () => {
     return () => document.removeEventListener('keydown', down)
   }, [])
 
+  // Select option by pressing [Enter] key (with/without ⌘ key)
+  useEffect(() => {
+    const down = (event: KeyboardEvent) => {
+      if (!open || !tableName) return
+
+      if (event.key === 'Enter') {
+        if (event.metaKey || event.ctrlKey) {
+          window.open(`?active=${tableName}`)
+        } else {
+          goToERD(tableName)
+        }
+      }
+    }
+
+    document.addEventListener('keydown', down)
+    return () => document.removeEventListener('keydown', down)
+  }, [open, tableName])
+
   return (
     <Command.Dialog
       open={open}

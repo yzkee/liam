@@ -68,7 +68,7 @@
 }
 
 .searchFormWithIcon [cmdk-input]:focus-visible {
-  outline: 1px solid var(--button-primary-background);
+  outline: none;
 }
 
 .searchIcon {

@@ -21,12 +21,10 @@ const parseAllowedDomains = (): string[] => {
 
 export const isValidSchemaUrl = (url: string): boolean => {
   // Check if it's a valid URL
-  let parsedUrl: URL
-  try {
-    parsedUrl = new URL(url)
-  } catch {
+  if (!URL.canParse(url)) {
     return false
   }
+  const parsedUrl = new URL(url)
 
   // Check domain whitelist with stricter validation
   const allowedDomains = parseAllowedDomains()
@@ -78,14 +76,9 @@ export const isValidSchemaUrl = (url: string): boolean => {
 
 export const getFormatFromUrl = (url: string): FormatType => {
   // Parse URL to extract pathname without query params and fragments
-  let pathname: string
-  try {
-    const urlObj = new URL(url)
-    pathname = urlObj.pathname
-  } catch {
-    // Fallback for invalid URLs
-    pathname = url.split('?')[0].split('#')[0]
-  }
+  const pathname = URL.canParse(url)
+    ? new URL(url).pathname
+    : url.split('?')[0].split('#')[0]
 
   // Extract extension from pathname
   const extension = pathname.split('.').pop()?.toLowerCase()
@@ -105,14 +98,13 @@ export const getFormatFromUrl = (url: string): FormatType => {
 }
 
 export const getFileNameFromUrl = (url: string): string => {
-  try {
-    const urlObj = new URL(url)
-    const pathname = urlObj.pathname
-    const fileName = pathname.split('/').pop() || 'schema'
-    return fileName
-  } catch {
+  if (!URL.canParse(url)) {
     return 'schema'
   }
+  const urlObj = new URL(url)
+  const pathname = urlObj.pathname
+  const fileName = pathname.split('/').pop() || 'schema'
+  return fileName
 }
 
 // Enhanced function for fetching schema from URL with security improvements
@@ -124,15 +116,14 @@ export const fetchSchemaFromUrl = async (
   error?: string
 }> => {
   // Step 1: Validate URL format and protocol
-  let parsedUrl: URL
-  try {
-    parsedUrl = new URL(url)
-  } catch {
+  if (!URL.canParse(url)) {
     return {
       success: false,
       error: 'Invalid URL format. Please provide a valid URL.',
     }
   }
+
+  const parsedUrl = new URL(url)
 
   // Step 2: Validate protocol
   const hostname = parsedUrl.hostname.toLowerCase()

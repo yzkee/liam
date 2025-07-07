@@ -2,7 +2,7 @@ import type { Schema } from '@liam-hq/db-structure'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { WorkflowState } from '../types'
 import { designSchemaNode } from './designSchemaNode'
-import { executeDDLNode } from './executeDDLNode'
+import { executeDdlNode } from './executeDdlNode'
 
 // Mock the database schema build agent
 vi.mock('../../../langchain/agents', () => ({
@@ -16,7 +16,7 @@ vi.mock('@liam-hq/pglite-server', () => ({
   executeQuery: vi.fn(),
 }))
 
-describe('designSchemaNode -> executeDDLNode integration', () => {
+describe('designSchemaNode -> executeDdlNode integration', () => {
   const mockLogger = {
     log: vi.fn(),
     debug: vi.fn(),
@@ -35,7 +35,6 @@ describe('designSchemaNode -> executeDDLNode integration', () => {
     userInput: 'Add a users table with id and name fields',
     schemaData,
     logger: mockLogger,
-    onNodeProgress: undefined,
     formattedHistory: '',
     retryCount: {},
     buildingSchemaId: 'test-schema',
@@ -50,7 +49,7 @@ describe('designSchemaNode -> executeDDLNode integration', () => {
     vi.clearAllMocks()
   })
 
-  it('should update schemaData and execute DDL in executeDDLNode', async () => {
+  it('should update schemaData and execute DDL in executeDdlNode', async () => {
     // Mock empty initial schema
     const initialSchema: Schema = { tables: {} }
 
@@ -140,7 +139,7 @@ describe('designSchemaNode -> executeDDLNode integration', () => {
     ])
 
     // Step 2: Execute DDL (should generate DDL and execute it)
-    const afterDDL = await executeDDLNode(afterDesign)
+    const afterDDL = await executeDdlNode(afterDesign)
 
     // Verify DDL generation and execution worked
     expect(afterDDL.ddlStatements).toContain('CREATE TABLE "users"')

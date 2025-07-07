@@ -21,7 +21,19 @@ const parseAllowedDomains = (): string[] => {
 
 export const isValidSchemaUrl = (url: string): boolean => {
   // Check if it's a valid URL
-  if (!URL.canParse(url)) {
+  if (typeof URL.canParse === 'function'
+      ? !URL.canParse(url)
+      : (() => { 
+          try { 
+            new URL(url); 
+            return false; 
+          } catch { 
+            return true; 
+          } 
+        })()
+  ) {
+    /* invalid URL */
+  }
     return false
   }
   const parsedUrl = new URL(url)

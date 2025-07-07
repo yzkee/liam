@@ -195,7 +195,7 @@ const constraintToCheckConstraint = (
 export const convertToSchema = (
   stmts: RawStmt[],
   rawSql: string,
-  mainSchema?: Schema,
+  mainSchema: Schema,
 ): ProcessResult => {
   const tables: Record<string, Table> = {}
   const errors: ProcessError[] = []
@@ -770,7 +770,7 @@ export const convertToSchema = (
     let table = tables[foreignTableName]
 
     // If table not found in current chunk, look in main schema
-    if (!table && mainSchema) {
+    if (!table) {
       table = mainSchema.tables[foreignTableName]
     }
 
@@ -803,7 +803,7 @@ export const convertToSchema = (
     let table = tables[foreignTableName]
 
     // If table not found in current chunk, look in main schema
-    if (!table && mainSchema) {
+    if (!table) {
       table = mainSchema.tables[foreignTableName]
     }
 
@@ -822,7 +822,7 @@ export const convertToSchema = (
     let table = tables[foreignTableName]
 
     // If table not found in current chunk, look in main schema
-    if (!table && mainSchema) {
+    if (!table) {
       table = mainSchema.tables[foreignTableName]
     }
 
@@ -855,7 +855,7 @@ export const convertToSchema = (
     let table = tables[foreignTableName]
 
     // If table not found in current chunk, look in main schema
-    if (!table && mainSchema) {
+    if (!table) {
       table = mainSchema.tables[foreignTableName]
     }
 

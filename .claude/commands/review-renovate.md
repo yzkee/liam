@@ -71,14 +71,6 @@ flowchart TD
 - **Minor updates**: MEDIUM risk - check for new features
 - **Major updates**: HIGH risk - detailed review required
 
-### Automerge Groups
-After merging, check if the package could be added to these automerge groups in renovate.json5:
-- `test`: Testing libraries (vitest, playwright, msw, etc.)
-- `tools`: Dev tools with no production impact (typescript, eslint, biome, etc.)
-- `definitelyTyped`: @types/* packages
-- `vrt`: UI libraries covered by visual regression tests (tailwindcss, radix-ui, etc.)
-- `e2e`: Libraries covered by E2E tests
-
 ### Arguments
 $ARGUMENTS
 

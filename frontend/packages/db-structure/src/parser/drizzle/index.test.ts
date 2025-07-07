@@ -183,13 +183,6 @@ describe(_processor, () => {
             notNull: false,
           }),
         },
-        indexes: {
-          users_email_unique: anIndex({
-            name: 'users_email_unique',
-            columns: ['email'],
-            unique: true,
-          }),
-        },
         constraints: {
           UNIQUE_email: {
             type: 'UNIQUE',
@@ -302,18 +295,7 @@ describe(_processor, () => {
         columnName: 'user_id',
       })
 
-      // Verify unique index
-      expect(value.tables['profiles']?.indexes).toHaveProperty(
-        'profiles_user_id_unique',
-      )
-      expect(
-        value.tables['profiles']?.indexes['profiles_user_id_unique'],
-      ).toEqual({
-        name: 'profiles_user_id_unique',
-        columns: ['user_id'],
-        unique: true,
-        type: '',
-      })
+      // Note: inline .unique() creates constraint only, not index
     })
 
     it('foreign key constraint with cascade actions', async () => {

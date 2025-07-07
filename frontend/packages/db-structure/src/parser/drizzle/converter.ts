@@ -86,22 +86,13 @@ const convertToTable = (
       }
     }
 
-    // Add unique constraint
+    // Add unique constraint (inline unique does not create index, only constraint)
     if (columnDef.unique && !columnDef.primaryKey) {
       const constraintName = `UNIQUE_${columnDef.name}`
       constraints[constraintName] = {
         type: 'UNIQUE',
         name: constraintName,
         columnName: columnDef.name,
-      }
-
-      // Add unique index
-      const indexName = `${tableDef.name}_${columnDef.name}_unique`
-      indexes[indexName] = {
-        name: indexName,
-        columns: [columnDef.name],
-        unique: true,
-        type: '',
       }
     }
 

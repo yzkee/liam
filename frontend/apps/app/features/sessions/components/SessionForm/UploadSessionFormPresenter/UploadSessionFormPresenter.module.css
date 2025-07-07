@@ -310,7 +310,7 @@
   color: var(--button-primary-background);
   font-size: var(--font-size-2);
   font-weight: var(--font-weight-semibold);
-  font-family: var(--font-family-mono);
+  font-family: var(--code-font);
   padding: 0 var(--spacing-1);
   border-radius: var(--border-radius-sm);
   letter-spacing: -0.55px;

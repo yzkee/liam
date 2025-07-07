@@ -224,21 +224,6 @@ const displayNextSteps = (
         '   $ npx @liam-hq/cli erd build --input schema.json --format tbls',
       ),
     )
-  } else if (
-    dbOrOrm === 'Drizzle (schema.ts) [Experimental]' &&
-    !inputFilePath
-  ) {
-    // If user is using Drizzle but didn't specify any input file,
-    // advise them to eventually produce a dump file.
-    console.info(
-      `${stepNum}) After you generate a dump file via pg_dump --schema-only, run:`,
-    )
-    stepNum++
-    console.info(
-      yocto.blueBright(
-        '   $ npx @liam-hq/cli erd build --input <schema.sql> --format postgres',
-      ),
-    )
   } else if (inputFilePath) {
     console.info(
       `${stepNum}) Build your ERD from the specified file using the following command:`,

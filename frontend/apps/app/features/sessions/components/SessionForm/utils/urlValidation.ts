@@ -127,19 +127,18 @@ export const fetchSchemaFromUrl = async (
   const hostname = parsedUrl.hostname.toLowerCase()
 
   // Step 2: Validate protocol
+  const isDev = process.env.NODE_ENV === 'development'
   const isLocalhost = ['localhost', '127.0.0.1'].includes(
     parsedUrl.hostname.toLowerCase(),
   )
 
   // Allow HTTP only for localhost in development
-  const allowedProtocols = ['https:']
-  if (process.env.NODE_ENV === 'development' && isLocalhost) {
-    allowedProtocols.push('http:')
-  }
+  const allowedProtocols: ReadonlyArray<string> =
+    isDev && isLocalhost ? ['https:', 'http:'] : ['https:']
 
   if (!allowedProtocols.includes(parsedUrl.protocol)) {
     const protocolError =
-      process.env.NODE_ENV === 'development' && parsedUrl.protocol === 'http:'
+      isDev && parsedUrl.protocol === 'http:'
         ? `HTTP is only allowed for localhost in development. Use HTTPS for ${hostname}.`
         : `Unsupported protocol: ${parsedUrl.protocol}. Only HTTPS is allowed.`
 
@@ -153,7 +152,7 @@ export const fetchSchemaFromUrl = async (
   const allowedDomains = parseAllowedDomains()
 
   // In development, apply special validation for localhost
-  if (process.env.NODE_ENV === 'development') {
+  if (isDev) {
     if (isLocalhost) {
       // Additional checks for localhost URLs
       // 1. Ensure the port is within expected range (e.g., common dev server ports)
@@ -211,8 +210,7 @@ export const fetchSchemaFromUrl = async (
 
   // In development, also allow localhost with the additional checks above
   const isLocalhostAllowed =
-    process.env.NODE_ENV === 'development' &&
-    ['localhost', '127.0.0.1'].includes(hostname)
+    isDev && ['localhost', '127.0.0.1'].includes(hostname)
 
   if (!isDomainAllowed && !isLocalhostAllowed) {
     return {

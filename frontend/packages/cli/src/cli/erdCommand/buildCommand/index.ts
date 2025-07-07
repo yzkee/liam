@@ -60,7 +60,7 @@ ERD has been generated successfully in the \`${displayOutDir}/\` directory.
 Note: You cannot open this file directly using \`file://\`.
 Please serve the \`${displayOutDir}/\` directory with an HTTP server and access it via \`http://\`.
 Example:
-    ${blueBright(`$ npx http-server ${displayOutDir}/`)}
+    ${blueBright(`$ npx http-server -c-1 ${displayOutDir}/`)}
 `)
   }
   return errors

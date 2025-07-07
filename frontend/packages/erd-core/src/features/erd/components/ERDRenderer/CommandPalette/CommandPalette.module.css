@@ -79,6 +79,10 @@
   color: var(--overlay-60);
 }
 
+.escButton {
+  min-width: auto;
+}
+
 .main {
   display: flex;
   padding: var(--spacing-2);

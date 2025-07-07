@@ -124,10 +124,12 @@ export const fetchSchemaFromUrl = async (
   }
 
   const parsedUrl = new URL(url)
+  const hostname = parsedUrl.hostname.toLowerCase()
 
   // Step 2: Validate protocol
-  const hostname = parsedUrl.hostname.toLowerCase()
-  const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1'
+  const isLocalhost = ['localhost', '127.0.0.1'].includes(
+    parsedUrl.hostname.toLowerCase(),
+  )
 
   // Allow HTTP only for localhost in development
   const allowedProtocols = ['https:']
@@ -210,7 +212,7 @@ export const fetchSchemaFromUrl = async (
   // In development, also allow localhost with the additional checks above
   const isLocalhostAllowed =
     process.env.NODE_ENV === 'development' &&
-    (hostname === 'localhost' || hostname === '127.0.0.1')
+    ['localhost', '127.0.0.1'].includes(hostname)
 
   if (!isDomainAllowed && !isLocalhostAllowed) {
     return {

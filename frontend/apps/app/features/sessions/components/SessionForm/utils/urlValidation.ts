@@ -107,6 +107,16 @@ export const getFileNameFromUrl = (url: string): string => {
   return fileName
 }
 
+const isAllowedDevPort = (port: string): boolean => {
+  const allowedPorts = ['3000', '3001', '4000', '5000', '8000', '8080', '8081']
+  return allowedPorts.includes(port) || port === '80'
+}
+
+const isSensitiveLocalPath = (pathname: string): boolean => {
+  const suspiciousPaths = ['/admin', '/api', '/config', '/.env', '/secret']
+  return suspiciousPaths.some((path) => pathname.toLowerCase().startsWith(path))
+}
+
 // Enhanced function for fetching schema from URL with security improvements
 export const fetchSchemaFromUrl = async (
   url: string,
@@ -152,45 +162,22 @@ export const fetchSchemaFromUrl = async (
   const allowedDomains = parseAllowedDomains()
 
   // In development, apply special validation for localhost
-  if (isDev) {
-    if (isLocalhost) {
-      // Additional checks for localhost URLs
-      // 1. Ensure the port is within expected range (e.g., common dev server ports)
-      const port = parsedUrl.port || '80'
-      const allowedPorts = [
-        '3000',
-        '3001',
-        '4000',
-        '5000',
-        '8000',
-        '8080',
-        '8081',
-      ]
-
-      if (!allowedPorts.includes(port) && port !== '80') {
-        return {
-          success: false,
-          error: `Localhost port ${port} is not allowed. Use common development ports.`,
-        }
+  if (isDev && isLocalhost) {
+    // Additional checks for localhost URLs
+    // 1. Ensure the port is within expected range (e.g., common dev server ports)
+    const port = parsedUrl.port || '80'
+    if (!isAllowedDevPort(port)) {
+      return {
+        success: false,
+        error: `Localhost port ${port} is not allowed. Use common development ports.`,
       }
+    }
 
-      // 2. Additional path validation for localhost
-      const suspiciousLocalPaths = [
-        '/admin',
-        '/api',
-        '/config',
-        '/.env',
-        '/secret',
-      ]
-      if (
-        suspiciousLocalPaths.some((path) =>
-          parsedUrl.pathname.toLowerCase().startsWith(path),
-        )
-      ) {
-        return {
-          success: false,
-          error: 'Access to sensitive localhost paths is not allowed.',
-        }
+    // 2. Additional path validation for localhost
+    if (isSensitiveLocalPath(parsedUrl.pathname)) {
+      return {
+        success: false,
+        error: 'Access to sensitive localhost paths is not allowed.',
       }
     }
   }

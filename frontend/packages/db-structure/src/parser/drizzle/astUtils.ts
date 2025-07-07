@@ -13,27 +13,6 @@ import type {
 import { getPropertyValue, hasProperty, isObject } from './types.js'
 
 /**
- * Safely get string value from unknown property value
- */
-export const getSafeStringValue = (value: unknown): string => {
-  return typeof value === 'string' ? value : ''
-}
-
-/**
- * Safely get array from unknown property value
- */
-export const getSafeArrayValue = (value: unknown): unknown[] => {
-  return Array.isArray(value) ? value : []
-}
-
-/**
- * Safely get relation type from unknown value
- */
-export const getSafeRelationType = (value: unknown): 'one' | 'many' => {
-  return value === 'one' || value === 'many' ? value : 'one'
-}
-
-/**
  * Type guard for SWC Argument wrapper
  */
 const isArgumentWrapper = (arg: unknown): arg is { expression: Expression } => {

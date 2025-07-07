@@ -41,14 +41,6 @@ export interface DrizzleEnumDefinition {
   values: string[]
 }
 
-export interface DrizzleRelationDefinition {
-  fromTable: string
-  toTable: string
-  type: 'one' | 'many'
-  fields?: string[]
-  references?: string[]
-}
-
 export interface CompositePrimaryKeyDefinition {
   type: 'primaryKey'
   columns: string[]

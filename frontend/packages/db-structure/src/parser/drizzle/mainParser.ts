@@ -8,13 +8,8 @@ import type { Processor, ProcessResult } from '../types.js'
 import { isPgTableCall } from './astUtils.js'
 import { convertDrizzleTablesToInternal } from './converter.js'
 import { parsePgEnumCall } from './enumParser.js'
-import { parseRelationsCall } from './relationParser.js'
 import { parsePgTableCall, parsePgTableWithComment } from './tableParser.js'
-import type {
-  DrizzleEnumDefinition,
-  DrizzleRelationDefinition,
-  DrizzleTableDefinition,
-} from './types.js'
+import type { DrizzleEnumDefinition, DrizzleTableDefinition } from './types.js'
 
 /**
  * Parse Drizzle TypeScript schema to extract table definitions using SWC AST
@@ -24,7 +19,6 @@ const parseDrizzleSchema = (
 ): {
   tables: Record<string, DrizzleTableDefinition>
   enums: Record<string, DrizzleEnumDefinition>
-  relations: DrizzleRelationDefinition[]
 } => {
   // Parse TypeScript code into AST
   const ast = parseSync(sourceCode, {
@@ -34,12 +28,11 @@ const parseDrizzleSchema = (
 
   const tables: Record<string, DrizzleTableDefinition> = {}
   const enums: Record<string, DrizzleEnumDefinition> = {}
-  const relations: DrizzleRelationDefinition[] = []
 
   // Traverse the AST to find pgTable calls
-  visitModule(ast, tables, enums, relations)
+  visitModule(ast, tables, enums)
 
-  return { tables, enums, relations }
+  return { tables, enums }
 }
 
 /**
@@ -49,19 +42,18 @@ const visitModule = (
   module: Module,
   tables: Record<string, DrizzleTableDefinition>,
   enums: Record<string, DrizzleEnumDefinition>,
-  relations: DrizzleRelationDefinition[],
 ) => {
   for (const item of module.body) {
     if (item.type === 'VariableDeclaration') {
       for (const declarator of item.declarations) {
-        visitVariableDeclarator(declarator, tables, enums, relations)
+        visitVariableDeclarator(declarator, tables, enums)
       }
     } else if (
       item.type === 'ExportDeclaration' &&
       item.declaration?.type === 'VariableDeclaration'
     ) {
       for (const declarator of item.declaration.declarations) {
-        visitVariableDeclarator(declarator, tables, enums, relations)
+        visitVariableDeclarator(declarator, tables, enums)
       }
     }
   }
@@ -74,7 +66,6 @@ const visitVariableDeclarator = (
   declarator: VariableDeclarator,
   tables: Record<string, DrizzleTableDefinition>,
   enums: Record<string, DrizzleEnumDefinition>,
-  relations: DrizzleRelationDefinition[],
 ) => {
   if (!declarator.init || declarator.init.type !== 'CallExpression') return
 
@@ -104,12 +95,6 @@ const visitVariableDeclarator = (
     if (enumDef && declarator.id.type === 'Identifier') {
       enums[declarator.id.value] = enumDef
     }
-  } else if (
-    callExpr.callee.type === 'Identifier' &&
-    callExpr.callee.value === 'relations'
-  ) {
-    const relationDefs = parseRelationsCall(callExpr)
-    relations.push(...relationDefs)
   }
 }
 

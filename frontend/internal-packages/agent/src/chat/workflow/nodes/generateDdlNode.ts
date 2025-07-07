@@ -4,7 +4,7 @@ import { convertSchemaToText } from '../../../utils/convertSchemaToText'
 import { getWorkflowNodeProgress } from '../shared/getWorkflowNodeProgress'
 import type { WorkflowState } from '../types'
 
-const NODE_NAME = 'generateDDLNode'
+const NODE_NAME = 'generateDdlNode'
 
 interface PreparedDDLGeneration {
   agent: QADDLGenerationAgent
@@ -33,16 +33,20 @@ async function prepareDDLGeneration(
  * TODO: DDL generation using LLM is a temporary solution.
  * In the future, DDL will be generated mechanically without LLM.
  */
-export async function generateDDLNode(
+export async function generateDdlNode(
   state: WorkflowState,
 ): Promise<WorkflowState> {
   try {
     state.logger.log(`[${NODE_NAME}] Started`)
 
-    if (state.onNodeProgress) {
-      await state.onNodeProgress(
-        'generateDDL',
-        getWorkflowNodeProgress('generateDDL'),
+    // Update progress message if available
+    if (state.progressTimelineItemId) {
+      await state.repositories.schema.updateTimelineItem(
+        state.progressTimelineItemId,
+        {
+          content: 'Processing: generateDDL',
+          progress: getWorkflowNodeProgress('generateDDL'),
+        },
       )
     }
 

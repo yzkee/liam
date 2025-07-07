@@ -39,8 +39,7 @@
       },
       "suspicious": {
         "noConsole": { "level": "error", "options": { "allow": ["warn", "error", "info", "debug"] } },
-        // TODO: Re-enable noDuplicateProperties after fixing duplicate property issues
-        "noDuplicateProperties": "off",
+        "noDuplicateProperties": "error",
         "noDocumentCookie": "error"
       },
       "a11y": {
@@ -58,8 +57,7 @@
         // TODO: Re-enable noUselessUndefinedInitialization after fixing undefined initialization issues
         "noUselessUndefinedInitialization": "off",
         "useDateNow": "error",
-        // TODO: Re-enable noUselessFragments after removing unnecessary fragments
-        "noUselessFragments": "off"
+        "noUselessFragments": "error"
       },
       "style": {
         "noParameterAssign": "error",

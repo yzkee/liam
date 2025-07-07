@@ -2,7 +2,6 @@ import commonjs from '@rollup/plugin-commonjs'
 import resolve from '@rollup/plugin-node-resolve'
 import typescript from '@rollup/plugin-typescript'
 import execute from 'rollup-plugin-execute'
-import { swc } from 'rollup-plugin-swc3'
 
 // This file is for building the CLI entry point.
 
@@ -20,14 +19,6 @@ export default {
     typescript({
       outputToFilesystem: true,
       tsconfig: './tsconfig.node.json',
-    }),
-    swc({
-      jsc: {
-        parser: {
-          syntax: 'typescript',
-        },
-        target: 'es2022',
-      },
     }),
     execute('chmod +x dist-cli/bin/cli.js'),
     commonjs(),

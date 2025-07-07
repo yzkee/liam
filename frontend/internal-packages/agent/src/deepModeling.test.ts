@@ -205,6 +205,7 @@ describe('Chat Workflow', () => {
     // Setup createVersion mock
     vi.mocked(mockSchemaRepository.createVersion).mockResolvedValue({
       success: true,
+      newSchema: mockSchemaData, // Return the same schema for simplicity
     })
 
     // Setup createTimelineItem mock

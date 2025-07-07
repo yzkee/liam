@@ -101,6 +101,34 @@ describe('designSchemaNode -> executeDdlNode integration', () => {
     // Mock successful repository operation
     mockRepository.schema.createVersion.mockResolvedValue({
       success: true,
+      newSchema: {
+        tables: {
+          users: {
+            name: 'users',
+            comment: null,
+            columns: {
+              id: {
+                name: 'id',
+                type: 'INTEGER',
+                default: null,
+                check: null,
+                notNull: true,
+                comment: null,
+              },
+              name: {
+                name: 'name',
+                type: 'VARCHAR',
+                default: null,
+                check: null,
+                notNull: true,
+                comment: null,
+              },
+            },
+            constraints: {},
+            indexes: {},
+          },
+        },
+      },
     })
 
     const initialState = createMockState(initialSchema)
@@ -151,20 +179,26 @@ describe('designSchemaNode -> executeDdlNode integration', () => {
     )
   })
 
-  it('should handle JSON patch operation errors gracefully', async () => {
+  it('should handle schema validation errors gracefully', async () => {
     const initialSchema: Schema = { tables: {} }
 
-    // Mock AI agent response with invalid JSON patch operation
+    // Mock AI agent response with changes
     const { DatabaseSchemaBuildAgent } = await import(
       '../../../langchain/agents'
     )
     const mockGenerate = vi.fn().mockResolvedValue({
-      message: 'Invalid patch operation',
+      message: 'Schema validation will fail',
       schemaChanges: [
         {
-          op: 'replace',
-          path: '/tables/nonexistent/name', // This path doesn't exist, will cause error
-          value: 'newname',
+          op: 'add',
+          path: '/tables/test',
+          value: {
+            name: 'test',
+            comment: null,
+            columns: {},
+            constraints: {},
+            indexes: {},
+          },
         },
       ],
     })
@@ -176,26 +210,26 @@ describe('designSchemaNode -> executeDdlNode integration', () => {
         }) as never,
     )
 
-    // Mock successful repository operation (but patch application will fail)
+    // Mock repository operation that returns validation error
     mockRepository.schema.createVersion.mockResolvedValue({
-      success: true,
+      success: false,
+      error: 'Invalid schema after applying changes: validation failed',
     })
 
     const initialState = createMockState(initialSchema)
 
-    // Step 1: Design schema (should fail during patch application)
+    // Step 1: Design schema (should fail during validation)
     const result = await designSchemaNode(initialState)
 
     // Verify error handling
     expect(result.error).toBe(
-      'Failed to apply schema changes to workflow state',
+      'Invalid schema after applying changes: validation failed',
     )
     expect(result.schemaData).toEqual(initialSchema) // Should remain unchanged
     expect(mockLogger.error).toHaveBeenCalledWith(
-      'Failed to apply patch operations to schema data:',
+      'Schema update failed:',
       expect.objectContaining({
-        error: expect.any(String),
-        operations: expect.any(Array),
+        error: 'Invalid schema after applying changes: validation failed',
       }),
     )
   })

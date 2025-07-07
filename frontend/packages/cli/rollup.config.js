@@ -1,5 +1,6 @@
 import commonjs from '@rollup/plugin-commonjs'
 import resolve from '@rollup/plugin-node-resolve'
+import typescript from '@rollup/plugin-typescript'
 import execute from 'rollup-plugin-execute'
 import { swc } from 'rollup-plugin-swc3'
 
@@ -15,6 +16,10 @@ export default {
     resolve({
       preferBuiltins: true,
       extensions: ['.mjs', '.js', '.json', '.node', '.ts'],
+    }),
+    typescript({
+      outputToFilesystem: true,
+      tsconfig: './tsconfig.node.json',
     }),
     swc({
       jsc: {

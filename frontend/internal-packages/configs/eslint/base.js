@@ -51,14 +51,8 @@ export function createBaseConfig(options = {}) {
           ignore: [
             '^global-error\\.(tsx?)$',
             '^instrumentation-client\\.(ts)$',
-            '\\.(css\\.d\\.ts)$',
-            '^.*\\.(test|spec)\\.(ts|tsx|js|jsx)$',
-            '^.*\\.config\\.(ts|tsx|js|jsx|mjs)$',
-            '^.*\\.setup\\.(ts|tsx|js|jsx)$',
             '^\\..*',
-            'README\\.md$',
-            '^.*\\.(sql|sh|md|json|yaml|yml|toml|lock)$',
-            '^.*_.*\\.ts$'
+            'README\\.md$'
           ]
         }],
         'no-restricted-exports': ['error', {

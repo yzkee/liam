@@ -67,6 +67,7 @@ export const CommandPalette: FC = () => {
           <Command.Input
             placeholder="Search"
             onValueChange={() => setFocusedTableName(null)}
+            onBlur={(event) => event.target.focus()}
           />
         </div>
         <DialogClose asChild>
@@ -78,7 +79,7 @@ export const CommandPalette: FC = () => {
       <div className={styles.main}>
         <Command.List>
           <Command.Empty>No results found.</Command.Empty>
-          <Command.Group heading="Suggestions">
+          <Command.Group heading="Tables">
             {Object.values(schema.current.tables).map((table) => (
               <Command.Item
                 key={table.name}
@@ -99,7 +100,7 @@ export const CommandPalette: FC = () => {
                   onDoubleClick={() => goToERD(table.name)}
                 >
                   <Table2 className={styles.itemIcon} />
-                  {table.name}
+                  <span className={styles.itemText}>{table.name}</span>
                 </div>
               </Command.Item>
             ))}

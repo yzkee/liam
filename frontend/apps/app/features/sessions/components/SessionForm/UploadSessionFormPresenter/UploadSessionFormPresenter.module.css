@@ -451,25 +451,6 @@
   font-weight: var(--font-weight-regular);
 }
 
-.removeButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--spacing-3);
-  height: var(--spacing-3);
-  padding: 0;
-  background: transparent;
-  border: none;
-  color: var(--overlay-50);
-  cursor: pointer;
-  transition: color var(--default-animation-duration)
-    var(--default-timing-function);
-}
-
-.removeButton:hover {
-  color: var(--global-foreground);
-}
-
 .formatSelect {
   display: flex;
   align-items: center;

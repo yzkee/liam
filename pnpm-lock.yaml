@@ -27,7 +27,7 @@ importers:
         version: 6.1.0
       '@turbo/gen':
         specifier: 2.5.4
-        version: 2.5.4(@swc/core@1.12.9)(@types/node@22.15.30)(typescript@5.8.3)
+        version: 2.5.4(@swc/core@1.12.9)(@swc/wasm@1.12.9)(@types/node@22.15.30)(typescript@5.8.3)
       '@types/node':
         specifier: 22.15.30
         version: 22.15.30
@@ -54,7 +54,7 @@ importers:
         version: 5.8.3
       vercel:
         specifier: 41.7.8
-        version: 41.7.8(@swc/core@1.12.9)(rollup@4.40.2)
+        version: 41.7.8(@swc/core@1.12.9)(@swc/wasm@1.12.9)(rollup@4.40.2)
       vitest:
         specifier: 3.2.2
         version: 3.2.2(@edge-runtime/vm@3.2.0)(@types/debug@4.1.12)(@types/node@22.15.30)(happy-dom@17.6.3)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.43.1)(tsx@4.19.4)(yaml@2.8.0)
@@ -118,6 +118,12 @@ importers:
       '@sentry/nextjs':
         specifier: '9'
         version: 9.34.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(next@15.3.3(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)(webpack@5.99.9(@swc/core@1.12.9)(esbuild@0.25.5))
+      '@swc/core':
+        specifier: 1.12.9
+        version: 1.12.9
+      '@swc/wasm':
+        specifier: 1.12.9
+        version: 1.12.9
       '@trigger.dev/sdk':
         specifier: 4.0.0-v4-beta.21
         version: 4.0.0-v4-beta.21(ai@4.3.16(react@19.1.0)(zod@3.23.8))(zod@3.23.8)
@@ -5007,6 +5013,9 @@ packages:
 
   '@swc/types@0.1.23':
     resolution: {integrity: sha512-u1iIVZV9Q0jxY+yM2vw/hZGDNudsN85bBpTqzAQ9rzkxW9D+e3aEM4Han+ow518gSewkXgjmEK0BD79ZcNVgPw==}
+
+  '@swc/wasm@1.12.9':
+    resolution: {integrity: sha512-IsN7alteok7GzLDejBKw1AB74YS46Gjl2qGCd7umssL9siFaNSAOwmtKXI5dQlwKG8JUHZ7fa5Tc4K7Z7S0C0Q==}
 
   '@tailwindcss/node@4.1.10':
     resolution: {integrity: sha512-2ACf1znY5fpRBwRhMgj9ZXvb2XZW8qs+oTfotJ2C5xR0/WNL7UHZ7zXl6s+rUqedL1mNi+0O+WQr5awGowS3PQ==}
@@ -15912,6 +15921,8 @@ snapshots:
     dependencies:
       '@swc/counter': 0.1.3
 
+  '@swc/wasm@1.12.9': {}
+
   '@tailwindcss/node@4.1.10':
     dependencies:
       '@ampproject/remapping': 2.3.0
@@ -16130,7 +16141,7 @@ snapshots:
 
   '@tsconfig/strictest@2.0.5': {}
 
-  '@turbo/gen@2.5.4(@swc/core@1.12.9)(@types/node@22.15.30)(typescript@5.8.3)':
+  '@turbo/gen@2.5.4(@swc/core@1.12.9)(@swc/wasm@1.12.9)(@types/node@22.15.30)(typescript@5.8.3)':
     dependencies:
       '@turbo/workspaces': 2.5.4
       commander: 10.0.1
@@ -16140,7 +16151,7 @@ snapshots:
       node-plop: 0.26.3
       picocolors: 1.0.1
       proxy-agent: 6.5.0
-      ts-node: 10.9.2(@swc/core@1.12.9)(@types/node@22.15.30)(typescript@5.8.3)
+      ts-node: 10.9.2(@swc/core@1.12.9)(@swc/wasm@1.12.9)(@types/node@22.15.30)(typescript@5.8.3)
       update-check: 1.5.4
       validate-npm-package-name: 5.0.1
     transitivePeerDependencies:
@@ -16552,7 +16563,7 @@ snapshots:
       - rollup
       - supports-color
 
-  '@vercel/node@5.1.16(@swc/core@1.12.9)(rollup@4.40.2)':
+  '@vercel/node@5.1.16(@swc/core@1.12.9)(@swc/wasm@1.12.9)(rollup@4.40.2)':
     dependencies:
       '@edge-runtime/node-utils': 2.3.0
       '@edge-runtime/primitives': 4.1.0
@@ -16572,7 +16583,7 @@ snapshots:
       path-to-regexp: 8.2.0
       path-to-regexp-updated: path-to-regexp@6.3.0
       ts-morph: 12.0.0
-      ts-node: 10.9.1(@swc/core@1.12.9)(@types/node@16.18.11)(typescript@4.9.5)
+      ts-node: 10.9.1(@swc/core@1.12.9)(@swc/wasm@1.12.9)(@types/node@16.18.11)(typescript@4.9.5)
       typescript: 4.9.5
       undici: 7.9.0
     transitivePeerDependencies:
@@ -23000,7 +23011,7 @@ snapshots:
       '@ts-morph/common': 0.11.1
       code-block-writer: 10.1.1
 
-  ts-node@10.9.1(@swc/core@1.12.9)(@types/node@16.18.11)(typescript@4.9.5):
+  ts-node@10.9.1(@swc/core@1.12.9)(@swc/wasm@1.12.9)(@types/node@16.18.11)(typescript@4.9.5):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.11
@@ -23019,8 +23030,9 @@ snapshots:
       yn: 3.1.1
     optionalDependencies:
       '@swc/core': 1.12.9
+      '@swc/wasm': 1.12.9
 
-  ts-node@10.9.2(@swc/core@1.12.9)(@types/node@22.15.30)(typescript@5.8.3):
+  ts-node@10.9.2(@swc/core@1.12.9)(@swc/wasm@1.12.9)(@types/node@22.15.30)(typescript@5.8.3):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.11
@@ -23039,6 +23051,7 @@ snapshots:
       yn: 3.1.1
     optionalDependencies:
       '@swc/core': 1.12.9
+      '@swc/wasm': 1.12.9
 
   ts-pattern@5.7.1: {}
 
@@ -23339,14 +23352,14 @@ snapshots:
       - '@types/react'
       - '@types/react-dom'
 
-  vercel@41.7.8(@swc/core@1.12.9)(rollup@4.40.2):
+  vercel@41.7.8(@swc/core@1.12.9)(@swc/wasm@1.12.9)(rollup@4.40.2):
     dependencies:
       '@vercel/build-utils': 10.5.1
       '@vercel/fun': 1.1.6
       '@vercel/go': 3.2.1
       '@vercel/hydrogen': 1.2.0
       '@vercel/next': 4.7.11(rollup@4.40.2)
-      '@vercel/node': 5.1.16(@swc/core@1.12.9)(rollup@4.40.2)
+      '@vercel/node': 5.1.16(@swc/core@1.12.9)(@swc/wasm@1.12.9)(rollup@4.40.2)
       '@vercel/python': 4.7.2
       '@vercel/redwood': 2.3.1(rollup@4.40.2)
       '@vercel/remix-builder': 5.4.6(rollup@4.40.2)

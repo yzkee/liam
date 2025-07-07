@@ -1,0 +1,7 @@
+{
+  "components/Chat/UserMessage/UserMessage.stories.tsx": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 1
+    }
+  }
+}

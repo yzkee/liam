@@ -10,11 +10,8 @@ import {
   isObjectExpression,
   isStringLiteral,
   parseMethodChain,
-} from './ast-utils.js'
-import {
-  parseDefaultValue,
-  parseObjectExpression,
-} from './expression-parser.js'
+} from './astUtils.js'
+import { parseDefaultValue, parseObjectExpression } from './expressionParser.js'
 import type { DrizzleColumnDefinition } from './types.js'
 
 /**

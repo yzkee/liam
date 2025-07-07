@@ -5,11 +5,11 @@
 import type { Module, VariableDeclarator } from '@swc/core'
 import { parseSync } from '@swc/core'
 import type { Processor, ProcessResult } from '../types.js'
-import { isPgTableCall } from './ast-utils.js'
+import { isPgTableCall } from './astUtils.js'
 import { convertDrizzleTablesToInternal } from './converter.js'
-import { parsePgEnumCall } from './enum-parser.js'
-import { parseRelationsCall } from './relation-parser.js'
-import { parsePgTableCall, parsePgTableWithComment } from './table-parser.js'
+import { parsePgEnumCall } from './enumParser.js'
+import { parseRelationsCall } from './relationParser.js'
+import { parsePgTableCall, parsePgTableWithComment } from './tableParser.js'
 import type {
   DrizzleEnumDefinition,
   DrizzleRelationDefinition,

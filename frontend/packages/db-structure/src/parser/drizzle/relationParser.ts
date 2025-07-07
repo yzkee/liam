@@ -7,7 +7,7 @@ import {
   getSafeArrayValue,
   getSafeRelationType,
   getSafeStringValue,
-} from './ast-utils.js'
+} from './astUtils.js'
 import type { DrizzleRelationDefinition } from './types.js'
 import { getPropertyValue, hasProperty } from './types.js'
 

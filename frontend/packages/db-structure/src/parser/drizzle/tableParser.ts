@@ -10,9 +10,9 @@ import {
   isObjectExpression,
   isPgTableCall,
   isStringLiteral,
-} from './ast-utils.js'
-import { parseColumnFromProperty } from './column-parser.js'
-import { parseObjectExpression } from './expression-parser.js'
+} from './astUtils.js'
+import { parseColumnFromProperty } from './columnParser.js'
+import { parseObjectExpression } from './expressionParser.js'
 import type {
   CompositePrimaryKeyDefinition,
   DrizzleIndexDefinition,

@@ -10,7 +10,7 @@ import {
   isArrayExpression,
   isIdentifier,
   isMemberExpression,
-} from './ast-utils.js'
+} from './astUtils.js'
 import { getPropertyValue, hasProperty, isObject } from './types.js'
 
 /**

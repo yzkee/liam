@@ -8,7 +8,7 @@ import {
   getStringValue,
   isArrayExpression,
   isStringLiteral,
-} from './ast-utils.js'
+} from './astUtils.js'
 import type { DrizzleEnumDefinition } from './types.js'
 
 /**

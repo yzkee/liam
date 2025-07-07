@@ -118,6 +118,17 @@ const createGraph = () => {
       return state.error ? 'finalizeArtifacts' : 'executeDDL'
     })
 
+    // Conditional edge for executeDDL - retry with designSchema if DDL execution fails
+    .addConditionalEdges('executeDDL', (state) => {
+      if (state.shouldRetryWithDesignSchema) {
+        return 'designSchema'
+      }
+      if (state.ddlExecutionFailed) {
+        return 'finalizeArtifacts'
+      }
+      return 'generateUsecase'
+    })
+
     // Conditional edges for validation results
     .addConditionalEdges('validateSchema', (state) => {
       // success → reviewDeliverables

@@ -1,5 +1,11 @@
 # @liam-hq/db-structure
 
+## 0.4.1
+
+### Patch Changes
+
+- [#2299](https://github.com/liam-hq/liam/pull/2299) - ✨ [Experimental]Add Drizzle ORM schema parser support / Thanks [@FunamaYukina](https://github.com/FunamaYukina)!
+
 ## 0.4.0
 
 ### Minor Changes

@@ -2,10 +2,10 @@
 
 import type { Database } from '@liam-hq/db'
 import type { FC, ReactNode } from 'react'
-import { AgentMessage } from '@/components/Chat/AgentMessage'
-import { ProcessIndicator } from '@/components/Chat/ProcessIndicator'
-import { UserMessage } from '@/components/Chat/UserMessage'
-import { VersionMessage } from '@/components/Chat/VersionMessage'
+import { AgentMessage } from './components/AgentMessage'
+import { ProcessIndicator } from './components/ProcessIndicator'
+import { UserMessage } from './components/UserMessage'
+import { VersionMessage } from './components/VersionMessage'
 import styles from './TimelineItem.module.css'
 
 // TODO: Modify to use what is inferred from the valibot schema

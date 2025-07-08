@@ -9,7 +9,7 @@ import {
   useTransition,
 } from 'react'
 import { safeParse } from 'valibot'
-import { Chat } from '../Chat'
+import { Chat } from './components/Chat'
 import { Output } from './components/Output'
 import { useRealtimeBuildlingSchema } from './hooks/useRealtimeBuildlingSchema'
 import { SCHEMA_UPDATES_DOC, SCHEMA_UPDATES_REVIEW_COMMENTS } from './mock'

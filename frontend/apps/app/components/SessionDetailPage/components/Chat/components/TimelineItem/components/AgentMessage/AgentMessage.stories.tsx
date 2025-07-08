@@ -3,7 +3,7 @@ import type { ComponentProps } from 'react'
 import {
   type MessageOption,
   MessageOptionButtons,
-} from '../MessageOptionButtons'
+} from '@/components/SessionDetailPage/components/Chat/components/TimelineItem/components/AgentMessage/components/MessageOptionButtons/MessageOptionButtons'
 import { ProcessIndicator } from '../ProcessIndicator'
 import { AgentMessage } from './AgentMessage'
 

@@ -1,9 +1,9 @@
 'use client'
 
 import type { FC, ReactNode } from 'react'
-import { MarkdownContent } from '../../MarkdownContent'
-import { BuildAgent } from '../AgentAvatar/BuildAgent'
+import { MarkdownContent } from '@/components/MarkdownContent'
 import styles from './AgentMessage.module.css'
+import { BuildAgent } from './components/AgentAvatar'
 
 type AgentMessageState = 'default' | 'generating'
 

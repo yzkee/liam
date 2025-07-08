@@ -1,4 +1,4 @@
-import type { TimelineItemProps } from '../../TimelineItem/TimelineItem'
+import type { TimelineItemProps } from '../components/TimelineItem/TimelineItem'
 
 /**
  * Represents a timeline item entry with additional metadata

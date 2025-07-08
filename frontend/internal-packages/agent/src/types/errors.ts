@@ -1,6 +1,6 @@
 import type { Result } from 'neverthrow'
 
-export type AgentError =
+type AgentError =
   | { type: 'LANGGRAPH_ERROR'; message: string; cause?: unknown }
   | { type: 'VECTOR_STORE_ERROR'; message: string; cause?: unknown }
   | { type: 'VALIDATION_ERROR'; message: string; cause?: unknown }

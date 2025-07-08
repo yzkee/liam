@@ -4,8 +4,6 @@ import { Document } from '@langchain/core/documents'
 import { OpenAIEmbeddings } from '@langchain/openai'
 import { createClient } from '@liam-hq/db'
 import type { Schema } from '@liam-hq/db-structure'
-import { err, ok } from 'neverthrow'
-import type { AgentError, AgentResult } from '../types/errors'
 import { convertSchemaToText } from '../utils/convertSchemaToText'
 
 /**
@@ -155,33 +153,27 @@ class SupabaseVectorStore extends LangchainSupabaseVectorStore {
 export async function createSupabaseVectorStore(
   schema: Schema,
   organizationId?: string,
-): Promise<AgentResult<SupabaseVectorStore>> {
+) {
   try {
     const openAIApiKey = validateOpenAIKey()
 
+    // Initialize OpenAI embeddings
     const embeddings = new OpenAIEmbeddings({ openAIApiKey })
     const supabaseClient = createSupabaseClient()
 
+    // Convert schema to documents with organization_id if provided
     const docs = await createDocumentFromSchema(schema, organizationId)
 
-    const vectorStore = await processBatchesAndCreateVectorStore(
+    // Process documents in batches
+    return await processBatchesAndCreateVectorStore(
       docs,
       embeddings,
       supabaseClient,
     )
-
-    return ok(vectorStore)
   } catch (error) {
-    const agentError: AgentError = {
-      type: 'VECTOR_STORE_ERROR',
-      message:
-        error instanceof Error
-          ? error.message
-          : 'Unknown vector store creation error',
-      cause: error,
-    }
-    process.stderr.write(`Error in implementation: ${agentError.message}\n`)
-    return err(agentError)
+    // Log the error
+    process.stderr.write(`Error in implementation: ${error}\n`)
+    throw error
   }
 }
 
@@ -236,6 +228,7 @@ async function processBatchesAndCreateVectorStore(
     const batchNumber = Math.floor(i / BATCH_SIZE) + 1
 
     try {
+      // Process batch and update vector store reference if needed
       vectorStore = await processBatch({
         batch,
         vectorStore,
@@ -276,13 +269,16 @@ async function processBatch({
   // Create or reuse the vector store instance
   if (isFirstBatch) {
     try {
+      // Create the vector store instance directly instead of using fromDocuments
       const vectorStore = new SupabaseVectorStore(embeddings, {
         client: supabaseClient,
         tableName: 'documents',
         queryName: 'match_documents',
       })
 
+      // Manually add documents to ensure updated_at is set
       await vectorStore.addDocuments(batch)
+
       return vectorStore
     } catch (error) {
       process.stderr.write(`Error creating vector store: ${error}\n`)
@@ -329,10 +325,12 @@ interface SchemaMetadata {
  * Gets the stored schema hash from the vector store
  * @returns The stored schema hash or null if not found
  */
-async function getStoredSchemaHash(): Promise<AgentResult<string | null>> {
+async function getStoredSchemaHash(): Promise<string | null> {
   try {
+    // Create Supabase client directly for more reliable querying
     const supabaseClient = createSupabaseClient()
 
+    // Query for schema_metadata documents directly using metadata
     const { data: metadataDocs } = await supabaseClient
       .from('documents')
       .select('metadata')
@@ -341,21 +339,25 @@ async function getStoredSchemaHash(): Promise<AgentResult<string | null>> {
       .order('created_at', { ascending: false })
       .limit(1)
 
+    // Log query results for debugging
     process.stdout.write(
       `Found ${metadataDocs?.length || 0} metadata documents\n`,
     )
 
+    // Check if we found a metadata document with a hash
     if (metadataDocs && metadataDocs.length > 0) {
+      // Type assertion for metadata
       const metadata = metadataDocs[0]?.metadata as SchemaMetadata
       if (metadata?.schemaHash) {
         const hash = metadata.schemaHash
         process.stdout.write(
           `Found stored hash in metadata document: ${hash}\n`,
         )
-        return ok(hash)
+        return hash
       }
     }
 
+    // If no metadata document found, try content documents as fallback
     const { data: contentDocs } = await supabaseClient
       .from('documents')
       .select('metadata')
@@ -368,27 +370,22 @@ async function getStoredSchemaHash(): Promise<AgentResult<string | null>> {
       `Found ${contentDocs?.length || 0} content documents\n`,
     )
 
+    // Check if we found a content document with a hash
     if (contentDocs && contentDocs.length > 0) {
+      // Type assertion for metadata
       const metadata = contentDocs[0]?.metadata as SchemaMetadata
       if (metadata?.schemaHash) {
         const hash = metadata.schemaHash
         process.stdout.write(`Found stored hash in content document: ${hash}\n`)
-        return ok(hash)
+        return hash
       }
     }
 
     process.stdout.write('No stored schema hash found\n')
-    return ok(null)
+    return null
   } catch (error) {
-    const agentError: AgentError = {
-      type: 'VECTOR_STORE_ERROR',
-      message: 'Failed to get stored schema hash',
-      cause: error,
-    }
-    process.stderr.write(
-      `Error getting stored schema hash: ${agentError.message}\n`,
-    )
-    return err(agentError)
+    process.stderr.write(`Error getting stored schema hash: ${error}\n`)
+    return null
   }
 }
 
@@ -399,22 +396,21 @@ async function getStoredSchemaHash(): Promise<AgentResult<string | null>> {
  */
 export async function isSchemaUpdated(schema: Schema): Promise<boolean> {
   try {
+    // Calculate hash for current schema
     const currentHash = generateSchemaHash(schema)
 
-    const storedHashResult = await getStoredSchemaHash()
+    // Get stored hash
+    const storedHash = await getStoredSchemaHash()
 
-    if (storedHashResult.isErr()) {
-      return true
-    }
-
-    const storedHash = storedHashResult.value
-
+    // If no stored hash exists, consider it as updated
     if (!storedHash) {
       return true
     }
 
+    // Compare hashes
     return currentHash !== storedHash
   } catch (error) {
+    // If there's any error in the process, assume the schema needs updating
     process.stderr.write(`Error checking if schema is updated: ${error}\n`)
     return true
   }

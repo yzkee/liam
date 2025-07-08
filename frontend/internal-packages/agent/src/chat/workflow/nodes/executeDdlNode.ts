@@ -1,8 +1,6 @@
 import { postgresqlSchemaDeparser } from '@liam-hq/db-structure'
 import { executeQuery } from '@liam-hq/pglite-server'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
-import { Result } from 'neverthrow'
-import type { AgentError } from '../../../types/errors'
 import { getWorkflowNodeProgress } from '../shared/getWorkflowNodeProgress'
 import type { WorkflowState } from '../types'
 
@@ -29,24 +27,11 @@ export async function executeDdlNode(
   }
 
   // Generate DDL from schema data
-  const generateDdl = Result.fromThrowable(
-    () => {
-      const result = postgresqlSchemaDeparser(state.schemaData)
-      return result.value
-    },
-    (error): AgentError => ({
-      type: 'DDL_GENERATION_ERROR',
-      message: error instanceof Error ? error.message : 'DDL generation failed',
-      cause: error,
-    }),
-  )
+  const result = postgresqlSchemaDeparser(state.schemaData)
 
-  const ddlResult = generateDdl()
-
-  if (ddlResult.isErr()) {
-    state.logger.log(
-      `[${NODE_NAME}] DDL generation failed: ${ddlResult.error.message}`,
-    )
+  if (result.errors.length > 0) {
+    const errorMessages = result.errors.map((e) => e.message).join('; ')
+    state.logger.log(`[${NODE_NAME}] DDL generation failed: ${errorMessages}`)
     state.logger.log(`[${NODE_NAME}] Completed`)
     return {
       ...state,
@@ -54,7 +39,7 @@ export async function executeDdlNode(
     }
   }
 
-  const ddlStatements = ddlResult.value
+  const ddlStatements = result.value
 
   // Log detailed information about what was generated
   const tableCount = Object.keys(state.schemaData.tables).length

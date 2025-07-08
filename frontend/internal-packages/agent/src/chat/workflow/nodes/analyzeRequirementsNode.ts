@@ -1,9 +1,8 @@
-import { Result } from 'neverthrow'
+import { ResultAsync } from 'neverthrow'
 import type * as v from 'valibot'
 import { PMAnalysisAgent } from '../../../langchain/agents'
 import type { requirementsAnalysisSchema } from '../../../langchain/agents/pmAnalysisAgent/agent'
 import type { BasePromptVariables } from '../../../langchain/utils/types'
-import type { AgentError } from '../../../types/errors'
 import { getWorkflowNodeProgress } from '../shared/getWorkflowNodeProgress'
 import type { WorkflowState } from '../types'
 
@@ -58,48 +57,13 @@ export async function analyzeRequirementsNode(
 
   const retryCount = state.retryCount[NODE_NAME] ?? 0
 
-  const analyzeRequirements = Result.fromThrowable(
-    () => pmAnalysisAgent.analyzeRequirements(promptVariables),
-    (error): AgentError => ({
-      type: 'WORKFLOW_NODE_ERROR',
-      message: error instanceof Error ? error.message : String(error),
-      node: NODE_NAME,
-      cause: error,
-    }),
+  const analysisResult = await ResultAsync.fromPromise(
+    pmAnalysisAgent.analyzeRequirements(promptVariables),
+    (error) => (error instanceof Error ? error.message : String(error)),
   )
 
-  const analysisResultPromise = analyzeRequirements()
-
-  if (analysisResultPromise.isErr()) {
-    const error = analysisResultPromise.error
-    state.logger.error(`[${NODE_NAME}] Failed: ${error.message}`)
-
-    return {
-      ...state,
-      error: error.message,
-      retryCount: {
-        ...state.retryCount,
-        [NODE_NAME]: retryCount + 1,
-      },
-    }
-  }
-
-  try {
-    const result = await analysisResultPromise.value
-    logAnalysisResult(state.logger, result)
-    state.logger.log(`[${NODE_NAME}] Completed`)
-
-    return {
-      ...state,
-      analyzedRequirements: {
-        businessRequirement: result.businessRequirement,
-        functionalRequirements: result.functionalRequirements,
-        nonFunctionalRequirements: result.nonFunctionalRequirements,
-      },
-      error: undefined,
-    }
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error)
+  if (analysisResult.isErr()) {
+    const errorMessage = analysisResult.error
     state.logger.error(`[${NODE_NAME}] Failed: ${errorMessage}`)
 
     return {
@@ -110,5 +74,19 @@ export async function analyzeRequirementsNode(
         [NODE_NAME]: retryCount + 1,
       },
     }
+  }
+
+  const result = analysisResult.value
+  logAnalysisResult(state.logger, result)
+  state.logger.log(`[${NODE_NAME}] Completed`)
+
+  return {
+    ...state,
+    analyzedRequirements: {
+      businessRequirement: result.businessRequirement,
+      functionalRequirements: result.functionalRequirements,
+      nonFunctionalRequirements: result.nonFunctionalRequirements,
+    },
+    error: undefined,
   }
 }

@@ -1,2 +1,2 @@
 export * from './Chat'
-export * from './ProcessIndicator'
+export * from './components/TimelineItem/components/ProcessIndicator'

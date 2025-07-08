@@ -1,8 +1,8 @@
 'use client'
 
 import type { FC, ReactNode } from 'react'
-import { MarkdownContent } from '../../MarkdownContent'
-import { BuildAgent } from '../AgentAvatar/BuildAgent'
+import { BuildAgent } from '@/components/Chat/AgentAvatar/BuildAgent'
+import { MarkdownContent } from '@/components/MarkdownContent'
 import styles from './AgentMessage.module.css'
 
 type AgentMessageState = 'default' | 'generating'

@@ -2,7 +2,7 @@
 
 import { Avatar, AvatarWithImage } from '@liam-hq/ui'
 import type { FC } from 'react'
-import { MarkdownContent } from '../../MarkdownContent'
+import { MarkdownContent } from '@/components/MarkdownContent'
 import styles from './UserMessage.module.css'
 
 export interface UserMessageProps {

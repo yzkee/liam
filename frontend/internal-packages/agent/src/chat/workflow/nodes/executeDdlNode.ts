@@ -1,6 +1,7 @@
 import { postgresqlSchemaDeparser } from '@liam-hq/db-structure'
 import { executeQuery } from '@liam-hq/pglite-server'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
+import { WORKFLOW_RETRY_CONFIG } from '../constants'
 import { getWorkflowNodeProgress } from '../shared/getWorkflowNodeProgress'
 import type { WorkflowState } from '../types'
 
@@ -79,8 +80,8 @@ export async function executeDdlNode(
     // Check if this is the first failure or if we've already retried
     const currentRetryCount = state.retryCount['ddlExecutionRetry'] || 0
 
-    if (currentRetryCount === 0) {
-      // First failure - set up retry with designSchemaNode
+    if (currentRetryCount < WORKFLOW_RETRY_CONFIG.MAX_DDL_EXECUTION_RETRIES) {
+      // Set up retry with designSchemaNode
       state.logger.log(`[${NODE_NAME}] Scheduling retry via designSchemaNode`)
       state.logger.log(`[${NODE_NAME}] Completed`)
       return {
@@ -89,7 +90,7 @@ export async function executeDdlNode(
         ddlExecutionFailureReason: errorMessages,
         retryCount: {
           ...state.retryCount,
-          ddlExecutionRetry: 1,
+          ddlExecutionRetry: currentRetryCount + 1,
         },
       }
     }

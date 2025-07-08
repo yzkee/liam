@@ -1,5 +1,6 @@
 import { END, START, StateGraph } from '@langchain/langgraph'
 import type { Schema } from '@liam-hq/db-structure'
+import { err, ok } from 'neverthrow'
 import { WORKFLOW_ERROR_MESSAGES } from './chat/workflow/constants'
 import {
   analyzeRequirementsNode,
@@ -19,6 +20,7 @@ import {
 } from './chat/workflow/shared/langGraphUtils'
 import type { WorkflowState } from './chat/workflow/types'
 import type { Repositories } from './repositories'
+import type { AgentResult } from './types/errors'
 import type { NodeLogger } from './utils/nodeLogger'
 
 export interface DeepModelingParams {
@@ -35,15 +37,9 @@ export interface DeepModelingParams {
   recursionLimit?: number
 }
 
-export type DeepModelingResult =
-  | {
-      text: string
-      success: true
-    }
-  | {
-      success: false
-      error: string | undefined
-    }
+export type DeepModelingResult = AgentResult<{
+  text: string
+}>
 
 /**
  * Format chat history array into a string
@@ -178,37 +174,34 @@ export const deepModeling = async (
 
   try {
     const compiled = createGraph()
-
     const result = await compiled.invoke(workflowState, {
       recursionLimit,
     })
 
     if (result.error) {
-      return {
-        success: false,
-        error: result.error,
-      }
+      return err({
+        type: 'LANGGRAPH_ERROR' as const,
+        message: result.error,
+      })
     }
 
-    return {
+    return ok({
       text: result.finalResponse || result.generatedAnswer || '',
-      success: true,
-    }
+    })
   } catch (error) {
     logger.error(WORKFLOW_ERROR_MESSAGES.LANGGRAPH_FAILED, { error })
 
-    // Even with LangGraph execution failure, go through finalizeArtifactsNode to ensure proper response
     const errorMessage =
       error instanceof Error
         ? error.message
         : WORKFLOW_ERROR_MESSAGES.EXECUTION_FAILED
-
     const errorState = { ...workflowState, error: errorMessage }
     const finalizedResult = await finalizeArtifactsNode(errorState)
 
-    return {
-      success: false,
-      error: finalizedResult.error,
-    }
+    return err({
+      type: 'LANGGRAPH_ERROR' as const,
+      message: finalizedResult.error || errorMessage,
+      cause: error,
+    })
   }
 }

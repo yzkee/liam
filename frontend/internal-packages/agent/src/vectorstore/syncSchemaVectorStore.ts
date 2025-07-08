@@ -1,4 +1,6 @@
 import type { Schema } from '@liam-hq/db-structure'
+import { err, ok } from 'neverthrow'
+import type { AgentError, AgentResult } from '../types/errors'
 import {
   createSupabaseVectorStore,
   isSchemaUpdated,
@@ -46,25 +48,43 @@ export async function syncSchemaVectorStore(
   schemaData: Schema,
   organizationId: string,
   forceUpdate = false,
-): Promise<boolean> {
+): Promise<AgentResult<boolean>> {
   try {
-    // Validate environment variables
     if (!validateEnvironmentVariables()) {
-      throw new Error('Required environment variables are missing')
+      return err({
+        type: 'ENVIRONMENT_ERROR',
+        message: 'Required environment variables are missing',
+      })
     }
 
-    // Check if schema has been updated
     const needsUpdate = forceUpdate || (await isSchemaUpdated(schemaData))
 
     if (needsUpdate) {
-      // Initialize or update vector store
-      await createSupabaseVectorStore(schemaData, organizationId)
-      return true
+      const vectorStoreResult = await createSupabaseVectorStore(
+        schemaData,
+        organizationId,
+      )
+      if (vectorStoreResult.isErr()) {
+        return err({
+          type: 'VECTOR_STORE_ERROR',
+          message: `Vector store creation failed: ${vectorStoreResult.error.message}`,
+          cause: vectorStoreResult.error.cause,
+        })
+      }
+      return ok(true)
     }
 
-    return false
+    return ok(false)
   } catch (error) {
-    process.stderr.write(`Error synchronizing vector store: ${error}\n`)
-    throw error
+    const agentError: AgentError = {
+      type: 'VECTOR_STORE_ERROR',
+      message:
+        error instanceof Error ? error.message : 'Unknown vector store error',
+      cause: error,
+    }
+    process.stderr.write(
+      `Error synchronizing vector store: ${agentError.message}\n`,
+    )
+    return err(agentError)
   }
 }

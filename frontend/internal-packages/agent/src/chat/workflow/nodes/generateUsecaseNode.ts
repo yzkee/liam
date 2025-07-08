@@ -1,6 +1,8 @@
+import { Result } from 'neverthrow'
 import { QAGenerateUsecaseAgent } from '../../../langchain/agents'
 import type { Usecase } from '../../../langchain/agents/qaGenerateUsecaseAgent/agent'
 import type { BasePromptVariables } from '../../../langchain/utils/types'
+import type { AgentError } from '../../../types/errors'
 import { getWorkflowNodeProgress } from '../shared/getWorkflowNodeProgress'
 import type { WorkflowState } from '../types'
 
@@ -99,24 +101,46 @@ export async function generateUsecaseNode(
 
   const retryCount = state.retryCount[NODE_NAME] ?? 0
 
+  const generateUsecases = Result.fromThrowable(
+    () => qaAgent.generate(promptVariables),
+    (error): AgentError => ({
+      type: 'WORKFLOW_NODE_ERROR',
+      message: error instanceof Error ? error.message : String(error),
+      node: NODE_NAME,
+      cause: error,
+    }),
+  )
+
+  const usecaseResultPromise = generateUsecases()
+
+  if (usecaseResultPromise.isErr()) {
+    const error = usecaseResultPromise.error
+    state.logger.error(`[${NODE_NAME}] Failed: ${error.message}`)
+
+    return {
+      ...state,
+      error: error.message,
+      retryCount: {
+        ...state.retryCount,
+        [NODE_NAME]: retryCount + 1,
+      },
+    }
+  }
+
   try {
-    const result = await qaAgent.generate(promptVariables)
-
-    // Log the usecase results for debugging/monitoring purposes
+    const result = await usecaseResultPromise.value
     logUsecaseResults(state.logger, result.usecases)
-
     state.logger.log(`[${NODE_NAME}] Completed`)
 
     return {
       ...state,
       generatedUsecases: result.usecases,
-      error: undefined, // Clear error on success
+      error: undefined,
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
     state.logger.error(`[${NODE_NAME}] Failed: ${errorMessage}`)
 
-    // Increment retry count and set error
     return {
       ...state,
       error: errorMessage,

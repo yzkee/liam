@@ -95,7 +95,7 @@ export const StandardAnimation: Story = {
     primaryActionLabel: 'View Build',
     secondaryActionLabel: 'Cancel',
   },
-  storyName: 'Standard Progress Animation',
+  name: 'Standard Progress Animation',
 }
 
 // Fast progress animation
@@ -108,7 +108,7 @@ export const FastAnimation: Story = {
     subtitle: 'Performing database optimization',
     primaryActionLabel: 'View Details',
   },
-  storyName: 'Fast Progress Animation',
+  name: 'Fast Progress Animation',
 }
 
 // Slow progress animation
@@ -122,5 +122,5 @@ export const SlowAnimation: Story = {
     primaryActionLabel: 'View Tests',
     secondaryActionLabel: 'Cancel',
   },
-  storyName: 'Slow Progress Animation',
+  name: 'Slow Progress Animation',
 }

@@ -26,7 +26,7 @@ export const OptionButtonsGroup: Story = {
       { id: '3', text: 'Option 3: Generate SQL queries' },
     ],
   },
-  storyName: 'MessageOptionButtons - Build',
+  name: 'MessageOptionButtons - Build',
 }
 
 // Multi-select MessageOptionButtons examples
@@ -39,5 +39,5 @@ export const OptionButtonsGroupMultiSelect: Story = {
     ],
     multiSelect: true,
   },
-  storyName: 'MessageOptionButtons - Build Multi Select',
+  name: 'MessageOptionButtons - Build Multi Select',
 }

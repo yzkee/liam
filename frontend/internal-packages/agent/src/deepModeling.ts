@@ -1,5 +1,6 @@
 import { END, START, StateGraph } from '@langchain/langgraph'
 import type { Schema } from '@liam-hq/db-structure'
+import type { Result } from 'neverthrow'
 import { err, ok } from 'neverthrow'
 import { WORKFLOW_ERROR_MESSAGES } from './chat/workflow/constants'
 import {
@@ -20,7 +21,6 @@ import {
 } from './chat/workflow/shared/langGraphUtils'
 import type { WorkflowState } from './chat/workflow/types'
 import type { Repositories } from './repositories'
-import type { AgentResult } from './types/errors'
 import type { NodeLogger } from './utils/nodeLogger'
 
 export interface DeepModelingParams {
@@ -37,9 +37,12 @@ export interface DeepModelingParams {
   recursionLimit?: number
 }
 
-export type DeepModelingResult = AgentResult<{
-  text: string
-}>
+export type DeepModelingResult = Result<
+  {
+    text: string
+  },
+  Error
+>
 
 /**
  * Format chat history array into a string
@@ -179,10 +182,7 @@ export const deepModeling = async (
     })
 
     if (result.error) {
-      return err({
-        type: 'LANGGRAPH_ERROR' as const,
-        message: result.error,
-      })
+      return err(new Error(result.error))
     }
 
     return ok({
@@ -198,10 +198,6 @@ export const deepModeling = async (
     const errorState = { ...workflowState, error: errorMessage }
     const finalizedResult = await finalizeArtifactsNode(errorState)
 
-    return err({
-      type: 'LANGGRAPH_ERROR' as const,
-      message: finalizedResult.error || errorMessage,
-      cause: error,
-    })
+    return err(new Error(finalizedResult.error || errorMessage))
   }
 }

@@ -1,10 +1,10 @@
 'use client'
 
 import type { Schema } from '@liam-hq/db-structure'
-import { type FC, useEffect, useRef, useState, useTransition } from 'react'
-import { ChatInput } from '../ChatInput'
-import { TimelineItem } from '../TimelineItem'
+import { type FC, useEffect, useRef, useTransition } from 'react'
 import styles from './Chat.module.css'
+import { ChatInput } from './components/ChatInput'
+import { TimelineItem } from './components/TimelineItem'
 import {
   type TimelineItemType,
   useRealtimeTimelineItems,

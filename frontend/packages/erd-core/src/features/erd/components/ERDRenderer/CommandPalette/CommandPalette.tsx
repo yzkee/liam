@@ -83,7 +83,11 @@ export const CommandPalette: FC = () => {
           />
         </div>
         <DialogClose asChild>
-          <Button size="xs" variant="outline-secondary">
+          <Button
+            size="xs"
+            variant="outline-secondary"
+            className={styles.escButton}
+          >
             ESC
           </Button>
         </DialogClose>

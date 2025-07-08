@@ -27,27 +27,28 @@ export async function executeDdlNode(
   }
 
   // Generate DDL from schema data
-  let ddlStatements: string
-  try {
-    const result = postgresqlSchemaDeparser(state.schemaData)
-    ddlStatements = result.value
+  const result = postgresqlSchemaDeparser(state.schemaData)
 
-    // Log detailed information about what was generated
-    const tableCount = Object.keys(state.schemaData.tables).length
-    const ddlLength = ddlStatements.length
-
-    state.logger.log(
-      `[${NODE_NAME}] Generated DDL for ${tableCount} tables (${ddlLength} characters)`,
-    )
-    state.logger.debug(`[${NODE_NAME}] Generated DDL:`, { ddlStatements })
-  } catch (error) {
-    state.logger.log(`[${NODE_NAME}] DDL generation failed: ${error}`)
+  if (result.errors.length > 0) {
+    const errorMessages = result.errors.map((e) => e.message).join('; ')
+    state.logger.log(`[${NODE_NAME}] DDL generation failed: ${errorMessages}`)
     state.logger.log(`[${NODE_NAME}] Completed`)
     return {
       ...state,
       ddlStatements: 'DDL generation failed due to an unexpected error.',
     }
   }
+
+  const ddlStatements = result.value
+
+  // Log detailed information about what was generated
+  const tableCount = Object.keys(state.schemaData.tables).length
+  const ddlLength = ddlStatements.length
+
+  state.logger.log(
+    `[${NODE_NAME}] Generated DDL for ${tableCount} tables (${ddlLength} characters)`,
+  )
+  state.logger.debug(`[${NODE_NAME}] Generated DDL:`, { ddlStatements })
 
   if (!ddlStatements || !ddlStatements.trim()) {
     state.logger.log(`[${NODE_NAME}] No DDL statements to execute`)

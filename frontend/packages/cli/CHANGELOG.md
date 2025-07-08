@@ -1,5 +1,12 @@
 # @liam-hq/cli
 
+## 0.6.2
+
+### Patch Changes
+
+- [#2299](https://github.com/liam-hq/liam/pull/2299) - ✨ [Experimental]Add Drizzle ORM schema parser support / Thanks [@FunamaYukina](https://github.com/FunamaYukina)!
+- [#2299](https://github.com/liam-hq/liam/pull/2299) - ✨ [Experimental]Add Drizzle ORM schema parser support / Thanks [@FunamaYukina](https://github.com/FunamaYukina)!
+
 ## 0.6.1
 
 ### Patch Changes

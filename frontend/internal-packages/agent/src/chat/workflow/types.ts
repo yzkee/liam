@@ -1,7 +1,5 @@
 import type { Schema } from '@liam-hq/db-structure'
 import type { Usecase } from '../../langchain/agents/qaGenerateUsecaseAgent/agent'
-import type { Repositories } from '../../repositories'
-import type { NodeLogger } from '../../utils/nodeLogger'
 
 export type WorkflowState = {
   userInput: string
@@ -36,12 +34,6 @@ export type WorkflowState = {
 
   // Message saving fields
   designSessionId: string
-
-  // Repository dependencies for data access
-  repositories: Repositories
-
-  // Logging functionality
-  logger: NodeLogger
 
   // Progress timeline item ID for tracking
   progressTimelineItemId?: string | undefined

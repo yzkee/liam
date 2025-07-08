@@ -1,8 +1,10 @@
-import { ResultAsync } from 'neverthrow'
+import type { RunnableConfig } from '@langchain/core/runnables'
 import type * as v from 'valibot'
 import { PMAnalysisAgent } from '../../../langchain/agents'
 import type { requirementsAnalysisSchema } from '../../../langchain/agents/pmAnalysisAgent/agent'
 import type { BasePromptVariables } from '../../../langchain/utils/types'
+import type { Repositories } from '../../../repositories'
+import type { NodeLogger } from '../../../utils/nodeLogger'
 import { getWorkflowNodeProgress } from '../shared/getWorkflowNodeProgress'
 import type { WorkflowState } from '../types'
 
@@ -15,7 +17,7 @@ type AnalysisResult = v.InferOutput<typeof requirementsAnalysisSchema>
  * TODO: Remove this function once the feature is stable and monitoring is no longer needed
  */
 const logAnalysisResult = (
-  logger: WorkflowState['logger'],
+  logger: NodeLogger,
   result: AnalysisResult,
 ): void => {
   logger.log(`[${NODE_NAME}] Analysis Result:`)
@@ -34,18 +36,21 @@ const logAnalysisResult = (
  */
 export async function analyzeRequirementsNode(
   state: WorkflowState,
+  config: RunnableConfig,
 ): Promise<WorkflowState> {
-  state.logger.log(`[${NODE_NAME}] Started`)
+  const { repositories, logger } = config.configurable as {
+    repositories: Repositories
+    logger: NodeLogger
+  }
+
+  logger.log(`[${NODE_NAME}] Started`)
 
   // Update progress message if available
   if (state.progressTimelineItemId) {
-    await state.repositories.schema.updateTimelineItem(
-      state.progressTimelineItemId,
-      {
-        content: 'Processing: analyzeRequirements',
-        progress: getWorkflowNodeProgress('analyzeRequirements'),
-      },
-    )
+    await repositories.schema.updateTimelineItem(state.progressTimelineItemId, {
+      content: 'Processing: analyzeRequirements',
+      progress: getWorkflowNodeProgress('analyzeRequirements'),
+    })
   }
 
   const pmAnalysisAgent = new PMAnalysisAgent()
@@ -57,37 +62,35 @@ export async function analyzeRequirementsNode(
 
   const retryCount = state.retryCount[NODE_NAME] ?? 0
 
-  const analysisResult = await ResultAsync.fromPromise(
-    pmAnalysisAgent.analyzeRequirements(promptVariables),
-    (error) => (error instanceof Error ? error.message : String(error)),
-  )
+  try {
+    const analysisResult = await pmAnalysisAgent.analyzeRequirements(promptVariables)
 
-  if (analysisResult.isErr()) {
-    const errorMessage = analysisResult.error
-    const error = new Error(`[${NODE_NAME}] Failed: ${errorMessage}`)
-    state.logger.error(error.message)
+    // Log the analysis result for debugging/monitoring purposes
+    logAnalysisResult(logger, analysisResult)
+
+    logger.log(`[${NODE_NAME}] Completed`)
 
     return {
       ...state,
-      error,
+      analyzedRequirements: {
+        businessRequirement: analysisResult.businessRequirement,
+        functionalRequirements: analysisResult.functionalRequirements,
+        nonFunctionalRequirements: analysisResult.nonFunctionalRequirements,
+      },
+      error: undefined, // Clear error on success
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    logger.error(`[${NODE_NAME}] Failed: ${errorMessage}`)
+
+    // Increment retry count and set error
+    return {
+      ...state,
+      error: errorMessage,
       retryCount: {
         ...state.retryCount,
         [NODE_NAME]: retryCount + 1,
       },
     }
-  }
-
-  const result = analysisResult.value
-  logAnalysisResult(state.logger, result)
-  state.logger.log(`[${NODE_NAME}] Completed`)
-
-  return {
-    ...state,
-    analyzedRequirements: {
-      businessRequirement: result.businessRequirement,
-      functionalRequirements: result.functionalRequirements,
-      nonFunctionalRequirements: result.nonFunctionalRequirements,
-    },
-    error: undefined,
   }
 }

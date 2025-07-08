@@ -104,14 +104,20 @@ describe('Chat Workflow', () => {
     latestVersionNumber: 1,
     userId: 'test-user-id',
     designSessionId: 'test-design-session-id',
-    repositories: mockRepositories,
-    logger: mockLogger,
     ...overrides,
+  })
+
+  // Helper function to create config object
+  const createConfig = () => ({
+    configurable: {
+      repositories: mockRepositories,
+      logger: mockLogger,
+    },
   })
 
   // Helper function to execute workflow and assert common expectations
   const executeAndAssertSuccess = async (params: DeepModelingParams) => {
-    const result = await deepModeling(params)
+    const result = await deepModeling(params, createConfig())
 
     expect(result.isOk()).toBe(true)
     if (result.isOk()) {
@@ -294,7 +300,7 @@ describe('Chat Workflow', () => {
         latestVersionNumber: 1,
       })
 
-      const result = await deepModeling(params)
+      const result = await deepModeling(params, createConfig())
 
       expect(result.isOk()).toBe(true)
       if (result.isOk()) {
@@ -328,7 +334,7 @@ describe('Chat Workflow', () => {
         userInput: 'Add a created_at timestamp column to the users table',
       })
 
-      const result = await deepModeling(params)
+      const result = await deepModeling(params, createConfig())
 
       expect(result.isOk()).toBe(true)
       if (result.isOk()) {
@@ -362,7 +368,7 @@ describe('Chat Workflow', () => {
         recursionLimit: 20,
       })
 
-      const result = await deepModeling(params)
+      const result = await deepModeling(params, createConfig())
 
       // The test should handle either the expected error or recursion limit error
       expect(result.isErr()).toBe(true)
@@ -396,7 +402,7 @@ describe('Chat Workflow', () => {
         latestVersionNumber: 1,
       })
 
-      const result = await deepModeling(params)
+      const result = await deepModeling(params, createConfig())
 
       expect(result.isErr()).toBe(true)
       if (result.isErr()) {
@@ -418,7 +424,7 @@ describe('Chat Workflow', () => {
       mockAgent.generate.mockRejectedValue(new Error('Agent generation failed'))
       const params = createBaseParams()
 
-      const result = await deepModeling(params)
+      const result = await deepModeling(params, createConfig())
 
       expect(result.isErr()).toBe(true)
       if (result.isErr()) {
@@ -432,7 +438,7 @@ describe('Chat Workflow', () => {
       })
       const params = createBaseParams()
 
-      const result = await deepModeling(params)
+      const result = await deepModeling(params, createConfig())
 
       expect(result.isErr()).toBe(true)
       if (result.isErr()) {
@@ -445,7 +451,7 @@ describe('Chat Workflow', () => {
     it('should handle empty user input', async () => {
       const params = createBaseParams({ userInput: '' })
 
-      const result = await deepModeling(params)
+      const result = await deepModeling(params, createConfig())
 
       expect(result).toBeDefined()
       expect(result.isOk()).toBe(true)
@@ -461,7 +467,7 @@ describe('Chat Workflow', () => {
         userInput: 'Test state management',
       })
 
-      const result = await deepModeling(initialParams)
+      const result = await deepModeling(initialParams, createConfig())
 
       expect(result.isOk()).toBe(true)
       if (result.isOk()) {
@@ -474,7 +480,7 @@ describe('Chat Workflow', () => {
     it('should instantiate DatabaseSchemaBuildAgent', async () => {
       const params = createBaseParams({})
 
-      await deepModeling(params)
+      await deepModeling(params, createConfig())
 
       expect(MockDatabaseSchemaBuildAgent).toHaveBeenCalledOnce()
     })
@@ -488,7 +494,7 @@ describe('Chat Workflow', () => {
       const results = []
       for (const input of inputs) {
         const params = createBaseParams(input)
-        const result = await deepModeling(params)
+        const result = await deepModeling(params, createConfig())
         results.push(result)
       }
       return results

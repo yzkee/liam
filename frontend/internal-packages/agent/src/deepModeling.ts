@@ -30,10 +30,8 @@ export interface DeepModelingParams {
   organizationId?: string
   buildingSchemaId: string
   latestVersionNumber: number
-  repositories: Repositories
   designSessionId: string
   userId: string
-  logger: NodeLogger
   recursionLimit?: number
 }
 
@@ -150,6 +148,12 @@ const createGraph = () => {
  */
 export const deepModeling = async (
   params: DeepModelingParams,
+  config: {
+    configurable: {
+      repositories: Repositories
+      logger: NodeLogger
+    }
+  },
 ): Promise<DeepModelingResult> => {
   const {
     userInput,
@@ -158,12 +162,12 @@ export const deepModeling = async (
     organizationId,
     buildingSchemaId,
     latestVersionNumber = 0,
-    repositories,
     designSessionId,
     userId,
-    logger,
     recursionLimit = DEFAULT_RECURSION_LIMIT,
   } = params
+
+  const { repositories, logger } = config.configurable
 
   // Convert history format with role prefix
   const historyArray = history.map(([role, content]) => {
@@ -179,10 +183,8 @@ export const deepModeling = async (
     organizationId,
     buildingSchemaId,
     latestVersionNumber,
-    repositories,
     designSessionId,
     userId,
-    logger,
     retryCount: {},
   }
 
@@ -190,10 +192,14 @@ export const deepModeling = async (
     const compiled = createGraph()
     const result = await compiled.invoke(workflowState, {
       recursionLimit,
+      configurable: {
+        repositories,
+        logger,
+      },
     })
 
     if (result.error) {
-      return err(result.error)
+      return err(new Error(result.error))
     }
 
     return ok({
@@ -206,9 +212,15 @@ export const deepModeling = async (
       error instanceof Error
         ? error.message
         : WORKFLOW_ERROR_MESSAGES.EXECUTION_FAILED
-    const errorState = { ...workflowState, error: new Error(errorMessage) }
-    const finalizedResult = await finalizeArtifactsNode(errorState)
 
-    return err(finalizedResult.error || new Error(errorMessage))
+    const errorState = { ...workflowState, error: errorMessage }
+    const finalizedResult = await finalizeArtifactsNode(errorState, {
+      configurable: {
+        repositories,
+        logger,
+      },
+    })
+
+    return err(new Error(finalizedResult.error || errorMessage))
   }
 }

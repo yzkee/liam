@@ -2,8 +2,12 @@
 
 import { Button, Search, Table2 } from '@liam-hq/ui'
 import {
+  Dialog,
   DialogClose,
+  DialogContent,
   DialogDescription,
+  DialogOverlay,
+  DialogPortal,
   DialogTitle,
 } from '@radix-ui/react-dialog'
 import { Command } from 'cmdk'
@@ -69,89 +73,93 @@ export const CommandPalette: FC = () => {
   }, [open, tableName])
 
   return (
-    <Command.Dialog
-      open={open}
-      onOpenChange={setOpen}
-      contentClassName={styles.content}
-      value={tableName ?? ''}
-      onValueChange={(v) => setTableName(v)}
-    >
-      <DialogTitle hidden>Command Palette</DialogTitle>
-      <DialogDescription hidden>
-        A search-based interface that allows quick access to various commands
-        and features within the application.
-      </DialogDescription>
-      <div className={styles.searchContainer}>
-        <div className={styles.searchFormWithIcon}>
-          <Search className={styles.searchIcon} />
-          <Command.Input
-            placeholder="Search"
-            onBlur={(event) => event.target.focus()}
-          />
-        </div>
-        <DialogClose asChild>
-          <Button
-            size="xs"
-            variant="outline-secondary"
-            className={styles.escButton}
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogPortal>
+        <DialogOverlay className={styles.overlay} />
+        <DialogContent className={styles.content}>
+          <DialogTitle hidden>Command Palette</DialogTitle>
+          <DialogDescription hidden>
+            A search-based interface that allows quick access to various
+            commands and features within the application.
+          </DialogDescription>
+          <Command
+            value={tableName ?? ''}
+            onValueChange={(v) => setTableName(v)}
           >
-            ESC
-          </Button>
-        </DialogClose>
-      </div>
-      <div className={styles.main}>
-        <Command.List>
-          <Command.Empty>No results found.</Command.Empty>
-          <Command.Group heading="Tables">
-            {Object.values(schema.current.tables).map((table) => (
-              <Command.Item key={table.name} value={table.name} asChild>
-                <a
-                  href={getTableLinkHref(table.name)}
-                  onClick={(event) => {
-                    // Do not call preventDefault to allow the default link behavior when ⌘ key is pressed
-                    if (event.ctrlKey || event.metaKey) {
-                      return
-                    }
-
-                    event.preventDefault()
-                    goToERD(table.name)
-                  }}
+            <div className={styles.searchContainer}>
+              <div className={styles.searchFormWithIcon}>
+                <Search className={styles.searchIcon} />
+                <Command.Input
+                  placeholder="Search"
+                  onBlur={(event) => event.target.focus()}
+                />
+              </div>
+              <DialogClose asChild>
+                <Button
+                  size="xs"
+                  variant="outline-secondary"
+                  className={styles.escButton}
                 >
-                  <Table2 className={styles.itemIcon} />
-                  <span className={styles.itemText}>{table.name}</span>
-                </a>
-              </Command.Item>
-            ))}
-          </Command.Group>
-        </Command.List>
-        <div
-          className={styles.previewContainer}
-          data-testid="CommandPalettePreview"
-        >
-          <div className={styles.previewBackground}>
-            {table && (
-              <TableNode
-                id=""
-                type="table"
-                data={{
-                  table: table,
-                  isActiveHighlighted: false,
-                  isHighlighted: false,
-                  isTooltipVisible: false,
-                  sourceColumnName: undefined,
-                  targetColumnCardinalities: undefined,
-                  showMode: 'ALL_FIELDS',
-                }}
-                dragging={false}
-                isConnectable={false}
-                positionAbsoluteX={0}
-                positionAbsoluteY={0}
-                zIndex={0}
-              />
-            )}
-          </div>
-        </div>
-      </div>
-    </Command.Dialog>
+                  ESC
+                </Button>
+              </DialogClose>
+            </div>
+            <div className={styles.main}>
+              <Command.List>
+                <Command.Empty>No results found.</Command.Empty>
+                <Command.Group heading="Tables">
+                  {Object.values(schema.current.tables).map((table) => (
+                    <Command.Item key={table.name} value={table.name} asChild>
+                      <a
+                        href={getTableLinkHref(table.name)}
+                        onClick={(event) => {
+                          // Do not call preventDefault to allow the default link behavior when ⌘ key is pressed
+                          if (event.ctrlKey || event.metaKey) {
+                            return
+                          }
+
+                          event.preventDefault()
+                          goToERD(table.name)
+                        }}
+                      >
+                        <Table2 className={styles.itemIcon} />
+                        <span className={styles.itemText}>{table.name}</span>
+                      </a>
+                    </Command.Item>
+                  ))}
+                </Command.Group>
+              </Command.List>
+              <div
+                className={styles.previewContainer}
+                data-testid="CommandPalettePreview"
+              >
+                <div className={styles.previewBackground}>
+                  {table && (
+                    <TableNode
+                      id=""
+                      type="table"
+                      data={{
+                        table: table,
+                        isActiveHighlighted: false,
+                        isHighlighted: false,
+                        isTooltipVisible: false,
+                        sourceColumnName: undefined,
+                        targetColumnCardinalities: undefined,
+                        showMode: 'ALL_FIELDS',
+                      }}
+                      dragging={false}
+                      isConnectable={false}
+                      positionAbsoluteX={0}
+                      positionAbsoluteY={0}
+                      zIndex={0}
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+          </Command>
+        </DialogContent>
+      </DialogPortal>
+    </Dialog>
   )
 }

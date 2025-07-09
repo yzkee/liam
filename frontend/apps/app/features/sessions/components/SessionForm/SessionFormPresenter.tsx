@@ -1,4 +1,4 @@
-import { type FC, useState } from 'react'
+import { type FC, useEffect, useRef, useState } from 'react'
 import type { Projects } from '@/components/CommonLayout/AppBar/ProjectsDropdownMenu/services/getProjects'
 import { GitHubSessionFormPresenter } from './GitHubSessionFormPresenter'
 import styles from './SessionFormPresenter.module.css'
@@ -36,48 +36,89 @@ export const SessionFormPresenter: FC<Props> = ({
   formAction,
 }) => {
   const [mode, setMode] = useState<SessionMode>('github')
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
 
-  const renderFormPresenter = () => {
-    switch (mode) {
-      case 'github':
-        return (
-          <GitHubSessionFormPresenter
-            projects={projects}
-            defaultProjectId={defaultProjectId}
-            branches={branches}
-            isBranchesLoading={isBranchesLoading}
-            branchesError={branchesError}
-            formError={formError}
-            isPending={isPending}
-            onProjectChange={onProjectChange}
-            formAction={formAction}
-          />
-        )
-      case 'upload':
-        return (
-          <UploadSessionFormPresenter
-            formError={formError}
-            isPending={isPending}
-            formAction={formAction}
-          />
-        )
-      case 'url':
-        return (
-          <URLSessionFormPresenter
-            formError={formError}
-            isPending={isPending}
-            formAction={formAction}
-          />
-        )
-      default:
-        return null
-    }
+  const handleModeChange = (newMode: SessionMode) => {
+    if (newMode === mode || isTransitioning) return
+
+    const container = containerRef.current
+    if (!container) return
+
+    // Start fade out
+    setIsTransitioning(true)
+
+    // Wait for fade out to complete
+    setTimeout(() => {
+      // Change mode (this will trigger height calculation in useEffect)
+      setMode(newMode)
+    }, 150) // Fade out duration
+
+    // Start fade in after mode change and height animation
+    setTimeout(() => {
+      setIsTransitioning(false)
+    }, 450) // Fade out (150ms) + height transition (300ms)
   }
+
+  useEffect(() => {
+    // Set height when mode changes
+    const timer = setTimeout(() => {
+      const container = containerRef.current
+      const currentPanel = container?.querySelector('[role="tabpanel"]')
+
+      if (container && currentPanel) {
+        const height = currentPanel.scrollHeight
+        container.style.height = `${height}px`
+      }
+    }, 0)
+
+    return () => clearTimeout(timer)
+  }, [mode])
 
   return (
     <div className={styles.container}>
-      <SessionModeSelector selectedMode={mode} onModeChange={setMode} />
-      {renderFormPresenter()}
+      <SessionModeSelector
+        selectedMode={mode}
+        onModeChange={handleModeChange}
+      />
+      <div ref={containerRef} className={styles.formContainer}>
+        {mode === 'github' && (
+          <div role="tabpanel" id="github-panel" aria-labelledby="github-tab">
+            <GitHubSessionFormPresenter
+              projects={projects}
+              defaultProjectId={defaultProjectId}
+              branches={branches}
+              isBranchesLoading={isBranchesLoading}
+              branchesError={branchesError}
+              formError={formError}
+              isPending={isPending}
+              onProjectChange={onProjectChange}
+              formAction={formAction}
+              isTransitioning={isTransitioning}
+            />
+          </div>
+        )}
+        {mode === 'upload' && (
+          <div role="tabpanel" id="upload-panel" aria-labelledby="upload-tab">
+            <UploadSessionFormPresenter
+              formError={formError}
+              isPending={isPending}
+              formAction={formAction}
+              isTransitioning={isTransitioning}
+            />
+          </div>
+        )}
+        {mode === 'url' && (
+          <div role="tabpanel" id="url-panel" aria-labelledby="url-tab">
+            <URLSessionFormPresenter
+              formError={formError}
+              isPending={isPending}
+              formAction={formAction}
+              isTransitioning={isTransitioning}
+            />
+          </div>
+        )}
+      </div>
     </div>
   )
 }

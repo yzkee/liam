@@ -21,6 +21,7 @@ type Props = {
   isPending: boolean
   onProjectChange: (projectId: string) => void
   formAction: (formData: FormData) => void
+  isTransitioning?: boolean
 }
 
 export const GitHubSessionFormPresenter: FC<Props> = ({
@@ -33,6 +34,7 @@ export const GitHubSessionFormPresenter: FC<Props> = ({
   isPending,
   onProjectChange,
   formAction,
+  isTransitioning = false,
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [hasContent, setHasContent] = useState(false)
@@ -121,7 +123,13 @@ export const GitHubSessionFormPresenter: FC<Props> = ({
         onDragOver={handleDrag}
         onDrop={handleDrop}
       >
-        <form action={formAction}>
+        <form
+          action={formAction}
+          style={{
+            opacity: isTransitioning ? 0 : 1,
+            transition: 'opacity 0.15s ease-out',
+          }}
+        >
           <div className={styles.formContent}>
             {attachments.length > 0 && (
               <div className={styles.attachmentsContainer}>

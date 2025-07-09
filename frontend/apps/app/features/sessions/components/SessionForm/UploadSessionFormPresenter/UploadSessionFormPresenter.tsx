@@ -20,6 +20,7 @@ type Props = {
   formError?: string
   isPending: boolean
   formAction: (formData: FormData) => void
+  isTransitioning?: boolean
 }
 
 // Helper function to handle file processing
@@ -47,6 +48,7 @@ export const UploadSessionFormPresenter: FC<Props> = ({
   formError,
   isPending,
   formAction,
+  isTransitioning = false,
 }) => {
   const [isHovered, setIsHovered] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -138,7 +140,13 @@ export const UploadSessionFormPresenter: FC<Props> = ({
         (attachmentDragActive || schemaDragActive) && styles.dragActive,
       )}
     >
-      <form action={formAction}>
+      <form
+        action={formAction}
+        style={{
+          opacity: isTransitioning ? 0 : 1,
+          transition: 'opacity 0.15s ease-out',
+        }}
+      >
         {selectedFile && schemaStatus === 'valid' && selectedFormat && (
           <input type="hidden" name="schemaFormat" value={selectedFormat} />
         )}

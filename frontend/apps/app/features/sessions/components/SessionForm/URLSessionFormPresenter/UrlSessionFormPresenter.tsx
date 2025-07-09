@@ -20,12 +20,14 @@ type Props = {
   formError?: string
   isPending: boolean
   formAction: (formData: FormData) => void
+  isTransitioning?: boolean
 }
 
 export const URLSessionFormPresenter: FC<Props> = ({
   formError,
   isPending,
   formAction,
+  isTransitioning = false,
 }) => {
   const [urlPath, setUrlPath] = useState('')
   const [textContent, setTextContent] = useState('')
@@ -192,7 +194,14 @@ export const URLSessionFormPresenter: FC<Props> = ({
         attachmentDragActive && styles.dragActive,
       )}
     >
-      <form action={formAction} className={styles.form}>
+      <form
+        action={formAction}
+        className={styles.form}
+        style={{
+          opacity: isTransitioning ? 0 : 1,
+          transition: 'opacity 0.15s ease-out',
+        }}
+      >
         {schemaContent && (
           <input type="hidden" name="schemaContent" value={schemaContent} />
         )}

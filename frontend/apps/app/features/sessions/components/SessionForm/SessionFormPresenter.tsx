@@ -62,9 +62,11 @@ export const SessionFormPresenter: FC<Props> = ({
     }, 150) // Fade out duration
 
     // Start fade in after mode change and height animation
+    const FADE_OUT_DURATION = 150
+    const HEIGHT_TRANSITION_DURATION = 300
     fadeInTimerRef.current = setTimeout(() => {
       setIsTransitioning(false)
-    }, 450) // Fade out (150ms) + height transition (300ms)
+    }, FADE_OUT_DURATION + HEIGHT_TRANSITION_DURATION)
   }
 
   useEffect(() => {

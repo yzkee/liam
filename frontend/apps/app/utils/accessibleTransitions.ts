@@ -54,16 +54,5 @@ export const createAccessibleOpacityTransition = (
 export const createAccessibleHeightTransition = (
   duration = 300,
 ): CSSProperties => {
-  const prefersReducedMotion =
-    typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-  if (prefersReducedMotion) {
-    // For height transitions, we skip the animation entirely when reduced motion is preferred
-    return {}
-  }
-
-  return {
-    transition: `height ${duration}ms ease-out`,
-  }
+  return createAccessibleTransition('height', duration, 'ease-out')
 }

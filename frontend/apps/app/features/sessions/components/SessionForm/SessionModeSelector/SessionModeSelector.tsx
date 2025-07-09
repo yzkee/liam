@@ -115,7 +115,7 @@ export const SessionModeSelector: FC<Props> = ({
           id={`${modeItem.mode}-tab`}
           aria-selected={selectedMode === modeItem.mode}
           aria-controls={`${modeItem.mode}-panel`}
-          tabIndex={0}
+          tabIndex={selectedMode === modeItem.mode ? 0 : -1}
           className={`${styles.modeButton} ${
             selectedMode === modeItem.mode ? styles.modeButtonActive : ''
           }`}

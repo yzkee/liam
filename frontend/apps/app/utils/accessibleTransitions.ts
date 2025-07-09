@@ -7,15 +7,17 @@ import type { CSSProperties } from 'react'
  * @param easing - The CSS easing function (default: 'ease-out')
  * @returns CSS properties object with the appropriate transition
  */
+const checkReducedMotion = (): boolean => {
+  return typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+}
+
 export const createAccessibleTransition = (
   property: string,
   duration: number,
   easing = 'ease-out',
 ): CSSProperties => {
-  // Check if user prefers reduced motion
-  const prefersReducedMotion =
-    typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const prefersReducedMotion = checkReducedMotion()
 
   if (prefersReducedMotion) {
     // For reduced motion, we still want state changes to be visible

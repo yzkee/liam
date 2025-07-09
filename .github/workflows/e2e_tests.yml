@@ -1,7 +1,8 @@
 name: E2E Tests
 
 on:
-  deployment_status:
+  repository_dispatch:
+    types: ['vercel.deployment.success']
 
 jobs:
   _e2e-tests:

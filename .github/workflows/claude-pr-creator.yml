@@ -69,19 +69,32 @@ jobs:
             // Get the branch created by Claude Code Action
             // Claude Code Action creates branches with pattern: claude/issue-<number>-<timestamp>
             const issueNumber = process.env.ISSUE_NUMBER;
-            const branches = await github.rest.repos.listBranches({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              per_page: 100, // Limit results per page
-              // Filter branches by prefix to reduce unnecessary data
-              protected: false // Only retrieve unprotected branches
-            });
+            let claudeBranch = null;
+            let page = 1;
+            const maxPages = 10; // Prevent infinite loops
 
-            // Find the branch created for this specific issue
-            const claudeBranch = branches.data.find(branch =>
-              branch.name.startsWith(`claude/issue-${issueNumber}`) ||
-              branch.name.startsWith(`issue-${issueNumber}`)
-            );
+            while (!claudeBranch && page <= maxPages) {
+              const branches = await github.rest.repos.listBranches({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                per_page: 100, // Limit results per page
+                page: page, // Specify the page number
+                protected: false // Only retrieve unprotected branches
+              });
+
+              // Find the branch created for this specific issue
+              claudeBranch = branches.data.find(branch =>
+                branch.name.startsWith(`claude/issue-${issueNumber}`) ||
+                branch.name.startsWith(`issue-${issueNumber}`)
+              );
+
+              // Break if no more branches are returned
+              if (branches.data.length === 0) {
+                break;
+              }
+
+              page++;
+            }
 
             if (claudeBranch) {
               console.log(`Creating PR for branch: ${claudeBranch.name}`);

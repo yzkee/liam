@@ -37,5 +37,12 @@ Split the current large pull request into smaller, manageable PRs following thes
 3. Get user approval
 4. Create branches and PRs in sequence
 5. Write appropriate descriptions for each PR
+6. **Create all PRs as Draft** to prevent premature reviews
+
+### Important Notes
+
+- All split PRs should be created as **Draft Pull Requests**
+- Only convert to "Ready for review" after all dependent PRs are created
+- This ensures reviewers don't start reviewing incomplete chains
 
 $ARGUMENTS

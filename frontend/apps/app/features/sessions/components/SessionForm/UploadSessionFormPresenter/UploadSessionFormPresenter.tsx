@@ -5,7 +5,7 @@ import {
   FormatIcon,
   type FormatType,
 } from '../../../../../components/FormatIcon/FormatIcon'
-import { createAccessibleOpacityTransition } from '../../../../../utils/accessibleTransitions'
+import { createAccessibleOpacityTransition } from '@/utils/accessibleTransitions'
 import { AttachmentsContainer } from '../AttachmentsContainer'
 import { FormatSelectDropdown } from '../FormatSelectDropdown'
 import { useAutoResizeTextarea } from '../hooks/useAutoResizeTextarea'

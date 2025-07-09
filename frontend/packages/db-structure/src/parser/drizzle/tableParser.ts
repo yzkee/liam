@@ -9,6 +9,7 @@ import {
   getStringValue,
   isObjectExpression,
   isPgTableCall,
+  isSchemaTableCall,
   isStringLiteral,
 } from './astUtils.js'
 import { parseColumnFromProperty } from './columnParser.js'
@@ -57,6 +58,89 @@ export const parsePgTableWithComment = (
 export const parsePgTableCall = (
   callExpr: CallExpression,
 ): DrizzleTableDefinition | null => {
+  if (callExpr.arguments.length < 2) return null
+
+  const tableNameArg = callExpr.arguments[0]
+  const columnsArg = callExpr.arguments[1]
+
+  if (!tableNameArg || !columnsArg) return null
+
+  // Extract expression from SWC argument structure
+  const tableNameExpr = getArgumentExpression(tableNameArg)
+  const columnsExpr = getArgumentExpression(columnsArg)
+
+  const tableName = tableNameExpr ? getStringValue(tableNameExpr) : null
+  if (!tableName || !columnsExpr || !isObjectExpression(columnsExpr))
+    return null
+
+  const table: DrizzleTableDefinition = {
+    name: tableName,
+    columns: {},
+    indexes: {},
+  }
+
+  // Parse columns from the object expression
+  for (const prop of columnsExpr.properties) {
+    if (prop.type === 'KeyValueProperty') {
+      const column = parseColumnFromProperty(prop)
+      if (column) {
+        // Use the JS property name as the key
+        const jsPropertyName =
+          prop.key.type === 'Identifier' ? getIdentifierName(prop.key) : null
+        if (jsPropertyName) {
+          table.columns[jsPropertyName] = column
+        }
+      }
+    }
+  }
+
+  // Parse indexes and composite primary key from third argument if present
+  if (callExpr.arguments.length > 2) {
+    const thirdArg = callExpr.arguments[2]
+    const thirdArgExpr = getArgumentExpression(thirdArg)
+    if (thirdArgExpr && thirdArgExpr.type === 'ArrowFunctionExpression') {
+      // Parse arrow function like (table) => ({ nameIdx: index(...), pk: primaryKey(...) })
+      let returnExpr = thirdArgExpr.body
+
+      // Handle parenthesized expressions like (table) => ({ ... })
+      if (returnExpr.type === 'ParenthesisExpression') {
+        returnExpr = returnExpr.expression
+      }
+
+      if (returnExpr.type === 'ObjectExpression') {
+        for (const prop of returnExpr.properties) {
+          if (prop.type === 'KeyValueProperty') {
+            const indexName =
+              prop.key.type === 'Identifier'
+                ? getIdentifierName(prop.key)
+                : null
+            if (indexName && prop.value.type === 'CallExpression') {
+              const indexDef = parseIndexDefinition(prop.value, indexName)
+              if (indexDef) {
+                if (isCompositePrimaryKey(indexDef)) {
+                  table.compositePrimaryKey = indexDef
+                } else if (isDrizzleIndex(indexDef)) {
+                  table.indexes[indexName] = indexDef
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return table
+}
+
+/**
+ * Parse schema.table() call expression
+ */
+export const parseSchemaTableCall = (
+  callExpr: CallExpression,
+): DrizzleTableDefinition | null => {
+  if (!isSchemaTableCall(callExpr)) return null
+
   if (callExpr.arguments.length < 2) return null
 
   const tableNameArg = callExpr.arguments[0]

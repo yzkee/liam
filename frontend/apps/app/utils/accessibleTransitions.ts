@@ -50,13 +50,31 @@ export const createAccessibleOpacityTransition = (
  * Hook to check if user prefers reduced motion
  * @returns boolean indicating if reduced motion is preferred
  */
-export const usePrefersReducedMotion = (): boolean => {
-  if (typeof window === 'undefined') {
-    return false
-  }
+import { useEffect, useState } from 'react'
 
-  const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
-  return mediaQuery.matches
+export const usePrefersReducedMotion = (): boolean => {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() => {
+    if (typeof window === 'undefined') {
+      return false
+    }
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  })
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const handleChange = (e: MediaQueryListEvent) => {
+      setPrefersReducedMotion(e.matches)
+    }
+
+    mediaQuery.addEventListener('change', handleChange)
+    return () => mediaQuery.removeEventListener('change', handleChange)
+  }, [])
+
+  return prefersReducedMotion
 }
 
 /**

@@ -162,6 +162,12 @@ export const parseSchemaTableCall = (
     indexes: {},
   }
 
+  // TODO: Handle table name conflicts across different schemas
+  // Currently, if multiple schemas have tables with the same name (e.g., auth.users and public.users),
+  // the later one will overwrite the earlier one since we only use the table name without schema prefix.
+  // This is a limitation shared by other parsers and should be addressed consistently across the codebase.
+  // ref: https://github.com/liam-hq/liam/discussions/2391
+
   // Parse columns from the object expression
   for (const prop of columnsExpr.properties) {
     if (prop.type === 'KeyValueProperty') {

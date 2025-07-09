@@ -1,6 +1,5 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
-import type { Repositories } from '../../../repositories'
-import type { NodeLogger } from '../../../utils/nodeLogger'
+import { getConfigurable } from '../shared/getConfigurable'
 import { getWorkflowNodeProgress } from '../shared/getWorkflowNodeProgress'
 import type { WorkflowState } from '../types'
 
@@ -12,10 +11,14 @@ export async function prepareDmlNode(
   state: WorkflowState,
   config: RunnableConfig,
 ): Promise<WorkflowState> {
-  const { repositories } = config.configurable as {
-    repositories: Repositories
-    logger: NodeLogger
+  const configurableResult = getConfigurable(config)
+  if (configurableResult.isErr()) {
+    return {
+      ...state,
+      error: configurableResult.error,
+    }
   }
+  const { repositories } = configurableResult.value
 
   // Update progress message if available
   if (state.progressTimelineItemId) {

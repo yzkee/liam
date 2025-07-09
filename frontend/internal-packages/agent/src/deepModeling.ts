@@ -19,9 +19,7 @@ import {
   createAnnotations,
   DEFAULT_RECURSION_LIMIT,
 } from './chat/workflow/shared/langGraphUtils'
-import type { WorkflowState } from './chat/workflow/types'
-import type { Repositories } from './repositories'
-import type { NodeLogger } from './utils/nodeLogger'
+import type { WorkflowConfigurable, WorkflowState } from './chat/workflow/types'
 
 export interface DeepModelingParams {
   userInput: string
@@ -149,10 +147,7 @@ const createGraph = () => {
 export const deepModeling = async (
   params: DeepModelingParams,
   config: {
-    configurable: {
-      repositories: Repositories
-      logger: NodeLogger
-    }
+    configurable: WorkflowConfigurable
   },
 ): Promise<DeepModelingResult> => {
   const {

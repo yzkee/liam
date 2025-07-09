@@ -4,8 +4,8 @@ import type * as v from 'valibot'
 import { PMAnalysisAgent } from '../../../langchain/agents'
 import type { requirementsAnalysisSchema } from '../../../langchain/agents/pmAnalysisAgent/agent'
 import type { BasePromptVariables } from '../../../langchain/utils/types'
-import type { Repositories } from '../../../repositories'
 import type { NodeLogger } from '../../../utils/nodeLogger'
+import { getConfigurable } from '../shared/getConfigurable'
 import { getWorkflowNodeProgress } from '../shared/getWorkflowNodeProgress'
 import type { WorkflowState } from '../types'
 
@@ -39,10 +39,14 @@ export async function analyzeRequirementsNode(
   state: WorkflowState,
   config: RunnableConfig,
 ): Promise<WorkflowState> {
-  const { repositories, logger } = config.configurable as {
-    repositories: Repositories
-    logger: NodeLogger
+  const configurableResult = getConfigurable(config)
+  if (configurableResult.isErr()) {
+    return {
+      ...state,
+      error: configurableResult.error,
+    }
   }
+  const { repositories, logger } = configurableResult.value
 
   logger.log(`[${NODE_NAME}] Started`)
 

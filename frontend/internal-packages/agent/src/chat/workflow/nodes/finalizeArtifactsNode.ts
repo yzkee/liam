@@ -1,6 +1,7 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
 import type { Repositories } from '../../../repositories'
 import type { NodeLogger } from '../../../utils/nodeLogger'
+import { getConfigurable } from '../shared/getConfigurable'
 import { getWorkflowNodeProgress } from '../shared/getWorkflowNodeProgress'
 import type { WorkflowState } from '../types'
 import {
@@ -101,10 +102,14 @@ export async function finalizeArtifactsNode(
   state: WorkflowState,
   config: RunnableConfig,
 ): Promise<WorkflowState> {
-  const { repositories, logger } = config.configurable as {
-    repositories: Repositories
-    logger: NodeLogger
+  const configurableResult = getConfigurable(config)
+  if (configurableResult.isErr()) {
+    return {
+      ...state,
+      error: configurableResult.error,
+    }
   }
+  const { repositories, logger } = configurableResult.value
 
   logger.log(`[${NODE_NAME}] Started`)
 

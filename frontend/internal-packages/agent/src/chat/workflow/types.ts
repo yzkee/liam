@@ -1,5 +1,7 @@
 import type { Schema } from '@liam-hq/db-structure'
 import type { Usecase } from '../../langchain/agents/qaGenerateUsecaseAgent/agent'
+import type { Repositories } from '../../repositories'
+import type { NodeLogger } from '../../utils/nodeLogger'
 
 export type WorkflowState = {
   userInput: string
@@ -37,4 +39,12 @@ export type WorkflowState = {
 
   // Progress timeline item ID for tracking
   progressTimelineItemId?: string | undefined
+}
+
+/**
+ * Type definition for the configurable object passed to workflow nodes
+ */
+export interface WorkflowConfigurable {
+  repositories: Repositories
+  logger: NodeLogger
 }

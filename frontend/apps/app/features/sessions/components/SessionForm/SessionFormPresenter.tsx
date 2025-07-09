@@ -38,6 +38,8 @@ export const SessionFormPresenter: FC<Props> = ({
   const [mode, setMode] = useState<SessionMode>('github')
   const [isTransitioning, setIsTransitioning] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const fadeOutTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const fadeInTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   const handleModeChange = (newMode: SessionMode) => {
     if (newMode === mode || isTransitioning) return
@@ -45,17 +47,21 @@ export const SessionFormPresenter: FC<Props> = ({
     const container = containerRef.current
     if (!container) return
 
+    // Clear any existing timers
+    if (fadeOutTimerRef.current) clearTimeout(fadeOutTimerRef.current)
+    if (fadeInTimerRef.current) clearTimeout(fadeInTimerRef.current)
+
     // Start fade out
     setIsTransitioning(true)
 
     // Wait for fade out to complete
-    setTimeout(() => {
+    fadeOutTimerRef.current = setTimeout(() => {
       // Change mode (this will trigger height calculation in useEffect)
       setMode(newMode)
     }, 150) // Fade out duration
 
     // Start fade in after mode change and height animation
-    setTimeout(() => {
+    fadeInTimerRef.current = setTimeout(() => {
       setIsTransitioning(false)
     }, 450) // Fade out (150ms) + height transition (300ms)
   }
@@ -74,6 +80,14 @@ export const SessionFormPresenter: FC<Props> = ({
 
     return () => clearTimeout(timer)
   }, [mode])
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      if (fadeOutTimerRef.current) clearTimeout(fadeOutTimerRef.current)
+      if (fadeInTimerRef.current) clearTimeout(fadeInTimerRef.current)
+    }
+  }, [])
 
   return (
     <div className={styles.container}>

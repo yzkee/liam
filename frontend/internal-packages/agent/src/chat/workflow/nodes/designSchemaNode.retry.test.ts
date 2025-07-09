@@ -40,33 +40,38 @@ describe('designSchemaNode retry behavior', () => {
       schemaData: { tables: {} },
       buildingSchemaId: 'test-id',
       latestVersionNumber: 1,
-      repositories: {
-        schema: {
-          updateTimelineItem: vi.fn(),
-          getSchema: vi.fn(),
-          getDesignSession: vi.fn(),
-          createVersion: vi.fn(),
-          createTimelineItem: vi.fn(),
-          createArtifact: vi.fn(),
-          updateArtifact: vi.fn(),
-          getArtifact: vi.fn(),
-        },
-      },
       designSessionId: 'session-id',
       userId: 'user-id',
-      logger: {
-        log: vi.fn(),
-        debug: vi.fn(),
-        error: vi.fn(),
-        info: vi.fn(),
-        warn: vi.fn(),
-      },
       retryCount: { ddlExecutionRetry: 1 },
       shouldRetryWithDesignSchema: true,
       ddlExecutionFailureReason: 'Foreign key constraint error',
     }
 
-    await designSchemaNode(state)
+    const config = {
+      configurable: {
+        repositories: {
+          schema: {
+            updateTimelineItem: vi.fn(),
+            getSchema: vi.fn(),
+            getDesignSession: vi.fn(),
+            createVersion: vi.fn(),
+            createTimelineItem: vi.fn(),
+            createArtifact: vi.fn(),
+            updateArtifact: vi.fn(),
+            getArtifact: vi.fn(),
+          },
+        },
+        logger: {
+          log: vi.fn(),
+          debug: vi.fn(),
+          error: vi.fn(),
+          info: vi.fn(),
+          warn: vi.fn(),
+        },
+      },
+    }
+
+    await designSchemaNode(state, config)
 
     // Check the generate call arguments
     expect(mockGenerate).toHaveBeenCalledWith(

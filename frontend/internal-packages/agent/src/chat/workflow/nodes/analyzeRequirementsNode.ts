@@ -1,4 +1,5 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
+import { ResultAsync } from 'neverthrow'
 import type * as v from 'valibot'
 import { PMAnalysisAgent } from '../../../langchain/agents'
 import type { requirementsAnalysisSchema } from '../../../langchain/agents/pmAnalysisAgent/agent'
@@ -62,35 +63,40 @@ export async function analyzeRequirementsNode(
 
   const retryCount = state.retryCount[NODE_NAME] ?? 0
 
-  try {
-    const analysisResult = await pmAnalysisAgent.analyzeRequirements(promptVariables)
+  const result = await ResultAsync.fromPromise(
+    pmAnalysisAgent.analyzeRequirements(promptVariables),
+    (error) => (error instanceof Error ? error : new Error(String(error))),
+  )
 
-    // Log the analysis result for debugging/monitoring purposes
-    logAnalysisResult(logger, analysisResult)
+  return result.match(
+    (analysisResult) => {
+      // Log the analysis result for debugging/monitoring purposes
+      logAnalysisResult(logger, analysisResult)
 
-    logger.log(`[${NODE_NAME}] Completed`)
+      logger.log(`[${NODE_NAME}] Completed`)
 
-    return {
-      ...state,
-      analyzedRequirements: {
-        businessRequirement: analysisResult.businessRequirement,
-        functionalRequirements: analysisResult.functionalRequirements,
-        nonFunctionalRequirements: analysisResult.nonFunctionalRequirements,
-      },
-      error: undefined, // Clear error on success
-    }
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error)
-    logger.error(`[${NODE_NAME}] Failed: ${errorMessage}`)
+      return {
+        ...state,
+        analyzedRequirements: {
+          businessRequirement: analysisResult.businessRequirement,
+          functionalRequirements: analysisResult.functionalRequirements,
+          nonFunctionalRequirements: analysisResult.nonFunctionalRequirements,
+        },
+        error: undefined, // Clear error on success
+      }
+    },
+    (error) => {
+      logger.error(`[${NODE_NAME}] Failed: ${error.message}`)
 
-    // Increment retry count and set error
-    return {
-      ...state,
-      error: errorMessage,
-      retryCount: {
-        ...state.retryCount,
-        [NODE_NAME]: retryCount + 1,
-      },
-    }
-  }
+      // Increment retry count and set error
+      return {
+        ...state,
+        error: error,
+        retryCount: {
+          ...state.retryCount,
+          [NODE_NAME]: retryCount + 1,
+        },
+      }
+    },
+  )
 }

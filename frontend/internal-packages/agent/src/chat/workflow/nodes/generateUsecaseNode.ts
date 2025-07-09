@@ -1,4 +1,5 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
+import { ResultAsync } from 'neverthrow'
 import { QAGenerateUsecaseAgent } from '../../../langchain/agents'
 import type { Usecase } from '../../../langchain/agents/qaGenerateUsecaseAgent/agent'
 import type { BasePromptVariables } from '../../../langchain/utils/types'
@@ -83,7 +84,7 @@ export async function generateUsecaseNode(
     logger.error(`[${NODE_NAME}] ${errorMessage}`)
     return {
       ...state,
-      error: errorMessage,
+      error: new Error(errorMessage),
     }
   }
 
@@ -102,31 +103,36 @@ export async function generateUsecaseNode(
 
   const retryCount = state.retryCount[NODE_NAME] ?? 0
 
-  try {
-    const result = await qaAgent.generate(promptVariables)
+  const result = await ResultAsync.fromPromise(
+    qaAgent.generate(promptVariables),
+    (error) => (error instanceof Error ? error : new Error(String(error))),
+  )
 
-    // Log the usecase results for debugging/monitoring purposes
-    logUsecaseResults(logger, result.usecases)
+  return result.match(
+    (generatedResult) => {
+      // Log the usecase results for debugging/monitoring purposes
+      logUsecaseResults(logger, generatedResult.usecases)
 
-    logger.log(`[${NODE_NAME}] Completed`)
+      logger.log(`[${NODE_NAME}] Completed`)
 
-    return {
-      ...state,
-      generatedUsecases: result.usecases,
-      error: undefined, // Clear error on success
-    }
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error)
-    logger.error(`[${NODE_NAME}] Failed: ${errorMessage}`)
+      return {
+        ...state,
+        generatedUsecases: generatedResult.usecases,
+        error: undefined, // Clear error on success
+      }
+    },
+    (error) => {
+      logger.error(`[${NODE_NAME}] Failed: ${error.message}`)
 
-    // Increment retry count and set error
-    return {
-      ...state,
-      error: errorMessage,
-      retryCount: {
-        ...state.retryCount,
-        [NODE_NAME]: retryCount + 1,
-      },
-    }
-  }
+      // Increment retry count and set error
+      return {
+        ...state,
+        error: error,
+        retryCount: {
+          ...state.retryCount,
+          [NODE_NAME]: retryCount + 1,
+        },
+      }
+    },
+  )
 }

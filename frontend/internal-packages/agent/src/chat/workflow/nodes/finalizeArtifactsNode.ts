@@ -71,9 +71,9 @@ async function generateFinalResponse(
   errorToReturn: string | undefined
 }> {
   if (state.error) {
-    const finalResponse = `Sorry, an error occurred during processing: ${state.error}`
+    const finalResponse = `Sorry, an error occurred during processing: ${state.error.message}`
     await saveTimelineItem(state, finalResponse, 'error', repositories)
-    return { finalResponse, errorToReturn: state.error }
+    return { finalResponse, errorToReturn: state.error.message }
   }
 
   if (state.generatedAnswer) {
@@ -127,6 +127,6 @@ export async function finalizeArtifactsNode(
   return {
     ...state,
     finalResponse,
-    error: errorToReturn,
+    error: errorToReturn ? new Error(errorToReturn) : undefined,
   }
 }

@@ -41,7 +41,7 @@ const applySchemaChanges = async (
     return {
       ...state,
       generatedAnswer: message,
-      error: errorMessage,
+      error: new Error(errorMessage),
     }
   }
 
@@ -141,7 +141,7 @@ Original request: ${state.userInput}
 
 Please fix this issue by analyzing the schema and adding any missing constraints, primary keys, or other required schema elements to resolve the DDL execution error.`
 
-    state.logger.log(`[${NODE_NAME}] Retrying after DDL execution failure`)
+    logger.log(`[${NODE_NAME}] Retrying after DDL execution failure`)
   }
 
   // Create prompt variables directly

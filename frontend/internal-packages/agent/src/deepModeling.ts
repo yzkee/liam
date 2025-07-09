@@ -199,7 +199,7 @@ export const deepModeling = async (
     })
 
     if (result.error) {
-      return err(new Error(result.error))
+      return err(new Error(result.error.message))
     }
 
     return ok({
@@ -213,7 +213,7 @@ export const deepModeling = async (
         ? error.message
         : WORKFLOW_ERROR_MESSAGES.EXECUTION_FAILED
 
-    const errorState = { ...workflowState, error: errorMessage }
+    const errorState = { ...workflowState, error: new Error(errorMessage) }
     const finalizedResult = await finalizeArtifactsNode(errorState, {
       configurable: {
         repositories,
@@ -221,6 +221,6 @@ export const deepModeling = async (
       },
     })
 
-    return err(new Error(finalizedResult.error || errorMessage))
+    return err(new Error(finalizedResult.error?.message || errorMessage))
   }
 }

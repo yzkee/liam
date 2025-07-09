@@ -81,7 +81,6 @@
     var(--default-timing-function);
 }
 
-
 .selectFileButton:hover:not(.selectFileButtonDisabled) {
   background-color: var(--button-primary-background-hover);
   border-color: var(--button-primary-background-hover);

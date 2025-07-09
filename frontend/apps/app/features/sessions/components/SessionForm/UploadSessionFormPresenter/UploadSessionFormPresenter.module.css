@@ -105,7 +105,6 @@
   outline: none;
 }
 
-
 .textarea:disabled {
   opacity: var(--opacity-60);
   cursor: not-allowed;

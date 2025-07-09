@@ -102,7 +102,6 @@
   border-color: var(--pane-border-hover);
 }
 
-
 .urlInput:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -141,7 +140,6 @@
 .textarea:focus {
   outline: none;
 }
-
 
 .textarea::placeholder {
   color: var(--overlay-30);

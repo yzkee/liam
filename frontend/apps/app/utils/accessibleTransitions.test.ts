@@ -3,7 +3,6 @@ import {
   createAccessibleHeightTransition,
   createAccessibleOpacityTransition,
   createAccessibleTransition,
-  usePrefersReducedMotion,
 } from './accessibleTransitions'
 
 // Mock window.matchMedia
@@ -114,20 +113,6 @@ describe('accessibleTransitions', () => {
       expect(result).toEqual({
         transition: 'height 500ms ease-out',
       })
-    })
-  })
-
-  describe('usePrefersReducedMotion', () => {
-    it('should return false when motion is not reduced', () => {
-      mockMatchMedia(false)
-      const result = usePrefersReducedMotion()
-      expect(result).toBe(false)
-    })
-
-    it('should return true when motion is reduced', () => {
-      mockMatchMedia(true)
-      const result = usePrefersReducedMotion()
-      expect(result).toBe(true)
     })
   })
 })

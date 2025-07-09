@@ -47,37 +47,6 @@ export const createAccessibleOpacityTransition = (
 }
 
 /**
- * Hook to check if user prefers reduced motion
- * @returns boolean indicating if reduced motion is preferred
- */
-import { useEffect, useState } from 'react'
-
-export const usePrefersReducedMotion = (): boolean => {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() => {
-    if (typeof window === 'undefined') {
-      return false
-    }
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  })
-
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return
-    }
-
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const handleChange = (e: MediaQueryListEvent) => {
-      setPrefersReducedMotion(e.matches)
-    }
-
-    mediaQuery.addEventListener('change', handleChange)
-    return () => mediaQuery.removeEventListener('change', handleChange)
-  }, [])
-
-  return prefersReducedMotion
-}
-
-/**
  * Creates accessible height transition styles for dynamic content
  * @param duration - The transition duration in milliseconds (default: 300)
  * @returns CSS properties object with the appropriate transition

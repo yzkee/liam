@@ -139,18 +139,11 @@ export const parsePgTableCall = (
 export const parseSchemaTableCall = (
   callExpr: CallExpression,
 ): DrizzleTableDefinition | null => {
-  if (!isSchemaTableCall(callExpr)) return null
-
-  if (callExpr.arguments.length < 2) return null
-
-  const tableNameArg = callExpr.arguments[0]
-  const columnsArg = callExpr.arguments[1]
-
-  if (!tableNameArg || !columnsArg) return null
+  if (!isSchemaTableCall(callExpr) || callExpr.arguments.length < 2) return null
 
   // Extract expression from SWC argument structure
-  const tableNameExpr = getArgumentExpression(tableNameArg)
-  const columnsExpr = getArgumentExpression(columnsArg)
+  const tableNameExpr = getArgumentExpression(callExpr.arguments[0])
+  const columnsExpr = getArgumentExpression(callExpr.arguments[1])
 
   const tableName = tableNameExpr ? getStringValue(tableNameExpr) : null
   if (!tableName || !columnsExpr || !isObjectExpression(columnsExpr))

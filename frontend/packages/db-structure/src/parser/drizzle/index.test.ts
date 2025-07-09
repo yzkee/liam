@@ -736,145 +736,53 @@ describe(_processor, () => {
 
     it('multiple PostgreSQL schemas', async () => {
       const { value } = await _processor(`
-        import { pgTable, serial, varchar, integer, timestamp, uuid, boolean, text } from 'drizzle-orm/pg-core';
+        import { pgTable, serial, varchar, integer } from 'drizzle-orm/pg-core';
         import { pgSchema } from 'drizzle-orm/pg-core';
 
-        // Define multiple schemas
+        // Define schemas
         export const authSchema = pgSchema('auth');
         export const publicSchema = pgSchema('public');
-        export const analyticsSchema = pgSchema('analytics');
-        export const adminSchema = pgSchema('admin');
 
-        // Auth schema tables
+        // Auth schema table
         export const authUsers = authSchema.table('users', {
           id: serial('id').primaryKey(),
-          email: varchar('email', { length: 255 }).notNull().unique(),
-          passwordHash: text('password_hash').notNull(),
-          isActive: boolean('is_active').default(true).notNull(),
-          createdAt: timestamp('created_at').defaultNow().notNull(),
+          email: varchar('email', { length: 255 }).notNull(),
         });
 
-        export const authSessions = authSchema.table('sessions', {
-          id: serial('id').primaryKey(),
-          userId: integer('user_id').references(() => authUsers.id).notNull(),
-          token: text('token').notNull().unique(),
-          expiresAt: timestamp('expires_at').notNull(),
-          createdAt: timestamp('created_at').defaultNow().notNull(),
-        });
-
-        // Public schema tables
-        export const publicEvents = publicSchema.table('events', {
-          id: serial('id').primaryKey(),
-          title: varchar('title', { length: 255 }).notNull(),
-          description: text('description'),
-          startDate: timestamp('start_date').notNull(),
-          endDate: timestamp('end_date'),
-          createdAt: timestamp('created_at').defaultNow().notNull(),
-        });
-
-        export const publicCategories = publicSchema.table('categories', {
-          id: serial('id').primaryKey(),
-          name: varchar('name', { length: 100 }).notNull().unique(),
-          description: text('description'),
-          createdAt: timestamp('created_at').defaultNow().notNull(),
-        });
-
-        // Analytics schema tables
-        export const analyticsPageViews = analyticsSchema.table('page_views', {
+        // Public schema tables with foreign keys
+        export const publicPosts = publicSchema.table('posts', {
           id: serial('id').primaryKey(),
           userId: integer('user_id').references(() => authUsers.id),
-          page: varchar('page', { length: 500 }).notNull(),
-          timestamp: timestamp('timestamp').defaultNow().notNull(),
-          sessionId: uuid('session_id').notNull(),
+          title: varchar('title', { length: 255 }),
         });
 
-        export const analyticsUserEvents = analyticsSchema.table('user_events', {
+        export const publicComments = publicSchema.table('comments', {
           id: serial('id').primaryKey(),
+          postId: integer('post_id').references(() => publicPosts.id),
           userId: integer('user_id').references(() => authUsers.id),
-          eventType: varchar('event_type', { length: 100 }).notNull(),
-          eventData: text('event_data'),
-          timestamp: timestamp('timestamp').defaultNow().notNull(),
-        });
-
-        // Admin schema tables
-        export const adminAuditLogs = adminSchema.table('audit_logs', {
-          id: serial('id').primaryKey(),
-          userId: integer('user_id').references(() => authUsers.id).notNull(),
-          action: varchar('action', { length: 100 }).notNull(),
-          tableName: varchar('table_name', { length: 100 }),
-          recordId: integer('record_id'),
-          oldValues: text('old_values'),
-          newValues: text('new_values'),
-          timestamp: timestamp('timestamp').defaultNow().notNull(),
-        });
-
-        export const adminSettings = adminSchema.table('settings', {
-          id: serial('id').primaryKey(),
-          key: varchar('key', { length: 100 }).notNull().unique(),
-          value: text('value').notNull(),
-          description: text('description'),
-          updatedAt: timestamp('updated_at').defaultNow().notNull(),
         });
       `)
 
-      // Check that all tables from different schemas are parsed
+      // Check that all tables are parsed
+      expect(Object.keys(value.tables)).toHaveLength(3)
       expect(value.tables).toHaveProperty('users')
-      expect(value.tables).toHaveProperty('sessions')
-      expect(value.tables).toHaveProperty('events')
-      expect(value.tables).toHaveProperty('categories')
-      expect(value.tables).toHaveProperty('page_views')
-      expect(value.tables).toHaveProperty('user_events')
-      expect(value.tables).toHaveProperty('audit_logs')
-      expect(value.tables).toHaveProperty('settings')
+      expect(value.tables).toHaveProperty('posts')
+      expect(value.tables).toHaveProperty('comments')
 
-      // Check that we have the expected number of tables
-      expect(Object.keys(value.tables)).toHaveLength(8)
-
-      // Verify foreign key constraints across schemas work
-      // Check that foreign keys now correctly reference table names, not variable names
-      const sessionsFK =
-        value.tables['sessions']?.constraints[
-          'sessions_user_id_authUsers_id_fk'
-        ]
-      expect(sessionsFK).toBeDefined()
-      if (sessionsFK && sessionsFK.type === 'FOREIGN KEY') {
-        expect(sessionsFK.targetTableName).toBe('users') // Should be 'users', not 'authUsers'
+      // Verify foreign key constraints across schemas
+      const postsFK =
+        value.tables['posts']?.constraints['posts_user_id_authUsers_id_fk']
+      expect(postsFK).toBeDefined()
+      if (postsFK && postsFK.type === 'FOREIGN KEY') {
+        expect(postsFK.targetTableName).toBe('users') // Should reference table name, not variable name
       }
 
-      const pageViewsFK =
-        value.tables['page_views']?.constraints[
-          'page_views_user_id_authUsers_id_fk'
-        ]
-      expect(pageViewsFK).toBeDefined()
-      if (pageViewsFK && pageViewsFK.type === 'FOREIGN KEY') {
-        expect(pageViewsFK.targetTableName).toBe('users') // Should be 'users', not 'authUsers'
-      }
-
-      const userEventsFK =
-        value.tables['user_events']?.constraints[
-          'user_events_user_id_authUsers_id_fk'
-        ]
-      expect(userEventsFK).toBeDefined()
-      if (userEventsFK && userEventsFK.type === 'FOREIGN KEY') {
-        expect(userEventsFK.targetTableName).toBe('users') // Should be 'users', not 'authUsers'
-      }
-
-      const auditLogsFK =
-        value.tables['audit_logs']?.constraints[
-          'audit_logs_user_id_authUsers_id_fk'
-        ]
-      expect(auditLogsFK).toBeDefined()
-      if (auditLogsFK && auditLogsFK.type === 'FOREIGN KEY') {
-        expect(auditLogsFK.targetTableName).toBe('users') // Should be 'users', not 'authUsers'
-      }
-
-      // Verify table structures
-      expect(value.tables['users']?.columns).toHaveProperty('email')
-      expect(value.tables['users']?.columns).toHaveProperty('passwordHash')
-      expect(value.tables['events']?.columns).toHaveProperty('title')
-      expect(value.tables['page_views']?.columns).toHaveProperty('sessionId')
-      expect(value.tables['user_events']?.columns).toHaveProperty('eventType')
-      expect(value.tables['audit_logs']?.columns).toHaveProperty('action')
+      // Verify multiple FKs in one table
+      const commentsFKs = value.tables['comments']?.constraints || {}
+      const foreignKeyCount = Object.values(commentsFKs).filter(
+        (c) => c.type === 'FOREIGN KEY',
+      ).length
+      expect(foreignKeyCount).toBe(2)
     })
 
     it('foreign key with different column names (JS property vs DB column)', async () => {

@@ -24,6 +24,7 @@ jobs:
           private-key: ${{ secrets.LIAM_CODE_ASSISTANT_PRIVATE_KEY }}
           permission-contents: read
           permission-issues: write
+          permission-pull-requests: write
 
       - name: Find and process scheduled issues
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
@@ -34,7 +35,7 @@ jobs:
             const dayOfWeek = now.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
 
             // Execute only Sunday to Thursday (0=Sunday to 4=Thursday)
-            if (dayOfWeek < 0 || dayOfWeek > 4) {
+            if (dayOfWeek > 4) {
               console.log(`Today is ${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][dayOfWeek]}`);
               console.log('Skipping execution - only runs Sunday through Thursday');
               return;
@@ -64,14 +65,18 @@ jobs:
 
               console.log(`Processing issue #${issue.number}: "${issue.title}"`);
 
-              await github.rest.issues.addLabels({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: issue.number,
-                labels: ['claude-create-pr']
-              });
-
               try {
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  labels: ['claude-create-pr']
+                });
+                console.log(`Added 'claude-create-pr' label to issue #${issue.number}`);
+
+                // Small delay to avoid rate limiting
+                await new Promise(resolve => setTimeout(resolve, 100));
+
                 await github.rest.issues.removeLabel({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
@@ -79,11 +84,26 @@ jobs:
                   name: 'scheduled-task'
                 });
                 console.log(`Removed 'scheduled-task' label from issue #${issue.number}`);
+
+                processedCount++;
               } catch (error) {
-                console.log(`Could not remove label from issue #${issue.number}: ${error.message}`);
+                console.error(`Failed to process issue #${issue.number}: ${error.message}`);
+
+                // Add error comment to the issue
+                try {
+                  await github.rest.issues.createComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: issue.number,
+                    body: `⚠️ Failed to process scheduled issue: ${error.message}`
+                  });
+                } catch (commentError) {
+                  console.error(`Failed to add error comment: ${commentError.message}`);
+                }
               }
 
-              processedCount++;
+              // Small delay between issues to avoid rate limiting
+              await new Promise(resolve => setTimeout(resolve, 200));
             }
 
             console.log(`Processed ${processedCount} issues in this run`);

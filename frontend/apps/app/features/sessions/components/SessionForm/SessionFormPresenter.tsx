@@ -1,6 +1,6 @@
 import { type FC, useEffect, useRef, useState } from 'react'
 import type { Projects } from '@/components/CommonLayout/AppBar/ProjectsDropdownMenu/services/getProjects'
-import { createAccessibleHeightTransition } from '../../../../utils/accessibleTransitions'
+import { createAccessibleHeightTransition } from '@/utils/accessibleTransitions'
 import { GitHubSessionFormPresenter } from './GitHubSessionFormPresenter'
 import styles from './SessionFormPresenter.module.css'
 import { type SessionMode, SessionModeSelector } from './SessionModeSelector'

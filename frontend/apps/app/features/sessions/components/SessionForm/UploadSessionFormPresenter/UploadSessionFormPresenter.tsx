@@ -1,11 +1,11 @@
 import { Button } from '@liam-hq/ui'
 import clsx from 'clsx'
 import { type ChangeEvent, type FC, useRef, useState } from 'react'
+import { createAccessibleOpacityTransition } from '@/utils/accessibleTransitions'
 import {
   FormatIcon,
   type FormatType,
 } from '../../../../../components/FormatIcon/FormatIcon'
-import { createAccessibleOpacityTransition } from '@/utils/accessibleTransitions'
 import { AttachmentsContainer } from '../AttachmentsContainer'
 import { FormatSelectDropdown } from '../FormatSelectDropdown'
 import { useAutoResizeTextarea } from '../hooks/useAutoResizeTextarea'

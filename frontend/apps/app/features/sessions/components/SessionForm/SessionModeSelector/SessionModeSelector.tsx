@@ -35,11 +35,16 @@ export const SessionModeSelector: FC<Props> = ({
   const buttonsRef = useRef<(HTMLButtonElement | null)[]>([])
   const backgroundRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const shouldFocusOnModeChange = useRef(false)
 
   useEffect(() => {
-    const selectedIndex = modes.findIndex((m) => m.mode === selectedMode)
-    if (selectedIndex !== -1 && buttonsRef.current[selectedIndex]) {
-      buttonsRef.current[selectedIndex]?.focus()
+    // Only focus when mode changes via arrow keys, not on initial render
+    if (shouldFocusOnModeChange.current) {
+      const selectedIndex = modes.findIndex((m) => m.mode === selectedMode)
+      if (selectedIndex !== -1 && buttonsRef.current[selectedIndex]) {
+        buttonsRef.current[selectedIndex]?.focus()
+      }
+      shouldFocusOnModeChange.current = false
     }
   }, [selectedMode])
 
@@ -67,18 +72,22 @@ export const SessionModeSelector: FC<Props> = ({
       case 'ArrowLeft':
         e.preventDefault()
         newIndex = currentIndex > 0 ? currentIndex - 1 : modes.length - 1
+        shouldFocusOnModeChange.current = true
         break
       case 'ArrowRight':
         e.preventDefault()
         newIndex = currentIndex < modes.length - 1 ? currentIndex + 1 : 0
+        shouldFocusOnModeChange.current = true
         break
       case 'Home':
         e.preventDefault()
         newIndex = 0
+        shouldFocusOnModeChange.current = true
         break
       case 'End':
         e.preventDefault()
         newIndex = modes.length - 1
+        shouldFocusOnModeChange.current = true
         break
       default:
         return
@@ -106,7 +115,7 @@ export const SessionModeSelector: FC<Props> = ({
           id={`${modeItem.mode}-tab`}
           aria-selected={selectedMode === modeItem.mode}
           aria-controls={`${modeItem.mode}-panel`}
-          tabIndex={selectedMode === modeItem.mode ? 0 : -1}
+          tabIndex={0}
           className={`${styles.modeButton} ${
             selectedMode === modeItem.mode ? styles.modeButtonActive : ''
           }`}

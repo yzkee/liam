@@ -876,5 +876,34 @@ describe(_processor, () => {
       expect(value.tables['user_events']?.columns).toHaveProperty('eventType')
       expect(value.tables['audit_logs']?.columns).toHaveProperty('action')
     })
+
+    it('foreign key with different column names (JS property vs DB column)', async () => {
+      const { value } = await _processor(`
+        import { pgTable, serial, varchar, integer } from 'drizzle-orm/pg-core';
+
+        export const users = pgTable('users', {
+          userId: serial('user_id').primaryKey(), // JS property: userId, DB column: user_id
+          email: varchar('email', { length: 255 }).notNull(),
+        });
+
+        export const posts = pgTable('posts', {
+          id: serial('id').primaryKey(),
+          authorId: integer('author_id').references(() => users.userId), // Referencing JS property
+          title: varchar('title', { length: 255 }),
+        });
+      `)
+
+      // Check that foreign key correctly references the actual DB column name
+      // Find the FK constraint (name might be different)
+      const constraints = value.tables['posts']?.constraints || {}
+      const fkConstraint = Object.values(constraints).find(
+        (c) => c.type === 'FOREIGN KEY',
+      )
+
+      expect(fkConstraint).toBeDefined()
+      if (fkConstraint && fkConstraint.type === 'FOREIGN KEY') {
+        expect(fkConstraint.targetColumnName).toBe('user_id') // Should be DB column name, not JS property name
+      }
+    })
   })
 })

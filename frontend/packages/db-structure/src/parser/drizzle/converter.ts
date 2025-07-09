@@ -186,20 +186,7 @@ const fixForeignKeyTargetColumnNames = (
   for (const table of Object.values(tables)) {
     for (const constraint of Object.values(table.constraints)) {
       if (constraint.type === 'FOREIGN KEY') {
-        // The targetTableName should already be resolved to the actual table name
-        // Now we need to get the actual target table to resolve column names
-        const targetTable = tables[constraint.targetTableName]
-        if (targetTable) {
-          // Find the actual column name in the target table
-          for (const [_, column] of Object.entries(targetTable.columns)) {
-            if (column.name === constraint.targetColumnName) {
-              // Column name is already correct
-              break
-            }
-          }
-        }
-
-        // Also check in drizzleTables for column mapping
+        // Check in drizzleTables for column mapping
         const drizzleTargetTable = drizzleTables[constraint.targetTableName]
         if (drizzleTargetTable) {
           // Find column definition by JS property name and get actual DB column name

@@ -101,10 +101,12 @@ describe('accessibleTransitions', () => {
       })
     })
 
-    it('should return empty object when motion is reduced', () => {
+    it('should return instant transition when motion is reduced', () => {
       mockMatchMedia(true)
       const result = createAccessibleHeightTransition()
-      expect(result).toEqual({})
+      expect(result).toEqual({
+        transition: 'height 0.01ms linear',
+      })
     })
 
     it('should accept custom duration', () => {

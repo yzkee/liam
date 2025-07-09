@@ -79,20 +79,26 @@ export const SessionFormPresenter: FC<Props> = ({
       '(prefers-reduced-motion: reduce)',
     ).matches
 
-    // Use ResizeObserver to detect content changes
+    // Use ResizeObserver to detect content changes with requestAnimationFrame throttling
+    let ticking = false
     const updateHeight = () => {
-      const currentPanel = container.querySelector('[role="tabpanel"]')
-      if (currentPanel) {
-        const height = currentPanel.scrollHeight
-        if (prefersReducedMotion) {
-          // Skip animation and set height immediately
-          container.style.transition = 'none'
-          container.style.maxHeight = `${height + 50}px`
-        } else {
-          // Set max-height slightly larger than actual height for smooth animation
-          container.style.maxHeight = `${height + 50}px`
+      if (ticking) return
+      ticking = true
+      requestAnimationFrame(() => {
+        const currentPanel = container.querySelector('[role="tabpanel"]')
+        if (currentPanel) {
+          const height = currentPanel.scrollHeight
+          if (prefersReducedMotion) {
+            // Skip animation and set height immediately
+            container.style.transition = 'none'
+            container.style.maxHeight = `${height + 50}px`
+          } else {
+            // Set max-height slightly larger than actual height for smooth animation
+            container.style.maxHeight = `${height + 50}px`
+          }
         }
-      }
+        ticking = false
+      })
     }
 
     // Initial height update

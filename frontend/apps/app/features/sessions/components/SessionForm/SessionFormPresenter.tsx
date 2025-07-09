@@ -1,5 +1,6 @@
 import { type FC, useEffect, useRef, useState } from 'react'
 import type { Projects } from '@/components/CommonLayout/AppBar/ProjectsDropdownMenu/services/getProjects'
+import { createAccessibleHeightTransition } from '../../../../utils/accessibleTransitions'
 import { GitHubSessionFormPresenter } from './GitHubSessionFormPresenter'
 import styles from './SessionFormPresenter.module.css'
 import { type SessionMode, SessionModeSelector } from './SessionModeSelector'
@@ -95,7 +96,11 @@ export const SessionFormPresenter: FC<Props> = ({
         selectedMode={mode}
         onModeChange={handleModeChange}
       />
-      <div ref={containerRef} className={styles.formContainer}>
+      <div
+        ref={containerRef}
+        className={styles.formContainer}
+        style={createAccessibleHeightTransition()}
+      >
         {mode === 'github' && (
           <div role="tabpanel" id="github-panel" aria-labelledby="github-tab">
             <GitHubSessionFormPresenter

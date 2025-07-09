@@ -3,6 +3,7 @@ import clsx from 'clsx'
 import type { ChangeEvent, DragEvent, FC } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import type { Projects } from '@/components/CommonLayout/AppBar/ProjectsDropdownMenu/services/getProjects'
+import { createAccessibleOpacityTransition } from '../../../../../utils/accessibleTransitions'
 import { AttachmentPreview } from '../AttachmentPreview'
 import type { Branch } from '../BranchesDropdown'
 import { BranchesDropdown } from '../BranchesDropdown'
@@ -125,10 +126,7 @@ export const GitHubSessionFormPresenter: FC<Props> = ({
       >
         <form
           action={formAction}
-          style={{
-            opacity: isTransitioning ? 0 : 1,
-            transition: 'opacity 0.15s ease-out',
-          }}
+          style={createAccessibleOpacityTransition(!isTransitioning)}
         >
           <div className={styles.formContent}>
             {attachments.length > 0 && (

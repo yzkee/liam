@@ -5,6 +5,7 @@ import {
   FormatIcon,
   type FormatType,
 } from '../../../../../components/FormatIcon/FormatIcon'
+import { createAccessibleOpacityTransition } from '../../../../../utils/accessibleTransitions'
 import { AttachmentsContainer } from '../AttachmentsContainer'
 import { FormatSelectDropdown } from '../FormatSelectDropdown'
 import { useAutoResizeTextarea } from '../hooks/useAutoResizeTextarea'
@@ -142,10 +143,7 @@ export const UploadSessionFormPresenter: FC<Props> = ({
     >
       <form
         action={formAction}
-        style={{
-          opacity: isTransitioning ? 0 : 1,
-          transition: 'opacity 0.15s ease-out',
-        }}
+        style={createAccessibleOpacityTransition(!isTransitioning)}
       >
         {selectedFile && schemaStatus === 'valid' && selectedFormat && (
           <input type="hidden" name="schemaFormat" value={selectedFormat} />

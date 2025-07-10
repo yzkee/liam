@@ -1,9 +1,12 @@
+import type { RunnableConfig } from '@langchain/core/runnables'
 import { ResultAsync } from 'neverthrow'
 import { QAGenerateUsecaseAgent } from '../../../langchain/agents'
 import type { Usecase } from '../../../langchain/agents/qaGenerateUsecaseAgent/agent'
 import type { BasePromptVariables } from '../../../langchain/utils/types'
-import { getWorkflowNodeProgress } from '../shared/getWorkflowNodeProgress'
+import type { NodeLogger } from '../../../utils/nodeLogger'
+import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
+import { logAssistantMessage } from '../utils/timelineLogger'
 
 const NODE_NAME = 'generateUsecaseNode'
 
@@ -11,10 +14,7 @@ const NODE_NAME = 'generateUsecaseNode'
  * Log usecase generation results for debugging/monitoring purposes
  * TODO: Remove this function once the feature is stable and monitoring is no longer needed
  */
-const logUsecaseResults = (
-  logger: WorkflowState['logger'],
-  usecases: Usecase[],
-): void => {
+const logUsecaseResults = (logger: NodeLogger, usecases: Usecase[]): void => {
   logger.log(`[${NODE_NAME}] Generated ${usecases.length} use cases`)
 
   usecases.forEach((usecase, index) => {
@@ -60,19 +60,20 @@ Original User Input: ${userInput}
  */
 export async function generateUsecaseNode(
   state: WorkflowState,
+  config: RunnableConfig,
 ): Promise<WorkflowState> {
-  state.logger.log(`[${NODE_NAME}] Started`)
-
-  // Update progress message if available
-  if (state.progressTimelineItemId) {
-    await state.repositories.schema.updateTimelineItem(
-      state.progressTimelineItemId,
-      {
-        content: 'Processing: generateUsecase',
-        progress: getWorkflowNodeProgress('generateUsecase'),
-      },
-    )
+  const configurableResult = getConfigurable(config)
+  if (configurableResult.isErr()) {
+    return {
+      ...state,
+      error: configurableResult.error,
+    }
   }
+  const { logger } = configurableResult.value
+
+  logger.log(`[${NODE_NAME}] Started`)
+
+  await logAssistantMessage(state, 'Generating use cases...')
 
   // Check if we have analyzed requirements
   if (!state.analyzedRequirements) {
@@ -80,9 +81,15 @@ export async function generateUsecaseNode(
       'No analyzed requirements found. Cannot generate use cases.'
     const error = new Error(`[${NODE_NAME}] ${errorMessage}`)
     state.logger.error(error.message)
+
+    await logAssistantMessage(
+      state,
+      'Error occurred during use case generation',
+    )
+
     return {
       ...state,
-      error,
+      error: new Error(errorMessage),
     }
   }
 
@@ -101,33 +108,45 @@ export async function generateUsecaseNode(
 
   const retryCount = state.retryCount[NODE_NAME] ?? 0
 
+  await logAssistantMessage(state, 'Analyzing test cases and queries...')
+
   const usecaseResult = await ResultAsync.fromPromise(
     qaAgent.generate(promptVariables),
-    (error) => (error instanceof Error ? error.message : String(error)),
+    (error) => (error instanceof Error ? error : new Error(String(error))),
   )
 
-  if (usecaseResult.isErr()) {
-    const errorMessage = usecaseResult.error
-    const error = new Error(`[${NODE_NAME}] Failed: ${errorMessage}`)
-    state.logger.error(error.message)
+  return await usecaseResult.match(
+    async (generatedResult) => {
+      // Log the usecase results for debugging/monitoring purposes
+      logUsecaseResults(state.logger, generatedResult.usecases)
 
-    return {
-      ...state,
-      error,
-      retryCount: {
-        ...state.retryCount,
-        [NODE_NAME]: retryCount + 1,
-      },
-    }
-  }
+      await logAssistantMessage(state, 'Use case generation completed')
 
-  const result = usecaseResult.value
-  logUsecaseResults(state.logger, result.usecases)
-  state.logger.log(`[${NODE_NAME}] Completed`)
+      state.logger.log(`[${NODE_NAME}] Completed`)
 
-  return {
-    ...state,
-    generatedUsecases: result.usecases,
-    error: undefined,
-  }
+      return {
+        ...state,
+        generatedUsecases: generatedResult.usecases,
+        error: undefined, // Clear error on success
+      }
+    },
+    async (error) => {
+      state.logger.error(`[${NODE_NAME}] Failed: ${error.message}`)
+
+      await logAssistantMessage(
+        state,
+        'Error occurred during use case generation',
+      )
+
+      // Increment retry count and set error
+      return {
+        ...state,
+        error: error,
+        retryCount: {
+          ...state.retryCount,
+          [NODE_NAME]: retryCount + 1,
+        },
+      }
+    },
+  )
 }

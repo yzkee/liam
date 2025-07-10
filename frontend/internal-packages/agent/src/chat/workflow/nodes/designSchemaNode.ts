@@ -16,6 +16,64 @@ type PreparedSchemaDesign = {
   schemaText: string
 }
 
+const formatAnalyzedRequirements = (
+  analyzedRequirements: NonNullable<WorkflowState['analyzedRequirements']>,
+): string => {
+  const formatRequirements = (
+    requirements: Record<string, string[]>,
+    title: string,
+  ): string => {
+    const entries = Object.entries(requirements)
+    if (entries.length === 0) return ''
+
+    return `${title}:
+${entries
+  .map(
+    ([category, items]) =>
+      `- ${category}:\n  ${items.map((item) => `  • ${item}`).join('\n')}`,
+  )
+  .join('\n')}`
+  }
+
+  const sections = [
+    `Business Requirement:\n${analyzedRequirements.businessRequirement}`,
+    formatRequirements(
+      analyzedRequirements.functionalRequirements,
+      'Functional Requirements',
+    ),
+    formatRequirements(
+      analyzedRequirements.nonFunctionalRequirements,
+      'Non-Functional Requirements',
+    ),
+  ].filter(Boolean)
+
+  return sections.join('\n\n')
+}
+
+const prepareUserMessage = (
+  state: WorkflowState,
+  logger: NodeLogger,
+): string => {
+  // DDL execution failure takes priority
+  if (state.shouldRetryWithDesignSchema && state.ddlExecutionFailureReason) {
+    logger.log(`[${NODE_NAME}] Retrying after DDL execution failure`)
+    return `The following DDL execution failed: ${state.ddlExecutionFailureReason}
+Original request: ${state.userInput}
+Please fix this issue by analyzing the schema and adding any missing constraints, primary keys, or other required schema elements to resolve the DDL execution error.`
+  }
+
+  // Include analyzed requirements if available
+  if (state.analyzedRequirements) {
+    logger.log(`[${NODE_NAME}] Including analyzed requirements as context`)
+    return `Based on the following analyzed requirements:
+${formatAnalyzedRequirements(state.analyzedRequirements)}
+User Request: ${state.userInput}`
+  }
+
+  // Default to original user input
+  return state.userInput
+}
+
 /**
  * Apply schema changes and return updated state
  */
@@ -143,16 +201,11 @@ export async function designSchemaNode(
 
   const { agent, schemaText } = await prepareSchemaDesign(state, logger)
 
-  // Check if this is a retry after DDL execution failure
-  let userMessage = state.userInput
+  // Prepare user message with context
+  const userMessage = prepareUserMessage(state, logger)
+
+  // Log appropriate message for DDL retry case
   if (state.shouldRetryWithDesignSchema && state.ddlExecutionFailureReason) {
-    userMessage = `The following DDL execution failed: ${state.ddlExecutionFailureReason}
-
-Original request: ${state.userInput}
-
-Please fix this issue by analyzing the schema and adding any missing constraints, primary keys, or other required schema elements to resolve the DDL execution error.`
-
-    logger.log(`[${NODE_NAME}] Retrying after DDL execution failure`)
     await logAssistantMessage(
       state,
       'Redesigning schema to fix DDL execution errors...',

@@ -43,3 +43,11 @@ export type WorkflowState = {
   // Logging functionality
   logger: NodeLogger
 }
+
+/**
+ * Type definition for the configurable object passed to workflow nodes
+ */
+export interface WorkflowConfigurable {
+  repositories: Repositories
+  logger: NodeLogger
+}

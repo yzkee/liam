@@ -1,3 +1,5 @@
+import type { RunnableConfig } from '@langchain/core/runnables'
+import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 
 const NODE_NAME = 'reviewDeliverablesNode'
@@ -8,13 +10,23 @@ const NODE_NAME = 'reviewDeliverablesNode'
  */
 export async function reviewDeliverablesNode(
   state: WorkflowState,
+  config: RunnableConfig,
 ): Promise<WorkflowState> {
-  state.logger.log(`[${NODE_NAME}] Started`)
+  const configurableResult = getConfigurable(config)
+  if (configurableResult.isErr()) {
+    return {
+      ...state,
+      error: configurableResult.error,
+    }
+  }
+  const { logger } = configurableResult.value
+
+  logger.log(`[${NODE_NAME}] Started`)
 
   // TODO: Implement deliverables review logic
   // This node should perform final confirmation of requirements and deliverables
 
-  state.logger.log(`[${NODE_NAME}] Completed`)
+  logger.log(`[${NODE_NAME}] Completed`)
 
   // For now, pass through the state unchanged (assuming review passes)
   // Future implementation will review deliverables and confirm requirements

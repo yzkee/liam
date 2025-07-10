@@ -26,7 +26,7 @@ const getProgressFillWidth = (
   return `${status === 'complete' ? 100 : progress}%`
 }
 
-interface ProcessIndicatorProps {
+type ProcessIndicatorProps = {
   /**
    * The title of the process
    */

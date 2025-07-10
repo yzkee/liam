@@ -20,7 +20,7 @@ import {
 } from './chat/workflow/shared/langGraphUtils'
 import type { WorkflowConfigurable, WorkflowState } from './chat/workflow/types'
 
-export interface DeepModelingParams {
+export type DeepModelingParams = {
   userInput: string
   schemaData: Schema
   history: [string, string][]

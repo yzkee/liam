@@ -11,7 +11,7 @@ import { logAssistantMessage } from '../utils/timelineLogger'
 
 const NODE_NAME = 'designSchemaNode'
 
-interface PreparedSchemaDesign {
+type PreparedSchemaDesign = {
   agent: DatabaseSchemaBuildAgent
   schemaText: string
 }

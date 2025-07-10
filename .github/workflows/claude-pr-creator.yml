@@ -62,6 +62,7 @@ jobs:
             ${{ github.event.issue.body }}
 
             Please implement with appropriate branch name and commit message.
+            At the end, confirm that `pnpm lint` and `pnpm test` pass successfully in the root directory.
             Output the branch name when implementation is complete.
 
       - name: Create Pull Request

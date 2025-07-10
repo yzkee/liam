@@ -1,9 +1,11 @@
+import type { RunnableConfig } from '@langchain/core/runnables'
 import { postgresqlSchemaDeparser } from '@liam-hq/db-structure'
 import { executeQuery } from '@liam-hq/pglite-server'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import { WORKFLOW_RETRY_CONFIG } from '../constants'
-import { getWorkflowNodeProgress } from '../shared/getWorkflowNodeProgress'
+import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
+import { logAssistantMessage } from '../utils/timelineLogger'
 
 const NODE_NAME = 'executeDdlNode'
 
@@ -13,19 +15,20 @@ const NODE_NAME = 'executeDdlNode'
  */
 export async function executeDdlNode(
   state: WorkflowState,
+  config: RunnableConfig,
 ): Promise<WorkflowState> {
-  state.logger.log(`[${NODE_NAME}] Started`)
-
-  // Update progress message if available
-  if (state.progressTimelineItemId) {
-    await state.repositories.schema.updateTimelineItem(
-      state.progressTimelineItemId,
-      {
-        content: 'Processing: executeDDL',
-        progress: getWorkflowNodeProgress('executeDDL'),
-      },
-    )
+  const configurableResult = getConfigurable(config)
+  if (configurableResult.isErr()) {
+    return {
+      ...state,
+      error: configurableResult.error,
+    }
   }
+  const { logger } = configurableResult.value
+
+  logger.log(`[${NODE_NAME}] Started`)
+
+  await logAssistantMessage(state, 'Creating database...')
 
   // Generate DDL from schema data
   const result = postgresqlSchemaDeparser(state.schemaData)
@@ -33,6 +36,9 @@ export async function executeDdlNode(
   if (result.errors.length > 0) {
     const errorMessages = result.errors.map((e) => e.message).join('; ')
     state.logger.log(`[${NODE_NAME}] DDL generation failed: ${errorMessages}`)
+
+    await logAssistantMessage(state, 'Error occurred during DDL generation')
+
     state.logger.log(`[${NODE_NAME}] Completed`)
     return {
       ...state,
@@ -49,16 +55,25 @@ export async function executeDdlNode(
   state.logger.log(
     `[${NODE_NAME}] Generated DDL for ${tableCount} tables (${ddlLength} characters)`,
   )
-  state.logger.debug(`[${NODE_NAME}] Generated DDL:`, { ddlStatements })
+
+  await logAssistantMessage(
+    state,
+    `Generated DDL statements (${tableCount} tables)`,
+  )
 
   if (!ddlStatements || !ddlStatements.trim()) {
     state.logger.log(`[${NODE_NAME}] No DDL statements to execute`)
+
+    await logAssistantMessage(state, 'No DDL statements to execute')
+
     state.logger.log(`[${NODE_NAME}] Completed`)
     return {
       ...state,
       ddlStatements,
     }
   }
+
+  await logAssistantMessage(state, 'Executing DDL statements...')
 
   const results: SqlResult[] = await executeQuery(
     state.designSessionId,
@@ -78,12 +93,17 @@ export async function executeDdlNode(
 
     state.logger.log(`[${NODE_NAME}] DDL execution failed: ${errorMessages}`)
 
+    await logAssistantMessage(state, 'Error occurred during DDL execution')
+
     // Check if this is the first failure or if we've already retried
     const currentRetryCount = state.retryCount['ddlExecutionRetry'] || 0
 
     if (currentRetryCount < WORKFLOW_RETRY_CONFIG.MAX_DDL_EXECUTION_RETRIES) {
       // Set up retry with designSchemaNode
       state.logger.log(`[${NODE_NAME}] Scheduling retry via designSchemaNode`)
+
+      await logAssistantMessage(state, 'Redesigning schema to fix errors...')
+
       state.logger.log(`[${NODE_NAME}] Completed`)
       return {
         ...state,
@@ -100,6 +120,9 @@ export async function executeDdlNode(
     state.logger.log(
       `[${NODE_NAME}] DDL execution failed after retry, marking as failed`,
     )
+
+    await logAssistantMessage(state, 'Unable to resolve DDL execution errors')
+
     state.logger.log(`[${NODE_NAME}] Completed`)
     return {
       ...state,
@@ -109,6 +132,9 @@ export async function executeDdlNode(
   }
 
   state.logger.log(`[${NODE_NAME}] DDL executed successfully`)
+
+  await logAssistantMessage(state, 'Database created successfully')
+
   state.logger.log(`[${NODE_NAME}] Completed`)
 
   return {

@@ -4,7 +4,7 @@ import styles from './DMLInputSection.module.css'
 import { QueryResultBox } from './QueryResultBox'
 import type { DMLSection } from './utils'
 
-interface DMLInputSectionProps {
+type DMLInputSectionProps = {
   section: DMLSection
   updateDmlInput: (sectionId: string, value: string) => void
   executeDML: (sectionId: string) => Promise<void>

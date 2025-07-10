@@ -5,7 +5,6 @@ import { err, ok } from 'neverthrow'
 import { WORKFLOW_ERROR_MESSAGES } from './chat/workflow/constants'
 import {
   analyzeRequirementsNode,
-  createProgressMessageNode,
   designSchemaNode,
   executeDdlNode,
   finalizeArtifactsNode,
@@ -19,21 +18,17 @@ import {
   createAnnotations,
   DEFAULT_RECURSION_LIMIT,
 } from './chat/workflow/shared/langGraphUtils'
-import type { WorkflowState } from './chat/workflow/types'
-import type { Repositories } from './repositories'
-import type { NodeLogger } from './utils/nodeLogger'
+import type { WorkflowConfigurable, WorkflowState } from './chat/workflow/types'
 
-export interface DeepModelingParams {
+export type DeepModelingParams = {
   userInput: string
   schemaData: Schema
   history: [string, string][]
   organizationId?: string
   buildingSchemaId: string
   latestVersionNumber: number
-  repositories: Repositories
   designSessionId: string
   userId: string
-  logger: NodeLogger
   recursionLimit?: number
 }
 
@@ -71,9 +66,6 @@ const createGraph = () => {
     .addNode('saveUserMessage', saveUserMessageNode, {
       retryPolicy: RETRY_POLICY,
     })
-    .addNode('createProgressMessage', createProgressMessageNode, {
-      retryPolicy: RETRY_POLICY,
-    })
     .addNode('analyzeRequirements', analyzeRequirementsNode, {
       retryPolicy: RETRY_POLICY,
     })
@@ -100,7 +92,6 @@ const createGraph = () => {
     })
 
     .addEdge(START, 'saveUserMessage')
-    .addEdge('createProgressMessage', 'analyzeRequirements')
     .addEdge('analyzeRequirements', 'designSchema')
     .addEdge('executeDDL', 'generateUsecase')
     .addEdge('generateUsecase', 'prepareDML')
@@ -109,7 +100,7 @@ const createGraph = () => {
 
     // Conditional edge for saveUserMessage - skip to finalizeArtifacts if error
     .addConditionalEdges('saveUserMessage', (state) => {
-      return state.error ? 'finalizeArtifacts' : 'createProgressMessage'
+      return state.error ? 'finalizeArtifacts' : 'analyzeRequirements'
     })
 
     // Conditional edge for designSchema - skip to finalizeArtifacts if error
@@ -150,6 +141,9 @@ const createGraph = () => {
  */
 export const deepModeling = async (
   params: DeepModelingParams,
+  config: {
+    configurable: WorkflowConfigurable
+  },
 ): Promise<DeepModelingResult> => {
   const {
     userInput,
@@ -158,12 +152,12 @@ export const deepModeling = async (
     organizationId,
     buildingSchemaId,
     latestVersionNumber = 0,
-    repositories,
     designSessionId,
     userId,
-    logger,
     recursionLimit = DEFAULT_RECURSION_LIMIT,
   } = params
+
+  const { repositories, logger } = config.configurable
 
   // Convert history format with role prefix
   const historyArray = history.map(([role, content]) => {
@@ -179,10 +173,8 @@ export const deepModeling = async (
     organizationId,
     buildingSchemaId,
     latestVersionNumber,
-    repositories,
     designSessionId,
     userId,
-    logger,
     retryCount: {},
   }
 
@@ -190,10 +182,14 @@ export const deepModeling = async (
     const compiled = createGraph()
     const result = await compiled.invoke(workflowState, {
       recursionLimit,
+      configurable: {
+        repositories,
+        logger,
+      },
     })
 
     if (result.error) {
-      return err(result.error)
+      return err(new Error(result.error.message))
     }
 
     return ok({
@@ -206,9 +202,15 @@ export const deepModeling = async (
       error instanceof Error
         ? error.message
         : WORKFLOW_ERROR_MESSAGES.EXECUTION_FAILED
-    const errorState = { ...workflowState, error: new Error(errorMessage) }
-    const finalizedResult = await finalizeArtifactsNode(errorState)
 
-    return err(finalizedResult.error || new Error(errorMessage))
+    const errorState = { ...workflowState, error: new Error(errorMessage) }
+    const finalizedResult = await finalizeArtifactsNode(errorState, {
+      configurable: {
+        repositories,
+        logger,
+      },
+    })
+
+    return err(new Error(finalizedResult.error?.message || errorMessage))
   }
 }

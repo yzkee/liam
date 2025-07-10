@@ -200,7 +200,10 @@ export const UploadSessionFormPresenter: FC<Props> = ({
         </div>
         <div className={styles.divider} />
         <div
-          className={`${styles.inputSection} ${attachmentDragActive ? styles.dragActive : ''}`}
+          className={clsx(
+            styles.inputSection,
+            attachmentDragActive ? styles.dragActive : '',
+          )}
           onDragEnter={handleAttachmentDrag}
           onDragLeave={handleAttachmentDrag}
           onDragOver={handleAttachmentDrag}

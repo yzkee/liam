@@ -1,10 +1,13 @@
+import type { RunnableConfig } from '@langchain/core/runnables'
 import { ResultAsync } from 'neverthrow'
 import type * as v from 'valibot'
 import { PMAnalysisAgent } from '../../../langchain/agents'
 import type { requirementsAnalysisSchema } from '../../../langchain/agents/pmAnalysisAgent/agent'
 import type { BasePromptVariables } from '../../../langchain/utils/types'
-import { getWorkflowNodeProgress } from '../shared/getWorkflowNodeProgress'
+import type { NodeLogger } from '../../../utils/nodeLogger'
+import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
+import { logAssistantMessage } from '../utils/timelineLogger'
 
 const NODE_NAME = 'analyzeRequirementsNode'
 
@@ -15,7 +18,7 @@ type AnalysisResult = v.InferOutput<typeof requirementsAnalysisSchema>
  * TODO: Remove this function once the feature is stable and monitoring is no longer needed
  */
 const logAnalysisResult = (
-  logger: WorkflowState['logger'],
+  logger: NodeLogger,
   result: AnalysisResult,
 ): void => {
   logger.log(`[${NODE_NAME}] Analysis Result:`)
@@ -34,19 +37,20 @@ const logAnalysisResult = (
  */
 export async function analyzeRequirementsNode(
   state: WorkflowState,
+  config: RunnableConfig,
 ): Promise<WorkflowState> {
-  state.logger.log(`[${NODE_NAME}] Started`)
-
-  // Update progress message if available
-  if (state.progressTimelineItemId) {
-    await state.repositories.schema.updateTimelineItem(
-      state.progressTimelineItemId,
-      {
-        content: 'Processing: analyzeRequirements',
-        progress: getWorkflowNodeProgress('analyzeRequirements'),
-      },
-    )
+  const configurableResult = getConfigurable(config)
+  if (configurableResult.isErr()) {
+    return {
+      ...state,
+      error: configurableResult.error,
+    }
   }
+  const { repositories, logger } = configurableResult.value
+
+  logger.log(`[${NODE_NAME}] Started`)
+
+  await logAssistantMessage(state, repositories, 'Analyzing requirements...')
 
   const pmAnalysisAgent = new PMAnalysisAgent()
 
@@ -57,37 +61,57 @@ export async function analyzeRequirementsNode(
 
   const retryCount = state.retryCount[NODE_NAME] ?? 0
 
-  const analysisResult = await ResultAsync.fromPromise(
-    pmAnalysisAgent.analyzeRequirements(promptVariables),
-    (error) => (error instanceof Error ? error.message : String(error)),
+  await logAssistantMessage(
+    state,
+    repositories,
+    'Organizing business and functional requirements...',
   )
 
-  if (analysisResult.isErr()) {
-    const errorMessage = analysisResult.error
-    const error = new Error(`[${NODE_NAME}] Failed: ${errorMessage}`)
-    state.logger.error(error.message)
+  const analysisResult = await ResultAsync.fromPromise(
+    pmAnalysisAgent.analyzeRequirements(promptVariables),
+    (error) => (error instanceof Error ? error : new Error(String(error))),
+  )
 
-    return {
-      ...state,
-      error,
-      retryCount: {
-        ...state.retryCount,
-        [NODE_NAME]: retryCount + 1,
-      },
-    }
-  }
+  return analysisResult.match(
+    async (result) => {
+      // Log the analysis result for debugging/monitoring purposes
+      logAnalysisResult(logger, result)
 
-  const result = analysisResult.value
-  logAnalysisResult(state.logger, result)
-  state.logger.log(`[${NODE_NAME}] Completed`)
+      await logAssistantMessage(
+        state,
+        repositories,
+        'Requirements analysis completed',
+      )
 
-  return {
-    ...state,
-    analyzedRequirements: {
-      businessRequirement: result.businessRequirement,
-      functionalRequirements: result.functionalRequirements,
-      nonFunctionalRequirements: result.nonFunctionalRequirements,
+      logger.log(`[${NODE_NAME}] Completed`)
+
+      return {
+        ...state,
+        analyzedRequirements: {
+          businessRequirement: result.businessRequirement,
+          functionalRequirements: result.functionalRequirements,
+          nonFunctionalRequirements: result.nonFunctionalRequirements,
+        },
+        error: undefined, // Clear error on success
+      }
     },
-    error: undefined,
-  }
+    async (error) => {
+      logger.error(`[${NODE_NAME}] Failed: ${error.message}`)
+
+      await logAssistantMessage(
+        state,
+        repositories,
+        'Error occurred during requirements analysis',
+      )
+
+      return {
+        ...state,
+        error,
+        retryCount: {
+          ...state.retryCount,
+          [NODE_NAME]: retryCount + 1,
+        },
+      }
+    },
+  )
 }

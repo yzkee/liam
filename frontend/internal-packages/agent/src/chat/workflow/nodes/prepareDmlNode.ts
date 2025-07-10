@@ -50,6 +50,13 @@ export async function prepareDmlNode(
     return state
   }
 
+  // Log input statistics
+  const tableCount = (state.ddlStatements.match(/CREATE TABLE/gi) || []).length
+  const useCaseCount = state.generatedUsecases.length
+  logger.info(
+    `[${NODE_NAME}] Generating DML for ${tableCount} tables and ${useCaseCount} use cases`,
+  )
+
   // Create DML generation agent
   const dmlAgent = new DMLGenerationAgent({ logger })
 
@@ -63,6 +70,18 @@ export async function prepareDmlNode(
     schemaSQL: state.ddlStatements,
     formattedUseCases,
   })
+
+  // Validate result
+  if (!result.dmlStatements || result.dmlStatements.trim().length === 0) {
+    logger.warn(`[${NODE_NAME}] DML generation returned empty statements`)
+    await logAssistantMessage(
+      state,
+      repositories,
+      'DML generation returned empty statements',
+    )
+    logger.log(`[${NODE_NAME}] Completed`)
+    return state
+  }
 
   logger.log(`[${NODE_NAME}] DML statements generated successfully`)
 

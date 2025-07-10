@@ -26,6 +26,7 @@
     "frontend/internal-packages/agent/src/vectorstore/syncSchemaVectorStore.ts"
   ],
 
+
   // Dependencies to ignore when analyzing
   "ignoreDependencies": [
     "@prisma/internals", // Used by CLI package for schema parsing

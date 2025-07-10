@@ -39,10 +39,7 @@ export const CommandPalette: FC = () => {
             A search-based interface that allows quick access to various
             commands and features within the application.
           </DialogDescription>
-          <CommandPaletteContent
-            open={open}
-            closeDialog={() => setOpen(false)}
-          />
+          <CommandPaletteContent closeDialog={() => setOpen(false)} />
         </DialogContent>
       </DialogPortal>
     </Dialog>

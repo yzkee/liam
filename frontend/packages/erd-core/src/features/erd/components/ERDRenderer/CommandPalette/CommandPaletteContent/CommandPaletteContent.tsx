@@ -15,11 +15,10 @@ const getTableLinkHref = (activeTableName: string) => {
 }
 
 type Props = {
-  open: boolean
   closeDialog: () => void
 }
 
-export const CommandPaletteContent: FC<Props> = ({ open, closeDialog }) => {
+export const CommandPaletteContent: FC<Props> = ({ closeDialog }) => {
   const schema = useSchema()
   const [tableName, setTableName] = useState<string | null>(null)
   const table = schema.current.tables[tableName ?? '']
@@ -36,7 +35,7 @@ export const CommandPaletteContent: FC<Props> = ({ open, closeDialog }) => {
   // Select option by pressing [Enter] key (with/without ⌘ key)
   useEffect(() => {
     const down = (event: KeyboardEvent) => {
-      if (!open || !tableName) return
+      if (!tableName) return
 
       if (event.key === 'Enter') {
         if (event.metaKey || event.ctrlKey) {
@@ -49,7 +48,7 @@ export const CommandPaletteContent: FC<Props> = ({ open, closeDialog }) => {
 
     document.addEventListener('keydown', down)
     return () => document.removeEventListener('keydown', down)
-  }, [open, tableName])
+  }, [tableName])
 
   return (
     <Command value={tableName ?? ''} onValueChange={(v) => setTableName(v)}>

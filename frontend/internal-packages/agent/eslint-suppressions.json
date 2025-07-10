@@ -1,7 +1,7 @@
 {
   "src/chat/workflow/nodes/designSchemaNode.integration.test.ts": {
     "@typescript-eslint/consistent-type-assertions": {
-      "count": 3
+      "count": 4
     }
   },
   "src/deepModeling.test.ts": {
@@ -24,7 +24,7 @@
   },
   "src/vectorstore/supabaseVectorStore.ts": {
     "@typescript-eslint/consistent-type-assertions": {
-      "count": 1
+      "count": 5
     },
     "no-restricted-syntax": {
       "count": 5

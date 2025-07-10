@@ -6,7 +6,7 @@ description: Update a pull request description to match the project's PR templat
 
 ## Task
 
-Update the specified pull request's description to follow the project's PR template format defined in `.github/pull_request_template.md`.
+Update the specified pull request's description to follow the project's PR template format defined in @.github/pull_request_template.md.
 
 The template includes these sections:
 

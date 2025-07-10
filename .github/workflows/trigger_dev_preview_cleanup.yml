@@ -1,0 +1,76 @@
+name: trigger_dev_preview_cleanup
+on:
+  workflow_dispatch:
+  schedule:
+    # Run hourly during JST business hours (5:00-23:00 JST = 20:00-14:00 UTC)
+    # JST is UTC+9, so JST 5:00 = UTC 20:00 (previous day), JST 23:00 = UTC 14:00
+    - cron: '0 20-23 * * 1-5'  # UTC 20:00-23:00 (JST 5:00-8:00)
+    - cron: '0 0-14 * * 1-5'   # UTC 0:00-14:00 (JST 9:00-23:00)
+
+jobs:
+  cleanup_stale_previews:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/pnpm-setup
+
+      - name: Find and cleanup stale preview environments
+        shell: bash
+        env:
+          TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
+          TRIGGER_PROJECT_ID: ${{ vars.TRIGGER_PROJECT_ID }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "Searching for closed and unmerged PRs..."
+          
+          # Get closed but unmerged PRs
+          CLOSED_BRANCHES=$(gh pr list --state closed --limit 300 --json headRefName,mergedAt | jq -r '.[] | select(.mergedAt == null) | .headRefName' | sort -u)
+          
+          if [ -z "$CLOSED_BRANCHES" ]; then
+            echo "No closed unmerged PRs found"
+            exit 0
+          fi
+          
+          echo "Found branches from closed unmerged PRs:"
+          echo "$CLOSED_BRANCHES"
+          echo ""
+          
+          # Process each branch
+          while IFS= read -r BRANCH; do
+            if [ -z "$BRANCH" ]; then
+              continue
+            fi
+            
+            echo "Checking branch: $BRANCH"
+            
+            # Check if there are any open PRs for this branch
+            OPEN_PRS=$(gh pr list --head "$BRANCH" --state open --json number | jq '. | length')
+            
+            if [ "$OPEN_PRS" -gt 0 ]; then
+              echo "  → Branch has $OPEN_PRS open PR(s), skipping"
+              continue
+            fi
+            
+            echo "  → No open PRs found, attempting to archive preview environment"
+            
+            # Attempt to archive the preview environment
+            if pnpm --filter @liam-hq/jobs exec trigger preview archive --branch "$BRANCH" 2>/dev/null; then
+              echo "  ✓ Successfully archived preview for branch: $BRANCH"
+            else
+              # If archive fails, it might already be archived or doesn't exist
+              echo "  → Archive command failed (environment may not exist or already archived)"
+            fi
+            
+            # Small delay to avoid rate limiting
+            sleep 2
+            
+          done <<< "$CLOSED_BRANCHES"
+          
+          echo ""
+          echo "Cleanup process completed"

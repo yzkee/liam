@@ -1,5 +1,6 @@
 'use client'
 
+import clsx from 'clsx'
 import type { FC } from 'react'
 import { AttachmentPreview } from '../AttachmentPreview'
 import type { FileAttachment } from '../hooks/useFileAttachments'
@@ -15,7 +16,10 @@ export const AttachmentsContainer: FC<Props> = ({ attachments, onRemove }) => {
 
   return (
     <div
-      className={`${styles.container} ${hasItems ? styles.containerWithItems : styles.containerEmpty}`}
+      className={clsx(
+        styles.container,
+        hasItems ? styles.containerWithItems : styles.containerEmpty,
+      )}
     >
       {attachments.map((attachment) => (
         <AttachmentPreview

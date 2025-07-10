@@ -148,12 +148,11 @@ describe('prepareDmlNode', () => {
 
   it('should handle empty DML generation result', async () => {
     vi.mocked(DMLGenerationAgent).mockImplementationOnce(
-      () =>
-        ({
-          generate: vi.fn().mockResolvedValue({
-            dmlStatements: '',
-          }),
-        }) as any,
+      vi.fn().mockImplementation(() => ({
+        generate: vi.fn().mockResolvedValue({
+          dmlStatements: '',
+        }),
+      })),
     )
 
     const state = createMockState({

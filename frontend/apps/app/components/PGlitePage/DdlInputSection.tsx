@@ -5,7 +5,7 @@ import styles from './DDLInputSection.module.css'
 import { QueryResultBox } from './QueryResultBox'
 import type { DDLState } from './utils'
 
-interface DDLInputSectionProps {
+type DDLInputSectionProps = {
   ddlState: DDLState
   updateDdlInput: (value: string) => void
   executeDDL: () => Promise<void>

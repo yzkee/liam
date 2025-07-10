@@ -21,7 +21,7 @@ type DesignSession = {
   latestVersionNumber?: number
 }
 
-interface Props {
+type Props = {
   schemaData: Schema
   designSession: DesignSession
   timelineItems: TimelineItemEntry[]

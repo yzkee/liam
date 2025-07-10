@@ -1,13 +1,17 @@
+import type { RunnableConfig } from '@langchain/core/runnables'
 import { DatabaseSchemaBuildAgent } from '../../../langchain/agents'
 import type { BuildAgentResponse } from '../../../langchain/agents/databaseSchemaBuildAgent/agent'
 import type { SchemaAwareChatVariables } from '../../../langchain/utils/types'
+import type { Repositories } from '../../../repositories'
 import { convertSchemaToText } from '../../../utils/convertSchemaToText'
+import type { NodeLogger } from '../../../utils/nodeLogger'
+import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 import { logAssistantMessage } from '../utils/timelineLogger'
 
 const NODE_NAME = 'designSchemaNode'
 
-interface PreparedSchemaDesign {
+type PreparedSchemaDesign = {
   agent: DatabaseSchemaBuildAgent
   schemaText: string
 }
@@ -21,10 +25,12 @@ const applySchemaChanges = async (
   latestVersionNumber: number,
   message: string,
   state: WorkflowState,
+  repositories: Repositories,
+  logger: NodeLogger,
 ): Promise<WorkflowState> => {
   await logAssistantMessage(state, 'Applying schema changes...')
 
-  const result = await state.repositories.schema.createVersion({
+  const result = await repositories.schema.createVersion({
     buildingSchemaId,
     latestVersionNumber,
     patch: schemaChanges,
@@ -32,20 +38,19 @@ const applySchemaChanges = async (
 
   if (!result.success) {
     const errorMessage = result.error || 'Failed to update schema'
-    const error = new Error(errorMessage)
-    state.logger.error('Schema update failed:', {
+    logger.error('Schema update failed:', {
       error: errorMessage,
     })
     await logAssistantMessage(state, 'Schema update failed')
     return {
       ...state,
       generatedAnswer: message,
-      error,
+      error: new Error(errorMessage),
     }
   }
 
   const newTableCount = Object.keys(result.newSchema.tables).length
-  state.logger.log(
+  logger.log(
     `[${NODE_NAME}] Applied ${schemaChanges.length} schema changes successfully (${newTableCount} tables)`,
   )
 
@@ -68,6 +73,8 @@ const applySchemaChanges = async (
 const handleSchemaChanges = async (
   parsedResponse: BuildAgentResponse,
   state: WorkflowState,
+  repositories: Repositories,
+  logger: NodeLogger,
 ): Promise<WorkflowState> => {
   if (parsedResponse.schemaChanges.length === 0) {
     return {
@@ -85,11 +92,14 @@ const handleSchemaChanges = async (
     latestVersionNumber,
     parsedResponse.message,
     state,
+    repositories,
+    logger,
   )
 }
 
 async function prepareSchemaDesign(
   state: WorkflowState,
+  logger: NodeLogger,
 ): Promise<PreparedSchemaDesign> {
   await logAssistantMessage(state, 'Preparing schema design...')
 
@@ -97,7 +107,7 @@ async function prepareSchemaDesign(
 
   // Log current schema state for debugging
   const tableCount = Object.keys(state.schemaData.tables).length
-  state.logger.log(`[${NODE_NAME}] Current schema has ${tableCount} tables`)
+  logger.log(`[${NODE_NAME}] Current schema has ${tableCount} tables`)
 
   // Create the agent instance
   const agent = new DatabaseSchemaBuildAgent()
@@ -116,12 +126,22 @@ async function prepareSchemaDesign(
  */
 export async function designSchemaNode(
   state: WorkflowState,
+  config: RunnableConfig,
 ): Promise<WorkflowState> {
-  state.logger.log(`[${NODE_NAME}] Started`)
+  const configurableResult = getConfigurable(config)
+  if (configurableResult.isErr()) {
+    return {
+      ...state,
+      error: configurableResult.error,
+    }
+  }
+  const { repositories, logger } = configurableResult.value
+
+  logger.log(`[${NODE_NAME}] Started`)
 
   await logAssistantMessage(state, 'Designing database schema...')
 
-  const { agent, schemaText } = await prepareSchemaDesign(state)
+  const { agent, schemaText } = await prepareSchemaDesign(state, logger)
 
   // Check if this is a retry after DDL execution failure
   let userMessage = state.userInput
@@ -132,7 +152,7 @@ Original request: ${state.userInput}
 
 Please fix this issue by analyzing the schema and adding any missing constraints, primary keys, or other required schema elements to resolve the DDL execution error.`
 
-    state.logger.log(`[${NODE_NAME}] Retrying after DDL execution failure`)
+    logger.log(`[${NODE_NAME}] Retrying after DDL execution failure`)
     await logAssistantMessage(
       state,
       'Redesigning schema to fix DDL execution errors...',
@@ -153,7 +173,12 @@ Please fix this issue by analyzing the schema and adding any missing constraints
 
   // Use agent's generate method with prompt variables
   const response = await agent.generate(promptVariables)
-  const result = await handleSchemaChanges(response, state)
+  const result = await handleSchemaChanges(
+    response,
+    state,
+    repositories,
+    logger,
+  )
 
   await logAssistantMessage(state, 'Schema design completed')
 
@@ -164,6 +189,6 @@ Please fix this issue by analyzing the schema and adding any missing constraints
     ddlExecutionFailureReason: undefined,
   }
 
-  state.logger.log(`[${NODE_NAME}] Completed`)
+  logger.log(`[${NODE_NAME}] Completed`)
   return finalResult
 }

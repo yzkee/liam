@@ -1,7 +1,9 @@
+import type { RunnableConfig } from '@langchain/core/runnables'
 import { postgresqlSchemaDeparser } from '@liam-hq/db-structure'
 import { executeQuery } from '@liam-hq/pglite-server'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import { WORKFLOW_RETRY_CONFIG } from '../constants'
+import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 import { logAssistantMessage } from '../utils/timelineLogger'
 
@@ -13,8 +15,18 @@ const NODE_NAME = 'executeDdlNode'
  */
 export async function executeDdlNode(
   state: WorkflowState,
+  config: RunnableConfig,
 ): Promise<WorkflowState> {
-  state.logger.log(`[${NODE_NAME}] Started`)
+  const configurableResult = getConfigurable(config)
+  if (configurableResult.isErr()) {
+    return {
+      ...state,
+      error: configurableResult.error,
+    }
+  }
+  const { logger } = configurableResult.value
+
+  logger.log(`[${NODE_NAME}] Started`)
 
   await logAssistantMessage(state, 'Creating database...')
 
@@ -43,7 +55,6 @@ export async function executeDdlNode(
   state.logger.log(
     `[${NODE_NAME}] Generated DDL for ${tableCount} tables (${ddlLength} characters)`,
   )
-  state.logger.debug(`[${NODE_NAME}] Generated DDL:`, { ddlStatements })
 
   await logAssistantMessage(
     state,

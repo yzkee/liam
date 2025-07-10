@@ -1,3 +1,4 @@
+import type { RunnableConfig } from '@langchain/core/runnables'
 import type { WorkflowState } from '../types'
 
 /**
@@ -6,6 +7,7 @@ import type { WorkflowState } from '../types'
  */
 export async function prepareDmlNode(
   state: WorkflowState,
+  _config: RunnableConfig,
 ): Promise<WorkflowState> {
   return {
     ...state,

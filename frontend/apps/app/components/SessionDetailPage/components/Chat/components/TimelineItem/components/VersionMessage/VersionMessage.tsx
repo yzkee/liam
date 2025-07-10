@@ -58,7 +58,7 @@ type BuildingSchemaVersion = Pick<
   'patch' | 'number' | 'id'
 >
 
-interface Props {
+type Props = {
   buildingSchemaVersionId: string
 }
 

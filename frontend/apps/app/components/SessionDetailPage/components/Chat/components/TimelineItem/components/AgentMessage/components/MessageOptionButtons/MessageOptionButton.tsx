@@ -6,7 +6,7 @@ import type { FC, KeyboardEvent, MouseEvent } from 'react'
 import { useCallback } from 'react'
 import styles from './MessageOptionButton.module.css'
 
-interface MessageOptionButtonProps {
+type MessageOptionButtonProps = {
   /**
    * The text content to display in the button
    */

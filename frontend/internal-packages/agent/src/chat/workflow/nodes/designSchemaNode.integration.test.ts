@@ -29,21 +29,34 @@ describe('designSchemaNode -> executeDdlNode integration', () => {
     schema: {
       createVersion: vi.fn(),
       createTimelineItem: vi.fn(),
+      getSchema: vi.fn(),
+      getDesignSession: vi.fn(),
+      updateTimelineItem: vi.fn(),
+      createArtifact: vi.fn(),
+      updateArtifact: vi.fn(),
+      getArtifact: vi.fn(),
     },
   }
 
   const createMockState = (schemaData: Schema): WorkflowState => ({
     userInput: 'Add a users table with id and name fields',
     schemaData,
-    logger: mockLogger,
     formattedHistory: '',
     retryCount: {},
     buildingSchemaId: 'test-schema',
     latestVersionNumber: 1,
     userId: 'test-user',
     designSessionId: 'test-session',
-    repositories: mockRepository as never,
     ddlStatements: '',
+    repositories: mockRepository,
+    logger: mockLogger,
+  })
+
+  const createMockConfig = () => ({
+    configurable: {
+      repositories: mockRepository,
+      logger: mockLogger,
+    },
   })
 
   beforeEach(() => {
@@ -140,7 +153,7 @@ describe('designSchemaNode -> executeDdlNode integration', () => {
     const initialState = createMockState(initialSchema)
 
     // Step 1: Design schema (should add users table)
-    const afterDesign = await designSchemaNode(initialState)
+    const afterDesign = await designSchemaNode(initialState, createMockConfig())
 
     // Verify schema was updated in workflow state
     expect(afterDesign.schemaData.tables['users']).toBeDefined()
@@ -173,7 +186,7 @@ describe('designSchemaNode -> executeDdlNode integration', () => {
     ])
 
     // Step 2: Execute DDL (should generate DDL and execute it)
-    const afterDDL = await executeDdlNode(afterDesign)
+    const afterDDL = await executeDdlNode(afterDesign, createMockConfig())
 
     // Verify DDL generation and execution worked
     expect(afterDDL.ddlStatements).toContain('CREATE TABLE "users"')
@@ -225,7 +238,7 @@ describe('designSchemaNode -> executeDdlNode integration', () => {
     const initialState = createMockState(initialSchema)
 
     // Step 1: Design schema (should fail during validation)
-    const result = await designSchemaNode(initialState)
+    const result = await designSchemaNode(initialState, createMockConfig())
 
     // Verify error handling
     expect(result.error).toBeInstanceOf(Error)
@@ -281,7 +294,7 @@ describe('designSchemaNode -> executeDdlNode integration', () => {
     const initialState = createMockState(initialSchema)
 
     // Step 1: Design schema (should fail at repository level)
-    const result = await designSchemaNode(initialState)
+    const result = await designSchemaNode(initialState, createMockConfig())
 
     // Verify error handling
     expect(result.error).toBeInstanceOf(Error)

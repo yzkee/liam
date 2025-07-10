@@ -36,12 +36,6 @@ export type WorkflowState = {
 
   // Message saving fields
   designSessionId: string
-
-  // Repository dependencies for data access
-  repositories: Repositories
-
-  // Logging functionality
-  logger: NodeLogger
 }
 
 /**

@@ -54,7 +54,7 @@ import type { DDLState, DMLSection, SqlResult } from './utils/types'
  * Interface for the PGlitePlayground component's imperative handle
  * Provides methods for external control of the playground
  */
-export interface PGlitePlaygroundHandle {
+export type PGlitePlaygroundHandle = {
   /**
    * Inserts DDL and executes it immediately.
    * Supports multiple statements.

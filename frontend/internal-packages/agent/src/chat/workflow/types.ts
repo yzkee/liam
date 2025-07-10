@@ -47,7 +47,7 @@ export type WorkflowState = {
 /**
  * Type definition for the configurable object passed to workflow nodes
  */
-export interface WorkflowConfigurable {
+export type WorkflowConfigurable = {
   repositories: Repositories
   logger: NodeLogger
 }

@@ -12,13 +12,13 @@ type DesignSession = {
   latestVersionNumber?: number
 }
 
-interface SendChatMessageParams {
+type SendChatMessageParams = {
   userInput: string
   timelineItems: TimelineItemEntry[]
   designSession: DesignSession
 }
 
-interface SendChatMessageResult {
+type SendChatMessageResult = {
   success: boolean
   error?: string
 }

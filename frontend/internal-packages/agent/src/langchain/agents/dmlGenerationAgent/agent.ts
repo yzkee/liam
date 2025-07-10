@@ -5,6 +5,7 @@ import type { ChatAgent } from '../../utils/types'
 const DMLGenerationAgentInputSchema = v.object({
   schemaSQL: v.string(),
   formattedUseCases: v.string(),
+  schemaContext: v.optional(v.string()),
 })
 
 const DMLGenerationAgentOutputSchema = v.object({

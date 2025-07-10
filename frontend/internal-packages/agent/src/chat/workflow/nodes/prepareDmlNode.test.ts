@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { DMLGenerationAgent } from '../../../langchain/agents/dmlGenerationAgent/agent'
 import type { Repositories } from '../../../repositories'
+import { convertSchemaToText } from '../../../utils/convertSchemaToText'
 import type { NodeLogger } from '../../../utils/nodeLogger'
 import type { WorkflowState } from '../types'
 import { prepareDmlNode } from './prepareDmlNode'
@@ -11,6 +12,10 @@ vi.mock('../../../langchain/agents/dmlGenerationAgent/agent', () => ({
       dmlStatements: '-- Generated DML statements',
     }),
   })),
+}))
+
+vi.mock('../../../utils/convertSchemaToText', () => ({
+  convertSchemaToText: vi.fn().mockReturnValue('Mocked schema text'),
 }))
 
 describe('prepareDmlNode', () => {
@@ -184,6 +189,7 @@ describe('prepareDmlNode', () => {
       expect.objectContaining({
         schemaSQL: 'CREATE TABLE users (id INT);',
         formattedUseCases: expect.stringContaining('User Management:'),
+        schemaContext: 'Mocked schema text',
       }),
     )
 
@@ -230,7 +236,99 @@ describe('prepareDmlNode', () => {
     expect(mockGenerate).toHaveBeenCalledWith({
       schemaSQL: 'CREATE TABLE users (id INT);',
       formattedUseCases: expect.stringContaining('General:'),
+      schemaContext: 'Mocked schema text',
     })
+  })
+
+  it('should pass schema context to DML generation agent', async () => {
+    const mockGenerate = vi.fn().mockResolvedValue({
+      dmlStatements: '-- Generated DML statements',
+    })
+    vi.mocked(DMLGenerationAgent).mockImplementationOnce(
+      () =>
+        ({
+          generate: mockGenerate,
+          // biome-ignore lint/suspicious/noExplicitAny: Mock implementation
+        }) as any,
+    )
+
+    const state = createMockState({
+      ddlStatements: 'CREATE TABLE users (id INT);',
+      generatedUsecases: [
+        {
+          requirementType: 'functional',
+          requirementCategory: 'User Management',
+          requirement: 'Users should be able to register',
+          title: 'User Registration',
+          description: 'Allow users to create new accounts',
+        },
+      ],
+      schemaData: {
+        tables: {
+          users: {
+            name: 'users',
+            comment: null,
+            columns: {
+              id: {
+                name: 'id',
+                type: 'INT',
+                notNull: true,
+                default: null,
+                check: null,
+                comment: null,
+              },
+              email: {
+                name: 'email',
+                type: 'VARCHAR',
+                notNull: true,
+                default: null,
+                check: null,
+                comment: null,
+              },
+            },
+            constraints: {},
+            indexes: {},
+          },
+        },
+      },
+    })
+
+    await prepareDmlNode(state as WorkflowState)
+
+    expect(mockGenerate).toHaveBeenCalledWith({
+      schemaSQL: 'CREATE TABLE users (id INT);',
+      formattedUseCases: expect.any(String),
+      schemaContext: 'Mocked schema text',
+    })
+
+    // Verify convertSchemaToText was called with the correct schema
+    expect(convertSchemaToText).toHaveBeenCalledWith(state.schemaData)
+  })
+
+  it('should log schema information during DML generation', async () => {
+    const state = createMockState({
+      ddlStatements:
+        'CREATE TABLE users (id INT);\nCREATE TABLE posts (id INT);',
+      generatedUsecases: [
+        {
+          requirementType: 'functional',
+          requirementCategory: 'User Management',
+          requirement: 'Users should be able to register',
+          title: 'User Registration',
+          description: 'Allow users to create new accounts',
+        },
+      ],
+    })
+
+    await prepareDmlNode(state as WorkflowState)
+
+    expect(mockLogger.info).toHaveBeenCalledWith('Preparing DML statements')
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      'Generating DML for 2 tables and 1 use cases',
+    )
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      'DML statements generated successfully',
+    )
   })
 
   it('should handle empty DML generation result', async () => {

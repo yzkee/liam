@@ -86,8 +86,7 @@ For database migration and type generation workflows, see [`docs/migrationOpsCon
 ## Development Guidelines
 
 ### TypeScript Standards
-- Use runtime type validation with `valibot` instead of type assertions
-- Avoid `as` keyword - use type predicates or `instanceof` checks
+- Use runtime type validation with `valibot` for external data validation
 - Use early returns for readability
 
 ### Code Editing

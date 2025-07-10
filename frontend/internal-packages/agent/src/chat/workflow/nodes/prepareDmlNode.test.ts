@@ -138,6 +138,101 @@ describe('prepareDmlNode', () => {
     )
   })
 
+  it('should format use cases by category', async () => {
+    const mockGenerate = vi.fn().mockResolvedValue({
+      dmlStatements: '-- Generated DML statements',
+    })
+    vi.mocked(DMLGenerationAgent).mockImplementationOnce(
+      () =>
+        ({
+          generate: mockGenerate,
+          // biome-ignore lint/suspicious/noExplicitAny: Mock implementation
+        }) as any,
+    )
+
+    const state = createMockState({
+      ddlStatements: 'CREATE TABLE users (id INT);',
+      generatedUsecases: [
+        {
+          requirementType: 'functional',
+          requirementCategory: 'User Management',
+          requirement: 'Users should be able to register',
+          title: 'User Registration',
+          description: 'Allow users to create new accounts',
+        },
+        {
+          requirementType: 'functional',
+          requirementCategory: 'User Management',
+          requirement: 'Users should be able to login',
+          title: 'User Login',
+          description: 'Allow users to authenticate',
+        },
+        {
+          requirementType: 'functional',
+          requirementCategory: 'Content Management',
+          requirement: 'Users can create posts',
+          title: 'Create Posts',
+          description: 'Users can publish new posts',
+        },
+      ],
+    })
+
+    await prepareDmlNode(state as WorkflowState)
+
+    expect(mockGenerate).toHaveBeenCalledTimes(1)
+    expect(mockGenerate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        schemaSQL: 'CREATE TABLE users (id INT);',
+        formattedUseCases: expect.stringContaining('User Management:'),
+      }),
+    )
+
+    // Verify the formatted use cases contain all expected content
+    const firstCall = mockGenerate.mock.calls[0]
+    const formattedUseCases = firstCall
+      ? (firstCall[0] as { schemaSQL: string; formattedUseCases: string })
+          .formattedUseCases
+      : ''
+    expect(formattedUseCases).toContain('User Management:')
+    expect(formattedUseCases).toContain('Content Management:')
+    expect(formattedUseCases).toContain('User Registration')
+    expect(formattedUseCases).toContain('User Login')
+    expect(formattedUseCases).toContain('Create Posts')
+  })
+
+  it('should handle use cases without category', async () => {
+    const mockGenerate = vi.fn().mockResolvedValue({
+      dmlStatements: '-- Generated DML statements',
+    })
+    vi.mocked(DMLGenerationAgent).mockImplementationOnce(
+      () =>
+        ({
+          generate: mockGenerate,
+          // biome-ignore lint/suspicious/noExplicitAny: Mock implementation
+        }) as any,
+    )
+
+    const state = createMockState({
+      ddlStatements: 'CREATE TABLE users (id INT);',
+      generatedUsecases: [
+        {
+          requirementType: 'functional',
+          requirementCategory: '',
+          requirement: 'Basic functionality',
+          title: 'Basic Feature',
+          description: 'A basic feature without category',
+        },
+      ],
+    })
+
+    await prepareDmlNode(state as WorkflowState)
+
+    expect(mockGenerate).toHaveBeenCalledWith({
+      schemaSQL: 'CREATE TABLE users (id INT);',
+      formattedUseCases: expect.stringContaining('General:'),
+    })
+  })
+
   it('should handle empty DML generation result', async () => {
     vi.mocked(DMLGenerationAgent).mockImplementationOnce(
       () =>
@@ -145,6 +240,7 @@ describe('prepareDmlNode', () => {
           generate: vi.fn().mockResolvedValue({
             dmlStatements: '',
           }),
+          // biome-ignore lint/suspicious/noExplicitAny: Mock implementation
         }) as any,
     )
 

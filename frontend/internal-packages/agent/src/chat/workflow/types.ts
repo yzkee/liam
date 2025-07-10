@@ -29,6 +29,10 @@ export type WorkflowState = {
   ddlExecutionFailed?: boolean | undefined
   ddlExecutionFailureReason?: string | undefined
 
+  // DML execution results
+  dmlExecutionSuccessful?: boolean | undefined
+  dmlExecutionErrors?: string | undefined
+
   // Schema update fields
   buildingSchemaId: string
   latestVersionNumber: number

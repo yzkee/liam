@@ -1,6 +1,7 @@
 'use client'
 
 import { Check } from '@liam-hq/ui'
+import clsx from 'clsx'
 import type { FC, KeyboardEvent, MouseEvent } from 'react'
 import { useCallback } from 'react'
 import styles from './MessageOptionButton.module.css'
@@ -75,14 +76,14 @@ export const MessageOptionButton: FC<MessageOptionButtonProps> = ({
       >
         {isSelected && (
           <Check
-            className={`${styles.checkIcon} ${checkIconClass}`}
+            className={clsx(styles.checkIcon, checkIconClass)}
             size={12}
             aria-hidden="true"
           />
         )}
       </div>
       <button
-        className={`${styles.optionButton} ${agentClass} ${selectedClass}`}
+        className={clsx(styles.optionButton, agentClass, selectedClass)}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
         disabled={isDisabled}

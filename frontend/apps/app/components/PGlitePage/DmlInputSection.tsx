@@ -1,5 +1,6 @@
 'use client'
 
+import clsx from 'clsx'
 import styles from './DMLInputSection.module.css'
 import { QueryResultBox } from './QueryResultBox'
 import type { DMLSection } from './utils'
@@ -24,7 +25,7 @@ export function DMLInputSection({
         <button
           type="button"
           onClick={() => removeDMLSection(section.id)}
-          className={`${styles.actionButton} ${styles.dangerButton}`}
+          className={clsx(styles.actionButton, styles.dangerButton)}
           aria-label="Delete DML Section"
         >
           Delete
@@ -42,7 +43,7 @@ SELECT * FROM users;"
       <button
         type="button"
         onClick={() => executeDML(section.id)}
-        className={`${styles.actionButton} ${styles.primaryButton}`}
+        className={clsx(styles.actionButton, styles.primaryButton)}
       >
         Execute
       </button>

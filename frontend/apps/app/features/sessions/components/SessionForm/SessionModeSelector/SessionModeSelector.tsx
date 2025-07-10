@@ -1,4 +1,5 @@
 import { GithubLogo, Link, Upload } from '@liam-hq/ui'
+import clsx from 'clsx'
 import { type FC, useEffect, useRef } from 'react'
 import styles from './SessionModeSelector.module.css'
 
@@ -116,9 +117,10 @@ export const SessionModeSelector: FC<Props> = ({
           aria-selected={selectedMode === modeItem.mode}
           aria-controls={`${modeItem.mode}-panel`}
           tabIndex={selectedMode === modeItem.mode ? 0 : -1}
-          className={`${styles.modeButton} ${
-            selectedMode === modeItem.mode ? styles.modeButtonActive : ''
-          }`}
+          className={clsx(
+            styles.modeButton,
+            selectedMode === modeItem.mode ? styles.modeButtonActive : '',
+          )}
           onClick={() => onModeChange(modeItem.mode)}
           onKeyDown={(e) => handleKeyDown(e, index)}
         >

@@ -173,7 +173,7 @@ SELECT
 FROM products
 GROUP BY status;
 \`\`\`
-`;
+`
 
 export const DML_GENERATION_HUMAN_MESSAGE_TEMPLATE = `
 ## Database Schema:
@@ -189,32 +189,34 @@ export const DML_GENERATION_HUMAN_MESSAGE_TEMPLATE = `
 {user_message}
 
 Please generate comprehensive DML statements that fulfill the requirements above. Ensure all data is realistic, properly formatted, and respects all database constraints.
-`;
+`
 
 /**
  * Type definitions for DML generation prompt variables
  */
 export interface DMLGenerationPromptVariables {
-  schema: string;
-  requirements: string;
-  chat_history: string;
-  user_message: string;
+  schema: string
+  requirements: string
+  chat_history: string
+  user_message: string
 }
 
 /**
  * Format the prompts with actual values
  */
 export function formatDMLGenerationPrompts(
-  variables: DMLGenerationPromptVariables
+  variables: DMLGenerationPromptVariables,
 ): { systemMessage: string; humanMessage: string } {
-  const humanMessage = DML_GENERATION_HUMAN_MESSAGE_TEMPLATE
-    .replace('{schema}', variables.schema)
+  const humanMessage = DML_GENERATION_HUMAN_MESSAGE_TEMPLATE.replace(
+    '{schema}',
+    variables.schema,
+  )
     .replace('{requirements}', variables.requirements)
     .replace('{chat_history}', variables.chat_history)
-    .replace('{user_message}', variables.user_message);
+    .replace('{user_message}', variables.user_message)
 
   return {
     systemMessage: DML_GENERATION_SYSTEM_MESSAGE,
     humanMessage,
-  };
+  }
 }

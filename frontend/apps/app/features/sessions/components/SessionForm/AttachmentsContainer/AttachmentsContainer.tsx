@@ -1,6 +1,5 @@
 'use client'
 
-import clsx from 'clsx'
 import type { FC } from 'react'
 import { AttachmentPreview } from '../AttachmentPreview'
 import type { FileAttachment } from '../hooks/useFileAttachments'

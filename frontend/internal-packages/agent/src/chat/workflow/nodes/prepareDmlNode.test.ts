@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
+import { DMLGenerationAgent } from '../../../langchain/agents/dmlGenerationAgent/agent'
 import type { Repositories } from '../../../repositories'
 import type { NodeLogger } from '../../../utils/nodeLogger'
 import type { WorkflowState } from '../types'
@@ -91,6 +92,80 @@ describe('prepareDmlNode', () => {
     expect(result.dmlStatements).toBeUndefined()
     expect(mockLogger.warn).toHaveBeenCalledWith(
       'No DDL statements available for DML generation',
+    )
+  })
+
+  it('should return state unchanged when use cases are missing', async () => {
+    const state = createMockState({
+      ddlStatements: 'CREATE TABLE users (id INT);',
+      generatedUsecases: [],
+    })
+
+    const result = await prepareDmlNode(state as WorkflowState)
+
+    expect(result.dmlStatements).toBeUndefined()
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      'No use cases available for DML generation',
+    )
+  })
+
+  it('should log input statistics', async () => {
+    const state = createMockState({
+      ddlStatements:
+        'CREATE TABLE users (id INT);\nCREATE TABLE posts (id INT);',
+      generatedUsecases: [
+        {
+          requirementType: 'functional',
+          requirementCategory: 'User Management',
+          requirement: 'Users should be able to register',
+          title: 'User Registration',
+          description: 'Allow users to create new accounts',
+        },
+        {
+          requirementType: 'functional',
+          requirementCategory: 'Content',
+          requirement: 'Users can create posts',
+          title: 'Create Posts',
+          description: 'Users can publish new posts',
+        },
+      ],
+    })
+
+    await prepareDmlNode(state as WorkflowState)
+
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      'Generating DML for 2 tables and 2 use cases',
+    )
+  })
+
+  it('should handle empty DML generation result', async () => {
+    vi.mocked(DMLGenerationAgent).mockImplementationOnce(
+      () =>
+        ({
+          generate: vi.fn().mockResolvedValue({
+            dmlStatements: '',
+          }),
+        }) as any,
+    )
+
+    const state = createMockState({
+      ddlStatements: 'CREATE TABLE users (id INT);',
+      generatedUsecases: [
+        {
+          requirementType: 'functional',
+          requirementCategory: 'User Management',
+          requirement: 'Users should be able to register',
+          title: 'User Registration',
+          description: 'Allow users to create new accounts',
+        },
+      ],
+    })
+
+    const result = await prepareDmlNode(state as WorkflowState)
+
+    expect(result.dmlStatements).toBeUndefined()
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      'DML generation returned empty statements',
     )
   })
 })

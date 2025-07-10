@@ -253,6 +253,7 @@ export async function designSchemaNode(
   const finalResult = {
     ...result,
     messages: [
+      ...state.messages,
       new AIMessage({
         content: response.message,
         name: 'Database Schema Build Agent',

@@ -42,7 +42,12 @@ export type WorkflowState = {
 
   // Logging functionality
   logger: NodeLogger
+}
 
-  // Progress timeline item ID for tracking
-  progressTimelineItemId?: string | undefined
+/**
+ * Type definition for the configurable object passed to workflow nodes
+ */
+export type WorkflowConfigurable = {
+  repositories: Repositories
+  logger: NodeLogger
 }

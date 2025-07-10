@@ -29,17 +29,7 @@ jobs:
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           script: |
-            const now = new Date();
-            const dayOfWeek = now.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
-
-            // Execute only Sunday to Thursday (0=Sunday to 4=Thursday)
-            if (dayOfWeek > 4) {
-              console.log(`Today is ${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][dayOfWeek]}`);
-              console.log('Skipping execution - only runs Sunday through Thursday');
-              return;
-            }
-
-            console.log(`Today is ${['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][dayOfWeek]} - proceeding with execution`);
+            console.log('Processing scheduled issues...');
 
             const issues = await github.rest.issues.listForRepo({
               owner: context.repo.owner,

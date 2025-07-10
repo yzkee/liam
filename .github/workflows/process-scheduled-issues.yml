@@ -22,9 +22,8 @@ jobs:
         with:
           app-id: ${{ secrets.LIAM_CODE_ASSISTANT_APP_ID }}
           private-key: ${{ secrets.LIAM_CODE_ASSISTANT_PRIVATE_KEY }}
-          permissions: |
-            contents: read
-            issues:   write
+          permission-contents: read
+          permission-issues: write
       - name: Find and process scheduled issues
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:

@@ -176,8 +176,6 @@ export const deepModeling = async (
     designSessionId,
     userId,
     retryCount: {},
-    repositories,
-    logger,
   }
 
   try {

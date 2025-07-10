@@ -49,7 +49,6 @@ interface WorkflowState {
   organizationId?: string
   userId: string
   designSessionId: string
-  repositories: Repositories
 }
 ```
 
@@ -85,6 +84,5 @@ const result = await executeChatWorkflow({
   latestVersionNumber: 1,
   userId: 'my-user-id',
   designSessionId: 'my-design-session-id',
-  repositories: myRepositories,
 })
 ```

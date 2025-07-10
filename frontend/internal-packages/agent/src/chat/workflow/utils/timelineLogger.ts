@@ -1,4 +1,5 @@
 import { ResultAsync } from 'neverthrow'
+import type { Repositories } from '../../../repositories'
 import type { WorkflowState } from '../types'
 
 /**
@@ -7,10 +8,11 @@ import type { WorkflowState } from '../types'
  */
 export async function logAssistantMessage(
   state: WorkflowState,
+  repositories: Repositories,
   content: string,
 ): Promise<void> {
   const result = await ResultAsync.fromPromise(
-    state.repositories.schema.createTimelineItem({
+    repositories.schema.createTimelineItem({
       designSessionId: state.designSessionId,
       content,
       type: 'assistant_log',

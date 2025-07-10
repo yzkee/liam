@@ -24,8 +24,8 @@ async function saveArtifacts(
     return
   }
 
-  await logAssistantMessage(state, 'Saving artifacts...')
-  state.logger.log(`[${NODE_NAME}] Saving artifacts`)
+  await logAssistantMessage(state, repositories, 'Saving artifacts...')
+  logger.log(`[${NODE_NAME}] Saving artifacts`)
   const artifact = transformWorkflowStateToArtifact(state)
   const artifactResult = await createOrUpdateArtifact(
     state,
@@ -34,13 +34,17 @@ async function saveArtifacts(
   )
 
   if (artifactResult.success) {
-    state.logger.log(`[${NODE_NAME}] Artifacts saved successfully`)
-    await logAssistantMessage(state, 'Artifacts saved successfully')
+    logger.log(`[${NODE_NAME}] Artifacts saved successfully`)
+    await logAssistantMessage(
+      state,
+      repositories,
+      'Artifacts saved successfully',
+    )
   } else {
-    state.logger.log(
+    logger.log(
       `[${NODE_NAME}] Failed to save artifacts: ${artifactResult.error}`,
     )
-    await logAssistantMessage(state, 'Failed to save artifacts')
+    await logAssistantMessage(state, repositories, 'Failed to save artifacts')
   }
 }
 
@@ -74,7 +78,7 @@ async function generateFinalResponse(
   finalResponse: string
   errorToReturn: string | undefined
 }> {
-  await logAssistantMessage(state, 'Generating final response...')
+  await logAssistantMessage(state, repositories, 'Generating final response...')
 
   if (state.error) {
     const finalResponse = `Sorry, an error occurred during processing: ${state.error.message}`
@@ -83,7 +87,11 @@ async function generateFinalResponse(
   }
 
   if (state.generatedAnswer) {
-    await logAssistantMessage(state, 'Final response generated successfully')
+    await logAssistantMessage(
+      state,
+      repositories,
+      'Final response generated successfully',
+    )
     await saveTimelineItem(
       state,
       state.generatedAnswer,
@@ -119,7 +127,11 @@ export async function finalizeArtifactsNode(
 
   logger.log(`[${NODE_NAME}] Started`)
 
-  await logAssistantMessage(state, 'Preparing final deliverables...')
+  await logAssistantMessage(
+    state,
+    repositories,
+    'Preparing final deliverables...',
+  )
 
   await saveArtifacts(state, logger, repositories)
   const { finalResponse, errorToReturn } = await generateFinalResponse(

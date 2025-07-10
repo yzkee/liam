@@ -69,21 +69,22 @@ export async function generateUsecaseNode(
       error: configurableResult.error,
     }
   }
-  const { logger } = configurableResult.value
+  const { repositories, logger } = configurableResult.value
 
   logger.log(`[${NODE_NAME}] Started`)
 
-  await logAssistantMessage(state, 'Generating use cases...')
+  await logAssistantMessage(state, repositories, 'Generating use cases...')
 
   // Check if we have analyzed requirements
   if (!state.analyzedRequirements) {
     const errorMessage =
       'No analyzed requirements found. Cannot generate use cases.'
     const error = new Error(`[${NODE_NAME}] ${errorMessage}`)
-    state.logger.error(error.message)
+    logger.error(error.message)
 
     await logAssistantMessage(
       state,
+      repositories,
       'Error occurred during use case generation',
     )
 
@@ -108,7 +109,11 @@ export async function generateUsecaseNode(
 
   const retryCount = state.retryCount[NODE_NAME] ?? 0
 
-  await logAssistantMessage(state, 'Analyzing test cases and queries...')
+  await logAssistantMessage(
+    state,
+    repositories,
+    'Analyzing test cases and queries...',
+  )
 
   const usecaseResult = await ResultAsync.fromPromise(
     qaAgent.generate(promptVariables),
@@ -118,11 +123,15 @@ export async function generateUsecaseNode(
   return await usecaseResult.match(
     async (generatedResult) => {
       // Log the usecase results for debugging/monitoring purposes
-      logUsecaseResults(state.logger, generatedResult.usecases)
+      logUsecaseResults(logger, generatedResult.usecases)
 
-      await logAssistantMessage(state, 'Use case generation completed')
+      await logAssistantMessage(
+        state,
+        repositories,
+        'Use case generation completed',
+      )
 
-      state.logger.log(`[${NODE_NAME}] Completed`)
+      logger.log(`[${NODE_NAME}] Completed`)
 
       return {
         ...state,
@@ -131,10 +140,11 @@ export async function generateUsecaseNode(
       }
     },
     async (error) => {
-      state.logger.error(`[${NODE_NAME}] Failed: ${error.message}`)
+      logger.error(`[${NODE_NAME}] Failed: ${error.message}`)
 
       await logAssistantMessage(
         state,
+        repositories,
         'Error occurred during use case generation',
       )
 

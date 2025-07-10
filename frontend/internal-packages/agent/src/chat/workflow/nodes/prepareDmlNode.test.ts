@@ -64,7 +64,7 @@ describe('prepareDmlNode', () => {
       ],
     })
 
-    const result = await prepareDmlNode(state as WorkflowState)
+    const result = await prepareDmlNode(state, {})
 
     expect(result.dmlStatements).toBe('-- Generated DML statements')
     expect(mockLogger.info).toHaveBeenCalledWith('Preparing DML statements')
@@ -86,7 +86,7 @@ describe('prepareDmlNode', () => {
       ],
     })
 
-    const result = await prepareDmlNode(state as WorkflowState)
+    const result = await prepareDmlNode(state, {})
 
     expect(result.dmlStatements).toBeUndefined()
     expect(mockLogger.warn).toHaveBeenCalledWith(

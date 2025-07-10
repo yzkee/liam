@@ -35,6 +35,9 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
           persist-credentials: false
 
+      - name: Setup pnpm
+        uses: ./.github/actions/pnpm-setup
+
       - name: Run Claude Code Action
         uses: anthropics/claude-code-action@91c510a769db0f9b79df0efbdded0c29c033f846 # beta
         id: claude-code

@@ -48,8 +48,6 @@ describe('designSchemaNode -> executeDdlNode integration', () => {
     userId: 'test-user',
     designSessionId: 'test-session',
     ddlStatements: '',
-    repositories: mockRepository,
-    logger: mockLogger,
   })
 
   const createMockConfig = () => ({

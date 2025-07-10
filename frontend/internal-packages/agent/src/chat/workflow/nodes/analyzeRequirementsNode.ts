@@ -46,11 +46,11 @@ export async function analyzeRequirementsNode(
       error: configurableResult.error,
     }
   }
-  const { logger } = configurableResult.value
+  const { repositories, logger } = configurableResult.value
 
   logger.log(`[${NODE_NAME}] Started`)
 
-  await logAssistantMessage(state, 'Analyzing requirements...')
+  await logAssistantMessage(state, repositories, 'Analyzing requirements...')
 
   const pmAnalysisAgent = new PMAnalysisAgent()
 
@@ -63,6 +63,7 @@ export async function analyzeRequirementsNode(
 
   await logAssistantMessage(
     state,
+    repositories,
     'Organizing business and functional requirements...',
   )
 
@@ -76,7 +77,11 @@ export async function analyzeRequirementsNode(
       // Log the analysis result for debugging/monitoring purposes
       logAnalysisResult(logger, result)
 
-      await logAssistantMessage(state, 'Requirements analysis completed')
+      await logAssistantMessage(
+        state,
+        repositories,
+        'Requirements analysis completed',
+      )
 
       logger.log(`[${NODE_NAME}] Completed`)
 
@@ -95,6 +100,7 @@ export async function analyzeRequirementsNode(
 
       await logAssistantMessage(
         state,
+        repositories,
         'Error occurred during requirements analysis',
       )
 

@@ -28,7 +28,7 @@ const applySchemaChanges = async (
   repositories: Repositories,
   logger: NodeLogger,
 ): Promise<WorkflowState> => {
-  await logAssistantMessage(state, 'Applying schema changes...')
+  await logAssistantMessage(state, repositories, 'Applying schema changes...')
 
   const result = await repositories.schema.createVersion({
     buildingSchemaId,
@@ -41,7 +41,7 @@ const applySchemaChanges = async (
     logger.error('Schema update failed:', {
       error: errorMessage,
     })
-    await logAssistantMessage(state, 'Schema update failed')
+    await logAssistantMessage(state, repositories, 'Schema update failed')
     return {
       ...state,
       generatedAnswer: message,
@@ -56,6 +56,7 @@ const applySchemaChanges = async (
 
   await logAssistantMessage(
     state,
+    repositories,
     `Applied ${schemaChanges.length} schema changes successfully`,
   )
 
@@ -99,9 +100,10 @@ const handleSchemaChanges = async (
 
 async function prepareSchemaDesign(
   state: WorkflowState,
+  repositories: Repositories,
   logger: NodeLogger,
 ): Promise<PreparedSchemaDesign> {
-  await logAssistantMessage(state, 'Preparing schema design...')
+  await logAssistantMessage(state, repositories, 'Preparing schema design...')
 
   const schemaText = convertSchemaToText(state.schemaData)
 
@@ -112,7 +114,11 @@ async function prepareSchemaDesign(
   // Create the agent instance
   const agent = new DatabaseSchemaBuildAgent()
 
-  await logAssistantMessage(state, 'Schema design preparation completed')
+  await logAssistantMessage(
+    state,
+    repositories,
+    'Schema design preparation completed',
+  )
 
   return {
     agent,
@@ -139,9 +145,13 @@ export async function designSchemaNode(
 
   logger.log(`[${NODE_NAME}] Started`)
 
-  await logAssistantMessage(state, 'Designing database schema...')
+  await logAssistantMessage(state, repositories, 'Designing database schema...')
 
-  const { agent, schemaText } = await prepareSchemaDesign(state, logger)
+  const { agent, schemaText } = await prepareSchemaDesign(
+    state,
+    repositories,
+    logger,
+  )
 
   // Check if this is a retry after DDL execution failure
   let userMessage = state.userInput
@@ -155,6 +165,7 @@ Please fix this issue by analyzing the schema and adding any missing constraints
     logger.log(`[${NODE_NAME}] Retrying after DDL execution failure`)
     await logAssistantMessage(
       state,
+      repositories,
       'Redesigning schema to fix DDL execution errors...',
     )
   }
@@ -168,6 +179,7 @@ Please fix this issue by analyzing the schema and adding any missing constraints
 
   await logAssistantMessage(
     state,
+    repositories,
     'Analyzing table structure and relationships...',
   )
 
@@ -180,7 +192,7 @@ Please fix this issue by analyzing the schema and adding any missing constraints
     logger,
   )
 
-  await logAssistantMessage(state, 'Schema design completed')
+  await logAssistantMessage(state, repositories, 'Schema design completed')
 
   // Clear retry flags after processing
   const finalResult = {

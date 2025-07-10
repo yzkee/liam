@@ -69,8 +69,6 @@ describe('designSchemaNode retry behavior', () => {
       retryCount: { ddlExecutionRetry: 1 },
       shouldRetryWithDesignSchema: true,
       ddlExecutionFailureReason: 'Foreign key constraint error',
-      repositories: mockRepositories,
-      logger: mockLogger,
     }
 
     const config = {

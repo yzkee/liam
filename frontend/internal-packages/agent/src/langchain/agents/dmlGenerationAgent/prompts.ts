@@ -194,7 +194,7 @@ Please generate comprehensive DML statements that fulfill the requirements above
 /**
  * Type definitions for DML generation prompt variables
  */
-export interface DMLGenerationPromptVariables {
+export type DMLGenerationPromptVariables = {
   schema: string
   requirements: string
   chat_history: string

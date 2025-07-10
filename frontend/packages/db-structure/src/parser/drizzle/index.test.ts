@@ -31,7 +31,7 @@ describe(_processor, () => {
             PRIMARY_id: {
               type: 'PRIMARY KEY',
               name: 'PRIMARY_id',
-              columnName: 'id',
+              columnNames: ['id'],
             },
             ...override?.constraints,
           },
@@ -187,7 +187,7 @@ describe(_processor, () => {
           UNIQUE_email: {
             type: 'UNIQUE',
             name: 'UNIQUE_email',
-            columnName: 'email',
+            columnNames: ['email'],
           },
         },
       })
@@ -292,7 +292,7 @@ describe(_processor, () => {
       expect(value.tables['profiles']?.constraints['UNIQUE_user_id']).toEqual({
         type: 'UNIQUE',
         name: 'UNIQUE_user_id',
-        columnName: 'user_id',
+        columnNames: ['user_id'],
       })
 
       // Note: inline .unique() creates constraint only, not index
@@ -413,7 +413,7 @@ describe(_processor, () => {
       expect(value.tables['user_tags']?.constraints['user_tags_pkey']).toEqual({
         type: 'PRIMARY KEY',
         name: 'user_tags_pkey',
-        columnName: 'user_id,tag_id',
+        columnNames: ['user_id', 'tag_id'],
       })
 
       // Verify composite primary key index
@@ -432,7 +432,7 @@ describe(_processor, () => {
       expect(value.tables['tags']?.constraints['UNIQUE_name']).toEqual({
         type: 'UNIQUE',
         name: 'UNIQUE_name',
-        columnName: 'name',
+        columnNames: ['name'],
       })
     })
 
@@ -651,7 +651,7 @@ describe(_processor, () => {
       ).toEqual({
         type: 'UNIQUE',
         name: 'UNIQUE_user_id',
-        columnName: 'user_id',
+        columnNames: ['user_id'],
       })
     })
 
@@ -731,6 +731,86 @@ describe(_processor, () => {
       // Type guard to check if it's a ForeignKeyConstraint
       if (foreignKeyConstraint && foreignKeyConstraint.type === 'FOREIGN KEY') {
         expect(foreignKeyConstraint.targetTableName).toBe('users')
+      }
+    })
+
+    it('multiple PostgreSQL schemas', async () => {
+      const { value } = await _processor(`
+        import { pgTable, serial, varchar, integer } from 'drizzle-orm/pg-core';
+        import { pgSchema } from 'drizzle-orm/pg-core';
+
+        // Define schemas
+        export const authSchema = pgSchema('auth');
+        export const publicSchema = pgSchema('public');
+
+        // Auth schema table
+        export const authUsers = authSchema.table('users', {
+          id: serial('id').primaryKey(),
+          email: varchar('email', { length: 255 }).notNull(),
+        });
+
+        // Public schema tables with foreign keys
+        export const publicPosts = publicSchema.table('posts', {
+          id: serial('id').primaryKey(),
+          userId: integer('user_id').references(() => authUsers.id),
+          title: varchar('title', { length: 255 }),
+        });
+
+        export const publicComments = publicSchema.table('comments', {
+          id: serial('id').primaryKey(),
+          postId: integer('post_id').references(() => publicPosts.id),
+          userId: integer('user_id').references(() => authUsers.id),
+        });
+      `)
+
+      // Check that all tables are parsed
+      expect(Object.keys(value.tables)).toHaveLength(3)
+      expect(value.tables).toHaveProperty('users')
+      expect(value.tables).toHaveProperty('posts')
+      expect(value.tables).toHaveProperty('comments')
+
+      // Verify foreign key constraints across schemas
+      const postsFK =
+        value.tables['posts']?.constraints['posts_user_id_authUsers_id_fk']
+      expect(postsFK).toBeDefined()
+      if (postsFK && postsFK.type === 'FOREIGN KEY') {
+        expect(postsFK.targetTableName).toBe('users') // Should reference table name, not variable name
+      }
+
+      // Verify multiple FKs in one table
+      const commentsFKs = value.tables['comments']?.constraints || {}
+      const foreignKeyCount = Object.values(commentsFKs).filter(
+        (c) => c.type === 'FOREIGN KEY',
+      ).length
+      expect(foreignKeyCount).toBe(2)
+    })
+
+    it('foreign key with different column names (JS property vs DB column)', async () => {
+      const { value } = await _processor(`
+        import { pgTable, serial, varchar, integer } from 'drizzle-orm/pg-core';
+
+        export const users = pgTable('users', {
+          userId: serial('user_id').primaryKey(), // JS property: userId, DB column: user_id
+          email: varchar('email', { length: 255 }).notNull(),
+        });
+
+        export const posts = pgTable('posts', {
+          id: serial('id').primaryKey(),
+          authorId: integer('author_id').references(() => users.userId), // Referencing JS property
+          title: varchar('title', { length: 255 }),
+        });
+      `)
+
+      // Check that foreign key correctly references the actual DB column name
+      // Find the FK constraint (name might be different)
+      const constraints = value.tables['posts']?.constraints || {}
+      const fkConstraint = Object.values(constraints).find(
+        (c) => c.type === 'FOREIGN KEY',
+      )
+
+      expect(fkConstraint).toBeDefined()
+      if (fkConstraint && fkConstraint.type === 'FOREIGN KEY') {
+        expect(fkConstraint.targetColumnName).toBe('user_id') // Should be DB column name, not JS property name
       }
     })
   })

@@ -85,7 +85,7 @@ describe('Chat Workflow', () => {
           users_pkey: {
             type: 'PRIMARY KEY',
             name: 'users_pkey',
-            columnName: 'id',
+            columnNames: ['id'],
           },
         },
       },
@@ -227,7 +227,6 @@ describe('Chat Workflow', () => {
         organization_id: 'test-org-id',
         design_session_id: 'test-design-session-id',
         building_schema_version_id: null,
-        progress: null,
       },
     })
 

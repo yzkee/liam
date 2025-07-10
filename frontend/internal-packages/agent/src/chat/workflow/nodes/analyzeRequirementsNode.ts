@@ -6,8 +6,8 @@ import type { requirementsAnalysisSchema } from '../../../langchain/agents/pmAna
 import type { BasePromptVariables } from '../../../langchain/utils/types'
 import type { NodeLogger } from '../../../utils/nodeLogger'
 import { getConfigurable } from '../shared/getConfigurable'
-import { getWorkflowNodeProgress } from '../shared/getWorkflowNodeProgress'
 import type { WorkflowState } from '../types'
+import { logAssistantMessage } from '../utils/timelineLogger'
 
 const NODE_NAME = 'analyzeRequirementsNode'
 
@@ -50,13 +50,7 @@ export async function analyzeRequirementsNode(
 
   logger.log(`[${NODE_NAME}] Started`)
 
-  // Update progress message if available
-  if (state.progressTimelineItemId) {
-    await repositories.schema.updateTimelineItem(state.progressTimelineItemId, {
-      content: 'Processing: analyzeRequirements',
-      progress: getWorkflowNodeProgress('analyzeRequirements'),
-    })
-  }
+  await logAssistantMessage(state, 'Analyzing requirements...')
 
   const pmAnalysisAgent = new PMAnalysisAgent()
 
@@ -67,35 +61,46 @@ export async function analyzeRequirementsNode(
 
   const retryCount = state.retryCount[NODE_NAME] ?? 0
 
-  const result = await ResultAsync.fromPromise(
+  await logAssistantMessage(
+    state,
+    'Organizing business and functional requirements...',
+  )
+
+  const analysisResult = await ResultAsync.fromPromise(
     pmAnalysisAgent.analyzeRequirements(promptVariables),
     (error) => (error instanceof Error ? error : new Error(String(error))),
   )
 
-  return result.match(
-    (analysisResult) => {
+  return analysisResult.match(
+    async (result) => {
       // Log the analysis result for debugging/monitoring purposes
-      logAnalysisResult(logger, analysisResult)
+      logAnalysisResult(logger, result)
+
+      await logAssistantMessage(state, 'Requirements analysis completed')
 
       logger.log(`[${NODE_NAME}] Completed`)
 
       return {
         ...state,
         analyzedRequirements: {
-          businessRequirement: analysisResult.businessRequirement,
-          functionalRequirements: analysisResult.functionalRequirements,
-          nonFunctionalRequirements: analysisResult.nonFunctionalRequirements,
+          businessRequirement: result.businessRequirement,
+          functionalRequirements: result.functionalRequirements,
+          nonFunctionalRequirements: result.nonFunctionalRequirements,
         },
         error: undefined, // Clear error on success
       }
     },
-    (error) => {
+    async (error) => {
       logger.error(`[${NODE_NAME}] Failed: ${error.message}`)
 
-      // Increment retry count and set error
+      await logAssistantMessage(
+        state,
+        'Error occurred during requirements analysis',
+      )
+
       return {
         ...state,
-        error: error,
+        error,
         retryCount: {
           ...state.retryCount,
           [NODE_NAME]: retryCount + 1,

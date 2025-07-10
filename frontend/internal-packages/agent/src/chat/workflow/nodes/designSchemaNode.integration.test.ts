@@ -28,6 +28,7 @@ describe('designSchemaNode -> executeDdlNode integration', () => {
   const mockRepository = {
     schema: {
       createVersion: vi.fn(),
+      createTimelineItem: vi.fn(),
     },
   }
 
@@ -52,6 +53,11 @@ describe('designSchemaNode -> executeDdlNode integration', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    // Setup default successful timeline item creation
+    mockRepository.schema.createTimelineItem.mockResolvedValue({
+      success: true,
+      timelineItem: { id: 'test-timeline-id' } as const,
+    })
   })
 
   it('should update schemaData and execute DDL in executeDdlNode', async () => {

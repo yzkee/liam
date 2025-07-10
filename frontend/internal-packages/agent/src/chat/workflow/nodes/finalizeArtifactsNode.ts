@@ -2,8 +2,8 @@ import type { RunnableConfig } from '@langchain/core/runnables'
 import type { Repositories } from '../../../repositories'
 import type { NodeLogger } from '../../../utils/nodeLogger'
 import { getConfigurable } from '../shared/getConfigurable'
-import { getWorkflowNodeProgress } from '../shared/getWorkflowNodeProgress'
 import type { WorkflowState } from '../types'
+import { logAssistantMessage } from '../utils/timelineLogger'
 import {
   createOrUpdateArtifact,
   transformWorkflowStateToArtifact,
@@ -24,7 +24,8 @@ async function saveArtifacts(
     return
   }
 
-  logger.log(`[${NODE_NAME}] Saving artifacts`)
+  await logAssistantMessage(state, 'Saving artifacts...')
+  state.logger.log(`[${NODE_NAME}] Saving artifacts`)
   const artifact = transformWorkflowStateToArtifact(state)
   const artifactResult = await createOrUpdateArtifact(
     state,
@@ -33,11 +34,13 @@ async function saveArtifacts(
   )
 
   if (artifactResult.success) {
-    logger.log(`[${NODE_NAME}] Artifacts saved successfully`)
+    state.logger.log(`[${NODE_NAME}] Artifacts saved successfully`)
+    await logAssistantMessage(state, 'Artifacts saved successfully')
   } else {
-    logger.log(
+    state.logger.log(
       `[${NODE_NAME}] Failed to save artifacts: ${artifactResult.error}`,
     )
+    await logAssistantMessage(state, 'Failed to save artifacts')
   }
 }
 
@@ -71,6 +74,8 @@ async function generateFinalResponse(
   finalResponse: string
   errorToReturn: string | undefined
 }> {
+  await logAssistantMessage(state, 'Generating final response...')
+
   if (state.error) {
     const finalResponse = `Sorry, an error occurred during processing: ${state.error.message}`
     await saveTimelineItem(state, finalResponse, 'error', repositories)
@@ -78,6 +83,7 @@ async function generateFinalResponse(
   }
 
   if (state.generatedAnswer) {
+    await logAssistantMessage(state, 'Final response generated successfully')
     await saveTimelineItem(
       state,
       state.generatedAnswer,
@@ -113,13 +119,7 @@ export async function finalizeArtifactsNode(
 
   logger.log(`[${NODE_NAME}] Started`)
 
-  // Update progress message if available
-  if (state.progressTimelineItemId) {
-    await repositories.schema.updateTimelineItem(state.progressTimelineItemId, {
-      content: 'Processing: finalizeArtifacts',
-      progress: getWorkflowNodeProgress('finalizeArtifacts'),
-    })
-  }
+  await logAssistantMessage(state, 'Preparing final deliverables...')
 
   await saveArtifacts(state, logger, repositories)
   const { finalResponse, errorToReturn } = await generateFinalResponse(

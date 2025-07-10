@@ -55,6 +55,14 @@ pnpm --filter @liam-hq/cli build
 ### Database Operations
 For database migration and type generation workflows, see [`docs/migrationOpsContext.md`](docs/migrationOpsContext.md).
 
+### Schema Changes
+- Schema files (schema.sql) must never be edited directly
+- Always use the following migration workflow:
+  1. `pnpm -F db supabase:migration:new <MIGRATION_NAME>`
+  2. Write DDL in the generated migration file
+  3. `pnpm -F db supabase:migration:up` to apply changes
+  4. `pnpm -F db supabase:gen` to regenerate type definitions
+
 ## Architecture
 
 ### Monorepo Structure
@@ -89,6 +97,22 @@ For database migration and type generation workflows, see [`docs/migrationOpsCon
 - Use runtime type validation with `valibot` instead of type assertions
 - Avoid `as` keyword - use type predicates or `instanceof` checks
 - Use early returns for readability
+- **Props type definitions**: Use `type` instead of `interface`
+  ```typescript
+  // ❌ Avoid
+  interface ComponentProps {
+    content: string
+    timestamp?: Date
+  }
+  
+  // ✅ Recommended
+  type ComponentProps = {
+    content: string
+    timestamp?: Date
+  }
+  ```
+  - Reason: Maintain code consistency across the project
+  - Scope: All React component Props type definitions
 
 ### Code Editing
 - When modifying existing code, write the ideal state without worrying about backward compatibility

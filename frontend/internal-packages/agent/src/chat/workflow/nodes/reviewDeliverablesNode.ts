@@ -1,6 +1,5 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { getConfigurable } from '../shared/getConfigurable'
-import { getWorkflowNodeProgress } from '../shared/getWorkflowNodeProgress'
 import type { WorkflowState } from '../types'
 
 const NODE_NAME = 'reviewDeliverablesNode'
@@ -23,14 +22,6 @@ export async function reviewDeliverablesNode(
   const { repositories, logger } = configurableResult.value
 
   logger.log(`[${NODE_NAME}] Started`)
-
-  // Update progress message if available
-  if (state.progressTimelineItemId) {
-    await repositories.schema.updateTimelineItem(state.progressTimelineItemId, {
-      content: 'Processing: reviewDeliverables',
-      progress: getWorkflowNodeProgress('reviewDeliverables'),
-    })
-  }
 
   // TODO: Implement deliverables review logic
   // This node should perform final confirmation of requirements and deliverables

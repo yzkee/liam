@@ -3,10 +3,9 @@
 import type { FC } from 'react'
 import type { TimelineItem as TimelineItemProps } from '@/features/timelineItems/types'
 import { AgentMessage } from './components/AgentMessage'
-import { ProcessIndicator } from './components/ProcessIndicator'
+import { LogMessage } from './components/LogMessage'
 import { UserMessage } from './components/UserMessage'
 import { VersionMessage } from './components/VersionMessage'
-import styles from './TimelineItem.module.css'
 
 type Props = TimelineItemProps
 
@@ -14,25 +13,11 @@ export const TimelineItem: FC<Props> = (props) => {
   // Handle schema_version role separately
   if ('building_schema_version_id' in props) {
     return (
-      <div className={styles.messageContainer}>
+      <AgentMessage state="default">
         <VersionMessage
           buildingSchemaVersionId={props.building_schema_version_id}
         />
-      </div>
-    )
-  }
-
-  // Handle progress role separately
-  if (props.role === 'progress' && 'progress' in props) {
-    const progress = props.progress
-    return (
-      <ProcessIndicator
-        initialExpanded
-        title="Processing AI Message"
-        subtitle={props.content}
-        progress={progress}
-        status={progress >= 100 ? 'complete' : 'processing'}
-      />
+      </AgentMessage>
     )
   }
 
@@ -48,25 +33,29 @@ export const TimelineItem: FC<Props> = (props) => {
       })
     : null
 
+  if (role === 'user') {
+    return (
+      <UserMessage
+        content={content}
+        timestamp={timestamp}
+        avatarSrc={avatarSrc}
+        avatarAlt={avatarAlt}
+        initial={initial}
+      />
+    )
+  }
+
+  if (role === 'assistant_log') {
+    return (
+      <AgentMessage state="default">
+        <LogMessage content={content} />
+      </AgentMessage>
+    )
+  }
+
   return (
-    <div className={styles.messageContainer}>
-      {role === 'user' ? (
-        <UserMessage
-          content={content}
-          timestamp={timestamp}
-          avatarSrc={avatarSrc}
-          avatarAlt={avatarAlt}
-          initial={initial}
-        />
-      ) : (
-        <AgentMessage
-          state="default"
-          message={content}
-          time={formattedTime || ''}
-        >
-          {children}
-        </AgentMessage>
-      )}
-    </div>
+    <AgentMessage state="default" message={content} time={formattedTime || ''}>
+      {children}
+    </AgentMessage>
   )
 }

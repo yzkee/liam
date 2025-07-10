@@ -6,8 +6,8 @@ import type { Repositories } from '../../../repositories'
 import { convertSchemaToText } from '../../../utils/convertSchemaToText'
 import type { NodeLogger } from '../../../utils/nodeLogger'
 import { getConfigurable } from '../shared/getConfigurable'
-import { getWorkflowNodeProgress } from '../shared/getWorkflowNodeProgress'
 import type { WorkflowState } from '../types'
+import { logAssistantMessage } from '../utils/timelineLogger'
 
 const NODE_NAME = 'designSchemaNode'
 
@@ -28,6 +28,8 @@ const applySchemaChanges = async (
   repositories: Repositories,
   logger: NodeLogger,
 ): Promise<WorkflowState> => {
+  await logAssistantMessage(state, 'Applying schema changes...')
+
   const result = await repositories.schema.createVersion({
     buildingSchemaId,
     latestVersionNumber,
@@ -39,6 +41,7 @@ const applySchemaChanges = async (
     logger.error('Schema update failed:', {
       error: errorMessage,
     })
+    await logAssistantMessage(state, 'Schema update failed')
     return {
       ...state,
       generatedAnswer: message,
@@ -49,6 +52,11 @@ const applySchemaChanges = async (
   const newTableCount = Object.keys(result.newSchema.tables).length
   logger.log(
     `[${NODE_NAME}] Applied ${schemaChanges.length} schema changes successfully (${newTableCount} tables)`,
+  )
+
+  await logAssistantMessage(
+    state,
+    `Applied ${schemaChanges.length} schema changes successfully`,
   )
 
   return {
@@ -93,6 +101,8 @@ async function prepareSchemaDesign(
   state: WorkflowState,
   logger: NodeLogger,
 ): Promise<PreparedSchemaDesign> {
+  await logAssistantMessage(state, 'Preparing schema design...')
+
   const schemaText = convertSchemaToText(state.schemaData)
 
   // Log current schema state for debugging
@@ -101,6 +111,8 @@ async function prepareSchemaDesign(
 
   // Create the agent instance
   const agent = new DatabaseSchemaBuildAgent()
+
+  await logAssistantMessage(state, 'Schema design preparation completed')
 
   return {
     agent,
@@ -127,13 +139,7 @@ export async function designSchemaNode(
 
   logger.log(`[${NODE_NAME}] Started`)
 
-  // Update progress message if available
-  if (state.progressTimelineItemId) {
-    await repositories.schema.updateTimelineItem(state.progressTimelineItemId, {
-      content: 'Processing: designSchema',
-      progress: getWorkflowNodeProgress('designSchema'),
-    })
-  }
+  await logAssistantMessage(state, 'Designing database schema...')
 
   const { agent, schemaText } = await prepareSchemaDesign(state, logger)
 
@@ -147,6 +153,10 @@ Original request: ${state.userInput}
 Please fix this issue by analyzing the schema and adding any missing constraints, primary keys, or other required schema elements to resolve the DDL execution error.`
 
     logger.log(`[${NODE_NAME}] Retrying after DDL execution failure`)
+    await logAssistantMessage(
+      state,
+      'Redesigning schema to fix DDL execution errors...',
+    )
   }
 
   // Create prompt variables directly
@@ -156,6 +166,11 @@ Please fix this issue by analyzing the schema and adding any missing constraints
     user_message: userMessage,
   }
 
+  await logAssistantMessage(
+    state,
+    'Analyzing table structure and relationships...',
+  )
+
   // Use agent's generate method with prompt variables
   const response = await agent.generate(promptVariables)
   const result = await handleSchemaChanges(
@@ -164,6 +179,8 @@ Please fix this issue by analyzing the schema and adding any missing constraints
     repositories,
     logger,
   )
+
+  await logAssistantMessage(state, 'Schema design completed')
 
   // Clear retry flags after processing
   const finalResult = {

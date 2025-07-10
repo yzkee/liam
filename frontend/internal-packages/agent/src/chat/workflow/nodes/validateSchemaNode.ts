@@ -1,6 +1,5 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { getConfigurable } from '../shared/getConfigurable'
-import { getWorkflowNodeProgress } from '../shared/getWorkflowNodeProgress'
 import type { WorkflowState } from '../types'
 
 const NODE_NAME = 'validateSchemaNode'
@@ -23,14 +22,6 @@ export async function validateSchemaNode(
   const { repositories, logger } = configurableResult.value
 
   logger.log(`[${NODE_NAME}] Started`)
-
-  // Update progress message if available
-  if (state.progressTimelineItemId) {
-    await repositories.schema.updateTimelineItem(state.progressTimelineItemId, {
-      content: 'Processing: validateSchema',
-      progress: getWorkflowNodeProgress('validateSchema'),
-    })
-  }
 
   // TODO: Implement DML execution and validation logic
   // This node should execute DML and validate the schema

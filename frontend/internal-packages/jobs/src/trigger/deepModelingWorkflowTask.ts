@@ -28,6 +28,7 @@ function createWorkflowLogger(): NodeLogger {
 
 export const deepModelingWorkflowTask = task({
   id: 'deep-modeling-workflow',
+  machine: 'medium-1x',
   run: async (payload: DeepModelingPayload) => {
     logger.log('Starting Deep Modeling workflow:', {
       buildingSchemaId: payload.buildingSchemaId,

@@ -37,8 +37,11 @@ export type WorkflowState = {
   // Message saving fields
   designSessionId: string
 
-  // Progress timeline item ID for tracking
-  progressTimelineItemId?: string | undefined
+  // Repository dependencies for data access
+  repositories: Repositories
+
+  // Logging functionality
+  logger: NodeLogger
 }
 
 /**

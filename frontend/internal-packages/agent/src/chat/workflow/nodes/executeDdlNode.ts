@@ -5,8 +5,8 @@ import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import { ResultAsync } from 'neverthrow'
 import { WORKFLOW_RETRY_CONFIG } from '../constants'
 import { getConfigurable } from '../shared/getConfigurable'
-import { getWorkflowNodeProgress } from '../shared/getWorkflowNodeProgress'
 import type { WorkflowState } from '../types'
+import { logAssistantMessage } from '../utils/timelineLogger'
 
 const NODE_NAME = 'executeDdlNode'
 
@@ -29,57 +29,52 @@ export async function executeDdlNode(
 
   logger.log(`[${NODE_NAME}] Started`)
 
-  // Update progress message if available
-  if (state.progressTimelineItemId) {
-    await repositories.schema.updateTimelineItem(state.progressTimelineItemId, {
-      content: 'Processing: executeDDL',
-      progress: getWorkflowNodeProgress('executeDDL'),
-    })
-  }
+  await logAssistantMessage(state, 'Creating database...')
 
   // Generate DDL from schema data
-  const ddlResult = ResultAsync.fromPromise(
-    Promise.resolve(postgresqlSchemaDeparser(state.schemaData)),
-    (error) => (error instanceof Error ? error : new Error(String(error))),
+  const result = postgresqlSchemaDeparser(state.schemaData)
+
+  if (result.errors.length > 0) {
+    const errorMessages = result.errors.map((e) => e.message).join('; ')
+    state.logger.log(`[${NODE_NAME}] DDL generation failed: ${errorMessages}`)
+
+    await logAssistantMessage(state, 'Error occurred during DDL generation')
+
+    state.logger.log(`[${NODE_NAME}] Completed`)
+    return {
+      ...state,
+      ddlStatements: 'DDL generation failed due to an unexpected error.',
+    }
+  }
+
+  const ddlStatements = result.value
+
+  // Log detailed information about what was generated
+  const tableCount = Object.keys(state.schemaData.tables).length
+  const ddlLength = ddlStatements.length
+
+  state.logger.log(
+    `[${NODE_NAME}] Generated DDL for ${tableCount} tables (${ddlLength} characters)`,
   )
 
-  const ddlStatements = await ddlResult.match(
-    (result) => {
-      if (result.errors.length > 0) {
-        const errorMessages = result.errors.map((e) => e.message).join('; ')
-        logger.log(`[${NODE_NAME}] DDL generation failed: ${errorMessages}`)
-        logger.log(`[${NODE_NAME}] Completed`)
-        return undefined
-      }
-
-      // Log detailed information about what was generated
-      const tableCount = Object.keys(state.schemaData.tables).length
-      const ddlLength = result.value.length
-
-      logger.log(
-        `[${NODE_NAME}] Generated DDL for ${tableCount} tables (${ddlLength} characters)`,
-      )
-      logger.debug(`[${NODE_NAME}] Generated DDL:`, {
-        ddlStatements: result.value,
-      })
-
-      return result.value
-    },
-    (error) => {
-      logger.log(`[${NODE_NAME}] DDL generation failed: ${error.message}`)
-      logger.log(`[${NODE_NAME}] Completed`)
-      return undefined
-    },
+  await logAssistantMessage(
+    state,
+    `Generated DDL statements (${tableCount} tables)`,
   )
 
   if (!ddlStatements || !ddlStatements.trim()) {
-    logger.log(`[${NODE_NAME}] No DDL statements to execute`)
-    logger.log(`[${NODE_NAME}] Completed`)
+    state.logger.log(`[${NODE_NAME}] No DDL statements to execute`)
+
+    await logAssistantMessage(state, 'No DDL statements to execute')
+
+    state.logger.log(`[${NODE_NAME}] Completed`)
     return {
       ...state,
       ddlStatements,
     }
   }
+
+  await logAssistantMessage(state, 'Executing DDL statements...')
 
   const results: SqlResult[] = await executeQuery(
     state.designSessionId,
@@ -97,15 +92,20 @@ export async function executeDdlNode(
       )
       .join('; ')
 
-    logger.log(`[${NODE_NAME}] DDL execution failed: ${errorMessages}`)
+    state.logger.log(`[${NODE_NAME}] DDL execution failed: ${errorMessages}`)
+
+    await logAssistantMessage(state, 'Error occurred during DDL execution')
 
     // Check if this is the first failure or if we've already retried
     const currentRetryCount = state.retryCount['ddlExecutionRetry'] || 0
 
     if (currentRetryCount < WORKFLOW_RETRY_CONFIG.MAX_DDL_EXECUTION_RETRIES) {
       // Set up retry with designSchemaNode
-      logger.log(`[${NODE_NAME}] Scheduling retry via designSchemaNode`)
-      logger.log(`[${NODE_NAME}] Completed`)
+      state.logger.log(`[${NODE_NAME}] Scheduling retry via designSchemaNode`)
+
+      await logAssistantMessage(state, 'Redesigning schema to fix errors...')
+
+      state.logger.log(`[${NODE_NAME}] Completed`)
       return {
         ...state,
         shouldRetryWithDesignSchema: true,
@@ -118,10 +118,13 @@ export async function executeDdlNode(
     }
 
     // Already retried - mark as permanently failed
-    logger.log(
+    state.logger.log(
       `[${NODE_NAME}] DDL execution failed after retry, marking as failed`,
     )
-    logger.log(`[${NODE_NAME}] Completed`)
+
+    await logAssistantMessage(state, 'Unable to resolve DDL execution errors')
+
+    state.logger.log(`[${NODE_NAME}] Completed`)
     return {
       ...state,
       ddlExecutionFailed: true,
@@ -129,8 +132,11 @@ export async function executeDdlNode(
     }
   }
 
-  logger.log(`[${NODE_NAME}] DDL executed successfully`)
-  logger.log(`[${NODE_NAME}] Completed`)
+  state.logger.log(`[${NODE_NAME}] DDL executed successfully`)
+
+  await logAssistantMessage(state, 'Database created successfully')
+
+  state.logger.log(`[${NODE_NAME}] Completed`)
 
   return {
     ...state,

@@ -7,7 +7,7 @@ import type { WorkflowState } from '../types'
  */
 export async function prepareDmlNode(
   state: WorkflowState,
-  config: RunnableConfig,
+  _config: RunnableConfig,
 ): Promise<WorkflowState> {
   return {
     ...state,

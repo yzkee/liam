@@ -29,6 +29,12 @@ describe('designSchemaNode -> executeDdlNode integration', () => {
     schema: {
       createVersion: vi.fn(),
       createTimelineItem: vi.fn(),
+      getSchema: vi.fn(),
+      getDesignSession: vi.fn(),
+      updateTimelineItem: vi.fn(),
+      createArtifact: vi.fn(),
+      updateArtifact: vi.fn(),
+      getArtifact: vi.fn(),
     },
   }
 
@@ -42,6 +48,8 @@ describe('designSchemaNode -> executeDdlNode integration', () => {
     userId: 'test-user',
     designSessionId: 'test-session',
     ddlStatements: '',
+    repositories: mockRepository,
+    logger: mockLogger,
   })
 
   const createMockConfig = () => ({

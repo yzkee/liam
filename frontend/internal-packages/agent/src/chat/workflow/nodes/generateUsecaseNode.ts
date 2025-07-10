@@ -69,7 +69,7 @@ export async function generateUsecaseNode(
       error: configurableResult.error,
     }
   }
-  const { repositories, logger } = configurableResult.value
+  const { logger } = configurableResult.value
 
   logger.log(`[${NODE_NAME}] Started`)
 

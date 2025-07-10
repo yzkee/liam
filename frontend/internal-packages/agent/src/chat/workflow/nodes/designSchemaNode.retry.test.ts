@@ -34,6 +34,30 @@ describe('designSchemaNode retry behavior', () => {
         }) as never,
     )
 
+    const mockRepositories = {
+      schema: {
+        updateTimelineItem: vi.fn(),
+        getSchema: vi.fn(),
+        getDesignSession: vi.fn(),
+        createVersion: vi.fn(),
+        createTimelineItem: vi.fn().mockResolvedValue({
+          success: true,
+          timelineItem: { id: 'test-timeline-id' },
+        }),
+        createArtifact: vi.fn(),
+        updateArtifact: vi.fn(),
+        getArtifact: vi.fn(),
+      },
+    }
+
+    const mockLogger = {
+      log: vi.fn(),
+      debug: vi.fn(),
+      error: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+    }
+
     const state: WorkflowState = {
       userInput: 'Create a users table',
       formattedHistory: '',
@@ -45,29 +69,14 @@ describe('designSchemaNode retry behavior', () => {
       retryCount: { ddlExecutionRetry: 1 },
       shouldRetryWithDesignSchema: true,
       ddlExecutionFailureReason: 'Foreign key constraint error',
+      repositories: mockRepositories,
+      logger: mockLogger,
     }
 
     const config = {
       configurable: {
-        repositories: {
-          schema: {
-            updateTimelineItem: vi.fn(),
-            getSchema: vi.fn(),
-            getDesignSession: vi.fn(),
-            createVersion: vi.fn(),
-            createTimelineItem: vi.fn(),
-            createArtifact: vi.fn(),
-            updateArtifact: vi.fn(),
-            getArtifact: vi.fn(),
-          },
-        },
-        logger: {
-          log: vi.fn(),
-          debug: vi.fn(),
-          error: vi.fn(),
-          info: vi.fn(),
-          warn: vi.fn(),
-        },
+        repositories: mockRepositories,
+        logger: mockLogger,
       },
     }
 

@@ -2,7 +2,6 @@ import type { RunnableConfig } from '@langchain/core/runnables'
 import { postgresqlSchemaDeparser } from '@liam-hq/db-structure'
 import { executeQuery } from '@liam-hq/pglite-server'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
-import { ResultAsync } from 'neverthrow'
 import { WORKFLOW_RETRY_CONFIG } from '../constants'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
@@ -25,7 +24,7 @@ export async function executeDdlNode(
       error: configurableResult.error,
     }
   }
-  const { repositories, logger } = configurableResult.value
+  const { logger } = configurableResult.value
 
   logger.log(`[${NODE_NAME}] Started`)
 

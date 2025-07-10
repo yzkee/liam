@@ -6,11 +6,10 @@ export const useCustomReactflow = () => {
   const reactFlowInstance = useReactFlow()
 
   const fitView = useCallback(
-    async (options?: FitViewOptions) => {
+    (options?: FitViewOptions) => {
       reactFlowInstance.fitView({
         minZoom: MIN_ZOOM,
         maxZoom: MAX_ZOOM,
-        duration: 500,
         ...options,
       })
     },

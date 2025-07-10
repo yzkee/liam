@@ -29,7 +29,7 @@ describe('prepareDmlNode', () => {
         getSchema: vi.fn(),
         getDesignSession: vi.fn(),
         createVersion: vi.fn(),
-        createTimelineItem: vi.fn(),
+        createTimelineItem: vi.fn().mockResolvedValue(undefined),
         createArtifact: vi.fn(),
         updateArtifact: vi.fn(),
         getArtifact: vi.fn(),
@@ -65,12 +65,14 @@ describe('prepareDmlNode', () => {
       ],
     })
 
-    const result = await prepareDmlNode(state as WorkflowState)
+    const result = await prepareDmlNode(state, {
+      configurable: { repositories: state.repositories, logger: mockLogger },
+    })
 
     expect(result.dmlStatements).toBe('-- Generated DML statements')
-    expect(mockLogger.info).toHaveBeenCalledWith('Preparing DML statements')
-    expect(mockLogger.info).toHaveBeenCalledWith(
-      'DML statements generated successfully',
+    expect(mockLogger.log).toHaveBeenCalledWith('[prepareDmlNode] Started')
+    expect(mockLogger.log).toHaveBeenCalledWith(
+      '[prepareDmlNode] DML statements generated successfully',
     )
   })
 
@@ -87,11 +89,13 @@ describe('prepareDmlNode', () => {
       ],
     })
 
-    const result = await prepareDmlNode(state as WorkflowState)
+    const result = await prepareDmlNode(state, {
+      configurable: { repositories: state.repositories, logger: mockLogger },
+    })
 
     expect(result.dmlStatements).toBeUndefined()
     expect(mockLogger.warn).toHaveBeenCalledWith(
-      'No DDL statements available for DML generation',
+      '[prepareDmlNode] No DDL statements available for DML generation',
     )
   })
 
@@ -101,11 +105,13 @@ describe('prepareDmlNode', () => {
       generatedUsecases: [],
     })
 
-    const result = await prepareDmlNode(state as WorkflowState)
+    const result = await prepareDmlNode(state, {
+      configurable: { repositories: state.repositories, logger: mockLogger },
+    })
 
     expect(result.dmlStatements).toBeUndefined()
     expect(mockLogger.warn).toHaveBeenCalledWith(
-      'No use cases available for DML generation',
+      '[prepareDmlNode] No use cases available for DML generation',
     )
   })
 
@@ -131,10 +137,12 @@ describe('prepareDmlNode', () => {
       ],
     })
 
-    await prepareDmlNode(state as WorkflowState)
+    await prepareDmlNode(state, {
+      configurable: { repositories: state.repositories, logger: mockLogger },
+    })
 
     expect(mockLogger.info).toHaveBeenCalledWith(
-      'Generating DML for 2 tables and 2 use cases',
+      '[prepareDmlNode] Generating DML for 2 tables and 2 use cases',
     )
   })
 
@@ -161,11 +169,13 @@ describe('prepareDmlNode', () => {
       ],
     })
 
-    const result = await prepareDmlNode(state as WorkflowState)
+    const result = await prepareDmlNode(state, {
+      configurable: { repositories: state.repositories, logger: mockLogger },
+    })
 
     expect(result.dmlStatements).toBeUndefined()
     expect(mockLogger.warn).toHaveBeenCalledWith(
-      'DML generation returned empty statements',
+      '[prepareDmlNode] DML generation returned empty statements',
     )
   })
 })

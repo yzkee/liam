@@ -37,13 +37,12 @@ export type WorkflowState = {
 
   // Message saving fields
   designSessionId: string
+}
 
-  // Repository dependencies for data access
+/**
+ * Type definition for the configurable object passed to workflow nodes
+ */
+export type WorkflowConfigurable = {
   repositories: Repositories
-
-  // Logging functionality
   logger: NodeLogger
-
-  // Progress timeline item ID for tracking
-  progressTimelineItemId?: string | undefined
 }

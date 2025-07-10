@@ -64,8 +64,5 @@ export const createAnnotations = () => {
 
     // Logging functionality
     logger: Annotation<NodeLogger>,
-
-    // Progress timeline item ID for tracking
-    progressTimelineItemId: Annotation<string | undefined>,
   })
 }

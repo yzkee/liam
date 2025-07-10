@@ -57,6 +57,11 @@ jobs:
             const maxProcessPerRun = 5; // Maximum 5 issues per run
 
             for (const issue of issues.data) {
+              // Ignore pull requests masquerading as issues
+              if (issue.pull_request) {
+                console.log(`Skipping PR #${issue.number}`);
+                continue;
+              }
               if (processedCount >= maxProcessPerRun) {
                 console.log(`Reached maximum limit of ${maxProcessPerRun} issues per run`);
                 break;

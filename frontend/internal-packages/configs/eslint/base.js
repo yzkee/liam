@@ -5,6 +5,7 @@ import unicorn from 'eslint-plugin-unicorn'
 import { requireUseServerPlugin } from './require-use-server-plugin.js'
 import { noNonEnglishPlugin } from './no-non-english-plugin.js'
 import { noThrowErrorPlugin } from './no-throw-error-plugin.js'
+import { preferClsxPlugin } from './prefer-clsx-plugin.js'
 
 /**
  * Base ESLint configuration with typescript-eslint setup
@@ -32,6 +33,7 @@ export function createBaseConfig(options = {}) {
         'require-use-server': requireUseServerPlugin,
         'no-non-english': noNonEnglishPlugin,
         'no-throw-error': noThrowErrorPlugin,
+        'prefer-clsx': preferClsxPlugin,
       },
       languageOptions: {
         parser: tsParser,
@@ -50,6 +52,7 @@ export function createBaseConfig(options = {}) {
         'require-use-server/require-use-server': 'error',
         'no-non-english/no-non-english-characters': 'error',
         'no-throw-error/no-throw-error': 'error',
+        'prefer-clsx/prefer-clsx-for-classnames': 'error',
         'unicorn/filename-case': ['error', {
           cases: {
             camelCase: true,

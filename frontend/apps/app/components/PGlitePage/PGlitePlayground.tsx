@@ -1,6 +1,7 @@
 'use client'
 
 import { executeQuery } from '@liam-hq/pglite-server'
+import clsx from 'clsx'
 import {
   type Ref,
   useCallback,
@@ -416,7 +417,10 @@ export const PGlitePlayground = ({
       <h1 className={styles.title}>PGlite Playground</h1>
 
       <div
-        className={`${styles.status} ${isConnected ? styles.success : styles.loading}`}
+        className={clsx(
+          styles.status,
+          isConnected ? styles.success : styles.loading,
+        )}
       >
         {isConnected
           ? 'PGlite Database Connected'
@@ -459,7 +463,7 @@ export const PGlitePlayground = ({
         <button
           type="button"
           onClick={() => addDMLSection()}
-          className={`${styles.actionButton} ${styles.secondaryButton}`}
+          className={clsx(styles.actionButton, styles.secondaryButton)}
         >
           ＋ Add DML Form
         </button>

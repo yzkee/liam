@@ -7,6 +7,7 @@ import type { BasePromptVariables } from '../../../langchain/utils/types'
 import type { NodeLogger } from '../../../utils/nodeLogger'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
+import { formatMessagesToHistory } from '../utils/messageUtils'
 import { logAssistantMessage } from '../utils/timelineLogger'
 
 const NODE_NAME = 'analyzeRequirementsNode'
@@ -55,7 +56,7 @@ export async function analyzeRequirementsNode(
   const pmAnalysisAgent = new PMAnalysisAgent()
 
   const promptVariables: BasePromptVariables = {
-    chat_history: state.formattedHistory,
+    chat_history: formatMessagesToHistory(state.messages),
     user_message: state.userInput,
   }
 

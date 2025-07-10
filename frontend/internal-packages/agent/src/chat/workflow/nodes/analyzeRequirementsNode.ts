@@ -1,3 +1,4 @@
+import { AIMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { ResultAsync } from 'neverthrow'
 import type * as v from 'valibot'
@@ -88,6 +89,12 @@ export async function analyzeRequirementsNode(
 
       return {
         ...state,
+        messages: [
+          new AIMessage({
+            content: result.businessRequirement,
+            name: 'PM Analysis Agent',
+          }),
+        ],
         analyzedRequirements: {
           businessRequirement: result.businessRequirement,
           functionalRequirements: result.functionalRequirements,

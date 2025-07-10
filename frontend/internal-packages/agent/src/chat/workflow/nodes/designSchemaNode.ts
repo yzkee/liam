@@ -1,3 +1,4 @@
+import { AIMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { DatabaseSchemaBuildAgent } from '../../../langchain/agents'
 import type { BuildAgentResponse } from '../../../langchain/agents/databaseSchemaBuildAgent/agent'
@@ -251,6 +252,12 @@ export async function designSchemaNode(
   // Clear retry flags after processing
   const finalResult = {
     ...result,
+    messages: [
+      new AIMessage({
+        content: response.message,
+        name: 'Database Schema Build Agent',
+      }),
+    ],
     shouldRetryWithDesignSchema: undefined,
     ddlExecutionFailureReason: undefined,
   }

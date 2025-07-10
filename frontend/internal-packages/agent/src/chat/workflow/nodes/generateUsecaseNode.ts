@@ -1,3 +1,4 @@
+import { AIMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { ResultAsync } from 'neverthrow'
 import { QAGenerateUsecaseAgent } from '../../../langchain/agents'
@@ -136,6 +137,12 @@ export async function generateUsecaseNode(
 
       return {
         ...state,
+        messages: [
+          new AIMessage({
+            content: `Generated ${generatedResult.usecases.length} use cases for testing and validation`,
+            name: 'QA Generate Usecase Agent',
+          }),
+        ],
         generatedUsecases: generatedResult.usecases,
         error: undefined, // Clear error on success
       }

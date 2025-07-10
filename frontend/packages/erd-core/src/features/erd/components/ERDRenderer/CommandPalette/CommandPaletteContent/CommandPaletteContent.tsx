@@ -5,7 +5,7 @@ import { type FC, useCallback, useEffect, useState } from 'react'
 import { useTableSelection } from '@/features/erd/hooks'
 import { useSchema } from '@/stores'
 import { TableNode } from '../../../ERDContent/components'
-import styles from '../CommandPalette.module.css'
+import styles from './CommandPaletteContent.module.css'
 
 const getTableLinkHref = (activeTableName: string) => {
   const searchParams = new URLSearchParams(window.location.search)

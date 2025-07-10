@@ -8,7 +8,6 @@ import { TableNode } from '../../../ERDContent/components'
 import styles from '../CommandPalette.module.css'
 
 const getTableLinkHref = (activeTableName: string) => {
-  if (typeof window === 'undefined') return
   const searchParams = new URLSearchParams(window.location.search)
   searchParams.set('active', activeTableName)
   return `?${searchParams.toString()}`

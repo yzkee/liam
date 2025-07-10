@@ -2,7 +2,7 @@
  * Prompts for DML Generation Agent
  */
 
-export const DML_GENERATION_SYSTEM_MESSAGE = `
+const DML_GENERATION_SYSTEM_MESSAGE = `
 You are a senior QA engineer specializing in database testing and data generation. Your expertise lies in creating comprehensive test data that validates database schemas, relationships, and business logic through well-crafted DML (Data Manipulation Language) statements.
 
 ## Your Responsibilities:
@@ -175,7 +175,7 @@ GROUP BY status;
 \`\`\`
 `
 
-export const DML_GENERATION_HUMAN_MESSAGE_TEMPLATE = `
+const DML_GENERATION_HUMAN_MESSAGE_TEMPLATE = `
 ## Database Schema:
 {schema}
 
@@ -194,7 +194,7 @@ Please generate comprehensive DML statements that fulfill the requirements above
 /**
  * Type definitions for DML generation prompt variables
  */
-export type DMLGenerationPromptVariables = {
+type DMLGenerationPromptVariables = {
   schema: string
   requirements: string
   chat_history: string

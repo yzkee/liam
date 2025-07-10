@@ -158,6 +158,9 @@ export const deepModeling = async (
       : new HumanMessage(content)
   })
 
+  // Add the current user input as the latest message
+  messages.push(new HumanMessage(userInput))
+
   // Create workflow state
   const workflowState: WorkflowState = {
     userInput: userInput,

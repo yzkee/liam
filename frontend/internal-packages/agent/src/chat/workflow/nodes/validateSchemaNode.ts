@@ -6,8 +6,8 @@ import type { WorkflowState } from '../types'
 const NODE_NAME = 'validateSchemaNode'
 
 /**
- * Validate Schema Node - DML Execution & Validation
- * Executed after DDL to populate schema with test data
+ * Validate Schema Node - Combined DDL/DML Execution & Validation
+ * Executes DDL (if needed) and then DML to validate schema with test data
  */
 export async function validateSchemaNode(
   state: WorkflowState,
@@ -25,27 +25,64 @@ export async function validateSchemaNode(
     )
   }
 
+  let updatedState = state
+
+  // Execute DDL first if available and not already executed
+  if (state.ddlStatements && !state.ddlExecutionFailed) {
+    state.logger.log(`[${NODE_NAME}] Executing DDL statements first`)
+
+    const ddlResults: SqlResult[] = await executeQuery(
+      state.designSessionId,
+      state.ddlStatements,
+    )
+
+    const ddlHasErrors = ddlResults.some((result: SqlResult) => !result.success)
+
+    if (ddlHasErrors) {
+      const errorMessages = ddlResults
+        .filter((result: SqlResult) => !result.success)
+        .map(
+          (result: SqlResult) =>
+            `SQL: ${result.sql}, Error: ${JSON.stringify(result.result)}`,
+        )
+        .join('; ')
+
+      state.logger.error(
+        `[${NODE_NAME}] DDL execution failed: ${errorMessages}`,
+      )
+      // Continue to try DML even if DDL fails
+      updatedState = {
+        ...updatedState,
+        ddlExecutionFailed: true,
+        ddlExecutionFailureReason: errorMessages,
+      }
+    } else {
+      state.logger.log(`[${NODE_NAME}] DDL executed successfully`)
+    }
+  }
+
   // Check if DML statements are available
-  if (!state.dmlStatements || !state.dmlStatements.trim()) {
+  if (!updatedState.dmlStatements || !updatedState.dmlStatements.trim()) {
     state.logger.log(`[${NODE_NAME}] No DML statements to execute`)
     state.logger.log(`[${NODE_NAME}] Completed`)
-    return state
+    return updatedState
   }
 
   // Log DML execution intent
-  const dmlLength = state.dmlStatements.length
-  const statementCount = (state.dmlStatements.match(/;/g) || []).length + 1
+  const dmlLength = updatedState.dmlStatements.length
+  const statementCount =
+    (updatedState.dmlStatements.match(/;/g) || []).length + 1
   state.logger.log(
     `[${NODE_NAME}] Executing ${statementCount} DML statements (${dmlLength} characters)`,
   )
   state.logger.debug(`[${NODE_NAME}] DML statements:`, {
-    dmlStatements: state.dmlStatements,
+    dmlStatements: updatedState.dmlStatements,
   })
 
   // Execute DML statements
   const results: SqlResult[] = await executeQuery(
-    state.designSessionId,
-    state.dmlStatements,
+    updatedState.designSessionId,
+    updatedState.dmlStatements,
   )
 
   // Check for execution errors
@@ -65,7 +102,7 @@ export async function validateSchemaNode(
 
     // For now, we continue even with errors (future PR will handle error recovery)
     return {
-      ...state,
+      ...updatedState,
       dmlExecutionErrors: errorMessages,
     }
   }
@@ -93,7 +130,7 @@ export async function validateSchemaNode(
   state.logger.log(`[${NODE_NAME}] Completed`)
 
   return {
-    ...state,
+    ...updatedState,
     dmlExecutionSuccessful: true,
   }
 }

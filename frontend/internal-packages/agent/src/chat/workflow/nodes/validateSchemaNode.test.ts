@@ -227,6 +227,143 @@ describe('validateSchemaNode', () => {
     )
   })
 
+  it('should execute DDL and DML in sequence', async () => {
+    const ddlResults: SqlResult[] = [
+      {
+        success: true,
+        sql: 'CREATE TABLE users (id INT);',
+        result: { rows: [], columns: [] },
+        id: 'ddl-1',
+        metadata: {
+          executionTime: 10,
+          timestamp: new Date().toISOString(),
+        },
+      },
+    ]
+
+    const dmlResults: SqlResult[] = [
+      {
+        success: true,
+        sql: 'INSERT INTO users VALUES (1);',
+        result: { rows: [], columns: [] },
+        id: 'dml-1',
+        metadata: {
+          executionTime: 5,
+          timestamp: new Date().toISOString(),
+          affectedRows: 1,
+        },
+      },
+    ]
+
+    vi.mocked(executeQuery)
+      .mockResolvedValueOnce(ddlResults)
+      .mockResolvedValueOnce(dmlResults)
+
+    const state = createMockState({
+      ddlStatements: 'CREATE TABLE users (id INT);',
+      dmlStatements: 'INSERT INTO users VALUES (1);',
+    })
+
+    const result = await validateSchemaNode(state as WorkflowState)
+
+    expect(executeQuery).toHaveBeenCalledTimes(2)
+    expect(executeQuery).toHaveBeenNthCalledWith(
+      1,
+      'session-id',
+      'CREATE TABLE users (id INT);',
+    )
+    expect(executeQuery).toHaveBeenNthCalledWith(
+      2,
+      'session-id',
+      'INSERT INTO users VALUES (1);',
+    )
+    expect(result.dmlExecutionSuccessful).toBe(true)
+    expect(mockLogger.log).toHaveBeenCalledWith(
+      '[validateSchemaNode] DDL executed successfully',
+    )
+  })
+
+  it('should continue with DML even if DDL fails', async () => {
+    const ddlResults: SqlResult[] = [
+      {
+        success: false,
+        sql: 'CREATE TABLE invalid_syntax;',
+        result: { error: 'Syntax error' },
+        id: 'ddl-1',
+        metadata: {
+          executionTime: 2,
+          timestamp: new Date().toISOString(),
+        },
+      },
+    ]
+
+    const dmlResults: SqlResult[] = [
+      {
+        success: true,
+        sql: 'INSERT INTO existing_table VALUES (1);',
+        result: { rows: [], columns: [] },
+        id: 'dml-1',
+        metadata: {
+          executionTime: 5,
+          timestamp: new Date().toISOString(),
+          affectedRows: 1,
+        },
+      },
+    ]
+
+    vi.mocked(executeQuery)
+      .mockResolvedValueOnce(ddlResults)
+      .mockResolvedValueOnce(dmlResults)
+
+    const state = createMockState({
+      ddlStatements: 'CREATE TABLE invalid_syntax;',
+      dmlStatements: 'INSERT INTO existing_table VALUES (1);',
+    })
+
+    const result = await validateSchemaNode(state as WorkflowState)
+
+    expect(result.ddlExecutionFailed).toBe(true)
+    expect(result.ddlExecutionFailureReason).toContain('Syntax error')
+    expect(result.dmlExecutionSuccessful).toBe(true)
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining('DDL execution failed'),
+    )
+  })
+
+  it('should skip DDL if already failed', async () => {
+    const dmlResults: SqlResult[] = [
+      {
+        success: true,
+        sql: 'INSERT INTO users VALUES (1);',
+        result: { rows: [], columns: [] },
+        id: 'dml-1',
+        metadata: {
+          executionTime: 5,
+          timestamp: new Date().toISOString(),
+          affectedRows: 1,
+        },
+      },
+    ]
+
+    vi.mocked(executeQuery).mockResolvedValueOnce(dmlResults)
+
+    const state = createMockState({
+      ddlStatements: 'CREATE TABLE users (id INT);',
+      dmlStatements: 'INSERT INTO users VALUES (1);',
+      ddlExecutionFailed: true,
+    })
+
+    const result = await validateSchemaNode(state as WorkflowState)
+
+    // Should only call executeQuery once for DML
+    expect(executeQuery).toHaveBeenCalledTimes(1)
+    expect(executeQuery).toHaveBeenCalledWith(
+      'session-id',
+      'INSERT INTO users VALUES (1);',
+    )
+    expect(result.dmlExecutionSuccessful).toBe(true)
+  })
+
   it('should handle results without metadata', async () => {
     const mockResults: SqlResult[] = [
       {

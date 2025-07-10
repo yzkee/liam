@@ -71,34 +71,54 @@ jobs:
             const issueTitle = JSON.parse(process.env.ISSUE_TITLE);
             const issueBody = JSON.parse(process.env.ISSUE_BODY);
 
-            // Get the branch created by Claude Code Action
-            // Claude Code Action creates branches with pattern: claude/issue-<number>-<timestamp>
+            // Get all branches for this issue
             const issueNumber = process.env.ISSUE_NUMBER;
-            let claudeBranch = null;
+            let allBranches = [];
             let page = 1;
-            const maxPages = 10; // Prevent infinite loops
+            const maxPages = 10;
 
-            while (!claudeBranch && page <= maxPages) {
+            while (page <= maxPages) {
               const branches = await github.rest.repos.listBranches({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                per_page: 100, // Limit results per page
-                page: page, // Specify the page number
-                protected: false // Only retrieve unprotected branches
+                per_page: 100,
+                page: page,
+                protected: false
               });
 
-              // Find the branch created for this specific issue
-              claudeBranch = branches.data.find(branch =>
-                branch.name.startsWith(`claude/issue-${issueNumber}`) ||
-                branch.name.startsWith(`issue-${issueNumber}`)
-              );
+              allBranches = allBranches.concat(branches.data);
 
-              // Break if no more branches are returned
               if (branches.data.length === 0) {
                 break;
               }
 
               page++;
+            }
+
+            // Filter matching branches and get commit details
+            const matchingBranches = allBranches.filter(branch =>
+              branch.name.startsWith(`claude/issue-${issueNumber}`)
+            );
+
+            let claudeBranch = null;
+            if (matchingBranches.length > 0) {
+              const branchesWithDetails = await Promise.all(
+                matchingBranches.map(async (branch) => {
+                  const commit = await github.rest.repos.getCommit({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    ref: branch.commit.sha
+                  });
+                  return {
+                    ...branch,
+                    commitDate: new Date(commit.data.commit.committer.date)
+                  };
+                })
+              );
+
+              // Sort by commit date (newest first)
+              branchesWithDetails.sort((a, b) => b.commitDate - a.commitDate);
+              claudeBranch = branchesWithDetails[0];
             }
 
             if (claudeBranch) {

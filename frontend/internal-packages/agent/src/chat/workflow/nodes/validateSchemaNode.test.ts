@@ -66,36 +66,4 @@ describe('validateSchemaNode', () => {
     expect(executeQuery).not.toHaveBeenCalled()
     expect(result).toEqual(state)
   })
-
-  it('should update progress timeline item', async () => {
-    const mockUpdateTimelineItem = vi.fn()
-    const state = createMockState({
-      dmlStatements: 'INSERT INTO users VALUES (1);',
-    })
-    const repositories = createMockRepositories()
-    repositories.schema.updateTimelineItem = mockUpdateTimelineItem
-
-    vi.mocked(executeQuery).mockResolvedValue([
-      {
-        success: true,
-        sql: 'INSERT INTO users VALUES (1);',
-        result: { rows: [], columns: [] },
-        id: 'result-1',
-        metadata: {
-          executionTime: 5,
-          timestamp: new Date().toISOString(),
-        },
-      },
-    ])
-
-    await validateSchemaNode(state, {
-      configurable: { repositories, logger: mockLogger },
-    })
-
-    // TODO: Re-enable when timeline item updates are implemented
-    // expect(mockUpdateTimelineItem).toHaveBeenCalledWith('timeline-id', {
-    //   content: 'Processing: validateSchema',
-    //   progress: expect.any(Number),
-    // })
-  })
 })

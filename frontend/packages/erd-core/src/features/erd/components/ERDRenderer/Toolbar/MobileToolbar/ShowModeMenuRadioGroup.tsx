@@ -14,9 +14,17 @@ const OPTION_LIST: { value: ShowMode; label: string }[] = [
 ]
 
 export const ShowModeMenuRadioGroup: FC = () => {
-  const { showMode, setShowMode } = useUserEditing()
+  const userEditingResult = useUserEditing()
+  if (userEditingResult.isErr()) {
+    throw userEditingResult.error
+  }
+  const { showMode, setShowMode } = userEditingResult.value
 
-  const { version } = useVersion()
+  const versionResult = useVersion()
+  if (versionResult.isErr()) {
+    throw versionResult.error
+  }
+  const { version } = versionResult.value
   const handleChangeValue = useCallback(
     (value: string) => {
       const parsed = safeParse(showModeSchema, value)

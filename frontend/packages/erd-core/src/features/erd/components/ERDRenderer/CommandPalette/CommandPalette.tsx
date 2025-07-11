@@ -22,11 +22,19 @@ const getTableLinkHref = (activeTableName: string) => {
 }
 
 export const CommandPalette: FC = () => {
-  const { open, setOpen, toggleOpen } = useCommandPalette()
+  const commandPaletteResult = useCommandPalette()
+  if (commandPaletteResult.isErr()) {
+    throw commandPaletteResult.error
+  }
+  const { open, setOpen, toggleOpen } = commandPaletteResult.value
 
-  const schema = useSchema()
+  const schemaResult = useSchema()
+  if (schemaResult.isErr()) {
+    throw schemaResult.error
+  }
+  const { current } = schemaResult.value
   const [tableName, setTableName] = useState<string | null>(null)
-  const table = schema.current.tables[tableName ?? '']
+  const table = current.tables[tableName ?? '']
   const { selectTable } = useTableSelection()
 
   const goToERD = useCallback(
@@ -103,7 +111,7 @@ export const CommandPalette: FC = () => {
         <Command.List>
           <Command.Empty>No results found.</Command.Empty>
           <Command.Group heading="Tables">
-            {Object.values(schema.current.tables).map((table) => (
+            {Object.values(current.tables).map((table) => (
               <Command.Item key={table.name} value={table.name} asChild>
                 <a
                   href={getTableLinkHref(table.name)}
@@ -142,6 +150,10 @@ export const CommandPalette: FC = () => {
                   targetColumnCardinalities: undefined,
                   showMode: 'ALL_FIELDS',
                 }}
+                draggable={false}
+                selectable={false}
+                deletable={false}
+                selected={false}
                 dragging={false}
                 isConnectable={false}
                 positionAbsoluteX={0}

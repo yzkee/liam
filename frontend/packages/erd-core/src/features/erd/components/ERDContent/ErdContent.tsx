@@ -62,7 +62,11 @@ export const ERDContentInner: FC<Props> = ({
   const {
     state: { loading },
   } = useErdContentContext()
-  const { activeTableName } = useUserEditing()
+  const userEditingResult = useUserEditing()
+  if (userEditingResult.isErr()) {
+    throw userEditingResult.error
+  }
+  const { activeTableName } = userEditingResult.value
 
   const { selectTable, deselectTable } = useTableSelection()
 
@@ -74,7 +78,11 @@ export const ERDContentInner: FC<Props> = ({
     displayArea,
   })
 
-  const { version } = useVersion()
+  const versionResult = useVersion()
+  if (versionResult.isErr()) {
+    throw versionResult.error
+  }
+  const { version } = versionResult.value
   const handleNodeClick = useCallback(
     (tableId: string) => {
       selectTable({

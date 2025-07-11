@@ -1,9 +1,11 @@
+import { err, ok, type Result } from 'neverthrow'
 import { useContext } from 'react'
-import { SchemaContext } from './context'
+import { SchemaContext, type SchemaContextValue } from './context'
 
-export const useSchema = () => {
+export const useSchema = (): Result<SchemaContextValue, Error> => {
   const schema = useContext(SchemaContext)
-  if (!schema) throw new Error('useSchema must be used within SchemaProvider')
+  if (!schema)
+    return err(new Error('useSchema must be used within SchemaProvider'))
 
-  return schema
+  return ok(schema)
 }

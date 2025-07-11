@@ -13,7 +13,11 @@ type Params = {
 }
 
 export const useInitialAutoLayout = ({ nodes, displayArea }: Params) => {
-  const { activeTableName, hiddenNodeIds } = useUserEditing()
+  const userEditingResult = useUserEditing()
+  if (userEditingResult.isErr()) {
+    throw userEditingResult.error
+  }
+  const { activeTableName, hiddenNodeIds } = userEditingResult.value
   const { getEdges, setNodes, setEdges, fitView } = useCustomReactflow()
   const {
     actions: { setLoading },

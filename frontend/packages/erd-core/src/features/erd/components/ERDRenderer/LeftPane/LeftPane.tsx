@@ -27,9 +27,17 @@ import { MenuItemLink, type Props as MenuItemLinkProps } from './MenuItemLink'
 import { TableNameMenuButton } from './TableNameMenuButton'
 
 export const LeftPane = () => {
-  const { version } = useVersion()
+  const versionResult = useVersion()
+  if (versionResult.isErr()) {
+    throw versionResult.error
+  }
+  const { version } = versionResult.value
+  const userEditingResult = useUserEditing()
+  if (userEditingResult.isErr()) {
+    throw userEditingResult.error
+  }
   const { selectedNodeIds, setHiddenNodeIds, resetSelectedNodeIds } =
-    useUserEditing()
+    userEditingResult.value
   const { setNodes } = useCustomReactflow()
 
   const menuItemLinks = useMemo(

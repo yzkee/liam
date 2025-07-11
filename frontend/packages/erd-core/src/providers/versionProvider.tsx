@@ -1,3 +1,4 @@
+import { err, ok, type Result } from 'neverthrow'
 import { createContext, type FC, type ReactNode, useContext } from 'react'
 import type { Version } from '@/schemas/version'
 
@@ -7,12 +8,12 @@ type VersionContextProps = {
 
 const VersionContext = createContext<VersionContextProps | undefined>(undefined)
 
-export const useVersion = (): VersionContextProps => {
+export const useVersion = (): Result<VersionContextProps, Error> => {
   const context = useContext(VersionContext)
   if (!context) {
-    throw new Error('useVersion must be used within a VersionProvider')
+    return err(new Error('useVersion must be used within a VersionProvider'))
   }
-  return context
+  return ok(context)
 }
 
 export const VersionProvider: FC<{

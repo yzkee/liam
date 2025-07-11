@@ -11,8 +11,16 @@ import styles from './ZoomControls.module.css'
 export const ZoomControls: FC = () => {
   const zoomLevel = useStore((store) => store.transform[2])
   const { zoomIn, zoomOut } = useCustomReactflow()
-  const { showMode } = useUserEditing()
-  const { version } = useVersion()
+  const userEditingResult = useUserEditing()
+  if (userEditingResult.isErr()) {
+    throw userEditingResult.error
+  }
+  const { showMode } = userEditingResult.value
+  const versionResult = useVersion()
+  if (versionResult.isErr()) {
+    throw versionResult.error
+  }
+  const { version } = versionResult.value
 
   const handleClickZoomOut = useCallback(() => {
     toolbarActionLogEvent({

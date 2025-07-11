@@ -5,11 +5,18 @@ import { TableDetail } from '../../ERDContent/components/TableNode/TableDetail'
 import styles from './TableDetailDrawer.module.css'
 
 export const TableDetailDrawerRoot: FC<PropsWithChildren> = ({ children }) => {
-  const { activeTableName, setActiveTableName } = useUserEditing()
-  const {
-    current: { tables },
-  } = useSchema()
-  const open = Object.keys(tables).length > 0 && activeTableName !== undefined
+  const userEditingResult = useUserEditing()
+  if (userEditingResult.isErr()) {
+    throw userEditingResult.error
+  }
+  const { activeTableName, setActiveTableName } = userEditingResult.value
+  const schemaResult = useSchema()
+  if (schemaResult.isErr()) {
+    throw schemaResult.error
+  }
+  const { current } = schemaResult.value
+  const open =
+    Object.keys(current.tables).length > 0 && activeTableName !== undefined
 
   const handleClose = useCallback(() => {
     setActiveTableName(null)
@@ -32,11 +39,17 @@ export const TableDetailDrawerRoot: FC<PropsWithChildren> = ({ children }) => {
 }
 
 export const TableDetailDrawer: FC = () => {
-  const {
-    current: { tables },
-  } = useSchema()
-  const { activeTableName } = useUserEditing()
-  const table = tables[activeTableName ?? '']
+  const schemaResult = useSchema()
+  if (schemaResult.isErr()) {
+    throw schemaResult.error
+  }
+  const { current } = schemaResult.value
+  const userEditingResult = useUserEditing()
+  if (userEditingResult.isErr()) {
+    throw userEditingResult.error
+  }
+  const { activeTableName } = userEditingResult.value
+  const table = current.tables[activeTableName ?? '']
   const ariaDescribedBy =
     table?.comment == null
       ? {

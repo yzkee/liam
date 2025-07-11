@@ -10,7 +10,11 @@ type SelectTableParams = {
 }
 
 export const useTableSelection = () => {
-  const { setActiveTableName } = useUserEditing()
+  const userEditingResult = useUserEditing()
+  if (userEditingResult.isErr()) {
+    throw userEditingResult.error
+  }
+  const { setActiveTableName } = userEditingResult.value
   const { getNodes, getEdges, setNodes, setEdges, fitView } =
     useCustomReactflow()
 

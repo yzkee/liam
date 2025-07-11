@@ -94,8 +94,16 @@ export const TableColumn: FC<TableColumnProps> = ({
   targetCardinality,
   isHighlightedTable,
 }) => {
-  const { showDiff } = useUserEditing()
-  const { diffItems } = useSchema()
+  const userEditingResult = useUserEditing()
+  if (userEditingResult.isErr()) {
+    throw userEditingResult.error
+  }
+  const { showDiff } = userEditingResult.value
+  const schemaResult = useSchema()
+  if (schemaResult.isErr()) {
+    throw schemaResult.error
+  }
+  const { diffItems } = schemaResult.value
 
   // Only calculate diff-related values when showDiff is true
   const changeStatus = useMemo(() => {

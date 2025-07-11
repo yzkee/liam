@@ -22,8 +22,16 @@ export const OpenedMobileToolbar: FC<Props> = ({
 }) => {
   const { zoomIn, zoomOut } = useCustomReactflow()
   const zoomLevel = useStore((store) => store.transform[2])
-  const { showMode } = useUserEditing()
-  const { version } = useVersion()
+  const userEditingResult = useUserEditing()
+  if (userEditingResult.isErr()) {
+    throw userEditingResult.error
+  }
+  const { showMode } = userEditingResult.value
+  const versionResult = useVersion()
+  if (versionResult.isErr()) {
+    throw versionResult.error
+  }
+  const { version } = versionResult.value
   const LabelList: Record<ShowMode, string> = {
     ALL_FIELDS: 'All Fields',
     TABLE_NAME: 'Table Name',

@@ -3,7 +3,11 @@ import { useVersion } from '@/providers'
 import styles from './ReleaseVersion.module.css'
 
 export const ReleaseVersion: FC = () => {
-  const { version } = useVersion()
+  const versionResult = useVersion()
+  if (versionResult.isErr()) {
+    throw versionResult.error
+  }
+  const { version } = versionResult.value
 
   // Example output for version:
   // - Released version:

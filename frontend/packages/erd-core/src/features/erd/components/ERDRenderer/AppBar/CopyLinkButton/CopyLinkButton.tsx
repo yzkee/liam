@@ -13,7 +13,11 @@ import { useVersion } from '@/providers'
 
 export const CopyLinkButton: FC = () => {
   const toast = useToast()
-  const { version } = useVersion()
+  const versionResult = useVersion()
+  if (versionResult.isErr()) {
+    throw versionResult.error
+  }
+  const { version } = versionResult.value
   const handleCopyUrl = useCallback(() => {
     navigator.clipboard
       .writeText(window.location.href)

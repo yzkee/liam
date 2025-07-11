@@ -2,8 +2,6 @@ import type { RunnableConfig } from '@langchain/core/runnables'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 
-const NODE_NAME = 'validateSchemaNode'
-
 /**
  * Validate Schema Node - DML Execution & Validation
  * Performed by qaAgent
@@ -19,14 +17,8 @@ export async function validateSchemaNode(
       error: configurableResult.error,
     }
   }
-  const { logger } = configurableResult.value
-
-  logger.log(`[${NODE_NAME}] Started`)
-
   // TODO: Implement DML execution and validation logic
   // This node should execute DML and validate the schema
-
-  logger.log(`[${NODE_NAME}] Completed`)
 
   // For now, pass through the state unchanged (assuming validation passes)
   // Future implementation will execute DML and validate results

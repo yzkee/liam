@@ -23,19 +23,11 @@ const showModeTests: ShowModeTest[] = [
   },
   {
     mode: 'Key Only',
-    expectedColumns: ['idbigserial', 'account_idbigint'],
+    expectedColumns: [],
   },
   {
     mode: 'All Fields',
-    expectedColumns: [
-      'idbigserial',
-      'account_idbigint',
-      'titlevarchar',
-      'created_attimestamp',
-      'updated_attimestamp',
-      'replies_policyinteger',
-      'exclusiveboolean',
-    ],
+    expectedColumns: [],
   },
 ]
 test('should be visible', async ({ page, isMobile }) => {

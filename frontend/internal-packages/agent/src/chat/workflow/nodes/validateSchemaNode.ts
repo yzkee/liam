@@ -27,18 +27,18 @@ export async function validateSchemaNode(
 
   // Check if DML statements are available
   if (!state.dmlStatements || !state.dmlStatements.trim()) {
-    state.logger.log(`[${NODE_NAME}] No DML statements to execute`)
-    state.logger.log(`[${NODE_NAME}] Completed`)
+    logger.log(`[${NODE_NAME}] No DML statements to execute`)
+    logger.log(`[${NODE_NAME}] Completed`)
     return state
   }
 
   // Log DML execution intent
   const dmlLength = state.dmlStatements.length
   const statementCount = (state.dmlStatements.match(/;/g) || []).length + 1
-  state.logger.log(
+  logger.log(
     `[${NODE_NAME}] Executing ${statementCount} DML statements (${dmlLength} characters)`,
   )
-  state.logger.debug(`[${NODE_NAME}] DML statements:`, {
+  logger.debug(`[${NODE_NAME}] DML statements:`, {
     dmlStatements: state.dmlStatements,
   })
 
@@ -60,8 +60,8 @@ export async function validateSchemaNode(
       )
       .join('; ')
 
-    state.logger.error(`[${NODE_NAME}] DML execution failed: ${errorMessages}`)
-    state.logger.log(`[${NODE_NAME}] Completed with errors`)
+    logger.error(`[${NODE_NAME}] DML execution failed: ${errorMessages}`)
+    logger.log(`[${NODE_NAME}] Completed with errors`)
 
     // For now, we continue even with errors (future PR will handle error recovery)
     return {
@@ -72,7 +72,7 @@ export async function validateSchemaNode(
 
   // Log successful execution
   const successfulCount = results.filter((r) => r.success).length
-  state.logger.log(
+  logger.log(
     `[${NODE_NAME}] DML executed successfully: ${successfulCount} statements`,
   )
 
@@ -85,9 +85,7 @@ export async function validateSchemaNode(
   }, 0)
 
   if (totalAffectedRows > 0) {
-    state.logger.info(
-      `[${NODE_NAME}] Total rows affected: ${totalAffectedRows}`,
-    )
+    logger.info(`[${NODE_NAME}] Total rows affected: ${totalAffectedRows}`)
   }
 
   logger.log(`[${NODE_NAME}] Completed`)

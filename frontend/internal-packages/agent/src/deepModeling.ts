@@ -192,8 +192,6 @@ export const deepModeling = async (
       text: result.finalResponse || result.generatedAnswer || '',
     })
   } catch (error) {
-    logger.error(WORKFLOW_ERROR_MESSAGES.LANGGRAPH_FAILED, { error })
-
     const errorMessage =
       error instanceof Error
         ? error.message

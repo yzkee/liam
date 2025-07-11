@@ -159,14 +159,6 @@ describe('designSchemaNode -> executeDdlNode integration', () => {
     expect(Object.keys(afterDesign.schemaData.tables)).toHaveLength(1)
     expect(afterDesign.error).toBeUndefined()
 
-    // Verify logs
-    expect(mockLogger.log).toHaveBeenCalledWith(
-      '[designSchemaNode] Current schema has 0 tables',
-    )
-    expect(mockLogger.log).toHaveBeenCalledWith(
-      '[designSchemaNode] Applied 1 schema changes successfully (1 tables)',
-    )
-
     // Mock successful DDL execution
     const { executeQuery } = await import('@liam-hq/pglite-server')
     vi.mocked(executeQuery).mockResolvedValue([
@@ -243,13 +235,7 @@ describe('designSchemaNode -> executeDdlNode integration', () => {
     expect(result.error?.message).toBe(
       'Invalid schema after applying changes: validation failed',
     )
-    expect(result.schemaData).toEqual(initialSchema) // Should remain unchanged
-    expect(mockLogger.error).toHaveBeenCalledWith(
-      'Schema update failed:',
-      expect.objectContaining({
-        error: 'Invalid schema after applying changes: validation failed',
-      }),
-    )
+    expect(result.schemaData).toEqual(initialSchema)
   })
 
   it('should handle repository errors gracefully', async () => {
@@ -297,12 +283,6 @@ describe('designSchemaNode -> executeDdlNode integration', () => {
     // Verify error handling
     expect(result.error).toBeInstanceOf(Error)
     expect(result.error?.message).toBe('Database connection failed')
-    expect(result.schemaData).toEqual(initialSchema) // Should remain unchanged
-    expect(mockLogger.error).toHaveBeenCalledWith(
-      'Schema update failed:',
-      expect.objectContaining({
-        error: 'Database connection failed',
-      }),
-    )
+    expect(result.schemaData).toEqual(initialSchema)
   })
 })

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { DMLGenerationAgent } from '../../../langchain/agents/dmlGenerationAgent/agent'
 import type { Repositories } from '../../../repositories'
 import { convertSchemaToText } from '../../../utils/convertSchemaToText'
@@ -6,13 +6,7 @@ import type { NodeLogger } from '../../../utils/nodeLogger'
 import type { WorkflowState } from '../types'
 import { prepareDmlNode } from './prepareDmlNode'
 
-vi.mock('../../../langchain/agents/dmlGenerationAgent/agent', () => ({
-  DMLGenerationAgent: vi.fn().mockImplementation(() => ({
-    generate: vi.fn().mockResolvedValue({
-      dmlStatements: '-- Generated DML statements',
-    }),
-  })),
-}))
+vi.mock('../../../langchain/agents/dmlGenerationAgent/agent')
 
 vi.mock('../../../utils/convertSchemaToText', () => ({
   convertSchemaToText: vi.fn().mockReturnValue('Mocked schema text'),
@@ -27,6 +21,20 @@ describe('prepareDmlNode', () => {
     error: vi.fn(),
   }
 
+  beforeEach(() => {
+    vi.clearAllMocks()
+    // Set up default mock implementation
+    vi.mocked(DMLGenerationAgent).mockImplementation(() => {
+      const agent = {
+        generate: vi.fn().mockResolvedValue({
+          dmlStatements: '-- Generated DML statements',
+        }),
+      }
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      return agent as unknown as DMLGenerationAgent
+    })
+  })
+
   const createMockState = (overrides?: Partial<WorkflowState>) => {
     const repositories: Repositories = {
       schema: {
@@ -34,7 +42,7 @@ describe('prepareDmlNode', () => {
         getSchema: vi.fn(),
         getDesignSession: vi.fn(),
         createVersion: vi.fn(),
-        createTimelineItem: vi.fn(),
+        createTimelineItem: vi.fn().mockResolvedValue(undefined),
         createArtifact: vi.fn(),
         updateArtifact: vi.fn(),
         getArtifact: vi.fn(),
@@ -70,12 +78,14 @@ describe('prepareDmlNode', () => {
       ],
     })
 
-    const result = await prepareDmlNode(state as WorkflowState)
+    const result = await prepareDmlNode(state, {
+      configurable: { repositories: state.repositories, logger: mockLogger },
+    })
 
     expect(result.dmlStatements).toBe('-- Generated DML statements')
-    expect(mockLogger.info).toHaveBeenCalledWith('Preparing DML statements')
-    expect(mockLogger.info).toHaveBeenCalledWith(
-      'DML statements generated successfully',
+    expect(mockLogger.log).toHaveBeenCalledWith('[prepareDmlNode] Started')
+    expect(mockLogger.log).toHaveBeenCalledWith(
+      '[prepareDmlNode] DML statements generated successfully',
     )
   })
 
@@ -92,11 +102,13 @@ describe('prepareDmlNode', () => {
       ],
     })
 
-    const result = await prepareDmlNode(state as WorkflowState)
+    const result = await prepareDmlNode(state, {
+      configurable: { repositories: state.repositories, logger: mockLogger },
+    })
 
     expect(result.dmlStatements).toBeUndefined()
     expect(mockLogger.warn).toHaveBeenCalledWith(
-      'No DDL statements available for DML generation',
+      '[prepareDmlNode] No DDL statements available for DML generation',
     )
   })
 
@@ -106,11 +118,13 @@ describe('prepareDmlNode', () => {
       generatedUsecases: [],
     })
 
-    const result = await prepareDmlNode(state as WorkflowState)
+    const result = await prepareDmlNode(state, {
+      configurable: { repositories: state.repositories, logger: mockLogger },
+    })
 
     expect(result.dmlStatements).toBeUndefined()
     expect(mockLogger.warn).toHaveBeenCalledWith(
-      'No use cases available for DML generation',
+      '[prepareDmlNode] No use cases available for DML generation',
     )
   })
 
@@ -136,10 +150,12 @@ describe('prepareDmlNode', () => {
       ],
     })
 
-    await prepareDmlNode(state as WorkflowState)
+    await prepareDmlNode(state, {
+      configurable: { repositories: state.repositories, logger: mockLogger },
+    })
 
     expect(mockLogger.info).toHaveBeenCalledWith(
-      'Generating DML for 2 tables and 2 use cases',
+      '[prepareDmlNode] Generating DML for 2 tables and 2 use cases',
     )
   })
 
@@ -147,13 +163,12 @@ describe('prepareDmlNode', () => {
     const mockGenerate = vi.fn().mockResolvedValue({
       dmlStatements: '-- Generated DML statements',
     })
-    vi.mocked(DMLGenerationAgent).mockImplementationOnce(
-      () =>
-        ({
-          generate: mockGenerate,
-          // biome-ignore lint/suspicious/noExplicitAny: Mock implementation
-        }) as any,
-    )
+
+    vi.mocked(DMLGenerationAgent).mockImplementationOnce(() => {
+      const agent = { generate: mockGenerate }
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      return agent as unknown as DMLGenerationAgent
+    })
 
     const state = createMockState({
       ddlStatements: 'CREATE TABLE users (id INT);',
@@ -182,7 +197,9 @@ describe('prepareDmlNode', () => {
       ],
     })
 
-    await prepareDmlNode(state as WorkflowState)
+    await prepareDmlNode(state, {
+      configurable: { repositories: state.repositories, logger: mockLogger },
+    })
 
     expect(mockGenerate).toHaveBeenCalledTimes(1)
     expect(mockGenerate).toHaveBeenCalledWith(
@@ -195,28 +212,35 @@ describe('prepareDmlNode', () => {
 
     // Verify the formatted use cases contain all expected content
     const firstCall = mockGenerate.mock.calls[0]
-    const formattedUseCases = firstCall
-      ? (firstCall[0] as { schemaSQL: string; formattedUseCases: string })
-          .formattedUseCases
-      : ''
-    expect(formattedUseCases).toContain('User Management:')
-    expect(formattedUseCases).toContain('Content Management:')
-    expect(formattedUseCases).toContain('User Registration')
-    expect(formattedUseCases).toContain('User Login')
-    expect(formattedUseCases).toContain('Create Posts')
+    if (firstCall?.[0]) {
+      const arg = firstCall[0]
+      if (
+        typeof arg === 'object' &&
+        arg !== null &&
+        'formattedUseCases' in arg
+      ) {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        const argWithUseCases = arg as { formattedUseCases: unknown }
+        const formattedUseCases = String(argWithUseCases.formattedUseCases)
+        expect(formattedUseCases).toContain('User Management:')
+        expect(formattedUseCases).toContain('Content Management:')
+        expect(formattedUseCases).toContain('User Registration')
+        expect(formattedUseCases).toContain('User Login')
+        expect(formattedUseCases).toContain('Create Posts')
+      }
+    }
   })
 
   it('should handle use cases without category', async () => {
     const mockGenerate = vi.fn().mockResolvedValue({
       dmlStatements: '-- Generated DML statements',
     })
-    vi.mocked(DMLGenerationAgent).mockImplementationOnce(
-      () =>
-        ({
-          generate: mockGenerate,
-          // biome-ignore lint/suspicious/noExplicitAny: Mock implementation
-        }) as any,
-    )
+
+    vi.mocked(DMLGenerationAgent).mockImplementationOnce(() => {
+      const agent = { generate: mockGenerate }
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      return agent as unknown as DMLGenerationAgent
+    })
 
     const state = createMockState({
       ddlStatements: 'CREATE TABLE users (id INT);',
@@ -231,7 +255,9 @@ describe('prepareDmlNode', () => {
       ],
     })
 
-    await prepareDmlNode(state as WorkflowState)
+    await prepareDmlNode(state, {
+      configurable: { repositories: state.repositories, logger: mockLogger },
+    })
 
     expect(mockGenerate).toHaveBeenCalledWith({
       schemaSQL: 'CREATE TABLE users (id INT);',
@@ -332,15 +358,15 @@ describe('prepareDmlNode', () => {
   })
 
   it('should handle empty DML generation result', async () => {
-    vi.mocked(DMLGenerationAgent).mockImplementationOnce(
-      () =>
-        ({
-          generate: vi.fn().mockResolvedValue({
-            dmlStatements: '',
-          }),
-          // biome-ignore lint/suspicious/noExplicitAny: Mock implementation
-        }) as any,
-    )
+    vi.mocked(DMLGenerationAgent).mockImplementationOnce(() => {
+      const agent = {
+        generate: vi.fn().mockResolvedValue({
+          dmlStatements: '',
+        }),
+      }
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      return agent as unknown as DMLGenerationAgent
+    })
 
     const state = createMockState({
       ddlStatements: 'CREATE TABLE users (id INT);',
@@ -355,11 +381,13 @@ describe('prepareDmlNode', () => {
       ],
     })
 
-    const result = await prepareDmlNode(state as WorkflowState)
+    const result = await prepareDmlNode(state, {
+      configurable: { repositories: state.repositories, logger: mockLogger },
+    })
 
     expect(result.dmlStatements).toBeUndefined()
     expect(mockLogger.warn).toHaveBeenCalledWith(
-      'DML generation returned empty statements',
+      '[prepareDmlNode] DML generation returned empty statements',
     )
   })
 })

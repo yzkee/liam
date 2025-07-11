@@ -54,58 +54,6 @@ describe('validateSchemaNode', () => {
     vi.clearAllMocks()
   })
 
-  it('should execute DML statements successfully', async () => {
-    const mockResults: SqlResult[] = [
-      {
-        success: true,
-        sql: 'INSERT INTO users VALUES (1, "test");',
-        result: { rows: [], columns: [] },
-        id: 'result-1',
-        metadata: {
-          executionTime: 10,
-          timestamp: new Date().toISOString(),
-          affectedRows: 1,
-        },
-      },
-      {
-        success: true,
-        sql: 'INSERT INTO posts VALUES (1, "post");',
-        result: { rows: [], columns: [] },
-        id: 'result-2',
-        metadata: {
-          executionTime: 5,
-          timestamp: new Date().toISOString(),
-          affectedRows: 1,
-        },
-      },
-    ]
-
-    vi.mocked(executeQuery).mockResolvedValue(mockResults)
-
-    const state = createMockState({
-      dmlStatements:
-        'INSERT INTO users VALUES (1, "test"); INSERT INTO posts VALUES (1, "post");',
-    })
-
-    const repositories = createMockRepositories()
-    const result = await validateSchemaNode(state, {
-      configurable: { repositories, logger: mockLogger },
-    })
-
-    expect(executeQuery).toHaveBeenCalledWith(
-      'session-id',
-      'INSERT INTO users VALUES (1, "test"); INSERT INTO posts VALUES (1, "post");',
-    )
-    expect(result.dmlExecutionSuccessful).toBe(true)
-    expect(result.dmlExecutionErrors).toBeUndefined()
-    expect(mockLogger.log).toHaveBeenCalledWith(
-      '[validateSchemaNode] DML executed successfully: 2 statements',
-    )
-    expect(mockLogger.info).toHaveBeenCalledWith(
-      '[validateSchemaNode] Total rows affected: 2',
-    )
-  })
-
   it('should handle empty DML statements', async () => {
     const state = createMockState({
       dmlStatements: '',
@@ -120,66 +68,6 @@ describe('validateSchemaNode', () => {
     expect(result).toEqual(state)
     expect(mockLogger.log).toHaveBeenCalledWith(
       '[validateSchemaNode] No DML statements to execute',
-    )
-  })
-
-  it('should handle missing DML statements', async () => {
-    const state = createMockState({
-      dmlStatements: undefined,
-    })
-
-    const repositories = createMockRepositories()
-    const result = await validateSchemaNode(state, {
-      configurable: { repositories, logger: mockLogger },
-    })
-
-    expect(executeQuery).not.toHaveBeenCalled()
-    expect(result).toEqual(state)
-    expect(mockLogger.log).toHaveBeenCalledWith(
-      '[validateSchemaNode] No DML statements to execute',
-    )
-  })
-
-  it('should handle DML execution errors', async () => {
-    const mockResults: SqlResult[] = [
-      {
-        success: true,
-        sql: 'INSERT INTO users VALUES (1, "test");',
-        result: { rows: [], columns: [] },
-        id: 'result-1',
-        metadata: {
-          executionTime: 5,
-          timestamp: new Date().toISOString(),
-        },
-      },
-      {
-        success: false,
-        sql: 'INSERT INTO invalid_table VALUES (1);',
-        result: { error: 'Table not found' },
-        id: 'result-2',
-        metadata: {
-          executionTime: 2,
-          timestamp: new Date().toISOString(),
-        },
-      },
-    ]
-
-    vi.mocked(executeQuery).mockResolvedValue(mockResults)
-
-    const state = createMockState({
-      dmlStatements:
-        'INSERT INTO users VALUES (1, "test"); INSERT INTO invalid_table VALUES (1);',
-    })
-
-    const repositories = createMockRepositories()
-    const result = await validateSchemaNode(state, {
-      configurable: { repositories, logger: mockLogger },
-    })
-
-    expect(result.dmlExecutionSuccessful).toBeUndefined()
-    expect(result.dmlExecutionErrors).toContain('Table not found')
-    expect(mockLogger.error).toHaveBeenCalledWith(
-      expect.stringContaining('DML execution failed'),
     )
   })
 

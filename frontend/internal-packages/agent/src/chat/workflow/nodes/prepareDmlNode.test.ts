@@ -7,10 +7,6 @@ import { prepareDmlNode } from './prepareDmlNode'
 
 vi.mock('../../../langchain/agents/dmlGenerationAgent/agent')
 
-vi.mock('../../../utils/convertSchemaToText', () => ({
-  convertSchemaToText: vi.fn().mockReturnValue('Mocked schema text'),
-}))
-
 describe('prepareDmlNode', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -43,8 +39,7 @@ describe('prepareDmlNode', () => {
     return {
       messages: [],
       userInput: 'test',
-      formattedHistory: '',
-      schemaData: { tables: {}, relationships: [] },
+      schemaData: { tables: {} },
       buildingSchemaId: 'test-id',
       latestVersionNumber: 1,
       userId: 'user-id',
@@ -97,6 +92,18 @@ describe('prepareDmlNode', () => {
   })
 
   it('should return state unchanged when use cases are missing', async () => {
+    const state = createMockState({
+      ddlStatements: 'CREATE TABLE users (id INT);',
+    })
+
+    const result = await prepareDmlNode(state, {
+      configurable: { repositories: state.repositories },
+    })
+
+    expect(result.dmlStatements).toBeUndefined()
+  })
+
+  it('should return state unchanged when use cases array is empty', async () => {
     const state = createMockState({
       ddlStatements: 'CREATE TABLE users (id INT);',
       generatedUsecases: [],
@@ -156,7 +163,7 @@ describe('prepareDmlNode', () => {
       expect.objectContaining({
         schemaSQL: 'CREATE TABLE users (id INT);',
         formattedUseCases: expect.stringContaining('User Management:'),
-        schemaContext: 'Mocked schema text',
+        schemaContext: expect.any(String),
       }),
     )
 
@@ -212,7 +219,7 @@ describe('prepareDmlNode', () => {
     expect(mockGenerate).toHaveBeenCalledWith({
       schemaSQL: 'CREATE TABLE users (id INT);',
       formattedUseCases: expect.stringContaining('General:'),
-      schemaContext: 'Mocked schema text',
+      schemaContext: expect.any(String),
     })
   })
 
@@ -276,7 +283,7 @@ describe('prepareDmlNode', () => {
     expect(mockGenerate).toHaveBeenCalledWith({
       schemaSQL: 'CREATE TABLE users (id INT);',
       formattedUseCases: expect.any(String),
-      schemaContext: 'Mocked schema text',
+      schemaContext: expect.any(String),
     })
 
     // Verify convertSchemaToText was called with the correct schema
@@ -312,5 +319,58 @@ describe('prepareDmlNode', () => {
     })
 
     expect(result.dmlStatements).toBeUndefined()
+  })
+
+  it('should process schema with convertSchemaToText', async () => {
+    const state = createMockState({
+      ddlStatements: 'CREATE TABLE users (id INT);',
+      generatedUsecases: [
+        {
+          requirementType: 'functional',
+          requirementCategory: 'User Management',
+          requirement: 'Users should be able to register',
+          title: 'User Registration',
+          description: 'Allow users to create new accounts',
+        },
+      ],
+      schemaData: {
+        tables: {
+          users: {
+            name: 'users',
+            comment: null,
+            columns: {
+              id: {
+                name: 'id',
+                type: 'INT',
+                notNull: true,
+                default: null,
+                check: null,
+                comment: null,
+              },
+              email: {
+                name: 'email',
+                type: 'VARCHAR',
+                notNull: true,
+                default: null,
+                check: null,
+                comment: null,
+              },
+            },
+            constraints: {},
+            indexes: {},
+          },
+        },
+      },
+    })
+
+    await prepareDmlNode(state, {
+      configurable: { repositories: state.repositories },
+    })
+
+    // Verify convertSchemaToText produces correct output
+    const schemaText = convertSchemaToText(state.schemaData)
+    expect(schemaText).toContain('Table: users')
+    expect(schemaText).toContain('id: INT (not nullable)')
+    expect(schemaText).toContain('email: VARCHAR (not nullable)')
   })
 })

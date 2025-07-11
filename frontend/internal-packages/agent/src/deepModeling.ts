@@ -149,7 +149,7 @@ export const deepModeling = async (
     recursionLimit = DEFAULT_RECURSION_LIMIT,
   } = params
 
-  const { repositories } = config.configurable
+  const { repositories, logger } = config.configurable
 
   // Convert history to BaseMessage objects
   const messages = history.map(([role, content]) => {
@@ -180,6 +180,7 @@ export const deepModeling = async (
       recursionLimit,
       configurable: {
         repositories,
+        logger,
       },
     })
 
@@ -200,6 +201,7 @@ export const deepModeling = async (
     const finalizedResult = await finalizeArtifactsNode(errorState, {
       configurable: {
         repositories,
+        logger,
       },
     })
 

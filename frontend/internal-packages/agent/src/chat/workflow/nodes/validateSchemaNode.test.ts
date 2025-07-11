@@ -2,6 +2,7 @@ import { executeQuery } from '@liam-hq/pglite-server'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Repositories } from '../../../repositories'
+import type { NodeLogger } from '../../../utils/nodeLogger'
 import type { WorkflowState } from '../types'
 import { validateSchemaNode } from './validateSchemaNode'
 
@@ -10,6 +11,14 @@ vi.mock('@liam-hq/pglite-server', () => ({
 }))
 
 describe('validateSchemaNode', () => {
+  const mockLogger: NodeLogger = {
+    debug: vi.fn(),
+    log: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  }
+
   const createMockState = (
     overrides?: Partial<WorkflowState>,
   ): WorkflowState => {
@@ -52,7 +61,7 @@ describe('validateSchemaNode', () => {
 
     const repositories = createMockRepositories()
     const result = await validateSchemaNode(state, {
-      configurable: { repositories },
+      configurable: { repositories, logger: mockLogger },
     })
 
     expect(executeQuery).not.toHaveBeenCalled()
@@ -81,7 +90,7 @@ describe('validateSchemaNode', () => {
     ])
 
     await validateSchemaNode(state, {
-      configurable: { repositories },
+      configurable: { repositories, logger: mockLogger },
     })
 
     // TODO: Re-enable when timeline item updates are implemented
@@ -103,7 +112,7 @@ describe('validateSchemaNode', () => {
 
     const repositories = createMockRepositories()
     await validateSchemaNode(state, {
-      configurable: { repositories },
+      configurable: { repositories, logger: mockLogger },
     })
   })
 
@@ -142,7 +151,7 @@ describe('validateSchemaNode', () => {
 
     const repositories = createMockRepositories()
     const result = await validateSchemaNode(state, {
-      configurable: { repositories },
+      configurable: { repositories, logger: mockLogger },
     })
 
     expect(result.dmlExecutionSuccessful).toBe(true)

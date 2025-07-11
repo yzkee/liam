@@ -2,6 +2,7 @@ import type { BaseMessage } from '@langchain/core/messages'
 import type { Schema } from '@liam-hq/db-structure'
 import type { Usecase } from '../../langchain/agents/qaGenerateUsecaseAgent/agent'
 import type { Repositories } from '../../repositories'
+import type { NodeLogger } from '../../utils/nodeLogger'
 
 export type WorkflowState = {
   messages: BaseMessage[]
@@ -48,4 +49,5 @@ export type WorkflowState = {
  */
 export type WorkflowConfigurable = {
   repositories: Repositories
+  logger: NodeLogger
 }

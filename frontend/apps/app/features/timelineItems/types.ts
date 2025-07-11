@@ -1,5 +1,6 @@
 import type { Database } from '@liam-hq/db'
 import type { ReactNode } from 'react'
+import type { DesignSessionWithTimelineItems } from '@/components/SessionDetailPage/services/designSessionWithTimelineItems/types'
 
 // TODO: Modify to use what is inferred from the valibot schema
 export type TimelineItem =
@@ -28,20 +29,4 @@ export type TimelineItemEntry = TimelineItem & {
 
 // TODO: Modify to use what is inferred from the valibot schema
 export type TimelineItemType =
-  | {
-      id: string
-      content: string
-      type: Database['public']['Enums']['timeline_item_type_enum']
-      user_id: string | null
-      created_at: string
-      updated_at: string
-      organization_id: string
-      design_session_id: string
-      building_schema_version_id: string | null
-    }
-  | {
-      id: string
-      type: 'schema_version'
-      content: string
-      building_schema_version_id: string
-    }
+  NonNullable<DesignSessionWithTimelineItems>['timeline_items'][number]

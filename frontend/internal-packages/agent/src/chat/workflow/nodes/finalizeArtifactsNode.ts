@@ -1,6 +1,5 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
 import type { Repositories } from '../../../repositories'
-import type { NodeLogger } from '../../../utils/nodeLogger'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 import { logAssistantMessage } from '../utils/timelineLogger'
@@ -9,23 +8,18 @@ import {
   transformWorkflowStateToArtifact,
 } from '../utils/transformWorkflowStateToArtifact'
 
-const NODE_NAME = 'finalizeArtifactsNode'
-
 /**
  * Save artifacts if workflow state contains artifact data
  */
 async function saveArtifacts(
   state: WorkflowState,
-  logger: NodeLogger,
   repositories: Repositories,
 ): Promise<void> {
   if (!state.analyzedRequirements && !state.generatedUsecases) {
-    logger.log(`[${NODE_NAME}] No artifact data available to save`)
     return
   }
 
   await logAssistantMessage(state, repositories, 'Saving artifacts...')
-  logger.log(`[${NODE_NAME}] Saving artifacts`)
   const artifact = transformWorkflowStateToArtifact(state)
   const artifactResult = await createOrUpdateArtifact(
     state,
@@ -34,16 +28,12 @@ async function saveArtifacts(
   )
 
   if (artifactResult.success) {
-    logger.log(`[${NODE_NAME}] Artifacts saved successfully`)
     await logAssistantMessage(
       state,
       repositories,
       'Artifacts saved successfully',
     )
   } else {
-    logger.log(
-      `[${NODE_NAME}] Failed to save artifacts: ${artifactResult.error}`,
-    )
     await logAssistantMessage(state, repositories, 'Failed to save artifacts')
   }
 }
@@ -123,9 +113,7 @@ export async function finalizeArtifactsNode(
       error: configurableResult.error,
     }
   }
-  const { repositories, logger } = configurableResult.value
-
-  logger.log(`[${NODE_NAME}] Started`)
+  const { repositories } = configurableResult.value
 
   await logAssistantMessage(
     state,
@@ -133,13 +121,11 @@ export async function finalizeArtifactsNode(
     'Preparing final deliverables...',
   )
 
-  await saveArtifacts(state, logger, repositories)
+  await saveArtifacts(state, repositories)
   const { finalResponse, errorToReturn } = await generateFinalResponse(
     state,
     repositories,
   )
-
-  logger.log(`[${NODE_NAME}] Completed`)
 
   return {
     ...state,

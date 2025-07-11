@@ -1,6 +1,7 @@
+import type { RunnableConfig } from '@langchain/core/runnables'
 import { executeQuery } from '@liam-hq/pglite-server'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
-import { getWorkflowNodeProgress } from '../shared/getWorkflowNodeProgress'
+import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 
 const NODE_NAME = 'validateSchemaNode'
@@ -11,19 +12,18 @@ const NODE_NAME = 'validateSchemaNode'
  */
 export async function validateSchemaNode(
   state: WorkflowState,
+  config: RunnableConfig,
 ): Promise<WorkflowState> {
-  state.logger.log(`[${NODE_NAME}] Started`)
-
-  // Update progress message if available
-  if (state.progressTimelineItemId) {
-    await state.repositories.schema.updateTimelineItem(
-      state.progressTimelineItemId,
-      {
-        content: 'Processing: validateSchema',
-        progress: getWorkflowNodeProgress('validateSchema'),
-      },
-    )
+  const configurableResult = getConfigurable(config)
+  if (configurableResult.isErr()) {
+    return {
+      ...state,
+      error: configurableResult.error,
+    }
   }
+  const { logger } = configurableResult.value
+
+  logger.log(`[${NODE_NAME}] Started`)
 
   // Check if DML statements are available
   if (!state.dmlStatements || !state.dmlStatements.trim()) {
@@ -90,7 +90,7 @@ export async function validateSchemaNode(
     )
   }
 
-  state.logger.log(`[${NODE_NAME}] Completed`)
+  logger.log(`[${NODE_NAME}] Completed`)
 
   return {
     ...state,

@@ -37,6 +37,7 @@ describe('prepareDmlNode', () => {
     }
 
     return {
+      messages: [],
       userInput: 'test',
       formattedHistory: '',
       schemaData: { tables: {}, relationships: [] },

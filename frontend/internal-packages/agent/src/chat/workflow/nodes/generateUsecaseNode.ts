@@ -1,3 +1,4 @@
+import { AIMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { ResultAsync } from 'neverthrow'
 import { QAGenerateUsecaseAgent } from '../../../langchain/agents'
@@ -6,6 +7,7 @@ import type { BasePromptVariables } from '../../../langchain/utils/types'
 import type { NodeLogger } from '../../../utils/nodeLogger'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
+import { formatMessagesToHistory } from '../utils/messageUtils'
 import { logAssistantMessage } from '../utils/timelineLogger'
 
 const NODE_NAME = 'generateUsecaseNode'
@@ -103,7 +105,7 @@ export async function generateUsecaseNode(
   )
 
   const promptVariables: BasePromptVariables = {
-    chat_history: state.formattedHistory,
+    chat_history: formatMessagesToHistory(state.messages),
     user_message: requirementsText,
   }
 
@@ -135,6 +137,13 @@ export async function generateUsecaseNode(
 
       return {
         ...state,
+        messages: [
+          ...state.messages,
+          new AIMessage({
+            content: `Generated ${generatedResult.usecases.length} use cases for testing and validation`,
+            name: 'QA Generate Usecase Agent',
+          }),
+        ],
         generatedUsecases: generatedResult.usecases,
         error: undefined, // Clear error on success
       }

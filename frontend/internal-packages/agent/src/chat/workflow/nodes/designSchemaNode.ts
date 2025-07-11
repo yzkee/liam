@@ -1,3 +1,4 @@
+import { AIMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { DatabaseSchemaBuildAgent } from '../../../langchain/agents'
 import type { BuildAgentResponse } from '../../../langchain/agents/databaseSchemaBuildAgent/agent'
@@ -7,6 +8,7 @@ import { convertSchemaToText } from '../../../utils/convertSchemaToText'
 import type { NodeLogger } from '../../../utils/nodeLogger'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
+import { formatMessagesToHistory } from '../utils/messageUtils'
 import { logAssistantMessage } from '../utils/timelineLogger'
 
 const NODE_NAME = 'designSchemaNode'
@@ -226,7 +228,7 @@ export async function designSchemaNode(
   // Create prompt variables directly
   const promptVariables: SchemaAwareChatVariables = {
     schema_text: schemaText,
-    chat_history: state.formattedHistory,
+    chat_history: formatMessagesToHistory(state.messages),
     user_message: userMessage,
   }
 
@@ -250,6 +252,13 @@ export async function designSchemaNode(
   // Clear retry flags after processing
   const finalResult = {
     ...result,
+    messages: [
+      ...state.messages,
+      new AIMessage({
+        content: response.message,
+        name: 'Database Schema Build Agent',
+      }),
+    ],
     shouldRetryWithDesignSchema: undefined,
     ddlExecutionFailureReason: undefined,
   }

@@ -1,3 +1,4 @@
+import { AIMessage, HumanMessage } from '@langchain/core/messages'
 import { END, START, StateGraph } from '@langchain/langgraph'
 import type { Schema } from '@liam-hq/db-structure'
 import type { Result } from 'neverthrow'
@@ -38,15 +39,6 @@ export type DeepModelingResult = Result<
   },
   Error
 >
-
-/**
- * Format chat history array into a string
- * @param history - Array of formatted chat history strings
- * @returns Formatted chat history string or default message if empty
- */
-const formatChatHistory = (history: string[]): string => {
-  return history.length > 0 ? history.join('\n') : 'No previous conversation.'
-}
 
 /**
  * Retry policy configuration for all nodes
@@ -159,16 +151,20 @@ export const deepModeling = async (
 
   const { repositories, logger } = config.configurable
 
-  // Convert history format with role prefix
-  const historyArray = history.map(([role, content]) => {
-    const prefix = role === 'assistant' ? 'Assistant' : 'User'
-    return `${prefix}: ${content}`
+  // Convert history to BaseMessage objects
+  const messages = history.map(([role, content]) => {
+    return role === 'assistant'
+      ? new AIMessage(content)
+      : new HumanMessage(content)
   })
+
+  // Add the current user input as the latest message
+  messages.push(new HumanMessage(userInput))
 
   // Create workflow state
   const workflowState: WorkflowState = {
     userInput: userInput,
-    formattedHistory: formatChatHistory(historyArray),
+    messages,
     schemaData,
     organizationId,
     buildingSchemaId,

@@ -1,9 +1,11 @@
+import type { BaseMessage } from '@langchain/core/messages'
 import type { Schema } from '@liam-hq/db-structure'
 import type { Usecase } from '../../langchain/agents/qaGenerateUsecaseAgent/agent'
 import type { Repositories } from '../../repositories'
 import type { NodeLogger } from '../../utils/nodeLogger'
 
 export type WorkflowState = {
+  messages: BaseMessage[]
   userInput: string
   analyzedRequirements?:
     | {
@@ -15,7 +17,6 @@ export type WorkflowState = {
   generatedUsecases?: Usecase[] | undefined
   generatedAnswer?: string | undefined
   finalResponse?: string | undefined
-  formattedHistory: string
   schemaData: Schema
   projectId?: string | undefined
   error?: Error | undefined

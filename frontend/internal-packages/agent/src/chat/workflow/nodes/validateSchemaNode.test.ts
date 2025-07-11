@@ -9,6 +9,14 @@ vi.mock('@liam-hq/pglite-server', () => ({
 }))
 
 describe('validateSchemaNode', () => {
+  const mockLogger = {
+    debug: vi.fn(),
+    log: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  }
+
   const createMockState = (
     overrides?: Partial<WorkflowState>,
   ): WorkflowState => {
@@ -51,7 +59,7 @@ describe('validateSchemaNode', () => {
 
     const repositories = createMockRepositories()
     const result = await validateSchemaNode(state, {
-      configurable: { repositories },
+      configurable: { repositories, logger: mockLogger },
     })
 
     expect(executeQuery).not.toHaveBeenCalled()

@@ -28,6 +28,7 @@ describe('DMLGenerationAgent', () => {
     const input = {
       schemaSQL: 'CREATE TABLE users (id INT PRIMARY KEY);',
       formattedUseCases: 'User registration use case',
+      schemaContext: 'Mocked schema text',
     }
 
     const result = await agent.generate(input)

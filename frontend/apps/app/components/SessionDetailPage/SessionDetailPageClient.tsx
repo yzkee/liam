@@ -4,22 +4,22 @@ import { type Schema, schemaSchema } from '@liam-hq/db-structure'
 import clsx from 'clsx'
 import { type FC, useCallback, useMemo, useState, useTransition } from 'react'
 import { safeParse } from 'valibot'
-import { useRealtimeTimelineItems } from '@/features/timelineItems/hooks/useRealtimeTimelineItems'
 import { Chat } from './components/Chat'
 import { Output } from './components/Output'
 import { OutputPlaceholder } from './components/OutputPlaceholder'
 import { useRealtimeBuildlingSchema } from './hooks/useRealtimeBuildlingSchema'
+import { useRealtimeTimelineItems } from './hooks/useRealtimeTimelineItems'
 import { SCHEMA_UPDATES_DOC, SCHEMA_UPDATES_REVIEW_COMMENTS } from './mock'
 import styles from './SessionDetailPage.module.css'
 import { buildCurrentSchema } from './services/buildCurrentSchema'
 import { getBuildingSchema } from './services/buildingSchema/client/getBuldingSchema'
 import { buildPrevSchema } from './services/buildPrevSchema/client/buildPrevSchema'
-import type { DesignSessionWithTimelineItems } from './services/designSessionWithTimelineItems/types'
+import { convertTimelineItemToTimelineItemEntry } from './services/convertTimelineItemToTimelineItemEntry'
 import { getLatestVersion } from './services/latestVersion/client/getLatestVersion'
-import type { Version } from './types'
+import type { DesignSessionWithTimelineItems, Version } from './types'
 
 type Props = {
-  designSessionWithTimelineItems: NonNullable<DesignSessionWithTimelineItems>
+  designSessionWithTimelineItems: DesignSessionWithTimelineItems
   buildingSchemaId: string
   latestVersionNumber?: number
   initialSchema: Schema | null
@@ -98,7 +98,9 @@ Please suggest a specific solution to resolve this problem.`
 
   const { timelineItems, addOrUpdateTimelineItem } = useRealtimeTimelineItems(
     designSessionId,
-    designSessionWithTimelineItems.timeline_items,
+    designSessionWithTimelineItems.timeline_items.map((timelineItem) =>
+      convertTimelineItemToTimelineItemEntry(timelineItem),
+    ),
   )
   const isGenerating = useMemo(() => {
     // Since progress role is removed, we no longer track generating state

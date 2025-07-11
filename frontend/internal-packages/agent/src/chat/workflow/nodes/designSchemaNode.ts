@@ -11,8 +11,6 @@ import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 import { logAssistantMessage } from '../utils/timelineLogger'
 
-const NODE_NAME = 'designSchemaNode'
-
 const formatAnalyzedRequirements = (
   analyzedRequirements: NonNullable<WorkflowState['analyzedRequirements']>,
 ): string => {

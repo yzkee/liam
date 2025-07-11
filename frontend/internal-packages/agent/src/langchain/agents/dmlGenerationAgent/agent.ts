@@ -5,7 +5,7 @@ import { formatDMLGenerationPrompts } from './prompts'
 const DMLGenerationAgentInputSchema = v.object({
   schemaSQL: v.string(),
   formattedUseCases: v.string(),
-  schemaContext: v.optional(v.string()),
+  schemaContext: v.string(),
 })
 
 const DMLGenerationAgentOutputSchema = v.object({

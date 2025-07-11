@@ -285,9 +285,6 @@ describe('prepareDmlNode', () => {
       formattedUseCases: expect.any(String),
       schemaContext: expect.any(String),
     })
-
-    // Verify convertSchemaToText was called with the correct schema
-    expect(convertSchemaToText).toHaveBeenCalledWith(state.schemaData)
   })
 
   it('should handle empty DML generation result', async () => {

@@ -1,10 +1,46 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { DMLGenerationAgent } from '../../../langchain/agents/dmlGenerationAgent/agent'
+import type { Usecase } from '../../../langchain/agents/qaGenerateUsecaseAgent/agent'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 import { logAssistantMessage } from '../utils/timelineLogger'
 
 const NODE_NAME = 'prepareDmlNode'
+
+/**
+ * Format use cases into a structured string for DML generation
+ */
+function formatUseCases(useCases: Usecase[]): string {
+  // Group use cases by requirement category
+  const groupedUseCases = useCases.reduce<Record<string, Usecase[]>>(
+    (acc, uc) => {
+      const category = uc.requirementCategory?.trim() || 'General'
+      if (!acc[category]) {
+        acc[category] = []
+      }
+      acc[category].push(uc)
+      return acc
+    },
+    {},
+  )
+
+  // Format grouped use cases
+  const formattedGroups = Object.entries(groupedUseCases).map(
+    ([category, cases]) => {
+      const formattedCases = cases
+        .map(
+          (uc) =>
+            `  - ${uc.title}: ${uc.description}${
+              uc.requirement ? ` (Requirement: ${uc.requirement})` : ''
+            }`,
+        )
+        .join('\n')
+      return `${category}:\n${formattedCases}`
+    },
+  )
+
+  return formattedGroups.join('\n\n')
+}
 
 /**
  * Prepare DML Node - Generates DML statements based on schema and use cases
@@ -61,9 +97,7 @@ export async function prepareDmlNode(
   const dmlAgent = new DMLGenerationAgent({ logger })
 
   // Format use cases for the agent
-  const formattedUseCases = state.generatedUsecases
-    .map((uc) => `- ${uc.title}: ${uc.description}`)
-    .join('\n')
+  const formattedUseCases = formatUseCases(state.generatedUsecases)
 
   // Generate DML statements
   const result = await dmlAgent.generate({

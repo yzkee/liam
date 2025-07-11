@@ -98,14 +98,4 @@ Present a detailed split plan showing:
 
 Use project template: `.github/pull_request_template.md`
 
-## Critical Rules
-
-1. **Never create test-only PRs** - Every PR must have feature + tests
-2. **First PR enables skeleton review** - Must show overall design
-3. **Strict size limits** - 100-200 lines target, 300 max
-4. **Complete units** - Each PR must be independently valuable
-5. **Use project template** - Maintain consistency in PR descriptions
-6. **Draft until ready** - All PRs start as drafts
-7. **TDD within each PR** - Red-Green-Refactor cycle
-
 $ARGUMENTS

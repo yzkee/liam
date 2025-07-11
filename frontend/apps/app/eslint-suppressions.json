@@ -46,7 +46,7 @@
   },
   "app/(app)/app/design_sessions/[id]/page.tsx": {
     "no-throw-error/no-throw-error": {
-      "count": 4
+      "count": 1
     }
   },
   "app/api/webhook/github/route.ts": {
@@ -105,6 +105,11 @@
   "components/SchemaPage/SchemaPage.tsx": {
     "no-throw-error/no-throw-error": {
       "count": 1
+    }
+  },
+  "components/SessionDetailPage/SessionDetailPage.tsx": {
+    "no-throw-error/no-throw-error": {
+      "count": 2
     }
   },
   "components/SessionDetailPage/components/Chat/components/ChatInput/ChatInput.tsx": {

@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import { type ChangeEvent, type FC, useRef, useState } from 'react'
+import type { FormatType } from '@/components/FormatIcon/FormatIcon'
 import { createAccessibleOpacityTransition } from '@/utils/accessibleTransitions'
-import type { FormatType } from '../../../../../components/FormatIcon/FormatIcon'
 import { AttachmentsContainer } from '../AttachmentsContainer'
 import { useAutoResizeTextarea } from '../hooks/useAutoResizeTextarea'
 import { useEnterKeySubmission } from '../hooks/useEnterKeySubmission'

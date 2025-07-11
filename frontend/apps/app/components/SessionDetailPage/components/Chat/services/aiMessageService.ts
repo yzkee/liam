@@ -1,9 +1,9 @@
 'use client'
 
 import { boolean, object, optional, parse, string } from 'valibot'
-import { formatTimelineItemHistory } from '@/features/timelineItems/services/timelineItemHelpers'
-import type { TimelineItemEntry } from '@/features/timelineItems/types'
+import type { TimelineItemEntry } from '../../../types'
 import { ERROR_MESSAGES } from '../constants/chatConstants'
+import { formatTimelineItemHistory } from './timelineItemHelpers'
 
 /**
  * Schema for API response validation

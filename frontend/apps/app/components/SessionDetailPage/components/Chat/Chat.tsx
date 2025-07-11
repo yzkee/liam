@@ -2,12 +2,12 @@
 
 import type { Schema } from '@liam-hq/db-structure'
 import { type FC, useTransition } from 'react'
-import { generateTimelineItemId } from '@/features/timelineItems/services/timelineItemHelpers'
-import type { TimelineItemEntry } from '@/features/timelineItems/types'
+import type { TimelineItemEntry } from '../../types'
 import styles from './Chat.module.css'
 import { ChatInput } from './components/ChatInput'
 import { TimelineItem } from './components/TimelineItem'
 import { sendChatMessage } from './services'
+import { generateTimelineItemId } from './services/timelineItemHelpers'
 import { useScrollToBottom } from './useScrollToBottom'
 
 type Props = {
@@ -57,7 +57,7 @@ export const Chat: FC<Props> = ({
     const userMessage: TimelineItemEntry = {
       id: generateTimelineItemId('user'),
       content,
-      role: 'user',
+      type: 'user',
       timestamp: new Date(),
     }
     onMessageSend(userMessage)

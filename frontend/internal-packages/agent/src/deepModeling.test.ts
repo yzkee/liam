@@ -16,6 +16,15 @@ vi.mock('./utils/convertSchemaToText', () => ({
   convertSchemaToText: vi.fn(() => 'Mocked schema text'),
 }))
 
+// Mock DMLGenerationAgent directly
+vi.mock('./langchain/agents/dmlGenerationAgent/agent', () => ({
+  DMLGenerationAgent: vi.fn().mockImplementation(() => ({
+    generate: vi.fn().mockResolvedValue({
+      dmlStatements: '-- Mocked DML statements',
+    }),
+  })),
+}))
+
 // Mock the pglite-server
 vi.mock('@liam-hq/pglite-server', () => ({
   executeQuery: vi.fn().mockResolvedValue([

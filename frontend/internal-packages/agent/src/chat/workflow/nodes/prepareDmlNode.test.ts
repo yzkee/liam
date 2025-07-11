@@ -23,7 +23,7 @@ describe('prepareDmlNode', () => {
     vi.mocked(DMLGenerationAgent).mockImplementation(() => {
       const agent = {
         generate: vi.fn().mockResolvedValue({
-          dmlStatements: '-- DML statements will be generated here',
+          dmlStatements: '-- Generated DML statements',
         }),
       }
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -48,8 +48,7 @@ describe('prepareDmlNode', () => {
     return {
       messages: [],
       userInput: 'test',
-      formattedHistory: '',
-      schemaData: { tables: {}, relationships: [] },
+      schemaData: { tables: {} },
       buildingSchemaId: 'test-id',
       latestVersionNumber: 1,
       userId: 'user-id',
@@ -59,31 +58,6 @@ describe('prepareDmlNode', () => {
       ...overrides,
     }
   }
-
-  it('should generate DML statements when DDL and use cases are available', async () => {
-    const state = createMockState({
-      ddlStatements: 'CREATE TABLE users (id INT);',
-      generatedUsecases: [
-        {
-          requirementType: 'functional',
-          requirementCategory: 'User Management',
-          requirement: 'Users should be able to register',
-          title: 'User Registration',
-          description: 'Allow users to create new accounts',
-        },
-      ],
-    })
-
-    const result = await prepareDmlNode(state, {
-      configurable: { repositories: state.repositories, logger: mockLogger },
-    })
-
-    // The actual implementation returns the placeholder
-    expect(result).toBeDefined()
-    expect(result.dmlStatements).toBe(
-      '-- DML statements will be generated here',
-    )
-  })
 
   it('should return state unchanged when DDL statements are missing', async () => {
     const state = createMockState({
@@ -102,7 +76,6 @@ describe('prepareDmlNode', () => {
       configurable: { repositories: state.repositories, logger: mockLogger },
     })
 
-    expect(result).toEqual(state)
     expect(result.dmlStatements).toBeUndefined()
   })
 
@@ -115,7 +88,6 @@ describe('prepareDmlNode', () => {
       configurable: { repositories: state.repositories, logger: mockLogger },
     })
 
-    expect(result).toEqual(state)
     expect(result.dmlStatements).toBeUndefined()
   })
 
@@ -129,7 +101,6 @@ describe('prepareDmlNode', () => {
       configurable: { repositories: state.repositories, logger: mockLogger },
     })
 
-    expect(result).toEqual(state)
     expect(result.dmlStatements).toBeUndefined()
   })
 

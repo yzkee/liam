@@ -8,10 +8,6 @@ import { prepareDmlNode } from './prepareDmlNode'
 
 vi.mock('../../../langchain/agents/dmlGenerationAgent/agent')
 
-vi.mock('../../../utils/convertSchemaToText', () => ({
-  convertSchemaToText: vi.fn().mockReturnValue('Mocked schema text'),
-}))
-
 describe('prepareDmlNode', () => {
   const mockLogger: NodeLogger = {
     debug: vi.fn(),
@@ -206,7 +202,11 @@ describe('prepareDmlNode', () => {
       expect.objectContaining({
         schemaSQL: 'CREATE TABLE users (id INT);',
         formattedUseCases: expect.stringContaining('User Management:'),
-        schemaContext: 'Mocked schema text',
+        schemaContext: `FULL DATABASE SCHEMA:
+
+TABLES:
+
+`,
       }),
     )
 
@@ -262,7 +262,11 @@ describe('prepareDmlNode', () => {
     expect(mockGenerate).toHaveBeenCalledWith({
       schemaSQL: 'CREATE TABLE users (id INT);',
       formattedUseCases: expect.stringContaining('General:'),
-      schemaContext: 'Mocked schema text',
+      schemaContext: `FULL DATABASE SCHEMA:
+
+TABLES:
+
+`,
     })
   })
 
@@ -326,11 +330,25 @@ describe('prepareDmlNode', () => {
     expect(mockGenerate).toHaveBeenCalledWith({
       schemaSQL: 'CREATE TABLE users (id INT);',
       formattedUseCases: expect.any(String),
-      schemaContext: 'Mocked schema text',
+      schemaContext: `FULL DATABASE SCHEMA:
+
+TABLES:
+
+Table: users
+Description: No description
+Columns:
+- id: INT (not nullable)
+- email: VARCHAR (not nullable)
+
+
+`,
     })
 
     // Verify convertSchemaToText was called with the correct schema
-    expect(convertSchemaToText).toHaveBeenCalledWith(state.schemaData)
+    const schemaText = convertSchemaToText(state.schemaData)
+    expect(schemaText).toContain('Table: users')
+    expect(schemaText).toContain('id: INT (not nullable)')
+    expect(schemaText).toContain('email: VARCHAR (not nullable)')
   })
 
   it('should log schema information during DML generation', async () => {

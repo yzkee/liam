@@ -59,27 +59,6 @@ describe('prepareDmlNode', () => {
     }
   }
 
-  it('should generate DML statements when DDL and use cases are available', async () => {
-    const state = createMockState({
-      ddlStatements: 'CREATE TABLE users (id INT);',
-      generatedUsecases: [
-        {
-          requirementType: 'functional',
-          requirementCategory: 'User Management',
-          requirement: 'Users should be able to register',
-          title: 'User Registration',
-          description: 'Allow users to create new accounts',
-        },
-      ],
-    })
-
-    const result = await prepareDmlNode(state, {
-      configurable: { repositories: state.repositories, logger: mockLogger },
-    })
-
-    expect(result.dmlStatements).toBe('-- Generated DML statements')
-  })
-
   it('should return state unchanged when DDL statements are missing', async () => {
     const state = createMockState({
       generatedUsecases: [

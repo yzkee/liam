@@ -4,7 +4,7 @@ export async function fetchDesignSessionWithTimelineItems(
   supabase: SupabaseClientType,
   designSessionId: string,
 ) {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('design_sessions')
     .select(`
         id,
@@ -26,6 +26,10 @@ export async function fetchDesignSessionWithTimelineItems(
       referencedTable: 'timeline_items',
     })
     .single()
+
+  if (error) {
+    throw new Error(`Failed to fetch design session: ${error.message}`)
+  }
 
   return data
 }

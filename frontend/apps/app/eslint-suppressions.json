@@ -157,6 +157,11 @@
       "count": 1
     }
   },
+  "components/SessionDetailPage/services/designSessionWithTimelineItems/fetchDesignSessionWithTimelineItems.ts": {
+    "no-throw-error/no-throw-error": {
+      "count": 1
+    }
+  },
   "features/organizations/services/getOrganizationId.ts": {
     "no-throw-error/no-throw-error": {
       "count": 2

@@ -9,22 +9,12 @@ Split the current large pull request into smaller, manageable PRs following t-wa
 ## Core Principles
 
 ### 1. Skeleton Review Approach
-**Reference**: https://note.com/knowledgework/n/n50fc54509dd5
+Reference: https://note.com/knowledgework/n/n50fc54509dd5
 
-The first PR must be a skeleton implementation that:
-- Shows the overall architecture and design
-- Contains interfaces and basic structure
-- Includes minimal working implementation
-- Has basic tests validating the structure
-- Enables early feedback on design decisions
+First PR should be a skeleton implementation to enable early design feedback.
 
 ### 2. TDD Practice (t-wada style)
-**Key Rule**: Each PR must contain both feature and test code together
-
-- Follow Red-Green-Refactor cycle within each PR
-- Never separate features and tests into different PRs
-- Each PR represents one complete, tested unit of work
-- Tests demonstrate the feature's behavior and usage
+Follow t-wada's TDD practice: Each PR must contain both feature and test code together.
 
 ### 3. PR Size Constraints
 - **Hard limit**: 300 lines maximum
@@ -106,30 +96,7 @@ Present a detailed split plan showing:
 
 ## PR Description Requirements
 
-Use project template (`.github/pull_request_template.md`):
-
-```markdown
-## Issue
-- resolve: [issue number]
-
-## Why is this change needed?
-[Brief explanation specific to this PR's scope]
-
-## What would you like reviewers to focus on?
-[Specific aspects for this PR - e.g., "skeleton design", "test coverage"]
-
-## Testing Verification
-[How you verified these specific changes]
-
-## What was done
-pr_agent:summary
-
-## Detailed Changes
-pr_agent:walkthrough
-
-## Additional Notes
-[Context about this PR's role in the chain]
-```
+Use project template: `.github/pull_request_template.md`
 
 ## Critical Rules
 

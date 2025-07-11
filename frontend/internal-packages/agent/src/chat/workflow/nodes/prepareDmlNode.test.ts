@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { DMLGenerationAgent } from '../../../langchain/agents/dmlGenerationAgent/agent'
 import type { Repositories } from '../../../repositories'
 import { convertSchemaToText } from '../../../utils/convertSchemaToText'
-import type { NodeLogger } from '../../../utils/nodeLogger'
 import type { WorkflowState } from '../types'
 import { prepareDmlNode } from './prepareDmlNode'
 
@@ -13,14 +12,6 @@ vi.mock('../../../utils/convertSchemaToText', () => ({
 }))
 
 describe('prepareDmlNode', () => {
-  const mockLogger: NodeLogger = {
-    debug: vi.fn(),
-    log: vi.fn(),
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-  }
-
   beforeEach(() => {
     vi.clearAllMocks()
     // Set up default mock implementation
@@ -60,7 +51,6 @@ describe('prepareDmlNode', () => {
       designSessionId: 'session-id',
       retryCount: {},
       repositories,
-      logger: mockLogger,
       ...overrides,
     }
   }
@@ -80,7 +70,7 @@ describe('prepareDmlNode', () => {
     })
 
     const result = await prepareDmlNode(state, {
-      configurable: { repositories: state.repositories, logger: mockLogger },
+      configurable: { repositories: state.repositories },
     })
 
     expect(result.dmlStatements).toBe('-- Generated DML statements')
@@ -100,7 +90,7 @@ describe('prepareDmlNode', () => {
     })
 
     const result = await prepareDmlNode(state, {
-      configurable: { repositories: state.repositories, logger: mockLogger },
+      configurable: { repositories: state.repositories },
     })
 
     expect(result.dmlStatements).toBeUndefined()
@@ -113,37 +103,10 @@ describe('prepareDmlNode', () => {
     })
 
     const result = await prepareDmlNode(state, {
-      configurable: { repositories: state.repositories, logger: mockLogger },
+      configurable: { repositories: state.repositories },
     })
 
     expect(result.dmlStatements).toBeUndefined()
-  })
-
-  it('should log input statistics', async () => {
-    const state = createMockState({
-      ddlStatements:
-        'CREATE TABLE users (id INT);\nCREATE TABLE posts (id INT);',
-      generatedUsecases: [
-        {
-          requirementType: 'functional',
-          requirementCategory: 'User Management',
-          requirement: 'Users should be able to register',
-          title: 'User Registration',
-          description: 'Allow users to create new accounts',
-        },
-        {
-          requirementType: 'functional',
-          requirementCategory: 'Content',
-          requirement: 'Users can create posts',
-          title: 'Create Posts',
-          description: 'Users can publish new posts',
-        },
-      ],
-    })
-
-    await prepareDmlNode(state, {
-      configurable: { repositories: state.repositories, logger: mockLogger },
-    })
   })
 
   it('should format use cases by category', async () => {
@@ -185,7 +148,7 @@ describe('prepareDmlNode', () => {
     })
 
     await prepareDmlNode(state, {
-      configurable: { repositories: state.repositories, logger: mockLogger },
+      configurable: { repositories: state.repositories },
     })
 
     expect(mockGenerate).toHaveBeenCalledTimes(1)
@@ -243,7 +206,7 @@ describe('prepareDmlNode', () => {
     })
 
     await prepareDmlNode(state, {
-      configurable: { repositories: state.repositories, logger: mockLogger },
+      configurable: { repositories: state.repositories },
     })
 
     expect(mockGenerate).toHaveBeenCalledWith({
@@ -307,7 +270,7 @@ describe('prepareDmlNode', () => {
     })
 
     await prepareDmlNode(state, {
-      configurable: { repositories: state.repositories, logger: mockLogger },
+      configurable: { repositories: state.repositories },
     })
 
     expect(mockGenerate).toHaveBeenCalledWith({
@@ -318,35 +281,6 @@ describe('prepareDmlNode', () => {
 
     // Verify convertSchemaToText was called with the correct schema
     expect(convertSchemaToText).toHaveBeenCalledWith(state.schemaData)
-  })
-
-  it('should log schema information during DML generation', async () => {
-    const state = createMockState({
-      ddlStatements:
-        'CREATE TABLE users (id INT);\nCREATE TABLE posts (id INT);',
-      generatedUsecases: [
-        {
-          requirementType: 'functional',
-          requirementCategory: 'User Management',
-          requirement: 'Users should be able to register',
-          title: 'User Registration',
-          description: 'Allow users to create new accounts',
-        },
-      ],
-    })
-
-    await prepareDmlNode(state, {
-      configurable: { repositories: state.repositories, logger: mockLogger },
-    })
-
-    expect(mockLogger.log).toHaveBeenCalledWith('[prepareDmlNode] Started')
-    expect(mockLogger.info).toHaveBeenCalledWith(
-      '[prepareDmlNode] Generating DML for 2 tables and 1 use cases',
-    )
-    expect(mockLogger.log).toHaveBeenCalledWith(
-      '[prepareDmlNode] DML statements generated successfully',
-    )
-    expect(mockLogger.log).toHaveBeenCalledWith('[prepareDmlNode] Completed')
   })
 
   it('should handle empty DML generation result', async () => {
@@ -374,7 +308,7 @@ describe('prepareDmlNode', () => {
     })
 
     const result = await prepareDmlNode(state, {
-      configurable: { repositories: state.repositories, logger: mockLogger },
+      configurable: { repositories: state.repositories },
     })
 
     expect(result.dmlStatements).toBeUndefined()

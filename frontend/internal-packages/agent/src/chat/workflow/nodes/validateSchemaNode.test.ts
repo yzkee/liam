@@ -2,7 +2,6 @@ import { executeQuery } from '@liam-hq/pglite-server'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Repositories } from '../../../repositories'
-import type { NodeLogger } from '../../../utils/nodeLogger'
 import type { WorkflowState } from '../types'
 import { validateSchemaNode } from './validateSchemaNode'
 
@@ -11,20 +10,12 @@ vi.mock('@liam-hq/pglite-server', () => ({
 }))
 
 describe('validateSchemaNode', () => {
-  const mockLogger: NodeLogger = {
-    debug: vi.fn(),
-    log: vi.fn(),
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-  }
-
   const createMockState = (
     overrides?: Partial<WorkflowState>,
   ): WorkflowState => {
     return {
+      messages: [],
       userInput: 'test',
-      formattedHistory: '',
       schemaData: { tables: {} },
       buildingSchemaId: 'test-id',
       latestVersionNumber: 1,
@@ -61,14 +52,11 @@ describe('validateSchemaNode', () => {
 
     const repositories = createMockRepositories()
     const result = await validateSchemaNode(state, {
-      configurable: { repositories, logger: mockLogger },
+      configurable: { repositories },
     })
 
     expect(executeQuery).not.toHaveBeenCalled()
     expect(result).toEqual(state)
-    expect(mockLogger.log).toHaveBeenCalledWith(
-      '[validateSchemaNode] No DML statements to execute',
-    )
   })
 
   it('should update progress timeline item', async () => {
@@ -93,7 +81,7 @@ describe('validateSchemaNode', () => {
     ])
 
     await validateSchemaNode(state, {
-      configurable: { repositories, logger: mockLogger },
+      configurable: { repositories },
     })
 
     // TODO: Re-enable when timeline item updates are implemented
@@ -115,12 +103,8 @@ describe('validateSchemaNode', () => {
 
     const repositories = createMockRepositories()
     await validateSchemaNode(state, {
-      configurable: { repositories, logger: mockLogger },
+      configurable: { repositories },
     })
-
-    expect(mockLogger.log).toHaveBeenCalledWith(
-      '[validateSchemaNode] Executing 4 DML statements (143 characters)',
-    )
   })
 
   it('should handle results without metadata', async () => {
@@ -158,13 +142,9 @@ describe('validateSchemaNode', () => {
 
     const repositories = createMockRepositories()
     const result = await validateSchemaNode(state, {
-      configurable: { repositories, logger: mockLogger },
+      configurable: { repositories },
     })
 
     expect(result.dmlExecutionSuccessful).toBe(true)
-    // Should not log affected rows since total is 0
-    expect(mockLogger.info).not.toHaveBeenCalledWith(
-      expect.stringContaining('Total rows affected'),
-    )
   })
 })

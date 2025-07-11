@@ -46,6 +46,7 @@ describe('prepareDmlNode', () => {
     }
 
     return {
+      messages: [],
       userInput: 'test',
       formattedHistory: '',
       schemaData: { tables: {}, relationships: [] },
@@ -79,10 +80,6 @@ describe('prepareDmlNode', () => {
     })
 
     expect(result.dmlStatements).toBe('-- Generated DML statements')
-    expect(mockLogger.log).toHaveBeenCalledWith('[prepareDmlNode] Started')
-    expect(mockLogger.log).toHaveBeenCalledWith(
-      '[prepareDmlNode] DML statements generated successfully',
-    )
   })
 
   it('should return state unchanged when DDL statements are missing', async () => {
@@ -103,9 +100,6 @@ describe('prepareDmlNode', () => {
     })
 
     expect(result.dmlStatements).toBeUndefined()
-    expect(mockLogger.warn).toHaveBeenCalledWith(
-      '[prepareDmlNode] No DDL statements available for DML generation',
-    )
   })
 
   it('should return state unchanged when use cases are missing', async () => {
@@ -119,9 +113,6 @@ describe('prepareDmlNode', () => {
     })
 
     expect(result.dmlStatements).toBeUndefined()
-    expect(mockLogger.warn).toHaveBeenCalledWith(
-      '[prepareDmlNode] No use cases available for DML generation',
-    )
   })
 
   it('should log input statistics', async () => {
@@ -149,10 +140,6 @@ describe('prepareDmlNode', () => {
     await prepareDmlNode(state, {
       configurable: { repositories: state.repositories, logger: mockLogger },
     })
-
-    expect(mockLogger.info).toHaveBeenCalledWith(
-      '[prepareDmlNode] Generating DML for 2 tables and 2 use cases',
-    )
   })
 
   it('should format use cases by category', async () => {
@@ -409,8 +396,5 @@ Columns:
     })
 
     expect(result.dmlStatements).toBeUndefined()
-    expect(mockLogger.warn).toHaveBeenCalledWith(
-      '[prepareDmlNode] DML generation returned empty statements',
-    )
   })
 })

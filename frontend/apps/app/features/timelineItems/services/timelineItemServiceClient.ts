@@ -3,17 +3,7 @@
 import type { Tables } from '@liam-hq/db/supabase/database.types'
 import * as v from 'valibot'
 import { createClient } from '@/libs/db/client'
-import type { TimelineItemEntry } from '../types'
-
-type SchemaVersionTimelineItem = {
-  id: string
-  type: 'schema_version'
-  content: string
-  building_schema_version_id: string
-}
-
-// TODO: Modify to use what is inferred from the valibot schema
-type TimelineItem = Tables<'timeline_items'> | SchemaVersionTimelineItem
+import type { TimelineItemEntry, TimelineItemType } from '../types'
 
 // TODO: Make sure to use it when storing data and as an inferential type
 const realtimeTimelineItemSchema = v.object({
@@ -34,23 +24,14 @@ const realtimeTimelineItemSchema = v.object({
   building_schema_version_id: v.nullable(v.string()),
 })
 
-/**
- * Convert database timeline item to TimelineItemEntry format
- */
-function isSchemaVersionTimelineItem(
-  timelineItem: TimelineItem,
-): timelineItem is SchemaVersionTimelineItem {
-  return (
+export const convertTimelineItemToChatEntry = (
+  timelineItem: TimelineItemType,
+): TimelineItemEntry => {
+  if (
     timelineItem.type === 'schema_version' &&
     'building_schema_version_id' in timelineItem &&
     typeof timelineItem.building_schema_version_id === 'string'
   )
-}
-
-export const convertTimelineItemToChatEntry = (
-  timelineItem: TimelineItem,
-): TimelineItemEntry => {
-  if (isSchemaVersionTimelineItem(timelineItem)) {
     // Schema version timeline item
     return {
       id: timelineItem.id,
@@ -58,7 +39,6 @@ export const convertTimelineItemToChatEntry = (
       content: timelineItem.content,
       building_schema_version_id: timelineItem.building_schema_version_id,
     }
-  }
 
   // Regular timeline item from Tables<'timeline_items'>
   return {

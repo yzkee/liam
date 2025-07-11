@@ -270,13 +270,13 @@ describe('prepareDmlNode', () => {
     const mockGenerate = vi.fn().mockResolvedValue({
       dmlStatements: '-- Generated DML statements',
     })
-    vi.mocked(DMLGenerationAgent).mockImplementationOnce(
-      () =>
-        ({
-          generate: mockGenerate,
-          // biome-ignore lint/suspicious/noExplicitAny: Mock implementation
-        }) as any,
-    )
+    vi.mocked(DMLGenerationAgent).mockImplementationOnce(() => {
+      const agent = {
+        generate: mockGenerate,
+      }
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      return agent as unknown as DMLGenerationAgent
+    })
 
     const state = createMockState({
       ddlStatements: 'CREATE TABLE users (id INT);',
@@ -319,7 +319,9 @@ describe('prepareDmlNode', () => {
       },
     })
 
-    await prepareDmlNode(state as WorkflowState)
+    await prepareDmlNode(state, {
+      configurable: { repositories: state.repositories, logger: mockLogger },
+    })
 
     expect(mockGenerate).toHaveBeenCalledWith({
       schemaSQL: 'CREATE TABLE users (id INT);',
@@ -346,15 +348,18 @@ describe('prepareDmlNode', () => {
       ],
     })
 
-    await prepareDmlNode(state as WorkflowState)
+    await prepareDmlNode(state, {
+      configurable: { repositories: state.repositories, logger: mockLogger },
+    })
 
-    expect(mockLogger.info).toHaveBeenCalledWith('Preparing DML statements')
+    expect(mockLogger.log).toHaveBeenCalledWith('[prepareDmlNode] Started')
     expect(mockLogger.info).toHaveBeenCalledWith(
-      'Generating DML for 2 tables and 1 use cases',
+      '[prepareDmlNode] Generating DML for 2 tables and 1 use cases',
     )
-    expect(mockLogger.info).toHaveBeenCalledWith(
-      'DML statements generated successfully',
+    expect(mockLogger.log).toHaveBeenCalledWith(
+      '[prepareDmlNode] DML statements generated successfully',
     )
+    expect(mockLogger.log).toHaveBeenCalledWith('[prepareDmlNode] Completed')
   })
 
   it('should handle empty DML generation result', async () => {

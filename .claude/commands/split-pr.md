@@ -1,48 +1,144 @@
 ---
-description: Split a large pull request into smaller, focused PRs following best practices
+description: Split a large pull request into smaller, focused PRs following skeleton review and TDD practices
 ---
 
 ## Task
 
-Split the current large pull request into smaller, manageable PRs following these guidelines:
+Split the current large pull request into smaller, manageable PRs following t-wada's TDD practices and skeleton review methodology.
 
-### PR Splitting Guidelines
+## Core Principles
 
-1. **Focus on One Purpose**
-   - Each PR should have a single purpose (bug fix, new feature, or refactoring)
-   - Don't mix multiple objectives in one PR
+### 1. Skeleton Review Approach
+**Reference**: https://note.com/knowledgework/n/n50fc54509dd5
 
-2. **Keep Reviewable Size**
-   - Ideal: 50-200 lines of changes per PR
-   - Split PRs that are too large
+The first PR must be a skeleton implementation that:
+- Shows the overall architecture and design
+- Contains interfaces and basic structure
+- Includes minimal working implementation
+- Has basic tests validating the structure
+- Enables early feedback on design decisions
 
-3. **Clear Descriptions**
-   - Clearly state the purpose, scope, and test results
-   - Make it easy for reviewers to understand
+### 2. TDD Practice (t-wada style)
+**Key Rule**: Each PR must contain both feature and test code together
 
-### Splitting Strategy
+- Follow Red-Green-Refactor cycle within each PR
+- Never separate features and tests into different PRs
+- Each PR represents one complete, tested unit of work
+- Tests demonstrate the feature's behavior and usage
 
-1. Analyze current changes and propose logical splits
-2. Consider dependencies when ordering splits
-3. Create chained PRs:
-   - PR1: Target main branch
-   - PR2: Target PR1's branch
-   - PR3: Target PR2's branch
-   - Continue chaining as needed
+### 3. PR Size Constraints
+- **Hard limit**: 300 lines maximum
+- **Target range**: 100-200 lines (ideal)
+- **Scope**: Both implementation and test code count toward the limit
 
-### Execution Steps
+## PR Structure
 
-1. Review current changes
-2. Propose split plan (purpose and files for each PR)
-3. Get user approval
-4. Create branches and PRs in sequence
-5. Write appropriate descriptions for each PR
-6. **Create all PRs as Draft** to prevent premature reviews
+### First PR: Skeleton Implementation
+```
+Purpose: Enable skeleton review for early architectural feedback
+Contents:
+- Core interfaces and contracts
+- Basic class/module structure  
+- Minimal implementation proving the approach
+- Basic tests validating structure
+- Clear TODOs for subsequent features
+```
 
-### Important Notes
+### Subsequent PRs: Feature Increments
+```
+Purpose: Add one small, complete feature
+Contents:
+- Single feature implementation
+- Comprehensive tests for that feature
+- Updates to skeleton if needed
+- Each PR independently valuable
+```
 
-- All split PRs should be created as **Draft Pull Requests**
-- Only convert to "Ready for review" after all dependent PRs are created
-- This ensures reviewers don't start reviewing incomplete chains
+### PR Chaining Strategy
+```
+PR1 (Skeleton) → main branch
+PR2 (Feature A) → PR1's branch
+PR3 (Feature B) → PR2's branch
+...continues as needed
+```
+
+## Execution Process
+
+### Phase 1: Analysis
+1. Review all current changes
+2. Identify core abstractions and interfaces
+3. Map features to logical units
+4. Estimate line counts per unit
+
+### Phase 2: Planning
+1. Design skeleton structure
+   - What interfaces are needed?
+   - What's the minimal viable structure?
+   - Which design patterns to showcase?
+
+2. Plan feature PRs
+   - One feature = one PR
+   - Each with complete test coverage
+   - Dependencies between features
+   - Expected 100-200 lines each
+
+### Phase 3: User Approval
+Present a detailed split plan showing:
+- Skeleton PR contents and purpose
+- Each feature PR with:
+  - Feature description
+  - Test approach
+  - Estimated line count
+  - Dependencies
+
+### Phase 4: Implementation
+1. Create skeleton branch and PR first
+2. Implement skeleton with tests
+3. Create feature branches from skeleton
+4. Implement features with TDD approach
+5. Chain PRs appropriately
+
+### Phase 5: PR Management
+1. Create all PRs as **Draft** status
+2. Use project template for descriptions
+3. Only mark "Ready for review" after full chain exists
+4. Ensure each PR description follows template
+
+## PR Description Requirements
+
+Use project template (`.github/pull_request_template.md`):
+
+```markdown
+## Issue
+- resolve: [issue number]
+
+## Why is this change needed?
+[Brief explanation specific to this PR's scope]
+
+## What would you like reviewers to focus on?
+[Specific aspects for this PR - e.g., "skeleton design", "test coverage"]
+
+## Testing Verification
+[How you verified these specific changes]
+
+## What was done
+pr_agent:summary
+
+## Detailed Changes
+pr_agent:walkthrough
+
+## Additional Notes
+[Context about this PR's role in the chain]
+```
+
+## Critical Rules
+
+1. **Never create test-only PRs** - Every PR must have feature + tests
+2. **First PR enables skeleton review** - Must show overall design
+3. **Strict size limits** - 100-200 lines target, 300 max
+4. **Complete units** - Each PR must be independently valuable
+5. **Use project template** - Maintain consistency in PR descriptions
+6. **Draft until ready** - All PRs start as drafts
+7. **TDD within each PR** - Red-Green-Refactor cycle
 
 $ARGUMENTS

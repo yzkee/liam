@@ -1,0 +1,307 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`snapshot test 1`] = `
+<div
+  aria-describedby="radix-«r51»"
+  aria-labelledby="radix-«r50»"
+  class="_content_933568"
+  cmdk-dialog=""
+  data-state="open"
+  id="radix-«r4v»"
+  role="dialog"
+  style="pointer-events: auto;"
+  tabindex="-1"
+>
+  <div
+    cmdk-root=""
+    tabindex="-1"
+  >
+    <label
+      cmdk-label=""
+      for="radix-«r54»"
+      id="radix-«r53»"
+      style="position: absolute; width: 1px; height: 1px; padding: 0px; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0px;"
+    />
+    <h2
+      hidden=""
+      id="radix-«r50»"
+    >
+      Command Palette
+    </h2>
+    <p
+      hidden=""
+      id="radix-«r51»"
+    >
+      A search-based interface that allows quick access to various commands and features within the application.
+    </p>
+    <div
+      class="_searchContainer_933568"
+    >
+      <div
+        class="_searchFormWithIcon_933568"
+      >
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-search _searchIcon_933568"
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m21 21-4.34-4.34"
+          />
+          <circle
+            cx="11"
+            cy="11"
+            r="8"
+          />
+        </svg>
+        <input
+          aria-autocomplete="list"
+          aria-controls="radix-«r52»"
+          aria-expanded="true"
+          aria-labelledby="radix-«r53»"
+          autocomplete="off"
+          autocorrect="off"
+          cmdk-input=""
+          id="radix-«r54»"
+          placeholder="Search"
+          role="combobox"
+          spellcheck="false"
+          type="text"
+          value=""
+        />
+      </div>
+      <button
+        class="_wrapper_ba280b _xs_ba280b _escButton_933568 _outlineSecondary_ba280b"
+        type="button"
+      >
+        ESC
+      </button>
+    </div>
+    <div
+      class="_main_933568"
+    >
+      <div
+        aria-label="Suggestions"
+        cmdk-list=""
+        id="radix-«r52»"
+        role="listbox"
+        tabindex="-1"
+      >
+        <div
+          cmdk-list-sizer=""
+        >
+          <div
+            cmdk-group=""
+            data-value="Tables"
+            role="presentation"
+          >
+            <div
+              aria-hidden="true"
+              cmdk-group-heading=""
+              id="radix-«r56»"
+            >
+              Tables
+            </div>
+            <div
+              aria-labelledby="radix-«r56»"
+              cmdk-group-items=""
+              role="group"
+            >
+              <a
+                aria-disabled="false"
+                aria-selected="true"
+                cmdk-item=""
+                data-disabled="false"
+                data-selected="true"
+                data-value="users"
+                href="?active=users"
+                id="radix-«r57»"
+                role="option"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-table2 lucide-table-2 _itemIcon_933568"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"
+                  />
+                </svg>
+                <span
+                  class="_itemText_933568"
+                >
+                  users
+                </span>
+              </a>
+              <a
+                aria-disabled="false"
+                aria-selected="false"
+                cmdk-item=""
+                data-disabled="false"
+                data-selected="false"
+                data-value="posts"
+                href="?active=posts"
+                id="radix-«r58»"
+                role="option"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-table2 lucide-table-2 _itemIcon_933568"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"
+                  />
+                </svg>
+                <span
+                  class="_itemText_933568"
+                >
+                  posts
+                </span>
+              </a>
+              <a
+                aria-disabled="false"
+                aria-selected="false"
+                cmdk-item=""
+                data-disabled="false"
+                data-selected="false"
+                data-value="follows"
+                href="?active=follows"
+                id="radix-«r59»"
+                role="option"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-table2 lucide-table-2 _itemIcon_933568"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"
+                  />
+                </svg>
+                <span
+                  class="_itemText_933568"
+                >
+                  follows
+                </span>
+              </a>
+              <a
+                aria-disabled="false"
+                aria-selected="false"
+                cmdk-item=""
+                data-disabled="false"
+                data-selected="false"
+                data-value="user_settings"
+                href="?active=user_settings"
+                id="radix-«r5a»"
+                role="option"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-table2 lucide-table-2 _itemIcon_933568"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"
+                  />
+                </svg>
+                <span
+                  class="_itemText_933568"
+                >
+                  user_settings
+                </span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="_previewContainer_933568"
+        data-testid="CommandPalettePreview"
+      >
+        <div
+          class="_previewBackground_933568"
+        >
+          <div
+            class="_wrapper_f5909b"
+            data-erd="false"
+            data-state="closed"
+          >
+            <div
+              class="_wrapper_5b50e5"
+            >
+              <div
+                class="_container_5b50e5"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-table2 lucide-table-2 _tableIcon_5b50e5"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"
+                  />
+                </svg>
+                <span
+                  class="_name_5b50e5"
+                >
+                  users
+                </span>
+              </div>
+            </div>
+            <ul />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

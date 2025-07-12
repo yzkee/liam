@@ -278,3 +278,11 @@ describe('opens table in a new tab when selecting option with ⌘ key', () => {
     expect(spyWindowOpen).toHaveBeenCalledWith('?active=posts')
   })
 })
+
+it('snapshot test', async () => {
+  const {
+    elements: { dialog },
+  } = await prepareCommandPalette()
+
+  expect(dialog).toMatchSnapshot()
+})

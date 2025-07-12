@@ -158,13 +158,11 @@ export const getRepository = async (
     return errAsync(new Error('Invalid project ID format'))
   }
 
-  return ResultAsync.fromPromise(
-    createOctokit(installationId),
-    (error) => new Error(String(error)),
+  return ResultAsync.fromPromise(createOctokit(installationId), (error) =>
+    error instanceof Error ? error : new Error(String(error)),
   ).andThen((octokit) =>
-    ResultAsync.fromPromise(
-      octokit.repos.get({ owner, repo }),
-      (error) => new Error(String(error)),
+    ResultAsync.fromPromise(octokit.repos.get({ owner, repo }), (error) =>
+      error instanceof Error ? error : new Error(String(error)),
     ).map((res) => res.data),
   )
 }

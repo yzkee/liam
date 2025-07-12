@@ -61,15 +61,19 @@ export const ERDRenderer: FC<Props> = ({
   const [isResizing, setIsResizing] = useState(false)
 
   const userEditingResult = useUserEditing()
-  if (userEditingResult.isErr()) {
-    throw userEditingResult.error
-  }
-  const { showMode, showDiff } = userEditingResult.value
+  const { showMode, showDiff } = userEditingResult.match(
+    (val) => val,
+    (error) => {
+      throw error
+    },
+  )
   const schemaResult = useSchema()
-  if (schemaResult.isErr()) {
-    throw schemaResult.error
-  }
-  const { current, merged } = schemaResult.value
+  const { current, merged } = schemaResult.match(
+    (val) => val,
+    (error) => {
+      throw error
+    },
+  )
 
   const schema = useMemo(() => {
     return showDiff && merged ? merged : current
@@ -88,10 +92,12 @@ export const ERDRenderer: FC<Props> = ({
   const leftPanelRef = createRef<ImperativePanelHandle>()
 
   const versionResult = useVersion()
-  if (versionResult.isErr()) {
-    throw versionResult.error
-  }
-  const { version } = versionResult.value
+  const { version } = versionResult.match(
+    (val) => val,
+    (error) => {
+      throw error
+    },
+  )
   const handleChangeOpen = useCallback(
     (nextPanelState: boolean) => {
       setOpen(nextPanelState)

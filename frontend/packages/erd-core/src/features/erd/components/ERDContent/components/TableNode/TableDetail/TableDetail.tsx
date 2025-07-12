@@ -27,15 +27,19 @@ type Props = {
 
 export const TableDetail: FC<Props> = ({ table }) => {
   const userEditingResult = useUserEditing()
-  if (userEditingResult.isErr()) {
-    throw userEditingResult.error
-  }
-  const { setActiveTableName, setHiddenNodeIds } = userEditingResult.value
+  const { setActiveTableName, setHiddenNodeIds } = userEditingResult.match(
+    (val) => val,
+    (error) => {
+      throw error
+    },
+  )
   const schemaResult = useSchema()
-  if (schemaResult.isErr()) {
-    throw schemaResult.error
-  }
-  const { current } = schemaResult.value
+  const { current } = schemaResult.match(
+    (val) => val,
+    (error) => {
+      throw error
+    },
+  )
   const extractedSchema = extractSchemaForTable(table, current)
   const { nodes, edges } = convertSchemaToNodes({
     schema: extractedSchema,
@@ -45,10 +49,12 @@ export const TableDetail: FC<Props> = ({ table }) => {
   const { getNodes, getEdges, setNodes, setEdges, fitView } =
     useCustomReactflow()
   const versionResult = useVersion()
-  if (versionResult.isErr()) {
-    throw versionResult.error
-  }
-  const { version } = versionResult.value
+  const { version } = versionResult.match(
+    (val) => val,
+    (error) => {
+      throw error
+    },
+  )
 
   const handleDrawerClose = () => {
     clickLogEvent({

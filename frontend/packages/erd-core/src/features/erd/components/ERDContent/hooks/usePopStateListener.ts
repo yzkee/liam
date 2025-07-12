@@ -3,10 +3,12 @@ import { useUserEditing } from '@/stores'
 
 export const usePopStateListener = () => {
   const userEditingResult = useUserEditing()
-  if (userEditingResult.isErr()) {
-    throw userEditingResult.error
-  }
-  const { setIsPopstateInProgress } = userEditingResult.value
+  const { setIsPopstateInProgress } = userEditingResult.match(
+    (val) => val,
+    (error) => {
+      throw error
+    },
+  )
 
   useEffect(() => {
     const handlePopstate = () => {

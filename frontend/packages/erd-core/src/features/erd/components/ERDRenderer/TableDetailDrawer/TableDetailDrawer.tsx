@@ -6,15 +6,19 @@ import styles from './TableDetailDrawer.module.css'
 
 export const TableDetailDrawerRoot: FC<PropsWithChildren> = ({ children }) => {
   const userEditingResult = useUserEditing()
-  if (userEditingResult.isErr()) {
-    throw userEditingResult.error
-  }
-  const { activeTableName, setActiveTableName } = userEditingResult.value
+  const { activeTableName, setActiveTableName } = userEditingResult.match(
+    (val) => val,
+    (error) => {
+      throw error
+    },
+  )
   const schemaResult = useSchema()
-  if (schemaResult.isErr()) {
-    throw schemaResult.error
-  }
-  const { current } = schemaResult.value
+  const { current } = schemaResult.match(
+    (val) => val,
+    (error) => {
+      throw error
+    },
+  )
   const open =
     Object.keys(current.tables).length > 0 && activeTableName !== undefined
 
@@ -40,15 +44,19 @@ export const TableDetailDrawerRoot: FC<PropsWithChildren> = ({ children }) => {
 
 export const TableDetailDrawer: FC = () => {
   const schemaResult = useSchema()
-  if (schemaResult.isErr()) {
-    throw schemaResult.error
-  }
-  const { current } = schemaResult.value
+  const { current } = schemaResult.match(
+    (val) => val,
+    (error) => {
+      throw error
+    },
+  )
   const userEditingResult = useUserEditing()
-  if (userEditingResult.isErr()) {
-    throw userEditingResult.error
-  }
-  const { activeTableName } = userEditingResult.value
+  const { activeTableName } = userEditingResult.match(
+    (val) => val,
+    (error) => {
+      throw error
+    },
+  )
   const table = current.tables[activeTableName ?? '']
   const ariaDescribedBy =
     table?.comment == null

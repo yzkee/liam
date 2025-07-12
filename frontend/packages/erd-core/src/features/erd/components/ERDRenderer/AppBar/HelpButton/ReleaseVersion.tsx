@@ -4,10 +4,12 @@ import styles from './ReleaseVersion.module.css'
 
 export const ReleaseVersion: FC = () => {
   const versionResult = useVersion()
-  if (versionResult.isErr()) {
-    throw versionResult.error
-  }
-  const { version } = versionResult.value
+  const { version } = versionResult.match(
+    (val) => val,
+    (error) => {
+      throw error
+    },
+  )
 
   // Example output for version:
   // - Released version:

@@ -28,16 +28,20 @@ import { TableNameMenuButton } from './TableNameMenuButton'
 
 export const LeftPane = () => {
   const versionResult = useVersion()
-  if (versionResult.isErr()) {
-    throw versionResult.error
-  }
-  const { version } = versionResult.value
+  const { version } = versionResult.match(
+    (val) => val,
+    (error) => {
+      throw error
+    },
+  )
   const userEditingResult = useUserEditing()
-  if (userEditingResult.isErr()) {
-    throw userEditingResult.error
-  }
   const { selectedNodeIds, setHiddenNodeIds, resetSelectedNodeIds } =
-    userEditingResult.value
+    userEditingResult.match(
+      (val) => val,
+      (error) => {
+        throw error
+      },
+    )
   const { setNodes } = useCustomReactflow()
 
   const menuItemLinks = useMemo(

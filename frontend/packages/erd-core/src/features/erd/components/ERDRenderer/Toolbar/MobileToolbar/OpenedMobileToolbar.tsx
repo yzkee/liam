@@ -23,15 +23,19 @@ export const OpenedMobileToolbar: FC<Props> = ({
   const { zoomIn, zoomOut } = useCustomReactflow()
   const zoomLevel = useStore((store) => store.transform[2])
   const userEditingResult = useUserEditing()
-  if (userEditingResult.isErr()) {
-    throw userEditingResult.error
-  }
-  const { showMode } = userEditingResult.value
+  const { showMode } = userEditingResult.match(
+    (val) => val,
+    (error) => {
+      throw error
+    },
+  )
   const versionResult = useVersion()
-  if (versionResult.isErr()) {
-    throw versionResult.error
-  }
-  const { version } = versionResult.value
+  const { version } = versionResult.match(
+    (val) => val,
+    (error) => {
+      throw error
+    },
+  )
   const LabelList: Record<ShowMode, string> = {
     ALL_FIELDS: 'All Fields',
     TABLE_NAME: 'Table Name',

@@ -22,15 +22,19 @@ export const FitviewButton: FC<FitviewButtonProps> = ({
 }) => {
   const { fitView } = useCustomReactflow()
   const userEditingResult = useUserEditing()
-  if (userEditingResult.isErr()) {
-    throw userEditingResult.error
-  }
-  const { showMode } = userEditingResult.value
+  const { showMode } = userEditingResult.match(
+    (val) => val,
+    (error) => {
+      throw error
+    },
+  )
   const versionResult = useVersion()
-  if (versionResult.isErr()) {
-    throw versionResult.error
-  }
-  const { version } = versionResult.value
+  const { version } = versionResult.match(
+    (val) => val,
+    (error) => {
+      throw error
+    },
+  )
 
   const handleClick = useCallback(() => {
     toolbarActionLogEvent({

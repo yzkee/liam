@@ -23,16 +23,20 @@ const getTableLinkHref = (activeTableName: string) => {
 
 export const CommandPalette: FC = () => {
   const commandPaletteResult = useCommandPalette()
-  if (commandPaletteResult.isErr()) {
-    throw commandPaletteResult.error
-  }
-  const { open, setOpen, toggleOpen } = commandPaletteResult.value
+  const { open, setOpen, toggleOpen } = commandPaletteResult.match(
+    (val) => val,
+    (error) => {
+      throw error
+    },
+  )
 
   const schemaResult = useSchema()
-  if (schemaResult.isErr()) {
-    throw schemaResult.error
-  }
-  const { current } = schemaResult.value
+  const { current } = schemaResult.match(
+    (val) => val,
+    (error) => {
+      throw error
+    },
+  )
   const [tableName, setTableName] = useState<string | null>(null)
   const table = current.tables[tableName ?? '']
   const { selectTable } = useTableSelection()

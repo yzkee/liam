@@ -24,7 +24,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.0.4",
     "@liam-hq/configs": "workspace:*",
-    "@pgsql/types": "15.0.2",
+    "@pgsql/types": "15.1.1",
     "@prisma/generator-helper": "6.8.2",
     "@types/node": "22.15.32",
     "eslint": "9.29.0",

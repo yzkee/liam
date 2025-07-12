@@ -5,13 +5,24 @@ exports[`snapshot test 1`] = `
   aria-describedby="radix-«r51»"
   aria-labelledby="radix-«r50»"
   class="_content_933568"
-  cmdk-dialog=""
   data-state="open"
   id="radix-«r4v»"
   role="dialog"
   style="pointer-events: auto;"
   tabindex="-1"
 >
+  <h2
+    hidden=""
+    id="radix-«r50»"
+  >
+    Command Palette
+  </h2>
+  <p
+    hidden=""
+    id="radix-«r51»"
+  >
+    A search-based interface that allows quick access to various commands and features within the application.
+  </p>
   <div
     cmdk-root=""
     tabindex="-1"
@@ -22,27 +33,15 @@ exports[`snapshot test 1`] = `
       id="radix-«r53»"
       style="position: absolute; width: 1px; height: 1px; padding: 0px; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0px;"
     />
-    <h2
-      hidden=""
-      id="radix-«r50»"
-    >
-      Command Palette
-    </h2>
-    <p
-      hidden=""
-      id="radix-«r51»"
-    >
-      A search-based interface that allows quick access to various commands and features within the application.
-    </p>
     <div
-      class="_searchContainer_933568"
+      class="_searchContainer_6f7bc2"
     >
       <div
-        class="_searchFormWithIcon_933568"
+        class="_searchFormWithIcon_6f7bc2"
       >
         <svg
           aria-hidden="true"
-          class="lucide lucide-search _searchIcon_933568"
+          class="lucide lucide-search _searchIcon_6f7bc2"
           fill="none"
           height="24"
           stroke="currentColor"
@@ -79,14 +78,14 @@ exports[`snapshot test 1`] = `
         />
       </div>
       <button
-        class="_wrapper_ba280b _xs_ba280b _escButton_933568 _outlineSecondary_ba280b"
+        class="_wrapper_ba280b _xs_ba280b _escButton_6f7bc2 _outlineSecondary_ba280b"
         type="button"
       >
         ESC
       </button>
     </div>
     <div
-      class="_main_933568"
+      class="_main_6f7bc2"
     >
       <div
         aria-label="Suggestions"
@@ -128,7 +127,7 @@ exports[`snapshot test 1`] = `
               >
                 <svg
                   aria-hidden="true"
-                  class="lucide lucide-table2 lucide-table-2 _itemIcon_933568"
+                  class="lucide lucide-table2 lucide-table-2 _itemIcon_6f7bc2"
                   fill="none"
                   height="24"
                   stroke="currentColor"
@@ -144,7 +143,7 @@ exports[`snapshot test 1`] = `
                   />
                 </svg>
                 <span
-                  class="_itemText_933568"
+                  class="_itemText_6f7bc2"
                 >
                   users
                 </span>
@@ -162,7 +161,7 @@ exports[`snapshot test 1`] = `
               >
                 <svg
                   aria-hidden="true"
-                  class="lucide lucide-table2 lucide-table-2 _itemIcon_933568"
+                  class="lucide lucide-table2 lucide-table-2 _itemIcon_6f7bc2"
                   fill="none"
                   height="24"
                   stroke="currentColor"
@@ -178,7 +177,7 @@ exports[`snapshot test 1`] = `
                   />
                 </svg>
                 <span
-                  class="_itemText_933568"
+                  class="_itemText_6f7bc2"
                 >
                   posts
                 </span>
@@ -196,7 +195,7 @@ exports[`snapshot test 1`] = `
               >
                 <svg
                   aria-hidden="true"
-                  class="lucide lucide-table2 lucide-table-2 _itemIcon_933568"
+                  class="lucide lucide-table2 lucide-table-2 _itemIcon_6f7bc2"
                   fill="none"
                   height="24"
                   stroke="currentColor"
@@ -212,7 +211,7 @@ exports[`snapshot test 1`] = `
                   />
                 </svg>
                 <span
-                  class="_itemText_933568"
+                  class="_itemText_6f7bc2"
                 >
                   follows
                 </span>
@@ -230,7 +229,7 @@ exports[`snapshot test 1`] = `
               >
                 <svg
                   aria-hidden="true"
-                  class="lucide lucide-table2 lucide-table-2 _itemIcon_933568"
+                  class="lucide lucide-table2 lucide-table-2 _itemIcon_6f7bc2"
                   fill="none"
                   height="24"
                   stroke="currentColor"
@@ -246,7 +245,7 @@ exports[`snapshot test 1`] = `
                   />
                 </svg>
                 <span
-                  class="_itemText_933568"
+                  class="_itemText_6f7bc2"
                 >
                   user_settings
                 </span>
@@ -256,11 +255,11 @@ exports[`snapshot test 1`] = `
         </div>
       </div>
       <div
-        class="_previewContainer_933568"
+        class="_previewContainer_6f7bc2"
         data-testid="CommandPalettePreview"
       >
         <div
-          class="_previewBackground_933568"
+          class="_previewBackground_6f7bc2"
         >
           <div
             class="_wrapper_f5909b"

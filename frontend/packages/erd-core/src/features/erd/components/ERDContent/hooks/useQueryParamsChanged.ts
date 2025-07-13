@@ -16,13 +16,11 @@ export const useQueryParamsChanged = ({ displayArea }: Params) => {
   const { getNodes, getEdges, setNodes, setEdges, fitView } =
     useCustomReactflow()
   const userEditingResult = useUserEditing()
+  if (userEditingResult.isErr()) {
+    throw userEditingResult.error
+  }
   const { activeTableName, hiddenNodeIds, showMode, isPopstateInProgress } =
-    userEditingResult.match(
-      (val) => val,
-      (error) => {
-        throw error
-      },
-    )
+    userEditingResult.value
 
   const handleChangeQueryParams = useCallback(async () => {
     // NOTE: Only execute layout calculation during browser navigation

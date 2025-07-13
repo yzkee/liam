@@ -13,20 +13,16 @@ type Props = {
 
 export const VisibilityButton: FC<Props> = ({ tableName, hidden }) => {
   const userEditingResult = useUserEditing()
-  const { toggleHiddenNodeId } = userEditingResult.match(
-    (val) => val,
-    (error) => {
-      throw error
-    },
-  )
+  if (userEditingResult.isErr()) {
+    throw userEditingResult.error
+  }
+  const { toggleHiddenNodeId } = userEditingResult.value
   const { updateNode } = useCustomReactflow()
   const versionResult = useVersion()
-  const { version } = versionResult.match(
-    (val) => val,
-    (error) => {
-      throw error
-    },
-  )
+  if (versionResult.isErr()) {
+    throw versionResult.error
+  }
+  const { version } = versionResult.value
 
   const handleClick = useCallback(
     (event: MouseEvent) => {

@@ -11,12 +11,11 @@ type SelectTableParams = {
 
 export const useTableSelection = () => {
   const userEditingResult = useUserEditing()
-  const { setActiveTableName } = userEditingResult.match(
-    (val) => val,
-    (error) => {
-      throw error
-    },
-  )
+  if (userEditingResult.isErr()) {
+    throw userEditingResult.error
+  }
+  const { setActiveTableName } = userEditingResult.value
+
   const { getNodes, getEdges, setNodes, setEdges, fitView } =
     useCustomReactflow()
 

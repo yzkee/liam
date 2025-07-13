@@ -18,19 +18,16 @@ type Props = {
 export const TableHeader: FC<Props> = ({ data }) => {
   const name = data.table.name
   const userEditingResult = useUserEditing()
-  const { showMode: _showMode, showDiff } = userEditingResult.match(
-    (val) => val,
-    (error) => {
-      throw error
-    },
-  )
+  if (userEditingResult.isErr()) {
+    throw userEditingResult.error
+  }
+  const { showMode: _showMode, showDiff } = userEditingResult.value
+
   const schemaResult = useSchema()
-  const { diffItems } = schemaResult.match(
-    (val) => val,
-    (error) => {
-      throw error
-    },
-  )
+  if (schemaResult.isErr()) {
+    throw schemaResult.error
+  }
+  const { diffItems } = schemaResult.value
   const showMode = data.showMode ?? _showMode
 
   const isTarget = data.targetColumnCardinalities !== undefined

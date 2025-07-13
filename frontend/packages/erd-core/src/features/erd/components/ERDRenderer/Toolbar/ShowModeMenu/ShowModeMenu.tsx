@@ -24,20 +24,16 @@ const OPTION_LIST: { value: ShowMode; label: string }[] = [
 
 export const ShowModeMenu: FC = () => {
   const userEditingResult = useUserEditing()
-  const { showMode, setShowMode } = userEditingResult.match(
-    (val) => val,
-    (error) => {
-      throw error
-    },
-  )
+  if (userEditingResult.isErr()) {
+    throw userEditingResult.error
+  }
+  const { showMode, setShowMode } = userEditingResult.value
 
   const versionResult = useVersion()
-  const { version } = versionResult.match(
-    (val) => val,
-    (error) => {
-      throw error
-    },
-  )
+  if (versionResult.isErr()) {
+    throw versionResult.error
+  }
+  const { version } = versionResult.value
   const handleChangeValue = useCallback(
     (value: string) => {
       const parsed = safeParse(showModeSchema, value)

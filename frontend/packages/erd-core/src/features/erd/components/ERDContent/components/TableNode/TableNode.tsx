@@ -18,12 +18,10 @@ type Props = NodeProps<TableNodeType>
 
 export const TableNode: FC<Props> = ({ data }) => {
   const userEditingResult = useUserEditing()
-  const { showMode: _showMode } = userEditingResult.match(
-    (val) => val,
-    (error) => {
-      throw error
-    },
-  )
+  if (userEditingResult.isErr()) {
+    throw userEditingResult.error
+  }
+  const { showMode: _showMode } = userEditingResult.value
   const showMode = data.showMode ?? _showMode
   const name = data?.table?.name
 

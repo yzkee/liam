@@ -95,19 +95,15 @@ export const TableColumn: FC<TableColumnProps> = ({
   isHighlightedTable,
 }) => {
   const userEditingResult = useUserEditing()
-  const { showDiff } = userEditingResult.match(
-    (val) => val,
-    (error) => {
-      throw error
-    },
-  )
+  if (userEditingResult.isErr()) {
+    throw userEditingResult.error
+  }
+  const { showDiff } = userEditingResult.value
   const schemaResult = useSchema()
-  const { diffItems } = schemaResult.match(
-    (val) => val,
-    (error) => {
-      throw error
-    },
-  )
+  if (schemaResult.isErr()) {
+    throw schemaResult.error
+  }
+  const { diffItems } = schemaResult.value
 
   // Only calculate diff-related values when showDiff is true
   const changeStatus = useMemo(() => {

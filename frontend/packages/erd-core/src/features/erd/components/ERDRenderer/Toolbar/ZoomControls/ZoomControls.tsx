@@ -12,19 +12,15 @@ export const ZoomControls: FC = () => {
   const zoomLevel = useStore((store) => store.transform[2])
   const { zoomIn, zoomOut } = useCustomReactflow()
   const userEditingResult = useUserEditing()
-  const { showMode } = userEditingResult.match(
-    (val) => val,
-    (error) => {
-      throw error
-    },
-  )
+  if (userEditingResult.isErr()) {
+    throw userEditingResult.error
+  }
+  const { showMode } = userEditingResult.value
   const versionResult = useVersion()
-  const { version } = versionResult.match(
-    (val) => val,
-    (error) => {
-      throw error
-    },
-  )
+  if (versionResult.isErr()) {
+    throw versionResult.error
+  }
+  const { version } = versionResult.value
 
   const handleClickZoomOut = useCallback(() => {
     toolbarActionLogEvent({

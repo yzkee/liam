@@ -14,12 +14,10 @@ type Props = {
 
 export const RelatedTables: FC<Props> = ({ nodes, edges, onOpenMainPane }) => {
   const userEditingResult = useUserEditing()
-  const { activeTableName } = userEditingResult.match(
-    (val) => val,
-    (error) => {
-      throw error
-    },
-  )
+  if (userEditingResult.isErr()) {
+    throw userEditingResult.error
+  }
+  const { activeTableName } = userEditingResult.value
 
   const handleClick = useCallback(
     async (event: MouseEvent) => {

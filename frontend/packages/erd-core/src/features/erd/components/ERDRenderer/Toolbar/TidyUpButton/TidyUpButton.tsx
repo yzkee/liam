@@ -25,19 +25,15 @@ export const TidyUpButton: FC<TidyUpButtonProps> = ({
   const { getNodes, getEdges, setNodes } = useReactFlow()
   const { fitView } = useCustomReactflow()
   const userEditingResult = useUserEditing()
-  const { showMode } = userEditingResult.match(
-    (val) => val,
-    (error) => {
-      throw error
-    },
-  )
+  if (userEditingResult.isErr()) {
+    throw userEditingResult.error
+  }
+  const { showMode } = userEditingResult.value
   const versionResult = useVersion()
-  const { version } = versionResult.match(
-    (val) => val,
-    (error) => {
-      throw error
-    },
-  )
+  if (versionResult.isErr()) {
+    throw versionResult.error
+  }
+  const { version } = versionResult.value
 
   const handleClick = useCallback(async () => {
     toolbarActionLogEvent({

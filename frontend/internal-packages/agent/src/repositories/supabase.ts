@@ -64,6 +64,15 @@ function createNestedPath(
     const part = pathParts[i]
     if (!part) continue
 
+    // Prevent prototype pollution by checking for dangerous keys
+    if (
+      part === '__proto__' ||
+      part === 'constructor' ||
+      part === 'prototype'
+    ) {
+      throw new Error(`Dangerous path part detected: ${part}`)
+    }
+
     if (!(part in current)) {
       const nextPart = pathParts[i + 1]
       const isArrayIndex = nextPart && /^\d+$/.test(nextPart)
@@ -345,9 +354,10 @@ export class SupabaseSchemaRepository implements SchemaRepository {
       .maybeSingle()
 
     if (latestVersionError) {
-      throw new Error(
-        `Failed to get latest version: ${latestVersionError.message}`,
-      )
+      return {
+        success: false,
+        error: `Failed to get latest version: ${latestVersionError.message}`,
+      }
     }
 
     // Get the actual latest version number

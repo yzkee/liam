@@ -99,6 +99,26 @@ export type ArtifactResult =
       error: string
     }
 
+export type CreateWorkflowRunParams = {
+  designSessionId: string
+  runId: string
+}
+
+export type WorkflowRunResult =
+  | {
+      success: true
+      workflowRun: Tables<'workflow_runs'>
+    }
+  | {
+      success: false
+      error: string
+    }
+
+export type UpdateWorkflowRunStatusParams = {
+  runId: string
+  status: Database['public']['Enums']['workflow_run_status']
+}
+
 /**
  * Schema repository interface for data access abstraction
  */
@@ -157,6 +177,18 @@ export type SchemaRepository = {
    * Get artifact for a design session
    */
   getArtifact(designSessionId: string): Promise<ArtifactResult>
+
+  /**
+   * Create a new workflow run record
+   */
+  createWorkflowRun(params: CreateWorkflowRunParams): Promise<WorkflowRunResult>
+
+  /**
+   * Update workflow run status
+   */
+  updateWorkflowRunStatus(
+    params: UpdateWorkflowRunStatusParams,
+  ): Promise<WorkflowRunResult>
 }
 
 /**

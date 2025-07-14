@@ -166,6 +166,8 @@ describe('Chat Workflow', () => {
       updateArtifact: vi.fn(),
       getArtifact: vi.fn(),
       updateTimelineItem: vi.fn(),
+      createWorkflowRun: vi.fn(),
+      updateWorkflowRunStatus: vi.fn(),
     } as SchemaRepository
 
     mockRepositories = {
@@ -280,6 +282,34 @@ describe('Chat Workflow', () => {
         artifact: {
           requirement_analysis: { business_requirement: '', requirements: [] },
         },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+    })
+
+    // Setup createWorkflowRun mock
+    vi.mocked(mockSchemaRepository.createWorkflowRun).mockResolvedValue({
+      success: true,
+      workflowRun: {
+        id: 'test-workflow-run-id',
+        run_id: 'test-run-id',
+        design_session_id: 'test-design-session-id',
+        organization_id: 'test-org-id',
+        status: 'pending' as const,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+    })
+
+    // Setup updateWorkflowRunStatus mock
+    vi.mocked(mockSchemaRepository.updateWorkflowRunStatus).mockResolvedValue({
+      success: true,
+      workflowRun: {
+        id: 'test-workflow-run-id',
+        run_id: 'test-run-id',
+        design_session_id: 'test-design-session-id',
+        organization_id: 'test-org-id',
+        status: 'success' as const,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       },

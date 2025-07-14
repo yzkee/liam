@@ -9,7 +9,7 @@ import type {
   ForeignKeyConstraint,
   Index,
   Table,
-} from '../../schema/index.js'
+} from '../../../schema/index.js'
 import {
   convertDefaultValue,
   convertDrizzleTypeToPgType,
@@ -185,7 +185,11 @@ const fixForeignKeyTargetColumnNames = (
 ): void => {
   for (const table of Object.values(tables)) {
     for (const constraint of Object.values(table.constraints)) {
-      if (constraint.type === 'FOREIGN KEY') {
+      if (
+        constraint.type === 'FOREIGN KEY' &&
+        'targetTableName' in constraint &&
+        'targetColumnName' in constraint
+      ) {
         // Check in drizzleTables for column mapping
         const drizzleTargetTable = drizzleTables[constraint.targetTableName]
         if (drizzleTargetTable) {

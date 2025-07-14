@@ -291,7 +291,7 @@ describe('Chat Workflow', () => {
     it('should handle Build mode with structured JSON response and schema changes', async () => {
       const structuredResponse = {
         message: 'Added created_at column to users table',
-        schemaChanges: [
+        operations: [
           {
             op: 'add',
             path: '/tables/users/columns/created_at',
@@ -309,7 +309,7 @@ describe('Chat Workflow', () => {
         ResultAsync.fromSafePromise(
           Promise.resolve({
             message: new AIMessage(structuredResponse.message),
-            operations: structuredResponse.schemaChanges,
+            operations: structuredResponse.operations,
           }),
         ),
       )
@@ -370,7 +370,7 @@ describe('Chat Workflow', () => {
     it('should handle schema update failure', async () => {
       const structuredResponse = {
         message: 'Attempted to add created_at column',
-        schemaChanges: [
+        operations: [
           {
             op: 'add',
             path: '/tables/users/columns/created_at',
@@ -383,7 +383,7 @@ describe('Chat Workflow', () => {
         ResultAsync.fromSafePromise(
           Promise.resolve({
             message: new AIMessage(structuredResponse.message),
-            operations: structuredResponse.schemaChanges,
+            operations: structuredResponse.operations,
           }),
         ),
       )
@@ -413,7 +413,7 @@ describe('Chat Workflow', () => {
     it('should handle schema update exception', async () => {
       const structuredResponse = {
         message: 'Attempted to add created_at column',
-        schemaChanges: [
+        operations: [
           {
             op: 'add',
             path: '/tables/users/columns/created_at',
@@ -426,7 +426,7 @@ describe('Chat Workflow', () => {
         ResultAsync.fromSafePromise(
           Promise.resolve({
             message: new AIMessage(structuredResponse.message),
-            operations: structuredResponse.schemaChanges,
+            operations: structuredResponse.operations,
           }),
         ),
       )

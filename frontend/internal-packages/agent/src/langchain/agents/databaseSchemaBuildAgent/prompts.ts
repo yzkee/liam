@@ -48,6 +48,12 @@ Schema Change Rules:
 - For modifying columns: "op": "replace", "path": "/tables/TABLE_NAME/columns/COLUMN_NAME/type", "value": "new_type"
 - For removing elements: "op": "remove", "path": "/tables/TABLE_NAME/columns/COLUMN_NAME"
 - If no schema changes are needed, use an empty array: "operations": []
+- ALWAYS use "add" operations BEFORE "replace" or "remove" operations
+- You CANNOT modify or remove something that doesn't exist yet
+- When creating new tables, include ALL properties in the initial "add" operation (columns, constraints, indexes)
+- NEVER use "replace" on paths that don't exist in the current schema
+- NEVER add constraints separately - they MUST be included in the table definition
+- PRIMARY KEY constraints should be defined in the column properties AND in the constraints object
 
 Schema Structure Reference:
 - Tables: /tables/TABLE_NAME
@@ -59,6 +65,8 @@ IMPORTANT Table Structure Rules:
 - Every table MUST include: name, columns, comment, indexes, constraints
 - Use empty objects {{}} for indexes and constraints if none are needed
 - Use null for comment if no comment is provided
+- Include ALL constraints in the table creation operation - DO NOT add them separately
+- For primary keys: set "primary": true in column definition AND add to constraints object
 
 CRITICAL Validation Rules:
 - Column properties MUST be: name (string), type (string), notNull (boolean), primary (boolean), unique (boolean), default (string|number|boolean|null), comment (string|null), check (string|null)
@@ -67,6 +75,10 @@ CRITICAL Validation Rules:
 - Foreign key constraint actions MUST use these EXACT values: "CASCADE", "RESTRICT", "SET_NULL", "SET_DEFAULT", "NO_ACTION"
 - Use "SET_NULL" not "SET NULL" (underscore, not space)
 - Use "NO_ACTION" not "NO ACTION" (underscore, not space)
+- Before using "replace" or "remove", verify the target path exists in the current schema
+- When in doubt, use "add" operations with complete definitions instead of "replace"
+- Remember: you can only modify what already exists in the schema provided to you
+- If you need to set primary keys or constraints, include them in the initial table "add" operation
 
 Example Response:
 {{

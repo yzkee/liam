@@ -161,7 +161,7 @@ export const VersionMessage: FC<Props> = ({ buildingSchemaVersionId }) => {
               <div className={styles.pathContainer}>
                 {operation.path.map((part, partIndex) => (
                   // biome-ignore lint/suspicious/noArrayIndexKey: Path parts maintain their order
-                  <Fragment key={`${part}-${partIndex}`}>
+                  <Fragment key={`${buildingSchemaVersionId}-${partIndex}`}>
                     {partIndex > 0 && (
                       <div className={styles.arrowContainer}>
                         <ArrowRight />

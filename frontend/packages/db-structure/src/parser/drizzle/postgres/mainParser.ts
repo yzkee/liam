@@ -161,5 +161,4 @@ const parseDrizzleSchemaString = (
   }
 }
 
-export const processor: Processor = (str: string) =>
-  parseDrizzleSchemaString(str)
+export const processor: Processor = parseDrizzleSchemaString

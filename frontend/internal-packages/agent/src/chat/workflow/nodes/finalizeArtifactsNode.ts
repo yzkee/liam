@@ -1,6 +1,5 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
 import type { Repositories } from '../../../repositories'
-import type { NodeLogger } from '../../../utils/nodeLogger'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 import { logAssistantMessage } from '../utils/timelineLogger'
@@ -9,23 +8,18 @@ import {
   transformWorkflowStateToArtifact,
 } from '../utils/transformWorkflowStateToArtifact'
 
-const NODE_NAME = 'finalizeArtifactsNode'
-
 /**
  * Save artifacts if workflow state contains artifact data
  */
 async function saveArtifacts(
   state: WorkflowState,
-  logger: NodeLogger,
   repositories: Repositories,
 ): Promise<void> {
   if (!state.analyzedRequirements && !state.generatedUsecases) {
-    logger.log(`[${NODE_NAME}] No artifact data available to save`)
     return
   }
 
-  await logAssistantMessage(state, 'Saving artifacts...')
-  state.logger.log(`[${NODE_NAME}] Saving artifacts`)
+  await logAssistantMessage(state, repositories, 'Saving artifacts...')
   const artifact = transformWorkflowStateToArtifact(state)
   const artifactResult = await createOrUpdateArtifact(
     state,
@@ -34,13 +28,13 @@ async function saveArtifacts(
   )
 
   if (artifactResult.success) {
-    state.logger.log(`[${NODE_NAME}] Artifacts saved successfully`)
-    await logAssistantMessage(state, 'Artifacts saved successfully')
-  } else {
-    state.logger.log(
-      `[${NODE_NAME}] Failed to save artifacts: ${artifactResult.error}`,
+    await logAssistantMessage(
+      state,
+      repositories,
+      'Artifacts saved successfully',
     )
-    await logAssistantMessage(state, 'Failed to save artifacts')
+  } else {
+    await logAssistantMessage(state, repositories, 'Failed to save artifacts')
   }
 }
 
@@ -74,7 +68,7 @@ async function generateFinalResponse(
   finalResponse: string
   errorToReturn: string | undefined
 }> {
-  await logAssistantMessage(state, 'Generating final response...')
+  await logAssistantMessage(state, repositories, 'Generating final response...')
 
   if (state.error) {
     const finalResponse = `Sorry, an error occurred during processing: ${state.error.message}`
@@ -83,7 +77,11 @@ async function generateFinalResponse(
   }
 
   if (state.generatedAnswer) {
-    await logAssistantMessage(state, 'Final response generated successfully')
+    await logAssistantMessage(
+      state,
+      repositories,
+      'Final response generated successfully',
+    )
     await saveTimelineItem(
       state,
       state.generatedAnswer,
@@ -115,19 +113,19 @@ export async function finalizeArtifactsNode(
       error: configurableResult.error,
     }
   }
-  const { repositories, logger } = configurableResult.value
+  const { repositories } = configurableResult.value
 
-  logger.log(`[${NODE_NAME}] Started`)
+  await logAssistantMessage(
+    state,
+    repositories,
+    'Preparing final deliverables...',
+  )
 
-  await logAssistantMessage(state, 'Preparing final deliverables...')
-
-  await saveArtifacts(state, logger, repositories)
+  await saveArtifacts(state, repositories)
   const { finalResponse, errorToReturn } = await generateFinalResponse(
     state,
     repositories,
   )
-
-  logger.log(`[${NODE_NAME}] Completed`)
 
   return {
     ...state,

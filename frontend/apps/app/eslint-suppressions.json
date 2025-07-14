@@ -46,7 +46,7 @@
   },
   "app/(app)/app/design_sessions/[id]/page.tsx": {
     "no-throw-error/no-throw-error": {
-      "count": 4
+      "count": 1
     }
   },
   "app/api/webhook/github/route.ts": {
@@ -107,6 +107,11 @@
       "count": 1
     }
   },
+  "components/SessionDetailPage/SessionDetailPage.tsx": {
+    "no-throw-error/no-throw-error": {
+      "count": 2
+    }
+  },
   "components/SessionDetailPage/components/Chat/components/ChatInput/ChatInput.tsx": {
     "@typescript-eslint/consistent-type-assertions": {
       "count": 2
@@ -148,6 +153,16 @@
     }
   },
   "components/SessionDetailPage/hooks/useRealtimeBuildlingSchema.ts": {
+    "no-throw-error/no-throw-error": {
+      "count": 1
+    }
+  },
+  "components/SessionDetailPage/hooks/useRealtimeTimelineItems/useRealtimeTimelineItems.ts": {
+    "no-throw-error/no-throw-error": {
+      "count": 1
+    }
+  },
+  "components/SessionDetailPage/services/designSessionWithTimelineItems/fetchDesignSessionWithTimelineItems.ts": {
     "no-throw-error/no-throw-error": {
       "count": 1
     }

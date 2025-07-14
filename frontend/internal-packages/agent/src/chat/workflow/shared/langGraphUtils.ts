@@ -1,3 +1,4 @@
+import type { BaseMessage } from '@langchain/core/messages'
 import { Annotation } from '@langchain/langgraph'
 import type { Schema } from '@liam-hq/db-structure'
 import type { Usecase } from '../../../langchain/agents/qaGenerateUsecaseAgent/agent'
@@ -28,6 +29,7 @@ export const DEFAULT_RECURSION_LIMIT = 20
  */
 export const createAnnotations = () => {
   return Annotation.Root({
+    messages: Annotation<BaseMessage[]>,
     userInput: Annotation<string>,
     analyzedRequirements: Annotation<
       | {
@@ -40,7 +42,6 @@ export const createAnnotations = () => {
     generatedUsecases: Annotation<Usecase[] | undefined>,
     generatedAnswer: Annotation<string | undefined>,
     finalResponse: Annotation<string | undefined>,
-    formattedHistory: Annotation<string>,
     schemaData: Annotation<Schema>,
     projectId: Annotation<string | undefined>,
     buildingSchemaId: Annotation<string>,
@@ -52,6 +53,7 @@ export const createAnnotations = () => {
     retryCount: Annotation<Record<string, number>>,
 
     ddlStatements: Annotation<string | undefined>,
+    dmlStatements: Annotation<string | undefined>,
 
     // DDL execution retry mechanism
     shouldRetryWithDesignSchema: Annotation<boolean | undefined>,

@@ -2,7 +2,13 @@
 
 import type { Json, Tables } from '@liam-hq/db'
 import { operationsSchema } from '@liam-hq/db-structure'
-import { ArrowRight, Check, ChevronDown, ChevronRight } from '@liam-hq/ui'
+import {
+  ArrowRight,
+  Button,
+  Check,
+  ChevronDown,
+  ChevronRight,
+} from '@liam-hq/ui'
 import clsx from 'clsx'
 import { type FC, Fragment, useEffect, useState, useTransition } from 'react'
 import * as v from 'valibot'
@@ -83,9 +89,13 @@ type BuildingSchemaVersion = Pick<
 
 type Props = {
   buildingSchemaVersionId: string
+  onView?: () => void
 }
 
-export const VersionMessage: FC<Props> = ({ buildingSchemaVersionId }) => {
+export const VersionMessage: FC<Props> = ({
+  buildingSchemaVersionId,
+  onView,
+}) => {
   const [version, setVersion] = useState<BuildingSchemaVersion | null>(null)
   const [isPending, startTransition] = useTransition()
   const [isExpanded, setIsExpanded] = useState(false)
@@ -114,10 +124,12 @@ export const VersionMessage: FC<Props> = ({ buildingSchemaVersionId }) => {
     return (
       <div className={styles.container}>
         <div className={styles.header}>
-          <div className={styles.collapseButton}>
-            <ChevronRight />
-          </div>
-          <span className={styles.versionNumber}>Loading version...</span>
+          <button type="button" className={styles.headerButton} disabled>
+            <div className={styles.collapseButton}>
+              <ChevronRight />
+            </div>
+            <span className={styles.versionNumber}>Loading version...</span>
+          </button>
         </div>
       </div>
     )
@@ -132,18 +144,30 @@ export const VersionMessage: FC<Props> = ({ buildingSchemaVersionId }) => {
 
   return (
     <div className={clsx(styles.container, isExpanded && styles.expanded)}>
-      <button
-        type="button"
-        className={clsx(styles.header, isExpanded && styles.expanded)}
-        onClick={toggleExpanded}
-      >
-        <div className={styles.collapseButton}>
-          {isExpanded ? <ChevronDown /> : <ChevronRight />}
-        </div>
-        <span className={styles.versionNumber}>
-          Version {displayVersionNumber}
-        </span>
-      </button>
+      <div className={clsx(styles.header, isExpanded && styles.expanded)}>
+        <button
+          type="button"
+          className={styles.headerButton}
+          onClick={toggleExpanded}
+        >
+          <div className={styles.collapseButton}>
+            {isExpanded ? <ChevronDown /> : <ChevronRight />}
+          </div>
+          <span className={styles.versionNumber}>
+            Version {displayVersionNumber}
+          </span>
+        </button>
+        {onView && (
+          <Button
+            variant="outline-secondary"
+            size="xs"
+            onClick={onView}
+            className={styles.viewButton}
+          >
+            View
+          </Button>
+        )}
+      </div>
 
       <div className={styles.divider} />
       <div

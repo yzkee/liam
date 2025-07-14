@@ -23,6 +23,7 @@ type Story = StoryObj<typeof meta>
 export const MultipleOperationsClosed: Story = {
   args: {
     versionNumber: 1,
+    onView: () => {},
     operations: [
       {
         path: ['tables', 'users', 'columns', 'email'],
@@ -74,6 +75,7 @@ export const EmptyOperationsClosed: Story = {
     versionNumber: 1,
     operations: [],
     initialExpanded: false,
+    onView: () => {},
   },
   name: 'Empty Operations (Closed)',
 }
@@ -91,6 +93,7 @@ export const EmptyOperationsOpen: Story = {
 export const ManyOperationsClosed: Story = {
   args: {
     versionNumber: 3,
+    onView: () => {},
     operations: [
       {
         path: ['tables', 'users', 'columns', 'email'],

@@ -1,6 +1,12 @@
 'use client'
 
-import { ArrowRight, Check, ChevronDown, ChevronRight } from '@liam-hq/ui'
+import {
+  ArrowRight,
+  Button,
+  Check,
+  ChevronDown,
+  ChevronRight,
+} from '@liam-hq/ui'
 import clsx from 'clsx'
 import { type FC, Fragment, useState } from 'react'
 import type { StatusClass } from './VersionMessage'
@@ -16,12 +22,14 @@ type Props = {
   versionNumber: number
   operations: Operation[]
   initialExpanded?: boolean
+  onView?: () => void
 }
 
 export const VersionMessageDemo: FC<Props> = ({
   versionNumber,
   operations,
   initialExpanded = false,
+  onView,
 }) => {
   const [isExpanded, setIsExpanded] = useState(initialExpanded)
 
@@ -31,16 +39,28 @@ export const VersionMessageDemo: FC<Props> = ({
 
   return (
     <div className={clsx(styles.container, isExpanded && styles.expanded)}>
-      <button
-        type="button"
-        className={clsx(styles.header, isExpanded && styles.expanded)}
-        onClick={toggleExpanded}
-      >
-        <div className={styles.collapseButton}>
-          {isExpanded ? <ChevronDown /> : <ChevronRight />}
-        </div>
-        <span className={styles.versionNumber}>Version {versionNumber}</span>
-      </button>
+      <div className={clsx(styles.header, isExpanded && styles.expanded)}>
+        <button
+          type="button"
+          className={styles.headerButton}
+          onClick={toggleExpanded}
+        >
+          <div className={styles.collapseButton}>
+            {isExpanded ? <ChevronDown /> : <ChevronRight />}
+          </div>
+          <span className={styles.versionNumber}>Version {versionNumber}</span>
+        </button>
+        {onView && (
+          <Button
+            variant="outline-secondary"
+            size="xs"
+            onClick={onView}
+            className={styles.viewButton}
+          >
+            View
+          </Button>
+        )}
+      </div>
 
       <div className={styles.divider} />
       <div

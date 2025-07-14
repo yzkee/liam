@@ -13,12 +13,9 @@
 .header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 8px 6px;
-  cursor: pointer;
-  background: transparent;
-  border: none;
   width: 100%;
-  text-align: left;
   transition: background-color 0.2s ease;
 }
 
@@ -32,6 +29,29 @@
 
 .header.expanded:hover {
   background: var(--overlay-5);
+}
+
+.headerButton {
+  display: flex;
+  align-items: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  flex: 1;
+  text-align: left;
+}
+
+.headerButton:disabled {
+  cursor: default;
+}
+
+.viewButton {
+  min-width: auto;
+}
+
+.viewButton :global(.wrapper) {
+  min-width: auto;
 }
 
 .collapseButton {

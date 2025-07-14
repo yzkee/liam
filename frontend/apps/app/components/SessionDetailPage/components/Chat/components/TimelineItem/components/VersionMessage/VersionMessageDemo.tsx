@@ -46,6 +46,7 @@ export const VersionMessageDemo: FC<Props> = ({
           onClick={toggleExpanded}
           aria-label={`${isExpanded ? 'Collapse' : 'Expand'} version ${versionNumber} details`}
           aria-expanded={isExpanded}
+          id={`version-header-${versionNumber}`}
         >
           <div className={styles.collapseButton}>
             {isExpanded ? <ChevronDown /> : <ChevronRight />}
@@ -65,8 +66,9 @@ export const VersionMessageDemo: FC<Props> = ({
       </div>
 
       <div className={styles.divider} />
-      <div
+      <section
         className={clsx(styles.contentWrapper, isExpanded && styles.expanded)}
+        aria-labelledby={`version-header-${versionNumber}`}
       >
         <div className={styles.content}>
           {operations.map((operation, index) => (
@@ -117,7 +119,7 @@ export const VersionMessageDemo: FC<Props> = ({
             </div>
           )}
         </div>
-      </div>
+      </section>
     </div>
   )
 }

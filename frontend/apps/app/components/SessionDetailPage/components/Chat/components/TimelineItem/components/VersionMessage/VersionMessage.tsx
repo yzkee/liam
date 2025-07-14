@@ -157,6 +157,7 @@ export const VersionMessage: FC<Props> = ({
           onClick={toggleExpanded}
           aria-label={`${isExpanded ? 'Collapse' : 'Expand'} version ${displayVersionNumber} details`}
           aria-expanded={isExpanded}
+          id={`version-header-${buildingSchemaVersionId}`}
         >
           <div className={styles.collapseButton}>
             {isExpanded ? <ChevronDown /> : <ChevronRight />}
@@ -178,8 +179,9 @@ export const VersionMessage: FC<Props> = ({
       </div>
 
       <div className={styles.divider} />
-      <div
+      <section
         className={clsx(styles.contentWrapper, isExpanded && styles.expanded)}
+        aria-labelledby={`version-header-${buildingSchemaVersionId}`}
       >
         <div className={styles.content}>
           {patchOperations.map((operation, index) => (
@@ -229,7 +231,7 @@ export const VersionMessage: FC<Props> = ({
             </div>
           )}
         </div>
-      </div>
+      </section>
     </div>
   )
 }

@@ -185,11 +185,7 @@ const fixForeignKeyTargetColumnNames = (
 ): void => {
   for (const table of Object.values(tables)) {
     for (const constraint of Object.values(table.constraints)) {
-      if (
-        constraint.type === 'FOREIGN KEY' &&
-        'targetTableName' in constraint &&
-        'targetColumnName' in constraint
-      ) {
+      if (constraint.type === 'FOREIGN KEY') {
         // Check in drizzleTables for column mapping
         const drizzleTargetTable = drizzleTables[constraint.targetTableName]
         if (drizzleTargetTable) {

@@ -377,10 +377,53 @@ async function parseTblsSchema(schemaString: string): Promise<ProcessResult> {
     comment?: string | null
   }
 
+  function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null
+  }
+
+  function isCompatibleTable(table: unknown): table is CompatibleTable {
+    if (typeof table !== 'object' || table === null) {
+      return false
+    }
+
+    if (isRecord(table)) {
+      const tableObj: Record<string, unknown> = table
+      // use tableObj safely here
+      if (typeof tableObj['name'] !== 'string') {
+        return false
+      }
+
+      if (!Array.isArray(tableObj['columns'])) {
+        return false
+      }
+
+      return tableObj['columns'].every((col: unknown) => {
+        if (typeof col !== 'object' || col === null) {
+          return false
+        }
+
+        if (isRecord(col)) {
+          const colObj: Record<string, unknown> = col
+
+          return (
+            typeof colObj['name'] === 'string' &&
+            typeof colObj['type'] === 'string' &&
+            typeof colObj['nullable'] === 'boolean'
+          )
+        }
+        return false
+      })
+    }
+
+    return false
+  }
+
   // Process tables
   for (const tblsTable of result.data.tables) {
-    // Use type assertion with a specific type
-    const [tableName, table] = processTable(tblsTable as CompatibleTable)
+    if (!isCompatibleTable(tblsTable)) {
+      continue
+    }
+    const [tableName, table] = processTable(tblsTable)
     tables[tableName] = table
   }
 

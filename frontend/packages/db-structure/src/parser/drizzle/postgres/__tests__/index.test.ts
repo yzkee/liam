@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import type { Constraint, Table } from '../../../../schema/index.js'
-import { aColumn, anIndex, aSchema, aTable } from '../../../../schema/index.js'
-import { createParserTestCases } from '../../../__tests__/index.js'
+import { createParserTestCases } from '@/parser/__tests__/index.js'
+import type { Constraint, Table } from '@/schema/index.js'
+import { aColumn, anIndex, aSchema, aTable } from '@/schema/index.js'
 import { processor as _processor } from '../index.js'
 
 describe(_processor, () => {

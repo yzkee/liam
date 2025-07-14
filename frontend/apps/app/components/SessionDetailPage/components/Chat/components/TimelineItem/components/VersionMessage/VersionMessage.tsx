@@ -124,7 +124,13 @@ export const VersionMessage: FC<Props> = ({
     return (
       <div className={styles.container}>
         <div className={styles.header}>
-          <button type="button" className={styles.headerButton} disabled>
+          <button
+            type="button"
+            className={styles.headerButton}
+            disabled
+            aria-label="Loading version details"
+            aria-expanded={false}
+          >
             <div className={styles.collapseButton}>
               <ChevronRight />
             </div>
@@ -149,6 +155,8 @@ export const VersionMessage: FC<Props> = ({
           type="button"
           className={styles.headerButton}
           onClick={toggleExpanded}
+          aria-label={`${isExpanded ? 'Collapse' : 'Expand'} version ${displayVersionNumber} details`}
+          aria-expanded={isExpanded}
         >
           <div className={styles.collapseButton}>
             {isExpanded ? <ChevronDown /> : <ChevronRight />}

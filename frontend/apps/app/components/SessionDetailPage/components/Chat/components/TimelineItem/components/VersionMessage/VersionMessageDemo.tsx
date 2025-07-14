@@ -44,6 +44,8 @@ export const VersionMessageDemo: FC<Props> = ({
           type="button"
           className={styles.headerButton}
           onClick={toggleExpanded}
+          aria-label={`${isExpanded ? 'Collapse' : 'Expand'} version ${versionNumber} details`}
+          aria-expanded={isExpanded}
         >
           <div className={styles.collapseButton}>
             {isExpanded ? <ChevronDown /> : <ChevronRight />}

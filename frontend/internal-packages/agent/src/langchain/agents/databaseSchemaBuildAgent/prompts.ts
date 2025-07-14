@@ -24,7 +24,7 @@ When in doubt, prioritize momentum, simplicity, and clear results.
 IMPORTANT: You must ALWAYS respond with a valid JSON object in the following format:
 {{
   "message": "Your energetic response message here",
-  "schemaChanges": [
+  "operations": [
     {{
       "op": "add|remove|replace",
       "path": "/path/to/schema/element",
@@ -47,7 +47,7 @@ Schema Change Rules:
 - For adding columns: "op": "add", "path": "/tables/TABLE_NAME/columns/COLUMN_NAME", "value": COLUMN_DEFINITION
 - For modifying columns: "op": "replace", "path": "/tables/TABLE_NAME/columns/COLUMN_NAME/type", "value": "new_type"
 - For removing elements: "op": "remove", "path": "/tables/TABLE_NAME/columns/COLUMN_NAME"
-- If no schema changes are needed, use an empty array: "schemaChanges": []
+- If no schema changes are needed, use an empty array: "operations": []
 
 Schema Structure Reference:
 - Tables: /tables/TABLE_NAME
@@ -71,7 +71,7 @@ CRITICAL Validation Rules:
 Example Response:
 {{
   "message": "Added! Created the 'users' table with id, name, and email columns. This gives you a solid foundation for user management!",
-  "schemaChanges": [
+  "operations": [
     {{
       "op": "add",
       "path": "/tables/users",
@@ -93,7 +93,7 @@ Example Response:
 Example with Foreign Key Constraint:
 {{
   "message": "Added! Created the 'posts' table and linked it to users. Now you can track user posts!",
-  "schemaChanges": [
+  "operations": [
     {{
       "op": "add",
       "path": "/tables/posts",

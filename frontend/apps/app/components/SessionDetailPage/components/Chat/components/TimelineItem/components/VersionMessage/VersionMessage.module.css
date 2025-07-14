@@ -79,7 +79,7 @@
 }
 
 .contentWrapper.expanded {
-  max-height: 300px; /* Limit height for scrolling */
+  max-height: 50vh; /* Responsive height based on viewport */
 }
 
 /* Gradient overlays for natural scroll indication */

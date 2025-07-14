@@ -198,7 +198,11 @@ export async function designSchemaNode(
   // Clear retry flags after processing
   const finalResult = {
     ...result,
-    messages: [...messages, invokeResult.value.message],
+    messages: [
+      ...state.messages,
+      new HumanMessage(userMessage),
+      invokeResult.value.message,
+    ],
     shouldRetryWithDesignSchema: undefined,
     ddlExecutionFailureReason: undefined,
   }

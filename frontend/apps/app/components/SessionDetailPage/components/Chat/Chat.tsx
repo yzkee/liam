@@ -13,9 +13,6 @@ import { useScrollToBottom } from './useScrollToBottom'
 type Props = {
   schemaData: Schema
   designSessionId: string
-  organizationId: string
-  buildingSchemaId: string
-  latestVersionNumber?: number
   timelineItems: TimelineItemEntry[]
   onMessageSend: (entry: TimelineItemEntry) => void
 }
@@ -23,9 +20,6 @@ type Props = {
 export const Chat: FC<Props> = ({
   schemaData,
   designSessionId,
-  organizationId,
-  buildingSchemaId,
-  latestVersionNumber,
   timelineItems,
   onMessageSend,
 }) => {
@@ -38,12 +32,8 @@ export const Chat: FC<Props> = ({
   const startAIResponse = async (content: string) => {
     // Send chat message to API
     const result = await sendChatMessage({
-      timelineItems,
       userInput: content,
       designSessionId,
-      organizationId,
-      buildingSchemaId,
-      latestVersionNumber,
     })
 
     if (result.success) {

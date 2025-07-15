@@ -3,7 +3,7 @@
   --default-animation-duration: 300ms;
   --default-hover-animation-duration: 100ms;
 
-  --code-font: 
+  --code-font:
     'ui-monospace', 'IBM·Plex·Mono', SF Mono, Menlo, Monaco, Consolas, monospace;
 
   --z-index-toolbar-closed: 800;

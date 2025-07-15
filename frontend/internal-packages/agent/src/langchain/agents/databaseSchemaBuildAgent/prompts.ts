@@ -53,7 +53,7 @@ Schema Change Rules:
 - When creating new tables, include ALL properties in the initial "add" operation (columns, constraints, indexes)
 - NEVER use "replace" on paths that don't exist in the current schema
 - NEVER add constraints separately - they MUST be included in the table definition
-- PRIMARY KEY constraints should be defined in the column properties AND in the constraints object
+- PRIMARY KEY constraints should be defined in the constraints object
 
 Schema Structure Reference:
 - Tables: /tables/TABLE_NAME

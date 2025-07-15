@@ -52,7 +52,7 @@ Schema Change Rules:
 Schema Structure Reference:
 - Tables: /tables/TABLE_NAME
 - Columns: /tables/TABLE_NAME/columns/COLUMN_NAME
-- Column properties: type, notNull, primary, unique, default, comment, check
+- Column properties: type, notNull, unique, default, comment, check
 - Table properties: name, columns, comment, indexes, constraints (ALL REQUIRED)
 
 IMPORTANT Table Structure Rules:
@@ -61,7 +61,7 @@ IMPORTANT Table Structure Rules:
 - Use null for comment if no comment is provided
 
 CRITICAL Validation Rules:
-- Column properties MUST be: name (string), type (string), notNull (boolean), primary (boolean), unique (boolean), default (string|number|boolean|null), comment (string|null), check (string|null)
+- Column properties MUST be: name (string), type (string), notNull (boolean), unique (boolean), default (string|number|boolean|null), comment (string|null), check (string|null)
 - All boolean values must be true/false, not strings
 - Constraint types: "PRIMARY KEY", "FOREIGN KEY", "UNIQUE", "CHECK"
 - Foreign key constraint actions MUST use these EXACT values: "CASCADE", "RESTRICT", "SET_NULL", "SET_DEFAULT", "NO_ACTION"
@@ -78,13 +78,19 @@ Example Response:
       "value": {{
         "name": "users",
         "columns": {{
-          "id": {{"name": "id", "type": "uuid", "notNull": true, "primary": true, "default": "gen_random_uuid()", "comment": "Unique identifier for each user", "check": null, "unique": false}},
-          "name": {{"name": "name", "type": "text", "notNull": true, "primary": false, "default": null, "comment": "Name of the user", "check": null, "unique": false}},
-          "email": {{"name": "email", "type": "text", "notNull": true, "primary": false, "default": null, "comment": "User email required for login", "check": null, "unique": true}}
+          "id": {{"name": "id", "type": "uuid", "notNull": true, "default": "gen_random_uuid()", "comment": "Unique identifier for each user", "check": null, "unique": false}},
+          "name": {{"name": "name", "type": "text", "notNull": true, "default": null, "comment": "Name of the user", "check": null, "unique": false}},
+          "email": {{"name": "email", "type": "text", "notNull": true, "default": null, "comment": "User email required for login", "check": null, "unique": true}}
         }},
         "comment": null,
         "indexes": {{}},
-        "constraints": {{}}
+        "constraints": {{
+          "pk_users": {{
+            "type": "PRIMARY KEY",
+            "name": "pk_users",
+            "columnNames": ["id"]
+          }}
+        }}
       }}
     }}
   ]
@@ -100,13 +106,18 @@ Example with Foreign Key Constraint:
       "value": {{
         "name": "posts",
         "columns": {{
-          "id": {{"name": "id", "type": "uuid", "notNull": true, "primary": true, "default": "gen_random_uuid()", "comment": "Primary key for posts", "check": null, "unique": false}},
-          "title": {{"name": "title", "type": "text", "notNull": true, "primary": false, "default": null, "comment": "Post title", "check": null, "unique": false}},
-          "user_id": {{"name": "user_id", "type": "uuid", "notNull": true, "primary": false, "default": null, "comment": "References the user who created the post", "check": null, "unique": false}}
+          "id": {{"name": "id", "type": "uuid", "notNull": true, "default": "gen_random_uuid()", "comment": "Primary key for posts", "check": null, "unique": false}},
+          "title": {{"name": "title", "type": "text", "notNull": true, "default": null, "comment": "Post title", "check": null, "unique": false}},
+          "user_id": {{"name": "user_id", "type": "uuid", "notNull": true, "default": null, "comment": "References the user who created the post", "check": null, "unique": false}}
         }},
         "comment": null,
         "indexes": {{}},
         "constraints": {{
+          "pk_posts": {{
+            "type": "PRIMARY KEY",
+            "name": "pk_posts",
+            "columnNames": ["id"]
+          }},
           "posts_user_fk": {{
             "type": "FOREIGN KEY",
             "name": "posts_user_fk",

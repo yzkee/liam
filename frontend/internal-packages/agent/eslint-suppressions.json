@@ -11,7 +11,7 @@
   },
   "src/repositories/supabase.ts": {
     "no-throw-error/no-throw-error": {
-      "count": 3
+      "count": 2
     }
   },
   "src/vectorstore/supabaseVectorStore.ts": {

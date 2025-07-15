@@ -85,9 +85,9 @@ Example Response:
         "comment": null,
         "indexes": {{}},
         "constraints": {{
-          "users_pkey": {{
+          "pk_users": {{
             "type": "PRIMARY KEY",
-            "name": "users_pkey",
+            "name": "pk_users",
             "columnNames": ["id"]
           }}
         }}

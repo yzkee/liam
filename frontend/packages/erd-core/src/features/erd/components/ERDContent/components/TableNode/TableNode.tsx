@@ -9,7 +9,7 @@ import type { NodeProps } from '@xyflow/react'
 import clsx from 'clsx'
 import type { FC } from 'react'
 import type { TableNodeType } from '@/features/erd/types'
-import { useUserEditing } from '@/stores'
+import { useUserEditingOrThrow } from '@/stores'
 import { TableColumnList } from './TableColumnList'
 import { TableHeader } from './TableHeader'
 import styles from './TableNode.module.css'
@@ -17,11 +17,8 @@ import styles from './TableNode.module.css'
 type Props = NodeProps<TableNodeType>
 
 export const TableNode: FC<Props> = ({ data }) => {
-  const userEditingResult = useUserEditing()
-  if (userEditingResult.isErr()) {
-    throw userEditingResult.error
-  }
-  const { showMode: _showMode } = userEditingResult.value
+  const userEditing = useUserEditingOrThrow()
+  const { showMode: _showMode } = userEditing
   const showMode = data.showMode ?? _showMode
   const name = data?.table?.name
 

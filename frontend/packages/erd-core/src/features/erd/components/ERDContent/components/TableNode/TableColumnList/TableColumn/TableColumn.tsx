@@ -11,7 +11,7 @@ import { type FC, useMemo } from 'react'
 import { match } from 'ts-pattern'
 import { DiffIcon } from '@/features/diff/components/DiffIcon'
 import diffStyles from '@/features/diff/styles/Diff.module.css'
-import { useSchema, useUserEditing } from '@/stores'
+import { useSchemaOrThrow, useUserEditingOrThrow } from '@/stores'
 import { getChangeStatus } from './getChangeStatus'
 import styles from './TableColumn.module.css'
 
@@ -94,16 +94,11 @@ export const TableColumn: FC<TableColumnProps> = ({
   targetCardinality,
   isHighlightedTable,
 }) => {
-  const userEditingResult = useUserEditing()
-  if (userEditingResult.isErr()) {
-    throw userEditingResult.error
-  }
-  const { showDiff } = userEditingResult.value
-  const schemaResult = useSchema()
-  if (schemaResult.isErr()) {
-    throw schemaResult.error
-  }
-  const { diffItems } = schemaResult.value
+  const userEditing = useUserEditingOrThrow()
+  const { showDiff } = userEditing
+
+  const schemaResult = useSchemaOrThrow()
+  const { diffItems } = schemaResult
 
   // Only calculate diff-related values when showDiff is true
   const changeStatus = useMemo(() => {

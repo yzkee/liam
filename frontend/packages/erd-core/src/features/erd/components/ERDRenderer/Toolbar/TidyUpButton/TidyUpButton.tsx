@@ -9,8 +9,8 @@ import {
 import { computeAutoLayout } from '@/features/erd/utils'
 import { toolbarActionLogEvent } from '@/features/gtm/utils'
 import { useCustomReactflow } from '@/features/reactflow/hooks'
-import { useVersion } from '@/providers'
-import { useUserEditing } from '@/stores'
+import { useVersionOrThrow } from '@/providers'
+import { useUserEditingOrThrow } from '@/stores'
 import { ToolbarIconButton } from '../ToolbarIconButton'
 
 type TidyUpButtonProps = {
@@ -24,16 +24,10 @@ export const TidyUpButton: FC<TidyUpButtonProps> = ({
 }) => {
   const { getNodes, getEdges, setNodes } = useReactFlow()
   const { fitView } = useCustomReactflow()
-  const userEditingResult = useUserEditing()
-  if (userEditingResult.isErr()) {
-    throw userEditingResult.error
-  }
-  const { showMode } = userEditingResult.value
-  const versionResult = useVersion()
-  if (versionResult.isErr()) {
-    throw versionResult.error
-  }
-  const { version } = versionResult.value
+  const userEditing = useUserEditingOrThrow()
+  const { showMode } = userEditing
+  const versionResult = useVersionOrThrow()
+  const { version } = versionResult
 
   const handleClick = useCallback(async () => {
     toolbarActionLogEvent({

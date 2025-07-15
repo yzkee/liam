@@ -18,8 +18,8 @@ import { useNodes } from '@xyflow/react'
 import { useCallback, useMemo } from 'react'
 import { isTableNode } from '@/features/erd/utils'
 import { useCustomReactflow } from '@/features/reactflow/hooks'
-import { useVersion } from '@/providers'
-import { useUserEditing } from '@/stores'
+import { useVersionOrThrow } from '@/providers'
+import { useUserEditingOrThrow } from '@/stores'
 import { updateNodesHiddenState } from '../../ERDContent/utils'
 import { CopyLinkButton } from './CopyLinkButton'
 import styles from './LeftPane.module.css'
@@ -27,17 +27,11 @@ import { MenuItemLink, type Props as MenuItemLinkProps } from './MenuItemLink'
 import { TableNameMenuButton } from './TableNameMenuButton'
 
 export const LeftPane = () => {
-  const versionResult = useVersion()
-  if (versionResult.isErr()) {
-    throw versionResult.error
-  }
-  const { version } = versionResult.value
-  const userEditingResult = useUserEditing()
-  if (userEditingResult.isErr()) {
-    throw userEditingResult.error
-  }
+  const versionResult = useVersionOrThrow()
+  const { version } = versionResult
+  const userEditing = useUserEditingOrThrow()
   const { selectedNodeIds, setHiddenNodeIds, resetSelectedNodeIds } =
-    userEditingResult.value
+    userEditing
 
   const { setNodes } = useCustomReactflow()
 

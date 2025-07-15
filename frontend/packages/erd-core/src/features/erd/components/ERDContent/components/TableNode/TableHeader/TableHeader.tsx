@@ -7,7 +7,7 @@ import { DiffIcon } from '@/features/diff/components/DiffIcon'
 import diffStyles from '@/features/diff/styles/Diff.module.css'
 import type { TableNodeData } from '@/features/erd/types'
 import { useCustomReactflow } from '@/features/reactflow/hooks'
-import { useSchema, useUserEditing } from '@/stores'
+import { useSchemaOrThrow, useUserEditingOrThrow } from '@/stores'
 import { getChangeStatus } from './getChangeStatus'
 import styles from './TableHeader.module.css'
 
@@ -17,17 +17,11 @@ type Props = {
 
 export const TableHeader: FC<Props> = ({ data }) => {
   const name = data.table.name
-  const userEditingResult = useUserEditing()
-  if (userEditingResult.isErr()) {
-    throw userEditingResult.error
-  }
-  const { showMode: _showMode, showDiff } = userEditingResult.value
+  const userEditing = useUserEditingOrThrow()
+  const { showMode: _showMode, showDiff } = userEditing
 
-  const schemaResult = useSchema()
-  if (schemaResult.isErr()) {
-    throw schemaResult.error
-  }
-  const { diffItems } = schemaResult.value
+  const schema = useSchemaOrThrow()
+  const { diffItems } = schema
   const showMode = data.showMode ?? _showMode
 
   const isTarget = data.targetColumnCardinalities !== undefined

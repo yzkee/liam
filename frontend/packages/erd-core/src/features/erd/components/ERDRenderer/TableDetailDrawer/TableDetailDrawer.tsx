@@ -1,21 +1,15 @@
 import { DrawerContent, DrawerPortal, DrawerRoot } from '@liam-hq/ui'
 import { type FC, type PropsWithChildren, useCallback } from 'react'
-import { useSchema, useUserEditing } from '@/stores'
+import { useSchemaOrThrow, useUserEditingOrThrow } from '@/stores'
 import { TableDetail } from '../../ERDContent/components/TableNode/TableDetail'
 import styles from './TableDetailDrawer.module.css'
 
 export const TableDetailDrawerRoot: FC<PropsWithChildren> = ({ children }) => {
-  const userEditingResult = useUserEditing()
-  if (userEditingResult.isErr()) {
-    throw userEditingResult.error
-  }
-  const { activeTableName, setActiveTableName } = userEditingResult.value
+  const userEditing = useUserEditingOrThrow()
+  const { activeTableName, setActiveTableName } = userEditing
 
-  const schemaResult = useSchema()
-  if (schemaResult.isErr()) {
-    throw schemaResult.error
-  }
-  const { current } = schemaResult.value
+  const schema = useSchemaOrThrow()
+  const { current } = schema
   const open =
     Object.keys(current.tables).length > 0 && activeTableName !== undefined
 
@@ -40,17 +34,11 @@ export const TableDetailDrawerRoot: FC<PropsWithChildren> = ({ children }) => {
 }
 
 export const TableDetailDrawer: FC = () => {
-  const schemaResult = useSchema()
-  if (schemaResult.isErr()) {
-    throw schemaResult.error
-  }
-  const { current } = schemaResult.value
+  const schema = useSchemaOrThrow()
+  const { current } = schema
 
-  const userEditingResult = useUserEditing()
-  if (userEditingResult.isErr()) {
-    throw userEditingResult.error
-  }
-  const { activeTableName } = userEditingResult.value
+  const userEditing = useUserEditingOrThrow()
+  const { activeTableName } = userEditing
 
   const table = current.tables[activeTableName ?? '']
   const ariaDescribedBy =

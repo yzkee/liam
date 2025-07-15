@@ -18,8 +18,8 @@ import {
 import { useTableSelection } from '@/features/erd/hooks'
 import type { TableNodeType } from '@/features/erd/types'
 import { selectTableLogEvent } from '@/features/gtm/utils'
-import { useVersion } from '@/providers'
-import { useUserEditing } from '@/stores'
+import { useVersionOrThrow } from '@/providers'
+import { useUserEditingOrThrow } from '@/stores'
 import styles from './TableNameMenuButton.module.css'
 import { VisibilityButton } from './VisibilityButton'
 
@@ -37,16 +37,10 @@ export const TableNameMenuButton: FC<Props> = ({
   const nodeId = node.id
   const name = node.data.table.name
   const { selectTable } = useTableSelection()
-  const userEditingResult = useUserEditing()
-  if (userEditingResult.isErr()) {
-    throw userEditingResult.error
-  }
-  const { selectedNodeIds, updateSelectedNodeIds } = userEditingResult.value
-  const versionResult = useVersion()
-  if (versionResult.isErr()) {
-    throw versionResult.error
-  }
-  const { version } = versionResult.value
+  const userEditing = useUserEditingOrThrow()
+  const { selectedNodeIds, updateSelectedNodeIds } = userEditing
+  const versionResult = useVersionOrThrow()
+  const { version } = versionResult
   const textRef = useRef<HTMLSpanElement>(null)
   const [isTruncated, setIsTruncated] = useState(false)
 

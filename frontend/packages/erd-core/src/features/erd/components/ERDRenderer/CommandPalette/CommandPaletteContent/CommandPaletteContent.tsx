@@ -3,7 +3,7 @@ import { DialogClose } from '@radix-ui/react-dialog'
 import { Command } from 'cmdk'
 import { type FC, useCallback, useEffect, useState } from 'react'
 import { useTableSelection } from '@/features/erd/hooks'
-import { useSchema } from '@/stores'
+import { useSchemaOrThrow } from '@/stores'
 import { TableNode } from '../../../ERDContent/components'
 import styles from './CommandPaletteContent.module.css'
 
@@ -18,13 +18,9 @@ type Props = {
 }
 
 export const CommandPaletteContent: FC<Props> = ({ closeDialog }) => {
-  const schema = useSchema()
+  const schema = useSchemaOrThrow()
   const [tableName, setTableName] = useState<string | null>(null)
-  if (schema.isErr()) {
-    throw schema.error
-  }
-  const { current } = schema.value
-  const table = current.tables[tableName ?? '']
+  const table = schema.current.tables[tableName ?? '']
   const { selectTable } = useTableSelection()
 
   const goToERD = useCallback(
@@ -77,7 +73,7 @@ export const CommandPaletteContent: FC<Props> = ({ closeDialog }) => {
         <Command.List>
           <Command.Empty>No results found.</Command.Empty>
           <Command.Group heading="Tables">
-            {Object.values(current.tables).map((table) => (
+            {Object.values(schema.current.tables).map((table) => (
               <Command.Item key={table.name} value={table.name} asChild>
                 <a
                   href={getTableLinkHref(table.name)}

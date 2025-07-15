@@ -2,7 +2,7 @@ import { useCallback, useEffect } from 'react'
 import type { DisplayArea } from '@/features/erd/types'
 import { computeAutoLayout, highlightNodesAndEdges } from '@/features/erd/utils'
 import { useCustomReactflow } from '@/features/reactflow/hooks'
-import { useUserEditing } from '@/stores'
+import { useUserEditingOrThrow } from '@/stores'
 import { hasNonRelatedChildNodes, updateNodesHiddenState } from '../utils'
 import { usePopStateListener } from './usePopStateListener'
 
@@ -15,12 +15,9 @@ export const useQueryParamsChanged = ({ displayArea }: Params) => {
 
   const { getNodes, getEdges, setNodes, setEdges, fitView } =
     useCustomReactflow()
-  const userEditingResult = useUserEditing()
-  if (userEditingResult.isErr()) {
-    throw userEditingResult.error
-  }
+  const userEditing = useUserEditingOrThrow()
   const { activeTableName, hiddenNodeIds, showMode, isPopstateInProgress } =
-    userEditingResult.value
+    userEditing
 
   const handleChangeQueryParams = useCallback(async () => {
     // NOTE: Only execute layout calculation during browser navigation

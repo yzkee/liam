@@ -15,8 +15,8 @@ import type { DisplayArea } from '@/features/erd/types'
 import { selectTableLogEvent } from '@/features/gtm/utils'
 import { repositionTableLogEvent } from '@/features/gtm/utils/repositionTableLogEvent'
 import { MAX_ZOOM, MIN_ZOOM } from '@/features/reactflow/constants'
-import { useVersion } from '@/providers'
-import { useUserEditing } from '@/stores'
+import { useVersionOrThrow } from '@/providers'
+import { useUserEditingOrThrow } from '@/stores'
 import { highlightNodesAndEdges, isTableNode } from '../../utils'
 import {
   NonRelatedTableGroupNode,
@@ -62,11 +62,8 @@ export const ERDContentInner: FC<Props> = ({
   const {
     state: { loading },
   } = useErdContentContext()
-  const userEditingResult = useUserEditing()
-  if (userEditingResult.isErr()) {
-    throw userEditingResult.error
-  }
-  const { activeTableName } = userEditingResult.value
+  const userEditing = useUserEditingOrThrow()
+  const { activeTableName } = userEditing
 
   const { selectTable, deselectTable } = useTableSelection()
 
@@ -78,11 +75,8 @@ export const ERDContentInner: FC<Props> = ({
     displayArea,
   })
 
-  const versionResult = useVersion()
-  if (versionResult.isErr()) {
-    throw versionResult.error
-  }
-  const { version } = versionResult.value
+  const versionResult = useVersionOrThrow()
+  const { version } = versionResult
   const handleNodeClick = useCallback(
     (tableId: string) => {
       selectTable({

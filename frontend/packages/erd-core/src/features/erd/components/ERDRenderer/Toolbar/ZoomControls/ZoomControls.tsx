@@ -3,24 +3,18 @@ import { useStore } from '@xyflow/react'
 import { type FC, useCallback } from 'react'
 import { toolbarActionLogEvent } from '@/features/gtm/utils'
 import { useCustomReactflow } from '@/features/reactflow/hooks'
-import { useVersion } from '@/providers'
-import { useUserEditing } from '@/stores'
+import { useVersionOrThrow } from '@/providers'
+import { useUserEditingOrThrow } from '@/stores'
 import { ToolbarIconButton } from '../ToolbarIconButton'
 import styles from './ZoomControls.module.css'
 
 export const ZoomControls: FC = () => {
   const zoomLevel = useStore((store) => store.transform[2])
   const { zoomIn, zoomOut } = useCustomReactflow()
-  const userEditingResult = useUserEditing()
-  if (userEditingResult.isErr()) {
-    throw userEditingResult.error
-  }
-  const { showMode } = userEditingResult.value
-  const versionResult = useVersion()
-  if (versionResult.isErr()) {
-    throw versionResult.error
-  }
-  const { version } = versionResult.value
+  const userEditing = useUserEditingOrThrow()
+  const { showMode } = userEditing
+  const versionResult = useVersionOrThrow()
+  const { version } = versionResult
 
   const handleClickZoomOut = useCallback(() => {
     toolbarActionLogEvent({

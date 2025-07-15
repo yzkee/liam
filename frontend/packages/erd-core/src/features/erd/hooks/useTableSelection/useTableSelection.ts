@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { useCustomReactflow } from '@/features/reactflow/hooks'
-import { useUserEditing } from '@/stores'
+import { useUserEditingOrThrow } from '@/stores'
 import type { DisplayArea } from '../../types'
 import { highlightNodesAndEdges } from '../../utils'
 
@@ -10,11 +10,8 @@ type SelectTableParams = {
 }
 
 export const useTableSelection = () => {
-  const userEditingResult = useUserEditing()
-  if (userEditingResult.isErr()) {
-    throw userEditingResult.error
-  }
-  const { setActiveTableName } = userEditingResult.value
+  const userEditing = useUserEditingOrThrow()
+  const { setActiveTableName } = userEditing
 
   const { getNodes, getEdges, setNodes, setEdges, fitView } =
     useCustomReactflow()

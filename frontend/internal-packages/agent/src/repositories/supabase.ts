@@ -8,9 +8,9 @@ import {
   operationsSchema,
   schemaSchema,
 } from '@liam-hq/db-structure'
-import type { Operation } from 'fast-json-patch'
 import { compare } from 'fast-json-patch'
 import * as v from 'valibot'
+import { ensurePathStructure } from '../utils/pathPreparation'
 import type {
   ArtifactResult,
   CreateArtifactParams,
@@ -42,66 +42,6 @@ const updateBuildingSchemaResultSchema = v.union([
  */
 const artifactToJson = (artifact: Artifact): Json => {
   return JSON.parse(JSON.stringify(artifact))
-}
-
-/**
- * Check if value is a record object
- */
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
-}
-
-/**
- * Create nested path if it doesn't exist
- */
-function createNestedPath(
-  target: Record<string, unknown>,
-  pathParts: string[],
-): void {
-  let current: Record<string, unknown> = target
-
-  for (let i = 0; i < pathParts.length - 1; i++) {
-    const part = pathParts[i]
-    if (!part) continue
-
-    // Prevent prototype pollution by checking for dangerous keys
-    if (
-      part === '__proto__' ||
-      part === 'constructor' ||
-      part === 'prototype'
-    ) {
-      throw new Error(`Dangerous path part detected: ${part}`)
-    }
-
-    if (!(part in current)) {
-      const nextPart = pathParts[i + 1]
-      const isArrayIndex = nextPart && /^\d+$/.test(nextPart)
-      current[part] = isArrayIndex ? [] : {}
-    }
-
-    const next = current[part]
-    if (isRecord(next)) {
-      current = next
-    }
-  }
-}
-
-/**
- * Ensure the necessary path structure exists before applying patch operations
- * This prevents "OPERATION_PATH_UNRESOLVABLE" errors
- */
-function ensurePathStructure(
-  target: Record<string, unknown>,
-  operations: Operation[],
-): void {
-  const modifyingOps = operations.filter(
-    (op) => op.op === 'add' || op.op === 'replace',
-  )
-
-  for (const op of modifyingOps) {
-    const pathParts = op.path.split('/').filter((part) => part !== '')
-    createNestedPath(target, pathParts)
-  }
 }
 
 /**
@@ -237,7 +177,16 @@ export class SupabaseSchemaRepository implements SchemaRepository {
     for (const version of versions) {
       const patchParsed = v.safeParse(operationsSchema, version.patch)
       if (patchParsed.success) {
-        ensurePathStructure(currentSchema, patchParsed.output)
+        const pathResult = ensurePathStructure(
+          currentSchema,
+          patchParsed.output,
+        )
+        if (pathResult.isErr()) {
+          console.warn(
+            `Failed to ensure path structure in version ${version.number}: ${pathResult.error}`,
+          )
+          continue
+        }
         applyPatchOperations(currentSchema, patchParsed.output)
       } else {
         console.warn(
@@ -319,14 +268,26 @@ export class SupabaseSchemaRepository implements SchemaRepository {
 
     // Apply all patches in order
     for (const patchArray of patchArrayHistory) {
-      ensurePathStructure(currentContent, patchArray)
+      const pathResult = ensurePathStructure(currentContent, patchArray)
+      if (pathResult.isErr()) {
+        return {
+          success: false,
+          error: `Failed to ensure path structure: ${pathResult.error}`,
+        }
+      }
       // Apply each operation in the patch to currentContent
       applyPatchOperations(currentContent, patchArray)
     }
 
     // Now apply the new patch to get the new content
     const newContent = JSON.parse(JSON.stringify(currentContent))
-    ensurePathStructure(newContent, patch)
+    const newPathResult = ensurePathStructure(newContent, patch)
+    if (newPathResult.isErr()) {
+      return {
+        success: false,
+        error: `Failed to ensure path structure for new patch: ${newPathResult.error}`,
+      }
+    }
     applyPatchOperations(newContent, patch)
 
     // Validate the new schema structure before proceeding

@@ -46,6 +46,24 @@ function createNestedPath(
     const next = current[part]
     if (isRecord(next)) {
       current = next
+    } else if (Array.isArray(next)) {
+      // Handle array traversal: ensure array element exists as object
+      const nextPart = pathParts[i + 1]
+      if (nextPart && /^\d+$/.test(nextPart)) {
+        const index = Number(nextPart)
+        // Ensure array is large enough and has object at index
+        while (next.length <= index) {
+          next.push({})
+        }
+        if (!isRecord(next[index])) {
+          next[index] = {}
+        }
+        const arrayElement = next[index]
+        if (isRecord(arrayElement)) {
+          current = arrayElement
+        }
+        i++ // Skip the numeric index in next iteration
+      }
     }
   }
 

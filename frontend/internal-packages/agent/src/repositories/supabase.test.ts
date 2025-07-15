@@ -45,7 +45,10 @@ describe('ensurePathStructure', () => {
     expect(target).toEqual({
       tables: {
         posts: {
-          columns: [],
+          columns: [
+            {}, // columns[0] created for first operation
+            {}, // columns[1] created for second operation
+          ],
         },
       },
     })
@@ -220,13 +223,14 @@ describe('ensurePathStructure', () => {
     const result = ensurePathStructure(target, operations)
     expect(result.isOk()).toBe(true)
 
-    // Current implementation has a bug: it creates numeric keys at wrong level
+    // Now correctly handles array traversal
     expect(target).toEqual({
       data: {
-        '0': {
-          properties: {},
-        },
-        items: [],
+        items: [
+          {
+            properties: {},
+          },
+        ],
         metadata: {},
       },
     })
@@ -247,5 +251,54 @@ describe('ensurePathStructure', () => {
     expect(result.isOk()).toBe(true)
 
     expect(target).toEqual({}) // Only structures for add/replace are created (but not the final keys)
+  })
+
+  it('should handle deep array nesting', () => {
+    const target: Record<string, unknown> = {}
+    const operations = [
+      {
+        op: 'add' as const,
+        path: '/matrix/0/1/data',
+        value: 'test',
+      },
+    ]
+
+    const result = ensurePathStructure(target, operations)
+    expect(result.isOk()).toBe(true)
+
+    expect(target).toEqual({
+      matrix: [
+        {
+          '1': {}, // matrix[0][1] is created as parent structure for 'data' key
+        },
+      ],
+    })
+  })
+
+  it('should handle multiple array indices at same level', () => {
+    const target: Record<string, unknown> = {}
+    const operations = [
+      {
+        op: 'add' as const,
+        path: '/items/0/name',
+        value: 'First',
+      },
+      {
+        op: 'add' as const,
+        path: '/items/2/name',
+        value: 'Third',
+      },
+    ]
+
+    const result = ensurePathStructure(target, operations)
+    expect(result.isOk()).toBe(true)
+
+    expect(target).toEqual({
+      items: [
+        {}, // items[0]
+        {}, // items[1] - filled automatically
+        {}, // items[2]
+      ],
+    })
   })
 })

@@ -1,14 +1,14 @@
+import { AIMessage } from '@langchain/core/messages'
 import type { Schema } from '@liam-hq/db-structure'
+import { ok } from 'neverthrow'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { WorkflowState } from '../types'
 import { designSchemaNode } from './designSchemaNode'
 import { executeDdlNode } from './executeDdlNode'
 
-// Mock the database schema build agent
-vi.mock('../../../langchain/agents', () => ({
-  DatabaseSchemaBuildAgent: vi.fn().mockImplementation(() => ({
-    generate: vi.fn(),
-  })),
+// Mock the design agent
+vi.mock('../../../langchain/agents/databaseSchemaBuildAgent/agent', () => ({
+  invokeDesignAgent: vi.fn(),
 }))
 
 // Mock executeQuery for DDL execution
@@ -71,48 +71,44 @@ describe('designSchemaNode -> executeDdlNode integration', () => {
     const initialSchema: Schema = { tables: {} }
 
     // Mock AI agent response with schema changes
-    const { DatabaseSchemaBuildAgent } = await import(
-      '../../../langchain/agents'
+    const { invokeDesignAgent } = await import(
+      '../../../langchain/agents/databaseSchemaBuildAgent/agent'
     )
-    const mockGenerate = vi.fn().mockResolvedValue({
-      message: 'Created users table with id and name fields',
-      schemaChanges: [
-        {
-          op: 'add',
-          path: '/tables/users',
-          value: {
-            name: 'users',
-            comment: null,
-            columns: {
-              id: {
-                name: 'id',
-                type: 'INTEGER',
-                default: null,
-                check: null,
-                notNull: true,
-                comment: null,
+    const mockInvokeDesignAgent = vi.mocked(invokeDesignAgent)
+    mockInvokeDesignAgent.mockResolvedValue(
+      ok({
+        message: new AIMessage('Created users table with id and name fields'),
+        operations: [
+          {
+            op: 'add',
+            path: '/tables/users',
+            value: {
+              name: 'users',
+              comment: null,
+              columns: {
+                id: {
+                  name: 'id',
+                  type: 'INTEGER',
+                  default: null,
+                  check: null,
+                  notNull: true,
+                  comment: null,
+                },
+                name: {
+                  name: 'name',
+                  type: 'VARCHAR',
+                  default: null,
+                  check: null,
+                  notNull: true,
+                  comment: null,
+                },
               },
-              name: {
-                name: 'name',
-                type: 'VARCHAR',
-                default: null,
-                check: null,
-                notNull: true,
-                comment: null,
-              },
+              constraints: {},
+              indexes: {},
             },
-            constraints: {},
-            indexes: {},
           },
-        },
-      ],
-    })
-
-    vi.mocked(DatabaseSchemaBuildAgent).mockImplementation(
-      () =>
-        ({
-          generate: mockGenerate,
-        }) as never,
+        ],
+      }),
     )
 
     // Mock successful repository operation
@@ -159,14 +155,6 @@ describe('designSchemaNode -> executeDdlNode integration', () => {
     expect(Object.keys(afterDesign.schemaData.tables)).toHaveLength(1)
     expect(afterDesign.error).toBeUndefined()
 
-    // Verify logs
-    expect(mockLogger.log).toHaveBeenCalledWith(
-      '[designSchemaNode] Current schema has 0 tables',
-    )
-    expect(mockLogger.log).toHaveBeenCalledWith(
-      '[designSchemaNode] Applied 1 schema changes successfully (1 tables)',
-    )
-
     // Mock successful DDL execution
     const { executeQuery } = await import('@liam-hq/pglite-server')
     vi.mocked(executeQuery).mockResolvedValue([
@@ -200,31 +188,27 @@ describe('designSchemaNode -> executeDdlNode integration', () => {
     const initialSchema: Schema = { tables: {} }
 
     // Mock AI agent response with changes
-    const { DatabaseSchemaBuildAgent } = await import(
-      '../../../langchain/agents'
+    const { invokeDesignAgent } = await import(
+      '../../../langchain/agents/databaseSchemaBuildAgent/agent'
     )
-    const mockGenerate = vi.fn().mockResolvedValue({
-      message: 'Schema validation will fail',
-      schemaChanges: [
-        {
-          op: 'add',
-          path: '/tables/test',
-          value: {
-            name: 'test',
-            comment: null,
-            columns: {},
-            constraints: {},
-            indexes: {},
+    const mockInvokeDesignAgent = vi.mocked(invokeDesignAgent)
+    mockInvokeDesignAgent.mockResolvedValue(
+      ok({
+        message: new AIMessage('Schema validation will fail'),
+        operations: [
+          {
+            op: 'add',
+            path: '/tables/test',
+            value: {
+              name: 'test',
+              comment: null,
+              columns: {},
+              constraints: {},
+              indexes: {},
+            },
           },
-        },
-      ],
-    })
-
-    vi.mocked(DatabaseSchemaBuildAgent).mockImplementation(
-      () =>
-        ({
-          generate: mockGenerate,
-        }) as never,
+        ],
+      }),
     )
 
     // Mock repository operation that returns validation error
@@ -243,44 +227,34 @@ describe('designSchemaNode -> executeDdlNode integration', () => {
     expect(result.error?.message).toBe(
       'Invalid schema after applying changes: validation failed',
     )
-    expect(result.schemaData).toEqual(initialSchema) // Should remain unchanged
-    expect(mockLogger.error).toHaveBeenCalledWith(
-      'Schema update failed:',
-      expect.objectContaining({
-        error: 'Invalid schema after applying changes: validation failed',
-      }),
-    )
+    expect(result.schemaData).toEqual(initialSchema)
   })
 
   it('should handle repository errors gracefully', async () => {
     const initialSchema: Schema = { tables: {} }
 
     // Mock AI agent response
-    const { DatabaseSchemaBuildAgent } = await import(
-      '../../../langchain/agents'
+    const { invokeDesignAgent } = await import(
+      '../../../langchain/agents/databaseSchemaBuildAgent/agent'
     )
-    const mockGenerate = vi.fn().mockResolvedValue({
-      message: 'Repository will fail',
-      schemaChanges: [
-        {
-          op: 'add',
-          path: '/tables/test',
-          value: {
-            name: 'test',
-            comment: null,
-            columns: {},
-            constraints: {},
-            indexes: {},
+    const mockInvokeDesignAgent = vi.mocked(invokeDesignAgent)
+    mockInvokeDesignAgent.mockResolvedValue(
+      ok({
+        message: new AIMessage('Repository will fail'),
+        operations: [
+          {
+            op: 'add',
+            path: '/tables/test',
+            value: {
+              name: 'test',
+              comment: null,
+              columns: {},
+              constraints: {},
+              indexes: {},
+            },
           },
-        },
-      ],
-    })
-
-    vi.mocked(DatabaseSchemaBuildAgent).mockImplementation(
-      () =>
-        ({
-          generate: mockGenerate,
-        }) as never,
+        ],
+      }),
     )
 
     // Mock repository failure
@@ -297,12 +271,6 @@ describe('designSchemaNode -> executeDdlNode integration', () => {
     // Verify error handling
     expect(result.error).toBeInstanceOf(Error)
     expect(result.error?.message).toBe('Database connection failed')
-    expect(result.schemaData).toEqual(initialSchema) // Should remain unchanged
-    expect(mockLogger.error).toHaveBeenCalledWith(
-      'Schema update failed:',
-      expect.objectContaining({
-        error: 'Database connection failed',
-      }),
-    )
+    expect(result.schemaData).toEqual(initialSchema)
   })
 })

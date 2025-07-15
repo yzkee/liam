@@ -1,11 +1,11 @@
 import * as v from 'valibot'
-import type { NodeLogger } from '../../../utils/nodeLogger'
 import type { ChatAgent } from '../../utils/types'
 import { formatDMLGenerationPrompts } from './prompts'
 
 const DMLGenerationAgentInputSchema = v.object({
   schemaSQL: v.string(),
   formattedUseCases: v.string(),
+  schemaContext: v.string(),
 })
 
 const DMLGenerationAgentOutputSchema = v.object({
@@ -22,18 +22,10 @@ type DMLGenerationAgentOutput = v.InferOutput<
 export class DMLGenerationAgent
   implements ChatAgent<DMLGenerationAgentInput, DMLGenerationAgentOutput>
 {
-  private readonly logger: NodeLogger
-
-  constructor(params: { logger: NodeLogger }) {
-    this.logger = params.logger
-  }
-
   async generate(
     input: DMLGenerationAgentInput,
   ): Promise<DMLGenerationAgentOutput> {
-    this.logger.info('Starting DML generation')
-
-    const { systemMessage, humanMessage } = formatDMLGenerationPrompts({
+    formatDMLGenerationPrompts({
       schema: input.schemaSQL,
       requirements: input.formattedUseCases,
       chat_history: '',
@@ -42,7 +34,6 @@ export class DMLGenerationAgent
     })
 
     // TODO: Integrate with LLM using systemMessage and humanMessage
-    this.logger.debug('Generated prompts', { systemMessage, humanMessage })
 
     return {
       dmlStatements: '-- DML statements will be generated here',

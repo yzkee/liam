@@ -1,12 +1,12 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
+import { executeQuery } from '@liam-hq/pglite-server'
+import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 
-const NODE_NAME = 'validateSchemaNode'
-
 /**
- * Validate Schema Node - DML Execution & Validation
- * Performed by qaAgent
+ * Validate Schema Node - Combined DDL/DML Execution & Validation
+ * Executes DDL and DML together in a single query to validate schema with test data
  */
 export async function validateSchemaNode(
   state: WorkflowState,
@@ -19,18 +19,49 @@ export async function validateSchemaNode(
       error: configurableResult.error,
     }
   }
-  const { logger } = configurableResult.value
 
-  logger.log(`[${NODE_NAME}] Started`)
+  // Check if we have any statements to execute
+  const hasDdl = state.ddlStatements?.trim()
+  const hasDml = state.dmlStatements?.trim()
 
-  // TODO: Implement DML execution and validation logic
-  // This node should execute DML and validate the schema
+  if (!hasDdl && !hasDml) {
+    return state
+  }
 
-  logger.log(`[${NODE_NAME}] Completed`)
+  // Combine DDL and DML statements
+  const combinedStatements = [
+    hasDdl ? state.ddlStatements : '',
+    hasDml ? state.dmlStatements : '',
+  ]
+    .filter(Boolean)
+    .join('\n')
 
-  // For now, pass through the state unchanged (assuming validation passes)
-  // Future implementation will execute DML and validate results
+  // Execute combined statements
+  const results: SqlResult[] = await executeQuery(
+    state.designSessionId,
+    combinedStatements,
+  )
+
+  // Check for execution errors
+  const hasErrors = results.some((result: SqlResult) => !result.success)
+
+  if (hasErrors) {
+    const errorMessages = results
+      .filter((result: SqlResult) => !result.success)
+      .map(
+        (result: SqlResult) =>
+          `SQL: ${result.sql}, Error: ${JSON.stringify(result.result)}`,
+      )
+      .join('; ')
+
+    return {
+      ...state,
+      dmlExecutionErrors: errorMessages,
+    }
+  }
+
   return {
     ...state,
+    dmlExecutionSuccessful: true,
   }
 }

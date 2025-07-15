@@ -24,7 +24,7 @@ This guide explains how to create pull requests using GitHub CLI in our project.
 
 ## Creating a New Pull Request
 
-1. First, prepare your PR description following the template in `.github/pull_request_template.md`
+1. First, prepare your PR description following the template in @.github/pull_request_template.md
 
 2. Use the `gh pr create --draft` command to create a new pull request:
 
@@ -37,7 +37,7 @@ This guide explains how to create pull requests using GitHub CLI in our project.
 
    ```bash
    # Create PR with proper template structure
-   gh pr create --draft --title "✨(scope): Your descriptive title" --body-file <(echo -e "## Issue\n\n- resolve:\n\n## Why is this change needed?\nYour description here.\n\n## What would you like reviewers to focus on?\n- Point 1\n- Point 2\n\n## Testing Verification\nHow you tested these changes.\n\n## What was done\npr_agent:summary\n\n## Detailed Changes\npr_agent:walkthrough\n\n## Additional Notes\nAny additional notes.") --base main
+   gh pr create --draft --title "✨(scope): Your descriptive title" --body-file .github/pull_request_template.md --base main
    ```
 
 ## Best Practices
@@ -51,14 +51,7 @@ This guide explains how to create pull requests using GitHub CLI in our project.
      - `🐛(auth): Fix login redirect issue`
      - `📝(readme): Update installation instructions`
 
-2. **Description Template**: Always use our PR template structure from `.github/pull_request_template.md`:
-
-   - Issue reference
-   - Why the change is needed
-   - Review focus points
-   - Testing verification
-   - PR-Agent sections (keep `pr_agent:summary` and `pr_agent:walkthrough` tags intact)
-   - Additional notes
+2. **Description Template**: Always use our PR template structure from @.github/pull_request_template.md:
 
 3. **Template Accuracy**: Ensure your PR description precisely follows the template structure:
 
@@ -73,9 +66,8 @@ This guide explains how to create pull requests using GitHub CLI in our project.
 ### Common Mistakes to Avoid
 
 1. **Incorrect Section Headers**: Always use the exact section headers from the template
-2. **Modifying PR-Agent Sections**: Don't remove or modify the `pr_agent:summary` and `pr_agent:walkthrough` placeholders
-3. **Adding Custom Sections**: Stick to the sections defined in the template
-4. **Using Outdated Templates**: Always refer to the current `.github/pull_request_template.md` file
+2. **Adding Custom Sections**: Stick to the sections defined in the template
+3. **Using Outdated Templates**: Always refer to the current @.github/pull_request_template.md file
 
 ### Missing Sections
 

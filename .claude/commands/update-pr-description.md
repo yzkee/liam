@@ -8,23 +8,32 @@ description: Update a pull request description to match the project's PR templat
 
 Update the specified pull request's description to follow the project's PR template format defined in @.github/pull_request_template.md.
 
-The template includes these sections:
-
-- Issue (with "resolve:" field)
-- Why is this change needed?
-- What would you like reviewers to focus on?
-- Testing Verification
-- What was done (with pr_agent:summary placeholder)
-- Detailed Changes (with pr_agent:walkthrough placeholder)
-- Additional Notes
+**IMPORTANT**: Always read the exact content of @.github/pull_request_template.md first to understand the current template structure. Do not assume the template contains sections that are not actually present.
 
 ### Steps
 
-1. Check the PR number provided in the arguments
-2. Read the current PR description using `gh pr view`
-3. Reformat the content to match the template structure
-4. Keep pr_agent placeholders intact (pr_agent:summary and pr_agent:walkthrough)
-5. Update the PR using `gh pr edit`
+1. **Read the template file**: Use the Read tool to get the exact content of @.github/pull_request_template.md
+2. **Get current PR info**: Use `gh pr view --json number,title,body` to get the current PR details
+3. **Analyze the changes**: Use `gh pr diff` to understand what changes were made in the PR
+4. **Update the description**: Use the exact template structure from step 1 and fill in appropriate content based on the PR's purpose and changes
+5. **Apply the update**: Use `gh pr edit` with the properly formatted description
+
+### Common Mistakes to Avoid
+
+1. **Assuming Template Content**: Always read the template file - don't assume what sections exist
+2. **Adding Non-existent Sections**: Only use sections that are actually in the template
+3. **Incomplete Descriptions**: Ensure all required sections are filled with meaningful content
+4. **Incorrect Section Headers**: Use the exact section headers from the template
+
+### Example Command Usage
+
+```bash
+# Update PR description for current PR
+gh pr edit --body "$(cat <<'EOF'
+[Use the exact template structure from @.github/pull_request_template.md]
+EOF
+)"
+```
 
 ### Arguments
 

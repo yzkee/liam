@@ -113,9 +113,9 @@ Example with Foreign Key Constraint:
         "comment": null,
         "indexes": {{}},
         "constraints": {{
-          "posts_pkey": {{
+          "pk_posts": {{
             "type": "PRIMARY KEY",
-            "name": "posts_pkey",
+            "name": "pk_posts",
             "columnNames": ["id"]
           }},
           "posts_user_fk": {{

@@ -52,8 +52,6 @@ Schema Change Rules:
 - You CANNOT modify or remove something that doesn't exist yet
 - When creating new tables, include ALL properties in the initial "add" operation (columns, constraints, indexes)
 - NEVER use "replace" on paths that don't exist in the current schema
-- NEVER add constraints separately - they MUST be included in the table definition
-- PRIMARY KEY constraints should be defined in the constraints object
 
 Schema Structure Reference:
 - Tables: /tables/TABLE_NAME
@@ -78,7 +76,6 @@ CRITICAL Validation Rules:
 - Before using "replace" or "remove", verify the target path exists in the current schema
 - When in doubt, use "add" operations with complete definitions instead of "replace"
 - Remember: you can only modify what already exists in the schema provided to you
-- If you need to set primary keys or constraints, include them in the initial table "add" operation
 
 Example Response:
 {{

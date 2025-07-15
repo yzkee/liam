@@ -19,11 +19,6 @@ export const CommandPalette: FC = () => {
     throw commandPaletteResult.error
   }
   const { open, setOpen, toggleOpen } = commandPaletteResult.value
-  const schemaResult = useSchema()
-  if (schemaResult.isErr()) {
-    throw schemaResult.error
-  }
-  const { current } = schemaResult.value
 
   // Toggle the menu when ⌘K is pressed
   useEffect(() => {

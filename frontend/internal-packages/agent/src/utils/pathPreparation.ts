@@ -16,6 +16,83 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 /**
+ * Check if a path part is dangerous for prototype pollution
+ */
+function isDangerousPathPart(part: string): boolean {
+  return part === '__proto__' || part === 'constructor' || part === 'prototype'
+}
+
+/**
+ * Check if a string represents a numeric array index
+ */
+function isNumericIndex(value: string): boolean {
+  return /^\d+$/.test(value)
+}
+
+/**
+ * Ensure array has sufficient length and object at index
+ */
+function ensureArrayElement(
+  array: unknown[],
+  index: number,
+): Record<string, unknown> {
+  while (array.length <= index) {
+    array.push({})
+  }
+  if (!isRecord(array[index])) {
+    array[index] = {}
+  }
+  const element = array[index]
+  return isRecord(element) ? element : {}
+}
+
+/**
+ * Handle array traversal logic
+ */
+function handleArrayTraversal(
+  current: Record<string, unknown>,
+  next: unknown[],
+  nextPart: string | undefined,
+): { newCurrent: Record<string, unknown>; skipNext: boolean } {
+  if (!nextPart || !isNumericIndex(nextPart)) {
+    return { newCurrent: current, skipNext: false }
+  }
+
+  const index = Number(nextPart)
+  const arrayElement = ensureArrayElement(next, index)
+  return { newCurrent: arrayElement, skipNext: true }
+}
+
+/**
+ * Process a single path part
+ */
+function processPathPart(
+  current: Record<string, unknown>,
+  part: string,
+  nextPart: string | undefined,
+): Result<{ newCurrent: Record<string, unknown>; skipNext: boolean }, string> {
+  if (isDangerousPathPart(part)) {
+    return err(`Dangerous path part detected: ${part}`)
+  }
+
+  if (!(part in current)) {
+    current[part] = nextPart && isNumericIndex(nextPart) ? [] : {}
+  }
+
+  const next = current[part]
+  if (isRecord(next)) {
+    return ok({ newCurrent: next, skipNext: false })
+  }
+
+  if (Array.isArray(next)) {
+    const result = handleArrayTraversal(current, next, nextPart)
+    return ok(result)
+  }
+
+  return ok({ newCurrent: current, skipNext: false })
+}
+
+/**
  * Create nested path if it doesn't exist
  */
 function createNestedPath(
@@ -28,42 +105,15 @@ function createNestedPath(
     const part = pathParts[i]
     if (!part) continue
 
-    // Prevent prototype pollution by checking for dangerous keys
-    if (
-      part === '__proto__' ||
-      part === 'constructor' ||
-      part === 'prototype'
-    ) {
-      return err(`Dangerous path part detected: ${part}`)
+    const result = processPathPart(current, part, pathParts[i + 1])
+    if (result.isErr()) {
+      return err(result.error)
     }
 
-    if (!(part in current)) {
-      const nextPart = pathParts[i + 1]
-      const isArrayIndex = nextPart && /^\d+$/.test(nextPart)
-      current[part] = isArrayIndex ? [] : {}
-    }
-
-    const next = current[part]
-    if (isRecord(next)) {
-      current = next
-    } else if (Array.isArray(next)) {
-      // Handle array traversal: ensure array element exists as object
-      const nextPart = pathParts[i + 1]
-      if (nextPart && /^\d+$/.test(nextPart)) {
-        const index = Number(nextPart)
-        // Ensure array is large enough and has object at index
-        while (next.length <= index) {
-          next.push({})
-        }
-        if (!isRecord(next[index])) {
-          next[index] = {}
-        }
-        const arrayElement = next[index]
-        if (isRecord(arrayElement)) {
-          current = arrayElement
-        }
-        i++ // Skip the numeric index in next iteration
-      }
+    const { newCurrent, skipNext } = result.value
+    current = newCurrent
+    if (skipNext) {
+      i++
     }
   }
 

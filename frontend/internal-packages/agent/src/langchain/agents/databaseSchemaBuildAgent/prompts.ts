@@ -66,7 +66,7 @@ IMPORTANT Table Structure Rules:
 - Use empty objects {{}} for indexes and constraints if none are needed
 - Use null for comment if no comment is provided
 - Include ALL constraints in the table creation operation - DO NOT add them separately
-- For primary keys: set "primary": true in column definition AND add to constraints object
+- For primary keys: add to constraints object
 
 CRITICAL Validation Rules:
 - Column properties MUST be: name (string), type (string), notNull (boolean), primary (boolean), unique (boolean), default (string|number|boolean|null), comment (string|null), check (string|null)

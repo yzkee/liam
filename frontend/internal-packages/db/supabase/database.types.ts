@@ -83,8 +83,8 @@ export type Database = {
           id: string
           number: number
           organization_id: string
-          patch: Json
-          reverse_patch: Json
+          patch: Json | null
+          reverse_patch: Json | null
         }
         Insert: {
           building_schema_id: string
@@ -92,8 +92,8 @@ export type Database = {
           id?: string
           number: number
           organization_id: string
-          patch: Json
-          reverse_patch: Json
+          patch?: Json | null
+          reverse_patch?: Json | null
         }
         Update: {
           building_schema_id?: string
@@ -101,8 +101,8 @@ export type Database = {
           id?: string
           number?: number
           organization_id?: string
-          patch?: Json
-          reverse_patch?: Json
+          patch?: Json | null
+          reverse_patch?: Json | null
         }
         Relationships: [
           {

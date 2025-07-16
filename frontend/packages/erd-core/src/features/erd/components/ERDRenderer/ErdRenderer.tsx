@@ -59,11 +59,9 @@ export const ERDRenderer: FC<Props> = ({
   const [open, setOpen] = useState(defaultSidebarOpen)
   const [isResizing, setIsResizing] = useState(false)
 
-  const userEditing = useUserEditingOrThrow()
-  const { showMode, showDiff } = userEditing
+  const { showMode, showDiff } = useUserEditingOrThrow()
 
-  const schemaValue = useSchemaOrThrow()
-  const { current, merged } = schemaValue
+  const { current, merged } = useSchemaOrThrow()
 
   const schema = useMemo(() => {
     return showDiff && merged ? merged : current
@@ -81,8 +79,7 @@ export const ERDRenderer: FC<Props> = ({
 
   const leftPanelRef = createRef<ImperativePanelHandle>()
 
-  const versionResult = useVersionOrThrow()
-  const { version } = versionResult
+  const { version } = useVersionOrThrow()
   const handleChangeOpen = useCallback(
     (nextPanelState: boolean) => {
       setOpen(nextPanelState)

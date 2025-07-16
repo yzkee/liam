@@ -23,11 +23,9 @@ const OPTION_LIST: { value: ShowMode; label: string }[] = [
 ]
 
 export const ShowModeMenu: FC = () => {
-  const userEditing = useUserEditingOrThrow()
-  const { showMode, setShowMode } = userEditing
+  const { showMode, setShowMode } = useUserEditingOrThrow()
 
-  const versionResult = useVersionOrThrow()
-  const { version } = versionResult
+  const { version } = useVersionOrThrow()
 
   const handleChangeValue = useCallback(
     (value: string) => {

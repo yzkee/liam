@@ -37,10 +37,8 @@ export const TableNameMenuButton: FC<Props> = ({
   const nodeId = node.id
   const name = node.data.table.name
   const { selectTable } = useTableSelection()
-  const userEditing = useUserEditingOrThrow()
-  const { selectedNodeIds, updateSelectedNodeIds } = userEditing
-  const versionResult = useVersionOrThrow()
-  const { version } = versionResult
+  const { selectedNodeIds, updateSelectedNodeIds } = useUserEditingOrThrow()
+  const { version } = useVersionOrThrow()
   const textRef = useRef<HTMLSpanElement>(null)
   const [isTruncated, setIsTruncated] = useState(false)
 

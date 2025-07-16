@@ -12,11 +12,9 @@ type Props = {
 }
 
 export const VisibilityButton: FC<Props> = ({ tableName, hidden }) => {
-  const userEditing = useUserEditingOrThrow()
-  const { toggleHiddenNodeId } = userEditing
+  const { toggleHiddenNodeId } = useUserEditingOrThrow()
   const { updateNode } = useCustomReactflow()
-  const versionResult = useVersionOrThrow()
-  const { version } = versionResult
+  const { version } = useVersionOrThrow()
 
   const handleClick = useCallback(
     (event: MouseEvent) => {

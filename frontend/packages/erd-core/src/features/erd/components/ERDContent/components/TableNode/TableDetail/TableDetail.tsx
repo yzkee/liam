@@ -26,11 +26,9 @@ type Props = {
 }
 
 export const TableDetail: FC<Props> = ({ table }) => {
-  const userEditing = useUserEditingOrThrow()
-  const { setActiveTableName, setHiddenNodeIds } = userEditing
+  const { setActiveTableName, setHiddenNodeIds } = useUserEditingOrThrow()
 
-  const schema = useSchemaOrThrow()
-  const { current } = schema
+  const { current } = useSchemaOrThrow()
 
   const extractedSchema = extractSchemaForTable(table, current)
   const { nodes, edges } = convertSchemaToNodes({
@@ -40,8 +38,7 @@ export const TableDetail: FC<Props> = ({ table }) => {
 
   const { getNodes, getEdges, setNodes, setEdges, fitView } =
     useCustomReactflow()
-  const versionResult = useVersionOrThrow()
-  const { version } = versionResult
+  const { version } = useVersionOrThrow()
 
   const handleDrawerClose = () => {
     clickLogEvent({

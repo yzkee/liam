@@ -5,11 +5,9 @@ import { TableDetail } from '../../ERDContent/components/TableNode/TableDetail'
 import styles from './TableDetailDrawer.module.css'
 
 export const TableDetailDrawerRoot: FC<PropsWithChildren> = ({ children }) => {
-  const userEditing = useUserEditingOrThrow()
-  const { activeTableName, setActiveTableName } = userEditing
+  const { activeTableName, setActiveTableName } = useUserEditingOrThrow()
 
-  const schema = useSchemaOrThrow()
-  const { current } = schema
+  const { current } = useSchemaOrThrow()
   const open =
     Object.keys(current.tables).length > 0 && activeTableName !== undefined
 
@@ -34,12 +32,9 @@ export const TableDetailDrawerRoot: FC<PropsWithChildren> = ({ children }) => {
 }
 
 export const TableDetailDrawer: FC = () => {
-  const schema = useSchemaOrThrow()
-  const { current } = schema
+  const { current } = useSchemaOrThrow()
 
-  const userEditing = useUserEditingOrThrow()
-  const { activeTableName } = userEditing
-
+  const { activeTableName } = useUserEditingOrThrow()
   const table = current.tables[activeTableName ?? '']
   const ariaDescribedBy =
     table?.comment == null

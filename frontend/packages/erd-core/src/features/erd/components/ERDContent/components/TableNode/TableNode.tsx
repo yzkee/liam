@@ -17,8 +17,7 @@ import styles from './TableNode.module.css'
 type Props = NodeProps<TableNodeType>
 
 export const TableNode: FC<Props> = ({ data }) => {
-  const userEditing = useUserEditingOrThrow()
-  const { showMode: _showMode } = userEditing
+  const { showMode: _showMode } = useUserEditingOrThrow()
   const showMode = data.showMode ?? _showMode
   const name = data?.table?.name
 

@@ -6,8 +6,7 @@ import styles from './CopyLinkButton.module.css'
 
 export const CopyLinkButton: FC = () => {
   const toast = useToast()
-  const versionResult = useVersionOrThrow()
-  const { version } = versionResult
+  const { version } = useVersionOrThrow()
 
   const handleCopyUrl = useCallback(() => {
     navigator.clipboard

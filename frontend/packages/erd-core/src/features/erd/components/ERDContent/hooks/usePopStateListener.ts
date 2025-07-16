@@ -2,8 +2,7 @@ import { useEffect } from 'react'
 import { useUserEditingOrThrow } from '@/stores'
 
 export const usePopStateListener = () => {
-  const userEditing = useUserEditingOrThrow()
-  const { setIsPopstateInProgress } = userEditing
+  const { setIsPopstateInProgress } = useUserEditingOrThrow()
 
   useEffect(() => {
     const handlePopstate = () => {

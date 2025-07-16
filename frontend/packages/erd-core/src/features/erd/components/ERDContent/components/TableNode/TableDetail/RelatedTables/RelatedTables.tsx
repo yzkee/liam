@@ -13,8 +13,7 @@ type Props = {
 }
 
 export const RelatedTables: FC<Props> = ({ nodes, edges, onOpenMainPane }) => {
-  const userEditing = useUserEditingOrThrow()
-  const { activeTableName } = userEditing
+  const { activeTableName } = useUserEditingOrThrow()
 
   const handleClick = useCallback(
     async (event: MouseEvent) => {

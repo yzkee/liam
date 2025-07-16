@@ -15,9 +15,8 @@ export const useQueryParamsChanged = ({ displayArea }: Params) => {
 
   const { getNodes, getEdges, setNodes, setEdges, fitView } =
     useCustomReactflow()
-  const userEditing = useUserEditingOrThrow()
   const { activeTableName, hiddenNodeIds, showMode, isPopstateInProgress } =
-    userEditing
+    useUserEditingOrThrow()
 
   const handleChangeQueryParams = useCallback(async () => {
     // NOTE: Only execute layout calculation during browser navigation

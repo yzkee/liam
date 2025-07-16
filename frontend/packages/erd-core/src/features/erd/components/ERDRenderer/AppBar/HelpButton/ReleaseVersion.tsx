@@ -3,8 +3,7 @@ import { useVersionOrThrow } from '@/providers'
 import styles from './ReleaseVersion.module.css'
 
 export const ReleaseVersion: FC = () => {
-  const versionResult = useVersionOrThrow()
-  const { version } = versionResult
+  const { version } = useVersionOrThrow()
 
   // Example output for version:
   // - Released version:

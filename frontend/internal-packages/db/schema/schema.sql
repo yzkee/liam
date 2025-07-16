@@ -1046,8 +1046,8 @@ CREATE TABLE IF NOT EXISTS "public"."building_schema_versions" (
     "building_schema_id" "uuid" NOT NULL,
     "number" integer NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "patch" "jsonb" NOT NULL,
-    "reverse_patch" "jsonb" NOT NULL
+    "patch" "jsonb",
+    "reverse_patch" "jsonb"
 );
 
 

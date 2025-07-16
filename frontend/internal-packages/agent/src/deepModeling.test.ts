@@ -159,7 +159,7 @@ describe('Chat Workflow', () => {
     mockSchemaRepository = {
       getSchema: vi.fn(),
       getDesignSession: vi.fn(),
-      createEmptyVersion: vi.fn(),
+      createEmptyPatchVersion: vi.fn(),
       updateVersion: vi.fn(),
       createTimelineItem: vi.fn(),
       createArtifact: vi.fn(),
@@ -226,7 +226,7 @@ describe('Chat Workflow', () => {
     }))
 
     // Setup createEmptyVersion mock
-    vi.mocked(mockSchemaRepository.createEmptyVersion).mockResolvedValue({
+    vi.mocked(mockSchemaRepository.createEmptyPatchVersion).mockResolvedValue({
       success: true,
       versionId: 'test-version-id',
     })
@@ -319,10 +319,12 @@ describe('Chat Workflow', () => {
   describe('Build Mode', () => {
     beforeEach(() => {
       // Reset mocks for each test
-      vi.mocked(mockSchemaRepository.createEmptyVersion).mockResolvedValue({
-        success: true,
-        versionId: 'test-version-id',
-      })
+      vi.mocked(mockSchemaRepository.createEmptyPatchVersion).mockResolvedValue(
+        {
+          success: true,
+          versionId: 'test-version-id',
+        },
+      )
       vi.mocked(mockSchemaRepository.updateVersion).mockResolvedValue({
         success: true,
         newSchema: mockSchemaData,
@@ -504,10 +506,12 @@ describe('Chat Workflow', () => {
   describe('Error Handling', () => {
     beforeEach(() => {
       // Reset mocks for each test
-      vi.mocked(mockSchemaRepository.createEmptyVersion).mockResolvedValue({
-        success: true,
-        versionId: 'test-version-id',
-      })
+      vi.mocked(mockSchemaRepository.createEmptyPatchVersion).mockResolvedValue(
+        {
+          success: true,
+          versionId: 'test-version-id',
+        },
+      )
       vi.mocked(mockSchemaRepository.updateVersion).mockResolvedValue({
         success: true,
         newSchema: mockSchemaData,
@@ -558,10 +562,12 @@ describe('Chat Workflow', () => {
   describe('State Management', () => {
     beforeEach(() => {
       // Reset mocks for each test
-      vi.mocked(mockSchemaRepository.createEmptyVersion).mockResolvedValue({
-        success: true,
-        versionId: 'test-version-id',
-      })
+      vi.mocked(mockSchemaRepository.createEmptyPatchVersion).mockResolvedValue(
+        {
+          success: true,
+          versionId: 'test-version-id',
+        },
+      )
       vi.mocked(mockSchemaRepository.updateVersion).mockResolvedValue({
         success: true,
         newSchema: mockSchemaData,
@@ -593,10 +599,12 @@ describe('Chat Workflow', () => {
   describe('Agent Selection', () => {
     beforeEach(() => {
       // Reset mocks for each test
-      vi.mocked(mockSchemaRepository.createEmptyVersion).mockResolvedValue({
-        success: true,
-        versionId: 'test-version-id',
-      })
+      vi.mocked(mockSchemaRepository.createEmptyPatchVersion).mockResolvedValue(
+        {
+          success: true,
+          versionId: 'test-version-id',
+        },
+      )
       vi.mocked(mockSchemaRepository.updateVersion).mockResolvedValue({
         success: true,
         newSchema: mockSchemaData,
@@ -623,10 +631,12 @@ describe('Chat Workflow', () => {
   describe('Workflow Integration', () => {
     beforeEach(() => {
       // Reset mocks for each test
-      vi.mocked(mockSchemaRepository.createEmptyVersion).mockResolvedValue({
-        success: true,
-        versionId: 'test-version-id',
-      })
+      vi.mocked(mockSchemaRepository.createEmptyPatchVersion).mockResolvedValue(
+        {
+          success: true,
+          versionId: 'test-version-id',
+        },
+      )
       vi.mocked(mockSchemaRepository.updateVersion).mockResolvedValue({
         success: true,
         newSchema: mockSchemaData,

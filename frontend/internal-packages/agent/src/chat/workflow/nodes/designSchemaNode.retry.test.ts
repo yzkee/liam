@@ -33,7 +33,7 @@ describe('designSchemaNode retry behavior', () => {
         updateTimelineItem: vi.fn(),
         getSchema: vi.fn(),
         getDesignSession: vi.fn(),
-        createEmptyVersion: vi.fn().mockResolvedValue({
+        createEmptyPatchVersion: vi.fn().mockResolvedValue({
           success: true,
           versionId: 'test-version-id',
         }),

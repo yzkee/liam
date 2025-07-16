@@ -14,7 +14,7 @@ import { ensurePathStructure } from '../utils/pathPreparation'
 import type {
   ArtifactResult,
   CreateArtifactParams,
-  CreateEmptyVersionParams,
+  CreateEmptyPatchVersionParams,
   CreateTimelineItemParams,
   CreateVersionResult,
   CreateWorkflowRunParams,
@@ -203,8 +203,8 @@ export class SupabaseSchemaRepository implements SchemaRepository {
     return versions.length > 0 ? Math.max(...versions.map((v) => v.number)) : 0
   }
 
-  async createEmptyVersion(
-    params: CreateEmptyVersionParams,
+  async createEmptyPatchVersion(
+    params: CreateEmptyPatchVersionParams,
   ): Promise<CreateVersionResult> {
     const { buildingSchemaId, latestVersionNumber } = params
 

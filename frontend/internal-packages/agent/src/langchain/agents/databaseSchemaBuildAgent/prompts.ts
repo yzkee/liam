@@ -48,25 +48,34 @@ Schema Change Rules:
 - For modifying columns: "op": "replace", "path": "/tables/TABLE_NAME/columns/COLUMN_NAME/type", "value": "new_type"
 - For removing elements: "op": "remove", "path": "/tables/TABLE_NAME/columns/COLUMN_NAME"
 - If no schema changes are needed, use an empty array: "operations": []
+- ALWAYS use "add" operations BEFORE "replace" or "remove" operations
+- You CANNOT modify or remove something that doesn't exist yet
+- When creating new tables, include ALL properties in the initial "add" operation (columns, constraints, indexes)
+- NEVER use "replace" on paths that don't exist in the current schema
 
 Schema Structure Reference:
 - Tables: /tables/TABLE_NAME
 - Columns: /tables/TABLE_NAME/columns/COLUMN_NAME
-- Column properties: type, notNull, primary, unique, default, comment, check
+- Column properties: type, notNull, unique, default, comment, check
 - Table properties: name, columns, comment, indexes, constraints (ALL REQUIRED)
 
 IMPORTANT Table Structure Rules:
 - Every table MUST include: name, columns, comment, indexes, constraints
 - Use empty objects {{}} for indexes and constraints if none are needed
 - Use null for comment if no comment is provided
+- Include ALL constraints in the table creation operation - DO NOT add them separately
+- For primary keys: add to constraints object
 
 CRITICAL Validation Rules:
-- Column properties MUST be: name (string), type (string), notNull (boolean), primary (boolean), unique (boolean), default (string|number|boolean|null), comment (string|null), check (string|null)
+- Column properties MUST be: name (string), type (string), notNull (boolean), unique (boolean), default (string|number|boolean|null), comment (string|null), check (string|null)
 - All boolean values must be true/false, not strings
 - Constraint types: "PRIMARY KEY", "FOREIGN KEY", "UNIQUE", "CHECK"
 - Foreign key constraint actions MUST use these EXACT values: "CASCADE", "RESTRICT", "SET_NULL", "SET_DEFAULT", "NO_ACTION"
 - Use "SET_NULL" not "SET NULL" (underscore, not space)
 - Use "NO_ACTION" not "NO ACTION" (underscore, not space)
+- Before using "replace" or "remove", verify the target path exists in the current schema
+- When in doubt, use "add" operations with complete definitions instead of "replace"
+- Remember: you can only modify what already exists in the schema provided to you
 
 Example Response:
 {{
@@ -78,13 +87,19 @@ Example Response:
       "value": {{
         "name": "users",
         "columns": {{
-          "id": {{"name": "id", "type": "uuid", "notNull": true, "primary": true, "default": "gen_random_uuid()", "comment": "Unique identifier for each user", "check": null, "unique": false}},
-          "name": {{"name": "name", "type": "text", "notNull": true, "primary": false, "default": null, "comment": "Name of the user", "check": null, "unique": false}},
-          "email": {{"name": "email", "type": "text", "notNull": true, "primary": false, "default": null, "comment": "User email required for login", "check": null, "unique": true}}
+          "id": {{"name": "id", "type": "uuid", "notNull": true, "default": "gen_random_uuid()", "comment": "Unique identifier for each user", "check": null, "unique": false}},
+          "name": {{"name": "name", "type": "text", "notNull": true, "default": null, "comment": "Name of the user", "check": null, "unique": false}},
+          "email": {{"name": "email", "type": "text", "notNull": true, "default": null, "comment": "User email required for login", "check": null, "unique": true}}
         }},
         "comment": null,
         "indexes": {{}},
-        "constraints": {{}}
+        "constraints": {{
+          "pk_users": {{
+            "type": "PRIMARY KEY",
+            "name": "pk_users",
+            "columnNames": ["id"]
+          }}
+        }}
       }}
     }}
   ]
@@ -100,13 +115,18 @@ Example with Foreign Key Constraint:
       "value": {{
         "name": "posts",
         "columns": {{
-          "id": {{"name": "id", "type": "uuid", "notNull": true, "primary": true, "default": "gen_random_uuid()", "comment": "Primary key for posts", "check": null, "unique": false}},
-          "title": {{"name": "title", "type": "text", "notNull": true, "primary": false, "default": null, "comment": "Post title", "check": null, "unique": false}},
-          "user_id": {{"name": "user_id", "type": "uuid", "notNull": true, "primary": false, "default": null, "comment": "References the user who created the post", "check": null, "unique": false}}
+          "id": {{"name": "id", "type": "uuid", "notNull": true, "default": "gen_random_uuid()", "comment": "Primary key for posts", "check": null, "unique": false}},
+          "title": {{"name": "title", "type": "text", "notNull": true, "default": null, "comment": "Post title", "check": null, "unique": false}},
+          "user_id": {{"name": "user_id", "type": "uuid", "notNull": true, "default": null, "comment": "References the user who created the post", "check": null, "unique": false}}
         }},
         "comment": null,
         "indexes": {{}},
         "constraints": {{
+          "pk_posts": {{
+            "type": "PRIMARY KEY",
+            "name": "pk_posts",
+            "columnNames": ["id"]
+          }},
           "posts_user_fk": {{
             "type": "FOREIGN KEY",
             "name": "posts_user_fk",

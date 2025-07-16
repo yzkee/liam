@@ -20,8 +20,6 @@ import type { DesignSessionWithTimelineItems, Version } from './types'
 
 type Props = {
   designSessionWithTimelineItems: DesignSessionWithTimelineItems
-  buildingSchemaId: string
-  latestVersionNumber?: number
   initialSchema: Schema | null
   initialPrevSchema: Schema | null
   initialCurrentVersion: Version | null
@@ -29,14 +27,11 @@ type Props = {
 
 export const SessionDetailPageClient: FC<Props> = ({
   designSessionWithTimelineItems,
-  buildingSchemaId,
-  latestVersionNumber,
   initialSchema,
   initialPrevSchema,
   initialCurrentVersion,
 }) => {
   const designSessionId = designSessionWithTimelineItems.id
-  const organizationId = designSessionWithTimelineItems.organization_id
 
   const [prevSchema, setPrevSchema] = useState<Schema | null>(initialPrevSchema)
   const [currentSchema, setCurrentSchema] = useState<Schema | null>(
@@ -129,9 +124,6 @@ Please suggest a specific solution to resolve this problem.`
           <Chat
             schemaData={currentSchema}
             designSessionId={designSessionId}
-            organizationId={organizationId}
-            buildingSchemaId={buildingSchemaId}
-            latestVersionNumber={latestVersionNumber}
             timelineItems={timelineItems}
             onMessageSend={addOrUpdateTimelineItem}
           />

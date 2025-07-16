@@ -10,6 +10,7 @@ import {
 } from '@liam-hq/db-structure'
 import { compare } from 'fast-json-patch'
 import * as v from 'valibot'
+import { ensurePathStructure } from '../utils/pathPreparation'
 import type {
   ArtifactResult,
   CreateArtifactParams,
@@ -176,6 +177,16 @@ export class SupabaseSchemaRepository implements SchemaRepository {
     for (const version of versions) {
       const patchParsed = v.safeParse(operationsSchema, version.patch)
       if (patchParsed.success) {
+        const pathResult = ensurePathStructure(
+          currentSchema,
+          patchParsed.output,
+        )
+        if (pathResult.isErr()) {
+          console.warn(
+            `Failed to ensure path structure in version ${version.number}: ${pathResult.error}`,
+          )
+          continue
+        }
         applyPatchOperations(currentSchema, patchParsed.output)
       } else {
         console.warn(
@@ -257,12 +268,26 @@ export class SupabaseSchemaRepository implements SchemaRepository {
 
     // Apply all patches in order
     for (const patchArray of patchArrayHistory) {
+      const pathResult = ensurePathStructure(currentContent, patchArray)
+      if (pathResult.isErr()) {
+        return {
+          success: false,
+          error: `Failed to ensure path structure: ${pathResult.error}`,
+        }
+      }
       // Apply each operation in the patch to currentContent
       applyPatchOperations(currentContent, patchArray)
     }
 
     // Now apply the new patch to get the new content
     const newContent = JSON.parse(JSON.stringify(currentContent))
+    const newPathResult = ensurePathStructure(newContent, patch)
+    if (newPathResult.isErr()) {
+      return {
+        success: false,
+        error: `Failed to ensure path structure for new patch: ${newPathResult.error}`,
+      }
+    }
     applyPatchOperations(newContent, patch)
 
     // Validate the new schema structure before proceeding
@@ -290,9 +315,10 @@ export class SupabaseSchemaRepository implements SchemaRepository {
       .maybeSingle()
 
     if (latestVersionError) {
-      throw new Error(
-        `Failed to get latest version: ${latestVersionError.message}`,
-      )
+      return {
+        success: false,
+        error: `Failed to get latest version: ${latestVersionError.message}`,
+      }
     }
 
     // Get the actual latest version number

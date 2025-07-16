@@ -165,6 +165,8 @@ describe('Chat Workflow', () => {
       updateArtifact: vi.fn(),
       getArtifact: vi.fn(),
       updateTimelineItem: vi.fn(),
+      createValidationQuery: vi.fn(),
+      createValidationResults: vi.fn(),
     } as SchemaRepository
 
     mockRepositories = {

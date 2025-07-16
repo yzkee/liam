@@ -42,6 +42,8 @@ describe('prepareDmlNode', () => {
         createArtifact: vi.fn(),
         updateArtifact: vi.fn(),
         getArtifact: vi.fn(),
+        createValidationQuery: vi.fn(),
+        createValidationResults: vi.fn(),
       },
     }
 

@@ -289,6 +289,16 @@ describe('Chat Workflow', () => {
       },
     })
 
+    // Setup validation query/results mocks
+    vi.mocked(mockSchemaRepository.createValidationQuery).mockResolvedValue({
+      success: true,
+      queryId: 'test-query-id',
+    })
+
+    vi.mocked(mockSchemaRepository.createValidationResults).mockResolvedValue({
+      success: true,
+    })
+
     // Setup createWorkflowRun mock
     vi.mocked(mockSchemaRepository.createWorkflowRun).mockResolvedValue({
       success: true,

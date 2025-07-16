@@ -12,7 +12,7 @@ jobs:
   claude-pr-creator:
     if: github.event.label.name == 'claude-create-pr'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     permissions:
       contents: write
       pull-requests: write

@@ -116,10 +116,6 @@ export const CommandPaletteContent: FC<Props> = ({ closeDialog }) => {
                 isConnectable={false}
                 positionAbsoluteX={0}
                 positionAbsoluteY={0}
-                selectable={false}
-                deletable={false}
-                selected={false}
-                draggable={false}
                 zIndex={0}
               />
             )}

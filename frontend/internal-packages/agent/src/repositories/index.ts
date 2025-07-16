@@ -7,4 +7,5 @@ export type {
   SchemaData,
   SchemaRepository,
   VersionResult,
+  WorkflowRunResult,
 } from './types'

@@ -46,6 +46,8 @@ describe('validateSchemaNode', () => {
         createArtifact: vi.fn(),
         updateArtifact: vi.fn(),
         getArtifact: vi.fn(),
+        createWorkflowRun: vi.fn(),
+        updateWorkflowRunStatus: vi.fn(),
       },
     }
   }

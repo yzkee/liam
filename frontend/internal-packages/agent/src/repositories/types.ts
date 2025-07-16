@@ -102,7 +102,7 @@ export type ArtifactResult =
 
 export type CreateWorkflowRunParams = {
   designSessionId: string
-  runId: string
+  workflowRunId: string
 }
 
 export type WorkflowRunResult =
@@ -116,7 +116,7 @@ export type WorkflowRunResult =
     }
 
 export type UpdateWorkflowRunStatusParams = {
-  runId: string
+  workflowRunId: string
   status: Database['public']['Enums']['workflow_run_status']
 }
 

@@ -40,7 +40,7 @@ describe('validateSchemaNode', () => {
         updateTimelineItem: vi.fn(),
         getSchema: vi.fn(),
         getDesignSession: vi.fn(),
-        createEmptyVersion: vi.fn(),
+        createEmptyPatchVersion: vi.fn(),
         updateVersion: vi.fn(),
         createTimelineItem: vi.fn(),
         createArtifact: vi.fn(),

@@ -24,7 +24,7 @@ export type DesignSessionData = {
   }>
 }
 
-export type CreateEmptyVersionParams = {
+export type CreateEmptyPatchVersionParams = {
   buildingSchemaId: string
   latestVersionNumber: number
 }
@@ -139,8 +139,8 @@ export type SchemaRepository = {
   /**
    * Create a new empty schema version (patch/reverse_patch are null)
    */
-  createEmptyVersion(
-    params: CreateEmptyVersionParams,
+  createEmptyPatchVersion(
+    params: CreateEmptyPatchVersionParams,
   ): Promise<CreateVersionResult>
 
   /**

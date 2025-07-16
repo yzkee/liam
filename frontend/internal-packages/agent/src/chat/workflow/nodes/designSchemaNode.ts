@@ -153,10 +153,12 @@ export async function designSchemaNode(
   const buildingSchemaId = state.buildingSchemaId
   const latestVersionNumber = state.latestVersionNumber
 
-  const createVersionResult = await repositories.schema.createEmptyVersion({
-    buildingSchemaId,
-    latestVersionNumber,
-  })
+  const createVersionResult = await repositories.schema.createEmptyPatchVersion(
+    {
+      buildingSchemaId,
+      latestVersionNumber,
+    },
+  )
 
   if (!createVersionResult.success) {
     const errorMessage =

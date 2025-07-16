@@ -244,9 +244,9 @@ describe(_processor, () => {
       expect(value.tables['posts']?.constraints['postsTousers']).toEqual({
         type: 'FOREIGN KEY',
         name: 'postsTousers',
-        columnName: 'user_id',
+        columnNames: ['user_id'],
         targetTableName: 'users',
-        targetColumnName: 'id',
+        targetColumnNames: ['id'],
         updateConstraint: 'NO_ACTION',
         deleteConstraint: 'NO_ACTION',
       })
@@ -269,9 +269,9 @@ describe(_processor, () => {
       expect(value.tables['posts']?.constraints['postsTousers']).toEqual({
         type: 'FOREIGN KEY',
         name: 'postsTousers',
-        columnName: 'user_id',
+        columnNames: ['user_id'],
         targetTableName: 'users',
-        targetColumnName: 'id',
+        targetColumnNames: ['id'],
         updateConstraint: 'NO_ACTION',
         deleteConstraint: 'NO_ACTION',
       })
@@ -305,9 +305,9 @@ describe(_processor, () => {
           expect(value.tables['posts']?.constraints['postsTousers']).toEqual({
             type: 'FOREIGN KEY',
             name: 'postsTousers',
-            columnName: 'user_id',
+            columnNames: ['user_id'],
             targetTableName: 'users',
-            targetColumnName: 'id',
+            targetColumnNames: ['id'],
             updateConstraint: 'NO_ACTION',
             deleteConstraint: expectedAction,
           })
@@ -508,9 +508,9 @@ describe(_processor, () => {
               postsTousers: {
                 type: 'FOREIGN KEY',
                 name: 'postsTousers',
-                columnName: 'raw_user_id',
+                columnNames: ['raw_user_id'],
                 targetTableName: 'users',
-                targetColumnName: '_id',
+                targetColumnNames: ['_id'],
                 updateConstraint: 'NO_ACTION',
                 deleteConstraint: 'NO_ACTION',
               },
@@ -625,9 +625,9 @@ describe(_processor, () => {
               PostToUser: {
                 type: 'FOREIGN KEY',
                 name: 'PostToUser',
-                columnName: 'raw_user_id',
+                columnNames: ['raw_user_id'],
                 targetTableName: 'users',
-                targetColumnName: '_id',
+                targetColumnNames: ['_id'],
                 updateConstraint: 'NO_ACTION',
                 deleteConstraint: 'NO_ACTION',
               },
@@ -745,18 +745,18 @@ describe(_processor, () => {
               _CategoryToPost_A_fkey: {
                 type: 'FOREIGN KEY',
                 name: '_CategoryToPost_A_fkey',
-                columnName: 'A',
+                columnNames: ['A'],
                 targetTableName: 'Category',
-                targetColumnName: 'id',
+                targetColumnNames: ['id'],
                 updateConstraint: 'CASCADE',
                 deleteConstraint: 'CASCADE',
               },
               _CategoryToPost_B_fkey: {
                 type: 'FOREIGN KEY',
                 name: '_CategoryToPost_B_fkey',
-                columnName: 'B',
+                columnNames: ['B'],
                 targetTableName: 'Post',
-                targetColumnName: 'id',
+                targetColumnNames: ['id'],
                 updateConstraint: 'CASCADE',
                 deleteConstraint: 'CASCADE',
               },

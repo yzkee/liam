@@ -9,6 +9,7 @@ import { Output } from './components/Output'
 import { OutputPlaceholder } from './components/OutputPlaceholder'
 import { useRealtimeBuildlingSchema } from './hooks/useRealtimeBuildlingSchema'
 import { useRealtimeTimelineItems } from './hooks/useRealtimeTimelineItems'
+import { useRealtimeWorkflowRuns } from './hooks/useRealtimeWorkflowRuns'
 import { SCHEMA_UPDATES_DOC, SCHEMA_UPDATES_REVIEW_COMMENTS } from './mock'
 import styles from './SessionDetailPage.module.css'
 import { buildCurrentSchema } from './services/buildCurrentSchema'
@@ -16,27 +17,28 @@ import { getBuildingSchema } from './services/buildingSchema/client/getBuldingSc
 import { buildPrevSchema } from './services/buildPrevSchema/client/buildPrevSchema'
 import { convertTimelineItemToTimelineItemEntry } from './services/convertTimelineItemToTimelineItemEntry'
 import { getLatestVersion } from './services/latestVersion/client/getLatestVersion'
-import type { DesignSessionWithTimelineItems, Version } from './types'
+import type {
+  DesignSessionWithTimelineItems,
+  Version,
+  WorkflowRunStatus,
+} from './types'
 
 type Props = {
   designSessionWithTimelineItems: DesignSessionWithTimelineItems
-  buildingSchemaId: string
-  latestVersionNumber?: number
   initialSchema: Schema | null
   initialPrevSchema: Schema | null
   initialCurrentVersion: Version | null
+  initialWorkflowRunStatus: WorkflowRunStatus | null
 }
 
 export const SessionDetailPageClient: FC<Props> = ({
   designSessionWithTimelineItems,
-  buildingSchemaId,
-  latestVersionNumber,
   initialSchema,
   initialPrevSchema,
   initialCurrentVersion,
+  initialWorkflowRunStatus,
 }) => {
   const designSessionId = designSessionWithTimelineItems.id
-  const organizationId = designSessionWithTimelineItems.organization_id
 
   const [prevSchema, setPrevSchema] = useState<Schema | null>(initialPrevSchema)
   const [currentSchema, setCurrentSchema] = useState<Schema | null>(
@@ -102,10 +104,15 @@ Please suggest a specific solution to resolve this problem.`
       convertTimelineItemToTimelineItemEntry(timelineItem),
     ),
   )
+
+  const { status } = useRealtimeWorkflowRuns(
+    designSessionId,
+    initialWorkflowRunStatus,
+  )
+  // TODO: Include logic to check if the latest version of Schema/DDL exists
   const isGenerating = useMemo(() => {
-    // Since progress role is removed, we no longer track generating state
-    return false
-  }, [timelineItems])
+    return status === 'pending'
+  }, [status, timelineItems])
 
   // Show loading state while schema is being fetched
   if (isRefetching) {
@@ -129,9 +136,6 @@ Please suggest a specific solution to resolve this problem.`
           <Chat
             schemaData={currentSchema}
             designSessionId={designSessionId}
-            organizationId={organizationId}
-            buildingSchemaId={buildingSchemaId}
-            latestVersionNumber={latestVersionNumber}
             timelineItems={timelineItems}
             onMessageSend={addOrUpdateTimelineItem}
           />

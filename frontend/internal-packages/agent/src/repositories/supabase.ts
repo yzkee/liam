@@ -625,7 +625,7 @@ export class SupabaseSchemaRepository implements SchemaRepository {
       .from('workflow_runs')
       .insert({
         design_session_id: designSessionId,
-        run_id: runId,
+        workflow_run_id: runId,
       })
       .select()
       .single()

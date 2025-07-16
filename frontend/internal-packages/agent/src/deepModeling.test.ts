@@ -292,7 +292,7 @@ describe('Chat Workflow', () => {
       success: true,
       workflowRun: {
         id: 'test-workflow-run-id',
-        run_id: 'test-run-id',
+        workflow_run_id: 'test-run-id',
         design_session_id: 'test-design-session-id',
         organization_id: 'test-org-id',
         status: 'pending' as const,
@@ -306,7 +306,7 @@ describe('Chat Workflow', () => {
       success: true,
       workflowRun: {
         id: 'test-workflow-run-id',
-        run_id: 'test-run-id',
+        workflow_run_id: 'test-run-id',
         design_session_id: 'test-design-session-id',
         organization_id: 'test-org-id',
         status: 'success' as const,

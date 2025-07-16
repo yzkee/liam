@@ -1349,27 +1349,27 @@ export type Database = {
           design_session_id: string
           id: string
           organization_id: string | null
-          run_id: string
           status: Database['public']['Enums']['workflow_run_status']
           updated_at: string
+          workflow_run_id: string
         }
         Insert: {
           created_at?: string
           design_session_id: string
           id?: string
           organization_id?: string | null
-          run_id: string
           status?: Database['public']['Enums']['workflow_run_status']
           updated_at?: string
+          workflow_run_id: string
         }
         Update: {
           created_at?: string
           design_session_id?: string
           id?: string
           organization_id?: string | null
-          run_id?: string
           status?: Database['public']['Enums']['workflow_run_status']
           updated_at?: string
+          workflow_run_id?: string
         }
         Relationships: [
           {

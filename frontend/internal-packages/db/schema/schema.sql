@@ -1474,7 +1474,7 @@ CREATE TABLE IF NOT EXISTS "public"."workflow_runs" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "design_session_id" "uuid" NOT NULL,
     "organization_id" "uuid",
-    "run_id" "uuid" NOT NULL,
+    "workflow_run_id" "uuid" NOT NULL,
     "status" "public"."workflow_run_status" DEFAULT 'pending'::"public"."workflow_run_status" NOT NULL,
     "created_at" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "updated_at" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
@@ -1675,7 +1675,7 @@ ALTER TABLE ONLY "public"."workflow_runs"
 
 
 ALTER TABLE ONLY "public"."workflow_runs"
-    ADD CONSTRAINT "workflow_runs_run_id_key" UNIQUE ("run_id");
+    ADD CONSTRAINT "workflow_runs_workflow_run_id_key" UNIQUE ("workflow_run_id");
 
 
 
@@ -1792,10 +1792,6 @@ CREATE INDEX "workflow_runs_design_session_id_idx" ON "public"."workflow_runs" U
 
 
 CREATE INDEX "workflow_runs_organization_id_idx" ON "public"."workflow_runs" USING "btree" ("organization_id");
-
-
-
-CREATE INDEX "workflow_runs_status_idx" ON "public"."workflow_runs" USING "btree" ("status");
 
 
 

@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS "public"."workflow_runs" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "design_session_id" "uuid" NOT NULL,
     "organization_id" "uuid",
-    "run_id" "uuid" NOT NULL,
+    "workflow_run_id" "uuid" NOT NULL,
     "status" "public"."workflow_run_status" DEFAULT 'pending' NOT NULL,
     "created_at" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "updated_at" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
@@ -33,14 +33,13 @@ ALTER TABLE ONLY "public"."workflow_runs"
 ALTER TABLE ONLY "public"."workflow_runs"
     ADD CONSTRAINT "workflow_runs_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON UPDATE CASCADE ON DELETE RESTRICT;
 
--- Add unique constraint on run_id
+-- Add unique constraint on workflow_run_id
 ALTER TABLE ONLY "public"."workflow_runs"
-    ADD CONSTRAINT "workflow_runs_run_id_key" UNIQUE ("run_id");
+    ADD CONSTRAINT "workflow_runs_workflow_run_id_key" UNIQUE ("workflow_run_id");
 
 -- Add index for better query performance
 CREATE INDEX "workflow_runs_design_session_id_idx" ON "public"."workflow_runs" ("design_session_id");
 CREATE INDEX "workflow_runs_organization_id_idx" ON "public"."workflow_runs" ("organization_id");
-CREATE INDEX "workflow_runs_status_idx" ON "public"."workflow_runs" ("status");
 
 -- Create function to set organization_id from design_session
 CREATE OR REPLACE FUNCTION "public"."set_workflow_runs_organization_id"() RETURNS "trigger"

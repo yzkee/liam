@@ -25,11 +25,19 @@ export type DesignSessionData = {
   }>
 }
 
-export type CreateVersionParams = {
+export type CreateEmptyPatchVersionParams = {
   buildingSchemaId: string
   latestVersionNumber: number
+}
+
+export type UpdateVersionParams = {
+  buildingSchemaVersionId: string
   patch: Operation[]
 }
+
+export type CreateVersionResult =
+  | { success: true; versionId: string }
+  | { success: false; error?: string | null }
 
 export type VersionResult =
   | { success: true; newSchema: Schema }
@@ -92,6 +100,26 @@ export type ArtifactResult =
       error: string
     }
 
+export type CreateWorkflowRunParams = {
+  designSessionId: string
+  runId: string
+}
+
+export type WorkflowRunResult =
+  | {
+      success: true
+      workflowRun: Tables<'workflow_runs'>
+    }
+  | {
+      success: false
+      error: string
+    }
+
+export type UpdateWorkflowRunStatusParams = {
+  runId: string
+  status: Database['public']['Enums']['workflow_run_status']
+}
+
 /**
  * Schema repository interface for data access abstraction
  */
@@ -110,9 +138,16 @@ export type SchemaRepository = {
   getDesignSession(designSessionId: string): Promise<DesignSessionData | null>
 
   /**
-   * Create a new schema version with optimistic locking
+   * Create a new empty schema version (patch/reverse_patch are null)
    */
-  createVersion(params: CreateVersionParams): Promise<VersionResult>
+  createEmptyPatchVersion(
+    params: CreateEmptyPatchVersionParams,
+  ): Promise<CreateVersionResult>
+
+  /**
+   * Update an existing schema version with patch/reverse_patch
+   */
+  updateVersion(params: UpdateVersionParams): Promise<VersionResult>
 
   /**
    * Create a new timeline item in the design session
@@ -161,6 +196,18 @@ export type SchemaRepository = {
     validationQueryId: string
     results: SqlResult[]
   }): Promise<{ success: true } | { success: false; error: string }>
+
+  /**
+   * Create a new workflow run record
+   */
+  createWorkflowRun(params: CreateWorkflowRunParams): Promise<WorkflowRunResult>
+
+  /**
+   * Update workflow run status
+   */
+  updateWorkflowRunStatus(
+    params: UpdateWorkflowRunStatusParams,
+  ): Promise<WorkflowRunResult>
 }
 
 /**

@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import type { Table } from '../../schema/index.js'
-import { aColumn, anIndex, aSchema, aTable } from '../../schema/index.js'
-import { createParserTestCases } from '../__tests__/index.js'
-import { processor as _processor } from './index.js'
+import { createParserTestCases } from '@/parser/__tests__/index.js'
+import type { Constraint, Table } from '@/schema/index.js'
+import { aColumn, anIndex, aSchema, aTable } from '@/schema/index.js'
+import { processor as _processor } from '../index.js'
 
 describe(_processor, () => {
   const userTable = (override?: Partial<Table>) =>
@@ -231,9 +231,9 @@ describe(_processor, () => {
       ).toEqual({
         type: 'FOREIGN KEY',
         name: 'posts_user_id_users_id_fk',
-        columnName: 'user_id',
+        columnNames: ['user_id'],
         targetTableName: 'users',
-        targetColumnName: 'id',
+        targetColumnNames: ['id'],
         updateConstraint: 'NO_ACTION',
         deleteConstraint: 'NO_ACTION',
       })
@@ -278,9 +278,9 @@ describe(_processor, () => {
       ).toEqual({
         type: 'FOREIGN KEY',
         name: 'profiles_user_id_users_id_fk',
-        columnName: 'user_id',
+        columnNames: ['user_id'],
         targetTableName: 'users',
-        targetColumnName: 'id',
+        targetColumnNames: ['id'],
         updateConstraint: 'NO_ACTION',
         deleteConstraint: 'NO_ACTION',
       })
@@ -322,9 +322,9 @@ describe(_processor, () => {
       ).toEqual({
         type: 'FOREIGN KEY',
         name: 'posts_user_id_users_id_fk',
-        columnName: 'user_id',
+        columnNames: ['user_id'],
         targetTableName: 'users',
-        targetColumnName: 'id',
+        targetColumnNames: ['id'],
         updateConstraint: 'RESTRICT',
         deleteConstraint: 'CASCADE',
       })
@@ -384,9 +384,9 @@ describe(_processor, () => {
       ).toEqual({
         type: 'FOREIGN KEY',
         name: 'user_tags_user_id_users_id_fk',
-        columnName: 'user_id',
+        columnNames: ['user_id'],
         targetTableName: 'users',
-        targetColumnName: 'id',
+        targetColumnNames: ['id'],
         updateConstraint: 'NO_ACTION',
         deleteConstraint: 'NO_ACTION',
       })
@@ -399,9 +399,9 @@ describe(_processor, () => {
       ).toEqual({
         type: 'FOREIGN KEY',
         name: 'user_tags_tag_id_tags_id_fk',
-        columnName: 'tag_id',
+        columnNames: ['tag_id'],
         targetTableName: 'tags',
-        targetColumnName: 'id',
+        targetColumnNames: ['id'],
         updateConstraint: 'NO_ACTION',
         deleteConstraint: 'NO_ACTION',
       })
@@ -635,9 +635,9 @@ describe(_processor, () => {
       ).toEqual({
         type: 'FOREIGN KEY',
         name: 'instructors_user_id_users_id_fk',
-        columnName: 'user_id',
+        columnNames: ['user_id'],
         targetTableName: 'users',
-        targetColumnName: 'id',
+        targetColumnNames: ['id'],
         updateConstraint: 'NO_ACTION',
         deleteConstraint: 'NO_ACTION',
       })
@@ -780,7 +780,7 @@ describe(_processor, () => {
       // Verify multiple FKs in one table
       const commentsFKs = value.tables['comments']?.constraints || {}
       const foreignKeyCount = Object.values(commentsFKs).filter(
-        (c) => c.type === 'FOREIGN KEY',
+        (c: Constraint) => c.type === 'FOREIGN KEY',
       ).length
       expect(foreignKeyCount).toBe(2)
     })
@@ -805,12 +805,12 @@ describe(_processor, () => {
       // Find the FK constraint (name might be different)
       const constraints = value.tables['posts']?.constraints || {}
       const fkConstraint = Object.values(constraints).find(
-        (c) => c.type === 'FOREIGN KEY',
+        (c: Constraint) => c.type === 'FOREIGN KEY',
       )
 
       expect(fkConstraint).toBeDefined()
       if (fkConstraint && fkConstraint.type === 'FOREIGN KEY') {
-        expect(fkConstraint.targetColumnName).toBe('user_id') // Should be DB column name, not JS property name
+        expect(fkConstraint.targetColumnNames).toEqual(['user_id']) // Should be DB column name, not JS property name
       }
     })
   })

@@ -1,6 +1,6 @@
 import { createAppAuth } from '@octokit/auth-app'
 import { Octokit } from '@octokit/rest'
-import { errAsync, ResultAsync } from 'neverthrow'
+import { errAsync, type ResultAsync } from 'neverthrow'
 import type { FileChange } from './types'
 
 const createOctokit = async (installationId: number) => {

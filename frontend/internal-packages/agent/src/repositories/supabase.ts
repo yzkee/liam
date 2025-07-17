@@ -8,6 +8,7 @@ import {
   operationsSchema,
   schemaSchema,
 } from '@liam-hq/db-structure'
+import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import { compare } from 'fast-json-patch'
 import * as v from 'valibot'
 import { ensurePathStructure } from '../utils/pathPreparation'
@@ -616,16 +617,74 @@ export class SupabaseSchemaRepository implements SchemaRepository {
     }
   }
 
+  async createValidationQuery(params: {
+    designSessionId: string
+    queryString: string
+  }): Promise<
+    { success: true; queryId: string } | { success: false; error: string }
+  > {
+    const { data: validationQuery, error } = await this.client
+      .from('validation_queries')
+      .insert({
+        design_session_id: params.designSessionId,
+        query_string: params.queryString,
+      })
+      .select('id')
+      .single()
+
+    if (error) {
+      console.error('Failed to create validation query:', error)
+      return {
+        success: false,
+        error: error.message,
+      }
+    }
+
+    return {
+      success: true,
+      queryId: validationQuery.id,
+    }
+  }
+
+  async createValidationResults(params: {
+    validationQueryId: string
+    results: SqlResult[]
+  }): Promise<{ success: true } | { success: false; error: string }> {
+    const validationResults = params.results.map((result) => ({
+      validation_query_id: params.validationQueryId,
+      result_set: [JSON.parse(JSON.stringify(result.result))],
+      executed_at: result.metadata.timestamp,
+      status: result.success ? 'success' : 'failure',
+      error_message: result.success ? null : JSON.stringify(result.result),
+    }))
+
+    const { error } = await this.client
+      .from('validation_results')
+      .insert(validationResults)
+
+    if (error) {
+      console.error('Failed to create validation results:', error)
+      return {
+        success: false,
+        error: error.message,
+      }
+    }
+
+    return {
+      success: true,
+    }
+  }
+
   async createWorkflowRun(
     params: CreateWorkflowRunParams,
   ): Promise<WorkflowRunResult> {
-    const { designSessionId, runId } = params
+    const { designSessionId, workflowRunId } = params
 
     const { data: workflowRun, error } = await this.client
       .from('workflow_runs')
       .insert({
         design_session_id: designSessionId,
-        workflow_run_id: runId,
+        workflow_run_id: workflowRunId,
       })
       .select()
       .single()
@@ -650,12 +709,12 @@ export class SupabaseSchemaRepository implements SchemaRepository {
   async updateWorkflowRunStatus(
     params: UpdateWorkflowRunStatusParams,
   ): Promise<WorkflowRunResult> {
-    const { runId, status } = params
+    const { workflowRunId, status } = params
 
     const { data: workflowRun, error } = await this.client
       .from('workflow_runs')
       .update({ status })
-      .eq('run_id', runId)
+      .eq('workflow_run_id', workflowRunId)
       .select()
       .single()
 

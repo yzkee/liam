@@ -176,13 +176,13 @@ export const deepModeling = async (
     retryCount: {},
   }
 
-  const runId = uuidv4()
+  const workflowRunId = uuidv4()
 
   try {
     const createWorkflowRunResult = await repositories.schema.createWorkflowRun(
       {
         designSessionId,
-        runId,
+        workflowRunId,
       },
     )
 
@@ -202,20 +202,20 @@ export const deepModeling = async (
         repositories,
         logger,
       },
-      runId,
+      runId: workflowRunId,
       callbacks: [runCollector],
     })
 
     if (result.error) {
       await repositories.schema.updateWorkflowRunStatus({
-        runId,
+        workflowRunId,
         status: 'error',
       })
       return err(new Error(result.error.message))
     }
 
     await repositories.schema.updateWorkflowRunStatus({
-      runId,
+      workflowRunId,
       status: 'success',
     })
 
@@ -229,7 +229,7 @@ export const deepModeling = async (
         : WORKFLOW_ERROR_MESSAGES.EXECUTION_FAILED
 
     await repositories.schema.updateWorkflowRunStatus({
-      runId,
+      workflowRunId,
       status: 'error',
     })
 

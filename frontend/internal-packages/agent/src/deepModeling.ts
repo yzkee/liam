@@ -16,6 +16,7 @@ import {
   reviewDeliverablesNode,
   saveUserMessageNode,
   validateSchemaNode,
+  webSearchNode,
 } from './chat/workflow/nodes'
 import {
   createAnnotations,
@@ -60,6 +61,9 @@ const createGraph = () => {
     .addNode('saveUserMessage', saveUserMessageNode, {
       retryPolicy: RETRY_POLICY,
     })
+    .addNode('webSearch', webSearchNode, {
+      retryPolicy: RETRY_POLICY,
+    })
     .addNode('analyzeRequirements', analyzeRequirementsNode, {
       retryPolicy: RETRY_POLICY,
     })
@@ -86,15 +90,16 @@ const createGraph = () => {
     })
 
     .addEdge(START, 'saveUserMessage')
+    .addEdge('webSearch', 'analyzeRequirements')
     .addEdge('analyzeRequirements', 'designSchema')
     .addEdge('executeDDL', 'generateUsecase')
     .addEdge('generateUsecase', 'prepareDML')
     .addEdge('prepareDML', 'validateSchema')
     .addEdge('finalizeArtifacts', END)
 
-    // Conditional edge for saveUserMessage - skip to finalizeArtifacts if error
+    // Conditional edge for saveUserMessage - skip to finalizeArtifacts if error, otherwise go to webSearch
     .addConditionalEdges('saveUserMessage', (state) => {
-      return state.error ? 'finalizeArtifacts' : 'analyzeRequirements'
+      return state.error ? 'finalizeArtifacts' : 'webSearch'
     })
 
     // Conditional edge for designSchema - skip to finalizeArtifacts if error

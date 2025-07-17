@@ -14,7 +14,7 @@ import {
   PMAgent,
   QAAgent,
 } from './components/AgentMessage/components/AgentAvatar'
-import { ErrorMessage, ErrorMessageContent } from './components/ErrorMessage'
+import { ErrorMessage } from './components/ErrorMessage'
 import { LogMessage } from './components/LogMessage'
 import { UserMessage } from './components/UserMessage'
 import { VersionMessage } from './components/VersionMessage'
@@ -23,19 +23,15 @@ import type { BuildingSchemaVersion } from './components/VersionMessage/VersionM
 type Props = PropsWithChildren &
   TimelineItemEntry & {
     onRetry?: () => void
-    mockVersionData?: BuildingSchemaVersion
   }
 
 export const TimelineItem: FC<Props> = (props) => {
-  const { onRetry, mockVersionData } = props
+  const { onRetry } = props
 
   return match(props)
     .with({ type: 'schema_version' }, ({ buildingSchemaVersionId }) => (
       <AgentMessage state="default">
-        <VersionMessage
-          buildingSchemaVersionId={buildingSchemaVersionId}
-          mockVersionData={mockVersionData}
-        />
+        <VersionMessage buildingSchemaVersionId={buildingSchemaVersionId} />
       </AgentMessage>
     ))
     .with({ type: 'user' }, ({ content, timestamp }) => (

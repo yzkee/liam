@@ -161,47 +161,6 @@ Sorry, an error occurred during processing: Cannot perform an add operation at t
   },
 ]
 
-// Mock version data for VersionMessage
-const mockVersionData = {
-  'version-1': {
-    id: 'version-1',
-    number: 1,
-    patch: [
-      {
-        op: 'add',
-        path: '/tables/greenhouses',
-        value: { name: 'greenhouses' },
-      },
-      { op: 'add', path: '/tables/sensors', value: { name: 'sensors' } },
-      {
-        op: 'add',
-        path: '/tables/sensor_data',
-        value: { name: 'sensor_data' },
-      },
-      {
-        op: 'add',
-        path: '/tables/greenhouses/columns/id',
-        value: { name: 'id', type: 'bigint' },
-      },
-      {
-        op: 'add',
-        path: '/tables/sensors/columns/id',
-        value: { name: 'id', type: 'bigint' },
-      },
-      {
-        op: 'add',
-        path: '/tables/sensor_data/columns/id',
-        value: { name: 'id', type: 'bigint' },
-      },
-      {
-        op: 'add',
-        path: '/tables/greenhouses/constraints/greenhouses_pkey',
-        value: { type: 'PRIMARY KEY', columnNames: ['id'] },
-      },
-    ],
-  },
-}
-
 // Mock schema based on greenhouse monitoring system
 const mockSchemaData = {
   tables: {
@@ -558,7 +517,6 @@ const InteractiveDemo = () => {
         designSessionId="design-session-1"
         onMessageSend={handleMessageSend}
         onRetry={animation.handleRetry}
-        mockVersionData={mockVersionData['version-1']}
       />
     </div>
   )
@@ -571,7 +529,6 @@ export const Default: Story = {
     designSessionId: 'design-session-1',
     onMessageSend: () => {},
     onRetry: () => {},
-    mockVersionData: mockVersionData['version-1'],
   },
   render: () => <InteractiveDemo />,
 }

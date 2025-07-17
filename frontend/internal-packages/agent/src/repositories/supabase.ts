@@ -678,13 +678,13 @@ export class SupabaseSchemaRepository implements SchemaRepository {
   async createWorkflowRun(
     params: CreateWorkflowRunParams,
   ): Promise<WorkflowRunResult> {
-    const { designSessionId, runId } = params
+    const { designSessionId, workflowRunId } = params
 
     const { data: workflowRun, error } = await this.client
       .from('workflow_runs')
       .insert({
         design_session_id: designSessionId,
-        workflow_run_id: runId,
+        workflow_run_id: workflowRunId,
       })
       .select()
       .single()
@@ -709,12 +709,12 @@ export class SupabaseSchemaRepository implements SchemaRepository {
   async updateWorkflowRunStatus(
     params: UpdateWorkflowRunStatusParams,
   ): Promise<WorkflowRunResult> {
-    const { runId, status } = params
+    const { workflowRunId, status } = params
 
     const { data: workflowRun, error } = await this.client
       .from('workflow_runs')
       .update({ status })
-      .eq('run_id', runId)
+      .eq('workflow_run_id', workflowRunId)
       .select()
       .single()
 

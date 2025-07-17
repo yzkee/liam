@@ -1,6 +1,11 @@
-import type { DeepModelingParams, NodeLogger } from '@liam-hq/agent'
+import type {
+  DeepModelingParams,
+  DeepModelingResult,
+  NodeLogger,
+} from '@liam-hq/agent'
 import { createSupabaseRepositories, deepModeling } from '@liam-hq/agent'
 import { logger, task } from '@trigger.dev/sdk'
+import { errAsync, ResultAsync } from 'neverthrow'
 import { createClient } from '../libs/supabase'
 
 // Define type excluding schemaData (repositories and logger are now passed via config)
@@ -29,7 +34,9 @@ function createWorkflowLogger(): NodeLogger {
 export const deepModelingWorkflowTask = task({
   id: 'deep-modeling-workflow',
   machine: 'medium-1x',
-  run: async (payload: DeepModelingPayload) => {
+  run: async (
+    payload: DeepModelingPayload,
+  ): Promise<ResultAsync<DeepModelingResult, Error>> => {
     logger.log('Starting Deep Modeling workflow:', {
       buildingSchemaId: payload.buildingSchemaId,
       messageLength: payload.userInput.length,
@@ -39,34 +46,51 @@ export const deepModelingWorkflowTask = task({
     // Create fresh repositories in job to avoid serialization issues
     // When repositories are passed from API Route to Job, class instances lose their methods
     // during JSON serialization/deserialization, causing "createMessage is not a function" errors
-    const supabaseClient = createClient()
-    const repositories = createSupabaseRepositories(supabaseClient)
+    const supabaseClientResult = createClient()
 
-    const schemaResult = await repositories.schema.getSchema(
-      payload.designSessionId,
-    )
-    if (schemaResult.error || !schemaResult.data) {
-      throw new Error(`Failed to fetch schema data: ${schemaResult.error}`)
+    if (supabaseClientResult.isErr()) {
+      return errAsync(supabaseClientResult.error)
     }
+    const repositories = createSupabaseRepositories(supabaseClientResult.value)
 
     const workflowLogger = createWorkflowLogger()
 
-    const deepModelingParams: DeepModelingParams = {
-      ...payload,
-      schemaData: schemaResult.data.schema,
-    }
+    return ResultAsync.fromPromise(
+      repositories.schema.getSchema(payload.designSessionId),
+      (err) => new Error(`Failed to fetch schema data: ${String(err)}`),
+    )
+      .andThen((schemaResult) => {
+        if (!schemaResult.data) {
+          return errAsync(
+            new Error(
+              `Schema data is missing: ${
+                schemaResult.error ?? 'Unknown error'
+              }`,
+            ),
+          )
+        }
 
-    const result = await deepModeling(deepModelingParams, {
-      configurable: {
-        repositories,
-        logger: workflowLogger,
-      },
-    })
+        const deepModelingParams: DeepModelingParams = {
+          ...payload,
+          schemaData: schemaResult.data.schema,
+        }
 
-    logger.log('Deep Modeling workflow completed:', {
-      success: result.isOk(),
-    })
+        return ResultAsync.fromPromise(
+          deepModeling(deepModelingParams, {
+            configurable: {
+              repositories,
+              logger: workflowLogger,
+            },
+          }),
+          (err) => new Error(String(err)),
+        )
+      })
+      .map((result) => {
+        logger.log('Deep Modeling workflow completed:', {
+          success: result.isOk(),
+        })
 
-    return result
+        return result
+      })
   },
 })

@@ -1,6 +1,6 @@
 import type { Schema } from '@liam-hq/db-structure'
 import { useMemo } from 'react'
-import { generateDiffDdl, schemaToDdl } from '../utils/schemaToDdl'
+import { schemaToDdl } from '../utils/schemaToDdl'
 
 type UseSchemaUpdatesProps = {
   currentSchema: Schema | null
@@ -10,7 +10,6 @@ type UseSchemaUpdatesProps = {
 type UseSchemaUpdatesResult = {
   cumulativeDdl: string
   prevCumulativeDdl: string
-  diffDdl: string
 }
 
 export const useSchemaUpdates = ({
@@ -30,15 +29,8 @@ export const useSchemaUpdates = ({
     return result.ddl
   }, [prevSchema])
 
-  const diffDdl = useMemo(() => {
-    if (!currentSchema || !prevSchema) return ''
-    const result = generateDiffDdl(currentSchema, prevSchema)
-    return result.ddl
-  }, [currentSchema, prevSchema])
-
   return {
     cumulativeDdl,
     prevCumulativeDdl,
-    diffDdl,
   }
 }

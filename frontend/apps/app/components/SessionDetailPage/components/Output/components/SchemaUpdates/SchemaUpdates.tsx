@@ -25,7 +25,7 @@ export const SchemaUpdates: FC<Props> = ({
 }) => {
   const [showReviewComments, setShowReviewComments] = useState(true)
 
-  const { cumulativeDdl, prevCumulativeDdl, diffDdl } = useSchemaUpdates({
+  const { cumulativeDdl, prevCumulativeDdl } = useSchemaUpdates({
     currentSchema,
     prevSchema,
   })

@@ -67,7 +67,7 @@ export const Chat: FC<Props> = ({
           <TimelineItem
             key={timelineItem.id}
             {...timelineItem}
-            onRetry={onRetry}
+            {...(timelineItem.type === 'error' && { onRetry })}
           />
         ))}
         {isLoading && (

@@ -1,10 +1,5 @@
-import type {
-  Column,
-  Constraint,
-  Index,
-  Schema,
-  Table,
-} from '@liam-hq/db-structure'
+import type { Column, Schema, Table } from '@liam-hq/db-structure'
+import { postgresqlSchemaDeparser } from '@liam-hq/db-structure'
 
 type SchemaToDdlResult = {
   ddl: string
@@ -14,75 +9,70 @@ type SchemaToDdlResult = {
 // Using actual types from @liam-hq/db-structure
 
 /**
- * Convert schema to DDL statements
+ * Format DDL statements into a single string
+ */
+const formatDdlStatements = (ddlStatements: string[]): string => {
+  return ddlStatements.length > 0 ? `${ddlStatements.join('\n\n')}\n` : ''
+}
+
+/**
+ * Convert schema to DDL statements using the official PostgreSQL deparser
  */
 export const schemaToDdl = (schema: Schema): SchemaToDdlResult => {
-  const ddlStatements: string[] = []
-  const errors: string[] = []
-
   try {
-    // Generate CREATE TABLE statements for all tables
-    for (const table of Object.values(schema.tables)) {
-      const tableStatement = generateCreateTableStatement(table)
-      if (tableStatement) {
-        ddlStatements.push(tableStatement)
-      }
-    }
+    const result = postgresqlSchemaDeparser(schema)
 
-    // Generate CREATE INDEX statements
-    for (const table of Object.values(schema.tables)) {
-      for (const index of Object.values(table.indexes)) {
-        const indexStatement = generateCreateIndexStatement(table.name, index)
-        if (indexStatement) {
-          ddlStatements.push(indexStatement)
-        }
-      }
-    }
-
-    // Join statements and ensure consistent ending with a single newline
-    const ddl =
-      ddlStatements.length > 0 ? `${ddlStatements.join('\n\n')}\n` : ''
+    // Add trailing newline for consistency
+    const ddl = result.value ? `${result.value}\n` : ''
 
     return {
       ddl,
-      errors,
+      errors: result.errors.map((err) => err.message),
     }
   } catch (error) {
-    errors.push(error instanceof Error ? error.message : 'Unknown error')
     return {
       ddl: '',
-      errors,
+      errors: [error instanceof Error ? error.message : 'Unknown error'],
     }
   }
 }
 
 /**
- * Generate diff DDL between two schemas using direct comparison
+ * Generate diff DDL between two schemas using the official deparser
  */
 export const generateDiffDdl = (
   currentSchema: Schema,
   prevSchema: Schema,
 ): SchemaToDdlResult => {
-  const ddlStatements: string[] = []
-  const errors: string[] = []
-
   try {
+    const ddlStatements: string[] = []
+    const errors: string[] = []
+
     // Compare tables directly
     const currentTables = currentSchema.tables
     const prevTables = prevSchema.tables
 
-    // Find added tables
+    // Find added tables - use the official deparser for CREATE TABLE statements
     for (const [tableId, table] of Object.entries(currentTables)) {
       if (!prevTables[tableId]) {
-        ddlStatements.push(`-- ADDED: table ${table.name}`)
-        ddlStatements.push(generateCreateTableStatement(table))
+        ddlStatements.push(`-- ADD TABLE ${table.name}`)
+
+        // Create a mini-schema with just this table to get proper DDL
+        const tableSchema: Schema = {
+          tables: { [tableId]: table },
+        }
+        const tableResult = postgresqlSchemaDeparser(tableSchema)
+        ddlStatements.push(tableResult.value)
+
+        // Collect any errors from the deparser
+        errors.push(...tableResult.errors.map((err) => err.message))
       }
     }
 
     // Find removed tables
     for (const [tableId, table] of Object.entries(prevTables)) {
       if (!currentTables[tableId]) {
-        ddlStatements.push(`-- REMOVED: table ${table.name}`)
+        ddlStatements.push(`-- DROP TABLE ${table.name}`)
         ddlStatements.push(`DROP TABLE ${table.name};`)
       }
     }
@@ -94,24 +84,22 @@ export const generateDiffDdl = (
 
       const tableDiff = compareTableColumns(currentTable, prevTable)
       if (tableDiff.length > 0) {
-        ddlStatements.push(`-- MODIFIED: table ${currentTable.name}`)
+        ddlStatements.push(`-- ALTER TABLE ${currentTable.name}`)
         ddlStatements.push(...tableDiff)
       }
     }
 
     // Join statements and ensure consistent ending with a single newline
-    const ddl =
-      ddlStatements.length > 0 ? `${ddlStatements.join('\n\n')}\n` : ''
+    const ddl = formatDdlStatements(ddlStatements)
 
     return {
       ddl,
       errors,
     }
   } catch (error) {
-    errors.push(error instanceof Error ? error.message : 'Unknown error')
     return {
       ddl: '',
-      errors,
+      errors: [error instanceof Error ? error.message : 'Unknown error'],
     }
   }
 }
@@ -166,21 +154,7 @@ const findRemovedColumns = (
 }
 
 /**
- * Check if column properties have changed
- */
-const hasColumnChanges = (
-  currentColumn: Column,
-  prevColumn: Column,
-): boolean => {
-  return (
-    currentColumn.type !== prevColumn.type ||
-    currentColumn.notNull !== prevColumn.notNull ||
-    currentColumn.default !== prevColumn.default
-  )
-}
-
-/**
- * Find modified columns and generate ALTER COLUMN statements
+ * Find modified columns and generate correct PostgreSQL ALTER COLUMN statements
  */
 const findModifiedColumns = (
   currentColumns: Record<string, Column>,
@@ -193,9 +167,32 @@ const findModifiedColumns = (
     const prevColumn = prevColumns[columnId]
     if (!prevColumn) continue
 
-    if (hasColumnChanges(currentColumn, prevColumn)) {
-      const columnDef = generateColumnDefinition(currentColumn)
-      statements.push(`ALTER TABLE ${tableName} ALTER COLUMN ${columnDef};`)
+    // Handle type changes
+    if (currentColumn.type !== prevColumn.type) {
+      statements.push(
+        `ALTER TABLE ${tableName} ALTER COLUMN ${currentColumn.name} TYPE ${currentColumn.type};`,
+      )
+    }
+
+    // Handle NOT NULL changes
+    if (currentColumn.notNull !== prevColumn.notNull) {
+      const notNullClause = currentColumn.notNull
+        ? 'SET NOT NULL'
+        : 'DROP NOT NULL'
+      statements.push(
+        `ALTER TABLE ${tableName} ALTER COLUMN ${currentColumn.name} ${notNullClause};`,
+      )
+    }
+
+    // Handle DEFAULT changes
+    if (currentColumn.default !== prevColumn.default) {
+      const defaultClause =
+        currentColumn.default !== null
+          ? `SET DEFAULT ${currentColumn.default}`
+          : 'DROP DEFAULT'
+      statements.push(
+        `ALTER TABLE ${tableName} ALTER COLUMN ${currentColumn.name} ${defaultClause};`,
+      )
     }
   }
 
@@ -226,85 +223,4 @@ const compareTableColumns = (
   )
 
   return [...addedColumns, ...removedColumns, ...modifiedColumns]
-}
-
-/**
- * Generate CREATE TABLE statement for a table
- */
-const generateCreateTableStatement = (table: Table): string => {
-  const columns = Object.values(table.columns)
-    .map((col: Column) => {
-      let columnDef = `  ${col.name} ${col.type}`
-      if (col.notNull) columnDef += ' NOT NULL'
-      if (col.default) columnDef += ` DEFAULT ${col.default}`
-      if (col.check) columnDef += ` CHECK (${col.check})`
-      return columnDef
-    })
-    .join(',\n')
-
-  let statement = `CREATE TABLE ${table.name} (\n${columns}`
-
-  // Add constraints
-  const constraints = Object.values(table.constraints)
-    .map((constraint: Constraint) => {
-      switch (constraint.type) {
-        case 'PRIMARY KEY':
-          return `  CONSTRAINT ${constraint.name} PRIMARY KEY (${constraint.columnNames.join(', ')})`
-        case 'FOREIGN KEY': {
-          if (
-            'targetTableName' in constraint &&
-            'targetColumnNames' in constraint
-          ) {
-            const fkConstraint = constraint
-            return `  CONSTRAINT ${constraint.name} FOREIGN KEY (${constraint.columnNames.join(', ')}) REFERENCES ${fkConstraint.targetTableName}(${fkConstraint.targetColumnNames.join(', ')})`
-          }
-          return null
-        }
-        case 'UNIQUE':
-          return `  CONSTRAINT ${constraint.name} UNIQUE (${constraint.columnNames.join(', ')})`
-        case 'CHECK': {
-          if ('detail' in constraint) {
-            const checkConstraint = constraint
-            return `  CONSTRAINT ${constraint.name} CHECK (${checkConstraint.detail})`
-          }
-          return null
-        }
-        default:
-          return null
-      }
-    })
-    .filter(Boolean)
-
-  if (constraints.length > 0) {
-    statement += `,\n${constraints.join(',\n')}`
-  }
-
-  statement += '\n);'
-
-  if (table.comment) {
-    statement += `\n\nCOMMENT ON TABLE ${table.name} IS '${table.comment}';`
-  }
-
-  // Add column comments
-  for (const col of Object.values(table.columns)) {
-    if (col.comment) {
-      statement += `\nCOMMENT ON COLUMN ${table.name}.${col.name} IS '${col.comment}';`
-    }
-  }
-
-  return statement
-}
-
-/**
- * Generate CREATE INDEX statement for an index
- */
-const generateCreateIndexStatement = (
-  tableName: string,
-  index: Index,
-): string => {
-  const uniqueKeyword = index.unique ? 'UNIQUE ' : ''
-  const columns = index.columns.join(', ')
-  const indexType =
-    index.type && index.type !== 'btree' ? ` USING ${index.type}` : ''
-  return `CREATE ${uniqueKeyword}INDEX ${index.name} ON ${tableName}${indexType} (${columns});`
 }

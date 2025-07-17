@@ -6,17 +6,22 @@ import { UserEditingProvider } from '@/stores/userEditing'
 
 type Props = {
   schema: SchemaProviderValue
+  showDiff?: boolean
   defaultShowMode?: ShowMode
 }
 
 export const ErdRendererProvider: FC<PropsWithChildren<Props>> = ({
   schema,
+  showDiff,
   defaultShowMode,
   children,
 }) => {
   return (
     <NuqsAdapter>
-      <UserEditingProvider defaultShowMode={defaultShowMode}>
+      <UserEditingProvider
+        showDiff={showDiff}
+        defaultShowMode={defaultShowMode}
+      >
         <SchemaProvider {...schema}>{children}</SchemaProvider>
       </UserEditingProvider>
     </NuqsAdapter>

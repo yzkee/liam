@@ -16,7 +16,6 @@ export type WorkflowState = {
     | undefined
   generatedUsecases?: Usecase[] | undefined
   generatedAnswer?: string | undefined
-  finalResponse?: string | undefined
   schemaData: Schema
   projectId?: string | undefined
   error?: Error | undefined

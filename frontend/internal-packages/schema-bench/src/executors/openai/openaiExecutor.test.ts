@@ -1,18 +1,28 @@
+import OpenAI from 'openai'
 import { describe, expect, it, vi } from 'vitest'
 import { OpenAIExecutor } from './openaiExecutor.ts'
 
-// Mock OpenAI module
+// Mock OpenAI constructor
 vi.mock('openai', () => {
   return {
-    default: vi.fn().mockImplementation(() => ({
-      chat: {
-        completions: {
-          create: vi.fn(),
-        },
-      },
-    })),
+    default: vi.fn(),
   }
 })
+
+const MockedOpenAI = vi.mocked(OpenAI)
+
+// Helper function to create mock OpenAI client without type assertion issues
+const setupMockOpenAI = (mockCreate: ReturnType<typeof vi.fn>) => {
+  const mockClient = {
+    chat: {
+      completions: {
+        create: mockCreate,
+      },
+    },
+  }
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  MockedOpenAI.mockImplementation(() => mockClient as unknown as OpenAI)
+}
 
 describe('OpenAIExecutor', () => {
   it('should execute and return schema', async () => {
@@ -51,12 +61,10 @@ describe('OpenAIExecutor', () => {
       ],
     }
 
-    const executor = new OpenAIExecutor({ apiKey: 'test-key' })
-
-    // Access the mocked client
     const mockCreate = vi.fn().mockResolvedValue(mockResponse)
-    // @ts-ignore - accessing private property for testing
-    executor.client.chat.completions.create = mockCreate
+    setupMockOpenAI(mockCreate)
+
+    const executor = new OpenAIExecutor({ apiKey: 'test-key' })
 
     const result = await executor.execute({ input: 'Create a users table' })
 
@@ -78,12 +86,10 @@ describe('OpenAIExecutor', () => {
   })
 
   it('should handle API errors', async () => {
-    const executor = new OpenAIExecutor({ apiKey: 'test-key' })
-
-    // Mock API error
     const mockCreate = vi.fn().mockRejectedValue(new Error('API Error'))
-    // @ts-ignore - accessing private property for testing
-    executor.client.chat.completions.create = mockCreate
+    setupMockOpenAI(mockCreate)
+
+    const executor = new OpenAIExecutor({ apiKey: 'test-key' })
 
     const result = await executor.execute({ input: 'Create a users table' })
 
@@ -98,11 +104,10 @@ describe('OpenAIExecutor', () => {
       choices: [{ message: { content: null } }],
     }
 
-    const executor = new OpenAIExecutor({ apiKey: 'test-key' })
-
     const mockCreate = vi.fn().mockResolvedValue(mockResponse)
-    // @ts-ignore - accessing private property for testing
-    executor.client.chat.completions.create = mockCreate
+    setupMockOpenAI(mockCreate)
+
+    const executor = new OpenAIExecutor({ apiKey: 'test-key' })
 
     const result = await executor.execute({ input: 'Create a users table' })
 

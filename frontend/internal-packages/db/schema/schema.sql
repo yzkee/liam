@@ -3354,6 +3354,10 @@ ALTER PUBLICATION "supabase_realtime" ADD TABLE ONLY "public"."artifacts";
 
 
 
+ALTER PUBLICATION "supabase_realtime" ADD TABLE ONLY "public"."building_schema_versions";
+
+
+
 ALTER PUBLICATION "supabase_realtime" ADD TABLE ONLY "public"."building_schemas";
 
 

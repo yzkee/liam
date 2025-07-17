@@ -82,7 +82,7 @@ const parsePatchOperations = (
   })
 }
 
-export type BuildingSchemaVersion = Pick<
+type BuildingSchemaVersion = Pick<
   Tables<'building_schema_versions'>,
   'patch' | 'number' | 'id'
 >

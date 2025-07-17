@@ -1,4 +1,4 @@
-import { err, ok, Result } from 'neverthrow'
+import { err, ok, type Result } from 'neverthrow'
 import { PATH_PATTERNS } from '../../operation/constants.js'
 import type {
   AddColumnOperation,
@@ -303,7 +303,8 @@ export const postgresqlOperationDeparser: OperationDeparser = (
   if (isAddTableOperation(operation)) {
     const result = generateCreateTableFromOperation(operation)
     if (result.isErr()) {
-      throw result.error
+      errors.push({ message: result.error.message })
+      return { value: '', errors }
     }
     const value = result.value
     return { value, errors }
@@ -312,7 +313,8 @@ export const postgresqlOperationDeparser: OperationDeparser = (
   if (isRemoveTableOperation(operation)) {
     const result = generateRemoveTableFromOperation(operation)
     if (result.isErr()) {
-      throw result.error
+      errors.push({ message: result.error.message })
+      return { value: '', errors }
     }
     const value = result.value
     return { value, errors }
@@ -321,7 +323,8 @@ export const postgresqlOperationDeparser: OperationDeparser = (
   if (isReplaceTableNameOperation(operation)) {
     const result = generateRenameTableFromOperation(operation)
     if (result.isErr()) {
-      throw result.error
+      errors.push({ message: result.error.message })
+      return { value: '', errors }
     }
     const value = result.value
     return { value, errors }
@@ -330,7 +333,8 @@ export const postgresqlOperationDeparser: OperationDeparser = (
   if (isAddColumnOperation(operation)) {
     const result = generateAddColumnFromOperation(operation)
     if (result.isErr()) {
-      throw result.error
+      errors.push({ message: result.error.message })
+      return { value: '', errors }
     }
     const value = result.value
     return { value, errors }
@@ -339,7 +343,8 @@ export const postgresqlOperationDeparser: OperationDeparser = (
   if (isRemoveColumnOperation(operation)) {
     const result = generateRemoveColumnFromOperation(operation)
     if (result.isErr()) {
-      throw result.error
+      errors.push({ message: result.error.message })
+      return { value: '', errors }
     }
     const value = result.value
     return { value, errors }
@@ -348,7 +353,8 @@ export const postgresqlOperationDeparser: OperationDeparser = (
   if (isRenameColumnOperation(operation)) {
     const result = generateRenameColumnFromOperation(operation)
     if (result.isErr()) {
-      throw result.error
+      errors.push({ message: result.error.message })
+      return { value: '', errors }
     }
     const value = result.value
     return { value, errors }
@@ -357,7 +363,8 @@ export const postgresqlOperationDeparser: OperationDeparser = (
   if (isAddIndexOperation(operation)) {
     const result = generateCreateIndexFromOperation(operation)
     if (result.isErr()) {
-      throw result.error
+      errors.push({ message: result.error.message })
+      return { value: '', errors }
     }
     const value = result.value
     return { value, errors }
@@ -366,7 +373,8 @@ export const postgresqlOperationDeparser: OperationDeparser = (
   if (isRemoveIndexOperation(operation)) {
     const result = generateRemoveIndexFromOperation(operation)
     if (result.isErr()) {
-      throw result.error
+      errors.push({ message: result.error.message })
+      return { value: '', errors }
     }
     const value = result.value
     return { value, errors }
@@ -375,7 +383,8 @@ export const postgresqlOperationDeparser: OperationDeparser = (
   if (isAddConstraintOperation(operation)) {
     const result = generateAddConstraintFromOperation(operation)
     if (result.isErr()) {
-      throw result.error
+      errors.push({ message: result.error.message })
+      return { value: '', errors }
     }
     const value = result.value
     return { value, errors }
@@ -384,7 +393,8 @@ export const postgresqlOperationDeparser: OperationDeparser = (
   if (isRemoveConstraintOperation(operation)) {
     const result = generateRemoveConstraintFromOperation(operation)
     if (result.isErr()) {
-      throw result.error
+      errors.push({ message: result.error.message })
+      return { value: '', errors }
     }
     const value = result.value
     return { value, errors }

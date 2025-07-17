@@ -48,6 +48,17 @@ vi.mock('@liam-hq/pglite-server', () => ({
   ]),
 }))
 
+// Mock ChatOpenAI for web search
+vi.mock('@langchain/openai', () => ({
+  ChatOpenAI: vi.fn().mockImplementation(() => ({
+    bindTools: vi.fn().mockReturnThis(),
+    invoke: vi.fn().mockResolvedValue({
+      content:
+        'Web search results: Best practices for database design include normalization, proper indexing, and consistent naming conventions.',
+    }),
+  })),
+}))
+
 describe('Chat Workflow', () => {
   let mockSchemaData: Schema
   let mockPMAnalysisAgent: {

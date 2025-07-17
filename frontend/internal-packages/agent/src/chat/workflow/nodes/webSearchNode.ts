@@ -1,4 +1,4 @@
-import { AIMessage } from '@langchain/core/messages'
+import { AIMessage, SystemMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { ChatOpenAI } from '@langchain/openai'
 import { ResultAsync } from 'neverthrow'
@@ -42,8 +42,6 @@ export async function webSearchNode(
   // Create a search query based on user input
   const searchPrompt = `Based on the following user request about database design, perform a web search to gather relevant information about best practices, patterns, and considerations:
 
-User Request: ${state.userInput}
-
 Search for information about:
 - Database design patterns related to the request
 - Best practices for the mentioned use case
@@ -53,7 +51,7 @@ Search for information about:
 Provide a concise summary of the most relevant findings.`
 
   const searchResult = await ResultAsync.fromPromise(
-    llm.invoke(searchPrompt),
+    llm.invoke([new SystemMessage(searchPrompt), ...state.messages]),
     (error) => (error instanceof Error ? error : new Error(String(error))),
   )
 

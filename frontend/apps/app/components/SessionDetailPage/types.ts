@@ -41,7 +41,7 @@ export type DesignSessionWithTimelineItems = Pick<
 export type WorkflowRunStatus =
   Database['public']['Enums']['workflow_run_status']
 
-type AssistantRole = 'pm' | 'db' | 'qa'
+type AssistantRole = Database['public']['Enums']['assistant_role_enum']
 
 type BaseTimelineItemEntry = {
   id: string

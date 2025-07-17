@@ -1,10 +1,13 @@
-import { AIMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { ResultAsync } from 'neverthrow'
 import { PMAnalysisAgent } from '../../../langchain/agents'
 import type { BasePromptVariables } from '../../../langchain/utils/types'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
+import {
+  createRequirementsAnalysisMessage,
+  TIMELINE_MESSAGES,
+} from '../utils/messageFormatters'
 import { formatMessagesToHistory } from '../utils/messageUtils'
 import { logAssistantMessage } from '../utils/timelineLogger'
 
@@ -25,7 +28,11 @@ export async function analyzeRequirementsNode(
   }
   const { repositories } = configurableResult.value
 
-  await logAssistantMessage(state, repositories, 'Analyzing requirements...')
+  await logAssistantMessage(
+    state,
+    repositories,
+    TIMELINE_MESSAGES.REQUIREMENTS_ANALYSIS.START,
+  )
 
   const pmAnalysisAgent = new PMAnalysisAgent()
 
@@ -39,7 +46,7 @@ export async function analyzeRequirementsNode(
   await logAssistantMessage(
     state,
     repositories,
-    'Organizing business and functional requirements...',
+    TIMELINE_MESSAGES.REQUIREMENTS_ANALYSIS.ORGANIZING,
   )
 
   const analysisResult = await ResultAsync.fromPromise(
@@ -52,17 +59,14 @@ export async function analyzeRequirementsNode(
       await logAssistantMessage(
         state,
         repositories,
-        'Requirements analysis completed',
+        TIMELINE_MESSAGES.REQUIREMENTS_ANALYSIS.COMPLETED,
       )
 
       return {
         ...state,
         messages: [
           ...state.messages,
-          new AIMessage({
-            content: result.businessRequirement,
-            name: 'PMAnalysisAgent',
-          }),
+          createRequirementsAnalysisMessage(result.businessRequirement),
         ],
         analyzedRequirements: {
           businessRequirement: result.businessRequirement,
@@ -76,7 +80,7 @@ export async function analyzeRequirementsNode(
       await logAssistantMessage(
         state,
         repositories,
-        'Error occurred during requirements analysis',
+        TIMELINE_MESSAGES.REQUIREMENTS_ANALYSIS.ERROR,
       )
 
       return {

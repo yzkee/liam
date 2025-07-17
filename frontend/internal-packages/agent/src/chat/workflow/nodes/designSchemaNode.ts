@@ -9,60 +9,11 @@ import type { Repositories } from '../../../repositories'
 import { convertSchemaToText } from '../../../utils/convertSchemaToText'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
+import {
+  prepareDesignSchemaUserMessage,
+  TIMELINE_MESSAGES,
+} from '../utils/messageFormatters'
 import { logAssistantMessage } from '../utils/timelineLogger'
-
-const formatAnalyzedRequirements = (
-  analyzedRequirements: NonNullable<WorkflowState['analyzedRequirements']>,
-): string => {
-  const formatRequirements = (
-    requirements: Record<string, string[]>,
-    title: string,
-  ): string => {
-    const entries = Object.entries(requirements)
-    if (entries.length === 0) return ''
-
-    return `${title}:
-${entries
-  .map(
-    ([category, items]) =>
-      `- ${category}:\n  ${items.map((item) => `  • ${item}`).join('\n')}`,
-  )
-  .join('\n')}`
-  }
-
-  const sections = [
-    `Business Requirement:\n${analyzedRequirements.businessRequirement}`,
-    formatRequirements(
-      analyzedRequirements.functionalRequirements,
-      'Functional Requirements',
-    ),
-    formatRequirements(
-      analyzedRequirements.nonFunctionalRequirements,
-      'Non-Functional Requirements',
-    ),
-  ].filter(Boolean)
-
-  return sections.join('\n\n')
-}
-
-const prepareUserMessage = (state: WorkflowState): string => {
-  // DDL execution failure takes priority
-  if (state.shouldRetryWithDesignSchema && state.ddlExecutionFailureReason) {
-    return `The following DDL execution failed: ${state.ddlExecutionFailureReason}
-Original request: ${state.userInput}
-Please fix this issue by analyzing the schema and adding any missing constraints, primary keys, or other required schema elements to resolve the DDL execution error.`
-  }
-
-  // Include analyzed requirements if available
-  if (state.analyzedRequirements) {
-    return `Based on the following analyzed requirements:
-${formatAnalyzedRequirements(state.analyzedRequirements)}
-User Request: ${state.userInput}`
-  }
-
-  // Default to original user input
-  return state.userInput
-}
 
 /**
  * Apply schema changes and return updated state
@@ -147,7 +98,11 @@ export async function designSchemaNode(
   }
   const { repositories } = configurableResult.value
 
-  await logAssistantMessage(state, repositories, 'Designing database schema...')
+  await logAssistantMessage(
+    state,
+    repositories,
+    TIMELINE_MESSAGES.SCHEMA_DESIGN.START,
+  )
 
   // Create empty version at the beginning of the node
   const buildingSchemaId = state.buildingSchemaId
@@ -175,20 +130,20 @@ export async function designSchemaNode(
   await logAssistantMessage(
     state,
     repositories,
-    'Created new schema version for updates...',
+    TIMELINE_MESSAGES.SCHEMA_DESIGN.VERSION_CREATED,
   )
 
   const schemaText = convertSchemaToText(state.schemaData)
 
   // Prepare user message with context
-  const userMessage = prepareUserMessage(state)
+  const userMessage = prepareDesignSchemaUserMessage(state)
 
   // Log appropriate message for DDL retry case
   if (state.shouldRetryWithDesignSchema && state.ddlExecutionFailureReason) {
     await logAssistantMessage(
       state,
       repositories,
-      'Redesigning schema to fix DDL execution errors...',
+      TIMELINE_MESSAGES.SCHEMA_DESIGN.REDESIGNING_FOR_DDL,
     )
   }
 
@@ -198,13 +153,17 @@ export async function designSchemaNode(
   await logAssistantMessage(
     state,
     repositories,
-    'Analyzing table structure and relationships...',
+    TIMELINE_MESSAGES.SCHEMA_DESIGN.ANALYZING_STRUCTURE,
   )
 
   const invokeResult = await invokeDesignAgent({ schemaText }, messages)
 
   if (invokeResult.isErr()) {
-    await logAssistantMessage(state, repositories, 'Schema design failed')
+    await logAssistantMessage(
+      state,
+      repositories,
+      TIMELINE_MESSAGES.SCHEMA_DESIGN.ERROR,
+    )
     return {
       ...state,
       error: invokeResult.error,
@@ -218,7 +177,11 @@ export async function designSchemaNode(
     repositories,
   )
 
-  await logAssistantMessage(state, repositories, 'Schema design completed')
+  await logAssistantMessage(
+    state,
+    repositories,
+    TIMELINE_MESSAGES.SCHEMA_DESIGN.COMPLETED,
+  )
 
   // Clear retry flags after processing
   const finalResult = {

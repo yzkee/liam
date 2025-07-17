@@ -58,7 +58,7 @@ All of the following conditions must be met:
 
 ```markdown
 ---
-"@liam-hq/package-name": version-type(major|minor|patch)
+"@liam-hq/package-name": version-type(minor|patch)
 ---
 
 - [emoji] Brief description
@@ -92,17 +92,6 @@ All of the following conditions must be met:
   - Restore positions when ERD is re-rendered
 ```
 
-### Breaking Change (major)
-```markdown
----
-"@liam-hq/cli": major
----
-
-- 💥 Rename output format option for consistency
-  - BREAKING: Change `--format` to `--output-format`
-  - BREAKING: Remove deprecated `--type` option
-  - Add migration guide in documentation
-```
 
 ## Emoji Guide
 

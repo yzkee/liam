@@ -345,7 +345,7 @@ importers:
         version: 3.1.1
       langfuse-langchain:
         specifier: 3.37.6
-        version: 3.37.6(langchain@0.3.29(@langchain/core@0.3.61(openai@5.9.0(ws@8.18.3)(zod@3.25.76)))(axios@1.10.0)(cheerio@1.0.0)(handlebars@4.7.8)(openai@5.9.0(ws@8.18.3)(zod@3.25.76))(ws@8.18.3))
+        version: 3.37.6(langchain@0.3.29(@langchain/core@0.3.61(openai@5.9.0(ws@8.18.3)(zod@3.25.76)))(axios@1.10.0(debug@4.4.1))(cheerio@1.0.0)(handlebars@4.7.8)(openai@5.9.0(ws@8.18.3)(zod@3.25.76))(ws@8.18.3))
       langsmith:
         specifier: 0.3.34
         version: 0.3.34(openai@5.9.0(ws@8.18.3)(zod@3.25.76))
@@ -875,7 +875,7 @@ importers:
         version: 8.2.0
       nuqs:
         specifier: 2.4.3
-        version: 2.4.3(next@15.3.4(@babel/core@7.28.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.53.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)
+        version: 2.4.3(next@15.3.4(@opentelemetry/api@1.9.0)(@playwright/test@1.53.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)
       pako:
         specifier: 2.1.0
         version: 2.1.0
@@ -13669,7 +13669,7 @@ snapshots:
       flat: 5.0.2
       ibm-cloud-sdk-core: 5.4.0
       js-yaml: 4.1.0
-      langchain: 0.3.29(@langchain/core@0.3.61(openai@5.9.0(ws@8.18.3)(zod@3.25.76)))(axios@1.10.0)(cheerio@1.0.0)(handlebars@4.7.8)(openai@5.9.0(ws@8.18.3)(zod@3.25.76))(ws@8.18.3)
+      langchain: 0.3.29(@langchain/core@0.3.61(openai@5.9.0(ws@8.18.3)(zod@3.25.76)))(axios@1.10.0(debug@4.4.1))(cheerio@1.0.0)(handlebars@4.7.8)(openai@5.9.0(ws@8.18.3)(zod@3.25.76))(ws@8.18.3)
       langsmith: 0.3.34(openai@5.9.0(ws@8.18.3)(zod@3.25.76))
       openai: 5.9.0(ws@8.18.3)(zod@3.25.76)
       uuid: 10.0.0
@@ -13856,7 +13856,7 @@ snapshots:
       cross-spawn: 7.0.6
       eventsource: 3.0.7
       express: 5.1.0(supports-color@10.0.0)
-      express-rate-limit: 7.5.1(express@5.1.0)
+      express-rate-limit: 7.5.1(express@5.1.0(supports-color@10.0.0))
       pkce-challenge: 5.0.0
       raw-body: 3.0.0
       zod: 3.25.76
@@ -18720,7 +18720,7 @@ snapshots:
 
   expr-eval@2.0.2: {}
 
-  express-rate-limit@7.5.1(express@5.1.0):
+  express-rate-limit@7.5.1(express@5.1.0(supports-color@10.0.0)):
     dependencies:
       express: 5.1.0(supports-color@10.0.0)
 
@@ -19618,7 +19618,7 @@ snapshots:
       isstream: 0.1.2
       jsonwebtoken: 9.0.2
       mime-types: 2.1.35
-      retry-axios: 2.6.0(axios@1.10.0)
+      retry-axios: 2.6.0(axios@1.10.0(debug@4.4.1))
       tough-cookie: 4.1.4
     transitivePeerDependencies:
       - supports-color
@@ -20139,7 +20139,7 @@ snapshots:
       zod: 3.25.76
       zod-validation-error: 3.5.3(zod@3.25.76)
 
-  langchain@0.3.29(@langchain/core@0.3.61(openai@5.9.0(ws@8.18.3)(zod@3.25.76)))(axios@1.10.0)(cheerio@1.0.0)(handlebars@4.7.8)(openai@5.9.0(ws@8.18.3)(zod@3.25.76))(ws@8.18.3):
+  langchain@0.3.29(@langchain/core@0.3.61(openai@5.9.0(ws@8.18.3)(zod@3.25.76)))(axios@1.10.0(debug@4.4.1))(cheerio@1.0.0)(handlebars@4.7.8)(openai@5.9.0(ws@8.18.3)(zod@3.25.76))(ws@8.18.3):
     dependencies:
       '@langchain/core': 0.3.61(openai@5.9.0(ws@8.18.3)(zod@3.25.76))
       '@langchain/openai': 0.5.16(@langchain/core@0.3.61(openai@5.9.0(ws@8.18.3)(zod@3.25.76)))(ws@8.18.3)
@@ -20165,9 +20165,9 @@ snapshots:
     dependencies:
       mustache: 4.2.0
 
-  langfuse-langchain@3.37.6(langchain@0.3.29(@langchain/core@0.3.61(openai@5.9.0(ws@8.18.3)(zod@3.25.76)))(axios@1.10.0)(cheerio@1.0.0)(handlebars@4.7.8)(openai@5.9.0(ws@8.18.3)(zod@3.25.76))(ws@8.18.3)):
+  langfuse-langchain@3.37.6(langchain@0.3.29(@langchain/core@0.3.61(openai@5.9.0(ws@8.18.3)(zod@3.25.76)))(axios@1.10.0(debug@4.4.1))(cheerio@1.0.0)(handlebars@4.7.8)(openai@5.9.0(ws@8.18.3)(zod@3.25.76))(ws@8.18.3)):
     dependencies:
-      langchain: 0.3.29(@langchain/core@0.3.61(openai@5.9.0(ws@8.18.3)(zod@3.25.76)))(axios@1.10.0)(cheerio@1.0.0)(handlebars@4.7.8)(openai@5.9.0(ws@8.18.3)(zod@3.25.76))(ws@8.18.3)
+      langchain: 0.3.29(@langchain/core@0.3.61(openai@5.9.0(ws@8.18.3)(zod@3.25.76)))(axios@1.10.0(debug@4.4.1))(cheerio@1.0.0)(handlebars@4.7.8)(openai@5.9.0(ws@8.18.3)(zod@3.25.76))(ws@8.18.3)
       langfuse: 3.38.4
       langfuse-core: 3.38.4
 
@@ -21221,7 +21221,7 @@ snapshots:
     dependencies:
       boolbase: 1.0.0
 
-  nuqs@2.4.3(next@15.3.4(@babel/core@7.28.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.53.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0):
+  nuqs@2.4.3(next@15.3.4(@opentelemetry/api@1.9.0)(@playwright/test@1.53.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0):
     dependencies:
       mitt: 3.0.1
       react: 19.1.0
@@ -22393,7 +22393,7 @@ snapshots:
       onetime: 7.0.0
       signal-exit: 4.1.0
 
-  retry-axios@2.6.0(axios@1.10.0):
+  retry-axios@2.6.0(axios@1.10.0(debug@4.4.1)):
     dependencies:
       axios: 1.10.0(debug@4.4.1)
 

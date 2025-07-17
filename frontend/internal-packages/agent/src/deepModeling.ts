@@ -46,7 +46,7 @@ export type DeepModelingResult = Result<
  * Retry policy configuration for all nodes
  */
 const RETRY_POLICY = {
-  maxAttempts: 3,
+  maxAttempts: process.env['NODE_ENV'] === 'test' ? 1 : 3,
 }
 
 /**

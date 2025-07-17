@@ -13,20 +13,22 @@ import {
 import * as v from 'valibot'
 import { OpenAIExecutor } from '../executors/openai/openaiExecutor.ts'
 import type { OpenAIExecutorInput } from '../executors/openai/types.ts'
+import {
+  getWorkspaceSubPath,
+  handleCliError,
+  handleUnexpectedError,
+} from './utils/index.ts'
 
 const InputSchema = v.object({
   input: v.string(),
 })
 
-const WORKSPACE_PATH = join(
-  process.env['INIT_CWD'] || process.cwd(),
-  'benchmark-workspace',
-)
+// Workspace path is now handled by common utilities
 
 async function loadInputFiles(): Promise<
   Result<Array<{ caseId: string; input: OpenAIExecutorInput }>, Error>
 > {
-  const inputDir = join(WORKSPACE_PATH, 'execution/input')
+  const inputDir = getWorkspaceSubPath('execution/input')
 
   if (!existsSync(inputDir)) {
     return err(
@@ -92,7 +94,7 @@ async function saveOutputFile(
   caseId: string,
   output: unknown,
 ): Promise<Result<void, Error>> {
-  const outputDir = join(WORKSPACE_PATH, 'execution/output')
+  const outputDir = getWorkspaceSubPath('execution/output')
 
   if (!existsSync(outputDir)) {
     mkdirSync(outputDir, { recursive: true })
@@ -133,20 +135,21 @@ async function main() {
   // Check API key
   const apiKey = process.env['OPENAI_API_KEY']
   if (!apiKey) {
-    console.error('❌ Error: OPENAI_API_KEY environment variable is required')
-    process.exit(1)
+    handleCliError('OPENAI_API_KEY environment variable is required')
+    return // This will never be reached but helps TypeScript
   }
 
   // Load input files
   const inputsResult = await loadInputFiles()
   if (inputsResult.isErr()) {
-    console.error(`❌ Error: ${inputsResult.error.message}`)
-    process.exit(1)
+    handleCliError('Failed to load input files', inputsResult.error)
+    return // This will never be reached but helps TypeScript
   }
 
   const inputs = inputsResult.value
 
   if (inputs.length === 0) {
+    // No input files found, exit silently
     return
   }
 
@@ -199,11 +202,9 @@ async function main() {
   }
 
   if (failureCount > 0) {
-    process.exit(1)
+    handleCliError(`${failureCount} case(s) failed`)
+    return // This will never be reached but helps TypeScript
   }
 }
 
-main().catch((error) => {
-  console.error('❌ Unexpected error:', error)
-  process.exit(1)
-})
+main().catch(handleUnexpectedError)

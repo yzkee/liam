@@ -31,7 +31,13 @@ export type WorkflowRunStatus =
 type BaseTimelineItemEntry = {
   id: string
   content: string
-  type: 'user' | 'assistant' | 'schema_version' | 'error' | 'assistant_log'
+  type:
+    | 'user'
+    | 'assistant'
+    | 'schema_version'
+    | 'error'
+    | 'assistant_log'
+    | 'query_result'
   timestamp: Date
 }
 
@@ -56,9 +62,16 @@ export type AssistantLogTimelineItemEntry = BaseTimelineItemEntry & {
   type: 'assistant_log'
 }
 
+export type QueryResultTimelineItemEntry = BaseTimelineItemEntry & {
+  type: 'query_result'
+  queryResultId: string
+  results: unknown
+}
+
 export type TimelineItemEntry =
   | UserTimelineItemEntry
   | AssistantTimelineItemEntry
   | SchemaVersionTimelineItemEntry
   | ErrorTimelineItemEntry
   | AssistantLogTimelineItemEntry
+  | QueryResultTimelineItemEntry

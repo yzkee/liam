@@ -1,5 +1,6 @@
 import { HumanMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
+import type { Database } from '@liam-hq/db'
 import {
   type DesignResponse,
   type InvokeResult,
@@ -20,8 +21,14 @@ const applySchemaChanges = async (
   message: string,
   state: WorkflowState,
   repositories: Repositories,
+  assistantRole: Database['public']['Enums']['assistant_role_enum'],
 ): Promise<WorkflowState> => {
-  await logAssistantMessage(state, repositories, 'Applying schema changes...')
+  await logAssistantMessage(
+    state,
+    repositories,
+    'Applying schema changes...',
+    assistantRole,
+  )
 
   const result = await repositories.schema.updateVersion({
     buildingSchemaVersionId,
@@ -30,7 +37,12 @@ const applySchemaChanges = async (
 
   if (!result.success) {
     const errorMessage = result.error || 'Failed to update schema'
-    await logAssistantMessage(state, repositories, 'Schema update failed')
+    await logAssistantMessage(
+      state,
+      repositories,
+      'Schema update failed',
+      assistantRole,
+    )
     return {
       ...state,
       error: new Error(errorMessage),
@@ -41,6 +53,7 @@ const applySchemaChanges = async (
     state,
     repositories,
     `Applied ${operations.length} schema changes successfully`,
+    assistantRole,
   )
 
   // Save timeline item directly when answer is generated
@@ -75,6 +88,7 @@ const handleSchemaChanges = async (
   buildingSchemaVersionId: string,
   state: WorkflowState,
   repositories: Repositories,
+  assistantRole: Database['public']['Enums']['assistant_role_enum'],
 ): Promise<WorkflowState> => {
   if (invokeResult.operations.length === 0) {
     // Save timeline item directly when answer is generated
@@ -101,6 +115,7 @@ const handleSchemaChanges = async (
     invokeResult.message.text,
     state,
     repositories,
+    assistantRole,
   )
 }
 
@@ -112,6 +127,7 @@ export async function designSchemaNode(
   state: WorkflowState,
   config: RunnableConfig,
 ): Promise<WorkflowState> {
+  const assistantRole: Database['public']['Enums']['assistant_role_enum'] = 'db'
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
     return {
@@ -121,7 +137,12 @@ export async function designSchemaNode(
   }
   const { repositories } = configurableResult.value
 
-  await logAssistantMessage(state, repositories, 'Designing database schema...')
+  await logAssistantMessage(
+    state,
+    repositories,
+    'Designing database schema...',
+    assistantRole,
+  )
 
   // Create empty version at the beginning of the node
   const buildingSchemaId = state.buildingSchemaId
@@ -137,7 +158,12 @@ export async function designSchemaNode(
   if (!createVersionResult.success) {
     const errorMessage =
       createVersionResult.error || 'Failed to create new version'
-    await logAssistantMessage(state, repositories, 'Version creation failed')
+    await logAssistantMessage(
+      state,
+      repositories,
+      'Version creation failed',
+      assistantRole,
+    )
     return {
       ...state,
       error: new Error(errorMessage),
@@ -150,6 +176,7 @@ export async function designSchemaNode(
     state,
     repositories,
     'Created new schema version for updates...',
+    assistantRole,
   )
 
   const schemaText = convertSchemaToText(state.schemaData)
@@ -160,6 +187,7 @@ export async function designSchemaNode(
       state,
       repositories,
       'Redesigning schema to fix DDL execution errors...',
+      assistantRole,
     )
   }
 
@@ -178,12 +206,18 @@ Please fix this issue by analyzing the schema and adding any missing constraints
     state,
     repositories,
     'Analyzing table structure and relationships...',
+    assistantRole,
   )
 
   const invokeResult = await invokeDesignAgent({ schemaText }, messages)
 
   if (invokeResult.isErr()) {
-    await logAssistantMessage(state, repositories, 'Schema design failed')
+    await logAssistantMessage(
+      state,
+      repositories,
+      'Schema design failed',
+      assistantRole,
+    )
     return {
       ...state,
       error: invokeResult.error,
@@ -195,9 +229,15 @@ Please fix this issue by analyzing the schema and adding any missing constraints
     buildingSchemaVersionId,
     state,
     repositories,
+    assistantRole,
   )
 
-  await logAssistantMessage(state, repositories, 'Schema design completed')
+  await logAssistantMessage(
+    state,
+    repositories,
+    'Schema design completed',
+    assistantRole,
+  )
 
   // Clear retry flags after processing
   const finalResult = {

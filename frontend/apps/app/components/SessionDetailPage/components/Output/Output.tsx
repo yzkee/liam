@@ -1,7 +1,7 @@
 import type { Schema } from '@liam-hq/db-structure'
 import type { ComponentProps, FC } from 'react'
 import { TabsContent, TabsRoot } from '@/components'
-import type { ReviewComment, Version } from '../../types'
+import type { ReviewComment } from '../../types'
 import { ArtifactContainer } from './components/Artifact/ArtifactContainer'
 import { ERD } from './components/ERD'
 import { Header } from './components/Header'
@@ -36,8 +36,8 @@ export const Output: FC<Props> = ({
         className={styles.tabsContent}
       >
         <SchemaUpdates
-          designSessionId={designSessionId}
-          currentVersionNumber={currentVersion?.number}
+          currentSchema={schema}
+          prevSchema={prevSchema}
           comments={schemaUpdatesReviewComments}
           onQuickFix={onQuickFix}
         />

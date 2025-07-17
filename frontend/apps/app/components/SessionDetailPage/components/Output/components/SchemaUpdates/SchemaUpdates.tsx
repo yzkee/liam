@@ -1,5 +1,6 @@
 'use client'
 
+import type { Schema } from '@liam-hq/db-structure'
 import clsx from 'clsx'
 import { MessageSquareCode } from 'lucide-react'
 import { type FC, useState } from 'react'
@@ -10,46 +11,24 @@ import { MigrationsViewer } from './MigrationsViewer'
 import styles from './SchemaUpdates.module.css'
 
 type Props = {
-  designSessionId: string
-  currentVersionNumber?: number
+  currentSchema: Schema | null
+  prevSchema: Schema | null
   comments?: ReviewComment[]
   onQuickFix?: (comment: string) => void
 }
 
 export const SchemaUpdates: FC<Props> = ({
-  designSessionId,
-  currentVersionNumber,
+  currentSchema,
+  prevSchema,
   comments = [],
   onQuickFix,
 }) => {
   const [showReviewComments, setShowReviewComments] = useState(true)
 
-  const { cumulativeDdl, prevCumulativeDdl, loading, error } = useSchemaUpdates(
-    {
-      designSessionId,
-      currentVersionNumber,
-    },
-  )
-
-  if (loading) {
-    return (
-      <section className={styles.section}>
-        <div className={styles.body}>
-          <div>Loading schema updates...</div>
-        </div>
-      </section>
-    )
-  }
-
-  if (error) {
-    return (
-      <section className={styles.section}>
-        <div className={styles.body}>
-          <div>Error loading schema updates: {error}</div>
-        </div>
-      </section>
-    )
-  }
+  const { cumulativeDdl, prevCumulativeDdl, diffDdl } = useSchemaUpdates({
+    currentSchema,
+    prevSchema,
+  })
 
   return (
     <section className={styles.section}>

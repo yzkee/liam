@@ -109,9 +109,7 @@ export function useRealtimeVersionsWithSchema({
             }
 
             const updatedVersion = parsed.output
-            if (updatedVersion.building_schema_id === buildingSchemaId) {
-              handleAddOrUpdateVersion(updatedVersion)
-            }
+            handleAddOrUpdateVersion(updatedVersion)
           } catch (error) {
             handleError(error)
           }
@@ -126,7 +124,7 @@ export function useRealtimeVersionsWithSchema({
     return () => {
       channel.unsubscribe()
     }
-  }, [buildingSchemaId, handleError])
+  }, [buildingSchemaId, handleError, handleAddOrUpdateVersion])
 
   return {
     isPending,

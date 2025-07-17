@@ -31,6 +31,7 @@ export const ERD: FC<Props> = ({ schema, prevSchema }) => {
         <ErdRendererProvider
           schema={{ current: schema, previous: prevSchema }}
           showDiff
+          defaultShowMode="ALL_FIELDS"
         >
           <ERDRenderer
             key={schemaKey}

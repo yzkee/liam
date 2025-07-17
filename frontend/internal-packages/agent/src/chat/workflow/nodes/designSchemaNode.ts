@@ -104,7 +104,13 @@ const applySchemaChanges = async (
   })
 
   if (!saveResult.success) {
-    console.error('Failed to save assistant timeline item:', saveResult.error)
+    return {
+      ...state,
+      schemaData: result.newSchema,
+      error: new Error(
+        `Failed to save assistant timeline item: ${saveResult.error}`,
+      ),
+    }
   }
 
   return {
@@ -132,7 +138,12 @@ const handleSchemaChanges = async (
     })
 
     if (!saveResult.success) {
-      console.error('Failed to save assistant timeline item:', saveResult.error)
+      return {
+        ...state,
+        error: new Error(
+          `Failed to save assistant timeline item: ${saveResult.error}`,
+        ),
+      }
     }
     return state
   }

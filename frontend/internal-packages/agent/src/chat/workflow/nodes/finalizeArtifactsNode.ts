@@ -62,7 +62,9 @@ async function handleWorkflowError(
     })
 
     if (!saveResult.success) {
-      console.error('Failed to save error timeline item:', saveResult.error)
+      return {
+        errorToReturn: `Failed to save error timeline item: ${saveResult.error}`,
+      }
     }
     return { errorToReturn: state.error.message }
   }

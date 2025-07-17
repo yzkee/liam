@@ -47,17 +47,23 @@ export function useRealtimeVersionsWithSchema({
       if (targetVersion === null) return
 
       startTransition(async () => {
-        const buildingSchema = await buildCurrentSchema(targetVersion)
-        const parsed = v.safeParse(schemaSchema, buildingSchema)
-        const currentSchema = parsed.success ? parsed.output : null
-        setDisplayedSchema(currentSchema)
+        try {
+          const buildingSchema = await buildCurrentSchema(targetVersion)
+          const parsed = v.safeParse(schemaSchema, buildingSchema)
+          const currentSchema = parsed.success ? parsed.output : null
+          setDisplayedSchema(currentSchema)
 
-        if (currentSchema === null) return
-        const prevSchema = await buildPrevSchema({
-          currentSchema,
-          targetVersionId: targetVersion.id,
-        })
-        setPrevSchema(prevSchema)
+          if (currentSchema === null) return
+          const prevSchema = await buildPrevSchema({
+            currentSchema,
+            targetVersionId: targetVersion.id,
+          })
+          setPrevSchema(prevSchema)
+        } catch (error) {
+          handleError(error)
+          setDisplayedSchema(null)
+          setPrevSchema(null)
+        }
       })
     },
     [],

@@ -3346,10 +3346,6 @@ ALTER TABLE "public"."workflow_runs" ENABLE ROW LEVEL SECURITY;
 ALTER PUBLICATION "supabase_realtime" OWNER TO "postgres";
 
 
-
-
-
-
 ALTER PUBLICATION "supabase_realtime" ADD TABLE ONLY "public"."artifacts";
 
 

@@ -61,10 +61,9 @@ All of the following conditions must be met:
 "@liam-hq/package-name": version-type(minor|patch)
 ---
 
-[emoji] Brief description
-
-- Specific change details
-- Technical details (if necessary)
+- [emoji] Brief description
+  - Specific change details
+  - Technical details (if necessary)
 ```
 
 ## Examples
@@ -75,12 +74,11 @@ All of the following conditions must be met:
 "@liam-hq/db-structure": minor
 ---
 
-✨ Add support for Rails inline index syntax in schema.rb parser
-
-- Support inline index declarations: `t.string "name", index: true`
-- Handle unique indexes: `t.text "mention", index: { unique: true }`
-- Parse custom index names: `t.string "slug", index: { name: "custom_name" }`
-- Support index types: `t.string "email", index: { using: "gin" }`
+- ✨ Add support for Rails inline index syntax in schema.rb parser
+  - Support inline index declarations: `t.string "name", index: true`
+  - Handle unique indexes: `t.text "mention", index: { unique: true }`
+  - Parse custom index names: `t.string "slug", index: { name: "custom_name" }`
+  - Support index types: `t.string "email", index: { using: "gin" }`
 ```
 
 ### Bug Fix (patch)
@@ -89,10 +87,9 @@ All of the following conditions must be met:
 "@liam-hq/erd-core": patch
 ---
 
-🐛 Fix table position not persisting after page reload
-
-- Store table positions in local storage
-- Restore positions when ERD is re-rendered
+- 🐛 Fix table position not persisting after page reload
+  - Store table positions in local storage
+  - Restore positions when ERD is re-rendered
 ```
 
 ### Breaking Change (major)
@@ -101,11 +98,10 @@ All of the following conditions must be met:
 "@liam-hq/cli": major
 ---
 
-💥 Rename output format option for consistency
-
-- BREAKING: Change `--format` to `--output-format`
-- BREAKING: Remove deprecated `--type` option
-- Add migration guide in documentation
+- 💥 Rename output format option for consistency
+  - BREAKING: Change `--format` to `--output-format`
+  - BREAKING: Remove deprecated `--type` option
+  - Add migration guide in documentation
 ```
 
 ## Emoji Guide

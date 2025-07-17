@@ -257,6 +257,7 @@ describe('Chat Workflow', () => {
         id: 'test-timeline-item-id',
         content: 'Test timeline item content',
         type: 'assistant',
+        assistant_role: 'db',
         user_id: null,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),

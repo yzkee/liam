@@ -58,7 +58,7 @@ All of the following conditions must be met:
 
 ```markdown
 ---
-"@liam-hq/package-name": version-type
+"@liam-hq/package-name": version-type(minor|patch)
 ---
 
 [emoji] Brief description

@@ -4,10 +4,7 @@ import { PMAnalysisAgent } from '../../../langchain/agents'
 import type { BasePromptVariables } from '../../../langchain/utils/types'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
-import {
-  createRequirementsAnalysisMessage,
-  TIMELINE_MESSAGES,
-} from '../utils/messageFormatters'
+import { createRequirementsAnalysisMessage } from '../utils/messageFormatters'
 import { formatMessagesToHistory } from '../utils/messageUtils'
 import { logAssistantMessage } from '../utils/timelineLogger'
 
@@ -28,11 +25,7 @@ export async function analyzeRequirementsNode(
   }
   const { repositories } = configurableResult.value
 
-  await logAssistantMessage(
-    state,
-    repositories,
-    TIMELINE_MESSAGES.REQUIREMENTS_ANALYSIS.START,
-  )
+  await logAssistantMessage(state, repositories, 'Analyzing requirements...')
 
   const pmAnalysisAgent = new PMAnalysisAgent()
 
@@ -46,7 +39,7 @@ export async function analyzeRequirementsNode(
   await logAssistantMessage(
     state,
     repositories,
-    TIMELINE_MESSAGES.REQUIREMENTS_ANALYSIS.ORGANIZING,
+    'Organizing business and functional requirements...',
   )
 
   const analysisResult = await ResultAsync.fromPromise(
@@ -59,7 +52,7 @@ export async function analyzeRequirementsNode(
       await logAssistantMessage(
         state,
         repositories,
-        TIMELINE_MESSAGES.REQUIREMENTS_ANALYSIS.COMPLETED,
+        'Requirements analysis completed',
       )
 
       return {
@@ -80,7 +73,7 @@ export async function analyzeRequirementsNode(
       await logAssistantMessage(
         state,
         repositories,
-        TIMELINE_MESSAGES.REQUIREMENTS_ANALYSIS.ERROR,
+        'Error occurred during requirements analysis',
       )
 
       return {

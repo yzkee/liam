@@ -9,10 +9,7 @@ import type { Repositories } from '../../../repositories'
 import { convertSchemaToText } from '../../../utils/convertSchemaToText'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
-import {
-  prepareDesignSchemaUserMessage,
-  TIMELINE_MESSAGES,
-} from '../utils/messageFormatters'
+import { prepareDesignSchemaUserMessage } from '../utils/messageFormatters'
 import { logAssistantMessage } from '../utils/timelineLogger'
 
 /**
@@ -98,11 +95,7 @@ export async function designSchemaNode(
   }
   const { repositories } = configurableResult.value
 
-  await logAssistantMessage(
-    state,
-    repositories,
-    TIMELINE_MESSAGES.SCHEMA_DESIGN.START,
-  )
+  await logAssistantMessage(state, repositories, 'Designing database schema...')
 
   // Create empty version at the beginning of the node
   const buildingSchemaId = state.buildingSchemaId
@@ -130,7 +123,7 @@ export async function designSchemaNode(
   await logAssistantMessage(
     state,
     repositories,
-    TIMELINE_MESSAGES.SCHEMA_DESIGN.VERSION_CREATED,
+    'Created new schema version for updates...',
   )
 
   const schemaText = convertSchemaToText(state.schemaData)
@@ -143,7 +136,7 @@ export async function designSchemaNode(
     await logAssistantMessage(
       state,
       repositories,
-      TIMELINE_MESSAGES.SCHEMA_DESIGN.REDESIGNING_FOR_DDL,
+      'Redesigning schema to fix DDL execution errors...',
     )
   }
 
@@ -153,17 +146,13 @@ export async function designSchemaNode(
   await logAssistantMessage(
     state,
     repositories,
-    TIMELINE_MESSAGES.SCHEMA_DESIGN.ANALYZING_STRUCTURE,
+    'Analyzing table structure and relationships...',
   )
 
   const invokeResult = await invokeDesignAgent({ schemaText }, messages)
 
   if (invokeResult.isErr()) {
-    await logAssistantMessage(
-      state,
-      repositories,
-      TIMELINE_MESSAGES.SCHEMA_DESIGN.ERROR,
-    )
+    await logAssistantMessage(state, repositories, 'Schema design failed')
     return {
       ...state,
       error: invokeResult.error,
@@ -177,11 +166,7 @@ export async function designSchemaNode(
     repositories,
   )
 
-  await logAssistantMessage(
-    state,
-    repositories,
-    TIMELINE_MESSAGES.SCHEMA_DESIGN.COMPLETED,
-  )
+  await logAssistantMessage(state, repositories, 'Schema design completed')
 
   // Clear retry flags after processing
   const finalResult = {

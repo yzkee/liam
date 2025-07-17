@@ -76,23 +76,3 @@ export const createRequirementsAnalysisMessage = (
     name: agentName,
   })
 }
-
-/**
- * Create timeline logging messages for different workflow phases
- */
-export const TIMELINE_MESSAGES = {
-  REQUIREMENTS_ANALYSIS: {
-    START: 'Analyzing requirements...',
-    ORGANIZING: 'Organizing business and functional requirements...',
-    COMPLETED: 'Requirements analysis completed',
-    ERROR: 'Error occurred during requirements analysis',
-  },
-  SCHEMA_DESIGN: {
-    START: 'Designing database schema...',
-    VERSION_CREATED: 'Created new schema version for updates...',
-    ANALYZING_STRUCTURE: 'Analyzing table structure and relationships...',
-    REDESIGNING_FOR_DDL: 'Redesigning schema to fix DDL execution errors...',
-    COMPLETED: 'Schema design completed',
-    ERROR: 'Schema design failed',
-  },
-} as const

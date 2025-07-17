@@ -183,8 +183,6 @@ export const deepModeling = async (
 
   const workflowRunId = uuidv4()
 
-  //todo: remove this eslint-disable-next-line
-  // eslint-disable-next-line no-restricted-syntax
   try {
     const createWorkflowRunResult = await repositories.schema.createWorkflowRun(
       {

@@ -44,10 +44,12 @@ All of the following conditions must be met:
 
 ### 1. Determine Version Type
 
-- **major**: Breaking changes
-- **minor**: New features (backward compatible)
+- **major**: ❌ Not allowed – we’re in 0.x
+- **minor**: New features or breaking changes
 - **patch**: Bug fixes, small improvements
 
+Note: We're in 0.x – no major bumps.
+While breaking changes are technically allowed in 0.x under SemVer, we treat them as minor version updates for consistency.
 ### 2. Create Changeset File
 
 ```

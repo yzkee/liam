@@ -30,7 +30,6 @@ export const ERD: FC<Props> = ({ schema, prevSchema }) => {
       <VersionProvider version={version}>
         <ErdRendererProvider
           schema={{ current: schema, previous: prevSchema }}
-          showDiff
           defaultShowMode="ALL_FIELDS"
         >
           <ERDRenderer

@@ -82,16 +82,9 @@ Please suggest a specific solution to resolve this problem.`
 
   const hasSelectedVersion = selectedVersion !== null
 
-  const isVersionNotReady =
-    status === 'pending' &&
-    (selectedVersion?.patch === null || selectedVersion?.reverse_patch === null)
-  console.info(!isVersionNotReady)
-
   const isVersionReady =
     status !== 'pending' ||
     (selectedVersion?.patch !== null && selectedVersion?.reverse_patch !== null)
-  console.info(isVersionReady)
-  console.info('============')
 
   // Show error state if no schema is available
   if (displayedSchema === null) {

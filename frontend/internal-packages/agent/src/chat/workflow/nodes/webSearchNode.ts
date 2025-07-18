@@ -1,6 +1,7 @@
 import { AIMessage, SystemMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { ChatOpenAI } from '@langchain/openai'
+import type { Database } from '@liam-hq/db'
 import { ResultAsync } from 'neverthrow'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
@@ -14,6 +15,7 @@ export async function webSearchNode(
   state: WorkflowState,
   config: RunnableConfig,
 ): Promise<WorkflowState> {
+  const assistantRole: Database['public']['Enums']['assistant_role_enum'] = 'pm'
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
     return {
@@ -27,6 +29,7 @@ export async function webSearchNode(
     state,
     repositories,
     'Searching for relevant information...',
+    assistantRole,
   )
 
   // Create LLM with web search tool binding
@@ -57,7 +60,12 @@ Provide a concise summary of the most relevant findings.`
 
   return searchResult.match(
     async (result) => {
-      await logAssistantMessage(state, repositories, 'Web search completed')
+      await logAssistantMessage(
+        state,
+        repositories,
+        'Web search completed',
+        assistantRole,
+      )
 
       // Extract the search results content
       const searchContent =
@@ -83,6 +91,7 @@ Provide a concise summary of the most relevant findings.`
         state,
         repositories,
         'Error occurred during web search',
+        assistantRole,
       )
 
       // Don't fail the entire workflow if web search fails

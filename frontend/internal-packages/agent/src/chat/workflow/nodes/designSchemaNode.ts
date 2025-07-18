@@ -61,6 +61,7 @@ const applySchemaChanges = async (
     designSessionId: state.designSessionId,
     content: message,
     type: 'assistant',
+    role: 'db',
   })
 
   if (!saveResult.success) {
@@ -96,6 +97,7 @@ const handleSchemaChanges = async (
       designSessionId: state.designSessionId,
       content: invokeResult.message.text,
       type: 'assistant',
+      role: 'db',
     })
 
     if (!saveResult.success) {

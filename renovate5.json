@@ -60,8 +60,11 @@
         "/^@vitest/",
         "playwright",
         "@playwright/test",
-        "pnpm",
-        "knip"
+        "pnpm"
+        // "knip" - Temporarily commented out due to compatibility issues with biome2
+        // See: https://github.com/webpro-nl/knip/issues/1154
+        // This has caused manual downgrades in PRs #2376 and #2534
+        // Re-enable knip when the compatibility issue is resolved
       ],
       "matchDepTypes": [
         "devDependencies"

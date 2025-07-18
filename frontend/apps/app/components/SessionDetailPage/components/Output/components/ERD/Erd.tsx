@@ -17,7 +17,7 @@ const version = parse(versionSchema, {
 
 type Props = {
   schema: Schema
-  prevSchema: Schema | undefined
+  prevSchema: Schema
 }
 
 export const ERD: FC<Props> = ({ schema, prevSchema }) => {

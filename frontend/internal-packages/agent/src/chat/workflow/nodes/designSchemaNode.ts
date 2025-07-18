@@ -9,7 +9,6 @@ import type { Repositories } from '../../../repositories'
 import { convertSchemaToText } from '../../../utils/convertSchemaToText'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
-import { prepareDesignSchemaUserMessage } from '../utils/messageFormatters'
 import { logAssistantMessage } from '../utils/timelineLogger'
 
 /**
@@ -128,9 +127,6 @@ export async function designSchemaNode(
 
   const schemaText = convertSchemaToText(state.schemaData)
 
-  // Prepare user message with context
-  const userMessage = prepareDesignSchemaUserMessage(state)
-
   // Log appropriate message for DDL retry case
   if (state.shouldRetryWithDesignSchema && state.ddlExecutionFailureReason) {
     await logAssistantMessage(
@@ -140,8 +136,16 @@ export async function designSchemaNode(
     )
   }
 
-  // Convert messages to BaseMessage array and add user message
-  const messages = [...state.messages, new HumanMessage(userMessage)]
+  // Use existing messages, or add DDL failure context if retrying
+  let messages = [...state.messages]
+  if (state.shouldRetryWithDesignSchema && state.ddlExecutionFailureReason) {
+    const ddlRetryMessage = new HumanMessage(
+      `The following DDL execution failed: ${state.ddlExecutionFailureReason}
+Original request: ${state.userInput}
+Please fix this issue by analyzing the schema and adding any missing constraints, primary keys, or other required schema elements to resolve the DDL execution error.`,
+    )
+    messages = [...messages, ddlRetryMessage]
+  }
 
   await logAssistantMessage(
     state,
@@ -171,11 +175,7 @@ export async function designSchemaNode(
   // Clear retry flags after processing
   const finalResult = {
     ...result,
-    messages: [
-      ...state.messages,
-      new HumanMessage(userMessage),
-      invokeResult.value.message,
-    ],
+    messages: [...messages, invokeResult.value.message],
     shouldRetryWithDesignSchema: undefined,
     ddlExecutionFailureReason: undefined,
   }

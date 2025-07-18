@@ -5,6 +5,8 @@ import styles from './LogMessage.module.css'
 type LogMessageProps = {
   content: string
   isLast?: boolean
+  // Note: Currently timeline_items table doesn't have a status field.
+  // This prop is for future use when we might want to show different states
   status?: 'success' | 'error' | 'in-progress' | 'pending'
 }
 

@@ -11,8 +11,8 @@ import { MigrationsViewer } from './MigrationsViewer'
 import styles from './SchemaUpdates.module.css'
 
 type Props = {
-  currentSchema: Schema | null
-  prevSchema: Schema | null
+  currentSchema: Schema
+  prevSchema: Schema
   comments?: ReviewComment[]
   onQuickFix?: (comment: string) => void
 }

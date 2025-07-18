@@ -12,7 +12,7 @@ import styles from './Output.module.css'
 type Props = ComponentProps<typeof Header> & {
   designSessionId: string
   schema: Schema
-  prevSchema: Schema | null
+  prevSchema: Schema
   schemaUpdatesReviewComments: ReviewComment[]
   onQuickFix?: (comment: string) => void
 }
@@ -29,7 +29,7 @@ export const Output: FC<Props> = ({
     <TabsRoot defaultValue={DEFAULT_OUTPUT_TAB} className={styles.tabsRoot}>
       <Header {...propsForHeader} />
       <TabsContent value={OUTPUT_TABS.ERD} className={styles.tabsContent}>
-        <ERD schema={schema} prevSchema={prevSchema ?? undefined} />
+        <ERD schema={schema} prevSchema={prevSchema} />
       </TabsContent>
       <TabsContent
         value={OUTPUT_TABS.SCHEMA_UPDATES}

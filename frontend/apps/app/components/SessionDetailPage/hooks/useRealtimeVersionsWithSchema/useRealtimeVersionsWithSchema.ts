@@ -2,6 +2,7 @@
 
 import { buildingSchemaVersionsSchema } from '@liam-hq/db'
 import { type Schema, schemaSchema } from '@liam-hq/db-structure'
+import { err, ok } from 'neverthrow'
 import { useCallback, useEffect, useState, useTransition } from 'react'
 import * as v from 'valibot'
 import { createClient } from '@/libs/db/client'
@@ -12,8 +13,8 @@ import { buildPrevSchema } from './services/buildPrevSchema'
 type Params = {
   buildingSchemaId: string
   initialVersions: Version[]
-  initialDisplayedSchema: Schema | null
-  initialPrevSchema: Schema | null
+  initialDisplayedSchema: Schema
+  initialPrevSchema: Schema
 }
 
 export function useRealtimeVersionsWithSchema({
@@ -28,10 +29,10 @@ export function useRealtimeVersionsWithSchema({
     initialVersions[0] ?? null,
   )
 
-  const [displayedSchema, setDisplayedSchema] = useState<Schema | null>(
+  const [displayedSchema, setDisplayedSchema] = useState<Schema>(
     initialDisplayedSchema,
   )
-  const [prevSchema, setPrevSchema] = useState<Schema | null>(initialPrevSchema)
+  const [prevSchema, setPrevSchema] = useState<Schema>(initialPrevSchema)
 
   const [error, setError] = useState<Error | null>(null)
   const handleError = useCallback((err: unknown) => {
@@ -50,19 +51,19 @@ export function useRealtimeVersionsWithSchema({
         try {
           const buildingSchema = await buildCurrentSchema(targetVersion)
           const parsed = v.safeParse(schemaSchema, buildingSchema)
-          const currentSchema = parsed.success ? parsed.output : null
+          if (!parsed.success) {
+            handleError(new Error('Invalid schema format'))
+            return
+          }
+          const currentSchema = parsed.output
           setDisplayedSchema(currentSchema)
-
-          if (currentSchema === null) return
-          const prevSchema = await buildPrevSchema({
+          const newPrevSchema = await buildPrevSchema({
             currentSchema,
             targetVersionId: targetVersion.id,
           })
-          setPrevSchema(prevSchema)
+          setPrevSchema(newPrevSchema ?? currentSchema)
         } catch (error) {
           handleError(error)
-          setDisplayedSchema(null)
-          setPrevSchema(null)
         }
       })
     },
@@ -111,7 +112,8 @@ export function useRealtimeVersionsWithSchema({
               payload.new,
             )
             if (!parsed.success) {
-              throw new Error('Invalid building schema version format')
+              handleError(new Error('Invalid building schema version format'))
+              return
             }
 
             const updatedVersion = parsed.output

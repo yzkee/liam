@@ -21,8 +21,8 @@ import type {
 type Props = {
   buildingSchemaId: string
   designSessionWithTimelineItems: DesignSessionWithTimelineItems
-  initialDisplayedSchema: Schema | null
-  initialPrevSchema: Schema | null
+  initialDisplayedSchema: Schema
+  initialPrevSchema: Schema
   initialVersions: Version[]
   initialWorkflowRunStatus: WorkflowRunStatus | null
 }
@@ -85,11 +85,6 @@ Please suggest a specific solution to resolve this problem.`
   const isVersionReady =
     status !== 'pending' ||
     (selectedVersion?.patch !== null && selectedVersion?.reverse_patch !== null)
-
-  // Show error state if no schema is available
-  if (displayedSchema === null) {
-    return <div>Failed to load schema</div>
-  }
 
   return (
     <div className={styles.container}>

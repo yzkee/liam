@@ -11,59 +11,6 @@ import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 import { logAssistantMessage } from '../utils/timelineLogger'
 
-const formatAnalyzedRequirements = (
-  analyzedRequirements: NonNullable<WorkflowState['analyzedRequirements']>,
-): string => {
-  const formatRequirements = (
-    requirements: Record<string, string[]>,
-    title: string,
-  ): string => {
-    const entries = Object.entries(requirements)
-    if (entries.length === 0) return ''
-
-    return `${title}:
-${entries
-  .map(
-    ([category, items]) =>
-      `- ${category}:\n  ${items.map((item) => `  • ${item}`).join('\n')}`,
-  )
-  .join('\n')}`
-  }
-
-  const sections = [
-    `Business Requirement:\n${analyzedRequirements.businessRequirement}`,
-    formatRequirements(
-      analyzedRequirements.functionalRequirements,
-      'Functional Requirements',
-    ),
-    formatRequirements(
-      analyzedRequirements.nonFunctionalRequirements,
-      'Non-Functional Requirements',
-    ),
-  ].filter(Boolean)
-
-  return sections.join('\n\n')
-}
-
-const prepareUserMessage = (state: WorkflowState): string => {
-  // DDL execution failure takes priority
-  if (state.shouldRetryWithDesignSchema && state.ddlExecutionFailureReason) {
-    return `The following DDL execution failed: ${state.ddlExecutionFailureReason}
-Original request: ${state.userInput}
-Please fix this issue by analyzing the schema and adding any missing constraints, primary keys, or other required schema elements to resolve the DDL execution error.`
-  }
-
-  // Include analyzed requirements if available
-  if (state.analyzedRequirements) {
-    return `Based on the following analyzed requirements:
-${formatAnalyzedRequirements(state.analyzedRequirements)}
-User Request: ${state.userInput}`
-  }
-
-  // Default to original user input
-  return state.userInput
-}
-
 /**
  * Apply schema changes and return updated state
  */
@@ -207,9 +154,6 @@ export async function designSchemaNode(
 
   const schemaText = convertSchemaToText(state.schemaData)
 
-  // Prepare user message with context
-  const userMessage = prepareUserMessage(state)
-
   // Log appropriate message for DDL retry case
   if (state.shouldRetryWithDesignSchema && state.ddlExecutionFailureReason) {
     await logAssistantMessage(
@@ -219,8 +163,16 @@ export async function designSchemaNode(
     )
   }
 
-  // Convert messages to BaseMessage array and add user message
-  const messages = [...state.messages, new HumanMessage(userMessage)]
+  // Use existing messages, or add DDL failure context if retrying
+  let messages = [...state.messages]
+  if (state.shouldRetryWithDesignSchema && state.ddlExecutionFailureReason) {
+    const ddlRetryMessage = new HumanMessage(
+      `The following DDL execution failed: ${state.ddlExecutionFailureReason}
+Original request: ${state.userInput}
+Please fix this issue by analyzing the schema and adding any missing constraints, primary keys, or other required schema elements to resolve the DDL execution error.`,
+    )
+    messages = [...messages, ddlRetryMessage]
+  }
 
   await logAssistantMessage(
     state,
@@ -250,11 +202,7 @@ export async function designSchemaNode(
   // Clear retry flags after processing
   const finalResult = {
     ...result,
-    messages: [
-      ...state.messages,
-      new HumanMessage(userMessage),
-      invokeResult.value.message,
-    ],
+    messages: [...messages, invokeResult.value.message],
     shouldRetryWithDesignSchema: undefined,
     ddlExecutionFailureReason: undefined,
   }

@@ -9,6 +9,43 @@ import { formatMessagesToHistory } from '../utils/messageUtils'
 import { logAssistantMessage } from '../utils/timelineLogger'
 
 /**
+ * Format analyzed requirements into a structured string
+ */
+const formatAnalyzedRequirements = (
+  analyzedRequirements: NonNullable<WorkflowState['analyzedRequirements']>,
+): string => {
+  const formatRequirements = (
+    requirements: Record<string, string[]>,
+    title: string,
+  ): string => {
+    const entries = Object.entries(requirements)
+    if (entries.length === 0) return ''
+
+    return `${title}:
+${entries
+  .map(
+    ([category, items]) =>
+      `- ${category}:\n  ${items.map((item) => `  • ${item}`).join('\n')}`,
+  )
+  .join('\n')}`
+  }
+
+  const sections = [
+    `Business Requirement:\n${analyzedRequirements.businessRequirement}`,
+    formatRequirements(
+      analyzedRequirements.functionalRequirements,
+      'Functional Requirements',
+    ),
+    formatRequirements(
+      analyzedRequirements.nonFunctionalRequirements,
+      'Non-Functional Requirements',
+    ),
+  ].filter(Boolean)
+
+  return sections.join('\n\n')
+}
+
+/**
  * Analyze Requirements Node - Requirements Organization
  * Performed by pmAnalysisAgent
  */
@@ -55,20 +92,22 @@ export async function analyzeRequirementsNode(
         'Requirements analysis completed',
       )
 
+      const analyzedRequirements = {
+        businessRequirement: result.businessRequirement,
+        functionalRequirements: result.functionalRequirements,
+        nonFunctionalRequirements: result.nonFunctionalRequirements,
+      }
+
+      // Create complete message with all analyzed requirements
+      const completeMessage = new AIMessage({
+        content: formatAnalyzedRequirements(analyzedRequirements),
+        name: 'PMAnalysisAgent',
+      })
+
       return {
         ...state,
-        messages: [
-          ...state.messages,
-          new AIMessage({
-            content: result.businessRequirement,
-            name: 'PMAnalysisAgent',
-          }),
-        ],
-        analyzedRequirements: {
-          businessRequirement: result.businessRequirement,
-          functionalRequirements: result.functionalRequirements,
-          nonFunctionalRequirements: result.nonFunctionalRequirements,
-        },
+        messages: [...state.messages, completeMessage],
+        analyzedRequirements,
         error: undefined, // Clear error on success
       }
     },

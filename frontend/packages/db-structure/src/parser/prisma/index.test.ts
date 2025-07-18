@@ -1,4 +1,3 @@
-import { errAsync, ResultAsync } from 'neverthrow'
 import { describe, expect, it } from 'vitest'
 import type { Table } from '../../schema/index.js'
 import { aColumn, anIndex, aSchema, aTable } from '../../schema/index.js'
@@ -331,8 +330,14 @@ describe(_processor, () => {
       expect(value.tables['users']).toBeDefined()
       expect(value.tables['posts']).toBeDefined()
 
-      const usersTable = value.tables['users']!
-      const postsTable = value.tables['posts']!
+      const usersTable = value.tables['users']
+      const postsTable = value.tables['posts']
+
+      if (!usersTable || !postsTable) {
+        expect(usersTable).toBeDefined()
+        expect(postsTable).toBeDefined()
+        return
+      }
 
       expect(usersTable.columns).toBeDefined()
       expect(postsTable.columns).toBeDefined()

@@ -1,3 +1,4 @@
+import { safeParse } from 'valibot'
 import type {
   Columns,
   Constraints,
@@ -8,7 +9,6 @@ import type {
 import { aColumn, anIndex, aTable } from '../../schema/index.js'
 import type { Processor, ProcessResult } from '../types.js'
 import { TablesSchema } from './valibotSchema.js'
-import { safeParse } from 'valibot'
 
 const FK_ACTIONS = 'SET NULL|SET DEFAULT|RESTRICT|CASCADE|NO ACTION'
 
@@ -356,23 +356,23 @@ async function parseTblsSchema(schemaString: string): Promise<ProcessResult> {
 
   // Process tables
   for (const tblsTable of result.output.tables) {
-    const columns = tblsTable.columns.map(col => ({
+    const columns = tblsTable.columns.map((col) => ({
       ...col,
       default: col.default ?? null,
       comment: col.comment ?? null,
-    }));
+    }))
 
-    const constraints = (tblsTable.constraints ?? []).map(con => ({
+    const constraints = (tblsTable.constraints ?? []).map((con) => ({
       ...con,
       columns: con.columns ?? [],
       referenced_table: con.referenced_table ?? '',
       referenced_columns: con.referenced_columns ?? [],
-    }));
+    }))
 
-    const indexes = (tblsTable.indexes ?? []).map(idx => ({
+    const indexes = (tblsTable.indexes ?? []).map((idx) => ({
       ...idx,
       columns: idx.columns ?? [],
-    }));
+    }))
 
     const table = {
       ...tblsTable,
@@ -380,10 +380,10 @@ async function parseTblsSchema(schemaString: string): Promise<ProcessResult> {
       constraints,
       indexes,
       comment: tblsTable.comment ?? null,
-    };
+    }
 
-    const [tableName, tableObj] = processTable(table);
-    tables[tableName] = tableObj;
+    const [tableName, tableObj] = processTable(table)
+    tables[tableName] = tableObj
   }
 
   // Return the schema

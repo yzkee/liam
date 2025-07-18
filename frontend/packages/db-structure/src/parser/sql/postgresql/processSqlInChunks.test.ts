@@ -1,4 +1,4 @@
-import { errAsync, okAsync, ResultAsync } from 'neverthrow'
+import { errAsync, okAsync, type ResultAsync } from 'neverthrow'
 import { describe, expect, it, type MockedFunction, vi } from 'vitest'
 import { UnexpectedTokenWarningError } from '../../errors.js'
 import { processSQLInChunks } from './processSqlInChunks.js'

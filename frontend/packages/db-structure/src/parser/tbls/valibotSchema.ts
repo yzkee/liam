@@ -1,4 +1,4 @@
-import { object, string, boolean, array, optional, nullable } from 'valibot'
+import { array, boolean, nullable, object, optional, string } from 'valibot'
 
 const ColumnSchema = object({
   name: string(),

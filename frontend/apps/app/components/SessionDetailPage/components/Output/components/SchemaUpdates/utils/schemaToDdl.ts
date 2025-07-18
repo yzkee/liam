@@ -10,20 +10,13 @@ type SchemaToDdlResult = {
  * Convert schema to DDL statements using the @liam-hq/db-structure PostgreSQL deparser
  */
 export const schemaToDdl = (schema: Schema): SchemaToDdlResult => {
-  try {
-    const result = postgresqlSchemaDeparser(schema)
+  const result = postgresqlSchemaDeparser(schema)
 
-    // Add trailing newline for consistency
-    const ddl = result.value ? `${result.value}\n` : ''
+  // Add trailing newline for consistency
+  const ddl = result.value ? `${result.value}\n` : ''
 
-    return {
-      ddl,
-      errors: result.errors.map((err) => err.message),
-    }
-  } catch (error) {
-    return {
-      ddl: '',
-      errors: [error instanceof Error ? error.message : 'Unknown error'],
-    }
+  return {
+    ddl,
+    errors: result.errors.map((err) => err.message),
   }
 }

@@ -31,10 +31,20 @@ export type DesignSessionWithTimelineItems = Pick<
 export type WorkflowRunStatus =
   Database['public']['Enums']['workflow_run_status']
 
+type AssistantRole = 'pm' | 'db' | 'qa'
+
 type BaseTimelineItemEntry = {
   id: string
   content: string
-  type: 'user' | 'assistant' | 'schema_version' | 'error' | 'assistant_log'
+  type:
+    | 'user'
+    | 'assistant'
+    | 'schema_version'
+    | 'error'
+    | 'assistant_log'
+    | 'assistant_pm'
+    | 'assistant_db'
+    | 'assistant_qa'
   timestamp: Date
 }
 
@@ -44,6 +54,7 @@ export type UserTimelineItemEntry = BaseTimelineItemEntry & {
 
 export type AssistantTimelineItemEntry = BaseTimelineItemEntry & {
   type: 'assistant'
+  role: AssistantRole
 }
 
 export type SchemaVersionTimelineItemEntry = BaseTimelineItemEntry & {
@@ -53,10 +64,12 @@ export type SchemaVersionTimelineItemEntry = BaseTimelineItemEntry & {
 
 export type ErrorTimelineItemEntry = BaseTimelineItemEntry & {
   type: 'error'
+  onRetry?: () => void
 }
 
 export type AssistantLogTimelineItemEntry = BaseTimelineItemEntry & {
   type: 'assistant_log'
+  role: AssistantRole
 }
 
 export type TimelineItemEntry =

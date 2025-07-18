@@ -1,4 +1,5 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
+import type { Database } from '@liam-hq/db'
 import type { Repositories } from '../../../repositories'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
@@ -14,12 +15,18 @@ import {
 async function saveArtifacts(
   state: WorkflowState,
   repositories: Repositories,
+  assistantRole: Database['public']['Enums']['assistant_role_enum'],
 ): Promise<void> {
   if (!state.analyzedRequirements && !state.generatedUsecases) {
     return
   }
 
-  await logAssistantMessage(state, repositories, 'Saving artifacts...')
+  await logAssistantMessage(
+    state,
+    repositories,
+    'Saving artifacts...',
+    assistantRole,
+  )
   const artifact = transformWorkflowStateToArtifact(state)
   const artifactResult = await createOrUpdateArtifact(
     state,
@@ -32,9 +39,15 @@ async function saveArtifacts(
       state,
       repositories,
       'Artifacts saved successfully',
+      assistantRole,
     )
   } else {
-    await logAssistantMessage(state, repositories, 'Failed to save artifacts')
+    await logAssistantMessage(
+      state,
+      repositories,
+      'Failed to save artifacts',
+      assistantRole,
+    )
   }
 }
 
@@ -44,6 +57,7 @@ async function saveArtifacts(
 async function handleWorkflowError(
   state: WorkflowState,
   repositories: Repositories,
+  assistantRole: Database['public']['Enums']['assistant_role_enum'],
 ): Promise<{
   errorToReturn: string | undefined
 }> {
@@ -51,6 +65,7 @@ async function handleWorkflowError(
     state,
     repositories,
     'Handling workflow completion...',
+    assistantRole,
   )
 
   if (state.error) {
@@ -81,6 +96,7 @@ export async function finalizeArtifactsNode(
   state: WorkflowState,
   config: RunnableConfig,
 ): Promise<WorkflowState> {
+  const assistantRole: Database['public']['Enums']['assistant_role_enum'] = 'db'
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
     return {
@@ -94,10 +110,15 @@ export async function finalizeArtifactsNode(
     state,
     repositories,
     'Preparing final deliverables...',
+    assistantRole,
   )
 
-  await saveArtifacts(state, repositories)
-  const { errorToReturn } = await handleWorkflowError(state, repositories)
+  await saveArtifacts(state, repositories, assistantRole)
+  const { errorToReturn } = await handleWorkflowError(
+    state,
+    repositories,
+    assistantRole,
+  )
 
   return {
     ...state,

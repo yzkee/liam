@@ -1,71 +1,87 @@
 import clsx from 'clsx'
-import type { FC } from 'react'
+import type { FC, ReactNode } from 'react'
 import styles from './LogMessage.module.css'
 
 type LogMessageProps = {
   content: string
 }
 
-export const LogMessage: FC<LogMessageProps> = ({ content }) => {
-  // Split content by lines to handle each task separately
-  const lines = content.split('\n')
+const generateLineKey = (lineIndex: number, line: string): string => {
+  const sanitizedLine =
+    line.trim().substring(0, 30).replace(/\s+/g, '-') || 'empty'
+  return `line-${lineIndex}-${sanitizedLine}`
+}
 
-  const formattedContent = lines.map((line, lineIndex) => {
-    // Check if this line is a pending task (starts with •)
-    const isPending = line.trim().startsWith('•')
-    // Check if this line is currently running (starts with ⏳)
-    const isCurrentTask = line.includes('⏳')
-    // Check if this line has a checkmark or crossmark
-    const hasCheckOrCross = line.includes('✓') || line.includes('✗')
+const processLineParts = (line: string, lineIndex: number): ReactNode[] => {
+  return line.split(/(\s*✓\s*|\s*✗\s*|⏳)/).map((part, partIndex) => {
+    const keyBase = `${lineIndex}-${part.trim()}-${partIndex}`
 
-    // Replace ✓, ✗, ⏳, and style • lines
-    const parts = line.split(/(\s*✓\s*|\s*✗\s*|⏳)/).map((part, partIndex) => {
-      const keyBase = `${lineIndex}-${part.trim()}-${partIndex}`
-      if (part.includes('✓')) {
-        return (
-          <span key={`check-${keyBase}`} className={styles.checkmark}>
-            {part}
-          </span>
-        )
-      }
-      if (part.includes('✗')) {
-        return (
-          <span key={`cross-${keyBase}`} className={styles.crossmark}>
-            {part}
-          </span>
-        )
-      }
-      if (part === '⏳') {
-        return <span key={`hourglass-${keyBase}`}>{part}</span>
-      }
-      return part
-    })
-
-    if (hasCheckOrCross || isCurrentTask) {
+    if (part.includes('✓')) {
       return (
-        <span
-          key={`line-${lineIndex}-${line.trim().substring(0, 30).replace(/\s+/g, '-') || 'empty'}`}
-          className={clsx(
-            styles.indentedLine,
-            isPending ? styles.pendingTask : '',
-            isCurrentTask ? styles.currentTask : '',
-          )}
-        >
-          {parts}
-          {lineIndex < lines.length - 1 && '\n'}
+        <span key={`check-${keyBase}`} className={styles.checkmark}>
+          {part}
         </span>
       )
     }
 
+    if (part.includes('✗')) {
+      return (
+        <span key={`cross-${keyBase}`} className={styles.crossmark}>
+          {part}
+        </span>
+      )
+    }
+
+    if (part === '⏳') {
+      return <span key={`hourglass-${keyBase}`}>{part}</span>
+    }
+
+    return part
+  })
+}
+
+const renderFormattedLine = (
+  line: string,
+  lineIndex: number,
+  parts: ReactNode[],
+  lines: string[],
+): ReactNode => {
+  const isPending = line.trim().startsWith('•')
+  const isCurrentTask = line.includes('⏳')
+  const hasCheckOrCross = line.includes('✓') || line.includes('✗')
+  const key = generateLineKey(lineIndex, line)
+  const lineBreak = lineIndex < lines.length - 1 ? '\n' : null
+
+  if (hasCheckOrCross || isCurrentTask) {
     return (
       <span
-        key={`line-${lineIndex}-${line.trim().substring(0, 30).replace(/\s+/g, '-') || 'empty'}`}
-        className={isPending ? styles.pendingTask : undefined}
+        key={key}
+        className={clsx(
+          styles.indentedLine,
+          isPending ? styles.pendingTask : '',
+          isCurrentTask ? styles.currentTask : '',
+        )}
       >
         {parts}
-        {lineIndex < lines.length - 1 && '\n'}
+        {lineBreak}
       </span>
     )
+  }
+
+  return (
+    <span key={key} className={isPending ? styles.pendingTask : undefined}>
+      {parts}
+      {lineBreak}
+    </span>
+  )
+}
+
+export const LogMessage: FC<LogMessageProps> = ({ content }) => {
+  const lines = content.split('\n')
+
+  const formattedContent = lines.map((line, lineIndex) => {
+    const parts = processLineParts(line, lineIndex)
+    return renderFormattedLine(line, lineIndex, parts, lines)
   })
 
   return <div className={styles.content}>{formattedContent}</div>

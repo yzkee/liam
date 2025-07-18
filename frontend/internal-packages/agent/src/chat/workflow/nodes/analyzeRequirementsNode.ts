@@ -1,5 +1,6 @@
 import { AIMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
+import type { Database } from '@liam-hq/db'
 import { ResultAsync } from 'neverthrow'
 import { PMAnalysisAgent } from '../../../langchain/agents'
 import type { BasePromptVariables } from '../../../langchain/utils/types'
@@ -53,6 +54,7 @@ export async function analyzeRequirementsNode(
   state: WorkflowState,
   config: RunnableConfig,
 ): Promise<WorkflowState> {
+  const assistantRole: Database['public']['Enums']['assistant_role_enum'] = 'pm'
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
     return {
@@ -62,7 +64,12 @@ export async function analyzeRequirementsNode(
   }
   const { repositories } = configurableResult.value
 
-  await logAssistantMessage(state, repositories, 'Analyzing requirements...')
+  await logAssistantMessage(
+    state,
+    repositories,
+    'Analyzing requirements...',
+    assistantRole,
+  )
 
   const pmAnalysisAgent = new PMAnalysisAgent()
 
@@ -77,6 +84,7 @@ export async function analyzeRequirementsNode(
     state,
     repositories,
     'Organizing business and functional requirements...',
+    assistantRole,
   )
 
   const analysisResult = await ResultAsync.fromPromise(
@@ -90,6 +98,7 @@ export async function analyzeRequirementsNode(
         state,
         repositories,
         'Requirements analysis completed',
+        assistantRole,
       )
 
       const analyzedRequirements = {
@@ -116,6 +125,7 @@ export async function analyzeRequirementsNode(
         state,
         repositories,
         'Error occurred during requirements analysis',
+        assistantRole,
       )
 
       return {

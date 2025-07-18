@@ -38,7 +38,7 @@
         "/^langfuse$/",
         "/^langfuse-langchain$/"
       ],
-      "matchPaths": ["frontend/internal-packages/**"],
+      "matchFileNames": ["frontend/internal-packages/**"],
       "automerge": true
     },
     {

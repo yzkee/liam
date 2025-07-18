@@ -16,21 +16,21 @@ type Props = {
   schemaData: Schema
   designSessionId: string
   timelineItems: TimelineItemEntry[]
-  onRetry: () => void
-  isLoading: boolean
   onMessageSend: (message: TimelineItemEntry) => void
-  isStreaming: boolean
-  onCancelStream: () => void
+  onRetry?: () => void
+  isLoading?: boolean
+  isStreaming?: boolean
+  onCancelStream?: () => void
 }
 
 export const Chat: FC<Props> = ({
   schemaData,
   designSessionId,
   timelineItems,
-  onRetry,
-  isLoading,
   onMessageSend,
-  isStreaming,
+  onRetry,
+  isLoading = false,
+  isStreaming = false,
   onCancelStream,
 }) => {
   const { containerRef } = useScrollToBottom<HTMLDivElement>(

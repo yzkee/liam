@@ -100,6 +100,14 @@ Please suggest a specific solution to resolve this problem.`
             designSessionId={designSessionId}
             timelineItems={timelineItems}
             onMessageSend={addOrUpdateTimelineItem}
+            onRetry={() => {
+              /* TODO: Implement retry logic */
+            }}
+            isLoading={false}
+            isStreaming={false}
+            onCancelStream={() => {
+              /* TODO: Implement cancel stream logic */
+            }}
           />
         </div>
         {hasSelectedVersion && (

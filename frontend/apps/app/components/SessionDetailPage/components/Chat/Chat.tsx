@@ -33,31 +33,32 @@ export const Chat: FC<Props> = ({
   isStreaming,
   onCancelStream,
 }) => {
-  const containerRef = useScrollToBottom([timelineItems])
+  const { containerRef } = useScrollToBottom<HTMLDivElement>(
+    timelineItems.length,
+  )
   const [, startTransition] = useTransition()
 
   const startAIResponse = async (content: string) => {
     const optimisticMessage: TimelineItemEntry = {
-      id: generateTimelineItemId(),
+      id: generateTimelineItemId('user'),
       type: 'user',
       content,
-      timestamp: new Date().toISOString(),
+      timestamp: new Date(),
     }
     onMessageSend(optimisticMessage)
 
     await sendChatMessage({
       designSessionId,
-      content,
-      schemaData,
+      userInput: content,
     })
   }
 
   const handleSendMessage = (content: string) => {
     const userMessage: TimelineItemEntry = {
-      id: generateTimelineItemId(),
+      id: generateTimelineItemId('user'),
       type: 'user',
       content,
-      timestamp: new Date().toISOString(),
+      timestamp: new Date(),
     }
     onMessageSend(userMessage)
 
@@ -163,9 +164,9 @@ export const Chat: FC<Props> = ({
       </div>
       <ChatInput
         onSendMessage={handleSendMessage}
-        disabled={isLoading}
-        isStreaming={isStreaming}
-        onCancelStream={onCancelStream}
+        isLoading={isLoading}
+        schema={schemaData}
+        onCancel={isStreaming ? onCancelStream : undefined}
       />
     </div>
   )

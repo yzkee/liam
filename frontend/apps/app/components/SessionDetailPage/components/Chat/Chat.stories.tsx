@@ -625,6 +625,9 @@ const InteractiveDemo = () => {
         designSessionId="design-session-1"
         onMessageSend={handleMessageSend}
         onRetry={animation.handleRetry}
+        isLoading={false}
+        isStreaming={false}
+        onCancelStream={() => {}}
       />
     </div>
   )
@@ -637,6 +640,9 @@ export const Default: Story = {
     designSessionId: 'design-session-1',
     onMessageSend: () => {},
     onRetry: () => {},
+    isLoading: false,
+    isStreaming: false,
+    onCancelStream: () => {},
   },
   render: () => <InteractiveDemo />,
 }
@@ -648,5 +654,8 @@ export const Static: Story = {
     designSessionId: 'design-session-1',
     onMessageSend: () => {},
     onRetry: () => {},
+    isLoading: false,
+    isStreaming: false,
+    onCancelStream: () => {},
   },
 }

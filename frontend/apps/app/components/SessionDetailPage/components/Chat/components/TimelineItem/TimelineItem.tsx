@@ -9,9 +9,13 @@ import { LogMessage } from './components/LogMessage'
 import { UserMessage } from './components/UserMessage'
 import { VersionMessage } from './components/VersionMessage'
 
-type Props = PropsWithChildren & TimelineItemEntry
+type Props = PropsWithChildren &
+  TimelineItemEntry & {
+    isLastOfType: boolean
+  }
 
 export const TimelineItem: FC<Props> = (props) => {
+  const { isLastOfType } = props
   return match(props)
     .with({ type: 'schema_version' }, ({ buildingSchemaVersionId }) => (
       <AgentMessage state="default" assistantRole="db">
@@ -23,7 +27,7 @@ export const TimelineItem: FC<Props> = (props) => {
     ))
     .with({ type: 'assistant_log' }, ({ content, role }) => (
       <AgentMessage state="default" assistantRole={role}>
-        <LogMessage content={content} />
+        <LogMessage content={content} isLast={isLastOfType} />
       </AgentMessage>
     ))
     .with({ type: 'assistant' }, ({ content, role, timestamp, children }) => (

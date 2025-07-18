@@ -46,15 +46,7 @@ type AssistantRole = Database['public']['Enums']['assistant_role_enum']
 type BaseTimelineItemEntry = {
   id: string
   content: string
-  type:
-    | 'user'
-    | 'assistant'
-    | 'schema_version'
-    | 'error'
-    | 'assistant_log'
-    | 'assistant_pm'
-    | 'assistant_db'
-    | 'assistant_qa'
+  type: 'user' | 'assistant' | 'schema_version' | 'error' | 'assistant_log'
   timestamp: Date
 }
 

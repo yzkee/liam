@@ -36,12 +36,7 @@ export type DeepModelingParams = {
   recursionLimit?: number
 }
 
-export type DeepModelingResult = Result<
-  {
-    text: string
-  },
-  Error
->
+export type DeepModelingResult = Result<WorkflowState, Error>
 
 /**
  * Retry policy configuration for all nodes
@@ -224,9 +219,7 @@ export const deepModeling = async (
       status: 'success',
     })
 
-    return ok({
-      text: result.finalResponse || result.generatedAnswer || '',
-    })
+    return ok(result)
   } catch (error) {
     const errorMessage =
       error instanceof Error

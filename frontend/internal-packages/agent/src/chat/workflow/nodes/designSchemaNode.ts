@@ -86,7 +86,6 @@ const applySchemaChanges = async (
     await logAssistantMessage(state, repositories, 'Schema update failed')
     return {
       ...state,
-      generatedAnswer: message,
       error: new Error(errorMessage),
     }
   }
@@ -97,10 +96,26 @@ const applySchemaChanges = async (
     `Applied ${operations.length} schema changes successfully`,
   )
 
+  // Save timeline item directly when answer is generated
+  const saveResult = await repositories.schema.createTimelineItem({
+    designSessionId: state.designSessionId,
+    content: message,
+    type: 'assistant',
+  })
+
+  if (!saveResult.success) {
+    return {
+      ...state,
+      schemaData: result.newSchema,
+      error: new Error(
+        `Failed to save assistant timeline item: ${saveResult.error}`,
+      ),
+    }
+  }
+
   return {
     ...state,
     schemaData: result.newSchema,
-    generatedAnswer: message,
     error: undefined,
   }
 }
@@ -115,10 +130,22 @@ const handleSchemaChanges = async (
   repositories: Repositories,
 ): Promise<WorkflowState> => {
   if (invokeResult.operations.length === 0) {
-    return {
-      ...state,
-      generatedAnswer: invokeResult.message.text,
+    // Save timeline item directly when answer is generated
+    const saveResult = await repositories.schema.createTimelineItem({
+      designSessionId: state.designSessionId,
+      content: invokeResult.message.text,
+      type: 'assistant',
+    })
+
+    if (!saveResult.success) {
+      return {
+        ...state,
+        error: new Error(
+          `Failed to save assistant timeline item: ${saveResult.error}`,
+        ),
+      }
     }
+    return state
   }
 
   return await applySchemaChanges(

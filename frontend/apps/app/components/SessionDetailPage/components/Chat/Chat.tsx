@@ -15,6 +15,7 @@ type Props = {
   designSessionId: string
   timelineItems: TimelineItemEntry[]
   onMessageSend: (entry: TimelineItemEntry) => void
+  onRetry?: () => void
 }
 
 export const Chat: FC<Props> = ({
@@ -22,6 +23,7 @@ export const Chat: FC<Props> = ({
   designSessionId,
   timelineItems,
   onMessageSend,
+  onRetry,
 }) => {
   const [isLoading, startTransition] = useTransition()
   const { containerRef, scrollToBottom } = useScrollToBottom<HTMLDivElement>(
@@ -62,7 +64,11 @@ export const Chat: FC<Props> = ({
       <div className={styles.messagesContainer} ref={containerRef}>
         {/* Display all timeline items */}
         {timelineItems.map((timelineItem) => (
-          <TimelineItem key={timelineItem.id} {...timelineItem} />
+          <TimelineItem
+            key={timelineItem.id}
+            {...timelineItem}
+            {...(timelineItem.type === 'error' && { onRetry })}
+          />
         ))}
         {isLoading && (
           <div className={styles.loadingIndicator}>

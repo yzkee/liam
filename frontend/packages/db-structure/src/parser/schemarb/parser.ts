@@ -441,12 +441,10 @@ function extractDefaultValue(
 
 function extractForeignKeyTableNames(
   argNodes: Node[],
-): Result<[string, string], UnexpectedTokenWarningError> {
+): Result<[string, string], Error> {
   const stringNodes = argNodes.filter((node) => node instanceof StringNode)
   if (stringNodes.length !== 2) {
-    return err(
-      new UnexpectedTokenWarningError('Foreign key must have two table names'),
-    )
+    return err(new Error('Foreign key must have two table names'))
   }
 
   const [firstNode, secondNode] = stringNodes.map((node): string => {
@@ -454,9 +452,7 @@ function extractForeignKeyTableNames(
     return ''
   })
   if (!firstNode || !secondNode) {
-    return err(
-      new UnexpectedTokenWarningError('Expected exactly 2 string values'),
-    )
+    return err(new Error('Expected exactly 2 string values'))
   }
   const foreignTableName = firstNode
   const primaryTableName = secondNode

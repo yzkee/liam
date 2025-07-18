@@ -7,7 +7,8 @@ import type {
 } from '../../schema/index.js'
 import { aColumn, anIndex, aTable } from '../../schema/index.js'
 import type { Processor, ProcessResult } from '../types.js'
-import schema from './schema.generated.js'
+import { TablesSchema } from './valibotSchema.js'
+import { safeParse } from 'valibot'
 
 const FK_ACTIONS = 'SET NULL|SET DEFAULT|RESTRICT|CASCADE|NO ACTION'
 
@@ -335,7 +336,7 @@ function processTable(tblsTable: {
 async function parseTblsSchema(schemaString: string): Promise<ProcessResult> {
   // Parse the schema
   const parsedSchema = JSON.parse(schemaString)
-  const result = schema.safeParse(parsedSchema)
+  const result = safeParse(TablesSchema, parsedSchema)
 
   // Handle invalid schema
   if (!result.success) {
@@ -343,7 +344,9 @@ async function parseTblsSchema(schemaString: string): Promise<ProcessResult> {
       value: {
         tables: {},
       },
-      errors: [new Error(`Invalid schema format: ${result.error}`)],
+      errors: [
+        new Error(`Invalid schema format: ${JSON.stringify(result.issues)}`),
+      ],
     }
   }
 
@@ -351,80 +354,36 @@ async function parseTblsSchema(schemaString: string): Promise<ProcessResult> {
   const tables: Tables = {}
   const errors: Error[] = []
 
-  // Define compatible types for type assertions
-  type CompatibleTable = {
-    name: string
-    columns: Array<{
-      name: string
-      type: string
-      nullable: boolean
-      default?: string | null
-      comment?: string | null
-    }>
-    constraints?: Array<{
-      type: string
-      name: string
-      columns?: string[]
-      def: string
-      referenced_table?: string
-      referenced_columns?: string[]
-    }>
-    indexes?: Array<{
-      name: string
-      def: string
-      columns: string[]
-    }>
-    comment?: string | null
-  }
-
-  function isRecord(value: unknown): value is Record<string, unknown> {
-    return typeof value === 'object' && value !== null
-  }
-
-  function isCompatibleTable(table: unknown): table is CompatibleTable {
-    if (typeof table !== 'object' || table === null) {
-      return false
-    }
-
-    if (isRecord(table)) {
-      const tableObj: Record<string, unknown> = table
-      // use tableObj safely here
-      if (typeof tableObj['name'] !== 'string') {
-        return false
-      }
-
-      if (!Array.isArray(tableObj['columns'])) {
-        return false
-      }
-
-      return tableObj['columns'].every((col: unknown) => {
-        if (typeof col !== 'object' || col === null) {
-          return false
-        }
-
-        if (isRecord(col)) {
-          const colObj: Record<string, unknown> = col
-
-          return (
-            typeof colObj['name'] === 'string' &&
-            typeof colObj['type'] === 'string' &&
-            typeof colObj['nullable'] === 'boolean'
-          )
-        }
-        return false
-      })
-    }
-
-    return false
-  }
-
   // Process tables
-  for (const tblsTable of result.data.tables) {
-    if (!isCompatibleTable(tblsTable)) {
-      continue
-    }
-    const [tableName, table] = processTable(tblsTable)
-    tables[tableName] = table
+  for (const tblsTable of result.output.tables) {
+    const columns = tblsTable.columns.map(col => ({
+      ...col,
+      default: col.default ?? null,
+      comment: col.comment ?? null,
+    }));
+
+    const constraints = (tblsTable.constraints ?? []).map(con => ({
+      ...con,
+      columns: con.columns ?? [],
+      referenced_table: con.referenced_table ?? '',
+      referenced_columns: con.referenced_columns ?? [],
+    }));
+
+    const indexes = (tblsTable.indexes ?? []).map(idx => ({
+      ...idx,
+      columns: idx.columns ?? [],
+    }));
+
+    const table = {
+      ...tblsTable,
+      columns,
+      constraints,
+      indexes,
+      comment: tblsTable.comment ?? null,
+    };
+
+    const [tableName, tableObj] = processTable(table);
+    tables[tableName] = tableObj;
   }
 
   // Return the schema

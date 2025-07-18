@@ -315,45 +315,35 @@ describe(_processor, () => {
       )
     })
 
-    it('columns do not include model type', (): ResultAsync<void, Error> => {
-      return ResultAsync.fromPromise(
-        processor(`
-          model users {
-            id   BigInt    @id @default(autoincrement())
-            posts posts[]
-          }
-  
-          model posts {
-            id   BigInt    @id @default(autoincrement())
-            user users @relation(fields: [user_id], references: [id])
-            user_id BigInt
-          }
-        `),
-        (err) => (err instanceof Error ? err : new Error(String(err))),
-      ).andThen(({ value }) => {
-        const usersTable = value.tables['users']
-        const postsTable = value.tables['posts']
-
-        if (!usersTable || !usersTable.columns) {
-          return errAsync(new Error('Users table or columns are undefined'))
+    it('columns do not include model type', async () => {
+      const { value } = await processor(`
+        model users {
+          id   BigInt    @id @default(autoincrement())
+          posts posts[]
         }
-        if (!postsTable || !postsTable.columns) {
-          return errAsync(new Error('Posts table or columns are undefined'))
+        model posts {
+          id   BigInt    @id @default(autoincrement())
+          user users @relation(fields: [user_id], references: [id])
+          user_id BigInt
         }
+      `)
 
-        const usersColumnNames = Object.keys(usersTable.columns)
-        const postsColumnNames = Object.keys(postsTable.columns)
+      expect(value.tables['users']).toBeDefined()
+      expect(value.tables['posts']).toBeDefined()
 
-        expect(usersColumnNames).toEqual(['id'])
-        expect(usersColumnNames).not.toContain('posts')
-        expect(postsColumnNames).toEqual(['id', 'user_id'])
-        expect(postsColumnNames).not.toContain('user')
+      const usersTable = value.tables['users']!
+      const postsTable = value.tables['posts']!
 
-        return ResultAsync.fromPromise(
-          Promise.resolve(),
-          () => new Error('Unexpected error'),
-        )
-      })
+      expect(usersTable.columns).toBeDefined()
+      expect(postsTable.columns).toBeDefined()
+
+      const usersColumnNames = Object.keys(usersTable.columns)
+      const postsColumnNames = Object.keys(postsTable.columns)
+
+      expect(usersColumnNames).toEqual(['id'])
+      expect(usersColumnNames).not.toContain('posts')
+      expect(postsColumnNames).toEqual(['id', 'user_id'])
+      expect(postsColumnNames).not.toContain('user')
     })
 
     it('unique', async () => {

@@ -76,8 +76,9 @@ export const LogMessage: FC<LogMessageProps> = ({
 
       return (
         <div
-          key={`line-${lineIndex}-${trimmedLine.substring(0, 30).replace(/\s+/g, '-') || 'empty'}`}
+          key={`line-${lineIndex}`}
           className={styles.lineContainer}
+        >
         >
           <span
             className={clsx(

@@ -23,7 +23,7 @@
     {
       "groupName": "trigger.dev",
       "matchPackageNames": [
-        "/^@trigger\\.dev/",
+        "/^@trigger\\.dev\//",
         "/^trigger\\.dev$/"
       ]
     },

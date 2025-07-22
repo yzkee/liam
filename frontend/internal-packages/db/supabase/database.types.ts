@@ -1178,6 +1178,7 @@ export type Database = {
           design_session_id: string
           id: string
           organization_id: string
+          query_result_id: string | null
           type: Database['public']['Enums']['timeline_item_type_enum']
           updated_at: string
           user_id: string | null
@@ -1192,6 +1193,7 @@ export type Database = {
           design_session_id: string
           id?: string
           organization_id: string
+          query_result_id?: string | null
           type: Database['public']['Enums']['timeline_item_type_enum']
           updated_at: string
           user_id?: string | null
@@ -1206,6 +1208,7 @@ export type Database = {
           design_session_id?: string
           id?: string
           organization_id?: string
+          query_result_id?: string | null
           type?: Database['public']['Enums']['timeline_item_type_enum']
           updated_at?: string
           user_id?: string | null
@@ -1230,6 +1233,13 @@ export type Database = {
             columns: ['organization_id']
             isOneToOne: false
             referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'timeline_items_query_result_id_fkey'
+            columns: ['query_result_id']
+            isOneToOne: false
+            referencedRelation: 'validation_queries'
             referencedColumns: ['id']
           },
           {
@@ -1568,6 +1578,7 @@ export type Database = {
         | 'schema_version'
         | 'error'
         | 'assistant_log'
+        | 'query_result'
       workflow_run_status: 'pending' | 'success' | 'error'
     }
     CompositeTypes: {
@@ -1704,6 +1715,7 @@ export const Constants = {
         'schema_version',
         'error',
         'assistant_log',
+        'query_result',
       ],
       workflow_run_status: ['pending', 'success', 'error'],
     },

@@ -66,6 +66,10 @@ export type CreateTimelineItemParams = {
       type: 'assistant_log'
       role: Database['public']['Enums']['assistant_role_enum']
     }
+  | {
+      type: 'query_result'
+      queryResultId: string
+    }
 )
 
 export type UpdateTimelineItemParams = {

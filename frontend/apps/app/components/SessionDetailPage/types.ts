@@ -28,7 +28,20 @@ export type TimelineItem = Pick<
   | 'design_session_id'
   | 'building_schema_version_id'
   | 'assistant_role'
->
+  | 'query_result_id'
+> & {
+  validation_queries?: {
+    id: string
+    query_string: string
+    validation_results?: Array<{
+      id: string
+      result_set: unknown[] | null
+      status: string
+      error_message: string | null
+      executed_at: string
+    }>
+  } | null
+}
 
 export type DesignSessionWithTimelineItems = Pick<
   Tables<'design_sessions'>,
@@ -45,7 +58,13 @@ type AssistantRole = Database['public']['Enums']['assistant_role_enum']
 type BaseTimelineItemEntry = {
   id: string
   content: string
-  type: 'user' | 'assistant' | 'schema_version' | 'error' | 'assistant_log'
+  type:
+    | 'user'
+    | 'assistant'
+    | 'schema_version'
+    | 'error'
+    | 'assistant_log'
+    | 'query_result'
   timestamp: Date
 }
 
@@ -73,9 +92,16 @@ export type AssistantLogTimelineItemEntry = BaseTimelineItemEntry & {
   role: AssistantRole
 }
 
+export type QueryResultTimelineItemEntry = BaseTimelineItemEntry & {
+  type: 'query_result'
+  queryResultId: string
+  results: unknown
+}
+
 export type TimelineItemEntry =
   | UserTimelineItemEntry
   | AssistantTimelineItemEntry
   | SchemaVersionTimelineItemEntry
   | ErrorTimelineItemEntry
   | AssistantLogTimelineItemEntry
+  | QueryResultTimelineItemEntry

@@ -6,6 +6,7 @@ import { convertSchemaToText } from '../../../utils/convertSchemaToText'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 import { logAssistantMessage } from '../utils/timelineLogger'
+import { withTimelineItemSync } from '../utils/withTimelineItemSync'
 
 /**
  * Design Schema Node - DB Design & DDL Execution
@@ -115,9 +116,18 @@ Please fix this issue by analyzing the schema and adding any missing constraints
     assistantRole,
   )
 
+  // Apply timeline sync to the message and clear retry flags
+  const syncedMessage = await withTimelineItemSync(invokeResult.value, {
+    designSessionId: state.designSessionId,
+    organizationId: state.organizationId || '',
+    userId: state.userId,
+    repositories,
+    assistantRole,
+  })
+
   return {
     ...state,
-    messages: [invokeResult.value],
+    messages: [syncedMessage],
     buildingSchemaVersionId: createVersionResult.versionId,
     latestVersionNumber: state.latestVersionNumber + 1,
     shouldRetryWithDesignSchema: undefined,

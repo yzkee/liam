@@ -73,7 +73,7 @@ export const MarkdownContent: FC<MarkdownContentProps> = ({ content }) => {
         },
         li({ children, ...props }) {
           // Check if the list item starts with an emoji or special character
-          const textContent =
+          const textContent: string =
             typeof children === 'string'
               ? children
               : Array.isArray(children) && typeof children[0] === 'string'

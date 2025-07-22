@@ -14,7 +14,8 @@ const generateId = () => {
 }
 
 // For test isolation - call this in beforeEach() to ensure deterministic ID generation
-export const resetIdCounter = () => {
+// NOTE: Export this when tests are added
+const resetIdCounter = () => {
   idCounter = 0
 }
 
@@ -72,13 +73,14 @@ const anAssistantLogTimelineItemEntry = (
 })
 
 // Export individual factory functions for test modularity
-export {
-  aUserTimelineItemEntry,
-  anAssistantTimelineItemEntry,
-  aSchemaVersionTimelineItemEntry,
-  anErrorTimelineItemEntry,
-  anAssistantLogTimelineItemEntry,
-}
+// NOTE: These are exported for future test use
+// export {
+//   aUserTimelineItemEntry,
+//   anAssistantTimelineItemEntry,
+//   aSchemaVersionTimelineItemEntry,
+//   anErrorTimelineItemEntry,
+//   anAssistantLogTimelineItemEntry,
+// }
 
 // SQL Constants
 const SQL_CREATE_TAXONOMIES = `-- Taxonomy hierarchy

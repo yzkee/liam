@@ -97,15 +97,25 @@ export const convertTimelineItemToTimelineItemEntry = (
       {
         type: 'query_result',
         query_result_id: P.string,
-        query_results: P.array(),
+        validation_queries: P.not(P.nullish),
       },
       (item): QueryResultTimelineItemEntry => {
-        let results = item.query_results
-
-        // Parse the results if they are an array
-        if (Array.isArray(results)) {
-          results = results.map(parseQueryResult)
-        }
+        // Extract and format query results from validation data
+        const validationResults =
+          item.validation_queries?.validation_results || []
+        const results = validationResults.flatMap((vr) =>
+          (vr.result_set || []).map((result, index) => ({
+            id: `${vr.id}-${index}`,
+            sql: item.validation_queries?.query_string || '',
+            success: vr.status === 'success',
+            result: result,
+            metadata: {
+              executionTime: 0, // Not available in validation_results
+              timestamp: vr.executed_at,
+              affectedRows: null,
+            },
+          })),
+        )
 
         return {
           ...baseItem,

@@ -1,9 +1,5 @@
 import type { Artifact } from '@liam-hq/artifact'
-import type {
-  Database,
-  Json,
-  Tables,
-} from '@liam-hq/db/supabase/database.types'
+import type { Database, Tables } from '@liam-hq/db/supabase/database.types'
 import type { Schema } from '@liam-hq/db-structure'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import type { Operation } from 'fast-json-patch'
@@ -71,7 +67,6 @@ export type CreateTimelineItemParams = {
   | {
       type: 'query_result'
       queryResultId: string
-      queryResults: Json
     }
 )
 

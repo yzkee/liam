@@ -444,7 +444,6 @@ export class SupabaseSchemaRepository implements SchemaRepository {
         : null
     const queryResultId =
       'queryResultId' in params ? params.queryResultId : null
-    const queryResults = 'queryResults' in params ? params.queryResults : null
     const now = new Date().toISOString()
 
     const { data: timelineItem, error } = await this.client
@@ -456,7 +455,6 @@ export class SupabaseSchemaRepository implements SchemaRepository {
         user_id: userId,
         building_schema_version_id: buildingSchemaVersionId,
         query_result_id: queryResultId,
-        query_results: queryResults,
         updated_at: now,
       })
       .select()

@@ -1176,7 +1176,6 @@ export type Database = {
           id: string
           organization_id: string
           query_result_id: string | null
-          query_results: Json | null
           type: Database['public']['Enums']['timeline_item_type_enum']
           updated_at: string
           user_id: string | null
@@ -1189,7 +1188,6 @@ export type Database = {
           id?: string
           organization_id: string
           query_result_id?: string | null
-          query_results?: Json | null
           type: Database['public']['Enums']['timeline_item_type_enum']
           updated_at: string
           user_id?: string | null
@@ -1202,7 +1200,6 @@ export type Database = {
           id?: string
           organization_id?: string
           query_result_id?: string | null
-          query_results?: Json | null
           type?: Database['public']['Enums']['timeline_item_type_enum']
           updated_at?: string
           user_id?: string | null

@@ -1425,8 +1425,7 @@ CREATE TABLE IF NOT EXISTS "public"."timeline_items" (
     "organization_id" "uuid" NOT NULL,
     "building_schema_version_id" "uuid",
     "type" "public"."timeline_item_type_enum" NOT NULL,
-    "query_result_id" "uuid",
-    "query_results" "jsonb"
+    "query_result_id" "uuid"
 );
 
 

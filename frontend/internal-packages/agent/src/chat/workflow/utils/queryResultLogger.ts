@@ -11,29 +11,15 @@ export async function logQueryResults(
   state: WorkflowState,
   repositories: Repositories,
   queryResultId: string,
-  results: SqlResult[],
+  _results: SqlResult[],
   summary: string,
 ): Promise<void> {
-  // Convert results to Json-compatible format by serializing result field
-  const jsonResults = results.map((r) => ({
-    id: r.id,
-    sql: r.sql,
-    success: r.success,
-    result: JSON.stringify(r.result),
-    metadata: {
-      executionTime: r.metadata.executionTime,
-      timestamp: r.metadata.timestamp,
-      affectedRows: r.metadata.affectedRows ?? null,
-    },
-  }))
-
   const result = await ResultAsync.fromPromise(
     repositories.schema.createTimelineItem({
       designSessionId: state.designSessionId,
       content: summary,
       type: 'query_result',
       queryResultId,
-      queryResults: jsonResults,
     }),
     (error) => error,
   )

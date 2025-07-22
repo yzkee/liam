@@ -345,7 +345,7 @@ export const postgresqlOperationDeparser: OperationDeparser = (
     value: '',
     errors: [
       {
-        message: `Unsupported operation: ${operation.op} at path ${operation.path}`,
+        message: 'Unsupported operation type',
       },
     ],
   }

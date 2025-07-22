@@ -23,6 +23,8 @@ import {
   DEFAULT_RECURSION_LIMIT,
 } from './chat/workflow/shared/langGraphUtils'
 import type { WorkflowConfigurable, WorkflowState } from './chat/workflow/types'
+import { invokeSchemaDesignToolNode } from './db-agent/nodes/invokeSchemaDesignToolNode'
+import { routeAfterDesignSchema } from './db-agent/routing/routeAfterDesignSchema'
 
 export type DeepModelingParams = {
   userInput: string
@@ -65,6 +67,9 @@ const createGraph = () => {
     .addNode('designSchema', designSchemaNode, {
       retryPolicy: RETRY_POLICY,
     })
+    .addNode('invokeSchemaDesignTool', invokeSchemaDesignToolNode, {
+      retryPolicy: RETRY_POLICY,
+    })
     .addNode('executeDDL', executeDdlNode, {
       retryPolicy: RETRY_POLICY,
     })
@@ -87,6 +92,11 @@ const createGraph = () => {
     .addEdge(START, 'saveUserMessage')
     .addEdge('webSearch', 'analyzeRequirements')
     .addEdge('analyzeRequirements', 'designSchema')
+    .addEdge('invokeSchemaDesignTool', 'designSchema')
+    .addConditionalEdges('designSchema', routeAfterDesignSchema, {
+      invokeSchemaDesignTool: 'invokeSchemaDesignTool',
+      executeDDL: 'executeDDL',
+    })
     .addEdge('executeDDL', 'generateUsecase')
     .addEdge('generateUsecase', 'prepareDML')
     .addEdge('prepareDML', 'validateSchema')
@@ -101,18 +111,6 @@ const createGraph = () => {
       {
         finalizeArtifacts: 'finalizeArtifacts',
         webSearch: 'webSearch',
-      },
-    )
-
-    // Conditional edge for designSchema - skip to finalizeArtifacts if error
-    .addConditionalEdges(
-      'designSchema',
-      (state) => {
-        return state.error ? 'finalizeArtifacts' : 'executeDDL'
-      },
-      {
-        finalizeArtifacts: 'finalizeArtifacts',
-        executeDDL: 'executeDDL',
       },
     )
 

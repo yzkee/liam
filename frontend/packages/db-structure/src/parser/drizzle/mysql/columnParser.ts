@@ -168,17 +168,12 @@ export const parseColumnFromProperty = (
     }
   }
 
-  // Handle autoincrement for primary key int columns
+  // Handle autoincrement for primary key columns
+  const hasAutoincrementMethod = methods.some((m) => m.name === 'autoincrement')
   if (
-    baseType === 'int' &&
     column.primaryKey &&
-    methods.some((m) => m.name === 'autoincrement')
+    ((baseType === 'int' && hasAutoincrementMethod) || baseType === 'serial')
   ) {
-    column.default = 'autoincrement()'
-  }
-
-  // Handle serial type (PostgreSQL compatibility)
-  if (baseType === 'serial' && column.primaryKey) {
     column.default = 'autoincrement()'
   }
 

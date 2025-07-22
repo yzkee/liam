@@ -30,68 +30,6 @@ export const convertDrizzleTypeToMysqlType = (
       }
       return 'decimal'
 
-    // Integer types
-    case 'tinyint':
-      return 'tinyint'
-    case 'smallint':
-      return 'smallint'
-    case 'mediumint':
-      return 'mediumint'
-    case 'int':
-      return 'int'
-    case 'bigint':
-      return 'bigint'
-
-    // Floating point types
-    case 'float':
-      return 'float'
-    case 'double':
-      return 'double'
-
-    // Date/time types
-    case 'date':
-      return 'date'
-    case 'datetime':
-      return 'datetime'
-    case 'timestamp':
-      return 'timestamp'
-    case 'time':
-      return 'time'
-    case 'year':
-      return 'year'
-
-    // Text types
-    case 'text':
-      return 'text'
-    case 'tinytext':
-      return 'tinytext'
-    case 'mediumtext':
-      return 'mediumtext'
-    case 'longtext':
-      return 'longtext'
-
-    // Binary types
-    case 'binary':
-      return 'binary'
-    case 'varbinary':
-      return 'varbinary'
-    case 'blob':
-      return 'blob'
-    case 'tinyblob':
-      return 'tinyblob'
-    case 'mediumblob':
-      return 'mediumblob'
-    case 'longblob':
-      return 'longblob'
-
-    // JSON type
-    case 'json':
-      return 'json'
-
-    // Boolean type
-    case 'boolean':
-      return 'boolean'
-
     // Enum type - handled as is
     case 'mysqlEnum':
       return 'enum'
@@ -100,7 +38,7 @@ export const convertDrizzleTypeToMysqlType = (
     case 'serial':
       return 'int'
 
-    // Default case: return type name as-is (works for most types)
+    // Default case: return type name as-is (works for most standard MySQL types)
     default:
       return drizzleType
   }

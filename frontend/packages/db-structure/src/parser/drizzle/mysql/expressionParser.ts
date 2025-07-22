@@ -14,6 +14,20 @@ import {
 import { getPropertyValue, hasProperty, isObject } from './types.js'
 
 /**
+ * Parse special function/identifier values
+ */
+const parseSpecialValue = (value: string): string => {
+  switch (value) {
+    case 'defaultNow':
+      return 'now()'
+    case 'defaultRandom':
+      return 'defaultRandom'
+    default:
+      return value
+  }
+}
+
+/**
  * Parse default value from expression
  */
 export const parseDefaultValue = (expr: Expression): unknown => {
@@ -27,26 +41,11 @@ export const parseDefaultValue = (expr: Expression): unknown => {
     case 'NullLiteral':
       return null
     case 'Identifier':
-      // Handle special cases like defaultRandom, defaultNow
-      switch (expr.value) {
-        case 'defaultRandom':
-          return 'defaultRandom'
-        case 'defaultNow':
-          return 'now()'
-        default:
-          return expr.value
-      }
+      return parseSpecialValue(expr.value)
     case 'CallExpression':
       // Handle function calls like defaultNow()
       if (expr.callee.type === 'Identifier') {
-        switch (expr.callee.value) {
-          case 'defaultNow':
-            return 'now()'
-          case 'defaultRandom':
-            return 'defaultRandom'
-          default:
-            return expr.callee.value
-        }
+        return parseSpecialValue(expr.callee.value)
       }
       return undefined
     default:

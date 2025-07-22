@@ -18,27 +18,38 @@ export const schemaDesignTool = tool(
   async (input: unknown, config: RunnableConfig): Promise<string> => {
     const toolConfigurableResult = getToolConfigurable(config)
     if (toolConfigurableResult.isErr()) {
-      return toolConfigurableResult.error.message
+      return `Configuration error: ${toolConfigurableResult.error.message}. Please check the tool configuration and try again.`
     }
     const { repositories, buildingSchemaVersionId } =
       toolConfigurableResult.value
-    const parsed = v.parse(schemaDesignToolSchema, input)
+    const parsed = v.safeParse(schemaDesignToolSchema, input)
+    if (!parsed.success) {
+      const errorDetails = parsed.issues
+        .map((issue) => `${issue.path?.join('.')}: ${issue.message}`)
+        .join(', ')
+      return `Input validation failed: ${errorDetails}. Please check your operations format and ensure all required fields are provided correctly.`
+    }
 
     const result = await repositories.schema.updateVersion({
       buildingSchemaVersionId,
-      patch: parsed.operations,
+      patch: parsed.output.operations,
     })
 
     if (!result.success) {
-      return result.error ?? 'Unknown error'
+      const errorMessage = result.error ?? 'Unknown error occurred'
+
+      // eslint-disable-next-line no-throw-error/no-throw-error
+      throw new Error(
+        `Schema update failed: ${errorMessage}. Please fix the error and try again.`,
+      )
     }
 
-    return 'success'
+    return 'Schema successfully updated. The operations have been applied to the database schema.'
   },
   {
     name: 'schemaDesignTool',
     description:
-      'Use to design database schemas, recommend table structures, and help with database modeling.',
+      'Use to design database schemas, recommend table structures, and help with database modeling. This tool applies JSON Patch operations to modify schema elements including tables, columns, indexes, and constraints. When operations fail, the tool provides detailed error messages with specific guidance for correction. Always include all required schema properties (columns, constraints, indexes) when creating tables.',
     schema: toolSchema,
   },
 )

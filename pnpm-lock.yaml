@@ -375,7 +375,7 @@ importers:
         specifier: 9.30.1
         version: 9.30.1(jiti@2.4.2)
       tsx:
-        specifier: ^4.20.3
+        specifier: 4.20.3
         version: 4.20.3
       typescript:
         specifier: 5.8.3
@@ -19606,7 +19606,7 @@ snapshots:
       isstream: 0.1.2
       jsonwebtoken: 9.0.2
       mime-types: 2.1.35
-      retry-axios: 2.6.0(axios@1.10.0)
+      retry-axios: 2.6.0(axios@1.10.0(debug@4.4.1))
       tough-cookie: 4.1.4
     transitivePeerDependencies:
       - supports-color
@@ -22369,7 +22369,7 @@ snapshots:
       onetime: 7.0.0
       signal-exit: 4.1.0
 
-  retry-axios@2.6.0(axios@1.10.0):
+  retry-axios@2.6.0(axios@1.10.0(debug@4.4.1)):
     dependencies:
       axios: 1.10.0(debug@4.4.1)
 

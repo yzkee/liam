@@ -1,5 +1,5 @@
 import {
-  AIMessage,
+  type AIMessage,
   type BaseMessage,
   SystemMessage,
 } from '@langchain/core/messages'
@@ -31,7 +31,5 @@ export const invokeDesignAgent = (
     (error) => new Error(`Failed to invoke design agent: ${error}`),
   )
 
-  return formatPrompt
-    .andThen(invoke)
-    .andThen((response) => ok(new AIMessage(response)))
+  return formatPrompt.andThen(invoke).andThen((response) => ok(response))
 }

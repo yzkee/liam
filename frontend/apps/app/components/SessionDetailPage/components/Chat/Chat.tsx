@@ -111,7 +111,7 @@ export const Chat: FC<Props> = ({
     <div className={styles.wrapper}>
       <div className={styles.messagesContainer} ref={containerRef}>
         {/* Display grouped timeline items */}
-        {groupedTimelineItems.map((item, groupIndex) => {
+        {groupedTimelineItems.map((item) => {
           if (Array.isArray(item)) {
             // Render grouped agent messages
             const agentRole = 'role' in item[0] ? item[0].role : 'db'
@@ -122,34 +122,20 @@ export const Chat: FC<Props> = ({
                 state="default"
                 assistantRole={agentRole}
               >
-                {item.map((message, messageIndex) => {
-                  // Check if this is the last message in the last group
-                  const isLastMessage =
-                    groupIndex === groupedTimelineItems.length - 1 &&
-                    messageIndex === item.length - 1
-
+                {item.map((message) => {
                   return (
-                    <LogMessage
-                      key={message.id}
-                      content={message.content}
-                      isLast={isLastMessage}
-                    />
+                    <LogMessage key={message.id} content={message.content} />
                   )
                 })}
               </AgentMessage>
             )
           }
 
-          // Render single timeline item
-          // Check if this is the last item overall
-          const isLastMessage = groupIndex === groupedTimelineItems.length - 1
-
           return (
             <TimelineItem
               key={item.id}
               {...item}
               {...(item.type === 'error' && { onRetry })}
-              isLastOfType={isLastMessage}
             />
           )
         })}

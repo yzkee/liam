@@ -50,7 +50,7 @@ const RETRY_POLICY = {
 /**
  * Create and configure the LangGraph workflow
  */
-const createGraph = () => {
+export const createGraph = () => {
   const ChatStateAnnotation = createAnnotations()
   const graph = new StateGraph(ChatStateAnnotation)
 
@@ -93,10 +93,10 @@ const createGraph = () => {
     .addEdge('webSearch', 'analyzeRequirements')
     .addEdge('analyzeRequirements', 'designSchema')
     .addEdge('invokeSchemaDesignTool', 'designSchema')
-    .addConditionalEdges('designSchema', shouldInvokeSchemaDesignTool, [
-      'invokeSchemaDesignTool',
-      'executeDDL',
-    ])
+    .addConditionalEdges('designSchema', shouldInvokeSchemaDesignTool, {
+      invokeSchemaDesignTool: 'invokeSchemaDesignTool',
+      executeDDL: 'executeDDL',
+    })
     .addEdge('executeDDL', 'generateUsecase')
     .addEdge('generateUsecase', 'prepareDML')
     .addEdge('prepareDML', 'validateSchema')

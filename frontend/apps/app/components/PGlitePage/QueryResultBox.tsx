@@ -1,7 +1,7 @@
 'use client'
 
 import clsx from 'clsx'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import styles from './QueryResultBox.module.css'
 import type { SqlResult } from './utils'
 

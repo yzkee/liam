@@ -1,5 +1,6 @@
 'use client'
 
+import { err, ok, type Result } from 'neverthrow'
 import { useCallback, useEffect, useState } from 'react'
 import * as v from 'valibot'
 import { createClient } from '@/libs/db/client'
@@ -7,6 +8,14 @@ import { timelineItemSchema } from '../../schema'
 import { convertTimelineItemToTimelineItemEntry } from '../../services/convertTimelineItemToTimelineItemEntry'
 import type { TimelineItem, TimelineItemEntry } from '../../types'
 import { isDuplicateTimelineItem } from './utils/isDuplicateTimelineItem'
+
+const parseTimelineItem = (data: unknown): Result<TimelineItem, Error> => {
+  const parsed = v.safeParse(timelineItemSchema, data)
+  if (!parsed.success) {
+    return err(new Error('Invalid timeline item format'))
+  }
+  return ok(parsed.output)
+}
 
 const findExistingTimelineItemIndex = (
   timelineItems: TimelineItemEntry[],
@@ -128,18 +137,15 @@ export function useRealtimeTimelineItems(
           filter: `design_session_id=eq.${designSessionId}`,
         },
         (payload) => {
-          try {
-            const parsed = v.safeParse(timelineItemSchema, payload.new)
-            if (!parsed.success) {
-              throw new Error('Invalid timeline item format')
-            }
+          const parseResult = parseTimelineItem(payload.new)
+          if (parseResult.isErr()) {
+            handleError(parseResult.error)
+            return
+          }
 
-            const updatedTimelineItem = parsed.output
-            if (updatedTimelineItem.design_session_id === designSessionId) {
-              handleNewTimelineItem(updatedTimelineItem)
-            }
-          } catch (error) {
-            handleError(error)
+          const updatedTimelineItem = parseResult.value
+          if (updatedTimelineItem.design_session_id === designSessionId) {
+            handleNewTimelineItem(updatedTimelineItem)
           }
         },
       )

@@ -1,3 +1,4 @@
+import { err, ok, type Result } from 'neverthrow'
 import { match, P } from 'ts-pattern'
 import type {
   AssistantLogTimelineItemEntry,
@@ -9,6 +10,42 @@ import type {
   TimelineItemEntry,
   UserTimelineItemEntry,
 } from '../types'
+
+const safeJsonParse = (text: string): Result<unknown, Error> => {
+  try {
+    return ok(JSON.parse(text))
+  } catch (error) {
+    return err(
+      new Error(
+        `Failed to parse JSON: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      ),
+    )
+  }
+}
+
+const parseQueryResult = (r: unknown) => {
+  if (typeof r !== 'object' || r === null || !('result' in r)) {
+    return r
+  }
+
+  if (typeof r.result === 'string') {
+    const parseResult = safeJsonParse(r.result)
+    if (parseResult.isOk()) {
+      return {
+        ...r,
+        result: parseResult.value,
+      }
+    }
+    // If parsing fails, keep the original string
+    console.error('Failed to parse query result:', parseResult.error)
+    return r
+  }
+
+  return {
+    ...r,
+    result: r.result,
+  }
+}
 
 export const convertTimelineItemToTimelineItemEntry = (
   timelineItem: TimelineItem,
@@ -67,18 +104,7 @@ export const convertTimelineItemToTimelineItemEntry = (
 
         // Parse the results if they are an array
         if (Array.isArray(results)) {
-          results = results.map((r) => {
-            if (typeof r === 'object' && r !== null && 'result' in r) {
-              return {
-                ...r,
-                result:
-                  typeof r.result === 'string'
-                    ? JSON.parse(r.result)
-                    : r.result,
-              }
-            }
-            return r
-          })
+          results = results.map(parseQueryResult)
         }
 
         return {

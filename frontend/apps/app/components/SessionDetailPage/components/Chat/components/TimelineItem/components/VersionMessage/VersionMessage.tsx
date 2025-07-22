@@ -32,7 +32,14 @@ const parsePatchOperations = (
   status: string
   statusClass: StatusClass
 }> => {
-  const operations = v.parse(operationsSchema, patch)
+  const result = v.safeParse(operationsSchema, patch)
+
+  if (!result.success) {
+    console.error('Failed to parse patch operations:', result.issues)
+    return []
+  }
+
+  const operations = result.output
 
   return operations.map((operation) => {
     const pathParts = operation.path.replace(/^\//, '').split('/')

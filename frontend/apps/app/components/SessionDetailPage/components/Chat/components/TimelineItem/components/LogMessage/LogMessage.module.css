@@ -4,15 +4,16 @@
   gap: var(--spacing-2);
   width: 100%;
   max-width: 100%;
-  font-family: var(--code-font);
+  font-family: var(--main-font);
   font-style: normal;
   font-weight: 400;
-  font-size: var(--font-size-2);
-  line-height: 1.8em;
-  color: var(--global-mute-text);
+  font-size: var(--font-size-4);
+  line-height: 1.6;
+  color: var(--global-body-text);
   word-wrap: break-word;
   overflow-wrap: break-word;
   word-break: break-word;
+  letter-spacing: 0.01em;
 }
 
 .content + .content {

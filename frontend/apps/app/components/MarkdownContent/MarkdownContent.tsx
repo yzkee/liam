@@ -48,7 +48,7 @@ export const MarkdownContent: FC<MarkdownContentProps> = ({ content }) => {
                 codeTagProps={syntaxCodeTagProps}
                 {...rest}
               >
-                {String(children).replace(/\n$/, '')}
+                {String(children)}
               </SyntaxHighlighter>
             </div>
           ) : (

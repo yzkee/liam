@@ -1,4 +1,5 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
+import type { Database } from '@liam-hq/db'
 import { postgresqlSchemaDeparser } from '@liam-hq/db-structure'
 import { executeQuery } from '@liam-hq/pglite-server'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
@@ -16,6 +17,7 @@ export async function executeDdlNode(
   state: WorkflowState,
   config: RunnableConfig,
 ): Promise<WorkflowState> {
+  const assistantRole: Database['public']['Enums']['assistant_role_enum'] = 'db'
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
     return {
@@ -25,7 +27,12 @@ export async function executeDdlNode(
   }
   const { repositories } = configurableResult.value
 
-  await logAssistantMessage(state, repositories, 'Creating database...')
+  await logAssistantMessage(
+    state,
+    repositories,
+    'Creating database...',
+    assistantRole,
+  )
 
   // Generate DDL from schema data
   const result = postgresqlSchemaDeparser(state.schemaData)
@@ -35,6 +42,7 @@ export async function executeDdlNode(
       state,
       repositories,
       'Error occurred during DDL generation',
+      assistantRole,
     )
 
     return {
@@ -51,6 +59,7 @@ export async function executeDdlNode(
     state,
     repositories,
     `Generated DDL statements (${tableCount} tables)`,
+    assistantRole,
   )
 
   if (!ddlStatements || !ddlStatements.trim()) {
@@ -58,6 +67,7 @@ export async function executeDdlNode(
       state,
       repositories,
       'No DDL statements to execute',
+      assistantRole,
     )
 
     return {
@@ -66,7 +76,12 @@ export async function executeDdlNode(
     }
   }
 
-  await logAssistantMessage(state, repositories, 'Executing DDL statements...')
+  await logAssistantMessage(
+    state,
+    repositories,
+    'Executing DDL statements...',
+    assistantRole,
+  )
 
   const results: SqlResult[] = await executeQuery(
     state.designSessionId,
@@ -105,6 +120,7 @@ export async function executeDdlNode(
       state,
       repositories,
       `DDL Execution Complete: ${successCount} successful, ${errorCount} failed queries`,
+      assistantRole,
     )
   }
 
@@ -123,6 +139,7 @@ export async function executeDdlNode(
       state,
       repositories,
       'Error occurred during DDL execution',
+      assistantRole,
     )
 
     // Check if this is the first failure or if we've already retried
@@ -134,6 +151,7 @@ export async function executeDdlNode(
         state,
         repositories,
         'Redesigning schema to fix errors...',
+        assistantRole,
       )
 
       return {
@@ -152,6 +170,7 @@ export async function executeDdlNode(
       state,
       repositories,
       'Unable to resolve DDL execution errors',
+      assistantRole,
     )
 
     return {
@@ -165,6 +184,7 @@ export async function executeDdlNode(
     state,
     repositories,
     'Database created successfully',
+    assistantRole,
   )
 
   return {

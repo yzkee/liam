@@ -1,16 +1,16 @@
 'use client'
 
 import { err, ok, type Result } from 'neverthrow'
+import { timelineItemsSchema } from '@liam-hq/db'
 import { useCallback, useEffect, useState } from 'react'
 import * as v from 'valibot'
 import { createClient } from '@/libs/db/client'
-import { timelineItemSchema } from '../../schema'
 import { convertTimelineItemToTimelineItemEntry } from '../../services/convertTimelineItemToTimelineItemEntry'
 import type { TimelineItem, TimelineItemEntry } from '../../types'
 import { isDuplicateTimelineItem } from './utils/isDuplicateTimelineItem'
 
 const parseTimelineItem = (data: unknown): Result<TimelineItem, Error> => {
-  const parsed = v.safeParse(timelineItemSchema, data)
+  const parsed = v.safeParse(timelineItemsSchema, data)
   if (!parsed.success) {
     return err(new Error('Invalid timeline item format'))
   }

@@ -48,6 +48,17 @@ vi.mock('@liam-hq/pglite-server', () => ({
   ]),
 }))
 
+// Mock ChatOpenAI for web search
+vi.mock('@langchain/openai', () => ({
+  ChatOpenAI: vi.fn().mockImplementation(() => ({
+    bindTools: vi.fn().mockReturnThis(),
+    invoke: vi.fn().mockResolvedValue({
+      content:
+        'Web search results: Best practices for database design include normalization, proper indexing, and consistent naming conventions.',
+    }),
+  })),
+}))
+
 describe('Chat Workflow', () => {
   let mockSchemaData: Schema
   let mockPMAnalysisAgent: {
@@ -133,8 +144,8 @@ describe('Chat Workflow', () => {
 
     expect(result.isOk()).toBe(true)
     if (result.isOk()) {
-      expect(result.value.text).toBe('Mocked agent response')
-      expect(typeof result.value.text).toBe('string')
+      expect(result.value.schemaData).toBeDefined()
+      expect(result.value.error).toBeUndefined()
     }
     expect(mockInvokeDesignAgent).toHaveBeenCalledOnce()
 
@@ -246,6 +257,7 @@ describe('Chat Workflow', () => {
         id: 'test-timeline-item-id',
         content: 'Test timeline item content',
         type: 'assistant',
+        assistant_role: 'db',
         user_id: null,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -360,7 +372,34 @@ describe('Chat Workflow', () => {
       await executeAndAssertSuccess(params)
     })
 
-    it('should handle Build mode with structured JSON response and schema changes', async () => {
+    it('should update schema when user requests column addition', async () => {
+      const expectedSchema = {
+        ...mockSchemaData,
+        tables: {
+          ...mockSchemaData.tables,
+          users: {
+            ...mockSchemaData.tables['users'],
+            name: 'users',
+            comment: null,
+            indexes: {},
+            constraints: {
+              ...mockSchemaData.tables['users']?.constraints,
+            },
+            columns: {
+              ...mockSchemaData.tables['users']?.columns,
+              created_at: {
+                name: 'created_at',
+                type: 'timestamp',
+                default: 'CURRENT_TIMESTAMP',
+                notNull: true,
+                check: null,
+                comment: null,
+              },
+            },
+          },
+        },
+      }
+
       const structuredResponse = {
         message: 'Added created_at column to users table',
         operations: [
@@ -376,6 +415,12 @@ describe('Chat Workflow', () => {
           },
         ],
       }
+
+      // Mock updateVersion to return the expected schema
+      vi.mocked(mockSchemaRepository.updateVersion).mockResolvedValue({
+        success: true,
+        newSchema: expectedSchema,
+      })
 
       mockInvokeDesignAgent.mockResolvedValue(
         ResultAsync.fromSafePromise(
@@ -396,7 +441,8 @@ describe('Chat Workflow', () => {
 
       expect(result.isOk()).toBe(true)
       if (result.isOk()) {
-        expect(result.value.text).toBe('Added created_at column to users table')
+        expect(result.value.schemaData).toEqual(expectedSchema)
+        expect(result.value.error).toBeUndefined()
       }
     })
 
@@ -418,7 +464,8 @@ describe('Chat Workflow', () => {
 
       expect(result.isOk()).toBe(true)
       if (result.isOk()) {
-        expect(result.value.text).toBe('Invalid JSON response')
+        expect(result.value.schemaData).toBeDefined()
+        expect(result.value.error).toBeUndefined()
       }
     })
 
@@ -567,7 +614,8 @@ describe('Chat Workflow', () => {
       expect(result).toBeDefined()
       expect(result.isOk()).toBe(true)
       if (result.isOk()) {
-        expect(result.value.text).toBe('Mocked agent response')
+        expect(result.value.schemaData).toBeDefined()
+        expect(result.value.error).toBeUndefined()
       }
     })
   })
@@ -604,7 +652,8 @@ describe('Chat Workflow', () => {
 
       expect(result.isOk()).toBe(true)
       if (result.isOk()) {
-        expect(result.value.text).toBe('Mocked agent response')
+        expect(result.value.schemaData).toBeDefined()
+        expect(result.value.error).toBeUndefined()
       }
     })
   })
@@ -690,7 +739,8 @@ describe('Chat Workflow', () => {
         expect(result).toBeDefined()
         expect(result.isOk()).toBe(true)
         if (result.isOk()) {
-          expect(result.value.text).toBe('Mocked agent response')
+          expect(result.value.schemaData).toBeDefined()
+          expect(result.value.error).toBeUndefined()
         }
       }
     })
@@ -711,7 +761,8 @@ describe('Chat Workflow', () => {
         expect(result).toBeDefined()
         expect(result.isOk()).toBe(true)
         if (result.isOk()) {
-          expect(result.value.text).toBe('Mocked agent response')
+          expect(result.value.schemaData).toBeDefined()
+          expect(result.value.error).toBeUndefined()
         }
       }
     })

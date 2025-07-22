@@ -21,6 +21,13 @@
       ]
     },
     {
+      "groupName": "trigger.dev",
+      "matchPackageNames": [
+        "/^@trigger\\.dev\//",
+        "/^trigger\\.dev$/"
+      ]
+    },
+    {
       "matchUpdateTypes": [
         "patch"
       ],
@@ -36,9 +43,10 @@
         "style-dictionary",
         "/^@langchain/",
         "/^langfuse$/",
-        "/^langfuse-langchain$/"
+        "/^langfuse-langchain$/",
+        "langsmith"
       ],
-      "matchPaths": ["frontend/internal-packages/**"],
+      "matchFileNames": ["frontend/internal-packages/**"],
       "automerge": true
     },
     {
@@ -61,6 +69,8 @@
         "playwright",
         "@playwright/test",
         "pnpm",
+        "concurrently",
+        "node",
         "knip"
       ],
       "matchDepTypes": [

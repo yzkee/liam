@@ -44,7 +44,7 @@ export const createAnnotations = () => {
     projectId: Annotation<string | undefined>,
     buildingSchemaId: Annotation<string>,
     latestVersionNumber: Annotation<number>,
-    organizationId: Annotation<string | undefined>,
+    organizationId: Annotation<string>,
     userId: Annotation<string>,
     designSessionId: Annotation<string>,
     error: Annotation<Error | undefined>,

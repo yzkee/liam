@@ -49,7 +49,7 @@ interface WorkflowState {
   error?: Error;
   buildingSchemaId: string;
   latestVersionNumber: number;
-  organizationId?: string;
+  organizationId: string;
   userId: string;
   designSessionId: string;
   retryCount: Record<string, number>;

@@ -24,7 +24,7 @@ import {
 } from './chat/workflow/shared/langGraphUtils'
 import type { WorkflowConfigurable, WorkflowState } from './chat/workflow/types'
 import { invokeSchemaDesignToolNode } from './db-agent/nodes/invokeSchemaDesignToolNode'
-import { shouldInvokeSchemaDesignTool } from './db-agent/routing/shouldInvokeSchemaDesignTool'
+import { routeAfterDesignSchema } from './db-agent/routing/routeAfterDesignSchema'
 
 export type DeepModelingParams = {
   userInput: string
@@ -93,7 +93,7 @@ const createGraph = () => {
     .addEdge('webSearch', 'analyzeRequirements')
     .addEdge('analyzeRequirements', 'designSchema')
     .addEdge('invokeSchemaDesignTool', 'designSchema')
-    .addConditionalEdges('designSchema', shouldInvokeSchemaDesignTool, {
+    .addConditionalEdges('designSchema', routeAfterDesignSchema, {
       invokeSchemaDesignTool: 'invokeSchemaDesignTool',
       executeDDL: 'executeDDL',
     })

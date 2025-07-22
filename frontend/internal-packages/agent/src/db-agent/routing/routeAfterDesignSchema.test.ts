@@ -1,7 +1,7 @@
 import { AIMessage, HumanMessage } from '@langchain/core/messages'
 import { describe, expect, it } from 'vitest'
 import type { WorkflowState } from '../../chat/workflow/types'
-import { shouldInvokeSchemaDesignTool } from './shouldInvokeSchemaDesignTool'
+import { routeAfterDesignSchema } from './routeAfterDesignSchema'
 
 const workflowState = (messages: WorkflowState['messages']): WorkflowState => ({
   messages,
@@ -14,7 +14,7 @@ const workflowState = (messages: WorkflowState['messages']): WorkflowState => ({
   retryCount: {},
 })
 
-describe('shouldInvokeSchemaDesignTool', () => {
+describe('routeAfterDesignSchema', () => {
   it('should return invokeSchemaDesignTool when message has tool calls', () => {
     const messageWithToolCalls = new AIMessage({
       content: 'I need to update the schema',
@@ -28,7 +28,7 @@ describe('shouldInvokeSchemaDesignTool', () => {
     })
 
     const state = workflowState([messageWithToolCalls])
-    const result = shouldInvokeSchemaDesignTool(state)
+    const result = routeAfterDesignSchema(state)
 
     expect(result).toBe('invokeSchemaDesignTool')
   })
@@ -39,7 +39,7 @@ describe('shouldInvokeSchemaDesignTool', () => {
     })
 
     const state = workflowState([messageWithoutToolCalls])
-    const result = shouldInvokeSchemaDesignTool(state)
+    const result = routeAfterDesignSchema(state)
 
     expect(result).toBe('executeDDL')
   })
@@ -51,7 +51,7 @@ describe('shouldInvokeSchemaDesignTool', () => {
     })
 
     const state = workflowState([messageWithEmptyToolCalls])
-    const result = shouldInvokeSchemaDesignTool(state)
+    const result = routeAfterDesignSchema(state)
 
     expect(result).toBe('executeDDL')
   })
@@ -62,7 +62,7 @@ describe('shouldInvokeSchemaDesignTool', () => {
     })
 
     const state = workflowState([humanMessage])
-    const result = shouldInvokeSchemaDesignTool(state)
+    const result = routeAfterDesignSchema(state)
 
     expect(result).toBe('executeDDL')
   })
@@ -84,7 +84,7 @@ describe('shouldInvokeSchemaDesignTool', () => {
     })
 
     const state = workflowState([messageWithToolCalls, messageWithoutToolCalls])
-    const result = shouldInvokeSchemaDesignTool(state)
+    const result = routeAfterDesignSchema(state)
 
     expect(result).toBe('executeDDL')
   })
@@ -107,7 +107,7 @@ describe('shouldInvokeSchemaDesignTool', () => {
     })
 
     const state = workflowState([messageWithMultipleToolCalls])
-    const result = shouldInvokeSchemaDesignTool(state)
+    const result = routeAfterDesignSchema(state)
 
     expect(result).toBe('invokeSchemaDesignTool')
   })

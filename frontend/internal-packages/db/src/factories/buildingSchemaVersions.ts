@@ -22,15 +22,8 @@ export const aBuildingSchemaVersion =
         },
         {
           op: 'replace',
-          path: '/tables/posts/columns/title',
-          value: {
-            name: 'title',
-            type: 'text',
-            check: null,
-            comment: 'Post title',
-            default: null,
-            notNull: true,
-          },
+          path: '/tables/posts/columns/title/comment',
+          value: 'Updated post title',
         },
         {
           op: 'remove',

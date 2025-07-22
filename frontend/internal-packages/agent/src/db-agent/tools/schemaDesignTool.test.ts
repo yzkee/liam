@@ -54,10 +54,27 @@ describe('schemaDesignTool', () => {
           path: '/tables/users',
           value: {
             name: 'users',
-            columns: [
-              { name: 'id', type: 'integer', primaryKey: true },
-              { name: 'name', type: 'varchar(255)' },
-            ],
+            comment: null,
+            columns: {
+              id: {
+                name: 'id',
+                type: 'integer',
+                default: null,
+                check: null,
+                notNull: true,
+                comment: null,
+              },
+              name: {
+                name: 'name',
+                type: 'varchar(255)',
+                default: null,
+                check: null,
+                notNull: false,
+                comment: null,
+              },
+            },
+            indexes: {},
+            constraints: {},
           },
         },
       ],
@@ -65,14 +82,16 @@ describe('schemaDesignTool', () => {
 
     const result = await schemaDesignTool.invoke(input, config)
 
-    expect(result).toBe('success')
+    expect(result).toBe(
+      'Schema successfully updated. The operations have been applied to the database schema.',
+    )
     expect(mockUpdateVersion).toHaveBeenCalledWith({
       buildingSchemaVersionId: 'test-version-id',
       patch: input.operations,
     })
   })
 
-  it('should return error message when update fails', async () => {
+  it('should throw error when update fails', async () => {
     const mockUpdateVersion = vi.fn().mockResolvedValue({
       success: false,
       error: 'Database connection failed',
@@ -87,18 +106,30 @@ describe('schemaDesignTool', () => {
           path: '/tables/users',
           value: {
             name: 'users',
-            columns: [{ name: 'id', type: 'integer', primaryKey: true }],
+            comment: null,
+            columns: {
+              id: {
+                name: 'id',
+                type: 'integer',
+                default: null,
+                check: null,
+                notNull: true,
+                comment: null,
+              },
+            },
+            indexes: {},
+            constraints: {},
           },
         },
       ],
     }
 
-    const result = await schemaDesignTool.invoke(input, config)
-
-    expect(result).toBe('Database connection failed')
+    await expect(schemaDesignTool.invoke(input, config)).rejects.toThrow(
+      'Schema update failed: Database connection failed. Please fix the error and try again.',
+    )
   })
 
-  it('should return unknown error when update fails without error message', async () => {
+  it('should throw unknown error when update fails without error message', async () => {
     const mockUpdateVersion = vi.fn().mockResolvedValue({
       success: false,
       error: null,
@@ -113,15 +144,27 @@ describe('schemaDesignTool', () => {
           path: '/tables/users',
           value: {
             name: 'users',
-            columns: [{ name: 'id', type: 'integer', primaryKey: true }],
+            comment: null,
+            columns: {
+              id: {
+                name: 'id',
+                type: 'integer',
+                default: null,
+                check: null,
+                notNull: true,
+                comment: null,
+              },
+            },
+            indexes: {},
+            constraints: {},
           },
         },
       ],
     }
 
-    const result = await schemaDesignTool.invoke(input, config)
-
-    expect(result).toBe('Unknown error')
+    await expect(schemaDesignTool.invoke(input, config)).rejects.toThrow(
+      'Schema update failed: Unknown error occurred. Please fix the error and try again.',
+    )
   })
 
   it('should handle missing configurable object', async () => {
@@ -132,7 +175,9 @@ describe('schemaDesignTool', () => {
 
     const result = await schemaDesignTool.invoke(input, config)
 
-    expect(result).toBe('Missing configurable object in RunnableConfig')
+    expect(result).toBe(
+      'Configuration error: Missing configurable object in RunnableConfig. Please check the tool configuration and try again.',
+    )
   })
 
   it('should handle invalid configurable object', async () => {
@@ -156,7 +201,10 @@ describe('schemaDesignTool', () => {
       operations: 'invalid-operations', // Should be an array
     }
 
-    await expect(schemaDesignTool.invoke(input, config)).rejects.toThrow()
+    // LangChain validates schema before our tool function is called
+    await expect(schemaDesignTool.invoke(input, config)).rejects.toThrow(
+      'Received tool input did not match expected schema',
+    )
   })
 
   it('should handle empty operations array', async () => {
@@ -173,7 +221,9 @@ describe('schemaDesignTool', () => {
 
     const result = await schemaDesignTool.invoke(input, config)
 
-    expect(result).toBe('success')
+    expect(result).toBe(
+      'Schema successfully updated. The operations have been applied to the database schema.',
+    )
     expect(mockUpdateVersion).toHaveBeenCalledWith({
       buildingSchemaVersionId: 'test-version-id',
       patch: [],

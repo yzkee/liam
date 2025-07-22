@@ -69,7 +69,7 @@ export const convertTimelineItemToTimelineItemEntry = (
         const validationResults =
           item.validation_queries?.validation_results || []
         const results = validationResults.flatMap((vr) =>
-          (vr.result_set || []).map((result, index) => ({
+          (vr.result_set || []).map((result: unknown, index: number) => ({
             id: `${vr.id}-${index}`,
             sql: item.validation_queries?.query_string || '',
             success: vr.status === 'success',

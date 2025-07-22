@@ -20,7 +20,7 @@ export const TimelineItem: FC<Props> = (props) => {
       </AgentMessage>
     ))
     .with({ type: 'query_result' }, ({ queryResultId, results }) => (
-      <AgentMessage state="default">
+      <AgentMessage state="default" assistantRole="db">
         <QueryResultMessage
           queryResultId={queryResultId}
           results={Array.isArray(results) ? results : undefined}

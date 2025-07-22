@@ -28,7 +28,20 @@ export type TimelineItem = Pick<
   | 'design_session_id'
   | 'building_schema_version_id'
   | 'assistant_role'
->
+  | 'query_result_id'
+> & {
+  validation_queries?: {
+    id: string
+    query_string: string
+    validation_results?: Array<{
+      id: string
+      result_set: unknown[] | null
+      status: string
+      error_message: string | null
+      executed_at: string
+    }>
+  } | null
+}
 
 export type DesignSessionWithTimelineItems = Pick<
   Tables<'design_sessions'>,

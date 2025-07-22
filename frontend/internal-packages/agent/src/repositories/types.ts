@@ -1,6 +1,7 @@
 import type { Artifact } from '@liam-hq/artifact'
 import type { Database, Tables } from '@liam-hq/db/supabase/database.types'
 import type { Schema } from '@liam-hq/db-structure'
+import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import type { Operation } from 'fast-json-patch'
 
 export type SchemaData = {
@@ -52,6 +53,7 @@ export type CreateTimelineItemParams = {
     }
   | {
       type: 'assistant'
+      role: Database['public']['Enums']['assistant_role_enum']
     }
   | {
       type: 'schema_version'
@@ -62,6 +64,7 @@ export type CreateTimelineItemParams = {
     }
   | {
       type: 'assistant_log'
+      role: Database['public']['Enums']['assistant_role_enum']
     }
 )
 
@@ -101,7 +104,7 @@ export type ArtifactResult =
 
 export type CreateWorkflowRunParams = {
   designSessionId: string
-  runId: string
+  workflowRunId: string
 }
 
 export type WorkflowRunResult =
@@ -115,7 +118,7 @@ export type WorkflowRunResult =
     }
 
 export type UpdateWorkflowRunStatusParams = {
-  runId: string
+  workflowRunId: string
   status: Database['public']['Enums']['workflow_run_status']
 }
 
@@ -177,6 +180,24 @@ export type SchemaRepository = {
    * Get artifact for a design session
    */
   getArtifact(designSessionId: string): Promise<ArtifactResult>
+
+  /**
+   * Create a validation query record
+   */
+  createValidationQuery(params: {
+    designSessionId: string
+    queryString: string
+  }): Promise<
+    { success: true; queryId: string } | { success: false; error: string }
+  >
+
+  /**
+   * Create validation results for a query
+   */
+  createValidationResults(params: {
+    validationQueryId: string
+    results: SqlResult[]
+  }): Promise<{ success: true } | { success: false; error: string }>
 
   /**
    * Create a new workflow run record

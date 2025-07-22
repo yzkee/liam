@@ -36,9 +36,10 @@ export const convertTimelineItemToTimelineItemEntry = (
     )
     .with(
       { type: 'assistant' },
-      (): AssistantTimelineItemEntry => ({
+      (item): AssistantTimelineItemEntry => ({
         ...baseItem,
         type: 'assistant',
+        role: item.assistant_role ?? 'db',
       }),
     )
     .with(
@@ -50,9 +51,10 @@ export const convertTimelineItemToTimelineItemEntry = (
     )
     .with(
       { type: 'assistant_log' },
-      (): AssistantLogTimelineItemEntry => ({
+      (item): AssistantLogTimelineItemEntry => ({
         ...baseItem,
         type: 'assistant_log',
+        role: item.assistant_role ?? 'db',
       }),
     )
     .otherwise((item) => {

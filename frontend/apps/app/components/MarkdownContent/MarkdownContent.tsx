@@ -5,6 +5,7 @@ import type { CSSProperties, FC, HTMLAttributes, ReactNode } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import remarkGfm from 'remark-gfm'
+import styles from './MarkdownContent.module.css'
 
 type CodeProps = {
   node?: unknown
@@ -44,6 +45,27 @@ export const MarkdownContent: FC<MarkdownContentProps> = ({ content }) => {
             <code className={className} {...rest}>
               {children}
             </code>
+          )
+        },
+        ul({ children, node, ...props }) {
+          return (
+            <ul className={styles.ul} {...props}>
+              {children}
+            </ul>
+          )
+        },
+        ol({ children, node, ...props }) {
+          return (
+            <ol className={styles.ol} {...props}>
+              {children}
+            </ol>
+          )
+        },
+        li({ children, node, ...props }) {
+          return (
+            <li className={styles.li} {...props}>
+              {children}
+            </li>
           )
         },
       }}

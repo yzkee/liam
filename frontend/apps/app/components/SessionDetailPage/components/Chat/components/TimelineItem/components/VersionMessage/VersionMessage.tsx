@@ -18,13 +18,10 @@ import styles from './VersionMessage.module.css'
 /**
  * Parse JSON patch operations into structured format
  */
-export type StatusClass =
+type StatusClass =
   | 'statusAdded'
   | 'statusRemoved'
   | 'statusModified'
-  | 'statusMoved'
-  | 'statusCopied'
-  | 'statusTested'
   | 'statusUnknown'
 
 const parsePatchOperations = (
@@ -54,18 +51,6 @@ const parsePatchOperations = (
       case 'replace':
         status = 'Modified'
         statusClass = 'statusModified'
-        break
-      case 'move':
-        status = 'Moved'
-        statusClass = 'statusMoved'
-        break
-      case 'copy':
-        status = 'Copied'
-        statusClass = 'statusCopied'
-        break
-      case 'test':
-        status = 'Tested'
-        statusClass = 'statusTested'
         break
       default:
         status = 'Unknown'

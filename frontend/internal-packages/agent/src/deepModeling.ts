@@ -16,6 +16,7 @@ import {
   reviewDeliverablesNode,
   saveUserMessageNode,
   validateSchemaNode,
+  webSearchNode,
 } from './chat/workflow/nodes'
 import {
   createAnnotations,
@@ -35,18 +36,13 @@ export type DeepModelingParams = {
   recursionLimit?: number
 }
 
-export type DeepModelingResult = Result<
-  {
-    text: string
-  },
-  Error
->
+export type DeepModelingResult = Result<WorkflowState, Error>
 
 /**
  * Retry policy configuration for all nodes
  */
 const RETRY_POLICY = {
-  maxAttempts: 3,
+  maxAttempts: process.env['NODE_ENV'] === 'test' ? 1 : 3,
 }
 
 /**
@@ -58,6 +54,9 @@ const createGraph = () => {
 
   graph
     .addNode('saveUserMessage', saveUserMessageNode, {
+      retryPolicy: RETRY_POLICY,
+    })
+    .addNode('webSearch', webSearchNode, {
       retryPolicy: RETRY_POLICY,
     })
     .addNode('analyzeRequirements', analyzeRequirementsNode, {
@@ -86,46 +85,83 @@ const createGraph = () => {
     })
 
     .addEdge(START, 'saveUserMessage')
+    .addEdge('webSearch', 'analyzeRequirements')
     .addEdge('analyzeRequirements', 'designSchema')
     .addEdge('executeDDL', 'generateUsecase')
     .addEdge('generateUsecase', 'prepareDML')
     .addEdge('prepareDML', 'validateSchema')
     .addEdge('finalizeArtifacts', END)
 
-    // Conditional edge for saveUserMessage - skip to finalizeArtifacts if error
-    .addConditionalEdges('saveUserMessage', (state) => {
-      return state.error ? 'finalizeArtifacts' : 'analyzeRequirements'
-    })
+    // Conditional edge for saveUserMessage - skip to finalizeArtifacts if error, otherwise go to webSearch
+    .addConditionalEdges(
+      'saveUserMessage',
+      (state) => {
+        return state.error ? 'finalizeArtifacts' : 'webSearch'
+      },
+      {
+        finalizeArtifacts: 'finalizeArtifacts',
+        webSearch: 'webSearch',
+      },
+    )
 
     // Conditional edge for designSchema - skip to finalizeArtifacts if error
-    .addConditionalEdges('designSchema', (state) => {
-      return state.error ? 'finalizeArtifacts' : 'executeDDL'
-    })
+    .addConditionalEdges(
+      'designSchema',
+      (state) => {
+        return state.error ? 'finalizeArtifacts' : 'executeDDL'
+      },
+      {
+        finalizeArtifacts: 'finalizeArtifacts',
+        executeDDL: 'executeDDL',
+      },
+    )
 
     // Conditional edge for executeDDL - retry with designSchema if DDL execution fails
-    .addConditionalEdges('executeDDL', (state) => {
-      if (state.shouldRetryWithDesignSchema) {
-        return 'designSchema'
-      }
-      if (state.ddlExecutionFailed) {
-        return 'finalizeArtifacts'
-      }
-      return 'generateUsecase'
-    })
+    .addConditionalEdges(
+      'executeDDL',
+      (state) => {
+        if (state.shouldRetryWithDesignSchema) {
+          return 'designSchema'
+        }
+        if (state.ddlExecutionFailed) {
+          return 'finalizeArtifacts'
+        }
+        return 'generateUsecase'
+      },
+      {
+        designSchema: 'designSchema',
+        finalizeArtifacts: 'finalizeArtifacts',
+        generateUsecase: 'generateUsecase',
+      },
+    )
 
     // Conditional edges for validation results
-    .addConditionalEdges('validateSchema', (state) => {
-      // success → reviewDeliverables
-      // dml error or test fail → designSchema
-      return state.error ? 'designSchema' : 'reviewDeliverables'
-    })
+    .addConditionalEdges(
+      'validateSchema',
+      (state) => {
+        // success → reviewDeliverables
+        // dml error or test fail → designSchema
+        return state.error ? 'designSchema' : 'reviewDeliverables'
+      },
+      {
+        designSchema: 'designSchema',
+        reviewDeliverables: 'reviewDeliverables',
+      },
+    )
 
     // Conditional edges for review results
-    .addConditionalEdges('reviewDeliverables', (state) => {
-      // OK → finalizeArtifacts
-      // NG or issues found → analyzeRequirements
-      return state.error ? 'analyzeRequirements' : 'finalizeArtifacts'
-    })
+    .addConditionalEdges(
+      'reviewDeliverables',
+      (state) => {
+        // OK → finalizeArtifacts
+        // NG or issues found → analyzeRequirements
+        return state.error ? 'analyzeRequirements' : 'finalizeArtifacts'
+      },
+      {
+        analyzeRequirements: 'analyzeRequirements',
+        finalizeArtifacts: 'finalizeArtifacts',
+      },
+    )
 
   return graph.compile()
 }
@@ -176,13 +212,13 @@ export const deepModeling = async (
     retryCount: {},
   }
 
-  const runId = uuidv4()
+  const workflowRunId = uuidv4()
 
   try {
     const createWorkflowRunResult = await repositories.schema.createWorkflowRun(
       {
         designSessionId,
-        runId,
+        workflowRunId,
       },
     )
 
@@ -202,26 +238,24 @@ export const deepModeling = async (
         repositories,
         logger,
       },
-      runId,
+      runId: workflowRunId,
       callbacks: [runCollector],
     })
 
     if (result.error) {
       await repositories.schema.updateWorkflowRunStatus({
-        runId,
+        workflowRunId,
         status: 'error',
       })
       return err(new Error(result.error.message))
     }
 
     await repositories.schema.updateWorkflowRunStatus({
-      runId,
+      workflowRunId,
       status: 'success',
     })
 
-    return ok({
-      text: result.finalResponse || result.generatedAnswer || '',
-    })
+    return ok(result)
   } catch (error) {
     const errorMessage =
       error instanceof Error
@@ -229,7 +263,7 @@ export const deepModeling = async (
         : WORKFLOW_ERROR_MESSAGES.EXECUTION_FAILED
 
     await repositories.schema.updateWorkflowRunStatus({
-      runId,
+      workflowRunId,
       status: 'error',
     })
 

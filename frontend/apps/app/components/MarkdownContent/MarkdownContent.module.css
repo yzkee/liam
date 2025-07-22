@@ -1,0 +1,21 @@
+.ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  list-style: disc;
+  list-style-position: inside;
+}
+
+.ol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  list-style: decimal;
+  list-style-position: inside;
+}
+
+.li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}

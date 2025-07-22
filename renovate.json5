@@ -21,6 +21,13 @@
       ]
     },
     {
+      "groupName": "trigger.dev",
+      "matchPackageNames": [
+        "/^@trigger\\.dev\//",
+        "/^trigger\\.dev$/"
+      ]
+    },
+    {
       "matchUpdateTypes": [
         "patch"
       ],
@@ -36,9 +43,10 @@
         "style-dictionary",
         "/^@langchain/",
         "/^langfuse$/",
-        "/^langfuse-langchain$/"
+        "/^langfuse-langchain$/",
+        "langsmith"
       ],
-      "matchPaths": ["frontend/internal-packages/**"],
+      "matchFileNames": ["frontend/internal-packages/**"],
       "automerge": true
     },
     {
@@ -61,7 +69,12 @@
         "playwright",
         "@playwright/test",
         "pnpm",
-        "knip"
+        "concurrently",
+        "node"
+        // "knip" - Temporarily commented out due to compatibility issues with biome2
+        // See: https://github.com/webpro-nl/knip/issues/1154
+        // This has caused manual downgrades in PRs #2376 and #2534
+        // Re-enable knip when the compatibility issue is resolved
       ],
       "matchDepTypes": [
         "devDependencies"

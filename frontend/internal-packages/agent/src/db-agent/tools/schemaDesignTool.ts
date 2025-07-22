@@ -38,6 +38,7 @@ export const schemaDesignTool = tool(
     if (!result.success) {
       const errorMessage = result.error ?? 'Unknown error occurred'
 
+      // LangGraph tool nodes require throwing errors to trigger retry mechanism
       // eslint-disable-next-line no-throw-error/no-throw-error
       throw new Error(
         `Schema update failed: ${errorMessage}. Please fix the error and try again.`,

@@ -6,6 +6,6 @@
     "target": "ES2022",
     "moduleResolution": "node"
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "debugDesignSchema.tsx"],
   "exclude": ["node_modules", "dist"]
 }

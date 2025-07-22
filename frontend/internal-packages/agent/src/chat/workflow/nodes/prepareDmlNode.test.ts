@@ -56,6 +56,7 @@ describe('prepareDmlNode', () => {
       schemaData: { tables: {} },
       buildingSchemaId: 'test-id',
       latestVersionNumber: 1,
+      organizationId: 'test-org-id',
       userId: 'user-id',
       designSessionId: 'session-id',
       retryCount: {},

@@ -50,7 +50,7 @@ const RETRY_POLICY = {
 /**
  * Create and configure the LangGraph workflow
  */
-export const createGraph = () => {
+const createGraph = () => {
   const ChatStateAnnotation = createAnnotations()
   const graph = new StateGraph(ChatStateAnnotation)
 

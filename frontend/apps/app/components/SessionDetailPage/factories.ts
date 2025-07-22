@@ -13,13 +13,19 @@ const generateId = () => {
   return `test-id-${idCounter}`
 }
 
+// For test isolation - call this in beforeEach() to ensure deterministic ID generation
+// Uncomment when tests are added:
+// export const resetIdCounter = () => {
+//   idCounter = 0
+// }
+
 const aUserTimelineItemEntry = (
   overrides?: Partial<UserTimelineItemEntry>,
 ): UserTimelineItemEntry => ({
   id: generateId(),
   content: 'Create a user management system',
   type: 'user',
-  timestamp: new Date('2024-01-01T10:00:00'),
+  timestamp: new Date(Date.now() - 60 * 60 * 1000), // 1 hour ago
   ...overrides,
 })
 
@@ -30,7 +36,7 @@ const anAssistantTimelineItemEntry = (
   content: "I'll help you create a user management system.",
   type: 'assistant',
   role: 'pm',
-  timestamp: new Date('2024-01-01T10:01:00'),
+  timestamp: new Date(Date.now() - 59 * 60 * 1000), // 59 minutes ago
   ...overrides,
 })
 
@@ -41,7 +47,7 @@ const aSchemaVersionTimelineItemEntry = (
   content: 'Schema version 1.0.0',
   type: 'schema_version',
   buildingSchemaVersionId: 'version-123',
-  timestamp: new Date('2024-01-01T10:02:00'),
+  timestamp: new Date(Date.now() - 58 * 60 * 1000), // 58 minutes ago
   ...overrides,
 })
 
@@ -51,7 +57,7 @@ const anErrorTimelineItemEntry = (
   id: generateId(),
   content: 'An error occurred while processing your request',
   type: 'error',
-  timestamp: new Date('2024-01-01T10:03:00'),
+  timestamp: new Date(Date.now() - 57 * 60 * 1000), // 57 minutes ago
   ...overrides,
 })
 
@@ -62,15 +68,24 @@ const anAssistantLogTimelineItemEntry = (
   content: 'Analyzing requirements...',
   type: 'assistant_log',
   role: 'pm',
-  timestamp: new Date('2024-01-01T10:00:30'),
+  timestamp: new Date(Date.now() - 59.5 * 60 * 1000), // 59.5 minutes ago
   ...overrides,
 })
+
+// Export individual factory functions for test modularity
+export {
+  aUserTimelineItemEntry,
+  anAssistantTimelineItemEntry,
+  aSchemaVersionTimelineItemEntry,
+  anErrorTimelineItemEntry,
+  anAssistantLogTimelineItemEntry,
+}
 
 export const aTypicalConversation = (): TimelineItemEntry[] => [
   aUserTimelineItemEntry({
     content:
       'A service where you input the application you want to create, and an AI Agent will output a database design and DDL, then verify if that output meets the business requirements of the inputted application.',
-    timestamp: new Date('2025-07-14T06:39:00Z'),
+    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
   }),
   anAssistantLogTimelineItemEntry({
     role: 'pm',

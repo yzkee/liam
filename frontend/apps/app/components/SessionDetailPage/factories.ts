@@ -14,10 +14,9 @@ const generateId = () => {
 }
 
 // For test isolation - call this in beforeEach() to ensure deterministic ID generation
-// Uncomment when tests are added:
-// export const resetIdCounter = () => {
-//   idCounter = 0
-// }
+export const resetIdCounter = () => {
+  idCounter = 0
+}
 
 const aUserTimelineItemEntry = (
   overrides?: Partial<UserTimelineItemEntry>,
@@ -81,26 +80,87 @@ export {
   anAssistantLogTimelineItemEntry,
 }
 
-export const aTypicalConversation = (): TimelineItemEntry[] => [
+// SQL Constants
+const SQL_CREATE_TAXONOMIES = `-- Taxonomy hierarchy
+CREATE TABLE taxonomies (
+  id SERIAL PRIMARY KEY,
+  parent_id INTEGER REFERENCES taxonomies(id),
+  rank VARCHAR(50) NOT NULL,
+  scientific_name VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);`
+
+const SQL_CREATE_ANIMALS = `-- Basic animal information
+CREATE TABLE animals (
+  id SERIAL PRIMARY KEY,
+  taxonomy_id INTEGER REFERENCES taxonomies(id),
+  scientific_name VARCHAR(255) UNIQUE NOT NULL,
+  characteristics JSONB,
+  habitat VARCHAR(255),
+  conservation_status VARCHAR(50),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);`
+
+const SQL_CREATE_INDEXES = `CREATE INDEX idx_animals_taxonomy ON animals(taxonomy_id);
+CREATE INDEX idx_characteristics_gin ON animals USING gin(characteristics);`
+
+const SQL_INSERT_TAXONOMIES = `-- Building the classification hierarchy
+INSERT INTO taxonomies (rank, scientific_name, parent_id) VALUES
+('Kingdom', 'Animalia', NULL),
+('Phylum', 'Chordata', 1),
+('Class', 'Mammalia', 2),
+('Order', 'Carnivora', 3),
+('Family', 'Felidae', 4),
+('Genus', 'Panthera', 5);`
+
+const SQL_INSERT_ANIMALS = `-- Inserting animal data
+INSERT INTO animals (taxonomy_id, scientific_name, characteristics, habitat, conservation_status) VALUES
+(6, 'Panthera uncia',
+ '{"size": "medium", "weight": "27-55kg", "lifespan": "15-18 years", "diet": "carnivore", "climate": "cold"}',
+ 'Mountain ranges of Central and South Asia',
+ 'Vulnerable');`
+
+const SQL_RECURSIVE_QUERY = `WITH RECURSIVE taxonomy_path AS (
+  SELECT id, scientific_name, rank, parent_id
+  FROM taxonomies
+  WHERE scientific_name = 'Panthera uncia'
+  -- Recursively trace parent hierarchy
+)`
+
+const SQL_JSONB_SEARCH = `SELECT * FROM animals
+WHERE characteristics @> '{"climate": "cold"}';`
+
+// Helper function to generate timestamps
+const getTimestamp = (hoursAgo: number): Date => {
+  return new Date(Date.now() - hoursAgo * 60 * 60 * 1000)
+}
+
+// Create initial user request
+const createInitialRequest = (): TimelineItemEntry[] => [
   aUserTimelineItemEntry({
     content:
       'A service where you input the application you want to create, and an AI Agent will output a database design and DDL, then verify if that output meets the business requirements of the inputted application.',
-    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
+    timestamp: getTimestamp(24), // 1 day ago
   }),
+]
+
+// Create project setup conversation
+const createProjectSetupConversation = (): TimelineItemEntry[] => [
   anAssistantLogTimelineItemEntry({
     role: 'pm',
     content: `**Saving user input**
-Received input from the user: “Animal Encyclopedia.”
+Received input from the user: "Animal Encyclopedia."
 It's simple, but this is where it all begins.
 Let's make sure to save it securely.
 
 Save complete.
-Alright, next, let's dive deeper into this “Animal Encyclopedia.”`,
+Alright, next, let's dive deeper into this "Animal Encyclopedia."`,
+    timestamp: getTimestamp(23.5),
   }),
   anAssistantLogTimelineItemEntry({
     role: 'pm',
     content: `**Web search**
-Database design for the “Animal Encyclopedia,” huh... First, let's gather some related information.
+Database design for the "Animal Encyclopedia," huh... First, let's gather some related information.
 What elements would be necessary for an animal encyclopedia system?
 
 Indexing Query Generation:
@@ -122,18 +182,23 @@ Summary of Search Results:
 - Efficient association of images and metadata
 - Index design with search performance in mind
 `,
+    timestamp: getTimestamp(23),
   }),
+]
+
+// Create requirements analysis conversation
+const createRequirementsAnalysisConversation = (): TimelineItemEntry[] => [
   anAssistantLogTimelineItemEntry({
     role: 'pm',
     content: `**Requirements Analysis**
-Let’s infer the implicit requirements from the short input “Animal Encyclopedia.”
+Let's infer the implicit requirements from the short input "Animal Encyclopedia."
 Based on the results of the web search, we need to define comprehensive requirements.
 
 Business Requirements Analysis:
-“Given that it’s an animal encyclopedia...
+"Given that it's an animal encyclopedia...
 - A system that allows systematic management and browsing of animal information
 - Intended for use in educational or research contexts
-- Needs to balance accurate classification with easy-to-understand presentation”
+- Needs to balance accurate classification with easy-to-understand presentation"
 
 Extraction of Functional Requirements:
 
@@ -160,7 +225,12 @@ Consideration of Non-Functional Requirements:
 * Data Integrity:
   • Ensuring consistency within the classification hierarchy
   • Maintaining referential integrity`,
+    timestamp: getTimestamp(22),
   }),
+]
+
+// Create schema design conversation
+const createSchemaDesignConversation = (): TimelineItemEntry[] => [
   anAssistantLogTimelineItemEntry({
     role: 'db',
     content: `**Schema Design**
@@ -187,26 +257,11 @@ Schema Design Considerations:
 DDL Generation:
 
 \`\`\`sql
--- Taxonomy hierarchy
-CREATE TABLE taxonomies (
-  id SERIAL PRIMARY KEY,
-  parent_id INTEGER REFERENCES taxonomies(id),
-  rank VARCHAR(50) NOT NULL,
-  scientific_name VARCHAR(255) NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+${SQL_CREATE_TAXONOMIES}
 
--- Basic animal information
-CREATE TABLE animals (
-  id SERIAL PRIMARY KEY,
-  taxonomy_id INTEGER REFERENCES taxonomies(id),
-  scientific_name VARCHAR(255) UNIQUE NOT NULL,
-  characteristics JSONB,
-  habitat VARCHAR(255),
-  conservation_status VARCHAR(50),
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+${SQL_CREATE_ANIMALS}
 \`\`\``,
+    timestamp: getTimestamp(20),
   }),
   anAssistantLogTimelineItemEntry({
     role: 'db',
@@ -226,14 +281,20 @@ In the case of self-referencing, it has to be added afterward."
 
 Executing the Revised Version:
 "This time, success! All tables were created.
-Let’s also add the indexes:
+Let's also add the indexes:
 
 \`\`\`sql
-CREATE INDEX idx_animals_taxonomy ON animals(taxonomy_id);
-CREATE INDEX idx_characteristics_gin ON animals USING gin(characteristics);
+${SQL_CREATE_INDEXES}
 \`\`\``,
+    timestamp: getTimestamp(18),
   }),
-  aSchemaVersionTimelineItemEntry({}),
+  aSchemaVersionTimelineItemEntry({
+    timestamp: getTimestamp(17),
+  }),
+]
+
+// Create testing and validation conversation
+const createTestingConversation = (): TimelineItemEntry[] => [
   anAssistantLogTimelineItemEntry({
     role: 'qa',
     content: `**Use Case Generation**
@@ -248,16 +309,17 @@ What kinds of operations are likely to be performed frequently?
 * Characteristics: White fur, lives in mountainous regions"
 
 **Use Case 2: Search by Classification**
-"Request: ‘Display all animals in the Felidae family.’
+"Request: 'Display all animals in the Felidae family.'
 Using a closure table allows for efficient retrieval."
 
 **Use Case 3: Search by Characteristics**
-"Search for animals that ‘live in cold regions.’
+"Search for animals that 'live in cold regions.'
 This is where the GIN index on the JSONB column proves useful."
 
 **Use Case 4: Managing Endangered Species**
 "Update conservation status and retrieve related statistical information."
 `,
+    timestamp: getTimestamp(15),
   }),
   anAssistantLogTimelineItemEntry({
     role: 'db',
@@ -268,21 +330,9 @@ We'll start by inserting a basic classification hierarchy and sample animal data
 **Preparing Classification Data:**
 
 \`\`\`sql
--- Building the classification hierarchy
-INSERT INTO taxonomies (rank, scientific_name, parent_id) VALUES
-('Kingdom', 'Animalia', NULL),
-('Phylum', 'Chordata', 1),
-('Class', 'Mammalia', 2),
-('Order', 'Carnivora', 3),
-('Family', 'Felidae', 4),
-('Genus', 'Panthera', 5);
+${SQL_INSERT_TAXONOMIES}
 
--- Inserting animal data
-INSERT INTO animals (taxonomy_id, scientific_name, characteristics, habitat, conservation_status) VALUES
-(6, 'Panthera uncia',
- '{"size": "medium", "weight": "27-55kg", "lifespan": "15-18 years", "diet": "carnivore", "climate": "cold"}',
- 'Mountain ranges of Central and South Asia',
- 'Vulnerable');
+${SQL_INSERT_ANIMALS}
 \`\`\`
 
 **Preparing Verification Queries:**
@@ -291,6 +341,7 @@ Let's check if the data was inserted correctly, including relationships:
 * Retrieve the classification hierarchy
 * Get all animals belonging to a specific family
 * Search by characteristics`,
+    timestamp: getTimestamp(12),
   }),
   anAssistantLogTimelineItemEntry({
     role: 'qa',
@@ -303,12 +354,7 @@ Pay special attention to foreign key constraints and search performance.
 1. **"Is the classification hierarchy correctly constructed?"**
 
    \`\`\`sql
-   WITH RECURSIVE taxonomy_path AS (
-     SELECT id, scientific_name, rank, parent_id
-     FROM taxonomies
-     WHERE scientific_name = 'Panthera uncia'
-     -- Recursively trace parent hierarchy
-   )
+   ${SQL_RECURSIVE_QUERY}
    \`\`\`
 
    **Result:** "Animalia > Chordata > Mammalia > Carnivora > Felidae > Panthera"
@@ -316,21 +362,26 @@ Pay special attention to foreign key constraints and search performance.
 2. **"Does characteristic search via JSONB work?"**
 
    \`\`\`sql
-   SELECT * FROM animals
-   WHERE characteristics @> '{"climate": "cold"}';
+   ${SQL_JSONB_SEARCH}
    \`\`\``,
+    timestamp: getTimestamp(10),
   }),
   anAssistantTimelineItemEntry({
     role: 'qa',
     content: `Snow Leopard was correctly retrieved!"
 All tests passed! The schema meets the requirements.`,
+    timestamp: getTimestamp(9),
   }),
+]
+
+// Create final review conversation
+const createFinalReviewConversation = (): TimelineItemEntry[] => [
   anAssistantLogTimelineItemEntry({
     role: 'pm',
     content: `**Deliverable Review**
 The database design for the animal encyclopedia is complete.
-Let’s do a final check.
-Does it fulfill the initial request: “Animal Encyclopedia”?
+Let's do a final check.
+Does it fulfill the initial request: "Animal Encyclopedia"?
 
 **Checklist:**
 - ✅ Hierarchical management of animal taxonomy
@@ -347,12 +398,13 @@ Future expansions could include:
 * Audio data such as animal sounds
 * Time-series management of observation records
   But as of now, it functions sufficiently as a basic animal encyclopedia.`,
+    timestamp: getTimestamp(6),
   }),
   anAssistantLogTimelineItemEntry({
     role: 'db',
     content: `**Finalizing Artifacts**
-From the short request “Animal Encyclopedia,” we’ve arrived at a complete database design.
-Let’s compile the deliverables and provide them in a usable form.
+From the short request "Animal Encyclopedia," we've arrived at a complete database design.
+Let's compile the deliverables and provide them in a usable form.
 
 **Final Deliverables:**
 
@@ -371,11 +423,22 @@ Let’s compile the deliverables and provide them in a usable form.
 4. **Extension Proposals**
    * Guidelines for future feature additions
    * Suggestions for performance tuning`,
+    timestamp: getTimestamp(3),
   }),
   anAssistantTimelineItemEntry({
     role: 'db',
     content: `The database design for the animal encyclopedia has been completed!
 It implements a hierarchical classification system, flexible attribute management, and multilingual support,
 making it well-suited for educational and research purposes.`,
+    timestamp: getTimestamp(1),
   }),
+]
+
+export const aTypicalConversation = (): TimelineItemEntry[] => [
+  ...createInitialRequest(),
+  ...createProjectSetupConversation(),
+  ...createRequirementsAnalysisConversation(),
+  ...createSchemaDesignConversation(),
+  ...createTestingConversation(),
+  ...createFinalReviewConversation(),
 ]

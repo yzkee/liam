@@ -64,7 +64,8 @@ export const convertDefaultValue = (
       return 'autoincrement()'
     }
     if (value === 'defaultRandom') {
-      return 'uuid()'
+      // Note: MySQL's UUID() generates UUID v1 (time-based), not truly random like PostgreSQL's gen_random_uuid()
+      return 'UUID()'
     }
   }
 

@@ -116,6 +116,13 @@ export const isMysqlTableCall = (callExpr: CallExpression): boolean => {
 }
 
 /**
+ * Check if a call expression is a mysqlSchema call
+ */
+export const isMysqlSchemaCall = (callExpr: CallExpression): boolean => {
+  return isIdentifierWithName(callExpr.callee, 'mysqlSchema')
+}
+
+/**
  * Check if a call expression is a schema.table() call
  */
 export const isSchemaTableCall = (callExpr: CallExpression): boolean => {

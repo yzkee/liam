@@ -21,7 +21,6 @@ export const convertDrizzleTypeToPgType = (
 
     // Numeric types with precision/scale
     case 'decimal':
-    case 'numeric':
       if (options?.['precision'] && options?.['scale']) {
         return `decimal(${options['precision']},${options['scale']})`
       }
@@ -29,6 +28,14 @@ export const convertDrizzleTypeToPgType = (
         return `decimal(${options['precision']})`
       }
       return 'decimal'
+    case 'numeric':
+      if (options?.['precision'] && options?.['scale']) {
+        return `numeric(${options['precision']},${options['scale']})`
+      }
+      if (options?.['precision']) {
+        return `numeric(${options['precision']})`
+      }
+      return 'numeric'
 
     // Timestamp with timezone option
     case 'timestamp':

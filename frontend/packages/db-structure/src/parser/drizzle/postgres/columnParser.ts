@@ -103,6 +103,9 @@ export const parseColumnFromProperty = (
       case 'defaultNow':
         column.default = 'now()'
         break
+      case 'defaultRandom':
+        column.default = 'defaultRandom'
+        break
       case 'references':
         if (method.args.length > 0) {
           const argExpr = getArgumentExpression(method.args[0])

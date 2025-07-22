@@ -5,15 +5,24 @@
 import type { Module, VariableDeclarator } from '@swc/core'
 import { parseSync } from '@swc/core'
 import type { Processor, ProcessResult } from '../../types.js'
-import { isMysqlTableCall, isSchemaTableCall } from './astUtils.js'
+import {
+  isMysqlSchemaCall,
+  isMysqlTableCall,
+  isSchemaTableCall,
+} from './astUtils.js'
 import { convertDrizzleTablesToInternal } from './converter.js'
 import { parseMysqlEnumCall } from './enumParser.js'
+import { parseMysqlSchemaCall } from './schemaParser.js'
 import {
   parseMysqlTableCall,
   parseMysqlTableWithComment,
   parseSchemaTableCall,
 } from './tableParser.js'
-import type { DrizzleEnumDefinition, DrizzleTableDefinition } from './types.js'
+import type {
+  DrizzleEnumDefinition,
+  DrizzleSchemaDefinition,
+  DrizzleTableDefinition,
+} from './types.js'
 
 /**
  * Parse Drizzle TypeScript schema to extract table definitions using SWC AST
@@ -23,6 +32,7 @@ const parseDrizzleSchema = (
 ): {
   tables: Record<string, DrizzleTableDefinition>
   enums: Record<string, DrizzleEnumDefinition>
+  schemas: Record<string, DrizzleSchemaDefinition>
   variableToTableMapping: Record<string, string>
 } => {
   // Parse TypeScript code into AST
@@ -33,12 +43,13 @@ const parseDrizzleSchema = (
 
   const tables: Record<string, DrizzleTableDefinition> = {}
   const enums: Record<string, DrizzleEnumDefinition> = {}
+  const schemas: Record<string, DrizzleSchemaDefinition> = {}
   const variableToTableMapping: Record<string, string> = {}
 
-  // Traverse the AST to find mysqlTable calls
-  visitModule(ast, tables, enums, variableToTableMapping)
+  // Traverse the AST to find mysqlTable, mysqlSchema calls
+  visitModule(ast, tables, enums, schemas, variableToTableMapping)
 
-  return { tables, enums, variableToTableMapping }
+  return { tables, enums, schemas, variableToTableMapping }
 }
 
 /**
@@ -48,6 +59,7 @@ const visitModule = (
   module: Module,
   tables: Record<string, DrizzleTableDefinition>,
   enums: Record<string, DrizzleEnumDefinition>,
+  schemas: Record<string, DrizzleSchemaDefinition>,
   variableToTableMapping: Record<string, string>,
 ) => {
   for (const item of module.body) {
@@ -57,6 +69,7 @@ const visitModule = (
           declarator,
           tables,
           enums,
+          schemas,
           variableToTableMapping,
         )
       }
@@ -69,6 +82,7 @@ const visitModule = (
           declarator,
           tables,
           enums,
+          schemas,
           variableToTableMapping,
         )
       }
@@ -77,12 +91,13 @@ const visitModule = (
 }
 
 /**
- * Visit variable declarator to find mysqlTable, mysqlEnum, or relations calls
+ * Visit variable declarator to find mysqlTable, mysqlEnum, mysqlSchema, or relations calls
  */
 const visitVariableDeclarator = (
   declarator: VariableDeclarator,
   tables: Record<string, DrizzleTableDefinition>,
   enums: Record<string, DrizzleEnumDefinition>,
+  schemas: Record<string, DrizzleSchemaDefinition>,
   variableToTableMapping: Record<string, string>,
 ) => {
   if (!declarator.init || declarator.init.type !== 'CallExpression') return
@@ -123,6 +138,11 @@ const visitVariableDeclarator = (
     const enumDef = parseMysqlEnumCall(callExpr)
     if (enumDef && declarator.id.type === 'Identifier') {
       enums[declarator.id.value] = enumDef
+    }
+  } else if (isMysqlSchemaCall(callExpr)) {
+    const schemaDef = parseMysqlSchemaCall(callExpr)
+    if (schemaDef && declarator.id.type === 'Identifier') {
+      schemas[declarator.id.value] = schemaDef
     }
   }
 }

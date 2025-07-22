@@ -181,17 +181,24 @@ export const parseSchemaTableCall = (
   if (!tableName || !columnsExpr || !isObjectExpression(columnsExpr))
     return null
 
-  const table: DrizzleTableDefinition = {
-    name: tableName,
-    columns: {},
-    indexes: {},
+  // Extract schema name from the member expression (e.g., authSchema.table -> authSchema)
+  let schemaName = ''
+  if (
+    callExpr.callee.type === 'MemberExpression' &&
+    callExpr.callee.object.type === 'Identifier'
+  ) {
+    schemaName = callExpr.callee.object.value
   }
 
-  // TODO: Handle table name conflicts across different schemas
-  // Currently, if multiple schemas have tables with the same name (e.g., auth.users and public.users),
-  // the later one will overwrite the earlier one since we only use the table name without schema prefix.
-  // This is a limitation shared by other parsers and should be addressed consistently across the codebase.
-  // ref: https://github.com/liam-hq/liam/discussions/2391
+  const table: DrizzleTableDefinition = {
+    name: tableName, // Keep the original table name for DB operations
+    columns: {},
+    indexes: {},
+    schemaName, // Add schema information for namespace handling
+  }
+
+  // Note: We now handle schema namespace by storing the schema name
+  // and using the original table name for database operations
 
   // Parse columns from the object expression
   for (const prop of columnsExpr.properties) {

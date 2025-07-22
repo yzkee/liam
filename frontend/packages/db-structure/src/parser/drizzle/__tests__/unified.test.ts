@@ -909,6 +909,107 @@ describe.each(Object.entries(dbConfigs))(
           })
         })
       }
+
+      // Add multi-schema tests for each database type
+      it(`multiple ${config.name} schemas`, async () => {
+        const schemaFunction = dbType === 'mysql' ? 'mysqlSchema' : 'pgSchema'
+        const schemaImport =
+          dbType === 'mysql' ? config.imports.core : config.imports.core
+
+        const schema = `
+        import { ${config.functions.table}, ${config.types.id}, varchar, ${config.types.integer}, ${schemaFunction} } from '${schemaImport}';
+
+        // Define schemas
+        export const authSchema = ${schemaFunction}('auth');
+        export const publicSchema = ${schemaFunction}('public');
+
+        // Auth schema table
+        export const authUsers = authSchema.table('users', {
+          id: ${config.types.idColumn()},
+          email: varchar('email', { length: 255 }).notNull(),
+        });
+
+        // Public schema tables with foreign keys
+        export const publicPosts = publicSchema.table('posts', {
+          id: ${config.types.idColumn()},
+          userId: ${config.types.integer}('user_id').references(() => authUsers.id),
+          title: varchar('title', { length: 255 }),
+        });
+
+        export const publicComments = publicSchema.table('comments', {
+          id: ${config.types.idColumn()},
+          postId: ${config.types.integer}('post_id').references(() => publicPosts.id),
+          userId: ${config.types.integer}('user_id').references(() => authUsers.id),
+        });
+      `
+
+        const { value } = await config.processor(schema)
+
+        // Check that all tables are parsed
+        expect(Object.keys(value.tables)).toHaveLength(3)
+        expect(value.tables).toHaveProperty('users')
+        expect(value.tables).toHaveProperty('posts')
+        expect(value.tables).toHaveProperty('comments')
+
+        // Verify foreign key constraints across schemas
+        const postsFK =
+          value.tables['posts']?.constraints['posts_user_id_authUsers_id_fk']
+        expect(postsFK).toBeDefined()
+        if (postsFK && postsFK.type === 'FOREIGN KEY') {
+          expect(postsFK.targetTableName).toBe('users') // Should reference table name, not variable name
+        }
+
+        // Verify multiple FKs in one table
+        const commentsFKs = value.tables['comments']?.constraints || {}
+        const foreignKeyCount = Object.values(commentsFKs).filter(
+          (c: Constraint) => c.type === 'FOREIGN KEY',
+        ).length
+        expect(foreignKeyCount).toBe(2)
+      })
+
+      // table-level unique constraints test
+      // TODO: postgres - add support for unique() function to enable this test for PostgreSQL
+      if (dbType === 'mysql') {
+        it('table-level unique constraints', async () => {
+          const schema = `
+          import { ${config.functions.table}, ${config.types.id}, varchar, unique } from '${config.imports.core}';
+
+          export const users = ${config.functions.table}('users', {
+            id: ${config.types.idColumn()},
+            firstName: varchar('first_name', { length: 255 }),
+            lastName: varchar('last_name', { length: 255 }),
+            email: varchar('email', { length: 255 }),
+          }, (table) => ({
+            fullNameUnique: unique('users_full_name_unique').on(table.firstName, table.lastName),
+            emailUnique: unique('users_email_unique').on(table.email),
+          }));
+        `
+
+          const { value } = await config.processor(schema)
+
+          expect(value.tables['users']?.constraints).toHaveProperty(
+            'users_full_name_unique',
+          )
+          expect(
+            value.tables['users']?.constraints['users_full_name_unique'],
+          ).toEqual({
+            type: 'UNIQUE',
+            name: 'users_full_name_unique',
+            columnNames: ['firstName', 'lastName'],
+          })
+
+          expect(value.tables['users']?.constraints).toHaveProperty(
+            'users_email_unique',
+          )
+          expect(
+            value.tables['users']?.constraints['users_email_unique'],
+          ).toEqual({
+            type: 'UNIQUE',
+            name: 'users_email_unique',
+            columnNames: ['email'],
+          })
+        })
+      }
     })
   },
 )

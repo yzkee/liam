@@ -4,117 +4,84 @@ import { processor as _processor } from '../index.js'
 describe(_processor, () => {
   // MySQL-specific tests (tests that are unique to MySQL and not covered by unified tests)
   describe('MySQL-specific functionality', () => {
-    it('test actual MySQL schema pattern', async () => {
+    it('MySQL-specific types and methods (tinyint, mediumint, datetime, year, json, mysqlEnum)', async () => {
       const { value } = await _processor(`
         import {
           mysqlTable,
           mysqlEnum,
           int,
-          text,
-          timestamp,
-          boolean,
+          tinyint,
+          mediumint,
+          bigint,
+          float,
+          double,
           decimal,
+          datetime,
+          year,
           json,
-          varchar,
-          primaryKey,
+          mediumtext,
+          longtext,
+          boolean,
         } from 'drizzle-orm/mysql-core';
-        import { relations } from 'drizzle-orm';
 
-        export const userRoleEnum = mysqlEnum('user_role', ['student', 'instructor', 'admin']);
-
-        export const users = mysqlTable('users', {
-          id: int('id').primaryKey().autoincrement(),
-          name: text('name').notNull(),
-          email: varchar('email', { length: 255 }).notNull().unique(),
-          passwordHash: text('password_hash').notNull(),
-          role: userRoleEnum.default('student').notNull(),
-          bio: text('bio'),
-          profilePictureUrl: text('profile_picture_url'),
-          createdAt: timestamp('created_at').defaultNow().notNull(),
-          updatedAt: timestamp('updated_at').defaultNow().notNull(),
-        });
-
-        export const instructors = mysqlTable('instructors', {
-          id: int('id').primaryKey().autoincrement(),
-          userId: int('user_id').notNull().unique().references(() => users.id, { onDelete: 'cascade' }),
-          specialization: text('specialization'),
-          experienceYears: int('experience_years').default(0).notNull(),
-          externalLink: text('external_link'),
-        });
-
-        export const usersRelations = relations(users, ({ one, many }) => ({
-          instructor: one(instructors), // users has 1:1 with instructors
-        }));
-
-        export const instructorsRelations = relations(instructors, ({ one, many }) => ({
-          user: one(users, {
-            fields: [instructors.userId],
-            references: [users.id],
-          }), // instructors has 1:1 with users (reverse direction)
-        }));
-      `)
-
-      // Focus on the key relationship elements
-
-      // The critical constraint for 1:1 relationship
-      expect(value.tables['instructors']?.constraints).toHaveProperty(
-        'UNIQUE_user_id',
-      )
-      expect(value.tables['instructors']?.constraints).toHaveProperty(
-        'instructors_user_id_users_id_fk',
-      )
-
-      // With unique constraint + foreign key, this establishes a proper 1:1 relationship
-      const uniqueConstraint =
-        value.tables['instructors']?.constraints['UNIQUE_user_id']
-      const foreignKeyConstraint =
-        value.tables['instructors']?.constraints[
-          'instructors_user_id_users_id_fk'
-        ]
-
-      expect(uniqueConstraint?.type).toBe('UNIQUE')
-      expect(foreignKeyConstraint?.type).toBe('FOREIGN KEY')
-
-      // Type guard to check if it's a ForeignKeyConstraint
-      if (foreignKeyConstraint && foreignKeyConstraint.type === 'FOREIGN KEY') {
-        expect(foreignKeyConstraint.targetTableName).toBe('users')
-      }
-    })
-
-    it('table-level unique constraints', async () => {
-      const { value } = await _processor(`
-        import { mysqlTable, int, varchar, unique } from 'drizzle-orm/mysql-core';
+        export const statusEnum = mysqlEnum('status', ['active', 'inactive', 'pending']);
 
         export const users = mysqlTable('users', {
           id: int('id').primaryKey().autoincrement(),
-          firstName: varchar('first_name', { length: 255 }),
-          lastName: varchar('last_name', { length: 255 }),
-          email: varchar('email', { length: 255 }),
-        }, (table) => ({
-          fullNameUnique: unique('users_full_name_unique').on(table.firstName, table.lastName),
-          emailUnique: unique('users_email_unique').on(table.email),
-        }));
+          age: tinyint('age'), // MySQL-specific small integer
+          score: mediumint('score'), // MySQL-specific medium integer
+          balance: bigint('balance', { mode: 'number' }),
+          rating: float('rating'),
+          precision_value: double('precision_value'),
+          price: decimal('price', { precision: 10, scale: 2 }),
+          created_at: datetime('created_at').defaultNow(),
+          birth_year: year('birth_year'), // MySQL-specific year type
+          metadata: json('metadata'), // MySQL JSON (different from PostgreSQL jsonb)
+          bio: mediumtext('bio'), // MySQL-specific text size
+          notes: longtext('notes'), // MySQL-specific text size
+          is_active: boolean('is_active').default(true),
+          status: mysqlEnum('status', ['active', 'inactive', 'pending']).default('active'),
+        });
       `)
 
-      expect(value.tables['users']?.constraints).toHaveProperty(
-        'users_full_name_unique',
-      )
-      expect(
-        value.tables['users']?.constraints['users_full_name_unique'],
-      ).toEqual({
-        type: 'UNIQUE',
-        name: 'users_full_name_unique',
-        columnNames: ['firstName', 'lastName'],
-      })
+      // Test MySQL-specific integer types
+      expect(value.tables['users']?.columns['age']?.type).toBe('tinyint')
+      expect(value.tables['users']?.columns['score']?.type).toBe('mediumint')
+      expect(value.tables['users']?.columns['balance']?.type).toBe('bigint')
 
-      expect(value.tables['users']?.constraints).toHaveProperty(
-        'users_email_unique',
+      // Test MySQL-specific floating point types
+      expect(value.tables['users']?.columns['rating']?.type).toBe('float')
+      expect(value.tables['users']?.columns['precision_value']?.type).toBe(
+        'double',
       )
-      expect(value.tables['users']?.constraints['users_email_unique']).toEqual({
-        type: 'UNIQUE',
-        name: 'users_email_unique',
-        columnNames: ['email'],
-      })
+      expect(value.tables['users']?.columns['price']?.type).toBe(
+        'decimal(10,2)',
+      )
+
+      // Test MySQL-specific date/time types
+      expect(value.tables['users']?.columns['created_at']?.type).toBe(
+        'datetime',
+      )
+      expect(value.tables['users']?.columns['created_at']?.default).toBe(
+        'now()',
+      )
+      expect(value.tables['users']?.columns['birth_year']?.type).toBe('year')
+
+      // Test MySQL-specific text types
+      expect(value.tables['users']?.columns['bio']?.type).toBe('mediumtext')
+      expect(value.tables['users']?.columns['notes']?.type).toBe('longtext')
+
+      // Test MySQL JSON type (different from PostgreSQL jsonb)
+      expect(value.tables['users']?.columns['metadata']?.type).toBe('json')
+
+      // Test mysqlEnum usage (inline enum definition)
+      expect(value.tables['users']?.columns['status']?.type).toBe('enum')
+      expect(value.tables['users']?.columns['status']?.default).toBe('active')
+
+      // Test autoincrement (MySQL-specific implementation)
+      expect(value.tables['users']?.columns['id']?.default).toBe(
+        'autoincrement()',
+      )
     })
   })
 })

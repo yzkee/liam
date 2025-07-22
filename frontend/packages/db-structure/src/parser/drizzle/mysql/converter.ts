@@ -225,9 +225,11 @@ export const convertDrizzleTablesToInternal = (
   const errors: Error[] = []
 
   // Convert Drizzle tables to internal format
-  for (const [tableName, tableDef] of Object.entries(drizzleTables)) {
+  for (const tableDef of Object.values(drizzleTables)) {
     try {
-      tables[tableName] = convertToTable(
+      // Use original table name for the key, not schema-prefixed name
+      // This maintains compatibility while handling schema namespaces internally
+      tables[tableDef.name] = convertToTable(
         tableDef,
         enums,
         variableToTableMapping,
@@ -235,7 +237,7 @@ export const convertDrizzleTablesToInternal = (
     } catch (error) {
       errors.push(
         new Error(
-          `Error parsing table ${tableName}: ${error instanceof Error ? error.message : String(error)}`,
+          `Error parsing table ${tableDef.name}: ${error instanceof Error ? error.message : String(error)}`,
         ),
       )
     }

@@ -11,6 +11,7 @@ export type DrizzleTableDefinition = {
   constraints?: Record<string, Constraint>
   compositePrimaryKey?: CompositePrimaryKeyDefinition
   comment?: string | undefined
+  schemaName?: string // Schema name for namespace handling
 }
 
 export type DrizzleColumnDefinition = {
@@ -48,6 +49,10 @@ export type DrizzleCheckConstraintDefinition = {
 export type DrizzleEnumDefinition = {
   name: string
   values: string[]
+}
+
+export type DrizzleSchemaDefinition = {
+  name: string
 }
 
 export type CompositePrimaryKeyDefinition = {

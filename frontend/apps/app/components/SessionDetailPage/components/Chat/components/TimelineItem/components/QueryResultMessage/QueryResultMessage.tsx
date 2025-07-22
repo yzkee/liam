@@ -46,7 +46,7 @@ export const QueryResultMessage: FC<Props> = ({
   const successCount = results.filter((r) => r.success).length
   const failureCount = results.length - successCount
 
-  const toggleExpanded = () => {
+  const handleToggleExpanded = () => {
     setIsExpanded(!isExpanded)
   }
 
@@ -69,7 +69,7 @@ export const QueryResultMessage: FC<Props> = ({
         <button
           type="button"
           className={styles.headerButton}
-          onClick={toggleExpanded}
+          onClick={handleToggleExpanded}
           aria-label={`${isExpanded ? 'Collapse' : 'Expand'} query results details`}
           aria-expanded={isExpanded}
           id={`query-result-header-${queryResultId}`}

@@ -73,7 +73,7 @@ export const convertTimelineItemToTimelineItemEntry = (
             success: vr.status === 'success',
             result: result,
             metadata: {
-              executionTime: 0, // Not available in validation_results
+              executionTime: 0, // TODO: Not available in validation_results
               timestamp: vr.executed_at,
               affectedRows: null,
             },

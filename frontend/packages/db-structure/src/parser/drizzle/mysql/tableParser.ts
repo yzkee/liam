@@ -17,6 +17,7 @@ import { parseObjectExpression } from './expressionParser.js'
 import type {
   CompositePrimaryKeyDefinition,
   DrizzleCheckConstraintDefinition,
+  DrizzleColumnDefinition,
   DrizzleIndexDefinition,
   DrizzleTableDefinition,
 } from './types.js'
@@ -146,6 +147,7 @@ export const parseMysqlTableCall = (
               const uniqueConstraint = parseUniqueConstraint(
                 prop.value,
                 indexName,
+                table.columns,
               )
               if (uniqueConstraint) {
                 table.constraints = table.constraints || {}
@@ -263,6 +265,7 @@ export const parseSchemaTableCall = (
               const uniqueConstraint = parseUniqueConstraint(
                 prop.value,
                 indexName,
+                table.columns,
               )
               if (uniqueConstraint) {
                 table.constraints = table.constraints || {}
@@ -494,6 +497,7 @@ const parseCheckConstraint = (
 const parseUniqueConstraint = (
   callExpr: CallExpression,
   name: string,
+  tableColumns: Record<string, DrizzleColumnDefinition>,
 ): { type: 'UNIQUE'; name: string; columnNames: string[] } | null => {
   // Handle unique('constraint_name').on(...) method chain
   let constraintName = name
@@ -541,7 +545,15 @@ const parseUniqueConstraint = (
             argExpr.object.type === 'Identifier' &&
             argExpr.property.type === 'Identifier'
           ) {
-            columns.push(argExpr.property.value)
+            // Get the JavaScript property name
+            const jsPropertyName = argExpr.property.value
+            // Find the actual database column name from the table columns
+            const column = tableColumns[jsPropertyName]
+            if (column) {
+              columns.push(column.name) // Use database column name
+            } else {
+              columns.push(jsPropertyName) // Fallback to JS property name
+            }
           }
         }
         break

@@ -995,7 +995,7 @@ describe.each(Object.entries(dbConfigs))(
           ).toEqual({
             type: 'UNIQUE',
             name: 'users_full_name_unique',
-            columnNames: ['firstName', 'lastName'],
+            columnNames: ['first_name', 'last_name'],
           })
 
           expect(value.tables['users']?.constraints).toHaveProperty(

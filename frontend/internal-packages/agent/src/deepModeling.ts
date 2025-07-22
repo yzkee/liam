@@ -93,39 +93,75 @@ const createGraph = () => {
     .addEdge('finalizeArtifacts', END)
 
     // Conditional edge for saveUserMessage - skip to finalizeArtifacts if error, otherwise go to webSearch
-    .addConditionalEdges('saveUserMessage', (state) => {
-      return state.error ? 'finalizeArtifacts' : 'webSearch'
-    })
+    .addConditionalEdges(
+      'saveUserMessage',
+      (state) => {
+        return state.error ? 'finalizeArtifacts' : 'webSearch'
+      },
+      {
+        finalizeArtifacts: 'finalizeArtifacts',
+        webSearch: 'webSearch',
+      },
+    )
 
     // Conditional edge for designSchema - skip to finalizeArtifacts if error
-    .addConditionalEdges('designSchema', (state) => {
-      return state.error ? 'finalizeArtifacts' : 'executeDDL'
-    })
+    .addConditionalEdges(
+      'designSchema',
+      (state) => {
+        return state.error ? 'finalizeArtifacts' : 'executeDDL'
+      },
+      {
+        finalizeArtifacts: 'finalizeArtifacts',
+        executeDDL: 'executeDDL',
+      },
+    )
 
     // Conditional edge for executeDDL - retry with designSchema if DDL execution fails
-    .addConditionalEdges('executeDDL', (state) => {
-      if (state.shouldRetryWithDesignSchema) {
-        return 'designSchema'
-      }
-      if (state.ddlExecutionFailed) {
-        return 'finalizeArtifacts'
-      }
-      return 'generateUsecase'
-    })
+    .addConditionalEdges(
+      'executeDDL',
+      (state) => {
+        if (state.shouldRetryWithDesignSchema) {
+          return 'designSchema'
+        }
+        if (state.ddlExecutionFailed) {
+          return 'finalizeArtifacts'
+        }
+        return 'generateUsecase'
+      },
+      {
+        designSchema: 'designSchema',
+        finalizeArtifacts: 'finalizeArtifacts',
+        generateUsecase: 'generateUsecase',
+      },
+    )
 
     // Conditional edges for validation results
-    .addConditionalEdges('validateSchema', (state) => {
-      // success → reviewDeliverables
-      // dml error or test fail → designSchema
-      return state.error ? 'designSchema' : 'reviewDeliverables'
-    })
+    .addConditionalEdges(
+      'validateSchema',
+      (state) => {
+        // success → reviewDeliverables
+        // dml error or test fail → designSchema
+        return state.error ? 'designSchema' : 'reviewDeliverables'
+      },
+      {
+        designSchema: 'designSchema',
+        reviewDeliverables: 'reviewDeliverables',
+      },
+    )
 
     // Conditional edges for review results
-    .addConditionalEdges('reviewDeliverables', (state) => {
-      // OK → finalizeArtifacts
-      // NG or issues found → analyzeRequirements
-      return state.error ? 'analyzeRequirements' : 'finalizeArtifacts'
-    })
+    .addConditionalEdges(
+      'reviewDeliverables',
+      (state) => {
+        // OK → finalizeArtifacts
+        // NG or issues found → analyzeRequirements
+        return state.error ? 'analyzeRequirements' : 'finalizeArtifacts'
+      },
+      {
+        analyzeRequirements: 'analyzeRequirements',
+        finalizeArtifacts: 'finalizeArtifacts',
+      },
+    )
 
   return graph.compile()
 }

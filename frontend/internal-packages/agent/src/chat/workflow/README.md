@@ -8,6 +8,7 @@ A **LangGraph implementation** for processing chat messages in the LIAM applicat
 flowchart TD
     START([START])
     SAVE[saveUserMessage<br/>Save User Input]
+    WEBSEARCH[webSearch<br/>Web Search<br/><i>webSearchNode</i>]
     ANALYZE[analyzeRequirements<br/>Requirements Organization<br/><i>pmAnalysisAgent</i>]
     DESIGN[designSchema<br/>DB Design & DDL Execution<br/><i>dbAgent</i>]
     EXECUTE_DDL[executeDDL<br/>DDL Execution<br/><i>agent</i>]
@@ -19,8 +20,9 @@ flowchart TD
     END([__end__<br/>End])
 
     START --> SAVE
-    SAVE -->|no error| ANALYZE
+    SAVE -->|no error| WEBSEARCH
     SAVE -->|error| FINALIZE
+    WEBSEARCH --> ANALYZE
     ANALYZE --> DESIGN
     DESIGN -->|no error| EXECUTE_DDL
     DESIGN -->|error| FINALIZE
@@ -93,7 +95,8 @@ interface WorkflowState {
 
 ### Conditional Edge Logic
 
-- **saveUserMessage**: Routes to `analyzeRequirements` on success, `finalizeArtifacts` on error
+- **saveUserMessage**: Routes to `webSearch` on success, `finalizeArtifacts` on error
+- **webSearch**: Routes to `analyzeRequirements`
 - **designSchema**: Routes to `executeDDL` on success, `finalizeArtifacts` on error
 - **executeDDL**: Routes to `generateUsecase` on success, `designSchema` if retry needed, `finalizeArtifacts` if failed
 - **validateSchema**: Routes to `reviewDeliverables` on success, `designSchema` on validation error

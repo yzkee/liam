@@ -1,7 +1,6 @@
 import type {
   AssistantLogTimelineItemEntry,
   AssistantTimelineItemEntry,
-  ErrorTimelineItemEntry,
   SchemaVersionTimelineItemEntry,
   TimelineItemEntry,
   UserTimelineItemEntry,

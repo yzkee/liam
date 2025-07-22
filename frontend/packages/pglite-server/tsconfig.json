@@ -6,6 +6,8 @@
     "declaration": true,
     "esModuleInterop": true,
     "module": "ESNext",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "target": "ES2022",
     "moduleResolution": "node"
   },

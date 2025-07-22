@@ -5,6 +5,8 @@
     "declaration": true,
     "target": "ES2022",
     "baseUrl": ".",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "paths": {
       "@/*": ["src/*"]
     }

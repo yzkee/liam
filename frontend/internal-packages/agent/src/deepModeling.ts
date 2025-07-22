@@ -92,11 +92,11 @@ const createGraph = () => {
     .addEdge(START, 'saveUserMessage')
     .addEdge('webSearch', 'analyzeRequirements')
     .addEdge('analyzeRequirements', 'designSchema')
+    .addEdge('invokeSchemaDesignTool', 'designSchema')
     .addConditionalEdges('designSchema', shouldInvokeSchemaDesignTool, [
       'invokeSchemaDesignTool',
       'executeDDL',
     ])
-    .addEdge('invokeSchemaDesignTool', 'designSchema')
     .addEdge('executeDDL', 'generateUsecase')
     .addEdge('generateUsecase', 'prepareDML')
     .addEdge('prepareDML', 'validateSchema')

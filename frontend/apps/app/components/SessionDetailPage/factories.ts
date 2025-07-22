@@ -14,9 +14,9 @@ const generateId = () => {
 
 // For test isolation - call this in beforeEach() to ensure deterministic ID generation
 // NOTE: Export this when tests are added
-const resetIdCounter = () => {
-  idCounter = 0
-}
+// export const resetIdCounter = () => {
+//   idCounter = 0
+// }
 
 const aUserTimelineItemEntry = (
   overrides?: Partial<UserTimelineItemEntry>,
@@ -50,15 +50,15 @@ const aSchemaVersionTimelineItemEntry = (
   ...overrides,
 })
 
-const anErrorTimelineItemEntry = (
-  overrides?: Partial<ErrorTimelineItemEntry>,
-): ErrorTimelineItemEntry => ({
-  id: generateId(),
-  content: 'An error occurred while processing your request',
-  type: 'error',
-  timestamp: new Date(Date.now() - 57 * 60 * 1000), // 57 minutes ago
-  ...overrides,
-})
+// const anErrorTimelineItemEntry = (
+//   overrides?: Partial<ErrorTimelineItemEntry>,
+// ): ErrorTimelineItemEntry => ({
+//   id: generateId(),
+//   content: 'An error occurred while processing your request',
+//   type: 'error',
+//   timestamp: new Date(Date.now() - 57 * 60 * 1000), // 57 minutes ago
+//   ...overrides,
+// })
 
 const anAssistantLogTimelineItemEntry = (
   overrides?: Partial<AssistantLogTimelineItemEntry>,
@@ -354,21 +354,17 @@ Pay special attention to foreign key constraints and search performance.
 
 1. **"Is the classification hierarchy correctly constructed?"**
 
-   \`\`\`sql
-   ${SQL_RECURSIVE_QUERY}
-   \`\`\`
-   
-   \`\`\`sql
-   SELECT id, scientific_name, rank, parent_id FROM taxonomies WHERE scientific_name = 'Panthera uncia' -- Recursively trace parent hierarchy
-   \`\`\`
+\`\`\`sql
+${SQL_RECURSIVE_QUERY}
+\`\`\`
 
    **Result:** "Animalia > Chordata > Mammalia > Carnivora > Felidae > Panthera"
 
 2. **"Does characteristic search via JSONB work?"**
 
-   \`\`\`sql
-   ${SQL_JSONB_SEARCH}
-   \`\`\``,
+\`\`\`sql
+${SQL_JSONB_SEARCH}
+\`\`\``,
     timestamp: getTimestamp(10),
   }),
   anAssistantTimelineItemEntry({

@@ -1,4 +1,3 @@
-import { safeParse } from 'valibot'
 import type {
   Columns,
   Constraints,
@@ -8,7 +7,7 @@ import type {
 } from '../../schema/index.js'
 import { aColumn, anIndex, aTable } from '../../schema/index.js'
 import type { Processor, ProcessResult } from '../types.js'
-import { TablesSchema } from './valibotSchema.js'
+import schema from './schema.generated.js'
 
 const FK_ACTIONS = 'SET NULL|SET DEFAULT|RESTRICT|CASCADE|NO ACTION'
 
@@ -336,7 +335,7 @@ function processTable(tblsTable: {
 async function parseTblsSchema(schemaString: string): Promise<ProcessResult> {
   // Parse the schema
   const parsedSchema = JSON.parse(schemaString)
-  const result = safeParse(TablesSchema, parsedSchema)
+  const result = schema.safeParse(parsedSchema)
 
   // Handle invalid schema
   if (!result.success) {
@@ -345,7 +344,7 @@ async function parseTblsSchema(schemaString: string): Promise<ProcessResult> {
         tables: {},
       },
       errors: [
-        new Error(`Invalid schema format: ${JSON.stringify(result.issues)}`),
+        new Error(`Invalid schema format: ${JSON.stringify(result.error)}`),
       ],
     }
   }
@@ -355,7 +354,7 @@ async function parseTblsSchema(schemaString: string): Promise<ProcessResult> {
   const errors: Error[] = []
 
   // Process tables
-  for (const tblsTable of result.output.tables) {
+  for (const tblsTable of result.data.tables) {
     const columns = tblsTable.columns.map((col) => ({
       ...col,
       default: col.default ?? null,

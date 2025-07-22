@@ -21,6 +21,13 @@
       ]
     },
     {
+      "groupName": "trigger.dev",
+      "matchPackageNames": [
+        "/^@trigger\\.dev\//",
+        "/^trigger\\.dev$/"
+      ]
+    },
+    {
       "matchUpdateTypes": [
         "patch"
       ],

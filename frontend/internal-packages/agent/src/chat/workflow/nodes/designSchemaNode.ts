@@ -119,6 +119,7 @@ Please fix this issue by analyzing the schema and adding any missing constraints
     ...state,
     messages: [invokeResult.value],
     buildingSchemaVersionId: createVersionResult.versionId,
+    latestVersionNumber: state.latestVersionNumber + 1,
     shouldRetryWithDesignSchema: undefined,
     ddlExecutionFailureReason: undefined,
   }

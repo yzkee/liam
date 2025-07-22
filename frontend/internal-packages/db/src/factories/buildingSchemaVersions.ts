@@ -36,27 +36,6 @@ export const aBuildingSchemaVersion =
           op: 'remove',
           path: '/tables/comments',
         },
-        {
-          op: 'move',
-          from: '/tables/archive',
-          path: '/tables/archive_moved',
-        },
-        {
-          op: 'copy',
-          from: '/tables/original',
-          path: '/tables/new_copy',
-        },
-        {
-          op: 'test',
-          path: '/tables/test_table',
-          value: {
-            name: 'test_table',
-            columns: {},
-            comment: 'Test table',
-            indexes: {},
-            constraints: {},
-          },
-        },
       ],
       reverse_patch: [],
       created_at: '2025-07-17 05:21:15.59056+00',

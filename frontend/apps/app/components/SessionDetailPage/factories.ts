@@ -1,7 +1,6 @@
 import type {
   AssistantLogTimelineItemEntry,
   AssistantTimelineItemEntry,
-  ErrorTimelineItemEntry,
   SchemaVersionTimelineItemEntry,
   TimelineItemEntry,
   UserTimelineItemEntry,
@@ -42,16 +41,6 @@ const aSchemaVersionTimelineItemEntry = (
   type: 'schema_version',
   buildingSchemaVersionId: 'version-123',
   timestamp: new Date('2024-01-01T10:02:00'),
-  ...overrides,
-})
-
-const anErrorTimelineItemEntry = (
-  overrides?: Partial<ErrorTimelineItemEntry>,
-): ErrorTimelineItemEntry => ({
-  id: generateId(),
-  content: 'An error occurred while processing your request',
-  type: 'error',
-  timestamp: new Date('2024-01-01T10:03:00'),
   ...overrides,
 })
 

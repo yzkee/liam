@@ -357,6 +357,10 @@ Pay special attention to foreign key constraints and search performance.
    \`\`\`sql
    ${SQL_RECURSIVE_QUERY}
    \`\`\`
+   
+   \`\`\`sql
+   SELECT id, scientific_name, rank, parent_id FROM taxonomies WHERE scientific_name = 'Panthera uncia' -- Recursively trace parent hierarchy
+   \`\`\`
 
    **Result:** "Animalia > Chordata > Mammalia > Carnivora > Felidae > Panthera"
 

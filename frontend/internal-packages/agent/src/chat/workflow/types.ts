@@ -37,7 +37,7 @@ export type WorkflowState = {
   buildingSchemaId: string
   latestVersionNumber: number
   buildingSchemaVersionId?: string | undefined
-  organizationId?: string | undefined
+  organizationId: string
   userId: string
 
   // Message saving fields

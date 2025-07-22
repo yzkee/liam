@@ -146,6 +146,9 @@ importers:
       dotenv:
         specifier: 16.5.0
         version: 16.5.0
+      emoji-regex:
+        specifier: 10.4.0
+        version: 10.4.0
       flags:
         specifier: 4.0.1
         version: 4.0.1(@opentelemetry/api@1.9.0)(next@15.3.5(@opentelemetry/api@1.9.0)(@playwright/test@1.53.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)

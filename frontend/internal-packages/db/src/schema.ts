@@ -46,6 +46,7 @@ export const timelineItemsSchema: v.GenericSchema<Tables<'timeline_items'>> =
       'schema_version',
       'error',
       'assistant_log',
+      'query_result',
     ]),
     assistant_role: v.nullable(v.picklist(['db', 'pm', 'qa'])),
     user_id: v.nullable(v.pipe(v.string(), v.uuid())),
@@ -53,4 +54,5 @@ export const timelineItemsSchema: v.GenericSchema<Tables<'timeline_items'>> =
     updated_at: v.string(),
     organization_id: v.pipe(v.string(), v.uuid()),
     building_schema_version_id: v.nullable(v.pipe(v.string(), v.uuid())),
+    query_result_id: v.nullable(v.pipe(v.string(), v.uuid())),
   })

@@ -19,7 +19,15 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
-    content: 'This is a simple log message without any formatting.',
+    content: `Starting database schema analysis. I'll examine all tables, their structures, relationships, indexes, and constraints in sequence.
+
+Currently analyzing the users table. This table contains 15 columns with a UUID type id column as the primary key. I've confirmed that indexes are set on the email, created_at, and updated_at columns.
+
+Moving on to analyze the posts table. This table has 12 columns with a BIGINT type id as the primary key. Indexes are configured on user_id, status, and published_at columns for performance optimization.
+
+Relationship validation results show a one-to-many relationship between the users and posts tables. Additionally, I've confirmed a many-to-many relationship between posts and tags tables through an intermediate table called post_tags.
+
+During the analysis, I've discovered several optimization opportunities. For example, the posts.title column is currently defined as VARCHAR(255), but after checking the actual data, the maximum length is 187 characters. Therefore, I suggest changing it to VARCHAR(200).`,
   },
 }
 

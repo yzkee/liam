@@ -53,6 +53,7 @@ describe('designSchemaNode -> executeDdlNode integration', () => {
     retryCount: {},
     buildingSchemaId: 'test-schema',
     latestVersionNumber: 1,
+    organizationId: 'test-org-id',
     userId: 'test-user',
     designSessionId: 'test-session',
     ddlStatements: '',

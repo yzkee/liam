@@ -30,7 +30,7 @@ export type DeepModelingParams = {
   userInput: string
   schemaData: Schema
   history: [string, string][]
-  organizationId?: string
+  organizationId: string
   buildingSchemaId: string
   latestVersionNumber: number
   designSessionId: string

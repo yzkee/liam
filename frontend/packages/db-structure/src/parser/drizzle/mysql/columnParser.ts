@@ -2,7 +2,7 @@
  * Column definition parsing for Drizzle ORM MySQL schema parsing
  */
 
-import type { Expression, Property } from '@swc/core'
+import type { Argument, Expression, Property } from '@swc/core'
 import {
   getArgumentExpression,
   getIdentifierName,
@@ -13,6 +13,30 @@ import {
 } from './astUtils.js'
 import { parseDefaultValue, parseObjectExpression } from './expressionParser.js'
 import type { DrizzleColumnDefinition } from './types.js'
+
+/**
+ * Parse runtime function from $defaultFn or $onUpdate arguments
+ */
+const parseRuntimeFunction = (args: Argument[]): string => {
+  if (args.length === 0) {
+    return 'custom_function()'
+  }
+
+  const argExpr = getArgumentExpression(args[0])
+  if (!argExpr || argExpr.type !== 'ArrowFunctionExpression') {
+    return 'custom_function()'
+  }
+
+  const body = argExpr.body
+  if (body.type === 'CallExpression' && body.callee.type === 'Identifier') {
+    return `${body.callee.value}()`
+  }
+  if (body.type === 'NewExpression' && body.callee.type === 'Identifier') {
+    return `new ${body.callee.value}()`
+  }
+
+  return 'custom_function()'
+}
 
 /**
  * Parse column definition from object property
@@ -107,8 +131,10 @@ export const parseColumnFromProperty = (
         column.default = 'now()'
         break
       case '$defaultFn':
-        // Custom default function - treat as generic default
-        column.default = 'custom_function()'
+        column.default = parseRuntimeFunction(method.args)
+        break
+      case '$onUpdate':
+        column.onUpdate = parseRuntimeFunction(method.args)
         break
       case 'onUpdateNow':
         // MySQL specific: ON UPDATE NOW() - ignore for now

@@ -22,6 +22,7 @@ export type DrizzleColumnDefinition = {
   primaryKey: boolean
   unique: boolean
   default?: unknown
+  onUpdate?: unknown
   comment?: string | undefined
   references?:
     | {

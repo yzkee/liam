@@ -2,7 +2,8 @@
  * Table structure parsing for Drizzle ORM MySQL schema parsing
  */
 
-import type { CallExpression, Expression } from '@swc/core'
+import type { CallExpression, Expression, ObjectExpression } from '@swc/core'
+import type { Constraint } from '../../../schema/index.js'
 import {
   getArgumentExpression,
   getIdentifierName,
@@ -22,6 +23,108 @@ import type {
   DrizzleTableDefinition,
 } from './types.js'
 import { isCompositePrimaryKey, isDrizzleIndex } from './types.js'
+
+/**
+ * Parse columns from object expression
+ */
+const parseTableColumns = (
+  columnsExpr: ObjectExpression,
+): Record<string, DrizzleColumnDefinition> => {
+  const columns: Record<string, DrizzleColumnDefinition> = {}
+
+  for (const prop of columnsExpr.properties) {
+    if (prop.type === 'KeyValueProperty') {
+      const column = parseColumnFromProperty(prop)
+      if (column) {
+        // Use the JS property name as the key
+        const jsPropertyName =
+          prop.key.type === 'Identifier' ? getIdentifierName(prop.key) : null
+        if (jsPropertyName) {
+          columns[jsPropertyName] = column
+        }
+      }
+    }
+  }
+
+  return columns
+}
+
+/**
+ * Parse indexes, constraints, and composite primary keys from third argument
+ */
+const parseTableExtensions = (
+  thirdArgExpr: Expression,
+  tableColumns: Record<string, DrizzleColumnDefinition>,
+): {
+  indexes: Record<string, DrizzleIndexDefinition>
+  constraints?: Record<string, Constraint>
+  compositePrimaryKey?: CompositePrimaryKeyDefinition
+} => {
+  const result: {
+    indexes: Record<string, DrizzleIndexDefinition>
+    constraints?: Record<string, Constraint>
+    compositePrimaryKey?: CompositePrimaryKeyDefinition
+  } = {
+    indexes: {},
+  }
+
+  if (thirdArgExpr.type === 'ArrowFunctionExpression') {
+    // Parse arrow function like (table) => ({ nameIdx: index(...), pk: primaryKey(...) })
+    let returnExpr = thirdArgExpr.body
+
+    // Handle parenthesized expressions like (table) => ({ ... })
+    if (returnExpr.type === 'ParenthesisExpression') {
+      returnExpr = returnExpr.expression
+    }
+
+    if (returnExpr.type === 'ObjectExpression') {
+      for (const prop of returnExpr.properties) {
+        if (prop.type === 'KeyValueProperty') {
+          const indexName =
+            prop.key.type === 'Identifier' ? getIdentifierName(prop.key) : null
+          if (indexName && prop.value.type === 'CallExpression') {
+            const indexDef = parseIndexDefinition(prop.value, indexName)
+            if (indexDef) {
+              if (isCompositePrimaryKey(indexDef)) {
+                result.compositePrimaryKey = indexDef
+              } else if (isDrizzleIndex(indexDef)) {
+                result.indexes[indexName] = indexDef
+              }
+            }
+
+            // Handle check constraints
+            const checkConstraint = parseCheckConstraint(prop.value, indexName)
+            if (checkConstraint) {
+              result.constraints = result.constraints || {}
+              result.constraints[checkConstraint.name] = {
+                type: 'CHECK',
+                name: checkConstraint.name,
+                detail: checkConstraint.condition,
+              }
+            }
+
+            // Handle unique constraints
+            const uniqueConstraint = parseUniqueConstraint(
+              prop.value,
+              indexName,
+              tableColumns,
+            )
+            if (uniqueConstraint) {
+              result.constraints = result.constraints || {}
+              result.constraints[uniqueConstraint.name] = {
+                type: 'UNIQUE',
+                name: uniqueConstraint.name,
+                columnNames: uniqueConstraint.columnNames,
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return result
+}
 
 /**
  * Parse mysqlTable call with comment method chain
@@ -85,81 +188,20 @@ export const parseMysqlTableCall = (
   }
 
   // Parse columns from the object expression
-  for (const prop of columnsExpr.properties) {
-    if (prop.type === 'KeyValueProperty') {
-      const column = parseColumnFromProperty(prop)
-      if (column) {
-        // Use the JS property name as the key
-        const jsPropertyName =
-          prop.key.type === 'Identifier' ? getIdentifierName(prop.key) : null
-        if (jsPropertyName) {
-          table.columns[jsPropertyName] = column
-        }
-      }
-    }
-  }
+  table.columns = parseTableColumns(columnsExpr)
 
   // Parse indexes and composite primary key from third argument if present
   if (callExpr.arguments.length > 2) {
     const thirdArg = callExpr.arguments[2]
     const thirdArgExpr = getArgumentExpression(thirdArg)
-    if (thirdArgExpr && thirdArgExpr.type === 'ArrowFunctionExpression') {
-      // Parse arrow function like (table) => ({ nameIdx: index(...), pk: primaryKey(...) })
-      let returnExpr = thirdArgExpr.body
-
-      // Handle parenthesized expressions like (table) => ({ ... })
-      if (returnExpr.type === 'ParenthesisExpression') {
-        returnExpr = returnExpr.expression
+    if (thirdArgExpr) {
+      const extensions = parseTableExtensions(thirdArgExpr, table.columns)
+      table.indexes = extensions.indexes
+      if (extensions.constraints) {
+        table.constraints = extensions.constraints
       }
-
-      if (returnExpr.type === 'ObjectExpression') {
-        for (const prop of returnExpr.properties) {
-          if (prop.type === 'KeyValueProperty') {
-            const indexName =
-              prop.key.type === 'Identifier'
-                ? getIdentifierName(prop.key)
-                : null
-            if (indexName && prop.value.type === 'CallExpression') {
-              const indexDef = parseIndexDefinition(prop.value, indexName)
-              if (indexDef) {
-                if (isCompositePrimaryKey(indexDef)) {
-                  table.compositePrimaryKey = indexDef
-                } else if (isDrizzleIndex(indexDef)) {
-                  table.indexes[indexName] = indexDef
-                }
-              }
-
-              // Handle check constraints
-              const checkConstraint = parseCheckConstraint(
-                prop.value,
-                indexName,
-              )
-              if (checkConstraint) {
-                table.constraints = table.constraints || {}
-                table.constraints[checkConstraint.name] = {
-                  type: 'CHECK',
-                  name: checkConstraint.name,
-                  detail: checkConstraint.condition,
-                }
-              }
-
-              // Handle unique constraints
-              const uniqueConstraint = parseUniqueConstraint(
-                prop.value,
-                indexName,
-                table.columns,
-              )
-              if (uniqueConstraint) {
-                table.constraints = table.constraints || {}
-                table.constraints[uniqueConstraint.name] = {
-                  type: 'UNIQUE',
-                  name: uniqueConstraint.name,
-                  columnNames: uniqueConstraint.columnNames,
-                }
-              }
-            }
-          }
-        }
+      if (extensions.compositePrimaryKey) {
+        table.compositePrimaryKey = extensions.compositePrimaryKey
       }
     }
   }
@@ -203,81 +245,20 @@ export const parseSchemaTableCall = (
   // and using the original table name for database operations
 
   // Parse columns from the object expression
-  for (const prop of columnsExpr.properties) {
-    if (prop.type === 'KeyValueProperty') {
-      const column = parseColumnFromProperty(prop)
-      if (column) {
-        // Use the JS property name as the key
-        const jsPropertyName =
-          prop.key.type === 'Identifier' ? getIdentifierName(prop.key) : null
-        if (jsPropertyName) {
-          table.columns[jsPropertyName] = column
-        }
-      }
-    }
-  }
+  table.columns = parseTableColumns(columnsExpr)
 
   // Parse indexes and composite primary key from third argument if present
   if (callExpr.arguments.length > 2) {
     const thirdArg = callExpr.arguments[2]
     const thirdArgExpr = getArgumentExpression(thirdArg)
-    if (thirdArgExpr && thirdArgExpr.type === 'ArrowFunctionExpression') {
-      // Parse arrow function like (table) => ({ nameIdx: index(...), pk: primaryKey(...) })
-      let returnExpr = thirdArgExpr.body
-
-      // Handle parenthesized expressions like (table) => ({ ... })
-      if (returnExpr.type === 'ParenthesisExpression') {
-        returnExpr = returnExpr.expression
+    if (thirdArgExpr) {
+      const extensions = parseTableExtensions(thirdArgExpr, table.columns)
+      table.indexes = extensions.indexes
+      if (extensions.constraints) {
+        table.constraints = extensions.constraints
       }
-
-      if (returnExpr.type === 'ObjectExpression') {
-        for (const prop of returnExpr.properties) {
-          if (prop.type === 'KeyValueProperty') {
-            const indexName =
-              prop.key.type === 'Identifier'
-                ? getIdentifierName(prop.key)
-                : null
-            if (indexName && prop.value.type === 'CallExpression') {
-              const indexDef = parseIndexDefinition(prop.value, indexName)
-              if (indexDef) {
-                if (isCompositePrimaryKey(indexDef)) {
-                  table.compositePrimaryKey = indexDef
-                } else if (isDrizzleIndex(indexDef)) {
-                  table.indexes[indexName] = indexDef
-                }
-              }
-
-              // Handle check constraints
-              const checkConstraint = parseCheckConstraint(
-                prop.value,
-                indexName,
-              )
-              if (checkConstraint) {
-                table.constraints = table.constraints || {}
-                table.constraints[checkConstraint.name] = {
-                  type: 'CHECK',
-                  name: checkConstraint.name,
-                  detail: checkConstraint.condition,
-                }
-              }
-
-              // Handle unique constraints
-              const uniqueConstraint = parseUniqueConstraint(
-                prop.value,
-                indexName,
-                table.columns,
-              )
-              if (uniqueConstraint) {
-                table.constraints = table.constraints || {}
-                table.constraints[uniqueConstraint.name] = {
-                  type: 'UNIQUE',
-                  name: uniqueConstraint.name,
-                  columnNames: uniqueConstraint.columnNames,
-                }
-              }
-            }
-          }
-        }
+      if (extensions.compositePrimaryKey) {
+        table.compositePrimaryKey = extensions.compositePrimaryKey
       }
     }
   }

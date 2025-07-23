@@ -660,6 +660,28 @@ if (require.main === module) {
   // Show usage information
   const args = process.argv.slice(2)
   if (args.includes('--help') || args.includes('-h')) {
+    console.info(`
+Usage: executeDesignProcess.ts [options]
+
+Description:
+  Executes the design process workflow for database schema generation.
+  This script creates a design session, builds a schema, and runs the
+  design workflow using LangGraph.
+
+Options:
+  --help, -h           Show this help message and exit
+  --log-level=LEVEL    Set the logging level (DEBUG, INFO, WARN, ERROR)
+                       Default: INFO (can also be set via LOG_LEVEL env var)
+
+Environment Variables:
+  SUPABASE_SERVICE_ROLE_KEY  Required. Supabase service role key for database access
+  LOG_LEVEL                  Optional. Set logging level (overridden by --log-level)
+
+Examples:
+  pnpm --filter @liam-hq/agent execute-design-process
+  pnpm --filter @liam-hq/agent execute-design-process:debug
+  pnpm --filter @liam-hq/agent execute-design-process:warn
+`)
     process.exit(0)
   }
 

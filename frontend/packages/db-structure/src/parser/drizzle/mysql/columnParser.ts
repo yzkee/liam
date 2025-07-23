@@ -1,8 +1,8 @@
 /**
- * Column definition parsing for Drizzle ORM schema parsing
+ * Column definition parsing for Drizzle ORM MySQL schema parsing
  */
 
-import type { Expression, Property } from '@swc/core'
+import type { Argument, Expression, Property } from '@swc/core'
 import {
   getArgumentExpression,
   getIdentifierName,
@@ -13,6 +13,30 @@ import {
 } from './astUtils.js'
 import { parseDefaultValue, parseObjectExpression } from './expressionParser.js'
 import type { DrizzleColumnDefinition } from './types.js'
+
+/**
+ * Parse runtime function from $defaultFn or $onUpdate arguments
+ */
+const parseRuntimeFunction = (args: Argument[]): string => {
+  if (args.length === 0) {
+    return 'custom_function()'
+  }
+
+  const argExpr = getArgumentExpression(args[0])
+  if (!argExpr || argExpr.type !== 'ArrowFunctionExpression') {
+    return 'custom_function()'
+  }
+
+  const body = argExpr.body
+  if (body.type === 'CallExpression' && body.callee.type === 'Identifier') {
+    return `${body.callee.value}()`
+  }
+  if (body.type === 'NewExpression' && body.callee.type === 'Identifier') {
+    return `new ${body.callee.value}()`
+  }
+
+  return 'custom_function()'
+}
 
 /**
  * Parse column definition from object property
@@ -86,6 +110,9 @@ export const parseColumnFromProperty = (
         column.primaryKey = true
         column.notNull = true
         break
+      case 'autoincrement':
+        // MySQL specific: int().autoincrement()
+        break
       case 'notNull':
         column.notNull = true
         break
@@ -103,8 +130,17 @@ export const parseColumnFromProperty = (
       case 'defaultNow':
         column.default = 'now()'
         break
-      case 'defaultRandom':
-        column.default = 'defaultRandom'
+      case '$defaultFn':
+        column.default = parseRuntimeFunction(method.args)
+        break
+      case '$onUpdate':
+        column.onUpdate = parseRuntimeFunction(method.args)
+        break
+      case 'onUpdateNow':
+        // MySQL specific: ON UPDATE NOW() - ignore for now
+        break
+      case '$type':
+        // Type assertion - ignore for parsing purposes
         break
       case 'references':
         if (method.args.length > 0) {
@@ -158,9 +194,13 @@ export const parseColumnFromProperty = (
     }
   }
 
-  // Handle serial types default
-  if (baseType === 'serial' && column.primaryKey) {
-    column.default = 'autoincrement'
+  // Handle autoincrement for primary key columns
+  const hasAutoincrementMethod = methods.some((m) => m.name === 'autoincrement')
+  if (
+    column.primaryKey &&
+    ((baseType === 'int' && hasAutoincrementMethod) || baseType === 'serial')
+  ) {
+    column.default = 'autoincrement()'
   }
 
   return column

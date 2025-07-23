@@ -1,8 +1,8 @@
 /**
- * Convert Drizzle column types to PostgreSQL column types
- * ref: https://orm.drizzle.team/docs/column-types/pg
+ * Convert Drizzle column types to MySQL column types
+ * ref: https://orm.drizzle.team/docs/column-types/mysql
  */
-export const convertDrizzleTypeToPgType = (
+export const convertDrizzleTypeToMysqlType = (
   drizzleType: string,
   options?: Record<string, unknown>,
 ): string => {
@@ -21,6 +21,7 @@ export const convertDrizzleTypeToPgType = (
 
     // Numeric types with precision/scale
     case 'decimal':
+    case 'numeric':
       if (options?.['precision'] && options?.['scale']) {
         return `decimal(${options['precision']},${options['scale']})`
       }
@@ -28,38 +29,23 @@ export const convertDrizzleTypeToPgType = (
         return `decimal(${options['precision']})`
       }
       return 'decimal'
-    case 'numeric':
-      if (options?.['precision'] && options?.['scale']) {
-        return `numeric(${options['precision']},${options['scale']})`
-      }
-      if (options?.['precision']) {
-        return `numeric(${options['precision']})`
-      }
-      return 'numeric'
 
-    // Timestamp with timezone option
-    case 'timestamp':
-      if (options?.['withTimezone']) {
-        return 'timestamp with time zone'
-      }
-      return 'timestamp'
+    // Enum type - handled as is
+    case 'mysqlEnum':
+      return 'enum'
 
-    // Type mapping for different names
-    case 'doublePrecision':
-      return 'double precision'
-    case 'timestamptz':
-      return 'timestamp with time zone'
-    case 'defaultRandom':
-      return 'uuid'
+    // Serial type (PostgreSQL compatibility in MySQL context)
+    case 'serial':
+      return 'int'
 
-    // Default case: return type name as-is (works for most types)
+    // Default case: return type name as-is (works for most standard MySQL types)
     default:
       return drizzleType
   }
 }
 
 /**
- * Convert default values from Drizzle to PostgreSQL format
+ * Convert default values from Drizzle to MySQL format
  */
 export const convertDefaultValue = (
   value: unknown,
@@ -78,7 +64,8 @@ export const convertDefaultValue = (
       return 'autoincrement()'
     }
     if (value === 'defaultRandom') {
-      return 'gen_random_uuid()'
+      // Note: MySQL's UUID() generates UUID v1 (time-based), not truly random like PostgreSQL's gen_random_uuid()
+      return 'UUID()'
     }
   }
 
@@ -95,7 +82,7 @@ export const convertDefaultValue = (
 }
 
 /**
- * Convert constraint reference options from Drizzle to PostgreSQL format
+ * Convert constraint reference options from Drizzle to MySQL format
  */
 export const convertReferenceOption = (
   option: string,

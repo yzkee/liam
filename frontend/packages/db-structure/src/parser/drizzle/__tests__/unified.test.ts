@@ -336,10 +336,7 @@ describe.each(Object.entries(dbConfigs))(
       })
 
       it('foreign key constraint (one-to-many)', async () => {
-        const foreignKeyRef =
-          dbType === 'mysql'
-            ? `${config.types.integer}('user_id').references(() => users.id)`
-            : `${config.types.integer}('user_id').references(() => users.id)`
+        const foreignKeyRef = `${config.types.integer}('user_id').references(() => users.id)`
 
         const schema = `
         import { ${config.functions.table}, ${config.types.id}, ${config.types.integer}, varchar } from '${config.imports.core}';
@@ -913,11 +910,9 @@ describe.each(Object.entries(dbConfigs))(
       // Add multi-schema tests for each database type
       it(`multiple ${config.name} schemas`, async () => {
         const schemaFunction = dbType === 'mysql' ? 'mysqlSchema' : 'pgSchema'
-        const schemaImport =
-          dbType === 'mysql' ? config.imports.core : config.imports.core
 
         const schema = `
-        import { ${config.functions.table}, ${config.types.id}, varchar, ${config.types.integer}, ${schemaFunction} } from '${schemaImport}';
+        import { ${config.functions.table}, ${config.types.id}, varchar, ${config.types.integer}, ${schemaFunction} } from '${config.imports.core}';
 
         // Define schemas
         export const authSchema = ${schemaFunction}('auth');

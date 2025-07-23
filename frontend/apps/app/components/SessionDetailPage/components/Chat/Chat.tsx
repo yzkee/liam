@@ -116,19 +116,16 @@ export const Chat: FC<Props> = ({
             // Render grouped agent messages
             const agentRole = 'role' in item[0] ? item[0].role : 'db'
 
-            return (
+            return item.map((message, messageIndex) => (
               <AgentMessage
-                key={`group-${item[0].id}`}
+                key={message.id}
                 state="default"
                 assistantRole={agentRole}
+                showHeader={messageIndex === 0}
               >
-                {item.map((message) => {
-                  return (
-                    <LogMessage key={message.id} content={message.content} />
-                  )
-                })}
+                <LogMessage content={message.content} />
               </AgentMessage>
-            )
+            ))
           }
 
           return (

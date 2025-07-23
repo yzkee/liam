@@ -5,6 +5,10 @@
   gap: var(--spacing-2);
 }
 
+.container:has(.avatarContainer) + .container:not(:has(.avatarContainer)) {
+  margin-top: calc(var(--spacing-2) * -1);
+}
+
 .avatarContainer {
   display: flex;
   flex-direction: row;

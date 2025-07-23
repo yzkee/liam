@@ -54,7 +54,7 @@ flowchart TD
     CreatePR --> AddApprovalComment
     
     AddApprovalComment --> ApprovePR[Approve PR with gh pr review --approve]
-    ApprovePR --> AddToMergeQueue[Add to merge queue with gh pr merge]
+    ApprovePR --> AddToMergeQueue[Add to merge queue with gh pr merge --auto]
     
     AddToMergeQueue --> NextPR{Other PRs exist?}
     

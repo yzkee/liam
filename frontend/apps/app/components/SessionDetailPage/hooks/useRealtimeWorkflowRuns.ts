@@ -1,19 +1,10 @@
 'use client'
 
+import { workflowRunsSchema } from '@liam-hq/db'
 import { useCallback, useEffect, useState } from 'react'
 import * as v from 'valibot'
 import { createClient } from '@/libs/db/client'
 import type { WorkflowRunStatus } from '../types'
-
-const workflowRunsTableSchema = v.object({
-  id: v.pipe(v.string(), v.uuid()),
-  run_id: v.pipe(v.string(), v.uuid()),
-  design_session_id: v.pipe(v.string(), v.uuid()),
-  organization_id: v.optional(v.nullable(v.pipe(v.string(), v.uuid()))),
-  status: v.picklist(['pending', 'success', 'error']),
-  created_at: v.string(),
-  updated_at: v.string(),
-})
 
 export function useRealtimeWorkflowRuns(
   designSessionId: string,
@@ -45,7 +36,7 @@ export function useRealtimeWorkflowRuns(
         },
         (payload) => {
           try {
-            const parsed = v.safeParse(workflowRunsTableSchema, payload.new)
+            const parsed = v.safeParse(workflowRunsSchema, payload.new)
             if (!parsed.success) {
               throw new Error('Invalid timeline item format')
             }

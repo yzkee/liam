@@ -6,8 +6,8 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { urlgen } from '@/libs/routes'
 import itemStyles from '../Item.module.css'
-import type { RecentSession } from '../services/fetchRecentSessions'
-import { fetchRecentSessions } from '../services/fetchRecentSessions'
+import type { RecentSession } from './fetchRecentSessionsClient'
+import { fetchRecentSessionsClient } from './fetchRecentSessionsClient'
 import styles from './RecentsSection.module.css'
 
 export const RecentsSection = () => {
@@ -18,7 +18,7 @@ export const RecentsSection = () => {
   useEffect(() => {
     const loadSessions = async () => {
       try {
-        const recentSessions = await fetchRecentSessions(5)
+        const recentSessions = await fetchRecentSessionsClient(5)
         setSessions(recentSessions)
       } catch (error) {
         console.error('Failed to fetch recent sessions:', error)

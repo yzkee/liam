@@ -4,10 +4,11 @@ import type { Database } from '@liam-hq/db'
 import clsx from 'clsx'
 import type { FC, ReactNode } from 'react'
 import { MarkdownContent } from '@/components/MarkdownContent'
+import { ErrorMessage } from '../ErrorMessage'
 import styles from './AgentMessage.module.css'
 import { DBAgent, PMAgent, QAAgent } from './components/AgentAvatar'
 
-type AgentMessageState = 'default' | 'generating'
+type AgentMessageState = 'default' | 'generating' | 'error'
 
 /**
  * Get agent avatar and name from role
@@ -45,6 +46,10 @@ type AgentMessageProps = {
    * Optional children to render below the message
    */
   children?: ReactNode
+  /**
+   * Callback for retry action when in error state
+   */
+  onRetry?: () => void
 }
 
 export const AgentMessage: FC<AgentMessageProps> = ({
@@ -52,8 +57,10 @@ export const AgentMessage: FC<AgentMessageProps> = ({
   message = '',
   assistantRole,
   children,
+  onRetry,
 }) => {
   const isGenerating = state === 'generating'
+  const isError = state === 'error'
   const { avatar, name } = getAgentInfo(assistantRole)
 
   return (
@@ -63,8 +70,11 @@ export const AgentMessage: FC<AgentMessageProps> = ({
         <span className={styles.agentName}>{name}</span>
       </div>
       <div className={styles.contentContainer}>
-        {isGenerating &&
-        (!message || (typeof message === 'string' && message.trim() === '')) ? (
+        {isError ? (
+          <ErrorMessage message={message} onRetry={onRetry} />
+        ) : isGenerating &&
+          (!message ||
+            (typeof message === 'string' && message.trim() === '')) ? (
           <div
             className={clsx(styles.messageWrapper, styles.generatingContainer)}
           >

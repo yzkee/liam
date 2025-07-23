@@ -43,6 +43,26 @@ export const BuildGenerating: Story = {
   },
 }
 
+export const BuildError: Story = {
+  args: {
+    state: 'error',
+    message:
+      'Failed to connect to the database. Please check your connection settings and try again.',
+    assistantRole: 'db',
+    onRetry: () => {},
+  },
+}
+
+export const BuildErrorLongMessage: Story = {
+  args: {
+    state: 'error',
+    message:
+      'An error occurred while processing your request. The database connection timed out after 30 seconds. This might be due to network issues or the database server being unavailable. Please check your network connection and database server status.',
+    assistantRole: 'pm',
+    onRetry: () => {},
+  },
+}
+
 // Markdown content for the story
 const markdownContent = `
 # Markdown Example

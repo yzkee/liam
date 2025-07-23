@@ -6,7 +6,7 @@
   gap: var(--spacing-1half);
   background-color: var(--severity-critical-20);
   border-radius: var(--border-radius-base);
-  padding: var(--spacing-2) var(--spacing-2half);
+  padding: var(--spacing-2) var(--spacing-2half) var(--spacing-2half);
   width: 100%;
   box-sizing: border-box;
 }
@@ -19,12 +19,11 @@
   align-items: center;
   justify-content: center;
   color: var(--severity-critical-100);
-  padding-top: 12px;
+  /* Align with text center */
+  margin-top: 4px;
 }
 
 .errorText {
-  flex-grow: 1;
-  min-width: 0;
   font-family: var(--main-font);
   font-weight: 400;
   font-size: var(--font-size-4);
@@ -36,8 +35,31 @@
   white-space: pre-wrap;
 }
 
+/* Reset margin/padding for markdown content */
+.errorText :global(*:first-child) {
+  margin-top: 0;
+}
+
+.errorText :global(*:last-child) {
+  margin-bottom: 0;
+}
+
+.errorText :global(p) {
+  margin: 0;
+}
+
+.contentWrapper {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.retryButtonWrapper {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .retryButton {
-  flex-shrink: 0;
-  align-self: flex-start;
-  margin-top: 1px;
+  min-width: auto !important;
 }

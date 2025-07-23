@@ -1,8 +1,10 @@
 import { AIMessage, HumanMessage } from '@langchain/core/messages'
+import { RunCollectorCallbackHandler } from '@langchain/core/tracers/run_collector'
 import { END, START, StateGraph } from '@langchain/langgraph'
 import type { Schema } from '@liam-hq/db-structure'
 import type { Result } from 'neverthrow'
 import { err, ok } from 'neverthrow'
+import { v4 as uuidv4 } from 'uuid'
 import { WORKFLOW_ERROR_MESSAGES } from './chat/workflow/constants'
 import {
   analyzeRequirementsNode,
@@ -12,20 +14,23 @@ import {
   generateUsecaseNode,
   prepareDmlNode,
   reviewDeliverablesNode,
-  saveUserMessageNode,
   validateSchemaNode,
+  webSearchNode,
 } from './chat/workflow/nodes'
 import {
   createAnnotations,
   DEFAULT_RECURSION_LIMIT,
 } from './chat/workflow/shared/langGraphUtils'
 import type { WorkflowConfigurable, WorkflowState } from './chat/workflow/types'
+import { withTimelineItemSync } from './chat/workflow/utils/withTimelineItemSync'
+import { invokeSchemaDesignToolNode } from './db-agent/nodes/invokeSchemaDesignToolNode'
+import { routeAfterDesignSchema } from './db-agent/routing/routeAfterDesignSchema'
 
 export type DeepModelingParams = {
   userInput: string
   schemaData: Schema
   history: [string, string][]
-  organizationId?: string
+  organizationId: string
   buildingSchemaId: string
   latestVersionNumber: number
   designSessionId: string
@@ -33,18 +38,13 @@ export type DeepModelingParams = {
   recursionLimit?: number
 }
 
-export type DeepModelingResult = Result<
-  {
-    text: string
-  },
-  Error
->
+export type DeepModelingResult = Result<WorkflowState, Error>
 
 /**
  * Retry policy configuration for all nodes
  */
 const RETRY_POLICY = {
-  maxAttempts: 3,
+  maxAttempts: process.env['NODE_ENV'] === 'test' ? 1 : 3,
 }
 
 /**
@@ -55,13 +55,16 @@ const createGraph = () => {
   const graph = new StateGraph(ChatStateAnnotation)
 
   graph
-    .addNode('saveUserMessage', saveUserMessageNode, {
+    .addNode('webSearch', webSearchNode, {
       retryPolicy: RETRY_POLICY,
     })
     .addNode('analyzeRequirements', analyzeRequirementsNode, {
       retryPolicy: RETRY_POLICY,
     })
     .addNode('designSchema', designSchemaNode, {
+      retryPolicy: RETRY_POLICY,
+    })
+    .addNode('invokeSchemaDesignTool', invokeSchemaDesignToolNode, {
       retryPolicy: RETRY_POLICY,
     })
     .addNode('executeDDL', executeDdlNode, {
@@ -83,47 +86,65 @@ const createGraph = () => {
       retryPolicy: RETRY_POLICY,
     })
 
-    .addEdge(START, 'saveUserMessage')
+    .addEdge(START, 'webSearch')
+    .addEdge('webSearch', 'analyzeRequirements')
     .addEdge('analyzeRequirements', 'designSchema')
+    .addEdge('invokeSchemaDesignTool', 'designSchema')
+    .addConditionalEdges('designSchema', routeAfterDesignSchema, {
+      invokeSchemaDesignTool: 'invokeSchemaDesignTool',
+      executeDDL: 'executeDDL',
+    })
     .addEdge('executeDDL', 'generateUsecase')
     .addEdge('generateUsecase', 'prepareDML')
     .addEdge('prepareDML', 'validateSchema')
     .addEdge('finalizeArtifacts', END)
 
-    // Conditional edge for saveUserMessage - skip to finalizeArtifacts if error
-    .addConditionalEdges('saveUserMessage', (state) => {
-      return state.error ? 'finalizeArtifacts' : 'analyzeRequirements'
-    })
-
-    // Conditional edge for designSchema - skip to finalizeArtifacts if error
-    .addConditionalEdges('designSchema', (state) => {
-      return state.error ? 'finalizeArtifacts' : 'executeDDL'
-    })
-
     // Conditional edge for executeDDL - retry with designSchema if DDL execution fails
-    .addConditionalEdges('executeDDL', (state) => {
-      if (state.shouldRetryWithDesignSchema) {
-        return 'designSchema'
-      }
-      if (state.ddlExecutionFailed) {
-        return 'finalizeArtifacts'
-      }
-      return 'generateUsecase'
-    })
+    .addConditionalEdges(
+      'executeDDL',
+      (state) => {
+        if (state.shouldRetryWithDesignSchema) {
+          return 'designSchema'
+        }
+        if (state.ddlExecutionFailed) {
+          return 'finalizeArtifacts'
+        }
+        return 'generateUsecase'
+      },
+      {
+        designSchema: 'designSchema',
+        finalizeArtifacts: 'finalizeArtifacts',
+        generateUsecase: 'generateUsecase',
+      },
+    )
 
     // Conditional edges for validation results
-    .addConditionalEdges('validateSchema', (state) => {
-      // success → reviewDeliverables
-      // dml error or test fail → designSchema
-      return state.error ? 'designSchema' : 'reviewDeliverables'
-    })
+    .addConditionalEdges(
+      'validateSchema',
+      (state) => {
+        // success → reviewDeliverables
+        // dml error or test fail → designSchema
+        return state.error ? 'designSchema' : 'reviewDeliverables'
+      },
+      {
+        designSchema: 'designSchema',
+        reviewDeliverables: 'reviewDeliverables',
+      },
+    )
 
     // Conditional edges for review results
-    .addConditionalEdges('reviewDeliverables', (state) => {
-      // OK → finalizeArtifacts
-      // NG or issues found → analyzeRequirements
-      return state.error ? 'analyzeRequirements' : 'finalizeArtifacts'
-    })
+    .addConditionalEdges(
+      'reviewDeliverables',
+      (state) => {
+        // OK → finalizeArtifacts
+        // NG or issues found → analyzeRequirements
+        return state.error ? 'analyzeRequirements' : 'finalizeArtifacts'
+      },
+      {
+        analyzeRequirements: 'analyzeRequirements',
+        finalizeArtifacts: 'finalizeArtifacts',
+      },
+    )
 
   return graph.compile()
 }
@@ -158,8 +179,14 @@ export const deepModeling = async (
       : new HumanMessage(content)
   })
 
-  // Add the current user input as the latest message
-  messages.push(new HumanMessage(userInput))
+  // Add the current user input as the latest message with timeline sync
+  const humanMessage = await withTimelineItemSync(new HumanMessage(userInput), {
+    designSessionId,
+    organizationId: organizationId || '',
+    userId,
+    repositories,
+  })
+  messages.push(humanMessage)
 
   // Create workflow state
   const workflowState: WorkflowState = {
@@ -174,28 +201,60 @@ export const deepModeling = async (
     retryCount: {},
   }
 
+  const workflowRunId = uuidv4()
+
   try {
+    const createWorkflowRunResult = await repositories.schema.createWorkflowRun(
+      {
+        designSessionId,
+        workflowRunId,
+      },
+    )
+
+    if (!createWorkflowRunResult.success) {
+      return err(
+        new Error(
+          `Failed to create workflow run record: ${createWorkflowRunResult.error}`,
+        ),
+      )
+    }
+
     const compiled = createGraph()
+    const runCollector = new RunCollectorCallbackHandler()
     const result = await compiled.invoke(workflowState, {
       recursionLimit,
       configurable: {
         repositories,
         logger,
       },
+      runId: workflowRunId,
+      callbacks: [runCollector],
     })
 
     if (result.error) {
+      await repositories.schema.updateWorkflowRunStatus({
+        workflowRunId,
+        status: 'error',
+      })
       return err(new Error(result.error.message))
     }
 
-    return ok({
-      text: result.finalResponse || result.generatedAnswer || '',
+    await repositories.schema.updateWorkflowRunStatus({
+      workflowRunId,
+      status: 'success',
     })
+
+    return ok(result)
   } catch (error) {
     const errorMessage =
       error instanceof Error
         ? error.message
         : WORKFLOW_ERROR_MESSAGES.EXECUTION_FAILED
+
+    await repositories.schema.updateWorkflowRunStatus({
+      workflowRunId,
+      status: 'error',
+    })
 
     const errorState = { ...workflowState, error: new Error(errorMessage) }
     const finalizedResult = await finalizeArtifactsNode(errorState, {

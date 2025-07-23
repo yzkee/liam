@@ -1,4 +1,5 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
+import type { Database } from '@liam-hq/db'
 import { DMLGenerationAgent } from '../../../langchain/agents/dmlGenerationAgent/agent'
 import type { Usecase } from '../../../langchain/agents/qaGenerateUsecaseAgent/agent'
 import { convertSchemaToText } from '../../../utils/convertSchemaToText'
@@ -49,6 +50,7 @@ export async function prepareDmlNode(
   state: WorkflowState,
   config: RunnableConfig,
 ): Promise<WorkflowState> {
+  const assistantRole: Database['public']['Enums']['assistant_role_enum'] = 'db'
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
     return {
@@ -58,14 +60,20 @@ export async function prepareDmlNode(
   }
   const { repositories } = configurableResult.value
 
-  await logAssistantMessage(state, repositories, 'Preparing DML statements...')
+  await logAssistantMessage(
+    state,
+    repositories,
+    'Creating sample data to test your database design...',
+    assistantRole,
+  )
 
   // Check if we have required inputs
   if (!state.ddlStatements) {
     await logAssistantMessage(
       state,
       repositories,
-      'Missing DDL statements for DML generation',
+      'Database structure not ready yet. Cannot create sample data without the schema...',
+      assistantRole,
     )
     return state
   }
@@ -74,7 +82,8 @@ export async function prepareDmlNode(
     await logAssistantMessage(
       state,
       repositories,
-      'Missing use cases for DML generation',
+      'Test scenarios not available. Cannot create sample data without use cases...',
+      assistantRole,
     )
     return state
   }
@@ -100,16 +109,11 @@ export async function prepareDmlNode(
     await logAssistantMessage(
       state,
       repositories,
-      'DML generation returned empty statements',
+      'No sample data could be generated for your database design...',
+      assistantRole,
     )
     return state
   }
-
-  await logAssistantMessage(
-    state,
-    repositories,
-    'DML statements generated successfully',
-  )
 
   return {
     ...state,

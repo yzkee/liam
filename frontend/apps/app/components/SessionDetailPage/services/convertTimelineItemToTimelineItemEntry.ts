@@ -3,6 +3,7 @@ import type {
   AssistantLogTimelineItemEntry,
   AssistantTimelineItemEntry,
   ErrorTimelineItemEntry,
+  QueryResultTimelineItemEntry,
   SchemaVersionTimelineItemEntry,
   TimelineItem,
   TimelineItemEntry,
@@ -36,9 +37,10 @@ export const convertTimelineItemToTimelineItemEntry = (
     )
     .with(
       { type: 'assistant' },
-      (): AssistantTimelineItemEntry => ({
+      (item): AssistantTimelineItemEntry => ({
         ...baseItem,
         type: 'assistant',
+        role: item.assistant_role ?? 'db',
       }),
     )
     .with(
@@ -50,13 +52,49 @@ export const convertTimelineItemToTimelineItemEntry = (
     )
     .with(
       { type: 'assistant_log' },
-      (): AssistantLogTimelineItemEntry => ({
+      (item): AssistantLogTimelineItemEntry => ({
         ...baseItem,
         type: 'assistant_log',
+        role: item.assistant_role ?? 'db',
       }),
     )
-    .otherwise(() => ({
-      ...baseItem,
-      type: 'user', // Default to user if type is unknown
-    }))
+    .with(
+      {
+        type: 'query_result',
+        query_result_id: P.string,
+        validation_queries: P.not(P.nullish),
+      },
+      (item): QueryResultTimelineItemEntry => {
+        // Extract and format query results from validation data
+        const validationResults =
+          item.validation_queries?.validation_results || []
+        const results = validationResults.flatMap((vr) =>
+          (vr.result_set || []).map((result: unknown, index: number) => ({
+            id: `${vr.id}-${index}`,
+            sql: item.validation_queries?.query_string || '',
+            success: vr.status === 'success',
+            result: result,
+            metadata: {
+              executionTime: 0, // TODO: Not available in validation_results
+              timestamp: vr.executed_at,
+              affectedRows: null,
+            },
+          })),
+        )
+
+        return {
+          ...baseItem,
+          type: 'query_result',
+          queryResultId: item.query_result_id,
+          results,
+        }
+      },
+    )
+    .otherwise((item) => {
+      console.warn(`Unknown timeline item type: ${item.type}`)
+      return {
+        ...baseItem,
+        type: 'user' as const,
+      }
+    })
 }

@@ -1,40 +1,35 @@
+import {
+  type AIMessage,
+  type BaseMessage,
+  SystemMessage,
+} from '@langchain/core/messages'
 import { ChatOpenAI } from '@langchain/openai'
-import { operationsSchema } from '@liam-hq/db-structure'
-import { toJsonSchema } from '@valibot/to-json-schema'
-import * as v from 'valibot'
+import { ok, ResultAsync } from 'neverthrow'
+import type { ToolConfigurable } from '../../../db-agent/getToolConfigurable'
+import { schemaDesignTool } from '../../../db-agent/tools/schemaDesignTool'
 import { createLangfuseHandler } from '../../utils/telemetry'
-import type { ChatAgent, SchemaAwareChatVariables } from '../../utils/types'
-import { buildAgentPrompt } from './prompts'
+import { type DesignAgentPromptVariables, designAgentPrompt } from './prompts'
 
-// Define the response schema
-const buildAgentResponseSchema = v.object({
-  message: v.string(),
-  schemaChanges: operationsSchema,
-})
+const model = new ChatOpenAI({
+  model: 'o4-mini',
+  callbacks: [createLangfuseHandler()],
+}).bindTools([schemaDesignTool])
 
-export type BuildAgentResponse = v.InferOutput<typeof buildAgentResponseSchema>
+export const invokeDesignAgent = (
+  variables: DesignAgentPromptVariables,
+  messages: BaseMessage[],
+  configurable: ToolConfigurable,
+): ResultAsync<AIMessage, Error> => {
+  const formatPrompt = ResultAsync.fromSafePromise(
+    designAgentPrompt.format(variables),
+  )
+  const invoke = ResultAsync.fromThrowable(
+    (systemPrompt: string) =>
+      model.invoke([new SystemMessage(systemPrompt), ...messages], {
+        configurable,
+      }),
+    (error) => new Error(`Failed to invoke design agent: ${error}`),
+  )
 
-export class DatabaseSchemaBuildAgent
-  implements ChatAgent<SchemaAwareChatVariables, BuildAgentResponse>
-{
-  private model: ReturnType<ChatOpenAI['withStructuredOutput']>
-
-  constructor() {
-    const baseModel = new ChatOpenAI({
-      model: 'o4-mini',
-      callbacks: [createLangfuseHandler()],
-    })
-
-    const jsonSchema = toJsonSchema(buildAgentResponseSchema)
-    this.model = baseModel.withStructuredOutput(jsonSchema)
-  }
-
-  async generate(
-    variables: SchemaAwareChatVariables,
-  ): Promise<BuildAgentResponse> {
-    const formattedPrompt = await buildAgentPrompt.format(variables)
-    const rawResponse = await this.model.invoke(formattedPrompt)
-
-    return v.parse(buildAgentResponseSchema, rawResponse)
-  }
+  return formatPrompt.andThen(invoke).andThen((response) => ok(response))
 }

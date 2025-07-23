@@ -1,5 +1,6 @@
 import { AIMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
+import type { Database } from '@liam-hq/db'
 import { ResultAsync } from 'neverthrow'
 import { QAGenerateUsecaseAgent } from '../../../langchain/agents'
 import type { BasePromptVariables } from '../../../langchain/utils/types'
@@ -7,6 +8,7 @@ import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 import { formatMessagesToHistory } from '../utils/messageUtils'
 import { logAssistantMessage } from '../utils/timelineLogger'
+import { withTimelineItemSync } from '../utils/withTimelineItemSync'
 
 /**
  * Format analyzed requirements into a structured text for AI processing
@@ -46,6 +48,7 @@ export async function generateUsecaseNode(
   state: WorkflowState,
   config: RunnableConfig,
 ): Promise<WorkflowState> {
+  const assistantRole: Database['public']['Enums']['assistant_role_enum'] = 'qa'
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
     return {
@@ -55,7 +58,12 @@ export async function generateUsecaseNode(
   }
   const { repositories } = configurableResult.value
 
-  await logAssistantMessage(state, repositories, 'Generating use cases...')
+  await logAssistantMessage(
+    state,
+    repositories,
+    'Creating test scenarios to validate your database design...',
+    assistantRole,
+  )
 
   // Check if we have analyzed requirements
   if (!state.analyzedRequirements) {
@@ -65,7 +73,8 @@ export async function generateUsecaseNode(
     await logAssistantMessage(
       state,
       repositories,
-      'Error occurred during use case generation',
+      'Unable to generate test scenarios. This might be due to unclear requirements...',
+      assistantRole,
     )
 
     return {
@@ -89,12 +98,6 @@ export async function generateUsecaseNode(
 
   const retryCount = state.retryCount['generateUsecaseNode'] ?? 0
 
-  await logAssistantMessage(
-    state,
-    repositories,
-    'Analyzing test cases and queries...',
-  )
-
   const usecaseResult = await ResultAsync.fromPromise(
     qaAgent.generate(promptVariables),
     (error) => (error instanceof Error ? error : new Error(String(error))),
@@ -102,21 +105,23 @@ export async function generateUsecaseNode(
 
   return await usecaseResult.match(
     async (generatedResult) => {
-      await logAssistantMessage(
-        state,
-        repositories,
-        'Use case generation completed',
+      const usecaseMessage = await withTimelineItemSync(
+        new AIMessage({
+          content: `Generated ${generatedResult.usecases.length} use cases for testing and validation`,
+          name: 'QAGenerateUsecaseAgent',
+        }),
+        {
+          designSessionId: state.designSessionId,
+          organizationId: state.organizationId || '',
+          userId: state.userId,
+          repositories,
+          assistantRole,
+        },
       )
 
       return {
         ...state,
-        messages: [
-          ...state.messages,
-          new AIMessage({
-            content: `Generated ${generatedResult.usecases.length} use cases for testing and validation`,
-            name: 'QA Generate Usecase Agent',
-          }),
-        ],
+        messages: [...state.messages, usecaseMessage],
         generatedUsecases: generatedResult.usecases,
         error: undefined, // Clear error on success
       }
@@ -125,7 +130,8 @@ export async function generateUsecaseNode(
       await logAssistantMessage(
         state,
         repositories,
-        'Error occurred during use case generation',
+        'Unable to generate test scenarios. This might be due to unclear requirements...',
+        assistantRole,
       )
 
       // Increment retry count and set error

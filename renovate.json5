@@ -1,0 +1,82 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":automergeRequireAllStatusChecks",
+    "helpers:pinGitHubActionDigestsToSemver"
+  ],
+  "lockFileMaintenance": {
+    "enabled": true
+  },
+  "minimumReleaseAge": "14 days",
+  "schedule": ["* * * * 0,6"],
+  "packageRules": [
+    {
+      "groupName": "fumadocs",
+      "matchPackageNames": [
+        "/^fumadocs-core$/",
+        "/^fumadocs-mdx$/",
+        "/^fumadocs-ui$/"
+      ]
+    },
+    {
+      "groupName": "trigger.dev",
+      "matchPackageNames": [
+        "/^@trigger\\.dev\//",
+        "/^trigger\\.dev$/"
+      ]
+    },
+    {
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "matchDepTypes": [
+        "devDependencies"
+      ],
+      "automerge": true
+    },
+    {
+      "description": "Automerge dependencies only used by internal packages",
+      "matchPackageNames": [
+        "@modelcontextprotocol/sdk",
+        "style-dictionary",
+        "/^@langchain/",
+        "/^langfuse$/",
+        "/^langfuse-langchain$/",
+        "langsmith"
+      ],
+      "matchFileNames": ["frontend/internal-packages/**"],
+      "automerge": true
+    },
+    {
+      "groupName": "dev-tools",
+      "description": "Automerge development tools that only need CI to pass",
+      "matchPackageNames": [
+        "eslint",
+        "/^eslint-/",
+        "/^@eslint/",
+        "@typescript-eslint/eslint-plugin",
+        "@typescript-eslint/parser",
+        "biome",
+        "@biomejs/biome",
+        "typescript",
+        "turbo",
+        "@types/node",
+        "/^@types/",
+        "vitest",
+        "/^@vitest/",
+        "playwright",
+        "@playwright/test",
+        "pnpm",
+        "concurrently",
+        "node",
+        "knip"
+      ],
+      "matchDepTypes": [
+        "devDependencies"
+      ],
+      "automerge": true
+    }
+  ]
+}

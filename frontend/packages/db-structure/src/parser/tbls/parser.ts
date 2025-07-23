@@ -129,10 +129,10 @@ function processForeignKeyConstraint(constraint: {
 }): [string, Constraints[string]] | null {
   if (
     constraint.type === 'FOREIGN KEY' &&
-    constraint.columns?.length === 1 &&
-    constraint.columns[0] &&
-    constraint.referenced_columns?.length === 1 &&
-    constraint.referenced_columns[0] &&
+    constraint.columns &&
+    constraint.columns.length > 0 &&
+    constraint.referenced_columns &&
+    constraint.referenced_columns.length > 0 &&
     constraint.referenced_table
   ) {
     const { updateConstraint, deleteConstraint } = extractForeignKeyActions(
@@ -144,9 +144,9 @@ function processForeignKeyConstraint(constraint: {
       {
         type: 'FOREIGN KEY',
         name: constraint.name,
-        columnName: constraint.columns[0],
+        columnNames: constraint.columns,
         targetTableName: constraint.referenced_table,
-        targetColumnName: constraint.referenced_columns[0],
+        targetColumnNames: constraint.referenced_columns,
         updateConstraint,
         deleteConstraint,
       },
@@ -343,7 +343,9 @@ async function parseTblsSchema(schemaString: string): Promise<ProcessResult> {
       value: {
         tables: {},
       },
-      errors: [new Error(`Invalid schema format: ${result.error}`)],
+      errors: [
+        new Error(`Invalid schema format: ${JSON.stringify(result.error)}`),
+      ],
     }
   }
 
@@ -351,37 +353,36 @@ async function parseTblsSchema(schemaString: string): Promise<ProcessResult> {
   const tables: Tables = {}
   const errors: Error[] = []
 
-  // Define compatible types for type assertions
-  type CompatibleTable = {
-    name: string
-    columns: Array<{
-      name: string
-      type: string
-      nullable: boolean
-      default?: string | null
-      comment?: string | null
-    }>
-    constraints?: Array<{
-      type: string
-      name: string
-      columns?: string[]
-      def: string
-      referenced_table?: string
-      referenced_columns?: string[]
-    }>
-    indexes?: Array<{
-      name: string
-      def: string
-      columns: string[]
-    }>
-    comment?: string | null
-  }
-
   // Process tables
   for (const tblsTable of result.data.tables) {
-    // Use type assertion with a specific type
-    const [tableName, table] = processTable(tblsTable as CompatibleTable)
-    tables[tableName] = table
+    const columns = tblsTable.columns.map((col) => ({
+      ...col,
+      default: col.default ?? null,
+      comment: col.comment ?? null,
+    }))
+
+    const constraints = (tblsTable.constraints ?? []).map((con) => ({
+      ...con,
+      columns: con.columns ?? [],
+      referenced_table: con.referenced_table ?? '',
+      referenced_columns: con.referenced_columns ?? [],
+    }))
+
+    const indexes = (tblsTable.indexes ?? []).map((idx) => ({
+      ...idx,
+      columns: idx.columns ?? [],
+    }))
+
+    const table = {
+      ...tblsTable,
+      columns,
+      constraints,
+      indexes,
+      comment: tblsTable.comment ?? null,
+    }
+
+    const [tableName, tableObj] = processTable(table)
+    tables[tableName] = tableObj
   }
 
   // Return the schema

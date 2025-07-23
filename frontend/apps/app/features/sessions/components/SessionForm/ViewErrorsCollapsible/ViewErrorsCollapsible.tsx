@@ -41,7 +41,7 @@ type GenericError = BaseError & {
   details: string[]
 }
 
-export type ErrorInfo = ParsingError | UnsupportedSyntaxError | GenericError
+type ErrorInfo = ParsingError | UnsupportedSyntaxError | GenericError
 
 // Type guards for error types
 const isParsingError = (error: ErrorInfo): error is ParsingError => {
@@ -172,11 +172,7 @@ export const ViewErrorsCollapsible: FC<Props> = ({
     }
 
     // This should never happen, but provide a fallback for exhaustiveness
-    return (
-      <>
-        <p>[Error] An unknown error occurred</p>
-      </>
-    )
+    return <p>[Error] An unknown error occurred</p>
   }
 
   return (

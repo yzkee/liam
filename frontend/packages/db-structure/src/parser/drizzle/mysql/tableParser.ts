@@ -353,25 +353,12 @@ const parseIndexDefinition = (
         }
       }
     } else if (method === 'using') {
-      // Parse index type from .using('type', ...) - first argument is the type
+      // Parse index type from .using('type') - only the first argument specifies the type
       if (expr.arguments.length > 0) {
         const typeArg = expr.arguments[0]
         const typeExpr = getArgumentExpression(typeArg)
         if (typeExpr && isStringLiteral(typeExpr)) {
           indexType = typeExpr.value
-        }
-      }
-      // Also parse columns from remaining arguments if present
-      for (let i = 1; i < expr.arguments.length; i++) {
-        const arg = expr.arguments[i]
-        const argExpr = getArgumentExpression(arg)
-        if (
-          argExpr &&
-          argExpr.type === 'MemberExpression' &&
-          argExpr.object.type === 'Identifier' &&
-          argExpr.property.type === 'Identifier'
-        ) {
-          columns.push(argExpr.property.value)
         }
       }
     }

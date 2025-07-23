@@ -7,12 +7,10 @@ import { ChatOpenAI } from '@langchain/openai'
 import { ok, ResultAsync } from 'neverthrow'
 import type { ToolConfigurable } from '../../../db-agent/getToolConfigurable'
 import { schemaDesignTool } from '../../../db-agent/tools/schemaDesignTool'
-import { createLangfuseHandler } from '../../utils/telemetry'
 import { type DesignAgentPromptVariables, designAgentPrompt } from './prompts'
 
 const model = new ChatOpenAI({
   model: 'o4-mini',
-  callbacks: [createLangfuseHandler()],
 }).bindTools([schemaDesignTool])
 
 export const invokeDesignAgent = (

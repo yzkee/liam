@@ -63,3 +63,15 @@
 .retryButton {
   min-width: auto !important;
 }
+
+/* Override link color for error messages */
+.errorText :global(a) {
+  color: var(--danger-high-contrast-text);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.errorText :global(a:hover) {
+  opacity: 0.8;
+  text-decoration: underline;
+}

@@ -2,6 +2,7 @@
 
 import { Button, XIcon } from '@liam-hq/ui'
 import type { FC } from 'react'
+import { MarkdownContent } from '@/components/MarkdownContent'
 import styles from './ErrorMessage.module.css'
 
 type ErrorMessageProps = {
@@ -15,17 +16,23 @@ export const ErrorMessage: FC<ErrorMessageProps> = ({ message, onRetry }) => {
       <div className={styles.errorIcon}>
         <XIcon size={12} />
       </div>
-      <div className={styles.errorText}>{message}</div>
-      {onRetry && (
-        <Button
-          variant="outline-secondary"
-          size="sm"
-          onClick={onRetry}
-          className={styles.retryButton}
-        >
-          Retry
-        </Button>
-      )}
+      <div className={styles.contentWrapper}>
+        <div className={styles.errorText}>
+          <MarkdownContent content={message} />
+        </div>
+        {onRetry && (
+          <div className={styles.retryButtonWrapper}>
+            <Button
+              variant="outline-overlay"
+              size="sm"
+              onClick={onRetry}
+              className={styles.retryButton}
+            >
+              Retry
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

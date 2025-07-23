@@ -590,10 +590,6 @@
   color: var(--primary-accent);
 }
 
-.errorIcon {
-  color: var(--severity-critical-100);
-}
-
 .progressIcon {
   color: var(--global-foreground);
 }

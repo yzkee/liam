@@ -6,8 +6,6 @@ import type { TimelineItemEntry } from '../../types'
 import styles from './Chat.module.css'
 import { ChatInput } from './components/ChatInput'
 import { TimelineItem } from './components/TimelineItem'
-import { AgentMessage } from './components/TimelineItem/components/AgentMessage'
-import { LogMessage } from './components/TimelineItem/components/LogMessage'
 import { sendChatMessage } from './services'
 import { generateTimelineItemId } from './services/timelineItemHelpers'
 import { useScrollToBottom } from './useScrollToBottom'
@@ -71,7 +69,13 @@ export const Chat: FC<Props> = ({
   const groupedTimelineItems = timelineItems.reduce<
     Array<TimelineItemEntry | TimelineItemEntry[]>
   >((acc, item) => {
-    const agentTypes = ['assistant_log']
+    const agentTypes = [
+      'assistant',
+      'assistant_log',
+      'schema_version',
+      'query_result',
+      'error',
+    ]
 
     if (!agentTypes.includes(item.type)) {
       // Non-agent messages are added as-is
@@ -81,28 +85,37 @@ export const Chat: FC<Props> = ({
 
     // Check if the previous item in the accumulator is a group of the same type
     const lastItem = acc[acc.length - 1]
-    if (
-      Array.isArray(lastItem) &&
-      lastItem.length > 0 &&
-      lastItem[0].type === item.type &&
-      'role' in lastItem[0] &&
-      'role' in item &&
-      lastItem[0].role === item.role
-    ) {
-      lastItem.push(item)
-    } else if (
-      !Array.isArray(lastItem) &&
-      lastItem &&
-      lastItem.type === item.type &&
-      agentTypes.includes(lastItem.type) &&
-      'role' in lastItem &&
-      'role' in item &&
-      lastItem.role === item.role
-    ) {
-      acc[acc.length - 1] = [lastItem, item]
-    } else {
-      acc.push(item)
+
+    // Helper function to get effective role
+    const getEffectiveRole = (entry: TimelineItemEntry): string => {
+      if ('role' in entry) {
+        return entry.role
+      }
+      // schema_version, query_result, error all render as 'db' agent
+      return 'db'
     }
+
+    const currentRole = getEffectiveRole(item)
+
+    if (Array.isArray(lastItem) && lastItem.length > 0) {
+      const lastRole = getEffectiveRole(lastItem[0])
+      if (lastRole === currentRole) {
+        lastItem.push(item)
+        return acc
+      }
+    } else if (
+      lastItem &&
+      !Array.isArray(lastItem) &&
+      agentTypes.includes(lastItem.type)
+    ) {
+      const lastRole = getEffectiveRole(lastItem)
+      if (lastRole === currentRole) {
+        acc[acc.length - 1] = [lastItem, item]
+        return acc
+      }
+    }
+
+    acc.push(item)
 
     return acc
   }, [])
@@ -113,18 +126,13 @@ export const Chat: FC<Props> = ({
         {/* Display grouped timeline items */}
         {groupedTimelineItems.map((item) => {
           if (Array.isArray(item)) {
-            // Render grouped agent messages
-            const agentRole = 'role' in item[0] ? item[0].role : 'db'
-
+            // Render grouped agent messages using modified TimelineItem
             return item.map((message, messageIndex) => (
-              <AgentMessage
+              <TimelineItem
                 key={message.id}
-                state="default"
-                assistantRole={agentRole}
+                {...message}
                 showHeader={messageIndex === 0}
-              >
-                <LogMessage content={message.content} />
-              </AgentMessage>
+              />
             ))
           }
 

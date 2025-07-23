@@ -29,8 +29,6 @@ const hasProperty = <T extends string>(
   prop: T,
 ): obj is Record<T, unknown> & Record<string, unknown> => prop in obj
 
-// Note: getCurrentNodeFromChunk is not currently used but kept for potential future use
-
 // Log levels
 const LOG_LEVELS = {
   DEBUG: 0,
@@ -232,8 +230,8 @@ const createBuildingSchema = async (
       .insert({
         design_session_id: designSessionId,
         organization_id: organizationId,
-        schema: JSON.parse(JSON.stringify(initialSchema)),
-        initial_schema_snapshot: JSON.parse(JSON.stringify(initialSchema)),
+        schema: structuredClone(initialSchema),
+        initial_schema_snapshot: structuredClone(initialSchema),
         schema_file_path: null,
         git_sha: null,
       })

@@ -9,7 +9,10 @@ export const customTheme = EditorView.theme({
     background: 'var(--global-background)',
   },
   '.cm-lineNumbers': { color: 'var(--overlay-20)' },
-  '.cm-foldGutter': { color: 'var(--overlay-50)' },
+  '.cm-foldGutter': {
+    color: 'var(--overlay-50)',
+    paddingTop: '2px',
+  },
   '.cm-content': {
     flex: 1,
     background: 'var(--global-background)',

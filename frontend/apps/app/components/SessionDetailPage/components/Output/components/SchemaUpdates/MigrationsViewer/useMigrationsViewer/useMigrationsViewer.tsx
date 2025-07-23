@@ -6,15 +6,36 @@ import { lintGutter } from '@codemirror/lint'
 import { unifiedMergeView } from '@codemirror/merge'
 import { EditorState, type Extension } from '@codemirror/state'
 import { drawSelection, lineNumbers } from '@codemirror/view'
+import { ChevronDown, ChevronRight } from '@liam-hq/ui'
 import { EditorView } from 'codemirror'
 import { useEffect, useRef, useState } from 'react'
+import { createRoot } from 'react-dom/client'
 import type { ReviewComment } from '../../../../../../types'
 import { commentStateField, setCommentsEffect } from './commentExtension'
 import { customTheme, sqlHighlightStyle } from './editorTheme'
 
 const baseExtensions: Extension[] = [
   lineNumbers(),
-  foldGutter(),
+  foldGutter({
+    markerDOM: (open) => {
+      const container = document.createElement('span')
+      container.style.display = 'inline-flex'
+      container.style.alignItems = 'center'
+      container.style.justifyContent = 'center'
+      container.style.width = '16px'
+      container.style.height = '16px'
+      container.style.marginTop = open ? '0px' : '-1px'
+
+      const root = createRoot(container)
+      if (open) {
+        root.render(<ChevronDown size={12} />)
+      } else {
+        root.render(<ChevronRight size={12} />)
+      }
+
+      return container
+    },
+  }),
   drawSelection(),
   sql(),
   lintGutter(),

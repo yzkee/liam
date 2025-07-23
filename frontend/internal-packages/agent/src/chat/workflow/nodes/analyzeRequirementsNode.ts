@@ -3,9 +3,14 @@ import type { RunnableConfig } from '@langchain/core/runnables'
 import type { Database } from '@liam-hq/db'
 import { ResultAsync } from 'neverthrow'
 import { PMAnalysisAgent } from '../../../langchain/agents'
+import type { Repositories } from '../../../repositories'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 import { logAssistantMessage } from '../utils/timelineLogger'
+import {
+  createOrUpdateArtifact,
+  transformWorkflowStateToArtifact,
+} from '../utils/transformWorkflowStateToArtifact'
 import { withTimelineItemSync } from '../utils/withTimelineItemSync'
 
 /**
@@ -43,6 +48,42 @@ ${entries
   ].filter(Boolean)
 
   return sections.join('\n\n')
+}
+
+/**
+ * Save artifacts if workflow state contains artifact data
+ */
+async function saveArtifacts(
+  state: WorkflowState,
+  repositories: Repositories,
+  assistantRole: Database['public']['Enums']['assistant_role_enum'],
+): Promise<void> {
+  if (!state.analyzedRequirements && !state.generatedUsecases) {
+    return
+  }
+
+  const artifact = transformWorkflowStateToArtifact(state)
+  const artifactResult = await createOrUpdateArtifact(
+    state,
+    artifact,
+    repositories,
+  )
+
+  if (artifactResult.success) {
+    await logAssistantMessage(
+      state,
+      repositories,
+      'Your requirements have been saved and are ready for implementation',
+      assistantRole,
+    )
+  } else {
+    await logAssistantMessage(
+      state,
+      repositories,
+      'Unable to save your requirements. Please try again or contact support...',
+      assistantRole,
+    )
+  }
 }
 
 /**
@@ -102,12 +143,17 @@ export async function analyzeRequirementsNode(
         },
       )
 
-      return {
+      const updatedState = {
         ...state,
         messages: [completeMessage],
         analyzedRequirements,
         error: undefined, // Clear error on success
       }
+
+      // Save artifacts if requirements are successfully analyzed
+      await saveArtifacts(updatedState, repositories, assistantRole)
+
+      return updatedState
     },
     async (error) => {
       await logAssistantMessage(

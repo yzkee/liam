@@ -4,10 +4,15 @@ import type { Database } from '@liam-hq/db'
 import { ResultAsync } from 'neverthrow'
 import { QAGenerateUsecaseAgent } from '../../../langchain/agents'
 import type { BasePromptVariables } from '../../../langchain/utils/types'
+import type { Repositories } from '../../../repositories'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 import { formatMessagesToHistory } from '../utils/messageUtils'
 import { logAssistantMessage } from '../utils/timelineLogger'
+import {
+  createOrUpdateArtifact,
+  transformWorkflowStateToArtifact,
+} from '../utils/transformWorkflowStateToArtifact'
 import { withTimelineItemSync } from '../utils/withTimelineItemSync'
 
 /**
@@ -38,6 +43,42 @@ ${Object.entries(analyzedRequirements.nonFunctionalRequirements)
 
 Original User Input: ${userInput}
 `
+}
+
+/**
+ * Save artifacts if workflow state contains artifact data
+ */
+async function saveArtifacts(
+  state: WorkflowState,
+  repositories: Repositories,
+  assistantRole: Database['public']['Enums']['assistant_role_enum'],
+): Promise<void> {
+  if (!state.analyzedRequirements && !state.generatedUsecases) {
+    return
+  }
+
+  const artifact = transformWorkflowStateToArtifact(state)
+  const artifactResult = await createOrUpdateArtifact(
+    state,
+    artifact,
+    repositories,
+  )
+
+  if (artifactResult.success) {
+    await logAssistantMessage(
+      state,
+      repositories,
+      'Your use cases have been saved and are ready for implementation',
+      assistantRole,
+    )
+  } else {
+    await logAssistantMessage(
+      state,
+      repositories,
+      'Unable to save your use cases. Please try again or contact support...',
+      assistantRole,
+    )
+  }
 }
 
 /**
@@ -119,12 +160,17 @@ export async function generateUsecaseNode(
         },
       )
 
-      return {
+      const updatedState = {
         ...state,
         messages: [...state.messages, usecaseMessage],
         generatedUsecases: generatedResult.usecases,
         error: undefined, // Clear error on success
       }
+
+      // Save artifacts if usecases are successfully generated
+      await saveArtifacts(updatedState, repositories, assistantRole)
+
+      return updatedState
     },
     async (error) => {
       await logAssistantMessage(

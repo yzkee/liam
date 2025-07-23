@@ -1,16 +1,10 @@
-import { createClient } from '@/libs/db/client'
+import { createClient } from '@/libs/db/server'
+import type { RecentSession } from './types'
 
-export type RecentSession = {
-  id: string
-  name: string
-  created_at: string
-  project_id: string | null
-}
-
-export const fetchRecentSessionsClient = async (
+export const fetchRecentSessions = async (
   limit = 5,
 ): Promise<RecentSession[]> => {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: userData, error: userError } = await supabase.auth.getUser()
   if (userError || !userData.user) {

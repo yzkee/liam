@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { processor as _processor } from '../index.js'
+import { processor } from '../index.js'
 
-describe(_processor, () => {
+describe(processor, () => {
   // PostgreSQL-specific tests (tests that are unique to PostgreSQL and not covered by unified tests)
   describe('PostgreSQL-specific functionality', () => {
     it('PostgreSQL-specific types and methods (uuid, jsonb, defaultRandom, pgEnum)', async () => {
-      const { value } = await _processor(`
+      const { value } = await processor(`
         import {
           pgTable,
           pgEnum,

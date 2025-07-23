@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { processor as _processor } from '../index.js'
+import { processor } from '../index.js'
 
-describe(_processor, () => {
+describe(processor, () => {
   // MySQL-specific tests (tests that are unique to MySQL and not covered by unified tests)
   describe('MySQL-specific functionality', () => {
     it('MySQL-specific types and methods (tinyint, mediumint, datetime, year, json, mysqlEnum)', async () => {
-      const { value } = await _processor(`
+      const { value } = await processor(`
         import {
           mysqlTable,
           mysqlEnum,

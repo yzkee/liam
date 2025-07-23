@@ -29,7 +29,7 @@ export async function designSchemaNode(
   await logAssistantMessage(
     state,
     repositories,
-    'Designing database schema...',
+    'Designing your database structure to meet the identified requirements...',
     assistantRole,
   )
 
@@ -54,13 +54,6 @@ export async function designSchemaNode(
     }
   }
 
-  await logAssistantMessage(
-    state,
-    repositories,
-    'Created new schema version for updates...',
-    assistantRole,
-  )
-
   const schemaText = convertSchemaToText(state.schemaData)
 
   // Log appropriate message for DDL retry case
@@ -84,13 +77,6 @@ Please fix this issue by analyzing the schema and adding any missing constraints
     messages = [...messages, ddlRetryMessage]
   }
 
-  await logAssistantMessage(
-    state,
-    repositories,
-    'Analyzing table structure and relationships...',
-    assistantRole,
-  )
-
   const invokeResult = await invokeDesignAgent({ schemaText }, messages, {
     buildingSchemaVersionId: createVersionResult.versionId,
     repositories,
@@ -100,7 +86,7 @@ Please fix this issue by analyzing the schema and adding any missing constraints
     await logAssistantMessage(
       state,
       repositories,
-      'Schema design failed',
+      'Unable to complete the database design. There may be conflicts in the requirements...',
       assistantRole,
     )
     return {
@@ -108,13 +94,6 @@ Please fix this issue by analyzing the schema and adding any missing constraints
       error: invokeResult.error,
     }
   }
-
-  await logAssistantMessage(
-    state,
-    repositories,
-    'Schema design completed',
-    assistantRole,
-  )
 
   // Apply timeline sync to the message and clear retry flags
   const syncedMessage = await withTimelineItemSync(invokeResult.value, {

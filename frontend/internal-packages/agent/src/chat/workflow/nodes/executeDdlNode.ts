@@ -30,7 +30,7 @@ export async function executeDdlNode(
   await logAssistantMessage(
     state,
     repositories,
-    'Creating database...',
+    'Building your database with the optimized structure...',
     assistantRole,
   )
 
@@ -41,7 +41,7 @@ export async function executeDdlNode(
     await logAssistantMessage(
       state,
       repositories,
-      'Error occurred during DDL generation',
+      'Unable to generate database structure. There may be an issue with the schema design...',
       assistantRole,
     )
 
@@ -53,20 +53,11 @@ export async function executeDdlNode(
 
   const ddlStatements = result.value
 
-  const tableCount = Object.keys(state.schemaData.tables).length
-
-  await logAssistantMessage(
-    state,
-    repositories,
-    `Generated DDL statements (${tableCount} tables)`,
-    assistantRole,
-  )
-
   if (!ddlStatements || !ddlStatements.trim()) {
     await logAssistantMessage(
       state,
       repositories,
-      'No DDL statements to execute',
+      'No database structure to build. The schema design appears to be empty...',
       assistantRole,
     )
 
@@ -75,13 +66,6 @@ export async function executeDdlNode(
       ddlStatements,
     }
   }
-
-  await logAssistantMessage(
-    state,
-    repositories,
-    'Executing DDL statements...',
-    assistantRole,
-  )
 
   const results: SqlResult[] = await executeQuery(
     state.designSessionId,
@@ -115,13 +99,6 @@ export async function executeDdlNode(
       results,
       resultSummary,
     )
-
-    await logAssistantMessage(
-      state,
-      repositories,
-      `DDL Execution Complete: ${successCount} successful, ${errorCount} failed queries`,
-      assistantRole,
-    )
   }
 
   const hasErrors = results.some((result: SqlResult) => !result.success)
@@ -138,7 +115,7 @@ export async function executeDdlNode(
     await logAssistantMessage(
       state,
       repositories,
-      'Error occurred during DDL execution',
+      'Database creation encountered issues. Attempting to fix the problems...',
       assistantRole,
     )
 
@@ -179,13 +156,6 @@ export async function executeDdlNode(
       ddlExecutionFailureReason: errorMessages,
     }
   }
-
-  await logAssistantMessage(
-    state,
-    repositories,
-    'Database created successfully',
-    assistantRole,
-  )
 
   return {
     ...state,

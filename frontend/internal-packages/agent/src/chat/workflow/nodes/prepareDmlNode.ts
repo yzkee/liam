@@ -63,7 +63,7 @@ export async function prepareDmlNode(
   await logAssistantMessage(
     state,
     repositories,
-    'Preparing DML statements...',
+    'Creating sample data to test your database design...',
     assistantRole,
   )
 
@@ -72,7 +72,7 @@ export async function prepareDmlNode(
     await logAssistantMessage(
       state,
       repositories,
-      'Missing DDL statements for DML generation',
+      'Database structure not ready yet. Cannot create sample data without the schema...',
       assistantRole,
     )
     return state
@@ -82,7 +82,7 @@ export async function prepareDmlNode(
     await logAssistantMessage(
       state,
       repositories,
-      'Missing use cases for DML generation',
+      'Test scenarios not available. Cannot create sample data without use cases...',
       assistantRole,
     )
     return state
@@ -109,18 +109,11 @@ export async function prepareDmlNode(
     await logAssistantMessage(
       state,
       repositories,
-      'DML generation returned empty statements',
+      'No sample data could be generated for your database design...',
       assistantRole,
     )
     return state
   }
-
-  await logAssistantMessage(
-    state,
-    repositories,
-    'DML statements generated successfully',
-    assistantRole,
-  )
 
   return {
     ...state,

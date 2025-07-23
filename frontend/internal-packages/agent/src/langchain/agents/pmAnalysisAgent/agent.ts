@@ -1,11 +1,11 @@
+import { type BaseMessage, SystemMessage } from '@langchain/core/messages'
 import { ChatOpenAI } from '@langchain/openai'
 import { toJsonSchema } from '@valibot/to-json-schema'
 import * as v from 'valibot'
 import { createLangfuseHandler } from '../../utils/telemetry'
-import type { BasePromptVariables, ChatAgent } from '../../utils/types'
-import { pmAnalysisPrompt } from './prompts'
+import { PM_ANALYSIS_SYSTEM_MESSAGE } from './prompts'
 
-export const requirementsAnalysisSchema = v.object({
+const requirementsAnalysisSchema = v.object({
   businessRequirement: v.string(),
   functionalRequirements: v.record(v.string(), v.array(v.string())),
   nonFunctionalRequirements: v.record(v.string(), v.array(v.string())),
@@ -13,9 +13,7 @@ export const requirementsAnalysisSchema = v.object({
 
 type AnalysisResponse = v.InferOutput<typeof requirementsAnalysisSchema>
 
-export class PMAnalysisAgent
-  implements ChatAgent<BasePromptVariables, AnalysisResponse>
-{
+export class PMAnalysisAgent {
   private analysisModel: ReturnType<ChatOpenAI['withStructuredOutput']>
 
   constructor() {
@@ -30,17 +28,13 @@ export class PMAnalysisAgent
     this.analysisModel = baseModel.withStructuredOutput(analysisJsonSchema)
   }
 
-  async generate(variables: BasePromptVariables): Promise<AnalysisResponse> {
-    const formattedPrompt = await pmAnalysisPrompt.format(variables)
-    const rawResponse = await this.analysisModel.invoke(formattedPrompt)
-    return v.parse(requirementsAnalysisSchema, rawResponse)
-  }
+  async generate(messages: BaseMessage[]): Promise<AnalysisResponse> {
+    const allMessages = [
+      new SystemMessage(PM_ANALYSIS_SYSTEM_MESSAGE),
+      ...messages,
+    ]
 
-  async analyzeRequirements(
-    variables: BasePromptVariables,
-  ): Promise<v.InferOutput<typeof requirementsAnalysisSchema>> {
-    const formattedPrompt = await pmAnalysisPrompt.format(variables)
-    const rawResponse = await this.analysisModel.invoke(formattedPrompt)
+    const rawResponse = await this.analysisModel.invoke(allMessages)
     return v.parse(requirementsAnalysisSchema, rawResponse)
   }
 }

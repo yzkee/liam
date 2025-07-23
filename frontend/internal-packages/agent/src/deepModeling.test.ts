@@ -62,7 +62,7 @@ vi.mock('@langchain/openai', () => ({
 describe('Chat Workflow', () => {
   let mockSchemaData: Schema
   let mockPMAnalysisAgent: {
-    analyzeRequirements: ReturnType<typeof vi.fn>
+    generate: ReturnType<typeof vi.fn>
   }
   let mockInvokeDesignAgent: ReturnType<typeof vi.fn>
   let MockQAGenerateUsecaseAgent: ReturnType<typeof vi.fn>
@@ -206,7 +206,7 @@ describe('Chat Workflow', () => {
 
     // Mock PM Analysis agent
     mockPMAnalysisAgent = {
-      analyzeRequirements: vi.fn().mockResolvedValue({
+      generate: vi.fn().mockResolvedValue({
         businessRequirement: 'Mocked BRD',
         functionalRequirements: {
           'Test Category': ['Mocked functional requirement'],

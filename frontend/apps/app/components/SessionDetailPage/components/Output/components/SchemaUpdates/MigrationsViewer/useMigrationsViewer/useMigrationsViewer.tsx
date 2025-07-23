@@ -6,10 +6,8 @@ import { lintGutter } from '@codemirror/lint'
 import { unifiedMergeView } from '@codemirror/merge'
 import { EditorState, type Extension } from '@codemirror/state'
 import { drawSelection, lineNumbers } from '@codemirror/view'
-import { ChevronDown, ChevronRight } from '@liam-hq/ui'
 import { EditorView } from 'codemirror'
 import { useEffect, useRef, useState } from 'react'
-import { createRoot } from 'react-dom/client'
 import type { ReviewComment } from '../../../../../../types'
 import { commentStateField, setCommentsEffect } from './commentExtension'
 import { customTheme, sqlHighlightStyle } from './editorTheme'
@@ -26,12 +24,29 @@ const baseExtensions: Extension[] = [
       container.style.height = '16px'
       container.style.marginTop = open ? '0px' : '-1px'
 
-      const root = createRoot(container)
+      // Directly insert SVG without React
+      const svgNS = 'http://www.w3.org/2000/svg'
+      const svg = document.createElementNS(svgNS, 'svg')
+      svg.setAttribute('width', '12')
+      svg.setAttribute('height', '12')
+      svg.setAttribute('viewBox', '0 0 24 24')
+      svg.setAttribute('fill', 'none')
+      svg.setAttribute('stroke', 'currentColor')
+      svg.setAttribute('stroke-width', '1.5')
+      svg.setAttribute('stroke-linecap', 'round')
+      svg.setAttribute('stroke-linejoin', 'round')
+
+      const path = document.createElementNS(svgNS, 'path')
       if (open) {
-        root.render(<ChevronDown size={12} />)
+        // ChevronDown path
+        path.setAttribute('d', 'M6 9l6 6 6-6')
       } else {
-        root.render(<ChevronRight size={12} />)
+        // ChevronRight path
+        path.setAttribute('d', 'M9 18l6-6-6-6')
       }
+
+      svg.appendChild(path)
+      container.appendChild(svg)
 
       return container
     },

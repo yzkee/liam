@@ -9,6 +9,7 @@ type Props = ComponentProps<'button'> & {
     | 'solid-primary'
     | 'solid-danger'
     | 'outline-secondary'
+    | 'outline-overlay'
     | 'ghost-secondary'
   size?: 'xs' | 'sm' | 'md' | 'lg'
   leftIcon?: ReactNode
@@ -45,6 +46,7 @@ export const Button = ({
     .with('solid-primary', () => styles.solidPrimary)
     .with('solid-danger', () => styles.solidDanger)
     .with('outline-secondary', () => styles.outlineSecondary)
+    .with('outline-overlay', () => styles.outlineOverlay)
     .with('ghost-secondary', () => styles.ghostSecondary)
     .exhaustive()
 
@@ -65,6 +67,7 @@ export const Button = ({
         className,
         !disabled && variantClassName,
         disabled && styles.disabled,
+        disabled && variant === 'outline-overlay' && styles.outlineOverlay,
       )}
       disabled={disabled}
       {...props}

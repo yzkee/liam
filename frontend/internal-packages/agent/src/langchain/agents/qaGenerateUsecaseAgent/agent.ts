@@ -1,8 +1,9 @@
+import { type BaseMessage, SystemMessage } from '@langchain/core/messages'
 import { ChatOpenAI } from '@langchain/openai'
 import { toJsonSchema } from '@valibot/to-json-schema'
 import * as v from 'valibot'
-import type { BasePromptVariables, ChatAgent } from '../../utils/types'
-import { usecaseGenerationPrompt } from './prompts'
+import { createLangfuseHandler } from '../../utils/telemetry'
+import { QA_GENERATE_USECASE_SYSTEM_MESSAGE } from './prompts'
 
 // Single usecase schema
 const usecaseSchema = v.object({
@@ -15,36 +16,32 @@ const usecaseSchema = v.object({
 })
 
 // Response schema for structured output
-const generateUsecasesResponseSchema = v.object({
+const usecaseGenerationSchema = v.object({
   usecases: v.array(usecaseSchema),
 })
 
 export type Usecase = v.InferOutput<typeof usecaseSchema>
-type GenerateUsecasesResponse = v.InferOutput<
-  typeof generateUsecasesResponseSchema
->
+type UsecaseResponse = v.InferOutput<typeof usecaseGenerationSchema>
 
-export class QAGenerateUsecaseAgent
-  implements ChatAgent<BasePromptVariables, GenerateUsecasesResponse>
-{
-  private model: ReturnType<ChatOpenAI['withStructuredOutput']>
+export class QAGenerateUsecaseAgent {
+  private usecaseModel: ReturnType<ChatOpenAI['withStructuredOutput']>
 
   constructor() {
     const baseModel = new ChatOpenAI({
       model: 'o4-mini',
     })
 
-    // Convert valibot schema to JSON Schema and bind to model
-    const jsonSchema = toJsonSchema(generateUsecasesResponseSchema)
-    this.model = baseModel.withStructuredOutput(jsonSchema)
+    const usecaseJsonSchema = toJsonSchema(usecaseGenerationSchema)
+    this.usecaseModel = baseModel.withStructuredOutput(usecaseJsonSchema)
   }
 
-  async generate(
-    variables: BasePromptVariables,
-  ): Promise<GenerateUsecasesResponse> {
-    const formattedPrompt = await usecaseGenerationPrompt.format(variables)
-    const rawResponse = await this.model.invoke(formattedPrompt)
+  async generate(messages: BaseMessage[]): Promise<UsecaseResponse> {
+    const allMessages = [
+      new SystemMessage(QA_GENERATE_USECASE_SYSTEM_MESSAGE),
+      ...messages,
+    ]
 
-    return v.parse(generateUsecasesResponseSchema, rawResponse)
+    const rawResponse = await this.usecaseModel.invoke(allMessages)
+    return v.parse(usecaseGenerationSchema, rawResponse)
   }
 }

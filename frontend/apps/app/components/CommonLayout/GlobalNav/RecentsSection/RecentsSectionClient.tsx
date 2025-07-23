@@ -35,12 +35,15 @@ export const RecentsSectionClient = ({
           </div>
 
           {sessions.length > 0 ? (
-            <div className={styles.sessionsList}>
+            <nav className={styles.sessionsList} aria-label="Recent sessions">
               {sessions.map((session) => {
                 const sessionUrl = urlgen('design_sessions/[id]', {
                   id: session.id,
                 })
                 const isActive = pathname === sessionUrl
+                const sessionDate = new Date(
+                  session.created_at,
+                ).toLocaleDateString()
                 return (
                   <Link
                     key={session.id}
@@ -49,15 +52,17 @@ export const RecentsSectionClient = ({
                       styles.sessionItem,
                       isActive && styles.sessionItemActive,
                     )}
+                    aria-label={`${session.name}, created on ${sessionDate}`}
+                    aria-current={isActive ? 'page' : undefined}
                   >
                     <span className={styles.sessionName}>{session.name}</span>
-                    <span className={styles.sessionDate}>
-                      {new Date(session.created_at).toLocaleDateString()}
+                    <span className={styles.sessionDate} aria-hidden="true">
+                      {sessionDate}
                     </span>
                   </Link>
                 )
               })}
-            </div>
+            </nav>
           ) : (
             <div className={styles.emptyState}>
               <span className={styles.emptyText}>No recent sessions</span>

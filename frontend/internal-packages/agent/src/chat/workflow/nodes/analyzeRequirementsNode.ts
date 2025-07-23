@@ -3,10 +3,8 @@ import type { RunnableConfig } from '@langchain/core/runnables'
 import type { Database } from '@liam-hq/db'
 import { ResultAsync } from 'neverthrow'
 import { PMAnalysisAgent } from '../../../langchain/agents'
-import type { BasePromptVariables } from '../../../langchain/utils/types'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
-import { formatMessagesToHistory } from '../utils/messageUtils'
 import { logAssistantMessage } from '../utils/timelineLogger'
 import { withTimelineItemSync } from '../utils/withTimelineItemSync'
 
@@ -74,11 +72,6 @@ export async function analyzeRequirementsNode(
 
   const pmAnalysisAgent = new PMAnalysisAgent()
 
-  const promptVariables: BasePromptVariables = {
-    chat_history: formatMessagesToHistory(state.messages),
-    user_message: state.userInput,
-  }
-
   const retryCount = state.retryCount['analyzeRequirementsNode'] ?? 0
 
   await logAssistantMessage(
@@ -89,7 +82,7 @@ export async function analyzeRequirementsNode(
   )
 
   const analysisResult = await ResultAsync.fromPromise(
-    pmAnalysisAgent.analyzeRequirements(promptVariables),
+    pmAnalysisAgent.generate(state.messages),
     (error) => (error instanceof Error ? error : new Error(String(error))),
   )
 

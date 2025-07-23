@@ -29,7 +29,7 @@ export async function webSearchNode(
   await logAssistantMessage(
     state,
     repositories,
-    'Searching for relevant information...',
+    'Researching best practices for your specific database needs...',
     assistantRole,
   )
 
@@ -61,13 +61,6 @@ Provide a concise summary of the most relevant findings.`
 
   return searchResult.match(
     async (result) => {
-      await logAssistantMessage(
-        state,
-        repositories,
-        'Web search completed',
-        assistantRole,
-      )
-
       // Extract the search results content
       const searchContent =
         typeof result.content === 'string'
@@ -99,7 +92,7 @@ Provide a concise summary of the most relevant findings.`
       await logAssistantMessage(
         state,
         repositories,
-        'Error occurred during web search',
+        'Web search temporarily unavailable. Proceeding with built-in best practices...',
         assistantRole,
       )
 

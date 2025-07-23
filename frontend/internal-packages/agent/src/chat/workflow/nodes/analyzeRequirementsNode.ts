@@ -68,7 +68,7 @@ export async function analyzeRequirementsNode(
   await logAssistantMessage(
     state,
     repositories,
-    'Analyzing requirements...',
+    'Breaking down your request into structured requirements...',
     assistantRole,
   )
 
@@ -81,13 +81,6 @@ export async function analyzeRequirementsNode(
 
   const retryCount = state.retryCount['analyzeRequirementsNode'] ?? 0
 
-  await logAssistantMessage(
-    state,
-    repositories,
-    'Organizing business and functional requirements...',
-    assistantRole,
-  )
-
   const analysisResult = await ResultAsync.fromPromise(
     pmAnalysisAgent.analyzeRequirements(promptVariables),
     (error) => (error instanceof Error ? error : new Error(String(error))),
@@ -95,13 +88,6 @@ export async function analyzeRequirementsNode(
 
   return analysisResult.match(
     async (result) => {
-      await logAssistantMessage(
-        state,
-        repositories,
-        'Requirements analysis completed',
-        assistantRole,
-      )
-
       const analyzedRequirements = {
         businessRequirement: result.businessRequirement,
         functionalRequirements: result.functionalRequirements,
@@ -134,7 +120,7 @@ export async function analyzeRequirementsNode(
       await logAssistantMessage(
         state,
         repositories,
-        'Error occurred during requirements analysis',
+        'Having trouble understanding your requirements. Let me try a different approach...',
         assistantRole,
       )
 

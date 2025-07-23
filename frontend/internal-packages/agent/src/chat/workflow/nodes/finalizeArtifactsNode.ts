@@ -21,12 +21,6 @@ async function saveArtifacts(
     return
   }
 
-  await logAssistantMessage(
-    state,
-    repositories,
-    'Saving artifacts...',
-    assistantRole,
-  )
   const artifact = transformWorkflowStateToArtifact(state)
   const artifactResult = await createOrUpdateArtifact(
     state,
@@ -38,14 +32,14 @@ async function saveArtifacts(
     await logAssistantMessage(
       state,
       repositories,
-      'Artifacts saved successfully',
+      'Your database design has been saved and is ready for implementation',
       assistantRole,
     )
   } else {
     await logAssistantMessage(
       state,
       repositories,
-      'Failed to save artifacts',
+      'Unable to save your database design. Please try again or contact support...',
       assistantRole,
     )
   }
@@ -57,17 +51,9 @@ async function saveArtifacts(
 async function handleWorkflowError(
   state: WorkflowState,
   repositories: Repositories,
-  assistantRole: Database['public']['Enums']['assistant_role_enum'],
 ): Promise<{
   errorToReturn: string | undefined
 }> {
-  await logAssistantMessage(
-    state,
-    repositories,
-    'Handling workflow completion...',
-    assistantRole,
-  )
-
   if (state.error) {
     const errorMessage = `Sorry, an error occurred during processing: ${state.error.message}`
     const saveResult = await repositories.schema.createTimelineItem({
@@ -109,16 +95,12 @@ export async function finalizeArtifactsNode(
   await logAssistantMessage(
     state,
     repositories,
-    'Preparing final deliverables...',
+    'Compiling your complete database design documentation...',
     assistantRole,
   )
 
   await saveArtifacts(state, repositories, assistantRole)
-  const { errorToReturn } = await handleWorkflowError(
-    state,
-    repositories,
-    assistantRole,
-  )
+  const { errorToReturn } = await handleWorkflowError(state, repositories)
 
   return {
     ...state,

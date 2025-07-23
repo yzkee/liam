@@ -59,10 +59,15 @@ export async function validateSchemaNode(
 
     const successCount = results.filter((r) => r.success).length
     const errorCount = results.length - successCount
+    const validationMessage =
+      errorCount === 0
+        ? 'Database validation complete: all checks passed successfully'
+        : `Database validation found ${errorCount} issues that need attention`
+
     await logAssistantMessage(
       state,
       repositories,
-      `Schema Validation Complete: ${successCount} successful, ${errorCount} failed queries`,
+      validationMessage,
       assistantRole,
     )
   }

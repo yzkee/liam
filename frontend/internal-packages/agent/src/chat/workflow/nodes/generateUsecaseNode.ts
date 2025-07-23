@@ -61,7 +61,7 @@ export async function generateUsecaseNode(
   await logAssistantMessage(
     state,
     repositories,
-    'Generating use cases...',
+    'Creating test scenarios to validate your database design...',
     assistantRole,
   )
 
@@ -73,7 +73,7 @@ export async function generateUsecaseNode(
     await logAssistantMessage(
       state,
       repositories,
-      'Error occurred during use case generation',
+      'Unable to generate test scenarios. This might be due to unclear requirements...',
       assistantRole,
     )
 
@@ -98,13 +98,6 @@ export async function generateUsecaseNode(
 
   const retryCount = state.retryCount['generateUsecaseNode'] ?? 0
 
-  await logAssistantMessage(
-    state,
-    repositories,
-    'Analyzing test cases and queries...',
-    assistantRole,
-  )
-
   const usecaseResult = await ResultAsync.fromPromise(
     qaAgent.generate(promptVariables),
     (error) => (error instanceof Error ? error : new Error(String(error))),
@@ -112,13 +105,6 @@ export async function generateUsecaseNode(
 
   return await usecaseResult.match(
     async (generatedResult) => {
-      await logAssistantMessage(
-        state,
-        repositories,
-        'Use case generation completed',
-        assistantRole,
-      )
-
       const usecaseMessage = await withTimelineItemSync(
         new AIMessage({
           content: `Generated ${generatedResult.usecases.length} use cases for testing and validation`,
@@ -144,7 +130,7 @@ export async function generateUsecaseNode(
       await logAssistantMessage(
         state,
         repositories,
-        'Error occurred during use case generation',
+        'Unable to generate test scenarios. This might be due to unclear requirements...',
         assistantRole,
       )
 

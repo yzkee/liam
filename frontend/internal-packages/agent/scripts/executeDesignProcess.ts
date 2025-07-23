@@ -17,7 +17,7 @@ import { designSchemaNode } from '../src/chat/workflow/nodes/designSchemaNode'
 import { createAnnotations } from '../src/chat/workflow/shared/langGraphUtils'
 import type { WorkflowState } from '../src/chat/workflow/types'
 import { invokeSchemaDesignToolNode } from '../src/db-agent/nodes/invokeSchemaDesignToolNode'
-import { shouldInvokeSchemaDesignTool } from '../src/db-agent/routing/shouldInvokeSchemaDesignTool'
+import { routeAfterDesignSchema } from '../src/db-agent/routing/routeAfterDesignSchema'
 import { createSupabaseRepositories } from '../src/repositories/factory'
 
 // Type guards for safe property access
@@ -132,7 +132,7 @@ const createSimplifiedGraph = () => {
     // Simple workflow: START -> designSchema -> conditional -> invokeSchemaDesignTool -> END
     .addEdge(START, 'designSchema')
     .addEdge('invokeSchemaDesignTool', 'designSchema')
-    .addConditionalEdges('designSchema', shouldInvokeSchemaDesignTool, {
+    .addConditionalEdges('designSchema', routeAfterDesignSchema, {
       invokeSchemaDesignTool: 'invokeSchemaDesignTool',
       executeDDL: END, // In simplified version, skip DDL and go to complete
     })

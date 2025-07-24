@@ -75,15 +75,6 @@ const logger = {
       process.stdout.write(`${JSON.stringify(metadata, null, 2)}\n`)
     }
   },
-  log: (message: string, metadata?: Record<string, unknown>) => {
-    if (LOG_LEVELS[currentLogLevel] > LOG_LEVELS.DEBUG) return
-
-    const timestamp = new Date().toISOString()
-    process.stdout.write(`\n📝 [LOG] ${timestamp} ${message}\n`)
-    if (metadata) {
-      process.stdout.write(`${JSON.stringify(metadata, null, 2)}\n`)
-    }
-  },
   info: (message: string, metadata?: Record<string, unknown>) => {
     if (LOG_LEVELS[currentLogLevel] > LOG_LEVELS.INFO) return
 

@@ -2,7 +2,6 @@ import * as fs from 'node:fs'
 import * as os from 'node:os'
 import * as path from 'node:path'
 import type { Schema } from '@liam-hq/db-structure'
-import { errAsync, ResultAsync } from 'neverthrow'
 import {
   afterEach,
   beforeEach,
@@ -291,42 +290,32 @@ describe('evaluateSchema', () => {
       consoleSpy.mockRestore()
     })
 
-    it('should create individual result files with correct naming', (): ResultAsync<
-      void,
-      Error
-    > => {
+    it('should create individual result files with correct naming', async () => {
       createTestFiles(['case1'])
 
       const config = getConfig()
-      return ResultAsync.fromPromise(evaluateSchema(config), (err) =>
-        err instanceof Error ? err : new Error(String(err)),
-      ).andThen((result) => {
-        expect(result.isOk()).toBe(true)
+      const result = await evaluateSchema(config)
 
-        const evaluationDir = path.join(tempDir, 'evaluation')
-        const files = fs.readdirSync(evaluationDir)
-        const resultFiles = files.filter((file) =>
-          file.includes('case1_results_'),
-        )
-        expect(resultFiles.length).toBe(1)
+      expect(result.isOk()).toBe(true)
 
-        // Check file content
-        const firstResultFile = resultFiles[0]
-        if (!firstResultFile) {
-          return errAsync(new Error('No result files found'))
-        }
-        const resultFile = path.join(evaluationDir, firstResultFile)
-        const ResultFileContent = fs.readFileSync(resultFile, 'utf-8')
-        const content: { caseId: string; metrics: unknown } =
-          JSON.parse(ResultFileContent)
+      const evaluationDir = path.join(tempDir, 'evaluation')
+      const files = fs.readdirSync(evaluationDir)
+      const resultFiles = files.filter((file) =>
+        file.includes('case1_results_'),
+      )
+      expect(resultFiles.length).toBe(1)
 
-        expect(content.caseId).toBe('case1')
-        expect(content.metrics).toBeDefined()
-        return ResultAsync.fromPromise(
-          Promise.resolve(),
-          () => new Error('Unexpected error'),
-        )
-      })
+      // Check file content
+      const firstResultFile = resultFiles[0]
+      if (!firstResultFile) {
+        expect.fail('No result files found')
+      }
+      const resultFile = path.join(evaluationDir, firstResultFile)
+      const ResultFileContent = fs.readFileSync(resultFile, 'utf-8')
+      const content: { caseId: string; metrics: unknown } =
+        JSON.parse(ResultFileContent)
+      expect(content.caseId).toBe('case1')
+      expect(content.metrics).toBeDefined()
     })
   })
 })

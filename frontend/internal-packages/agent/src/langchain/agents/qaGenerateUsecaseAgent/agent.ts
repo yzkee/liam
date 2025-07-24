@@ -2,7 +2,6 @@ import { type BaseMessage, SystemMessage } from '@langchain/core/messages'
 import { ChatOpenAI } from '@langchain/openai'
 import { toJsonSchema } from '@valibot/to-json-schema'
 import * as v from 'valibot'
-import { createLangfuseHandler } from '../../utils/telemetry'
 import { QA_GENERATE_USECASE_SYSTEM_MESSAGE } from './prompts'
 
 // Single usecase schema

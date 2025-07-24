@@ -149,10 +149,12 @@ export async function getRepositoriesByInstallationId(installationId: number) {
   return data
 }
 
-export const getRepository = async (
+type RepoData = Awaited<ReturnType<Octokit['repos']['get']>>['data']
+
+export const getRepository = (
   projectId: string,
   installationId: number,
-): Promise<ResultAsync<any, Error>> => {
+): ResultAsync<RepoData, Error> => {
   const [owner, repo] = projectId.split('/')
   if (!owner || !repo) {
     return errAsync(new Error('Invalid project ID format'))

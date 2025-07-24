@@ -10,6 +10,7 @@ import {
 } from '@liam-hq/db-structure'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import { compare } from 'fast-json-patch'
+import { errAsync, okAsync, ResultAsync } from 'neverthrow'
 import * as v from 'valibot'
 import { ensurePathStructure } from '../utils/pathPreparation'
 import type {
@@ -54,7 +55,8 @@ export class SupabaseSchemaRepository implements SchemaRepository {
     // Fetch design session with timeline items
     const { data, error } = await this.client
       .from('design_sessions')
-      .select(`
+      .select(
+        `
         organization_id,
         timeline_items (
           id,
@@ -67,7 +69,8 @@ export class SupabaseSchemaRepository implements SchemaRepository {
           design_session_id,
           building_schema_version_id
         )
-      `)
+      `,
+      )
       .eq('id', designSessionId)
       .order('created_at', {
         ascending: true,
@@ -89,34 +92,47 @@ export class SupabaseSchemaRepository implements SchemaRepository {
     }
   }
 
-  async getSchema(designSessionId: string): Promise<{
-    data: SchemaData | null
-    error: { message: string } | null
-  }> {
-    const buildingSchemaResult = await this.getBuildingSchema(designSessionId)
-    if (buildingSchemaResult.error || !buildingSchemaResult.data) {
-      return buildingSchemaResult
-    }
+  getSchema(designSessionId: string): ResultAsync<SchemaData, Error> {
+    return ResultAsync.fromPromise(
+      this.getBuildingSchema(designSessionId),
+      (err) => new Error(`Failed to fetch schema data: ${String(err)}`),
+    ).andThen((buildingSchemaResult) => {
+      if (buildingSchemaResult.error || !buildingSchemaResult.data) {
+        return errAsync(
+          new Error(
+            `Failed to fetch schema data: ${String(
+              buildingSchemaResult.error,
+            )}`,
+          ),
+        )
+      }
 
-    const { buildingSchema } = buildingSchemaResult.data
+      const { buildingSchema } = buildingSchemaResult.data
 
-    const versionsResult = await this.getSchemaVersions(buildingSchema.id)
-    if (versionsResult.error) {
-      return versionsResult
-    }
+      return ResultAsync.fromPromise(
+        this.getSchemaVersions(buildingSchema.id),
+        (err) => new Error(`Failed to fetch schema versions: ${String(err)}`),
+      ).andThen((versionsResult) => {
+        if (versionsResult.error || !versionsResult.data) {
+          return errAsync(
+            new Error(
+              versionsResult.error?.message ||
+                'Schema versions data is missing',
+            ),
+          )
+        }
 
-    const { versions } = versionsResult.data
-    const currentSchema = this.buildCurrentSchema(buildingSchema, versions)
-    const latestVersionNumber = this.getLatestVersionNumber(versions)
+        const { versions } = versionsResult.data
+        const currentSchema = this.buildCurrentSchema(buildingSchema, versions)
+        const latestVersionNumber = this.getLatestVersionNumber(versions)
 
-    return {
-      data: {
-        id: buildingSchema.id,
-        schema: currentSchema,
-        latestVersionNumber,
-      },
-      error: null,
-    }
+        return okAsync({
+          id: buildingSchema.id,
+          schema: currentSchema,
+          latestVersionNumber,
+        })
+      })
+    })
   }
 
   private async getBuildingSchema(designSessionId: string) {
@@ -301,9 +317,11 @@ export class SupabaseSchemaRepository implements SchemaRepository {
     // Get the building schema
     const { data: buildingSchema, error } = await this.client
       .from('building_schemas')
-      .select(`
+      .select(
+        `
         id, organization_id, initial_schema_snapshot, design_session_id
-      `)
+      `,
+      )
       .eq('id', version.building_schema_id)
       .maybeSingle()
 

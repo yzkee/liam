@@ -55,24 +55,12 @@ export const deepModelingWorkflowTask = task({
 
     const workflowLogger = createWorkflowLogger()
 
-    return ResultAsync.fromPromise(
-      repositories.schema.getSchema(payload.designSessionId),
-      (err) => new Error(`Failed to fetch schema data: ${String(err)}`),
-    )
+    return repositories.schema
+      .getSchema(payload.designSessionId)
       .andThen((schemaResult) => {
-        if (!schemaResult.data) {
-          return errAsync(
-            new Error(
-              `Schema data is missing: ${
-                schemaResult.error ?? 'Unknown error'
-              }`,
-            ),
-          )
-        }
-
         const deepModelingParams: DeepModelingParams = {
           ...payload,
-          schemaData: schemaResult.data.schema,
+          schemaData: schemaResult.schema,
         }
 
         return ResultAsync.fromPromise(

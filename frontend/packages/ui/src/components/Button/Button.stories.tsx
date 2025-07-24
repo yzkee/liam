@@ -10,6 +10,7 @@ const meta = {
         'solid-primary',
         'solid-danger',
         'outline-secondary',
+        'outline-overlay',
         'ghost-secondary',
       ],
       description: 'The visual style of the button',
@@ -70,6 +71,14 @@ export const GhostSecondary: Story = {
   },
 }
 
+export const OutlineOverlay: Story = {
+  args: {
+    variant: 'outline-overlay',
+    children: 'Overlay Button',
+    size: 'md',
+  },
+}
+
 export const ExtraSmall: Story = {
   args: {
     size: 'xs',
@@ -117,5 +126,13 @@ export const Disabled: Story = {
   args: {
     disabled: true,
     children: 'Disabled Button',
+  },
+}
+
+export const OutlineOverlayDisabled: Story = {
+  args: {
+    variant: 'outline-overlay',
+    disabled: true,
+    children: 'Disabled Overlay',
   },
 }

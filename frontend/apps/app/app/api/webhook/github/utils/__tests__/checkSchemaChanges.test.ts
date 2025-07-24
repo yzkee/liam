@@ -81,6 +81,7 @@ describe('checkSchemaChanges', () => {
       .from('projects')
       .insert({
         name: 'Test Project for Schema Changes Test',
+        organization_id: '99999999-9999-9999-9999-999999999999',
         updated_at: now,
       })
       .select()

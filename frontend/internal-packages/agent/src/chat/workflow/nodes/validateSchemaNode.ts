@@ -1,8 +1,10 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
+import type { Database } from '@liam-hq/db'
 import { executeQuery } from '@liam-hq/pglite-server'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
+import { logAssistantMessage } from '../utils/timelineLogger'
 
 /**
  * Validate Schema Node - Combined DDL/DML Execution & Validation
@@ -12,6 +14,7 @@ export async function validateSchemaNode(
   state: WorkflowState,
   config: RunnableConfig,
 ): Promise<WorkflowState> {
+  const assistantRole: Database['public']['Enums']['assistant_role_enum'] = 'db'
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
     return {
@@ -19,6 +22,7 @@ export async function validateSchemaNode(
       error: configurableResult.error,
     }
   }
+  const { repositories } = configurableResult.value
 
   // Check if we have any statements to execute
   const hasDdl = state.ddlStatements?.trim()
@@ -41,6 +45,32 @@ export async function validateSchemaNode(
     state.designSessionId,
     combinedStatements,
   )
+
+  const queryResult = await repositories.schema.createValidationQuery({
+    designSessionId: state.designSessionId,
+    queryString: combinedStatements,
+  })
+
+  if (queryResult.success) {
+    await repositories.schema.createValidationResults({
+      validationQueryId: queryResult.queryId,
+      results,
+    })
+
+    const successCount = results.filter((r) => r.success).length
+    const errorCount = results.length - successCount
+    const validationMessage =
+      errorCount === 0
+        ? 'Database validation complete: all checks passed successfully'
+        : `Database validation found ${errorCount} issues that need attention`
+
+    await logAssistantMessage(
+      state,
+      repositories,
+      validationMessage,
+      assistantRole,
+    )
+  }
 
   // Check for execution errors
   const hasErrors = results.some((result: SqlResult) => !result.success)

@@ -21,56 +21,12 @@ Don't:
 
 When in doubt, prioritize momentum, simplicity, and clear results.
 
-IMPORTANT: You must ALWAYS respond with a valid JSON object in the following format:
+You have access to schema manipulation tools. Use them to make actual schema changes and communicate naturally with users about what you're doing.
+
+Tool Usage Examples:
+
+Adding a new table:
 {{
-  "message": "Your energetic response message here",
-  "operations": [
-    {{
-      "op": "add|remove|replace",
-      "path": "/path/to/schema/element",
-      "value": "new value (for add/replace operations)"
-    }}
-  ]
-}}
-
-CRITICAL JSON RULES:
-- NO COMMENTS of any kind in your JSON response (no /* */, no //, no #)
-- NO extra text before or after the JSON object
-- NO explanatory text outside the JSON structure
-- Your response must be PURE JSON that can be parsed by JSON.parse()
-- Comments will break the JSON parser and cause errors
-
-Schema Change Rules:
-- Use JSON Patch format (RFC 6902) for all schema modifications
-- "path" should point to specific schema elements like "/tables/users/columns/email" or "/tables/posts"
-- For adding new tables: "op": "add", "path": "/tables/TABLE_NAME", "value": TABLE_DEFINITION
-- For adding columns: "op": "add", "path": "/tables/TABLE_NAME/columns/COLUMN_NAME", "value": COLUMN_DEFINITION
-- For modifying columns: "op": "replace", "path": "/tables/TABLE_NAME/columns/COLUMN_NAME/type", "value": "new_type"
-- For removing elements: "op": "remove", "path": "/tables/TABLE_NAME/columns/COLUMN_NAME"
-- If no schema changes are needed, use an empty array: "operations": []
-
-Schema Structure Reference:
-- Tables: /tables/TABLE_NAME
-- Columns: /tables/TABLE_NAME/columns/COLUMN_NAME
-- Column properties: type, notNull, primary, unique, default, comment, check
-- Table properties: name, columns, comment, indexes, constraints (ALL REQUIRED)
-
-IMPORTANT Table Structure Rules:
-- Every table MUST include: name, columns, comment, indexes, constraints
-- Use empty objects {{}} for indexes and constraints if none are needed
-- Use null for comment if no comment is provided
-
-CRITICAL Validation Rules:
-- Column properties MUST be: name (string), type (string), notNull (boolean), primary (boolean), unique (boolean), default (string|number|boolean|null), comment (string|null), check (string|null)
-- All boolean values must be true/false, not strings
-- Constraint types: "PRIMARY KEY", "FOREIGN KEY", "UNIQUE", "CHECK"
-- Foreign key constraint actions MUST use these EXACT values: "CASCADE", "RESTRICT", "SET_NULL", "SET_DEFAULT", "NO_ACTION"
-- Use "SET_NULL" not "SET NULL" (underscore, not space)
-- Use "NO_ACTION" not "NO ACTION" (underscore, not space)
-
-Example Response:
-{{
-  "message": "Added! Created the 'users' table with id, name, and email columns. This gives you a solid foundation for user management!",
   "operations": [
     {{
       "op": "add",
@@ -78,21 +34,26 @@ Example Response:
       "value": {{
         "name": "users",
         "columns": {{
-          "id": {{"name": "id", "type": "uuid", "notNull": true, "primary": true, "default": "gen_random_uuid()", "comment": "Unique identifier for each user", "check": null, "unique": false}},
-          "name": {{"name": "name", "type": "text", "notNull": true, "primary": false, "default": null, "comment": "Name of the user", "check": null, "unique": false}},
-          "email": {{"name": "email", "type": "text", "notNull": true, "primary": false, "default": null, "comment": "User email required for login", "check": null, "unique": true}}
+          "id": {{"name": "id", "type": "uuid", "notNull": true, "default": "gen_random_uuid()", "comment": "Unique identifier for each user", "check": null, "unique": false}},
+          "name": {{"name": "name", "type": "text", "notNull": true, "default": null, "comment": "Name of the user", "check": null, "unique": false}},
+          "email": {{"name": "email", "type": "text", "notNull": true, "default": null, "comment": "User email required for login", "check": null, "unique": true}}
         }},
         "comment": null,
         "indexes": {{}},
-        "constraints": {{}}
+        "constraints": {{
+          "pk_users": {{
+            "type": "PRIMARY KEY",
+            "name": "pk_users",
+            "columnNames": ["id"]
+          }}
+        }}
       }}
     }}
   ]
 }}
 
-Example with Foreign Key Constraint:
+Adding a table with foreign key:
 {{
-  "message": "Added! Created the 'posts' table and linked it to users. Now you can track user posts!",
   "operations": [
     {{
       "op": "add",
@@ -100,13 +61,18 @@ Example with Foreign Key Constraint:
       "value": {{
         "name": "posts",
         "columns": {{
-          "id": {{"name": "id", "type": "uuid", "notNull": true, "primary": true, "default": "gen_random_uuid()", "comment": "Primary key for posts", "check": null, "unique": false}},
-          "title": {{"name": "title", "type": "text", "notNull": true, "primary": false, "default": null, "comment": "Post title", "check": null, "unique": false}},
-          "user_id": {{"name": "user_id", "type": "uuid", "notNull": true, "primary": false, "default": null, "comment": "References the user who created the post", "check": null, "unique": false}}
+          "id": {{"name": "id", "type": "uuid", "notNull": true, "default": "gen_random_uuid()", "comment": "Primary key for posts", "check": null, "unique": false}},
+          "title": {{"name": "title", "type": "text", "notNull": true, "default": null, "comment": "Post title", "check": null, "unique": false}},
+          "user_id": {{"name": "user_id", "type": "uuid", "notNull": true, "default": null, "comment": "References the user who created the post", "check": null, "unique": false}}
         }},
         "comment": null,
         "indexes": {{}},
         "constraints": {{
+          "pk_posts": {{
+            "type": "PRIMARY KEY",
+            "name": "pk_posts",
+            "columnNames": ["id"]
+          }},
           "posts_user_fk": {{
             "type": "FOREIGN KEY",
             "name": "posts_user_fk",
@@ -122,17 +88,10 @@ Example with Foreign Key Constraint:
   ]
 }}
 
-Additional Constraint Examples:
-- For cascading deletes: "deleteConstraint": "CASCADE"
-- For restricting deletes: "deleteConstraint": "RESTRICT"
-- For setting null on delete: "deleteConstraint": "SET_NULL"
-- For setting default on delete: "deleteConstraint": "SET_DEFAULT"
-- For no action on delete: "deleteConstraint": "NO_ACTION"
-- Same options apply to "updateConstraint"
-
-Complete Schema Information:
+Current Schema Information:
 {schemaText}
-`
+
+Remember: Use the available tools to make schema changes, and respond naturally!`
 
 export const designAgentPrompt = ChatPromptTemplate.fromTemplate(
   designAgentSystemPrompt,

@@ -22,10 +22,7 @@ describe('designSchemaNode retry behavior', () => {
     )
     const mockInvokeDesignAgent = vi.mocked(invokeDesignAgent)
     mockInvokeDesignAgent.mockResolvedValue(
-      ok({
-        message: new AIMessage('Schema generated successfully'),
-        operations: [],
-      }),
+      ok(new AIMessage('Schema generated successfully')),
     )
 
     const mockRepositories = {
@@ -33,7 +30,14 @@ describe('designSchemaNode retry behavior', () => {
         updateTimelineItem: vi.fn(),
         getSchema: vi.fn(),
         getDesignSession: vi.fn(),
-        createVersion: vi.fn(),
+        createEmptyPatchVersion: vi.fn().mockResolvedValue({
+          success: true,
+          versionId: 'test-version-id',
+        }),
+        updateVersion: vi.fn().mockResolvedValue({
+          success: true,
+          newSchema: { tables: {} },
+        }),
         createTimelineItem: vi.fn().mockResolvedValue({
           success: true,
           timelineItem: { id: 'test-timeline-id' },
@@ -58,6 +62,7 @@ describe('designSchemaNode retry behavior', () => {
       schemaData: { tables: {} },
       buildingSchemaId: 'test-id',
       latestVersionNumber: 1,
+      organizationId: 'test-org-id',
       designSessionId: 'session-id',
       userId: 'user-id',
       retryCount: { ddlExecutionRetry: 1 },
@@ -87,6 +92,10 @@ describe('designSchemaNode retry behavior', () => {
           content: expect.stringContaining('Foreign key constraint error'),
         }),
       ]),
+      expect.objectContaining({
+        buildingSchemaVersionId: 'test-version-id',
+        repositories: mockRepositories,
+      }),
     )
   })
 })

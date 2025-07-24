@@ -18,7 +18,20 @@ export const fetchDesignSessionWithTimelineItems = async (
           created_at,
           organization_id,
           design_session_id,
-          building_schema_version_id
+          building_schema_version_id,
+          query_result_id,
+          assistant_role,
+          validation_queries!query_result_id (
+            id,
+            query_string,
+            validation_results (
+              id,
+              result_set,
+              status,
+              error_message,
+              executed_at
+            )
+          )
         )
       `)
     .eq('id', designSessionId)

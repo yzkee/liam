@@ -243,9 +243,9 @@ describe(_processor, () => {
       expect(value.tables['posts']?.constraints['postsTousers']).toEqual({
         type: 'FOREIGN KEY',
         name: 'postsTousers',
-        columnName: 'user_id',
+        columnNames: ['user_id'],
         targetTableName: 'users',
-        targetColumnName: 'id',
+        targetColumnNames: ['id'],
         updateConstraint: 'NO_ACTION',
         deleteConstraint: 'NO_ACTION',
       })
@@ -268,9 +268,9 @@ describe(_processor, () => {
       expect(value.tables['posts']?.constraints['postsTousers']).toEqual({
         type: 'FOREIGN KEY',
         name: 'postsTousers',
-        columnName: 'user_id',
+        columnNames: ['user_id'],
         targetTableName: 'users',
-        targetColumnName: 'id',
+        targetColumnNames: ['id'],
         updateConstraint: 'NO_ACTION',
         deleteConstraint: 'NO_ACTION',
       })
@@ -304,9 +304,9 @@ describe(_processor, () => {
           expect(value.tables['posts']?.constraints['postsTousers']).toEqual({
             type: 'FOREIGN KEY',
             name: 'postsTousers',
-            columnName: 'user_id',
+            columnNames: ['user_id'],
             targetTableName: 'users',
-            targetColumnName: 'id',
+            targetColumnNames: ['id'],
             updateConstraint: 'NO_ACTION',
             deleteConstraint: expectedAction,
           })
@@ -320,7 +320,6 @@ describe(_processor, () => {
           id   BigInt    @id @default(autoincrement())
           posts posts[]
         }
-
         model posts {
           id   BigInt    @id @default(autoincrement())
           user users @relation(fields: [user_id], references: [id])
@@ -328,15 +327,20 @@ describe(_processor, () => {
         }
       `)
 
+      expect(value.tables['users']).toBeDefined()
+      expect(value.tables['posts']).toBeDefined()
+
       const usersTable = value.tables['users']
       const postsTable = value.tables['posts']
 
-      if (!usersTable || !usersTable.columns) {
-        throw new Error('Users table or columns are undefined')
+      if (!usersTable || !postsTable) {
+        expect(usersTable).toBeDefined()
+        expect(postsTable).toBeDefined()
+        return
       }
-      if (!postsTable || !postsTable.columns) {
-        throw new Error('Posts table or columns are undefined')
-      }
+
+      expect(usersTable.columns).toBeDefined()
+      expect(postsTable.columns).toBeDefined()
 
       const usersColumnNames = Object.keys(usersTable.columns)
       const postsColumnNames = Object.keys(postsTable.columns)
@@ -499,9 +503,9 @@ describe(_processor, () => {
               postsTousers: {
                 type: 'FOREIGN KEY',
                 name: 'postsTousers',
-                columnName: 'raw_user_id',
+                columnNames: ['raw_user_id'],
                 targetTableName: 'users',
-                targetColumnName: '_id',
+                targetColumnNames: ['_id'],
                 updateConstraint: 'NO_ACTION',
                 deleteConstraint: 'NO_ACTION',
               },
@@ -616,9 +620,9 @@ describe(_processor, () => {
               PostToUser: {
                 type: 'FOREIGN KEY',
                 name: 'PostToUser',
-                columnName: 'raw_user_id',
+                columnNames: ['raw_user_id'],
                 targetTableName: 'users',
-                targetColumnName: '_id',
+                targetColumnNames: ['_id'],
                 updateConstraint: 'NO_ACTION',
                 deleteConstraint: 'NO_ACTION',
               },
@@ -736,18 +740,18 @@ describe(_processor, () => {
               _CategoryToPost_A_fkey: {
                 type: 'FOREIGN KEY',
                 name: '_CategoryToPost_A_fkey',
-                columnName: 'A',
+                columnNames: ['A'],
                 targetTableName: 'Category',
-                targetColumnName: 'id',
+                targetColumnNames: ['id'],
                 updateConstraint: 'CASCADE',
                 deleteConstraint: 'CASCADE',
               },
               _CategoryToPost_B_fkey: {
                 type: 'FOREIGN KEY',
                 name: '_CategoryToPost_B_fkey',
-                columnName: 'B',
+                columnNames: ['B'],
                 targetTableName: 'Post',
-                targetColumnName: 'id',
+                targetColumnNames: ['id'],
                 updateConstraint: 'CASCADE',
                 deleteConstraint: 'CASCADE',
               },

@@ -1,12 +1,31 @@
 'use client'
 
+import type { Database } from '@liam-hq/db'
 import clsx from 'clsx'
 import type { FC, ReactNode } from 'react'
 import { MarkdownContent } from '@/components/MarkdownContent'
 import styles from './AgentMessage.module.css'
-import { BuildAgent } from './components/AgentAvatar'
+import { DBAgent, PMAgent, QAAgent } from './components/AgentAvatar'
 
 type AgentMessageState = 'default' | 'generating'
+
+/**
+ * Get agent avatar and name from role
+ */
+const getAgentInfo = (
+  role: Database['public']['Enums']['assistant_role_enum'],
+) => {
+  switch (role) {
+    case 'db':
+      return { avatar: <DBAgent />, name: 'DB Agent' }
+    case 'pm':
+      return { avatar: <PMAgent />, name: 'PM Agent' }
+    case 'qa':
+      return { avatar: <QAAgent />, name: 'QA Agent' }
+    default:
+      return { avatar: <DBAgent />, name: 'DB Agent' }
+  }
+}
 
 type AgentMessageProps = {
   /**
@@ -21,30 +40,35 @@ type AgentMessageProps = {
    * The timestamp to display
    */
   time?: string
-  /**
-   * The name of the agent to display
-   */
-  agentName?: string
+  assistantRole: Database['public']['Enums']['assistant_role_enum']
   /**
    * Optional children to render below the message
    */
   children?: ReactNode
+  /**
+   * Whether to show avatar and name (false for consecutive messages from the same agent)
+   */
+  showHeader?: boolean
 }
 
 export const AgentMessage: FC<AgentMessageProps> = ({
   state = 'default',
   message = '',
-  agentName,
+  assistantRole,
   children,
+  showHeader = true,
 }) => {
   const isGenerating = state === 'generating'
+  const { avatar, name } = getAgentInfo(assistantRole)
 
   return (
     <div className={styles.container}>
-      <div className={styles.avatarContainer}>
-        <BuildAgent />
-        <span className={styles.agentName}>{agentName || 'Build Agent'}</span>
-      </div>
+      {showHeader && (
+        <div className={styles.avatarContainer}>
+          {avatar}
+          <span className={styles.agentName}>{name}</span>
+        </div>
+      )}
       <div className={styles.contentContainer}>
         {isGenerating &&
         (!message || (typeof message === 'string' && message.trim() === '')) ? (

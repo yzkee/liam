@@ -105,7 +105,7 @@ export async function POST(request: Request) {
   const jobPayload: DeepModelingPayload = {
     ...validationResult.output,
     userId,
-    organizationId: organizationId ?? undefined,
+    organizationId: organizationId,
     latestVersionNumber: latestVersion.number,
     buildingSchemaId: buildingSchema.id,
     history,

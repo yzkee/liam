@@ -72,6 +72,16 @@ CREATE EXTENSION IF NOT EXISTS "vector" WITH SCHEMA "public";
 
 
 
+CREATE TYPE "public"."assistant_role_enum" AS ENUM (
+    'db',
+    'pm',
+    'qa'
+);
+
+
+ALTER TYPE "public"."assistant_role_enum" OWNER TO "postgres";
+
+
 CREATE TYPE "public"."category_enum" AS ENUM (
     'MIGRATION_SAFETY',
     'DATA_INTEGRITY',
@@ -120,7 +130,8 @@ CREATE TYPE "public"."timeline_item_type_enum" AS ENUM (
     'assistant',
     'schema_version',
     'error',
-    'assistant_log'
+    'assistant_log',
+    'query_result'
 );
 
 
@@ -1334,7 +1345,7 @@ CREATE TABLE IF NOT EXISTS "public"."projects" (
     "name" "text" NOT NULL,
     "created_at" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "updated_at" timestamp(3) with time zone NOT NULL,
-    "organization_id" "uuid"
+    "organization_id" "uuid" NOT NULL
 );
 
 
@@ -1423,7 +1434,9 @@ CREATE TABLE IF NOT EXISTS "public"."timeline_items" (
     "updated_at" timestamp(3) with time zone NOT NULL,
     "organization_id" "uuid" NOT NULL,
     "building_schema_version_id" "uuid",
-    "type" "public"."timeline_item_type_enum" NOT NULL
+    "type" "public"."timeline_item_type_enum" NOT NULL,
+    "query_result_id" "uuid",
+    "assistant_role" "public"."assistant_role_enum"
 );
 
 
@@ -1764,6 +1777,10 @@ CREATE UNIQUE INDEX "schema_file_path_project_id_key" ON "public"."schema_file_p
 
 
 CREATE INDEX "timeline_items_building_schema_version_id_idx" ON "public"."timeline_items" USING "btree" ("building_schema_version_id");
+
+
+
+CREATE INDEX "timeline_items_query_result_id_idx" ON "public"."timeline_items" USING "btree" ("query_result_id") WHERE ("query_result_id" IS NOT NULL);
 
 
 
@@ -2180,6 +2197,11 @@ ALTER TABLE ONLY "public"."timeline_items"
 
 ALTER TABLE ONLY "public"."timeline_items"
     ADD CONSTRAINT "timeline_items_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+
+ALTER TABLE ONLY "public"."timeline_items"
+    ADD CONSTRAINT "timeline_items_query_result_id_fkey" FOREIGN KEY ("query_result_id") REFERENCES "public"."validation_queries"("id") ON DELETE CASCADE;
 
 
 
@@ -3335,6 +3357,10 @@ ALTER PUBLICATION "supabase_realtime" OWNER TO "postgres";
 
 
 ALTER PUBLICATION "supabase_realtime" ADD TABLE ONLY "public"."artifacts";
+
+
+
+ALTER PUBLICATION "supabase_realtime" ADD TABLE ONLY "public"."building_schema_versions";
 
 
 

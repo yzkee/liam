@@ -7,6 +7,7 @@ describe('getProjects', () => {
     const supabase = await createClient()
     await supabase.from('projects').insert({
       name: 'Test Project',
+      organization_id: '99999999-9999-9999-9999-999999999999',
       updated_at: new Date().toISOString(),
     })
 

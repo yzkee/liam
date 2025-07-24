@@ -32,10 +32,10 @@ const config: StorybookConfig = {
       config.resolve.alias = {
         ...config.resolve.alias,
         '@': path.resolve(__dirname, '../../../apps/app'),
-        // Redirect imports of langfuseWeb to our mock implementation
-        '../../../apps/app/lib/langfuseWeb': path.resolve(
+        // Mock VersionMessage component to avoid Supabase dependency
+        '../../../apps/app/components/SessionDetailPage/components/Chat/components/TimelineItem/components/VersionMessage/VersionMessage': path.resolve(
           __dirname,
-          './langfuseWeb.mock.ts',
+          '../../../apps/app/components/SessionDetailPage/components/Chat/components/TimelineItem/components/VersionMessage/VersionMessage.mock.tsx',
         ),
       }
     }

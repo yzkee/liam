@@ -892,21 +892,21 @@ export type Database = {
           created_at: string
           id: string
           name: string
-          organization_id: string | null
+          organization_id: string
           updated_at: string
         }
         Insert: {
           created_at?: string
           id?: string
           name: string
-          organization_id?: string | null
+          organization_id: string
           updated_at: string
         }
         Update: {
           created_at?: string
           id?: string
           name?: string
-          organization_id?: string | null
+          organization_id?: string
           updated_at?: string
         }
         Relationships: [
@@ -1169,34 +1169,46 @@ export type Database = {
       }
       timeline_items: {
         Row: {
+          assistant_role:
+            | Database['public']['Enums']['assistant_role_enum']
+            | null
           building_schema_version_id: string | null
           content: string
           created_at: string
           design_session_id: string
           id: string
           organization_id: string
+          query_result_id: string | null
           type: Database['public']['Enums']['timeline_item_type_enum']
           updated_at: string
           user_id: string | null
         }
         Insert: {
+          assistant_role?:
+            | Database['public']['Enums']['assistant_role_enum']
+            | null
           building_schema_version_id?: string | null
           content: string
           created_at?: string
           design_session_id: string
           id?: string
           organization_id: string
+          query_result_id?: string | null
           type: Database['public']['Enums']['timeline_item_type_enum']
           updated_at: string
           user_id?: string | null
         }
         Update: {
+          assistant_role?:
+            | Database['public']['Enums']['assistant_role_enum']
+            | null
           building_schema_version_id?: string | null
           content?: string
           created_at?: string
           design_session_id?: string
           id?: string
           organization_id?: string
+          query_result_id?: string | null
           type?: Database['public']['Enums']['timeline_item_type_enum']
           updated_at?: string
           user_id?: string | null
@@ -1221,6 +1233,13 @@ export type Database = {
             columns: ['organization_id']
             isOneToOne: false
             referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'timeline_items_query_result_id_fkey'
+            columns: ['query_result_id']
+            isOneToOne: false
+            referencedRelation: 'validation_queries'
             referencedColumns: ['id']
           },
           {
@@ -1543,6 +1562,7 @@ export type Database = {
       }
     }
     Enums: {
+      assistant_role_enum: 'db' | 'pm' | 'qa'
       category_enum:
         | 'MIGRATION_SAFETY'
         | 'DATA_INTEGRITY'
@@ -1558,6 +1578,7 @@ export type Database = {
         | 'schema_version'
         | 'error'
         | 'assistant_log'
+        | 'query_result'
       workflow_run_status: 'pending' | 'success' | 'error'
     }
     CompositeTypes: {
@@ -1677,6 +1698,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      assistant_role_enum: ['db', 'pm', 'qa'],
       category_enum: [
         'MIGRATION_SAFETY',
         'DATA_INTEGRITY',
@@ -1693,6 +1715,7 @@ export const Constants = {
         'schema_version',
         'error',
         'assistant_log',
+        'query_result',
       ],
       workflow_run_status: ['pending', 'success', 'error'],
     },

@@ -26,6 +26,12 @@
   border: 1px solid var(--button-border);
 }
 
+.disabled.outlineOverlay {
+  color: var(--overlay-30);
+  background: var(--overlay-10);
+  border: 1px solid var(--overlay-10);
+}
+
 .solidPrimary {
   background: var(--button-primary-background);
   border: 1px solid var(--button-primary-background);
@@ -77,6 +83,22 @@
 
 .ghostSecondary:hover {
   background-color: var(--overlay-5);
+}
+
+.outlineOverlay {
+  color: var(--button-secondary-foreground);
+  background-color: transparent;
+  border: 1px solid var(--overlay-20);
+  transition:
+    background-color var(--default-hover-animation-duration)
+    var(--default-timing-function),
+    border-color var(--default-hover-animation-duration)
+    var(--default-timing-function);
+}
+
+.outlineOverlay:hover {
+  background-color: var(--overlay-10);
+  border-color: transparent;
 }
 
 .xs {

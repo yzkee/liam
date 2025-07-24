@@ -438,10 +438,13 @@ export class SupabaseSchemaRepository implements SchemaRepository {
   ): Promise<TimelineItemResult> {
     const { designSessionId, content, type } = params
     const userId = 'userId' in params ? params.userId : null
+    const assistantRole = 'role' in params ? params.role : null
     const buildingSchemaVersionId =
       'buildingSchemaVersionId' in params
         ? params.buildingSchemaVersionId
         : null
+    const queryResultId =
+      'queryResultId' in params ? params.queryResultId : null
     const now = new Date().toISOString()
 
     const { data: timelineItem, error } = await this.client
@@ -452,7 +455,9 @@ export class SupabaseSchemaRepository implements SchemaRepository {
         type,
         user_id: userId,
         building_schema_version_id: buildingSchemaVersionId,
+        query_result_id: queryResultId,
         updated_at: now,
+        assistant_role: assistantRole,
       })
       .select()
       .single()
@@ -678,13 +683,13 @@ export class SupabaseSchemaRepository implements SchemaRepository {
   async createWorkflowRun(
     params: CreateWorkflowRunParams,
   ): Promise<WorkflowRunResult> {
-    const { designSessionId, runId } = params
+    const { designSessionId, workflowRunId } = params
 
     const { data: workflowRun, error } = await this.client
       .from('workflow_runs')
       .insert({
         design_session_id: designSessionId,
-        workflow_run_id: runId,
+        workflow_run_id: workflowRunId,
       })
       .select()
       .single()
@@ -709,12 +714,12 @@ export class SupabaseSchemaRepository implements SchemaRepository {
   async updateWorkflowRunStatus(
     params: UpdateWorkflowRunStatusParams,
   ): Promise<WorkflowRunResult> {
-    const { runId, status } = params
+    const { workflowRunId, status } = params
 
     const { data: workflowRun, error } = await this.client
       .from('workflow_runs')
       .update({ status })
-      .eq('run_id', runId)
+      .eq('workflow_run_id', workflowRunId)
       .select()
       .single()
 

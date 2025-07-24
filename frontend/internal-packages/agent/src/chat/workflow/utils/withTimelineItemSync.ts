@@ -21,10 +21,7 @@ async function handleAIMessage(
 ): Promise<void> {
   const result = await context.repositories.schema.createTimelineItem({
     designSessionId: context.designSessionId,
-    content:
-      typeof message.content === 'string'
-        ? message.content
-        : JSON.stringify(message.content),
+    content: message.text,
     type: 'assistant',
     role: context.assistantRole || 'db',
   })
@@ -40,10 +37,7 @@ async function handleHumanMessage(
 ): Promise<void> {
   const result = await context.repositories.schema.createTimelineItem({
     designSessionId: context.designSessionId,
-    content:
-      typeof message.content === 'string'
-        ? message.content
-        : JSON.stringify(message.content),
+    content: message.text,
     type: 'user',
     userId: context.userId,
   })
@@ -60,10 +54,7 @@ async function handleToolMessage(
   message: ToolMessage,
   context: TimelineSyncContext,
 ): Promise<void> {
-  const content =
-    typeof message.content === 'string'
-      ? message.content
-      : JSON.stringify(message.content)
+  const content = message.text
 
   const isError = content.toLowerCase().includes('error')
   const timelineType = isError ? 'error' : 'assistant'

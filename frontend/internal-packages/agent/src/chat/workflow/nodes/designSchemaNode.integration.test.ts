@@ -27,8 +27,6 @@ describe('designSchemaNode -> executeDdlNode integration', () => {
 
   const mockRepository = {
     schema: {
-      updateVersion: vi.fn(),
-      createEmptyPatchVersion: vi.fn(),
       createVersion: vi.fn(),
       createTimelineItem: vi.fn(),
       getSchema: vi.fn(),
@@ -44,6 +42,8 @@ describe('designSchemaNode -> executeDdlNode integration', () => {
       createValidationResults: vi.fn().mockResolvedValue({
         success: true,
       }),
+      createWorkflowRun: vi.fn(),
+      updateWorkflowRunStatus: vi.fn(),
     },
   }
 
@@ -75,12 +75,7 @@ describe('designSchemaNode -> executeDdlNode integration', () => {
       timelineItem: { id: 'test-timeline-id' } as const,
     })
     // Setup default successful version creation
-    mockRepository.schema.createEmptyPatchVersion.mockResolvedValue({
-      success: true,
-      versionId: 'test-version-id',
-    })
-    // Setup default successful version update
-    mockRepository.schema.updateVersion.mockResolvedValue({
+    mockRepository.schema.createVersion.mockResolvedValue({
       success: true,
       newSchema: {
         tables: {

@@ -8,9 +8,7 @@ describe('getToolConfigurable', () => {
     schema: {
       getSchema: vi.fn(),
       getDesignSession: vi.fn(),
-      createEmptyPatchVersion: vi.fn(),
       createVersion: vi.fn(),
-      updateVersion: vi.fn(),
       createTimelineItem: vi.fn(),
       updateTimelineItem: vi.fn(),
       createArtifact: vi.fn(),

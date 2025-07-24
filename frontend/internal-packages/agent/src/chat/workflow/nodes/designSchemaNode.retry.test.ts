@@ -30,15 +30,7 @@ describe('designSchemaNode retry behavior', () => {
         updateTimelineItem: vi.fn(),
         getSchema: vi.fn(),
         getDesignSession: vi.fn(),
-        createEmptyPatchVersion: vi.fn().mockResolvedValue({
-          success: true,
-          versionId: 'test-version-id',
-        }),
         createVersion: vi.fn().mockResolvedValue({
-          success: true,
-          newSchema: { tables: {} },
-        }),
-        updateVersion: vi.fn().mockResolvedValue({
           success: true,
           newSchema: { tables: {} },
         }),
@@ -49,6 +41,10 @@ describe('designSchemaNode retry behavior', () => {
         createArtifact: vi.fn(),
         updateArtifact: vi.fn(),
         getArtifact: vi.fn(),
+        createValidationQuery: vi.fn(),
+        createValidationResults: vi.fn(),
+        createWorkflowRun: vi.fn(),
+        updateWorkflowRunStatus: vi.fn(),
       },
     }
 

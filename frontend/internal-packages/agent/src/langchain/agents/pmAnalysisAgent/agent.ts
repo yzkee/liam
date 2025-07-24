@@ -2,7 +2,6 @@ import { type BaseMessage, SystemMessage } from '@langchain/core/messages'
 import { ChatOpenAI } from '@langchain/openai'
 import { toJsonSchema } from '@valibot/to-json-schema'
 import * as v from 'valibot'
-import { createLangfuseHandler } from '../../utils/telemetry'
 import { PM_ANALYSIS_SYSTEM_MESSAGE } from './prompts'
 
 const requirementsAnalysisSchema = v.object({
@@ -19,7 +18,6 @@ export class PMAnalysisAgent {
   constructor() {
     const baseModel = new ChatOpenAI({
       model: 'o4-mini',
-      callbacks: [createLangfuseHandler()],
     })
 
     // Convert valibot schema to JSON Schema and bind to model

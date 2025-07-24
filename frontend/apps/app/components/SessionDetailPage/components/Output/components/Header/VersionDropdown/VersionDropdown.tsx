@@ -45,7 +45,7 @@ export const VersionDropdown: FC<Props> = ({
               key={version.id}
               onSelect={() => handleVersionSelect(version)}
             >
-              {`v${version.number}`}
+              {`Version ${version.number}`}
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>

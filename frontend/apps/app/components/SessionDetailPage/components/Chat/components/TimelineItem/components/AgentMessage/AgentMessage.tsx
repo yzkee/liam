@@ -45,6 +45,10 @@ type AgentMessageProps = {
    * Optional children to render below the message
    */
   children?: ReactNode
+  /**
+   * Whether to show avatar and name (false for consecutive messages from the same agent)
+   */
+  showHeader?: boolean
 }
 
 export const AgentMessage: FC<AgentMessageProps> = ({
@@ -52,16 +56,19 @@ export const AgentMessage: FC<AgentMessageProps> = ({
   message = '',
   assistantRole,
   children,
+  showHeader = true,
 }) => {
   const isGenerating = state === 'generating'
   const { avatar, name } = getAgentInfo(assistantRole)
 
   return (
     <div className={styles.container}>
-      <div className={styles.avatarContainer}>
-        {avatar}
-        <span className={styles.agentName}>{name}</span>
-      </div>
+      {showHeader && (
+        <div className={styles.avatarContainer}>
+          {avatar}
+          <span className={styles.agentName}>{name}</span>
+        </div>
+      )}
       <div className={styles.contentContainer}>
         {isGenerating &&
         (!message || (typeof message === 'string' && message.trim() === '')) ? (

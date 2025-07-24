@@ -1,7 +1,6 @@
 import { ChatOpenAI } from '@langchain/openai'
 import { toJsonSchema } from '@valibot/to-json-schema'
 import * as v from 'valibot'
-import { createLangfuseHandler } from '../../utils/telemetry'
 import type { BasePromptVariables, ChatAgent } from '../../utils/types'
 import { usecaseGenerationPrompt } from './prompts'
 
@@ -33,7 +32,6 @@ export class QAGenerateUsecaseAgent
   constructor() {
     const baseModel = new ChatOpenAI({
       model: 'o4-mini',
-      callbacks: [createLangfuseHandler()],
     })
 
     // Convert valibot schema to JSON Schema and bind to model

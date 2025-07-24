@@ -1,15 +1,9 @@
 import type { Preview } from '@storybook/react'
 import '@liam-hq/ui/src/styles/globals.css'
 import { initialize, mswDecorator } from 'msw-storybook-addon'
-import { getLangfuseWeb } from './langfuseWeb.mock'
 
 // Initialize MSW
 initialize()
-
-// Initialize the mock for Storybook
-if (typeof window !== 'undefined') {
-  window.__STORYBOOK_LANGFUSE_MOCK__ = getLangfuseWeb()
-}
 
 // Mock Supabase environment variables
 if (typeof process !== 'undefined') {

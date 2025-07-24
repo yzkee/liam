@@ -7,7 +7,6 @@ This directory contains the configuration for Storybook, a tool for developing U
 - `main.ts`: Main configuration file for Storybook
 - `preview.ts`: Preview configuration for stories
 - `preview-head.html`: For including global styles
-- `langfuseWeb.mock.ts`: Mock implementation for langfuseWeb
 - `vitest.setup.ts`: Setup for testing stories with Vitest
 
 ## Framework Configuration

@@ -45,6 +45,10 @@ const executeDeepModelingProcess = async (): Promise<Result<void, Error>> => {
   }
 
   logger.info('Starting Deep Modeling workflow execution...')
+  logger.info(`Input: "${workflowState.userInput.substring(0, 100)}..."`)
+  logger.info(
+    `Initial tables: ${Object.keys(workflowState.schemaData.tables).length}`,
+  )
 
   const result = await deepModeling(workflowState, config)
 
@@ -55,6 +59,30 @@ const executeDeepModelingProcess = async (): Promise<Result<void, Error>> => {
 
   const finalWorkflowState = result.value
   logger.info('Deep Modeling workflow completed successfully')
+
+  // Log actual messages content
+  if (finalWorkflowState.messages && finalWorkflowState.messages.length > 0) {
+    logger.info('Workflow Messages:')
+    finalWorkflowState.messages.forEach((message, index) => {
+      const messageType = message.constructor.name
+        .toLowerCase()
+        .replace('message', '')
+      const content =
+        typeof message.content === 'string'
+          ? message.content
+          : JSON.stringify(message.content)
+      logger.info(
+        `  ${index + 1}. [${messageType}] ${content.substring(0, 200)}${content.length > 200 ? '...' : ''}`,
+      )
+    })
+  }
+
+  // Debug: Log the final schema data structure
+  if (currentLogLevel === 'DEBUG') {
+    logger.debug('Final Schema Data:', {
+      schemaData: finalWorkflowState.schemaData,
+    })
+  }
 
   logSchemaResults(
     logger,

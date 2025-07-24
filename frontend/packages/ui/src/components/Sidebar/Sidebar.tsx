@@ -2,9 +2,9 @@
 
 import { Slot } from '@radix-ui/react-slot'
 import clsx from 'clsx'
+import { err, ok, Result } from 'neverthrow'
 import {
   type ComponentProps,
-  type CSSProperties,
   createContext,
   type ElementRef,
   type Ref,
@@ -34,15 +34,20 @@ type SidebarContext = {
   toggleSidebar: () => void
 }
 
+type CSSPropertiesWithCustomProps = React.CSSProperties & {
+  '--sidebar-width'?: string
+  '--sidebar-width-icon'?: string
+}
+
 const SidebarContext = createContext<SidebarContext | null>(null)
 
-function useSidebar() {
+function useSidebar(): Result<SidebarContext, Error> {
   const context = useContext(SidebarContext)
   if (!context) {
-    throw new Error('useSidebar must be used within a SidebarProvider.')
+    return err(new Error('useSidebar must be used within a SidebarProvider.'))
   }
 
-  return context
+  return ok(context)
 }
 
 const SidebarProvider = ({
@@ -95,17 +100,17 @@ const SidebarProvider = ({
     [state, openMobile, toggleSidebar, open],
   )
 
+  const sidebarStyle: CSSPropertiesWithCustomProps = {
+    '--sidebar-width': SIDEBAR_WIDTH,
+    '--sidebar-width-icon': SIDEBAR_WIDTH_ICON,
+    ...style,
+  }
+
   return (
     <SidebarContext.Provider value={contextValue}>
       <TooltipProvider delayDuration={0}>
         <div
-          style={
-            {
-              '--sidebar-width': SIDEBAR_WIDTH,
-              '--sidebar-width-icon': SIDEBAR_WIDTH_ICON,
-              ...style,
-            } as CSSProperties
-          }
+          style={sidebarStyle}
           className={clsx(styles.sidebarProvider, className)}
           ref={ref}
           {...props}
@@ -128,7 +133,11 @@ const Sidebar = ({
   collapsible?: 'offcanvas' | 'icon' | 'none'
   ref?: Ref<HTMLDivElement>
 }) => {
-  const { state } = useSidebar()
+  const sidebarResult = useSidebar()
+  if (sidebarResult.isErr()) {
+    throw sidebarResult.error
+  }
+  const { state } = sidebarResult.value
 
   if (collapsible === 'none') {
     return (
@@ -167,7 +176,11 @@ const SidebarTrigger = ({
   ref,
   ...props
 }: SidebarTriggerProps) => {
-  const { toggleSidebar, state } = useSidebar()
+  const sidebarResult = useSidebar()
+  if (sidebarResult.isErr()) {
+    throw sidebarResult.error
+  }
+  const { toggleSidebar, state } = sidebarResult.value
 
   return (
     <TooltipRoot>

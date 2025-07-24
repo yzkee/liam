@@ -371,7 +371,14 @@ const executeDesignProcess = async (): Promise<Result<void, Error>> => {
   })
 
   // Execute workflow
-  const config = { configurable: { repositories, logger } }
+  const config = {
+    configurable: {
+      repositories,
+      logger,
+      buildingSchemaId: buildingSchema.id,
+      latestVersionNumber: buildingSchema.latest_version_number,
+    },
+  }
   const initialState = await createWorkflowState(
     organization.id,
     buildingSchema.id,

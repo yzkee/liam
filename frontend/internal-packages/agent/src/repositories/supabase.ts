@@ -255,13 +255,16 @@ export class SupabaseSchemaRepository implements SchemaRepository {
 
     // Start with the initial schema snapshot
     const initialSchemaSnapshot = buildingSchema.initial_schema_snapshot
-    if (typeof initialSchemaSnapshot !== 'string') {
+    if (
+      typeof initialSchemaSnapshot !== 'object' ||
+      initialSchemaSnapshot === null
+    ) {
       return {
         success: false,
         error: 'Invalid initial schema snapshot format',
       }
     }
-    const initialSchemaParsed = JSON.parse(initialSchemaSnapshot)
+    const initialSchemaParsed = initialSchemaSnapshot
 
     const validationResult = v.safeParse(schemaSchema, initialSchemaParsed)
 

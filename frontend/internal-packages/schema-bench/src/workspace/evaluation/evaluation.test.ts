@@ -311,9 +311,9 @@ describe('evaluateSchema', () => {
         expect.fail('No result files found')
       }
       const resultFile = path.join(evaluationDir, firstResultFile)
-      const ResultFileContent = fs.readFileSync(resultFile, 'utf-8')
+      const resultFileContent = fs.readFileSync(resultFile, 'utf-8')
       const content: { caseId: string; metrics: unknown } =
-        JSON.parse(ResultFileContent)
+        JSON.parse(resultFileContent)
       expect(content.caseId).toBe('case1')
       expect(content.metrics).toBeDefined()
     })

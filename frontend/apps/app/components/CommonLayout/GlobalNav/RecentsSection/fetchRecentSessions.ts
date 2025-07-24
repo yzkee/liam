@@ -1,11 +1,5 @@
 import { createClient } from '@/libs/db/server'
-
-export type RecentSession = {
-  id: string
-  name: string
-  created_at: string
-  project_id: string | null
-}
+import type { RecentSession } from './types'
 
 export const fetchRecentSessions = async (
   limit = 5,

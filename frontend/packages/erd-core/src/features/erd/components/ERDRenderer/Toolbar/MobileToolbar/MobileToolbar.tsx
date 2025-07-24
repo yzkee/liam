@@ -52,9 +52,9 @@ export const MobileToolbar: FC = () => {
       <ToolbarPrimitive.Root
         ref={toolbarRef}
         className={clsx(styles.root, {
-          [styles.closed]: !isOpen,
-          [styles.open]: isOpen && !isShowModeMenu,
-          [styles.openShowModeMenu]: isOpen && isShowModeMenu,
+          [styles.closed!]: !isOpen,
+          [styles.open!]: isOpen && !isShowModeMenu,
+          [styles.openShowModeMenu!]: isOpen && isShowModeMenu,
         })}
         aria-label="Toolbar"
         data-testid="toolbar"

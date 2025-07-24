@@ -12,43 +12,20 @@ import type { ReviewComment } from '../../../../../../types'
 import { commentStateField, setCommentsEffect } from './commentExtension'
 import { customTheme, sqlHighlightStyle } from './editorTheme'
 
+// Function to create fold gutter marker DOM elements
+const createFoldMarkerElement = (isOpen: boolean): HTMLElement => {
+  const span = document.createElement('span')
+  span.className = `cm-foldMarker ${isOpen ? 'open' : 'closed'}`
+  const transform = isOpen ? ' transform="rotate(90 8 8)"' : ''
+  span.innerHTML = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 4L10 8L6 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"${transform}/></svg>`
+  return span
+}
+
 const baseExtensions: Extension[] = [
   lineNumbers(),
   foldGutter({
-    markerDOM: (open) => {
-      const container = document.createElement('span')
-      container.style.display = 'inline-flex'
-      container.style.alignItems = 'center'
-      container.style.justifyContent = 'center'
-      container.style.width = '16px'
-      container.style.height = '16px'
-      container.style.marginTop = open ? '0px' : '-1px'
-
-      // Directly insert SVG without React
-      const svgNS = 'http://www.w3.org/2000/svg'
-      const svg = document.createElementNS(svgNS, 'svg')
-      svg.setAttribute('width', '12')
-      svg.setAttribute('height', '12')
-      svg.setAttribute('viewBox', '0 0 24 24')
-      svg.setAttribute('fill', 'none')
-      svg.setAttribute('stroke', 'currentColor')
-      svg.setAttribute('stroke-width', '1.5')
-      svg.setAttribute('stroke-linecap', 'round')
-      svg.setAttribute('stroke-linejoin', 'round')
-
-      const path = document.createElementNS(svgNS, 'path')
-      if (open) {
-        // ChevronDown path
-        path.setAttribute('d', 'M6 9l6 6 6-6')
-      } else {
-        // ChevronRight path
-        path.setAttribute('d', 'M9 18l6-6-6-6')
-      }
-
-      svg.appendChild(path)
-      container.appendChild(svg)
-
-      return container
+    markerDOM: (open): HTMLElement => {
+      return createFoldMarkerElement(open)
     },
   }),
   drawSelection(),

@@ -29,6 +29,7 @@ describe('designSchemaNode -> executeDdlNode integration', () => {
     schema: {
       updateVersion: vi.fn(),
       createEmptyPatchVersion: vi.fn(),
+      createVersion: vi.fn(),
       createTimelineItem: vi.fn(),
       getSchema: vi.fn(),
       getDesignSession: vi.fn(),
@@ -130,10 +131,10 @@ describe('designSchemaNode -> executeDdlNode integration', () => {
     // Step 1: Design schema (now returns buildingSchemaVersionId for tool workflow)
     const afterDesign = await designSchemaNode(initialState, createMockConfig())
 
-    // Verify design completed without error and has version ID
-    expect(afterDesign.buildingSchemaVersionId).toBeDefined()
+    // Verify design completed without error
     expect(afterDesign.error).toBeUndefined()
     // Schema updates now happen through the tool workflow, not directly in this node
+    // Version creation is atomic and happens when the tool is called
 
     // Since schema updates now happen through tool workflow,
     // we simulate the updated schema state for DDL execution
@@ -202,32 +203,26 @@ describe('designSchemaNode -> executeDdlNode integration', () => {
     )
   })
 
-  it('should handle schema validation errors gracefully', async () => {
+  it('should handle agent invocation errors gracefully', async () => {
     const initialSchema: Schema = { tables: {} }
 
-    // Mock AI agent response with changes
+    // Mock AI agent invocation failure
     const { invokeDesignAgent } = await import(
       '../../../langchain/agents/databaseSchemaBuildAgent/agent'
     )
     const mockInvokeDesignAgent = vi.mocked(invokeDesignAgent)
     mockInvokeDesignAgent.mockResolvedValue(
-      ok(new AIMessage('Schema validation will fail')),
+      err(new Error('Agent invocation failed')),
     )
-
-    // Mock version creation failure
-    mockRepository.schema.createEmptyPatchVersion.mockResolvedValue({
-      success: false,
-      error: 'Failed to create new version',
-    })
 
     const initialState = createMockState(initialSchema)
 
-    // Step 1: Design schema (should fail during version creation)
+    // Step 1: Design schema (should fail during agent invocation)
     const result = await designSchemaNode(initialState, createMockConfig())
 
     // Verify error handling
     expect(result.error).toBeInstanceOf(Error)
-    expect(result.error?.message).toBe('Failed to create new version')
+    expect(result.error?.message).toBe('Agent invocation failed')
     expect(result.schemaData).toEqual(initialSchema)
   })
 

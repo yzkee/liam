@@ -34,6 +34,10 @@ describe('designSchemaNode retry behavior', () => {
           success: true,
           versionId: 'test-version-id',
         }),
+        createVersion: vi.fn().mockResolvedValue({
+          success: true,
+          newSchema: { tables: {} },
+        }),
         updateVersion: vi.fn().mockResolvedValue({
           success: true,
           newSchema: { tables: {} },
@@ -93,7 +97,8 @@ describe('designSchemaNode retry behavior', () => {
         }),
       ]),
       expect.objectContaining({
-        buildingSchemaVersionId: 'test-version-id',
+        buildingSchemaId: 'test-id',
+        latestVersionNumber: 1,
         repositories: mockRepositories,
       }),
     )

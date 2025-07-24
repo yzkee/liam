@@ -171,6 +171,7 @@ describe('Chat Workflow', () => {
       getSchema: vi.fn(),
       getDesignSession: vi.fn(),
       createEmptyPatchVersion: vi.fn(),
+      createVersion: vi.fn(),
       updateVersion: vi.fn(),
       createTimelineItem: vi.fn(),
       createArtifact: vi.fn(),

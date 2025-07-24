@@ -9,6 +9,7 @@ describe('schemaDesignTool', () => {
       getSchema: vi.fn(),
       getDesignSession: vi.fn(),
       createEmptyPatchVersion: vi.fn(),
+      createVersion: vi.fn(),
       updateVersion: vi.fn(),
       createTimelineItem: vi.fn(),
       updateTimelineItem: vi.fn(),
@@ -23,11 +24,13 @@ describe('schemaDesignTool', () => {
   }
 
   const createMockConfig = (
-    buildingSchemaVersionId: string,
+    buildingSchemaId: string,
+    latestVersionNumber: number,
     repositories: Repositories = mockRepositories,
   ): RunnableConfig => ({
     configurable: {
-      buildingSchemaVersionId,
+      buildingSchemaId,
+      latestVersionNumber,
       repositories,
       logger: {
         log: vi.fn(),
@@ -44,9 +47,9 @@ describe('schemaDesignTool', () => {
       success: true,
       newSchema: { tables: [], relations: [] },
     })
-    mockRepositories.schema.updateVersion = mockUpdateVersion
+    mockRepositories.schema.createVersion = mockUpdateVersion
 
-    const config = createMockConfig('test-version-id')
+    const config = createMockConfig('test-version-id', 1)
     const input = {
       operations: [
         {
@@ -86,7 +89,8 @@ describe('schemaDesignTool', () => {
       'Schema successfully updated. The operations have been applied to the database schema.',
     )
     expect(mockUpdateVersion).toHaveBeenCalledWith({
-      buildingSchemaVersionId: 'test-version-id',
+      buildingSchemaId: 'test-version-id',
+      latestVersionNumber: 1,
       patch: input.operations,
     })
   })
@@ -96,9 +100,9 @@ describe('schemaDesignTool', () => {
       success: false,
       error: 'Database connection failed',
     })
-    mockRepositories.schema.updateVersion = mockUpdateVersion
+    mockRepositories.schema.createVersion = mockUpdateVersion
 
-    const config = createMockConfig('test-version-id')
+    const config = createMockConfig('test-version-id', 1)
     const input = {
       operations: [
         {
@@ -134,9 +138,9 @@ describe('schemaDesignTool', () => {
       success: false,
       error: null,
     })
-    mockRepositories.schema.updateVersion = mockUpdateVersion
+    mockRepositories.schema.createVersion = mockUpdateVersion
 
-    const config = createMockConfig('test-version-id')
+    const config = createMockConfig('test-version-id', 1)
     const input = {
       operations: [
         {
@@ -196,7 +200,7 @@ describe('schemaDesignTool', () => {
   })
 
   it('should handle malformed input', async () => {
-    const config = createMockConfig('test-version-id')
+    const config = createMockConfig('test-version-id', 1)
     const input = {
       operations: 'invalid-operations', // Should be an array
     }
@@ -212,9 +216,9 @@ describe('schemaDesignTool', () => {
       success: true,
       newSchema: { tables: [], relations: [] },
     })
-    mockRepositories.schema.updateVersion = mockUpdateVersion
+    mockRepositories.schema.createVersion = mockUpdateVersion
 
-    const config = createMockConfig('test-version-id')
+    const config = createMockConfig('test-version-id', 1)
     const input = {
       operations: [],
     }
@@ -225,7 +229,8 @@ describe('schemaDesignTool', () => {
       'Schema successfully updated. The operations have been applied to the database schema.',
     )
     expect(mockUpdateVersion).toHaveBeenCalledWith({
-      buildingSchemaVersionId: 'test-version-id',
+      buildingSchemaId: 'test-version-id',
+      latestVersionNumber: 1,
       patch: [],
     })
   })

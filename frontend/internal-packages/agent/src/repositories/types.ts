@@ -30,6 +30,12 @@ export type CreateEmptyPatchVersionParams = {
   latestVersionNumber: number
 }
 
+export type CreateVersionParams = {
+  buildingSchemaId: string
+  latestVersionNumber: number
+  patch: Operation[]
+}
+
 export type UpdateVersionParams = {
   buildingSchemaVersionId: string
   patch: Operation[]
@@ -149,6 +155,11 @@ export type SchemaRepository = {
   createEmptyPatchVersion(
     params: CreateEmptyPatchVersionParams,
   ): Promise<CreateVersionResult>
+
+  /**
+   * Create a new schema version with optimistic locking (atomic operation)
+   */
+  createVersion(params: CreateVersionParams): Promise<VersionResult>
 
   /**
    * Update an existing schema version with patch/reverse_patch

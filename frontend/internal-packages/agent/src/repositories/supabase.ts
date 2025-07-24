@@ -17,6 +17,7 @@ import type {
   CreateArtifactParams,
   CreateEmptyPatchVersionParams,
   CreateTimelineItemParams,
+  CreateVersionParams,
   CreateVersionResult,
   CreateWorkflowRunParams,
   DesignSessionData,
@@ -278,6 +279,188 @@ export class SupabaseSchemaRepository implements SchemaRepository {
     return {
       success: true,
       versionId: newVersion.id,
+    }
+  }
+
+  async createVersion(params: CreateVersionParams): Promise<VersionResult> {
+    const { buildingSchemaId, latestVersionNumber, patch } = params
+
+    // Generate message content based on patch operations
+    const patchCount = patch.length
+    const messageContent =
+      patchCount === 1
+        ? 'Schema updated with 1 change'
+        : `Schema updated with ${patchCount} changes`
+
+    const { data: buildingSchema, error } = await this.client
+      .from('building_schemas')
+      .select(`
+        id, organization_id, initial_schema_snapshot, design_session_id
+      `)
+      .eq('id', buildingSchemaId)
+      .maybeSingle()
+
+    if (!buildingSchema || error) {
+      return {
+        success: false,
+        error: `Failed to fetch building schema: ${error?.message}`,
+      }
+    }
+
+    // Get all previous versions to reconstruct the content
+    const { data: previousVersions, error: previousVersionsError } =
+      await this.client
+        .from('building_schema_versions')
+        .select('number, patch')
+        .eq('building_schema_id', buildingSchemaId)
+        .lte('number', latestVersionNumber)
+        .order('number', { ascending: true })
+
+    if (previousVersionsError) {
+      return {
+        success: false,
+        error: `Failed to fetch previous versions: ${previousVersionsError.message}`,
+      }
+    }
+
+    const patchArrayHistory = previousVersions
+      .map((version) => {
+        const parsed = v.safeParse(operationsSchema, version.patch)
+        if (parsed.success) {
+          return parsed.output
+        }
+        return null
+      })
+      .filter((patch): patch is NonNullable<typeof patch> => patch !== null)
+
+    // Start with the initial schema snapshot
+    const initialSchemaSnapshot = buildingSchema.initial_schema_snapshot
+    if (typeof initialSchemaSnapshot !== 'string') {
+      return {
+        success: false,
+        error: 'Invalid initial schema snapshot format',
+      }
+    }
+    const initialSchemaParsed = JSON.parse(initialSchemaSnapshot)
+
+    const validationResult = v.safeParse(schemaSchema, initialSchemaParsed)
+
+    if (!validationResult.success) {
+      return {
+        success: false,
+        error: 'Invalid initial schema structure',
+      }
+    }
+
+    const currentContent = JSON.parse(JSON.stringify(validationResult.output))
+
+    // Apply all patches in order
+    for (const patchArray of patchArrayHistory) {
+      // Apply each operation in the patch to currentContent
+      applyPatchOperations(currentContent, patchArray)
+    }
+
+    // Now apply the new patch to get the new content
+    const newContent = JSON.parse(JSON.stringify(currentContent))
+    applyPatchOperations(newContent, patch)
+
+    // Validate the new schema structure before proceeding
+    const newSchemaValidationResult = v.safeParse(schemaSchema, newContent)
+
+    if (!newSchemaValidationResult.success) {
+      return {
+        success: false,
+        error: 'New schema structure is invalid after applying changes',
+      }
+    }
+
+    // Calculate reverse patch from new content to current content
+    const reversePatch = compare(newContent, currentContent)
+
+    // Get the latest version number for this schema
+    const { data: latestVersion, error: latestVersionError } = await this.client
+      .from('building_schema_versions')
+      .select('number')
+      .eq('building_schema_id', buildingSchemaId)
+      .order('number', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (latestVersionError) {
+      return {
+        success: false,
+        error: `Failed to get latest version: ${latestVersionError.message}`,
+      }
+    }
+
+    // Get the actual latest version number
+    const actualLatestVersionNumber = latestVersion ? latestVersion.number : 0
+
+    // Check if the expected version number matches the actual latest version number
+    if (latestVersionNumber !== actualLatestVersionNumber) {
+      // Version conflict detected
+      return {
+        success: false,
+        error:
+          'Version conflict: The schema has been modified since you last loaded it',
+      }
+    }
+
+    const newVersionNumber = actualLatestVersionNumber + 1
+
+    // Create new version with patch and reverse_patch
+    const { data: newVersion, error: createVersionError } = await this.client
+      .from('building_schema_versions')
+      .insert({
+        building_schema_id: buildingSchemaId,
+        organization_id: buildingSchema.organization_id,
+        number: newVersionNumber,
+        patch: JSON.parse(JSON.stringify(patch)),
+        reverse_patch: JSON.parse(JSON.stringify(reversePatch)),
+      })
+      .select('id')
+      .single()
+
+    if (createVersionError) {
+      return {
+        success: false,
+        error: createVersionError.message,
+      }
+    }
+
+    // Update the building schema with the new schema
+    const { error: schemaUpdateError } = await this.client
+      .from('building_schemas')
+      .update({
+        schema: newContent,
+      })
+      .eq('id', buildingSchemaId)
+
+    if (schemaUpdateError) {
+      return {
+        success: false,
+        error: schemaUpdateError.message,
+      }
+    }
+
+    // Create a timeline item for the schema version
+    const timelineResult = await this.createTimelineItem({
+      designSessionId: buildingSchema.design_session_id,
+      content: messageContent,
+      type: 'schema_version',
+      buildingSchemaVersionId: newVersion.id,
+    })
+
+    if (!timelineResult.success) {
+      return {
+        success: false,
+        error: `Failed to create timeline item: ${timelineResult.error}`,
+      }
+    }
+
+    return {
+      success: true,
+      newSchema: newSchemaValidationResult.output,
     }
   }
 

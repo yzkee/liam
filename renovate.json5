@@ -42,8 +42,6 @@
         "@modelcontextprotocol/sdk",
         "style-dictionary",
         "/^@langchain/",
-        "/^langfuse$/",
-        "/^langfuse-langchain$/",
         "langsmith"
       ],
       "matchFileNames": ["frontend/internal-packages/**"],

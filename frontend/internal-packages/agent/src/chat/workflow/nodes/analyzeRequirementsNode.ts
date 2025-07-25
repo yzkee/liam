@@ -73,7 +73,7 @@ async function saveArtifacts(
     await logAssistantMessage(
       state,
       repositories,
-      'Your requirements have been saved and are ready for implementation',
+      'Your requirements have been analyzed and saved',
       assistantRole,
     )
   } else {

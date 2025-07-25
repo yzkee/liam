@@ -36,9 +36,9 @@ export const Input = ({
   return (
     <div
       className={clsx(styles.wrapper, wrapperClassName, sizeClassName, {
-        [styles.readOnly]: readOnly,
-        [styles.disabled]: disabled,
-        [styles.error]: error,
+        [styles['readOnly']]: readOnly,
+        [styles['disabled']]: disabled,
+        [styles['error']]: error,
       })}
     >
       {leftIcon && <div className={styles.icon}>{leftIcon}</div>}

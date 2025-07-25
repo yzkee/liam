@@ -18,9 +18,9 @@ import type {
   UpdateWorkflowRunStatusParams,
   VersionResult,
   WorkflowRunResult,
-} from '../repositories/types'
+} from './types'
 
-type TestSchemaRepositoryState = {
+type InMemoryRepositoryState = {
   schemas: Map<string, SchemaData>
   designSessions: Map<string, DesignSessionData>
   timelineItems: Map<string, Tables<'timeline_items'>>
@@ -34,18 +34,18 @@ type TestSchemaRepositoryState = {
   versions: Map<string, { id: string; schema: Schema; versionNumber: number }>
 }
 
-type TestSchemaRepositoryOptions = {
+type InMemoryRepositoryOptions = {
   schemas?: Record<string, Schema>
   designSessions?: Record<string, Partial<DesignSessionData>>
   artifacts?: Record<string, Artifact>
   workflowRuns?: Record<string, Partial<Tables<'workflow_runs'>>>
 }
 
-export class TestSchemaRepository implements SchemaRepository {
-  private state: TestSchemaRepositoryState
+export class InMemoryRepository implements SchemaRepository {
+  private state: InMemoryRepositoryState
   private idCounter = 1
 
-  constructor(options: TestSchemaRepositoryOptions = {}) {
+  constructor(options: InMemoryRepositoryOptions = {}) {
     this.state = {
       schemas: new Map(),
       designSessions: new Map(),

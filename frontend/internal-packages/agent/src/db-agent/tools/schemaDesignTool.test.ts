@@ -41,11 +41,11 @@ describe('schemaDesignTool', () => {
   })
 
   it('should successfully update schema version', async () => {
-    const mockUpdateVersion = vi.fn().mockResolvedValue({
+    const mockCreateVersion = vi.fn().mockResolvedValue({
       success: true,
       newSchema: { tables: [], relations: [] },
     })
-    mockRepositories.schema.createVersion = mockUpdateVersion
+    mockRepositories.schema.createVersion = mockCreateVersion
 
     const config = createMockConfig('test-version-id', 1)
     const input = {
@@ -86,7 +86,7 @@ describe('schemaDesignTool', () => {
     expect(result).toBe(
       'Schema successfully updated. The operations have been applied to the database schema.',
     )
-    expect(mockUpdateVersion).toHaveBeenCalledWith({
+    expect(mockCreateVersion).toHaveBeenCalledWith({
       buildingSchemaId: 'test-version-id',
       latestVersionNumber: 1,
       patch: input.operations,
@@ -94,11 +94,11 @@ describe('schemaDesignTool', () => {
   })
 
   it('should throw error when update fails', async () => {
-    const mockUpdateVersion = vi.fn().mockResolvedValue({
+    const mockCreateVersion = vi.fn().mockResolvedValue({
       success: false,
       error: 'Database connection failed',
     })
-    mockRepositories.schema.createVersion = mockUpdateVersion
+    mockRepositories.schema.createVersion = mockCreateVersion
 
     const config = createMockConfig('test-version-id', 1)
     const input = {
@@ -132,11 +132,11 @@ describe('schemaDesignTool', () => {
   })
 
   it('should throw unknown error when update fails without error message', async () => {
-    const mockUpdateVersion = vi.fn().mockResolvedValue({
+    const mockCreateVersion = vi.fn().mockResolvedValue({
       success: false,
       error: null,
     })
-    mockRepositories.schema.createVersion = mockUpdateVersion
+    mockRepositories.schema.createVersion = mockCreateVersion
 
     const config = createMockConfig('test-version-id', 1)
     const input = {
@@ -210,11 +210,11 @@ describe('schemaDesignTool', () => {
   })
 
   it('should handle empty operations array', async () => {
-    const mockUpdateVersion = vi.fn().mockResolvedValue({
+    const mockCreateVersion = vi.fn().mockResolvedValue({
       success: true,
       newSchema: { tables: [], relations: [] },
     })
-    mockRepositories.schema.createVersion = mockUpdateVersion
+    mockRepositories.schema.createVersion = mockCreateVersion
 
     const config = createMockConfig('test-version-id', 1)
     const input = {
@@ -226,7 +226,7 @@ describe('schemaDesignTool', () => {
     expect(result).toBe(
       'Schema successfully updated. The operations have been applied to the database schema.',
     )
-    expect(mockUpdateVersion).toHaveBeenCalledWith({
+    expect(mockCreateVersion).toHaveBeenCalledWith({
       buildingSchemaId: 'test-version-id',
       latestVersionNumber: 1,
       patch: [],

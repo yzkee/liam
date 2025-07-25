@@ -46,6 +46,7 @@ describe('prepareDmlNode', () => {
         createValidationResults: vi.fn(),
         createWorkflowRun: vi.fn(),
         updateWorkflowRunStatus: vi.fn(),
+        getVersion: vi.fn(),
       },
     }
 

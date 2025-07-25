@@ -2,7 +2,7 @@ import type { RunnableConfig } from '@langchain/core/runnables'
 import { aColumn, aSchema, aTable } from '@liam-hq/db-structure'
 import { describe, expect, it, vi } from 'vitest'
 import type { Repositories } from '../../repositories'
-import { TestSchemaRepository } from '../../test-helpers/TestSchemaRepository'
+import { InMemoryRepository } from '../../repositories/InMemoryRepository'
 import { schemaDesignTool } from './schemaDesignTool'
 
 describe('schemaDesignTool', () => {
@@ -27,7 +27,7 @@ describe('schemaDesignTool', () => {
 
   it('should successfully update schema version', async () => {
     const repositories: Repositories = {
-      schema: new TestSchemaRepository({
+      schema: new InMemoryRepository({
         schemas: {
           'test-schema': aSchema(),
         },
@@ -93,7 +93,7 @@ describe('schemaDesignTool', () => {
 
   it('should throw error when update fails', async () => {
     const repositories: Repositories = {
-      schema: new TestSchemaRepository(),
+      schema: new InMemoryRepository(),
     }
 
     const config = createMockConfig('non-existent-schema-id', 1, repositories)
@@ -123,7 +123,7 @@ describe('schemaDesignTool', () => {
 
   it('should handle malformed input', async () => {
     const repositories: Repositories = {
-      schema: new TestSchemaRepository(),
+      schema: new InMemoryRepository(),
     }
 
     const config = createMockConfig('test-schema-id', 1, repositories)
@@ -140,7 +140,7 @@ describe('schemaDesignTool', () => {
   it('should handle empty operations array', async () => {
     const initialSchema = aSchema({ tables: {} })
     const repositories: Repositories = {
-      schema: new TestSchemaRepository({
+      schema: new InMemoryRepository({
         schemas: {
           'test-schema': initialSchema,
         },

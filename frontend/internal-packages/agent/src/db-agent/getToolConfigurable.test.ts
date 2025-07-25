@@ -1,12 +1,12 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { describe, expect, it, vi } from 'vitest'
 import type { Repositories } from '../repositories'
-import { TestSchemaRepository } from '../test-helpers/TestSchemaRepository'
+import { InMemoryRepository } from '../repositories/InMemoryRepository'
 import { getToolConfigurable } from './getToolConfigurable'
 
 describe('getToolConfigurable', () => {
   const repositories: Repositories = {
-    schema: new TestSchemaRepository(),
+    schema: new InMemoryRepository(),
   }
 
   const mockLogger = {

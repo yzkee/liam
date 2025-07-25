@@ -19,9 +19,7 @@ export const PrimaryKeyConstraintsItem: FC<Props> = ({
     <GridTableRoot>
       <GridTableHeader>{primaryKeyConstraint.name}</GridTableHeader>
       <GridTableItem>
-        <GridTableDt>
-          {primaryKeyConstraint.columnNames.length === 1 ? 'Column' : 'Columns'}
-        </GridTableDt>
+        <GridTableDt>Column</GridTableDt>
         <GridTableDd>{primaryKeyConstraint.columnNames.join(', ')}</GridTableDd>
       </GridTableItem>
     </GridTableRoot>

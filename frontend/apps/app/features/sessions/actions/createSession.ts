@@ -122,6 +122,10 @@ async function getRepositoryInfo(
   const repository = projectData.github_repositories
   const schemaFilePathData = projectData.projects?.schema_file_paths?.[0]
 
+  if (!schemaFilePathData) {
+    return { success: false, error: 'Schema file path not found' }
+  }
+
   return { success: true, schemaFilePathData, repository }
 }
 

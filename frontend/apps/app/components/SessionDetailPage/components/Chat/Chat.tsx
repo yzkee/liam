@@ -98,7 +98,9 @@ export const Chat: FC<Props> = ({
     const currentRole = getEffectiveRole(item)
 
     if (Array.isArray(lastItem) && lastItem.length > 0) {
-      const lastRole = getEffectiveRole(lastItem[0])
+      const firstItem = lastItem[0]
+      if (!firstItem) return acc
+      const lastRole = getEffectiveRole(firstItem)
       if (lastRole === currentRole) {
         lastItem.push(item)
         return acc

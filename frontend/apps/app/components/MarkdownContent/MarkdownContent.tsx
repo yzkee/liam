@@ -84,7 +84,7 @@ export const MarkdownContent: FC<MarkdownContentProps> = ({ content }) => {
           const startsWithEmoji = regex.test(textContent.trim())
 
           const className = clsx(styles.li, {
-            [styles.liWithEmoji]: startsWithEmoji,
+            [styles.liWithEmoji ?? '']: startsWithEmoji,
           })
 
           return (

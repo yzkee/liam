@@ -87,7 +87,7 @@ export const GitHubSessionFormPresenter: FC<Props> = ({
   const handleRemoveAttachment = (index: number) => {
     setAttachments((prev) => {
       const updated = [...prev]
-      URL.revokeObjectURL(updated[index].url)
+      URL.revokeObjectURL(updated[index]?.url ?? '')
       updated.splice(index, 1)
       return updated
     })

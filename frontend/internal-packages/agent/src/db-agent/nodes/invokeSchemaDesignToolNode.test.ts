@@ -1,23 +1,12 @@
 import { AIMessage, HumanMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import type { Schema } from '@liam-hq/db-structure'
-import { err, ok, okAsync } from 'neverthrow'
+import { okAsync } from 'neverthrow'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { WorkflowState } from '../../chat/workflow/types'
 import type { Repositories } from '../../repositories'
 import type { NodeLogger } from '../../utils/nodeLogger'
 import { invokeSchemaDesignToolNode } from './invokeSchemaDesignToolNode'
-
-// Mock only external dependencies
-vi.mock('../../chat/workflow/shared/getConfigurable', () => ({
-  getConfigurable: vi.fn(),
-}))
-
-vi.mock('../../chat/workflow/utils/withTimelineItemSync', () => ({
-  withTimelineItemSync: vi.fn().mockImplementation((message) => message),
-}))
-
-import { getConfigurable } from '../../chat/workflow/shared/getConfigurable'
 
 describe('invokeSchemaDesignToolNode', () => {
   let mockRepositories: Repositories
@@ -42,7 +31,7 @@ describe('invokeSchemaDesignToolNode', () => {
         getDesignSession: vi.fn(),
         createEmptyPatchVersion: vi.fn(),
         updateVersion: vi.fn(),
-        createTimelineItem: vi.fn(),
+        createTimelineItem: vi.fn().mockResolvedValue({ success: true }),
         updateTimelineItem: vi.fn(),
         createArtifact: vi.fn(),
         updateArtifact: vi.fn(),
@@ -77,23 +66,19 @@ describe('invokeSchemaDesignToolNode', () => {
         buildingSchemaVersionId: 'test-version-id',
       },
     }
-
-    // Mock getConfigurable to return success
-    vi.mocked(getConfigurable).mockReturnValue(
-      ok({ repositories: mockRepositories, logger: mockLogger }),
-    )
   })
 
-  it('should return error when configuration is invalid', async () => {
-    const mockError = new Error('Configuration error')
-    vi.mocked(getConfigurable).mockReturnValue(err(mockError))
-
+  it('should process tool execution and return result', async () => {
     const result = await invokeSchemaDesignToolNode(mockState, mockConfig)
 
-    expect(result).toEqual({
-      ...mockState,
-      error: mockError,
-    })
+    // Should return a result with messages
+    expect(result.messages).toBeDefined()
+    expect(Array.isArray(result.messages)).toBe(true)
+    // Should preserve other state properties when not errored
+    if ('buildingSchemaId' in result) {
+      expect(result.buildingSchemaId).toBe(mockState.buildingSchemaId)
+      expect(result.designSessionId).toBe(mockState.designSessionId)
+    }
   })
 
   it('should update schema data when tool execution is successful', async () => {

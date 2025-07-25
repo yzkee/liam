@@ -200,7 +200,7 @@ export class InMemoryRepository implements SchemaRepository {
       query_result_id: null,
       assistant_role: null,
       type: 'user',
-    } satisfies Partial<Tables<'timeline_items'>>
+    }
 
     let timelineItem: Tables<'timeline_items'>
 

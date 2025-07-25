@@ -253,20 +253,10 @@ export class SupabaseSchemaRepository implements SchemaRepository {
       })
       .filter((patch): patch is NonNullable<typeof patch> => patch !== null)
 
-    // Start with the initial schema snapshot
-    const initialSchemaSnapshot = buildingSchema.initial_schema_snapshot
-    if (
-      typeof initialSchemaSnapshot !== 'object' ||
-      initialSchemaSnapshot === null
-    ) {
-      return {
-        success: false,
-        error: 'Invalid initial schema snapshot format',
-      }
-    }
-    const initialSchemaParsed = initialSchemaSnapshot
-
-    const validationResult = v.safeParse(schemaSchema, initialSchemaParsed)
+    const validationResult = v.safeParse(
+      schemaSchema,
+      buildingSchema.initial_schema_snapshot,
+    )
 
     if (!validationResult.success) {
       return {

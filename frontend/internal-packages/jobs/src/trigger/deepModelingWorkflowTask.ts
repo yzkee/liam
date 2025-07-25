@@ -45,15 +45,17 @@ export const deepModelingWorkflowTask = task({
     const schemaResult = await repositories.schema.getSchema(
       payload.designSessionId,
     )
-    if (schemaResult.error || !schemaResult.data) {
-      throw new Error(`Failed to fetch schema data: ${schemaResult.error}`)
+    if (schemaResult.isErr()) {
+      throw new Error(
+        `Failed to fetch schema data: ${schemaResult.error.message}`,
+      )
     }
 
     const workflowLogger = createWorkflowLogger()
 
     const deepModelingParams: DeepModelingParams = {
       ...payload,
-      schemaData: schemaResult.data.schema,
+      schemaData: schemaResult.value.schema,
     }
 
     const result = await deepModeling(deepModelingParams, {

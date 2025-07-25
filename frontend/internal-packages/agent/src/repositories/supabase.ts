@@ -10,6 +10,7 @@ import {
 } from '@liam-hq/db-structure'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import { compare } from 'fast-json-patch'
+import { errAsync, okAsync, ResultAsync } from 'neverthrow'
 import * as v from 'valibot'
 import { ensurePathStructure } from '../utils/pathPreparation'
 import type {
@@ -89,34 +90,47 @@ export class SupabaseSchemaRepository implements SchemaRepository {
     }
   }
 
-  async getSchema(designSessionId: string): Promise<{
-    data: SchemaData | null
-    error: { message: string } | null
-  }> {
-    const buildingSchemaResult = await this.getBuildingSchema(designSessionId)
-    if (buildingSchemaResult.error || !buildingSchemaResult.data) {
-      return buildingSchemaResult
-    }
+  getSchema(designSessionId: string): ResultAsync<SchemaData, Error> {
+    return ResultAsync.fromPromise(
+      this.getBuildingSchema(designSessionId),
+      (error) => new Error(`Failed to get building schema: ${String(error)}`),
+    )
+      .andThen((buildingSchemaResult) => {
+        if (buildingSchemaResult.error || !buildingSchemaResult.data) {
+          return errAsync(
+            new Error(
+              buildingSchemaResult.error?.message ||
+                'Building schema not found',
+            ),
+          )
+        }
 
-    const { buildingSchema } = buildingSchemaResult.data
+        return okAsync(buildingSchemaResult.data.buildingSchema)
+      })
+      .andThen((buildingSchema) => {
+        return ResultAsync.fromPromise(
+          this.getSchemaVersions(buildingSchema.id),
+          (error) =>
+            new Error(`Failed to get schema versions: ${String(error)}`),
+        ).andThen((versionsResult) => {
+          if (versionsResult.error) {
+            return errAsync(new Error(versionsResult.error.message))
+          }
 
-    const versionsResult = await this.getSchemaVersions(buildingSchema.id)
-    if (versionsResult.error) {
-      return versionsResult
-    }
+          const { versions } = versionsResult.data
+          const currentSchema = this.buildCurrentSchema(
+            buildingSchema,
+            versions,
+          )
+          const latestVersionNumber = this.getLatestVersionNumber(versions)
 
-    const { versions } = versionsResult.data
-    const currentSchema = this.buildCurrentSchema(buildingSchema, versions)
-    const latestVersionNumber = this.getLatestVersionNumber(versions)
-
-    return {
-      data: {
-        id: buildingSchema.id,
-        schema: currentSchema,
-        latestVersionNumber,
-      },
-      error: null,
-    }
+          return okAsync({
+            id: buildingSchema.id,
+            schema: currentSchema,
+            latestVersionNumber,
+          })
+        })
+      })
   }
 
   private async getBuildingSchema(designSessionId: string) {

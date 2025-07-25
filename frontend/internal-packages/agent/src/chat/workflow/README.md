@@ -14,7 +14,6 @@ flowchart TD
     GENERATE_USECASE[generateUsecase<br/>Use Case Creation<br/><i>qaAgent</i>]
     PREPARE_DML[prepareDML<br/>DML Generation<br/><i>qaAgent</i>]
     VALIDATE[validateSchema<br/>DML Execution & Validation<br/><i>qaAgent</i>]
-    REVIEW[reviewDeliverables<br/>Final Requirements & Deliverables Confirmation<br/><i>pmReviewAgent</i>]
     FINALIZE[finalizeArtifacts<br/>Generate & Save Artifacts<br/><i>dbAgentArtifactGen</i>]
     END([__end__<br/>End])
 
@@ -28,10 +27,8 @@ flowchart TD
     EXECUTE_DDL -->|ddlExecutionFailed| FINALIZE
     GENERATE_USECASE --> PREPARE_DML
     PREPARE_DML --> VALIDATE
-    VALIDATE -->|success| REVIEW
+    VALIDATE -->|success| FINALIZE
     VALIDATE -->|error| DESIGN
-    REVIEW -->|no error| FINALIZE
-    REVIEW -->|error| ANALYZE
     FINALIZE --> END
 
 ```
@@ -88,15 +85,13 @@ interface WorkflowState {
 5. **generateUsecase**: Creates use cases for testing with automatic timeline sync (performed by qaAgent)
 6. **prepareDML**: Generates DML statements for testing (performed by qaAgent)
 7. **validateSchema**: Executes DML and validates schema (performed by qaAgent)
-8. **reviewDeliverables**: Performs final confirmation of requirements and deliverables (performed by pmReviewAgent)
-9. **finalizeArtifacts**: Generates and saves comprehensive artifacts to database, handles error timeline items (performed by dbAgentArtifactGen)
+8. **finalizeArtifacts**: Generates and saves comprehensive artifacts to database, handles error timeline items (performed by dbAgentArtifactGen)
 
 ### Conditional Edge Logic
 
 - **designSchema**: Routes to `executeDDL` on success, `finalizeArtifacts` on error
 - **executeDDL**: Routes to `generateUsecase` on success, `designSchema` if retry needed, `finalizeArtifacts` if failed
-- **validateSchema**: Routes to `reviewDeliverables` on success, `designSchema` on validation error
-- **reviewDeliverables**: Routes to `finalizeArtifacts` on success, `analyzeRequirements` if issues found
+- **validateSchema**: Routes to `finalizeArtifacts` on success, `designSchema` on validation error
 
 ## Timeline Synchronization
 

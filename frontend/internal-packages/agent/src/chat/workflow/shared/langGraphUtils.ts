@@ -11,10 +11,10 @@ import type { NodeLogger } from '../../../utils/nodeLogger'
  * Important: Node retries do NOT count toward this limit. The limit only
  * applies to transitions between nodes.
  *
- * The workflow has 9 nodes:
- * - Normal execution: 10 transitions (START → 9 nodes → END)
+ * The workflow has 8 nodes:
+ * - Normal execution: 9 transitions (START → 8 nodes → END)
  * - With error loops: May have additional transitions when errors occur
- *   (e.g., validateSchema → designSchema, reviewDeliverables → analyzeRequirements)
+ *   (e.g., validateSchema → designSchema)
  *
  * Setting this to 20 ensures:
  * - Complete workflow execution under normal conditions

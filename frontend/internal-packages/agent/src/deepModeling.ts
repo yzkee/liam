@@ -13,7 +13,6 @@ import {
   finalizeArtifactsNode,
   generateUsecaseNode,
   prepareDmlNode,
-  reviewDeliverablesNode,
   validateSchemaNode,
   webSearchNode,
 } from './chat/workflow/nodes'
@@ -79,9 +78,6 @@ const createGraph = () => {
     .addNode('validateSchema', validateSchemaNode, {
       retryPolicy: RETRY_POLICY,
     })
-    .addNode('reviewDeliverables', reviewDeliverablesNode, {
-      retryPolicy: RETRY_POLICY,
-    })
     .addNode('finalizeArtifacts', finalizeArtifactsNode, {
       retryPolicy: RETRY_POLICY,
     })
@@ -122,26 +118,12 @@ const createGraph = () => {
     .addConditionalEdges(
       'validateSchema',
       (state) => {
-        // success → reviewDeliverables
+        // success → finalizeArtifacts
         // dml error or test fail → designSchema
-        return state.error ? 'designSchema' : 'reviewDeliverables'
+        return state.error ? 'designSchema' : 'finalizeArtifacts'
       },
       {
         designSchema: 'designSchema',
-        reviewDeliverables: 'reviewDeliverables',
-      },
-    )
-
-    // Conditional edges for review results
-    .addConditionalEdges(
-      'reviewDeliverables',
-      (state) => {
-        // OK → finalizeArtifacts
-        // NG or issues found → analyzeRequirements
-        return state.error ? 'analyzeRequirements' : 'finalizeArtifacts'
-      },
-      {
-        analyzeRequirements: 'analyzeRequirements',
         finalizeArtifacts: 'finalizeArtifacts',
       },
     )

@@ -38,7 +38,6 @@ describe('withTimelineItemSync', () => {
         createValidationResults: vi.fn(),
         createWorkflowRun: vi.fn(),
         updateWorkflowRunStatus: vi.fn(),
-        getVersion: vi.fn(),
       },
     }
     mockConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {})

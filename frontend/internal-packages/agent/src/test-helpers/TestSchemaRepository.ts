@@ -3,13 +3,11 @@ import type { Tables } from '@liam-hq/db/supabase/database.types'
 import type { Schema } from '@liam-hq/db-structure'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import { applyPatch } from 'fast-json-patch'
-import { errAsync, okAsync, type ResultAsync } from 'neverthrow'
 import type {
   ArtifactResult,
   CreateArtifactParams,
-  CreateEmptyPatchVersionParams,
   CreateTimelineItemParams,
-  CreateVersionResult,
+  CreateVersionParams,
   CreateWorkflowRunParams,
   DesignSessionData,
   SchemaData,
@@ -17,7 +15,6 @@ import type {
   TimelineItemResult,
   UpdateArtifactParams,
   UpdateTimelineItemParams,
-  UpdateVersionParams,
   UpdateWorkflowRunStatusParams,
   VersionResult,
   WorkflowRunResult,
@@ -129,9 +126,37 @@ export class TestSchemaRepository implements SchemaRepository {
     return this.state.designSessions.get(designSessionId) || null
   }
 
-  async createEmptyPatchVersion(
-    params: CreateEmptyPatchVersionParams,
-  ): Promise<CreateVersionResult> {
+  async createVersion(params: CreateVersionParams): Promise<VersionResult> {
+    const schema = this.state.schemas.get(params.buildingSchemaId)
+
+    if (!schema) {
+      return { success: false, error: 'Building schema not found' }
+    }
+
+    const patchResult = applyPatch(schema.schema, params.patch, false, false)
+    const updatedSchema = patchResult.newDocument
+
+    if (!this.isValidSchema(updatedSchema)) {
+      return { success: false, error: 'Invalid schema after patch' }
+    }
+
+    // Update schema
+    this.state.schemas.set(params.buildingSchemaId, {
+      ...schema,
+      schema: updatedSchema,
+      latestVersionNumber: params.latestVersionNumber + 1,
+    })
+
+    return { success: true, newSchema: updatedSchema }
+  }
+
+  // Helper method for tests that need to create empty versions
+  async createEmptyPatchVersion(params: {
+    buildingSchemaId: string
+    latestVersionNumber: number
+  }): Promise<
+    { success: true; versionId: string } | { success: false; error: string }
+  > {
     const versionId = this.generateId()
     const schema = this.state.schemas.get(params.buildingSchemaId)
 
@@ -152,29 +177,6 @@ export class TestSchemaRepository implements SchemaRepository {
     })
 
     return { success: true, versionId }
-  }
-
-  async updateVersion(params: UpdateVersionParams): Promise<VersionResult> {
-    const version = this.state.versions.get(params.buildingSchemaVersionId)
-
-    if (!version) {
-      return { success: false, error: 'Version not found' }
-    }
-
-    const patchResult = applyPatch(version.schema, params.patch, false, false)
-    const updatedSchema = patchResult.newDocument
-
-    if (!this.isValidSchema(updatedSchema)) {
-      return { success: false, error: 'Invalid schema after patch' }
-    }
-
-    // Update version
-    this.state.versions.set(params.buildingSchemaVersionId, {
-      ...version,
-      schema: updatedSchema,
-    })
-
-    return { success: true, newSchema: updatedSchema }
   }
 
   async createTimelineItem(
@@ -424,19 +426,5 @@ export class TestSchemaRepository implements SchemaRepository {
 
   getValidationResults(queryId: string): SqlResult[] | null {
     return this.state.validationResults.get(queryId) || null
-  }
-
-  getVersion(versionId: string): ResultAsync<
-    {
-      id: string
-      schema: Schema
-      versionNumber: number
-    },
-    Error
-  > {
-    const version = this.state.versions.get(versionId)
-    return version
-      ? okAsync(version)
-      : errAsync(new Error(`Version not found: ${versionId}`))
   }
 }

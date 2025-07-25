@@ -7,11 +7,13 @@ import { schemaDesignTool } from './schemaDesignTool'
 
 describe('schemaDesignTool', () => {
   const createMockConfig = (
-    buildingSchemaVersionId: string,
+    buildingSchemaId: string,
+    latestVersionNumber: number,
     testRepositories: Repositories,
   ): RunnableConfig => ({
     configurable: {
-      buildingSchemaVersionId,
+      buildingSchemaId,
+      latestVersionNumber,
       repositories: testRepositories,
       logger: {
         log: vi.fn(),
@@ -32,15 +34,7 @@ describe('schemaDesignTool', () => {
       }),
     }
 
-    const versionResult = await repositories.schema.createEmptyPatchVersion({
-      buildingSchemaId: 'test-schema',
-      latestVersionNumber: 1,
-    })
-
-    expect(versionResult.success).toBe(true)
-    if (!versionResult.success) return
-
-    const config = createMockConfig(versionResult.versionId, repositories)
+    const config = createMockConfig('test-schema', 1, repositories)
     const input = {
       operations: [
         {
@@ -72,15 +66,9 @@ describe('schemaDesignTool', () => {
     )
 
     // Verify the schema was actually updated in the repository by schemaDesignTool
-    const versionData = await repositories.schema.getVersion(
-      versionResult.versionId,
-    )
-    const version = versionData.unwrapOr(null)
-
-    expect(version).toEqual({
-      id: versionResult.versionId,
-      versionNumber: 2,
-      schema: aSchema({
+    const schemaData = await repositories.schema.getSchema('test-schema')
+    expect(schemaData.data?.schema).toEqual(
+      aSchema({
         tables: {
           users: aTable({
             name: 'users',
@@ -99,7 +87,8 @@ describe('schemaDesignTool', () => {
           }),
         },
       }),
-    })
+    )
+    expect(schemaData.data?.latestVersionNumber).toBe(2)
   })
 
   it('should throw error when update fails', async () => {
@@ -107,7 +96,7 @@ describe('schemaDesignTool', () => {
       schema: new TestSchemaRepository(),
     }
 
-    const config = createMockConfig('non-existent-version-id', repositories)
+    const config = createMockConfig('non-existent-schema-id', 1, repositories)
     const input = {
       operations: [
         {
@@ -128,7 +117,7 @@ describe('schemaDesignTool', () => {
     }
 
     await expect(schemaDesignTool.invoke(input, config)).rejects.toThrow(
-      'Schema update failed: Version not found. Please fix the error and try again.',
+      'Schema update failed: Building schema not found. Please fix the error and try again.',
     )
   })
 
@@ -137,7 +126,7 @@ describe('schemaDesignTool', () => {
       schema: new TestSchemaRepository(),
     }
 
-    const config = createMockConfig('test-version-id', repositories)
+    const config = createMockConfig('test-schema-id', 1, repositories)
     const input = {
       operations: 'invalid-operations', // Should be an array
     }
@@ -157,15 +146,8 @@ describe('schemaDesignTool', () => {
         },
       }),
     }
-    const versionResult = await repositories.schema.createEmptyPatchVersion({
-      buildingSchemaId: 'test-schema',
-      latestVersionNumber: 1,
-    })
 
-    expect(versionResult.success).toBe(true)
-    if (!versionResult.success) return
-
-    const config = createMockConfig(versionResult.versionId, repositories) // Pass repositories to config
+    const config = createMockConfig('test-schema', 1, repositories)
     const input = {
       operations: [],
     }

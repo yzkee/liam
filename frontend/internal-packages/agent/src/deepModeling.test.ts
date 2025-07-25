@@ -180,7 +180,6 @@ describe('Chat Workflow', () => {
       createValidationResults: vi.fn(),
       createWorkflowRun: vi.fn(),
       updateWorkflowRunStatus: vi.fn(),
-      getVersion: vi.fn(),
     } as SchemaRepository
 
     mockRepositories = {

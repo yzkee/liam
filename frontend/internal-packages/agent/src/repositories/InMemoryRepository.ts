@@ -1,8 +1,10 @@
 import type { Artifact } from '@liam-hq/artifact'
 import type { Tables } from '@liam-hq/db/supabase/database.types'
 import type { Schema } from '@liam-hq/db-structure'
+import { schemaSchema } from '@liam-hq/db-structure'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import { applyPatch } from 'fast-json-patch'
+import * as v from 'valibot'
 import type {
   ArtifactResult,
   CreateArtifactParams,
@@ -106,7 +108,8 @@ export class InMemoryRepository implements SchemaRepository {
   }
 
   private isValidSchema(obj: unknown): obj is Schema {
-    return typeof obj === 'object' && obj !== null && 'tables' in obj
+    const result = v.safeParse(schemaSchema, obj)
+    return result.success
   }
 
   async getSchema(designSessionId: string): Promise<{

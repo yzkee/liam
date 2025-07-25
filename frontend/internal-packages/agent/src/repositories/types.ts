@@ -25,19 +25,11 @@ export type DesignSessionData = {
   }>
 }
 
-export type CreateEmptyPatchVersionParams = {
+export type CreateVersionParams = {
   buildingSchemaId: string
   latestVersionNumber: number
-}
-
-export type UpdateVersionParams = {
-  buildingSchemaVersionId: string
   patch: Operation[]
 }
-
-export type CreateVersionResult =
-  | { success: true; versionId: string }
-  | { success: false; error?: string | null }
 
 export type VersionResult =
   | { success: true; newSchema: Schema }
@@ -144,16 +136,9 @@ export type SchemaRepository = {
   getDesignSession(designSessionId: string): Promise<DesignSessionData | null>
 
   /**
-   * Create a new empty schema version (patch/reverse_patch are null)
+   * Create a new schema version with optimistic locking (atomic operation)
    */
-  createEmptyPatchVersion(
-    params: CreateEmptyPatchVersionParams,
-  ): Promise<CreateVersionResult>
-
-  /**
-   * Update an existing schema version with patch/reverse_patch
-   */
-  updateVersion(params: UpdateVersionParams): Promise<VersionResult>
+  createVersion(params: CreateVersionParams): Promise<VersionResult>
 
   /**
    * Create a new timeline item in the design session

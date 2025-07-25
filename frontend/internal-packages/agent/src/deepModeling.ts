@@ -102,6 +102,8 @@ export const deepModeling = async (
       configurable: {
         repositories,
         logger,
+        buildingSchemaId,
+        latestVersionNumber,
       },
       runId: workflowRunId,
       callbacks: [runCollector],

@@ -65,7 +65,9 @@ export class SupabaseSchemaRepository implements SchemaRepository {
           updated_at,
           organization_id,
           design_session_id,
-          building_schema_version_id
+          building_schema_version_id,
+          assistant_role,
+          query_result_id
         )
       `,
       )
@@ -698,5 +700,63 @@ export class SupabaseSchemaRepository implements SchemaRepository {
       success: true,
       workflowRun,
     }
+  }
+
+  getVersion(versionId: string): ResultAsync<
+    {
+      id: string
+      schema: Schema
+      versionNumber: number
+    },
+    Error
+  > {
+    return ResultAsync.fromSafePromise(
+      (async () => {
+        const { data: version, error } = await this.client
+          .from('building_schema_versions')
+          .select('id, number, building_schema_id')
+          .eq('id', versionId)
+          .single()
+
+        if (error || !version) {
+          return errAsync(new Error(`Version not found: ${versionId}`))
+        }
+
+        // Get building schema and all versions to reconstruct the schema
+        const { data: buildingSchema, error: buildingSchemaError } =
+          await this.client
+            .from('building_schemas')
+            .select('initial_schema_snapshot')
+            .eq('id', version.building_schema_id)
+            .single()
+
+        if (buildingSchemaError || !buildingSchema) {
+          return errAsync(
+            new Error(`Building schema not found for version: ${versionId}`),
+          )
+        }
+
+        const { data: versions, error: versionsError } = await this.client
+          .from('building_schema_versions')
+          .select('number, patch')
+          .eq('building_schema_id', version.building_schema_id)
+          .lte('number', version.number)
+          .order('number', { ascending: true })
+
+        if (versionsError) {
+          return errAsync(
+            new Error(`Failed to fetch versions: ${versionsError.message}`),
+          )
+        }
+
+        const schema = this.buildCurrentSchema(buildingSchema, versions || [])
+
+        return okAsync({
+          id: version.id,
+          schema,
+          versionNumber: version.number,
+        })
+      })(),
+    ).andThen((result) => result)
   }
 }

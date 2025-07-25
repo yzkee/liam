@@ -58,7 +58,6 @@ describe('validateSchemaNode', () => {
         }),
         createWorkflowRun: vi.fn(),
         updateWorkflowRunStatus: vi.fn(),
-        getVersion: vi.fn(),
       },
     }
   }

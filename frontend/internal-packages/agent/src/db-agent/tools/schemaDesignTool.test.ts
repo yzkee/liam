@@ -8,8 +8,7 @@ describe('schemaDesignTool', () => {
     schema: {
       getSchema: vi.fn(),
       getDesignSession: vi.fn(),
-      createEmptyPatchVersion: vi.fn(),
-      updateVersion: vi.fn(),
+      createVersion: vi.fn(),
       createTimelineItem: vi.fn(),
       updateTimelineItem: vi.fn(),
       createArtifact: vi.fn(),
@@ -23,11 +22,13 @@ describe('schemaDesignTool', () => {
   }
 
   const createMockConfig = (
-    buildingSchemaVersionId: string,
+    buildingSchemaId: string,
+    latestVersionNumber: number,
     repositories: Repositories = mockRepositories,
   ): RunnableConfig => ({
     configurable: {
-      buildingSchemaVersionId,
+      buildingSchemaId,
+      latestVersionNumber,
       repositories,
       logger: {
         log: vi.fn(),
@@ -40,13 +41,13 @@ describe('schemaDesignTool', () => {
   })
 
   it('should successfully update schema version', async () => {
-    const mockUpdateVersion = vi.fn().mockResolvedValue({
+    const mockCreateVersion = vi.fn().mockResolvedValue({
       success: true,
       newSchema: { tables: [], relations: [] },
     })
-    mockRepositories.schema.updateVersion = mockUpdateVersion
+    mockRepositories.schema.createVersion = mockCreateVersion
 
-    const config = createMockConfig('test-version-id')
+    const config = createMockConfig('test-version-id', 1)
     const input = {
       operations: [
         {
@@ -85,20 +86,21 @@ describe('schemaDesignTool', () => {
     expect(result).toBe(
       'Schema successfully updated. The operations have been applied to the database schema.',
     )
-    expect(mockUpdateVersion).toHaveBeenCalledWith({
-      buildingSchemaVersionId: 'test-version-id',
+    expect(mockCreateVersion).toHaveBeenCalledWith({
+      buildingSchemaId: 'test-version-id',
+      latestVersionNumber: 1,
       patch: input.operations,
     })
   })
 
   it('should throw error when update fails', async () => {
-    const mockUpdateVersion = vi.fn().mockResolvedValue({
+    const mockCreateVersion = vi.fn().mockResolvedValue({
       success: false,
       error: 'Database connection failed',
     })
-    mockRepositories.schema.updateVersion = mockUpdateVersion
+    mockRepositories.schema.createVersion = mockCreateVersion
 
-    const config = createMockConfig('test-version-id')
+    const config = createMockConfig('test-version-id', 1)
     const input = {
       operations: [
         {
@@ -130,13 +132,13 @@ describe('schemaDesignTool', () => {
   })
 
   it('should throw unknown error when update fails without error message', async () => {
-    const mockUpdateVersion = vi.fn().mockResolvedValue({
+    const mockCreateVersion = vi.fn().mockResolvedValue({
       success: false,
       error: null,
     })
-    mockRepositories.schema.updateVersion = mockUpdateVersion
+    mockRepositories.schema.createVersion = mockCreateVersion
 
-    const config = createMockConfig('test-version-id')
+    const config = createMockConfig('test-version-id', 1)
     const input = {
       operations: [
         {
@@ -196,7 +198,7 @@ describe('schemaDesignTool', () => {
   })
 
   it('should handle malformed input', async () => {
-    const config = createMockConfig('test-version-id')
+    const config = createMockConfig('test-version-id', 1)
     const input = {
       operations: 'invalid-operations', // Should be an array
     }
@@ -208,13 +210,13 @@ describe('schemaDesignTool', () => {
   })
 
   it('should handle empty operations array', async () => {
-    const mockUpdateVersion = vi.fn().mockResolvedValue({
+    const mockCreateVersion = vi.fn().mockResolvedValue({
       success: true,
       newSchema: { tables: [], relations: [] },
     })
-    mockRepositories.schema.updateVersion = mockUpdateVersion
+    mockRepositories.schema.createVersion = mockCreateVersion
 
-    const config = createMockConfig('test-version-id')
+    const config = createMockConfig('test-version-id', 1)
     const input = {
       operations: [],
     }
@@ -224,8 +226,9 @@ describe('schemaDesignTool', () => {
     expect(result).toBe(
       'Schema successfully updated. The operations have been applied to the database schema.',
     )
-    expect(mockUpdateVersion).toHaveBeenCalledWith({
-      buildingSchemaVersionId: 'test-version-id',
+    expect(mockCreateVersion).toHaveBeenCalledWith({
+      buildingSchemaId: 'test-version-id',
+      latestVersionNumber: 1,
       patch: [],
     })
   })

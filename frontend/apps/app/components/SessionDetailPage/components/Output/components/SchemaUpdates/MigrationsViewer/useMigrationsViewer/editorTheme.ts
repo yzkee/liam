@@ -9,7 +9,20 @@ export const customTheme = EditorView.theme({
     background: 'var(--global-background)',
   },
   '.cm-lineNumbers': { color: 'var(--overlay-20)' },
-  '.cm-foldGutter': { color: 'var(--overlay-50)' },
+  '.cm-foldGutter': {
+    color: 'var(--overlay-50)',
+    paddingTop: 'var(--spacing-half)',
+  },
+  '.cm-foldMarker': {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '16px',
+    height: '16px',
+  },
+  '.cm-foldMarker.closed': {
+    marginTop: '-1px',
+  },
   '.cm-content': {
     flex: 1,
     background: 'var(--global-background)',

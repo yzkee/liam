@@ -12,11 +12,13 @@ import { Comment } from './Comment'
 
 // Widget that displays comments as DOM elements
 class CommentWidget extends WidgetType {
-  constructor(
-    readonly comment: ReviewComment,
-    readonly onQuickFix: (comment: string) => void,
-  ) {
+  readonly comment: ReviewComment
+  readonly onQuickFix: (comment: string) => void
+
+  constructor(comment: ReviewComment, onQuickFix: (comment: string) => void) {
     super()
+    this.comment = comment
+    this.onQuickFix = onQuickFix
   }
 
   toDOM() {
@@ -33,7 +35,7 @@ class CommentWidget extends WidgetType {
     return container
   }
 
-  ignoreEvent() {
+  override ignoreEvent() {
     return false
   }
 }

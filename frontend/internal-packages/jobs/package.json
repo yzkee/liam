@@ -12,7 +12,7 @@
     "@liam-hq/agent": "workspace:*",
     "@liam-hq/db": "workspace:*",
     "@liam-hq/github": "workspace:*",
-    "@octokit/auth-app": "7.2.1",
+    "@octokit/auth-app": "7.2.2",
     "@octokit/rest": "21.1.1",
     "@sentry/node": "9.19.0",
     "@trigger.dev/build": "4.0.0-v4-beta.22",

@@ -47,13 +47,13 @@
     "valibot": "1.1.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.0.6",
+    "@biomejs/biome": "2.1.1",
     "@liam-hq/configs": "workspace:*",
     "@storybook/react": "8.6.14",
-    "@types/node": "22.16.0",
+    "@types/node": "22.16.3",
     "@types/react": "19.1.8",
     "@types/react-dom": "19.1.6",
-    "eslint": "9.30.1",
+    "eslint": "9.31.0",
     "msw": "2.10.4",
     "storybook": "8.6.14",
     "typed-css-modules": "0.9.1",

@@ -1,1 +1,1 @@
-export * from './useCommands'
+export * from './useSubscribeCommands'

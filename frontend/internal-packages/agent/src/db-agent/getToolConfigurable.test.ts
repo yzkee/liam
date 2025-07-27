@@ -1,24 +1,12 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { describe, expect, it, vi } from 'vitest'
 import type { Repositories } from '../repositories'
+import { InMemoryRepository } from '../repositories/InMemoryRepository'
 import { getToolConfigurable } from './getToolConfigurable'
 
 describe('getToolConfigurable', () => {
-  const mockRepositories: Repositories = {
-    schema: {
-      getSchema: vi.fn(),
-      getDesignSession: vi.fn(),
-      createVersion: vi.fn(),
-      createTimelineItem: vi.fn(),
-      updateTimelineItem: vi.fn(),
-      createArtifact: vi.fn(),
-      updateArtifact: vi.fn(),
-      getArtifact: vi.fn(),
-      createValidationQuery: vi.fn(),
-      createValidationResults: vi.fn(),
-      createWorkflowRun: vi.fn(),
-      updateWorkflowRunStatus: vi.fn(),
-    },
+  const repositories: Repositories = {
+    schema: new InMemoryRepository(),
   }
 
   const mockLogger = {
@@ -34,7 +22,7 @@ describe('getToolConfigurable', () => {
       configurable: {
         buildingSchemaId: 'test-version-id',
         latestVersionNumber: 1,
-        repositories: mockRepositories,
+        repositories,
         logger: mockLogger,
       },
     }
@@ -44,7 +32,7 @@ describe('getToolConfigurable', () => {
     expect(result.isOk()).toBe(true)
     if (result.isOk()) {
       expect(result.value.buildingSchemaId).toBe('test-version-id')
-      expect(result.value.repositories).toBe(mockRepositories)
+      expect(result.value.repositories).toBe(repositories)
     }
   })
 
@@ -86,7 +74,7 @@ describe('getToolConfigurable', () => {
       configurable: {
         buildingSchemaId: 'test-version-id',
         latestVersionNumber: 1,
-        repositories: mockRepositories,
+        repositories,
         // Missing logger
       },
     }
@@ -102,7 +90,7 @@ describe('getToolConfigurable', () => {
   it('should return error when buildingSchemaId is missing', () => {
     const config: RunnableConfig = {
       configurable: {
-        repositories: mockRepositories,
+        repositories,
         logger: mockLogger,
         latestVersionNumber: 1,
         // Missing buildingSchemaId
@@ -123,7 +111,8 @@ describe('getToolConfigurable', () => {
     const config: RunnableConfig = {
       configurable: {
         buildingSchemaId: 123, // Should be string
-        repositories: mockRepositories,
+        latestVersionNumber: 1,
+        repositories,
         logger: mockLogger,
       },
     }
@@ -143,7 +132,7 @@ describe('getToolConfigurable', () => {
       configurable: {
         buildingSchemaId: '', // Empty string is valid for v.string()
         latestVersionNumber: 1,
-        repositories: mockRepositories,
+        repositories,
         logger: mockLogger,
       },
     }
@@ -161,7 +150,7 @@ describe('getToolConfigurable', () => {
       configurable: {
         buildingSchemaId: 'test-version-id',
         latestVersionNumber: 1,
-        repositories: mockRepositories,
+        repositories,
         logger: mockLogger,
         additionalProperty: 'should-be-ignored',
       },
@@ -172,7 +161,7 @@ describe('getToolConfigurable', () => {
     expect(result.isOk()).toBe(true)
     if (result.isOk()) {
       expect(result.value.buildingSchemaId).toBe('test-version-id')
-      expect(result.value.repositories).toBe(mockRepositories)
+      expect(result.value.repositories).toBe(repositories)
       // Additional properties should not be included in the result
       expect('additionalProperty' in result.value).toBe(false)
     }
@@ -201,7 +190,7 @@ describe('getToolConfigurable', () => {
       configurable: {
         buildingSchemaId: 'test-version-id',
         latestVersionNumber: 1,
-        repositories: mockRepositories,
+        repositories,
         logger: 'not-an-object', // Truthy value passes basic check
       },
     }
@@ -210,7 +199,7 @@ describe('getToolConfigurable', () => {
 
     expect(result.isOk()).toBe(true)
     if (result.isOk()) {
-      expect(result.value.repositories).toBe(mockRepositories)
+      expect(result.value.repositories).toBe(repositories)
     }
   })
 
@@ -239,7 +228,7 @@ describe('getToolConfigurable', () => {
       configurable: {
         buildingSchemaId: 'test-version-id',
         latestVersionNumber: 1,
-        repositories: mockRepositories,
+        repositories,
         logger: null, // Falsy value
       },
     }

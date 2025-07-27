@@ -63,7 +63,9 @@ export class SupabaseSchemaRepository implements SchemaRepository {
           updated_at,
           organization_id,
           design_session_id,
-          building_schema_version_id
+          building_schema_version_id,
+          assistant_role,
+          query_result_id
         )
       `)
       .eq('id', designSessionId)

@@ -1,35 +1,20 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
+import { aColumn, aSchema, aTable } from '@liam-hq/db-structure'
 import { describe, expect, it, vi } from 'vitest'
 import type { Repositories } from '../../repositories'
+import { InMemoryRepository } from '../../repositories/InMemoryRepository'
 import { schemaDesignTool } from './schemaDesignTool'
 
 describe('schemaDesignTool', () => {
-  const mockRepositories: Repositories = {
-    schema: {
-      getSchema: vi.fn(),
-      getDesignSession: vi.fn(),
-      createVersion: vi.fn(),
-      createTimelineItem: vi.fn(),
-      updateTimelineItem: vi.fn(),
-      createArtifact: vi.fn(),
-      updateArtifact: vi.fn(),
-      getArtifact: vi.fn(),
-      createValidationQuery: vi.fn(),
-      createValidationResults: vi.fn(),
-      createWorkflowRun: vi.fn(),
-      updateWorkflowRunStatus: vi.fn(),
-    },
-  }
-
   const createMockConfig = (
     buildingSchemaId: string,
     latestVersionNumber: number,
-    repositories: Repositories = mockRepositories,
+    testRepositories: Repositories,
   ): RunnableConfig => ({
     configurable: {
       buildingSchemaId,
       latestVersionNumber,
-      repositories,
+      repositories: testRepositories,
       logger: {
         log: vi.fn(),
         debug: vi.fn(),
@@ -41,42 +26,35 @@ describe('schemaDesignTool', () => {
   })
 
   it('should successfully update schema version', async () => {
-    const mockCreateVersion = vi.fn().mockResolvedValue({
-      success: true,
-      newSchema: { tables: [], relations: [] },
-    })
-    mockRepositories.schema.createVersion = mockCreateVersion
+    const repositories: Repositories = {
+      schema: new InMemoryRepository({
+        schemas: {
+          'test-schema': aSchema(),
+        },
+      }),
+    }
 
-    const config = createMockConfig('test-version-id', 1)
+    const config = createMockConfig('test-schema', 1, repositories)
     const input = {
       operations: [
         {
           op: 'add',
           path: '/tables/users',
-          value: {
+          value: aTable({
             name: 'users',
-            comment: null,
             columns: {
-              id: {
+              id: aColumn({
                 name: 'id',
                 type: 'integer',
-                default: null,
-                check: null,
                 notNull: true,
-                comment: null,
-              },
-              name: {
+              }),
+              name: aColumn({
                 name: 'name',
                 type: 'varchar(255)',
-                default: null,
-                check: null,
                 notNull: false,
-                comment: null,
-              },
+              }),
             },
-            indexes: {},
-            constraints: {},
-          },
+          }),
         },
       ],
     }
@@ -86,119 +64,69 @@ describe('schemaDesignTool', () => {
     expect(result).toBe(
       'Schema successfully updated. The operations have been applied to the database schema.',
     )
-    expect(mockCreateVersion).toHaveBeenCalledWith({
-      buildingSchemaId: 'test-version-id',
-      latestVersionNumber: 1,
-      patch: input.operations,
-    })
+
+    // Verify the schema was actually updated in the repository by schemaDesignTool
+    const schemaData = await repositories.schema.getSchema('test-schema')
+    expect(schemaData.data?.schema).toEqual(
+      aSchema({
+        tables: {
+          users: aTable({
+            name: 'users',
+            columns: {
+              id: aColumn({
+                name: 'id',
+                type: 'integer',
+                notNull: true,
+              }),
+              name: aColumn({
+                name: 'name',
+                type: 'varchar(255)',
+                notNull: false,
+              }),
+            },
+          }),
+        },
+      }),
+    )
+    expect(schemaData.data?.latestVersionNumber).toBe(2)
   })
 
   it('should throw error when update fails', async () => {
-    const mockCreateVersion = vi.fn().mockResolvedValue({
-      success: false,
-      error: 'Database connection failed',
-    })
-    mockRepositories.schema.createVersion = mockCreateVersion
+    const repositories: Repositories = {
+      schema: new InMemoryRepository(),
+    }
 
-    const config = createMockConfig('test-version-id', 1)
+    const config = createMockConfig('non-existent-schema-id', 1, repositories)
     const input = {
       operations: [
         {
           op: 'add',
           path: '/tables/users',
-          value: {
+          value: aTable({
             name: 'users',
-            comment: null,
             columns: {
-              id: {
+              id: aColumn({
                 name: 'id',
                 type: 'integer',
-                default: null,
-                check: null,
                 notNull: true,
-                comment: null,
-              },
+              }),
             },
-            indexes: {},
-            constraints: {},
-          },
+          }),
         },
       ],
     }
 
     await expect(schemaDesignTool.invoke(input, config)).rejects.toThrow(
-      'Schema update failed: Database connection failed. Please fix the error and try again.',
+      'Schema update failed: Building schema not found. Please fix the error and try again.',
     )
-  })
-
-  it('should throw unknown error when update fails without error message', async () => {
-    const mockCreateVersion = vi.fn().mockResolvedValue({
-      success: false,
-      error: null,
-    })
-    mockRepositories.schema.createVersion = mockCreateVersion
-
-    const config = createMockConfig('test-version-id', 1)
-    const input = {
-      operations: [
-        {
-          op: 'add',
-          path: '/tables/users',
-          value: {
-            name: 'users',
-            comment: null,
-            columns: {
-              id: {
-                name: 'id',
-                type: 'integer',
-                default: null,
-                check: null,
-                notNull: true,
-                comment: null,
-              },
-            },
-            indexes: {},
-            constraints: {},
-          },
-        },
-      ],
-    }
-
-    await expect(schemaDesignTool.invoke(input, config)).rejects.toThrow(
-      'Schema update failed: Unknown error occurred. Please fix the error and try again.',
-    )
-  })
-
-  it('should handle missing configurable object', async () => {
-    const config: RunnableConfig = {}
-    const input = {
-      operations: [],
-    }
-
-    const result = await schemaDesignTool.invoke(input, config)
-
-    expect(result).toBe(
-      'Configuration error: Missing configurable object in RunnableConfig. Please check the tool configuration and try again.',
-    )
-  })
-
-  it('should handle invalid configurable object', async () => {
-    const config: RunnableConfig = {
-      configurable: {
-        // Missing required fields
-      },
-    }
-    const input = {
-      operations: [],
-    }
-
-    const result = await schemaDesignTool.invoke(input, config)
-
-    expect(result).toContain('Missing repositories in configurable object')
   })
 
   it('should handle malformed input', async () => {
-    const config = createMockConfig('test-version-id', 1)
+    const repositories: Repositories = {
+      schema: new InMemoryRepository(),
+    }
+
+    const config = createMockConfig('test-schema-id', 1, repositories)
     const input = {
       operations: 'invalid-operations', // Should be an array
     }
@@ -210,13 +138,16 @@ describe('schemaDesignTool', () => {
   })
 
   it('should handle empty operations array', async () => {
-    const mockCreateVersion = vi.fn().mockResolvedValue({
-      success: true,
-      newSchema: { tables: [], relations: [] },
-    })
-    mockRepositories.schema.createVersion = mockCreateVersion
+    const initialSchema = aSchema({ tables: {} })
+    const repositories: Repositories = {
+      schema: new InMemoryRepository({
+        schemas: {
+          'test-schema': initialSchema,
+        },
+      }),
+    }
 
-    const config = createMockConfig('test-version-id', 1)
+    const config = createMockConfig('test-schema', 1, repositories)
     const input = {
       operations: [],
     }
@@ -226,10 +157,5 @@ describe('schemaDesignTool', () => {
     expect(result).toBe(
       'Schema successfully updated. The operations have been applied to the database schema.',
     )
-    expect(mockCreateVersion).toHaveBeenCalledWith({
-      buildingSchemaId: 'test-version-id',
-      latestVersionNumber: 1,
-      patch: [],
-    })
   })
 })

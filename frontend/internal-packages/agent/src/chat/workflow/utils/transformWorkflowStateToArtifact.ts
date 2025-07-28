@@ -8,6 +8,95 @@ import type { Repositories } from '../../../repositories'
 import type { WorkflowState } from '../types'
 
 /**
+ * Convert analyzed requirements to artifact requirements
+ */
+const convertAnalyzedRequirementsToArtifact = (
+  analyzedRequirements: NonNullable<WorkflowState['analyzedRequirements']>,
+): (FunctionalRequirement | NonFunctionalRequirement)[] => {
+  const requirements: (FunctionalRequirement | NonFunctionalRequirement)[] = []
+
+  // Add functional requirements
+  for (const [category, items] of Object.entries(
+    analyzedRequirements.functionalRequirements,
+  )) {
+    const functionalRequirement: FunctionalRequirement = {
+      type: 'functional',
+      name: category,
+      description: items.join(', '),
+      use_cases: [], // Will be populated later if usecases exist
+    }
+    requirements.push(functionalRequirement)
+  }
+
+  // Add non-functional requirements
+  for (const [category, items] of Object.entries(
+    analyzedRequirements.nonFunctionalRequirements,
+  )) {
+    const nonFunctionalRequirement: NonFunctionalRequirement = {
+      type: 'non_functional',
+      name: category,
+      description: items.join(', '),
+    }
+    requirements.push(nonFunctionalRequirement)
+  }
+
+  return requirements
+}
+
+/**
+ * Map use cases to functional requirements
+ */
+const mapUseCasesToRequirements = (
+  usecase: Usecase,
+): { title: string; description: string; dml_operations: never[] } => ({
+  title: usecase.title,
+  description: usecase.description,
+  dml_operations: [], // Empty for now - to be populated when DML tracking is added
+})
+
+/**
+ * Merge use cases into existing requirements
+ */
+const mergeUseCasesIntoRequirements = (
+  requirements: (FunctionalRequirement | NonFunctionalRequirement)[],
+  usecases: Usecase[],
+): void => {
+  const requirementGroups = groupUsecasesByRequirement(usecases)
+
+  for (const [category, data] of Object.entries(requirementGroups)) {
+    const { type, usecases: groupedUsecases, description } = data
+    const existingReq = requirements.find((req) => req.name === category)
+
+    if (
+      existingReq &&
+      existingReq.type === 'functional' &&
+      type === 'functional'
+    ) {
+      // Update existing functional requirement with use cases
+      existingReq.use_cases = groupedUsecases.map(mapUseCasesToRequirements)
+    } else if (!existingReq) {
+      // Add new requirement from use cases if it doesn't exist
+      if (type === 'functional') {
+        const functionalRequirement: FunctionalRequirement = {
+          type: 'functional',
+          name: category,
+          description: description || `Functional requirement: ${category}`,
+          use_cases: groupedUsecases.map(mapUseCasesToRequirements),
+        }
+        requirements.push(functionalRequirement)
+      } else {
+        const nonFunctionalRequirement: NonFunctionalRequirement = {
+          type: 'non_functional',
+          name: category,
+          description: description || `Non-functional requirement: ${category}`,
+        }
+        requirements.push(nonFunctionalRequirement)
+      }
+    }
+  }
+}
+
+/**
  * Transform WorkflowState to Artifact format
  * This handles the conversion from the workflow's data structure to the artifact schema
  */
@@ -16,38 +105,16 @@ export const transformWorkflowStateToArtifact = (
 ): Artifact => {
   const businessRequirement =
     state.analyzedRequirements?.businessRequirement ?? ''
-  const usecases = state.generatedUsecases || []
 
-  // Group use cases by requirement category and type
-  const requirementGroups = groupUsecasesByRequirement(usecases)
+  // Start with requirements from analyzedRequirements
+  const requirements = state.analyzedRequirements
+    ? convertAnalyzedRequirementsToArtifact(state.analyzedRequirements)
+    : []
 
-  // Convert grouped requirements to the artifact format
-  const requirements = Object.entries(requirementGroups).map(
-    ([category, data]) => {
-      const { type, usecases: groupedUsecases, description } = data
-
-      if (type === 'functional') {
-        const functionalRequirement: FunctionalRequirement = {
-          type: 'functional',
-          name: category,
-          description: description || `Functional requirement: ${category}`,
-          use_cases: groupedUsecases.map((usecase) => ({
-            title: usecase.title,
-            description: usecase.description,
-            dml_operations: [], // Empty for now - to be populated when DML tracking is added
-          })),
-        }
-        return functionalRequirement
-      }
-
-      const nonFunctionalRequirement: NonFunctionalRequirement = {
-        type: 'non_functional',
-        name: category,
-        description: description || `Non-functional requirement: ${category}`,
-      }
-      return nonFunctionalRequirement
-    },
-  )
+  // Then merge in use cases if they exist
+  if (state.generatedUsecases && state.generatedUsecases.length > 0) {
+    mergeUseCasesIntoRequirements(requirements, state.generatedUsecases)
+  }
 
   return {
     requirement_analysis: {

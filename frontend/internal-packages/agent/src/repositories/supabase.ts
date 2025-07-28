@@ -91,32 +91,22 @@ export class SupabaseSchemaRepository implements SchemaRepository {
   }
 
   getSchema(designSessionId: string): ResultAsync<SchemaData, Error> {
-    return this.getBuildingSchema(designSessionId).andThen(
-      ({ buildingSchema }) => {
-        return ResultAsync.fromPromise(
-          this.getSchemaVersions(buildingSchema.id),
-          (error) =>
-            new Error(`Failed to get schema versions: ${String(error)}`),
-        ).andThen((versionsResult) => {
-          if (versionsResult.error) {
-            return errAsync(new Error(versionsResult.error.message))
-          }
-
-          const { versions } = versionsResult.data
-          const currentSchema = this.buildCurrentSchema(
-            buildingSchema,
-            versions,
-          )
-          const latestVersionNumber = this.getLatestVersionNumber(versions)
-
-          return okAsync({
-            id: buildingSchema.id,
-            schema: currentSchema,
-            latestVersionNumber,
-          })
-        })
-      },
-    )
+    return this.getBuildingSchema(designSessionId)
+      .andThen(({ buildingSchema }) =>
+        this.getSchemaVersions(buildingSchema.id).map(({ versions }) => ({
+          buildingSchema,
+          versions,
+        })),
+      )
+      .map(({ buildingSchema, versions }) => {
+        const currentSchema = this.buildCurrentSchema(buildingSchema, versions)
+        const latestVersionNumber = this.getLatestVersionNumber(versions)
+        return {
+          id: buildingSchema.id,
+          schema: currentSchema,
+          latestVersionNumber,
+        }
+      })
   }
 
   private getBuildingSchema(
@@ -144,21 +134,25 @@ export class SupabaseSchemaRepository implements SchemaRepository {
     })
   }
 
-  private async getSchemaVersions(buildingSchemaId: string) {
-    const { data: versions, error: versionsError } = await this.client
-      .from('building_schema_versions')
-      .select('number, patch')
-      .eq('building_schema_id', buildingSchemaId)
-      .order('number', { ascending: true })
-
-    if (versionsError) {
-      return {
-        data: null,
-        error: { message: versionsError.message },
+  private getSchemaVersions(
+    buildingSchemaId: string,
+  ): ResultAsync<
+    { versions: Array<{ number: number; patch: unknown }> },
+    Error
+  > {
+    return ResultAsync.fromPromise(
+      this.client
+        .from('building_schema_versions')
+        .select('number, patch')
+        .eq('building_schema_id', buildingSchemaId)
+        .order('number', { ascending: true }),
+      (error) => new Error(`Failed to get schema versions: ${String(error)}`),
+    ).andThen(({ data: versions, error: versionsError }) => {
+      if (versionsError) {
+        return errAsync(new Error(versionsError.message))
       }
-    }
-
-    return { data: { versions: versions || [] }, error: null }
+      return okAsync({ versions: versions || [] })
+    })
   }
 
   // TODO: Set response type to `{ success: true, data: Schema } | { success: false, error: unknown }`

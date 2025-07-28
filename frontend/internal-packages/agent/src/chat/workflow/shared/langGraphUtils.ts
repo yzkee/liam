@@ -2,7 +2,6 @@ import { Annotation, MessagesAnnotation } from '@langchain/langgraph'
 import type { Schema } from '@liam-hq/db-structure'
 import type { Usecase } from '../../../langchain/agents/qaGenerateUsecaseAgent/agent'
 import type { Repositories } from '../../../repositories'
-import type { NodeLogger } from '../../../utils/nodeLogger'
 
 /**
  * Default recursion limit for LangGraph workflow execution.
@@ -60,8 +59,5 @@ export const createAnnotations = () => {
 
     // Repository dependencies for data access
     repositories: Annotation<Repositories>,
-
-    // Logging functionality
-    logger: Annotation<NodeLogger>,
   })
 }

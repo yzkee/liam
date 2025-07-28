@@ -91,23 +91,8 @@ export class SupabaseSchemaRepository implements SchemaRepository {
   }
 
   getSchema(designSessionId: string): ResultAsync<SchemaData, Error> {
-    return ResultAsync.fromPromise(
-      this.getBuildingSchema(designSessionId),
-      (error) => new Error(`Failed to get building schema: ${String(error)}`),
-    )
-      .andThen((buildingSchemaResult) => {
-        if (buildingSchemaResult.error || !buildingSchemaResult.data) {
-          return errAsync(
-            new Error(
-              buildingSchemaResult.error?.message ||
-                'Building schema not found',
-            ),
-          )
-        }
-
-        return okAsync(buildingSchemaResult.data.buildingSchema)
-      })
-      .andThen((buildingSchema) => {
+    return this.getBuildingSchema(designSessionId).andThen(
+      ({ buildingSchema }) => {
         return ResultAsync.fromPromise(
           this.getSchemaVersions(buildingSchema.id),
           (error) =>
@@ -130,27 +115,33 @@ export class SupabaseSchemaRepository implements SchemaRepository {
             latestVersionNumber,
           })
         })
-      })
+      },
+    )
   }
 
-  private async getBuildingSchema(designSessionId: string) {
-    const { data: buildingSchema, error: buildingSchemaError } =
-      await this.client
+  private getBuildingSchema(
+    designSessionId: string,
+  ): ResultAsync<
+    { buildingSchema: { id: string; initial_schema_snapshot: Json | null } },
+    Error
+  > {
+    return ResultAsync.fromPromise(
+      this.client
         .from('building_schemas')
         .select('id, initial_schema_snapshot')
         .eq('design_session_id', designSessionId)
-        .single()
-
-    if (buildingSchemaError || !buildingSchema) {
-      return {
-        data: null,
-        error: buildingSchemaError
-          ? { message: buildingSchemaError.message }
-          : null,
+        .single(),
+      (error) => new Error(`Failed to get building schema: ${String(error)}`),
+    ).andThen(({ data: buildingSchema, error: buildingSchemaError }) => {
+      if (buildingSchemaError || !buildingSchema) {
+        return errAsync(
+          new Error(
+            buildingSchemaError?.message || 'Building schema not found',
+          ),
+        )
       }
-    }
-
-    return { data: { buildingSchema }, error: null }
+      return okAsync({ buildingSchema })
+    })
   }
 
   private async getSchemaVersions(buildingSchemaId: string) {

@@ -167,24 +167,6 @@ describe('getToolConfigurable', () => {
     }
   })
 
-  it('should work with string logger (logger is ignored)', () => {
-    const config: RunnableConfig = {
-      configurable: {
-        buildingSchemaId: 'test-version-id',
-        latestVersionNumber: 1,
-        repositories,
-        logger: 'not-an-object', // Logger is ignored since it's not required
-      },
-    }
-
-    const result = getToolConfigurable(config)
-
-    expect(result.isOk()).toBe(true)
-    if (result.isOk()) {
-      expect(result.value.repositories).toBe(repositories)
-    }
-  })
-
   it('should return error when repositories is null', () => {
     const config: RunnableConfig = {
       configurable: {

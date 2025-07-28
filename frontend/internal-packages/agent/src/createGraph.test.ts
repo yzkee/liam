@@ -11,7 +11,6 @@ graph TD;
 	analyzeRequirements(analyzeRequirements)
 	designSchema(designSchema)
 	invokeSchemaDesignTool(invokeSchemaDesignTool)
-	executeDDL(executeDDL)
 	generateUsecase(generateUsecase)
 	prepareDML(prepareDML)
 	validateSchema(validateSchema)
@@ -19,17 +18,13 @@ graph TD;
 	__end__([<p>__end__</p>]):::last
 	__start__ --> webSearch;
 	analyzeRequirements --> designSchema;
-	executeDDL --> generateUsecase;
 	finalizeArtifacts --> __end__;
 	generateUsecase --> prepareDML;
 	invokeSchemaDesignTool --> designSchema;
 	prepareDML --> validateSchema;
 	webSearch --> analyzeRequirements;
 	designSchema -.-> invokeSchemaDesignTool;
-	designSchema -.-> executeDDL;
-	executeDDL -.-> designSchema;
-	executeDDL -.-> finalizeArtifacts;
-	executeDDL -.-> generateUsecase;
+	designSchema -.-> generateUsecase;
 	validateSchema -.-> designSchema;
 	validateSchema -.-> finalizeArtifacts;
 	classDef default fill:#f2f0ff,line-height:1.2;

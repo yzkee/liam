@@ -12,7 +12,6 @@ graph TD;
 	analyzeRequirements(analyzeRequirements)
 	designSchema(designSchema)
 	invokeSchemaDesignTool(invokeSchemaDesignTool)
-	executeDDL(executeDDL)
 	generateUsecase(generateUsecase)
 	prepareDML(prepareDML)
 	validateSchema(validateSchema)
@@ -20,17 +19,13 @@ graph TD;
 	__end__([<p>__end__</p>]):::last
 	__start__ --> webSearch;
 	analyzeRequirements --> designSchema;
-	executeDDL --> generateUsecase;
 	finalizeArtifacts --> __end__;
 	generateUsecase --> prepareDML;
 	invokeSchemaDesignTool --> designSchema;
 	prepareDML --> validateSchema;
 	webSearch --> analyzeRequirements;
 	designSchema -.-> invokeSchemaDesignTool;
-	designSchema -.-> executeDDL;
-	executeDDL -.-> designSchema;
-	executeDDL -.-> finalizeArtifacts;
-	executeDDL -.-> generateUsecase;
+	designSchema -.-> generateUsecase;
 	validateSchema -.-> designSchema;
 	validateSchema -.-> finalizeArtifacts;
 	classDef default fill:#f2f0ff,line-height:1.2;
@@ -86,16 +81,14 @@ interface WorkflowState {
 1. **webSearch**: Performs initial research and gathers relevant information (performed by pmAgent)
 2. **analyzeRequirements**: Organizes and clarifies requirements from user input (performed by pmAnalysisAgent)
 3. **designSchema**: Designs database schema with automatic timeline sync (performed by dbAgent)
-4. **executeDDL**: Executes DDL statements (performed by agent)
-5. **generateUsecase**: Creates use cases for testing with automatic timeline sync (performed by qaAgent)
-6. **prepareDML**: Generates DML statements for testing (performed by qaAgent)
-7. **validateSchema**: Executes DML and validates schema (performed by qaAgent)
-8. **finalizeArtifacts**: Generates and saves comprehensive artifacts to database, handles error timeline items (performed by dbAgentArtifactGen)
+4. **generateUsecase**: Creates use cases for testing with automatic timeline sync (performed by qaAgent)
+5. **prepareDML**: Generates DML statements for testing (performed by qaAgent)
+6. **validateSchema**: Executes DML and validates schema (performed by qaAgent)
+7. **finalizeArtifacts**: Generates and saves comprehensive artifacts to database, handles error timeline items (performed by dbAgentArtifactGen)
 
 ### Conditional Edge Logic
 
-- **designSchema**: Routes to `executeDDL` on success, `finalizeArtifacts` on error
-- **executeDDL**: Routes to `generateUsecase` on success, `designSchema` if retry needed, `finalizeArtifacts` if failed
+- **designSchema**: Routes to `generateUsecase` on success, `finalizeArtifacts` on error
 - **validateSchema**: Routes to `finalizeArtifacts` on success, `designSchema` on validation error
 
 ## Timeline Synchronization

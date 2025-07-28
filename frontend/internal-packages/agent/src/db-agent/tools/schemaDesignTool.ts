@@ -108,7 +108,7 @@ export const schemaDesignTool = tool(
 
     // Get current schema to validate DDL before creating version
     const schemaResult = await repositories.schema.getSchema(designSessionId)
-    if (schemaResult.error || !schemaResult.data) {
+    if (schemaResult.isErr()) {
       // LangGraph tool nodes require throwing errors to trigger retry mechanism
       // eslint-disable-next-line no-throw-error/no-throw-error
       throw new Error(
@@ -118,7 +118,7 @@ export const schemaDesignTool = tool(
 
     // Apply operations to current schema to get the updated schema
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const currentSchema = structuredClone(schemaResult.data.schema) as Schema
+    const currentSchema = structuredClone(schemaResult.value.schema) as Schema
     applySchemaOperations(currentSchema, parsed.output.operations)
 
     // Validate DDL by generating and executing it
@@ -166,7 +166,7 @@ export const schemaDesignTool = tool(
     // After DDL validation passes, create the actual version
     const versionResult = await repositories.schema.createVersion({
       buildingSchemaId,
-      latestVersionNumber: schemaResult.data.latestVersionNumber,
+      latestVersionNumber: schemaResult.value.latestVersionNumber,
       patch: parsed.output.operations,
     })
 

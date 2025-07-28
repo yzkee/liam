@@ -29,8 +29,6 @@ export const deepModelingWorkflowTask = task({
     }
     const repositories = createSupabaseRepositories(supabaseClientResult.value)
 
-    const workflowLogger = createWorkflowLogger()
-
     return repositories.schema
       .getSchema(payload.designSessionId)
       .andThen((schemaResult) => {
@@ -43,7 +41,6 @@ export const deepModelingWorkflowTask = task({
           deepModeling(deepModelingParams, {
             configurable: {
               repositories,
-              logger: workflowLogger,
             },
           }),
           (err) => new Error(String(err)),

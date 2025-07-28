@@ -7,12 +7,10 @@ export function applyPatchOperations<T extends Record<string, unknown>>(
   target: T,
   operations: Operation[],
 ): Result<T, Error> {
-  const clonedTarget = structuredClone(target)
-
   return Result.fromThrowable(
     () => {
-      applyPatch(clonedTarget, operations, true, true)
-      return clonedTarget
+      const result = applyPatch(target, operations, true, false)
+      return result.newDocument
     },
     (error) => (error instanceof Error ? error : new Error(String(error))),
   )()

@@ -1,6 +1,7 @@
 import type { Artifact } from '@liam-hq/artifact'
 import type { Tables } from '@liam-hq/db/supabase/database.types'
-import { type Schema, schemaSchema } from '@liam-hq/db-structure'
+import type { Schema } from '@liam-hq/db-structure'
+import { schemaSchema } from '@liam-hq/db-structure'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import { applyPatch } from 'fast-json-patch'
 import { errAsync, okAsync, type ResultAsync } from 'neverthrow'

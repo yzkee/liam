@@ -3,7 +3,7 @@ import { createSupabaseRepositories, deepModeling } from '@liam-hq/agent'
 import { logger, task } from '@trigger.dev/sdk'
 import { createClient } from '../libs/supabase'
 
-// Define type excluding schemaData (repositories and logger are now passed via config)
+// Define type excluding schemaData (repositories are now passed via config)
 export type DeepModelingPayload = Omit<DeepModelingParams, 'schemaData'>
 
 export const deepModelingWorkflowTask = task({

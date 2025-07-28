@@ -69,24 +69,6 @@ describe('getToolConfigurable', () => {
     }
   })
 
-  it('should work without logger (logger is no longer required)', () => {
-    const config: RunnableConfig = {
-      configurable: {
-        buildingSchemaId: 'test-version-id',
-        latestVersionNumber: 1,
-        repositories,
-      },
-    }
-
-    const result = getToolConfigurable(config)
-
-    expect(result.isOk()).toBe(true)
-    if (result.isOk()) {
-      expect(result.value.buildingSchemaId).toBe('test-version-id')
-      expect(result.value.repositories).toBe(repositories)
-    }
-  })
-
   it('should return error when buildingSchemaId is missing', () => {
     const config: RunnableConfig = {
       configurable: {
@@ -220,25 +202,6 @@ describe('getToolConfigurable', () => {
       expect(result.error.message).toBe(
         'Missing repositories in configurable object',
       )
-    }
-  })
-
-  it('should work with null logger (logger is no longer required)', () => {
-    const config: RunnableConfig = {
-      configurable: {
-        buildingSchemaId: 'test-version-id',
-        latestVersionNumber: 1,
-        repositories,
-        logger: null, // Logger can be null since it's not required
-      },
-    }
-
-    const result = getToolConfigurable(config)
-
-    expect(result.isOk()).toBe(true)
-    if (result.isOk()) {
-      expect(result.value.buildingSchemaId).toBe('test-version-id')
-      expect(result.value.repositories).toBe(repositories)
     }
   })
 })

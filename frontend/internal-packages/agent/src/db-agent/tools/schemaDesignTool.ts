@@ -143,6 +143,29 @@ export const schemaDesignTool = tool(
         validationQueryId: queryResult.queryId,
         results,
       })
+
+      // Log successful DDL execution to timeline
+      const successfulStatements = results.filter(
+        (result) => result.success,
+      ).length
+      const totalStatements = results.length
+      const summary = `DDL validation successful: ${successfulStatements}/${totalStatements} statements executed successfully`
+
+      // Create timeline item for DDL execution results
+      const result = await repositories.schema.createTimelineItem({
+        designSessionId,
+        content: summary,
+        type: 'query_result',
+        queryResultId: queryResult.queryId,
+      })
+
+      if (!result.success) {
+        // LangGraph tool nodes require throwing errors to trigger retry mechanism
+        // eslint-disable-next-line no-throw-error/no-throw-error
+        throw new Error(
+          `Failed to create timeline item for DDL execution results: ${result.error}. Please try again.`,
+        )
+      }
     }
 
     // After DDL validation passes, get the latest version number and create the actual version

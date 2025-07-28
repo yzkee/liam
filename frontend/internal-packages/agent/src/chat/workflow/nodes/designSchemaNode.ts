@@ -33,27 +33,6 @@ export async function designSchemaNode(
     assistantRole,
   )
 
-  // Create empty version at the beginning of the node
-  const buildingSchemaId = state.buildingSchemaId
-  const latestVersionNumber = state.latestVersionNumber
-
-  const createVersionResult = await repositories.schema.createEmptyPatchVersion(
-    {
-      buildingSchemaId,
-      latestVersionNumber,
-    },
-  )
-
-  if (!createVersionResult.success) {
-    const errorMessage =
-      createVersionResult.error || 'Failed to create new version'
-    await logAssistantMessage(state, repositories, errorMessage, assistantRole)
-    return {
-      ...state,
-      error: new Error(errorMessage),
-    }
-  }
-
   const schemaText = convertSchemaToText(state.schemaData)
 
   // Log appropriate message for DDL retry case
@@ -78,7 +57,8 @@ Please fix this issue by analyzing the schema and adding any missing constraints
   }
 
   const invokeResult = await invokeDesignAgent({ schemaText }, messages, {
-    buildingSchemaVersionId: createVersionResult.versionId,
+    buildingSchemaId: state.buildingSchemaId,
+    latestVersionNumber: state.latestVersionNumber,
     repositories,
   })
 
@@ -107,7 +87,6 @@ Please fix this issue by analyzing the schema and adding any missing constraints
   return {
     ...state,
     messages: [syncedMessage],
-    buildingSchemaVersionId: createVersionResult.versionId,
     latestVersionNumber: state.latestVersionNumber + 1,
     shouldRetryWithDesignSchema: undefined,
     ddlExecutionFailureReason: undefined,

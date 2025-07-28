@@ -5,6 +5,7 @@ import clsx from 'clsx'
 import { type FC, useCallback, useState } from 'react'
 import { Chat } from './components/Chat'
 import { Output } from './components/Output'
+import { useRealtimeArtifact } from './components/Output/components/Artifact/hooks/useRealtimeArtifact'
 import { OutputPlaceholder } from './components/OutputPlaceholder'
 import { useRealtimeTimelineItems } from './hooks/useRealtimeTimelineItems'
 import { useRealtimeVersionsWithSchema } from './hooks/useRealtimeVersionsWithSchema'
@@ -75,16 +76,20 @@ Please suggest a specific solution to resolve this problem.`
     setQuickFixMessage(fixMessage)
   }, [])
 
+  const hasSelectedVersion = selectedVersion !== null
+
+  // Use realtime artifact hook to monitor artifact changes
+  const { artifact } = useRealtimeArtifact(designSessionId)
+  const hasRealtimeArtifact = !!artifact
+
+  // Use realtime workflow status
   const { status } = useRealtimeWorkflowRuns(
     designSessionId,
     initialWorkflowRunStatus,
   )
 
-  const hasSelectedVersion = selectedVersion !== null
-
-  const isVersionReady =
-    status !== 'pending' ||
-    (selectedVersion?.patch !== null && selectedVersion?.reverse_patch !== null)
+  // Show Output if artifact exists OR workflow is not pending
+  const shouldShowOutput = hasRealtimeArtifact || status !== 'pending'
 
   return (
     <div className={styles.container}>
@@ -104,7 +109,7 @@ Please suggest a specific solution to resolve this problem.`
         </div>
         {hasSelectedVersion && (
           <div className={styles.outputSection}>
-            {isVersionReady ? (
+            {shouldShowOutput ? (
               <Output
                 designSessionId={designSessionId}
                 schema={displayedSchema}

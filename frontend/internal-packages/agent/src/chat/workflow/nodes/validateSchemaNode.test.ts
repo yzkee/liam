@@ -41,8 +41,7 @@ describe('validateSchemaNode', () => {
         updateTimelineItem: vi.fn(),
         getSchema: vi.fn(),
         getDesignSession: vi.fn(),
-        createEmptyPatchVersion: vi.fn(),
-        updateVersion: vi.fn(),
+        createVersion: vi.fn(),
         createTimelineItem: vi.fn().mockResolvedValue({
           success: true,
           timelineItem: { id: 'mock-timeline-id' },

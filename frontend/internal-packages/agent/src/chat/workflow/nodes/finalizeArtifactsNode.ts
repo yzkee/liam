@@ -1,49 +1,7 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
-import type { Database } from '@liam-hq/db'
 import type { Repositories } from '../../../repositories'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
-import { logAssistantMessage } from '../utils/timelineLogger'
-import {
-  createOrUpdateArtifact,
-  transformWorkflowStateToArtifact,
-} from '../utils/transformWorkflowStateToArtifact'
-
-/**
- * Save artifacts if workflow state contains artifact data
- */
-async function saveArtifacts(
-  state: WorkflowState,
-  repositories: Repositories,
-  assistantRole: Database['public']['Enums']['assistant_role_enum'],
-): Promise<void> {
-  if (!state.analyzedRequirements && !state.generatedUsecases) {
-    return
-  }
-
-  const artifact = transformWorkflowStateToArtifact(state)
-  const artifactResult = await createOrUpdateArtifact(
-    state,
-    artifact,
-    repositories,
-  )
-
-  if (artifactResult.success) {
-    await logAssistantMessage(
-      state,
-      repositories,
-      'Your database design has been saved and is ready for implementation',
-      assistantRole,
-    )
-  } else {
-    await logAssistantMessage(
-      state,
-      repositories,
-      'Unable to save your database design. Please try again or contact support...',
-      assistantRole,
-    )
-  }
-}
 
 /**
  * Handle workflow errors and save error timeline items
@@ -82,7 +40,6 @@ export async function finalizeArtifactsNode(
   state: WorkflowState,
   config: RunnableConfig,
 ): Promise<WorkflowState> {
-  const assistantRole: Database['public']['Enums']['assistant_role_enum'] = 'db'
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
     return {
@@ -91,15 +48,6 @@ export async function finalizeArtifactsNode(
     }
   }
   const { repositories } = configurableResult.value
-
-  await logAssistantMessage(
-    state,
-    repositories,
-    'Compiling your complete database design documentation...',
-    assistantRole,
-  )
-
-  await saveArtifacts(state, repositories, assistantRole)
   const { errorToReturn } = await handleWorkflowError(state, repositories)
 
   return {

@@ -170,8 +170,7 @@ describe('Chat Workflow', () => {
     mockSchemaRepository = {
       getSchema: vi.fn(),
       getDesignSession: vi.fn(),
-      createEmptyPatchVersion: vi.fn(),
-      updateVersion: vi.fn(),
+      createVersion: vi.fn(),
       createTimelineItem: vi.fn(),
       createArtifact: vi.fn(),
       updateArtifact: vi.fn(),
@@ -233,14 +232,8 @@ describe('Chat Workflow', () => {
       }),
     }))
 
-    // Setup createEmptyVersion mock
-    vi.mocked(mockSchemaRepository.createEmptyPatchVersion).mockResolvedValue({
-      success: true,
-      versionId: 'test-version-id',
-    })
-
-    // Setup updateVersion mock
-    vi.mocked(mockSchemaRepository.updateVersion).mockResolvedValue({
+    // Setup createVersion mock
+    vi.mocked(mockSchemaRepository.createVersion).mockResolvedValue({
       success: true,
       newSchema: mockSchemaData,
     })
@@ -339,13 +332,7 @@ describe('Chat Workflow', () => {
   describe('Build Mode', () => {
     beforeEach(() => {
       // Reset mocks for each test
-      vi.mocked(mockSchemaRepository.createEmptyPatchVersion).mockResolvedValue(
-        {
-          success: true,
-          versionId: 'test-version-id',
-        },
-      )
-      vi.mocked(mockSchemaRepository.updateVersion).mockResolvedValue({
+      vi.mocked(mockSchemaRepository.createVersion).mockResolvedValue({
         success: true,
         newSchema: mockSchemaData,
       })
@@ -390,8 +377,8 @@ describe('Chat Workflow', () => {
         },
       }
 
-      // Mock updateVersion to return the expected schema
-      vi.mocked(mockSchemaRepository.updateVersion).mockResolvedValue({
+      // Mock createVersion to return the expected schema
+      vi.mocked(mockSchemaRepository.createVersion).mockResolvedValue({
         success: true,
         newSchema: expectedSchema,
       })
@@ -435,8 +422,8 @@ describe('Chat Workflow', () => {
     })
 
     it('should handle schema update failure', async () => {
-      // Mock updateVersion to fail for this test
-      vi.mocked(mockSchemaRepository.updateVersion).mockResolvedValue({
+      // Mock createVersion to fail for this test
+      vi.mocked(mockSchemaRepository.createVersion).mockResolvedValue({
         success: false,
         error: 'Database constraint violation',
       })
@@ -463,8 +450,8 @@ describe('Chat Workflow', () => {
     })
 
     it('should handle schema update exception', async () => {
-      // Mock updateVersion to throw an exception for this test
-      vi.mocked(mockSchemaRepository.updateVersion).mockRejectedValue(
+      // Mock createVersion to throw an exception for this test
+      vi.mocked(mockSchemaRepository.createVersion).mockRejectedValue(
         new Error('Network error'),
       )
 
@@ -500,13 +487,7 @@ describe('Chat Workflow', () => {
   describe('Error Handling', () => {
     beforeEach(() => {
       // Reset mocks for each test
-      vi.mocked(mockSchemaRepository.createEmptyPatchVersion).mockResolvedValue(
-        {
-          success: true,
-          versionId: 'test-version-id',
-        },
-      )
-      vi.mocked(mockSchemaRepository.updateVersion).mockResolvedValue({
+      vi.mocked(mockSchemaRepository.createVersion).mockResolvedValue({
         success: true,
         newSchema: mockSchemaData,
       })
@@ -557,13 +538,7 @@ describe('Chat Workflow', () => {
   describe('State Management', () => {
     beforeEach(() => {
       // Reset mocks for each test
-      vi.mocked(mockSchemaRepository.createEmptyPatchVersion).mockResolvedValue(
-        {
-          success: true,
-          versionId: 'test-version-id',
-        },
-      )
-      vi.mocked(mockSchemaRepository.updateVersion).mockResolvedValue({
+      vi.mocked(mockSchemaRepository.createVersion).mockResolvedValue({
         success: true,
         newSchema: mockSchemaData,
       })
@@ -590,13 +565,7 @@ describe('Chat Workflow', () => {
   describe('Agent Selection', () => {
     beforeEach(() => {
       // Reset mocks for each test
-      vi.mocked(mockSchemaRepository.createEmptyPatchVersion).mockResolvedValue(
-        {
-          success: true,
-          versionId: 'test-version-id',
-        },
-      )
-      vi.mocked(mockSchemaRepository.updateVersion).mockResolvedValue({
+      vi.mocked(mockSchemaRepository.createVersion).mockResolvedValue({
         success: true,
         newSchema: mockSchemaData,
       })
@@ -617,13 +586,7 @@ describe('Chat Workflow', () => {
   describe('Workflow Integration', () => {
     beforeEach(() => {
       // Reset mocks for each test
-      vi.mocked(mockSchemaRepository.createEmptyPatchVersion).mockResolvedValue(
-        {
-          success: true,
-          versionId: 'test-version-id',
-        },
-      )
-      vi.mocked(mockSchemaRepository.updateVersion).mockResolvedValue({
+      vi.mocked(mockSchemaRepository.createVersion).mockResolvedValue({
         success: true,
         newSchema: mockSchemaData,
       })

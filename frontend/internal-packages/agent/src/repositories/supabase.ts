@@ -16,9 +16,8 @@ import { ensurePathStructure } from '../utils/pathPreparation'
 import type {
   ArtifactResult,
   CreateArtifactParams,
-  CreateEmptyPatchVersionParams,
   CreateTimelineItemParams,
-  CreateVersionResult,
+  CreateVersionParams,
   CreateWorkflowRunParams,
   DesignSessionData,
   SchemaData,
@@ -26,7 +25,6 @@ import type {
   TimelineItemResult,
   UpdateArtifactParams,
   UpdateTimelineItemParams,
-  UpdateVersionParams,
   UpdateWorkflowRunStatusParams,
   VersionResult,
   WorkflowRunResult,
@@ -66,7 +64,9 @@ export class SupabaseSchemaRepository implements SchemaRepository {
           updated_at,
           organization_id,
           design_session_id,
-          building_schema_version_id
+          building_schema_version_id,
+          assistant_role,
+          query_result_id
         )
       `)
       .eq('id', designSessionId)
@@ -218,25 +218,93 @@ export class SupabaseSchemaRepository implements SchemaRepository {
     return versions.length > 0 ? Math.max(...versions.map((v) => v.number)) : 0
   }
 
-  async createEmptyPatchVersion(
-    params: CreateEmptyPatchVersionParams,
-  ): Promise<CreateVersionResult> {
-    const { buildingSchemaId, latestVersionNumber } = params
+  async createVersion(params: CreateVersionParams): Promise<VersionResult> {
+    const { buildingSchemaId, latestVersionNumber, patch } = params
 
-    // Get the building schema to get organization_id
-    const { data: buildingSchema, error: buildingSchemaError } =
-      await this.client
-        .from('building_schemas')
-        .select('organization_id')
-        .eq('id', buildingSchemaId)
-        .single()
+    // Generate message content based on patch operations
+    const patchCount = patch.length
+    const messageContent =
+      patchCount === 1
+        ? 'Schema updated with 1 change'
+        : `Schema updated with ${patchCount} changes`
 
-    if (buildingSchemaError || !buildingSchema) {
+    const { data: buildingSchema, error } = await this.client
+      .from('building_schemas')
+      .select(`
+        id, organization_id, initial_schema_snapshot, design_session_id
+      `)
+      .eq('id', buildingSchemaId)
+      .maybeSingle()
+
+    if (!buildingSchema || error) {
       return {
         success: false,
-        error: `Failed to fetch building schema: ${buildingSchemaError?.message}`,
+        error: `Failed to fetch building schema: ${error?.message}`,
       }
     }
+
+    // Get all previous versions to reconstruct the content
+    const { data: previousVersions, error: previousVersionsError } =
+      await this.client
+        .from('building_schema_versions')
+        .select('number, patch')
+        .eq('building_schema_id', buildingSchemaId)
+        .lte('number', latestVersionNumber)
+        .order('number', { ascending: true })
+
+    if (previousVersionsError) {
+      return {
+        success: false,
+        error: `Failed to fetch previous versions: ${previousVersionsError.message}`,
+      }
+    }
+
+    const patchArrayHistory = previousVersions
+      .map((version) => {
+        const parsed = v.safeParse(operationsSchema, version.patch)
+        if (parsed.success) {
+          return parsed.output
+        }
+        return null
+      })
+      .filter((patch): patch is NonNullable<typeof patch> => patch !== null)
+
+    const validationResult = v.safeParse(
+      schemaSchema,
+      buildingSchema.initial_schema_snapshot,
+    )
+
+    if (!validationResult.success) {
+      return {
+        success: false,
+        error: 'Invalid initial schema structure',
+      }
+    }
+
+    const currentContent = JSON.parse(JSON.stringify(validationResult.output))
+
+    // Apply all patches in order
+    for (const patchArray of patchArrayHistory) {
+      // Apply each operation in the patch to currentContent
+      applyPatchOperations(currentContent, patchArray)
+    }
+
+    // Now apply the new patch to get the new content
+    const newContent = JSON.parse(JSON.stringify(currentContent))
+    applyPatchOperations(newContent, patch)
+
+    // Validate the new schema structure before proceeding
+    const newSchemaValidationResult = v.safeParse(schemaSchema, newContent)
+
+    if (!newSchemaValidationResult.success) {
+      return {
+        success: false,
+        error: 'New schema structure is invalid after applying changes',
+      }
+    }
+
+    // Calculate reverse patch from new content to current content
+    const reversePatch = compare(newContent, currentContent)
 
     // Get the latest version number for this schema
     const { data: latestVersion, error: latestVersionError } = await this.client
@@ -269,145 +337,23 @@ export class SupabaseSchemaRepository implements SchemaRepository {
 
     const newVersionNumber = actualLatestVersionNumber + 1
 
-    // Create empty version with null patch and reverse_patch
-    const { data: newVersion, error } = await this.client
+    // Create new version with patch and reverse_patch
+    const { data: newVersion, error: createVersionError } = await this.client
       .from('building_schema_versions')
       .insert({
         building_schema_id: buildingSchemaId,
         organization_id: buildingSchema.organization_id,
         number: newVersionNumber,
-        patch: null,
-        reverse_patch: null,
+        patch: JSON.parse(JSON.stringify(patch)),
+        reverse_patch: JSON.parse(JSON.stringify(reversePatch)),
       })
       .select('id')
       .single()
 
-    if (error) {
+    if (createVersionError) {
       return {
         success: false,
-        error: error.message,
-      }
-    }
-
-    return {
-      success: true,
-      versionId: newVersion.id,
-    }
-  }
-
-  async updateVersion(params: UpdateVersionParams): Promise<VersionResult> {
-    const { buildingSchemaVersionId, patch } = params
-
-    // Get the building schema version
-    const { data: version, error: versionError } = await this.client
-      .from('building_schema_versions')
-      .select('building_schema_id, number')
-      .eq('id', buildingSchemaVersionId)
-      .single()
-
-    if (versionError || !version) {
-      return {
-        success: false,
-        error: `Failed to fetch building schema version: ${versionError?.message}`,
-      }
-    }
-
-    // Get the building schema
-    const { data: buildingSchema, error } = await this.client
-      .from('building_schemas')
-      .select(`
-        id, organization_id, initial_schema_snapshot, design_session_id
-      `)
-      .eq('id', version.building_schema_id)
-      .maybeSingle()
-
-    if (!buildingSchema || error) {
-      return {
-        success: false,
-        error: `Failed to fetch building schema: ${error?.message}`,
-      }
-    }
-
-    // Get all previous versions to reconstruct the content (excluding the current version)
-    const { data: previousVersions, error: previousVersionsError } =
-      await this.client
-        .from('building_schema_versions')
-        .select('number, patch')
-        .eq('building_schema_id', version.building_schema_id)
-        .lt('number', version.number)
-        .order('number', { ascending: true })
-
-    if (previousVersionsError) {
-      return {
-        success: false,
-        error: `Failed to fetch previous versions: ${previousVersionsError.message}`,
-      }
-    }
-
-    const patchArrayHistory = previousVersions
-      ?.map((version) => {
-        const parsed = v.safeParse(operationsSchema, version.patch)
-        if (parsed.success) {
-          return parsed.output
-        }
-        return null
-      })
-      .filter((version) => version !== null)
-
-    // Reconstruct the base content (first version) from the initial schema snapshot
-    const baseContent: Record<string, unknown> =
-      typeof buildingSchema.initial_schema_snapshot === 'object'
-        ? JSON.parse(JSON.stringify(buildingSchema.initial_schema_snapshot))
-        : {}
-
-    // Apply all patches in order to get the current content
-    const currentContent: Record<string, unknown> = { ...baseContent }
-
-    // Apply all patches in order
-    for (const patchArray of patchArrayHistory) {
-      // Apply each operation in the patch to currentContent
-      applyPatchOperations(currentContent, patchArray)
-    }
-
-    // Now apply the new patch to get the new content
-    const newContent = JSON.parse(JSON.stringify(currentContent))
-    applyPatchOperations(newContent, patch)
-
-    // Validate the new schema structure before proceeding
-    const validationResult = v.safeParse(schemaSchema, newContent)
-    if (!validationResult.success) {
-      const errorMessages = validationResult.issues
-        .map((issue) => `${issue.path?.join('.')} ${issue.message}`)
-        .join(', ')
-      return {
-        success: false,
-        error: `Invalid schema after applying changes: ${errorMessages}`,
-      }
-    }
-
-    // Calculate reverse patch from new content to current content
-    const reversePatch = compare(newContent, currentContent)
-
-    // Generate message content based on patch operations
-    const patchCount = patch.length
-    const messageContent =
-      patchCount === 1
-        ? 'Schema updated with 1 change'
-        : `Schema updated with ${patchCount} changes`
-
-    // Update the version with patch and reverse_patch
-    const { error: updateError } = await this.client
-      .from('building_schema_versions')
-      .update({
-        patch: JSON.parse(JSON.stringify(patch)),
-        reverse_patch: JSON.parse(JSON.stringify(reversePatch)),
-      })
-      .eq('id', buildingSchemaVersionId)
-
-    if (updateError) {
-      return {
-        success: false,
-        error: updateError.message,
+        error: createVersionError.message,
       }
     }
 
@@ -417,7 +363,7 @@ export class SupabaseSchemaRepository implements SchemaRepository {
       .update({
         schema: newContent,
       })
-      .eq('id', version.building_schema_id)
+      .eq('id', buildingSchemaId)
 
     if (schemaUpdateError) {
       return {
@@ -431,7 +377,7 @@ export class SupabaseSchemaRepository implements SchemaRepository {
       designSessionId: buildingSchema.design_session_id,
       content: messageContent,
       type: 'schema_version',
-      buildingSchemaVersionId: buildingSchemaVersionId,
+      buildingSchemaVersionId: newVersion.id,
     })
 
     if (!timelineResult.success) {
@@ -443,7 +389,7 @@ export class SupabaseSchemaRepository implements SchemaRepository {
 
     return {
       success: true,
-      newSchema: validationResult.output,
+      newSchema: newSchemaValidationResult.output,
     }
   }
 

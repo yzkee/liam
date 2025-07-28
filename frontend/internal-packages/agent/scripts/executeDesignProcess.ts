@@ -49,7 +49,7 @@ const createSimplifiedGraph = () => {
     .addEdge('invokeSchemaDesignTool', 'designSchema')
     .addConditionalEdges('designSchema', routeAfterDesignSchema, {
       invokeSchemaDesignTool: 'invokeSchemaDesignTool',
-      executeDDL: END, // In simplified version, skip DDL and go to complete
+      generateUsecase: END, // Schema design complete, end workflow
     })
 
   return graph.compile()
@@ -111,7 +111,15 @@ const executeDesignProcess = async (): Promise<Result<void, Error>> => {
   const { repositories, workflowState } = setupResult.value
 
   // Execute workflow
-  const config = { configurable: { repositories, logger } }
+  const config = {
+    configurable: {
+      repositories,
+      logger,
+      buildingSchemaId: workflowState.buildingSchemaId,
+      latestVersionNumber: workflowState.latestVersionNumber,
+      designSessionId: workflowState.designSessionId,
+    },
+  }
   const graph = createSimplifiedGraph()
 
   logger.info('Starting AI workflow execution...')
@@ -120,7 +128,7 @@ const executeDesignProcess = async (): Promise<Result<void, Error>> => {
   const streamResult = await (async () => {
     const stream = await graph.stream(workflowState, {
       configurable: config.configurable,
-      recursionLimit: 10,
+      recursionLimit: 20, // Increased to allow for schema design tool calls
       streamMode: 'values',
     })
 

@@ -9,11 +9,13 @@ describe('schemaDesignTool', () => {
   const createMockConfig = (
     buildingSchemaId: string,
     latestVersionNumber: number,
+    designSessionId: string,
     testRepositories: Repositories,
   ): RunnableConfig => ({
     configurable: {
       buildingSchemaId,
       latestVersionNumber,
+      designSessionId,
       repositories: testRepositories,
       logger: {
         log: vi.fn(),
@@ -25,16 +27,21 @@ describe('schemaDesignTool', () => {
     },
   })
 
-  it('should successfully update schema version', async () => {
+  it('should successfully update schema version with DDL validation', async () => {
     const repositories: Repositories = {
       schema: new InMemoryRepository({
         schemas: {
-          'test-schema': aSchema(),
+          'test-session': aSchema(), // Use designSessionId as the key
         },
       }),
     }
 
-    const config = createMockConfig('test-schema', 1, repositories)
+    const config = createMockConfig(
+      'test-session', // Use same ID for both buildingSchemaId and designSessionId
+      1,
+      'test-session',
+      repositories,
+    )
     const input = {
       operations: [
         {
@@ -62,36 +69,33 @@ describe('schemaDesignTool', () => {
     const result = await schemaDesignTool.invoke(input, config)
 
     expect(result).toBe(
-      'Schema successfully updated. The operations have been applied to the database schema.',
+      'Schema successfully updated. The operations have been applied to the database schema, DDL validation passed, and new version created.',
     )
 
     // Verify the schema was actually updated in the repository by schemaDesignTool
-    const schemaResult = await repositories.schema.getSchema('test-schema')
-    expect(schemaResult.isOk()).toBe(true)
-    if (schemaResult.isOk()) {
-      expect(schemaResult.value.schema).toEqual(
-        aSchema({
-          tables: {
-            users: aTable({
-              name: 'users',
-              columns: {
-                id: aColumn({
-                  name: 'id',
-                  type: 'integer',
-                  notNull: true,
-                }),
-                name: aColumn({
-                  name: 'name',
-                  type: 'varchar(255)',
-                  notNull: false,
-                }),
-              },
-            }),
-          },
-        }),
-      )
-      expect(schemaResult.value.latestVersionNumber).toBe(2)
-    }
+    const schemaData = await repositories.schema.getSchema('test-session')
+    expect(schemaData.data?.schema).toEqual(
+      aSchema({
+        tables: {
+          users: aTable({
+            name: 'users',
+            columns: {
+              id: aColumn({
+                name: 'id',
+                type: 'integer',
+                notNull: true,
+              }),
+              name: aColumn({
+                name: 'name',
+                type: 'varchar(255)',
+                notNull: false,
+              }),
+            },
+          }),
+        },
+      }),
+    )
+    expect(schemaData.data?.latestVersionNumber).toBe(2)
   })
 
   it('should throw error when update fails', async () => {
@@ -99,7 +103,12 @@ describe('schemaDesignTool', () => {
       schema: new InMemoryRepository(),
     }
 
-    const config = createMockConfig('non-existent-schema-id', 1, repositories)
+    const config = createMockConfig(
+      'non-existent-schema-id',
+      1,
+      'test-session',
+      repositories,
+    )
     const input = {
       operations: [
         {
@@ -120,7 +129,7 @@ describe('schemaDesignTool', () => {
     }
 
     await expect(schemaDesignTool.invoke(input, config)).rejects.toThrow(
-      'Schema update failed: Building schema not found. Please fix the error and try again.',
+      'Could not retrieve current schema for DDL validation. Please check the schema ID and try again.',
     )
   })
 
@@ -129,7 +138,12 @@ describe('schemaDesignTool', () => {
       schema: new InMemoryRepository(),
     }
 
-    const config = createMockConfig('test-schema-id', 1, repositories)
+    const config = createMockConfig(
+      'test-schema-id',
+      1,
+      'test-session',
+      repositories,
+    )
     const input = {
       operations: 'invalid-operations', // Should be an array
     }
@@ -145,20 +159,64 @@ describe('schemaDesignTool', () => {
     const repositories: Repositories = {
       schema: new InMemoryRepository({
         schemas: {
-          'test-schema': initialSchema,
+          'test-session': initialSchema, // Use designSessionId as the key
         },
       }),
     }
 
-    const config = createMockConfig('test-schema', 1, repositories)
+    const config = createMockConfig(
+      'test-session', // Use same ID for both buildingSchemaId and designSessionId
+      1,
+      'test-session',
+      repositories,
+    )
     const input = {
       operations: [],
     }
 
+    // With actual PGlite, empty operations on empty schema should succeed
     const result = await schemaDesignTool.invoke(input, config)
-
     expect(result).toBe(
-      'Schema successfully updated. The operations have been applied to the database schema.',
+      'Schema successfully updated. The operations have been applied to the database schema, DDL validation passed, and new version created.',
+    )
+  })
+
+  it('should throw error when DDL execution fails', async () => {
+    const repositories: Repositories = {
+      schema: new InMemoryRepository({
+        schemas: {
+          'test-session': aSchema(), // Use designSessionId as the key
+        },
+      }),
+    }
+
+    const config = createMockConfig(
+      'test-session', // Use same ID for both buildingSchemaId and designSessionId
+      1,
+      'test-session',
+      repositories,
+    )
+    const input = {
+      operations: [
+        {
+          op: 'add',
+          path: '/tables/invalid_table',
+          value: aTable({
+            name: 'invalid_table',
+            columns: {
+              id: aColumn({
+                name: 'id',
+                type: 'invalid_type',
+                notNull: true,
+              }),
+            },
+          }),
+        },
+      ],
+    }
+
+    await expect(schemaDesignTool.invoke(input, config)).rejects.toThrow(
+      'DDL execution validation failed:',
     )
   })
 })

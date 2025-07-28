@@ -255,12 +255,25 @@ export const createBuildingSchema = (
         ),
       )
     }
-    return okAsync({
-      ...sessionData,
-      buildingSchema: {
-        id: buildingSchema.id,
-        latest_version_number: 0,
-      },
+    // Get the actual latest version number for this building schema
+    return ResultAsync.fromPromise(
+      supabaseClient
+        .from('building_schema_versions')
+        .select('number')
+        .eq('building_schema_id', buildingSchema.id)
+        .order('number', { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      (error) => new Error(`Failed to get latest version: ${error}`),
+    ).andThen(({ data: latestVersion }) => {
+      const latestVersionNumber = latestVersion ? latestVersion.number : 0
+      return okAsync({
+        ...sessionData,
+        buildingSchema: {
+          id: buildingSchema.id,
+          latest_version_number: latestVersionNumber,
+        },
+      })
     })
   })
 }

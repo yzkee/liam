@@ -2,7 +2,6 @@ import { END, START, StateGraph } from '@langchain/langgraph'
 import {
   analyzeRequirementsNode,
   designSchemaNode,
-  executeDdlNode,
   finalizeArtifactsNode,
   generateUsecaseNode,
   prepareDmlNode,
@@ -40,9 +39,6 @@ export const createGraph = () => {
     .addNode('invokeSchemaDesignTool', invokeSchemaDesignToolNode, {
       retryPolicy: RETRY_POLICY,
     })
-    .addNode('executeDDL', executeDdlNode, {
-      retryPolicy: RETRY_POLICY,
-    })
     .addNode('generateUsecase', generateUsecaseNode, {
       retryPolicy: RETRY_POLICY,
     })
@@ -62,31 +58,11 @@ export const createGraph = () => {
     .addEdge('invokeSchemaDesignTool', 'designSchema')
     .addConditionalEdges('designSchema', routeAfterDesignSchema, {
       invokeSchemaDesignTool: 'invokeSchemaDesignTool',
-      executeDDL: 'executeDDL',
+      generateUsecase: 'generateUsecase',
     })
-    .addEdge('executeDDL', 'generateUsecase')
     .addEdge('generateUsecase', 'prepareDML')
     .addEdge('prepareDML', 'validateSchema')
     .addEdge('finalizeArtifacts', END)
-
-    // Conditional edge for executeDDL - retry with designSchema if DDL execution fails
-    .addConditionalEdges(
-      'executeDDL',
-      (state) => {
-        if (state.shouldRetryWithDesignSchema) {
-          return 'designSchema'
-        }
-        if (state.ddlExecutionFailed) {
-          return 'finalizeArtifacts'
-        }
-        return 'generateUsecase'
-      },
-      {
-        designSchema: 'designSchema',
-        finalizeArtifacts: 'finalizeArtifacts',
-        generateUsecase: 'generateUsecase',
-      },
-    )
 
     // Conditional edges for validation results
     .addConditionalEdges(

@@ -2,21 +2,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { DMLGenerationAgent } from '../../../langchain/agents/dmlGenerationAgent/agent'
 import type { Repositories } from '../../../repositories'
 import { convertSchemaToText } from '../../../utils/convertSchemaToText'
-import type { NodeLogger } from '../../../utils/nodeLogger'
 import type { WorkflowState } from '../types'
 import { prepareDmlNode } from './prepareDmlNode'
 
 vi.mock('../../../langchain/agents/dmlGenerationAgent/agent')
 
 describe('prepareDmlNode', () => {
-  const mockLogger: NodeLogger = {
-    debug: vi.fn(),
-    log: vi.fn(),
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-  }
-
   beforeEach(() => {
     vi.clearAllMocks()
     // Set up default mock implementation
@@ -78,7 +69,7 @@ describe('prepareDmlNode', () => {
     })
 
     const result = await prepareDmlNode(state, {
-      configurable: { repositories: state.repositories, logger: mockLogger },
+      configurable: { repositories: state.repositories },
     })
 
     expect(result.dmlStatements).toBeUndefined()
@@ -90,7 +81,7 @@ describe('prepareDmlNode', () => {
     })
 
     const result = await prepareDmlNode(state, {
-      configurable: { repositories: state.repositories, logger: mockLogger },
+      configurable: { repositories: state.repositories },
     })
 
     expect(result.dmlStatements).toBeUndefined()
@@ -103,7 +94,7 @@ describe('prepareDmlNode', () => {
     })
 
     const result = await prepareDmlNode(state, {
-      configurable: { repositories: state.repositories, logger: mockLogger },
+      configurable: { repositories: state.repositories },
     })
 
     expect(result.dmlStatements).toBeUndefined()
@@ -134,7 +125,7 @@ describe('prepareDmlNode', () => {
     })
 
     const result = await prepareDmlNode(state, {
-      configurable: { repositories: state.repositories, logger: mockLogger },
+      configurable: { repositories: state.repositories },
     })
 
     expect(result.dmlStatements).toBeUndefined()
@@ -183,7 +174,7 @@ describe('prepareDmlNode', () => {
     })
 
     await prepareDmlNode(state, {
-      configurable: { repositories: state.repositories, logger: mockLogger },
+      configurable: { repositories: state.repositories },
     })
 
     // Verify convertSchemaToText produces correct output

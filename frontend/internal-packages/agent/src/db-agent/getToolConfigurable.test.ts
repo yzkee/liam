@@ -69,21 +69,21 @@ describe('getToolConfigurable', () => {
     }
   })
 
-  it('should return error when logger is missing', () => {
+  it('should work without logger (logger is no longer required)', () => {
     const config: RunnableConfig = {
       configurable: {
         buildingSchemaId: 'test-version-id',
         latestVersionNumber: 1,
         repositories,
-        // Missing logger
       },
     }
 
     const result = getToolConfigurable(config)
 
-    expect(result.isErr()).toBe(true)
-    if (result.isErr()) {
-      expect(result.error.message).toBe('Missing logger in configurable object')
+    expect(result.isOk()).toBe(true)
+    if (result.isOk()) {
+      expect(result.value.buildingSchemaId).toBe('test-version-id')
+      expect(result.value.repositories).toBe(repositories)
     }
   })
 
@@ -185,13 +185,13 @@ describe('getToolConfigurable', () => {
     }
   })
 
-  it('should accept string as logger (truthy check)', () => {
+  it('should work with string logger (logger is ignored)', () => {
     const config: RunnableConfig = {
       configurable: {
         buildingSchemaId: 'test-version-id',
         latestVersionNumber: 1,
         repositories,
-        logger: 'not-an-object', // Truthy value passes basic check
+        logger: 'not-an-object', // Logger is ignored since it's not required
       },
     }
 
@@ -223,21 +223,22 @@ describe('getToolConfigurable', () => {
     }
   })
 
-  it('should return error when logger is null', () => {
+  it('should work with null logger (logger is no longer required)', () => {
     const config: RunnableConfig = {
       configurable: {
         buildingSchemaId: 'test-version-id',
         latestVersionNumber: 1,
         repositories,
-        logger: null, // Falsy value
+        logger: null, // Logger can be null since it's not required
       },
     }
 
     const result = getToolConfigurable(config)
 
-    expect(result.isErr()).toBe(true)
-    if (result.isErr()) {
-      expect(result.error.message).toBe('Missing logger in configurable object')
+    expect(result.isOk()).toBe(true)
+    if (result.isOk()) {
+      expect(result.value.buildingSchemaId).toBe('test-version-id')
+      expect(result.value.repositories).toBe(repositories)
     }
   })
 })

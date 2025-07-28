@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { DMLGenerationAgent } from '../../../langchain/agents/dmlGenerationAgent/agent'
 import type { Repositories } from '../../../repositories'
+import { InMemoryRepository } from '../../../repositories/InMemoryRepository'
 import { convertSchemaToText } from '../../../utils/convertSchemaToText'
 import type { NodeLogger } from '../../../utils/nodeLogger'
 import type { WorkflowState } from '../types'
@@ -33,20 +34,7 @@ describe('prepareDmlNode', () => {
 
   const createMockState = (overrides?: Partial<WorkflowState>) => {
     const repositories: Repositories = {
-      schema: {
-        updateTimelineItem: vi.fn(),
-        getSchema: vi.fn(),
-        getDesignSession: vi.fn(),
-        createVersion: vi.fn(),
-        createTimelineItem: vi.fn().mockResolvedValue(undefined),
-        createArtifact: vi.fn(),
-        updateArtifact: vi.fn(),
-        getArtifact: vi.fn(),
-        createValidationQuery: vi.fn(),
-        createValidationResults: vi.fn(),
-        createWorkflowRun: vi.fn(),
-        updateWorkflowRunStatus: vi.fn(),
-      },
+      schema: new InMemoryRepository(),
     }
 
     return {

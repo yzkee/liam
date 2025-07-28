@@ -105,6 +105,7 @@ Please suggest a specific solution to resolve this problem.`
             designSessionId={designSessionId}
             timelineItems={timelineItems}
             onMessageSend={addOrUpdateTimelineItem}
+            onVersionView={handleChangeSelectedVersion}
           />
         </div>
         {hasSelectedVersion && (

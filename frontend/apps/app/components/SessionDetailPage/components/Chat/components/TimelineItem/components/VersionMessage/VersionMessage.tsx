@@ -1,6 +1,6 @@
 'use client'
 
-import type { Json, Tables } from '@liam-hq/db'
+import type { Json } from '@liam-hq/db'
 import { operationsSchema } from '@liam-hq/db-structure'
 import {
   ArrowRight,
@@ -10,8 +10,16 @@ import {
   ChevronRight,
 } from '@liam-hq/ui'
 import clsx from 'clsx'
-import { type FC, Fragment, useEffect, useState, useTransition } from 'react'
+import {
+  type FC,
+  Fragment,
+  useCallback,
+  useEffect,
+  useState,
+  useTransition,
+} from 'react'
 import * as v from 'valibot'
+import type { Version } from '@/components/SessionDetailPage/types'
 import { createClient } from '@/libs/db/client'
 import styles from './VersionMessage.module.css'
 
@@ -74,30 +82,30 @@ const parsePatchOperations = (
   })
 }
 
-type BuildingSchemaVersion = Pick<
-  Tables<'building_schema_versions'>,
-  'patch' | 'number' | 'id'
->
-
 type Props = {
   buildingSchemaVersionId: string
-  onView?: () => void
+  onView?: (version: Version) => void
 }
 
 export const VersionMessage: FC<Props> = ({
   buildingSchemaVersionId,
   onView,
 }) => {
-  const [version, setVersion] = useState<BuildingSchemaVersion | null>(null)
+  const [version, setVersion] = useState<Version | null>(null)
   const [isPending, startTransition] = useTransition()
   const [isExpanded, setIsExpanded] = useState(false)
+
+  const handleClick = useCallback(() => {
+    if (!version) return
+    onView?.(version)
+  }, [version, onView])
 
   useEffect(() => {
     startTransition(async () => {
       const supabase = createClient()
       const { data, error } = await supabase
         .from('building_schema_versions')
-        .select('id, number, patch')
+        .select('id, number, patch, reverse_patch, building_schema_id')
         .eq('id', buildingSchemaVersionId)
         .single()
 
@@ -162,7 +170,7 @@ export const VersionMessage: FC<Props> = ({
           <Button
             variant="outline-secondary"
             size="xs"
-            onClick={onView}
+            onClick={handleClick}
             className={styles.viewButton}
           >
             View

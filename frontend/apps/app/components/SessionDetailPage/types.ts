@@ -80,6 +80,7 @@ export type AssistantTimelineItemEntry = BaseTimelineItemEntry & {
 export type SchemaVersionTimelineItemEntry = BaseTimelineItemEntry & {
   type: 'schema_version'
   buildingSchemaVersionId: string
+  onView?: (version: Version) => void
 }
 
 export type ErrorTimelineItemEntry = BaseTimelineItemEntry & {

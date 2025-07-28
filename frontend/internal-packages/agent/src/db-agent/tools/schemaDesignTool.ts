@@ -49,22 +49,17 @@ const validateAndExecuteDDL = async (
   const ddlResult = postgresqlSchemaDeparser(schema)
 
   if (ddlResult.errors.length > 0) {
+    const errorDetails = ddlResult.errors
+      .map((error) => error.message)
+      .join('; ')
     // LangGraph tool nodes require throwing errors to trigger retry mechanism
     // eslint-disable-next-line no-throw-error/no-throw-error
     throw new Error(
-      'DDL generation failed due to schema errors. The schema design contains issues that prevent valid SQL generation. Please review and fix the schema structure.',
+      `DDL generation failed due to schema errors: ${errorDetails}. The schema design contains issues that prevent valid SQL generation. Please review and fix the schema structure.`,
     )
   }
 
   const ddlStatements = ddlResult.value
-
-  if (!ddlStatements || !ddlStatements.trim()) {
-    // LangGraph tool nodes require throwing errors to trigger retry mechanism
-    // eslint-disable-next-line no-throw-error/no-throw-error
-    throw new Error(
-      'No DDL statements generated - schema appears to be empty. Please ensure the schema contains valid table definitions.',
-    )
-  }
 
   // Execute DDL to validate it
   const results: SqlResult[] = await executeQuery(
@@ -168,20 +163,10 @@ export const schemaDesignTool = tool(
       }
     }
 
-    // After DDL validation passes, get the latest version number and create the actual version
-    const refreshedSchemaResult =
-      await repositories.schema.getSchema(designSessionId)
-    if (refreshedSchemaResult.error || !refreshedSchemaResult.data) {
-      // LangGraph tool nodes require throwing errors to trigger retry mechanism
-      // eslint-disable-next-line no-throw-error/no-throw-error
-      throw new Error(
-        'Could not retrieve latest schema for version creation. Please try again.',
-      )
-    }
-
+    // After DDL validation passes, create the actual version
     const versionResult = await repositories.schema.createVersion({
       buildingSchemaId,
-      latestVersionNumber: refreshedSchemaResult.data.latestVersionNumber,
+      latestVersionNumber: schemaResult.data.latestVersionNumber,
       patch: parsed.output.operations,
     })
 

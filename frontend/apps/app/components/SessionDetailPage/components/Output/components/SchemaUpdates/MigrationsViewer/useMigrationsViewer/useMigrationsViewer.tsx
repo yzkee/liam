@@ -12,9 +12,22 @@ import type { ReviewComment } from '../../../../../../types'
 import { commentStateField, setCommentsEffect } from './commentExtension'
 import { customTheme, sqlHighlightStyle } from './editorTheme'
 
+// Function to create fold gutter marker DOM elements
+const createFoldMarkerElement = (isOpen: boolean): HTMLElement => {
+  const span = document.createElement('span')
+  span.className = `cm-foldMarker ${isOpen ? 'open' : 'closed'}`
+  const transform = isOpen ? ' transform="rotate(90 8 8)"' : ''
+  span.innerHTML = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 4L10 8L6 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"${transform}/></svg>`
+  return span
+}
+
 const baseExtensions: Extension[] = [
   lineNumbers(),
-  foldGutter(),
+  foldGutter({
+    markerDOM: (open): HTMLElement => {
+      return createFoldMarkerElement(open)
+    },
+  }),
   drawSelection(),
   sql(),
   lintGutter(),

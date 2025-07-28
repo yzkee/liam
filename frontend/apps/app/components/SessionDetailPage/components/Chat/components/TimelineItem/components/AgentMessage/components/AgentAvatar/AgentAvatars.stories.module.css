@@ -11,6 +11,7 @@
 .agentLabel {
   margin-top: var(--spacing-2);
   font-size: 0.75rem;
+  color: var(--global-foreground);
 }
 
 .sizesContainer {

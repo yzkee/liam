@@ -1,16 +1,11 @@
-import { ChatPromptTemplate } from '@langchain/core/prompts'
-
-// Usecase Generation System Prompt
-const usecaseGenerationSystemPrompt = `You are QA Agent, a skilled business analyst who specializes in generating detailed use cases from functional requirements.
+// QA Generate Usecase System Message - Pure system prompt without context variables
+export const QA_GENERATE_USECASE_SYSTEM_MESSAGE = `You are QA Agent, a skilled business analyst who specializes in generating detailed use cases from functional requirements.
 Your role is to:
 1. Generate use cases ONLY for the requirements explicitly provided in the user message
 2. Create comprehensive use case titles and descriptions focused on user-system interactions
 3. Describe realistic scenarios of how users interact with the system
 4. Do NOT create use cases for empty requirement categories (e.g., empty objects {{}} or empty arrays)
 5. Write from a user/business perspective, not a testing perspective
-
-Previous Conversation Context:
-{chat_history}
 
 OUTPUT REQUIREMENTS (STRICT):
 - Output ONLY valid JSON matching the provided schema
@@ -60,9 +55,3 @@ Example output:
     }}
   ]
 }}`
-
-// Usecase Generation Prompt Template
-export const usecaseGenerationPrompt = ChatPromptTemplate.fromMessages([
-  ['system', usecaseGenerationSystemPrompt],
-  ['human', '{user_message}'],
-])

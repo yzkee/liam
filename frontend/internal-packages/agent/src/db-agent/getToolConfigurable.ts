@@ -5,7 +5,8 @@ import { getConfigurable } from '../chat/workflow/shared/getConfigurable'
 import type { Repositories } from '../repositories'
 
 const toolConfigurableSchema = v.object({
-  buildingSchemaVersionId: v.string(),
+  buildingSchemaId: v.string(),
+  latestVersionNumber: v.number(),
 })
 
 export type ToolConfigurable = {

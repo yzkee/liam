@@ -20,7 +20,7 @@ export const schemaDesignTool = tool(
     if (toolConfigurableResult.isErr()) {
       return `Configuration error: ${toolConfigurableResult.error.message}. Please check the tool configuration and try again.`
     }
-    const { repositories, buildingSchemaVersionId } =
+    const { repositories, buildingSchemaId, latestVersionNumber } =
       toolConfigurableResult.value
     const parsed = v.safeParse(schemaDesignToolSchema, input)
     if (!parsed.success) {
@@ -30,8 +30,9 @@ export const schemaDesignTool = tool(
       return `Input validation failed: ${errorDetails}. Please check your operations format and ensure all required fields are provided correctly.`
     }
 
-    const result = await repositories.schema.updateVersion({
-      buildingSchemaVersionId,
+    const result = await repositories.schema.createVersion({
+      buildingSchemaId,
+      latestVersionNumber,
       patch: parsed.output.operations,
     })
 

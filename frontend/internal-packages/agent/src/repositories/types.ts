@@ -3,6 +3,7 @@ import type { Database, Tables } from '@liam-hq/db/supabase/database.types'
 import type { Schema } from '@liam-hq/db-structure'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import type { Operation } from 'fast-json-patch'
+import type { ResultAsync } from 'neverthrow'
 
 export type SchemaData = {
   id: string
@@ -25,19 +26,11 @@ export type DesignSessionData = {
   }>
 }
 
-export type CreateEmptyPatchVersionParams = {
+export type CreateVersionParams = {
   buildingSchemaId: string
   latestVersionNumber: number
-}
-
-export type UpdateVersionParams = {
-  buildingSchemaVersionId: string
   patch: Operation[]
 }
-
-export type CreateVersionResult =
-  | { success: true; versionId: string }
-  | { success: false; error?: string | null }
 
 export type VersionResult =
   | { success: true; newSchema: Schema }
@@ -133,10 +126,7 @@ export type SchemaRepository = {
   /**
    * Fetch schema data for a design session
    */
-  getSchema(designSessionId: string): Promise<{
-    data: SchemaData | null
-    error: { message: string } | null
-  }>
+  getSchema(designSessionId: string): ResultAsync<SchemaData, Error>
 
   /**
    * Fetch design session data including organization_id and timeline_items
@@ -144,16 +134,9 @@ export type SchemaRepository = {
   getDesignSession(designSessionId: string): Promise<DesignSessionData | null>
 
   /**
-   * Create a new empty schema version (patch/reverse_patch are null)
+   * Create a new schema version with optimistic locking (atomic operation)
    */
-  createEmptyPatchVersion(
-    params: CreateEmptyPatchVersionParams,
-  ): Promise<CreateVersionResult>
-
-  /**
-   * Update an existing schema version with patch/reverse_patch
-   */
-  updateVersion(params: UpdateVersionParams): Promise<VersionResult>
+  createVersion(params: CreateVersionParams): Promise<VersionResult>
 
   /**
    * Create a new timeline item in the design session

@@ -69,7 +69,7 @@ describe('evaluateSchema', () => {
 
   beforeEach(async () => {
     const { evaluate } = await import('../../evaluate/evaluate.ts')
-    mockEvaluate = evaluate as MockedFunction<typeof evaluate>
+    mockEvaluate = vi.mocked(evaluate)
     mockEvaluate.mockClear()
     mockEvaluate.mockResolvedValue(mockEvaluateResult)
 
@@ -308,13 +308,12 @@ describe('evaluateSchema', () => {
       // Check file content
       const firstResultFile = resultFiles[0]
       if (!firstResultFile) {
-        throw new Error('No result files found')
+        expect.fail('No result files found')
       }
       const resultFile = path.join(evaluationDir, firstResultFile)
-      const content = JSON.parse(fs.readFileSync(resultFile, 'utf-8')) as {
-        caseId: string
-        metrics: unknown
-      }
+      const resultFileContent = fs.readFileSync(resultFile, 'utf-8')
+      const content: { caseId: string; metrics: unknown } =
+        JSON.parse(resultFileContent)
       expect(content.caseId).toBe('case1')
       expect(content.metrics).toBeDefined()
     })

@@ -3,41 +3,50 @@ import type { RunnableConfig } from '@langchain/core/runnables'
 import type { Database } from '@liam-hq/db'
 import { ResultAsync } from 'neverthrow'
 import { QAGenerateUsecaseAgent } from '../../../langchain/agents'
-import type { BasePromptVariables } from '../../../langchain/utils/types'
+import type { Repositories } from '../../../repositories'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
-import { formatMessagesToHistory } from '../utils/messageUtils'
 import { logAssistantMessage } from '../utils/timelineLogger'
+import {
+  createOrUpdateArtifact,
+  transformWorkflowStateToArtifact,
+} from '../utils/transformWorkflowStateToArtifact'
 import { withTimelineItemSync } from '../utils/withTimelineItemSync'
 
 /**
- * Format analyzed requirements into a structured text for AI processing
+ * Save artifacts if workflow state contains artifact data
  */
-function formatAnalyzedRequirements(
-  analyzedRequirements: NonNullable<WorkflowState['analyzedRequirements']>,
-  userInput: string,
-): string {
-  return `
-Business Requirement: ${analyzedRequirements.businessRequirement}
+async function saveArtifacts(
+  state: WorkflowState,
+  repositories: Repositories,
+  assistantRole: Database['public']['Enums']['assistant_role_enum'],
+): Promise<void> {
+  if (!state.analyzedRequirements && !state.generatedUsecases) {
+    return
+  }
 
-Functional Requirements:
-${Object.entries(analyzedRequirements.functionalRequirements)
-  .map(
-    ([category, requirements]) =>
-      `${category}:\n${requirements.map((req) => `- ${req}`).join('\n')}`,
+  const artifact = transformWorkflowStateToArtifact(state)
+  const artifactResult = await createOrUpdateArtifact(
+    state,
+    artifact,
+    repositories,
   )
-  .join('\n\n')}
 
-Non-Functional Requirements:
-${Object.entries(analyzedRequirements.nonFunctionalRequirements)
-  .map(
-    ([category, requirements]) =>
-      `${category}:\n${requirements.map((req) => `- ${req}`).join('\n')}`,
-  )
-  .join('\n\n')}
-
-Original User Input: ${userInput}
-`
+  if (artifactResult.success) {
+    await logAssistantMessage(
+      state,
+      repositories,
+      'Your use cases have been saved and are ready for implementation',
+      assistantRole,
+    )
+  } else {
+    await logAssistantMessage(
+      state,
+      repositories,
+      'Unable to save your use cases. Please try again or contact support...',
+      assistantRole,
+    )
+  }
 }
 
 /**
@@ -85,21 +94,11 @@ export async function generateUsecaseNode(
 
   const qaAgent = new QAGenerateUsecaseAgent()
 
-  // Create a user message that includes the analyzed requirements
-  const requirementsText = formatAnalyzedRequirements(
-    state.analyzedRequirements,
-    state.userInput,
-  )
-
-  const promptVariables: BasePromptVariables = {
-    chat_history: formatMessagesToHistory(state.messages),
-    user_message: requirementsText,
-  }
-
   const retryCount = state.retryCount['generateUsecaseNode'] ?? 0
 
+  // Use state.messages directly - includes error messages and all context
   const usecaseResult = await ResultAsync.fromPromise(
-    qaAgent.generate(promptVariables),
+    qaAgent.generate(state.messages),
     (error) => (error instanceof Error ? error : new Error(String(error))),
   )
 
@@ -119,12 +118,17 @@ export async function generateUsecaseNode(
         },
       )
 
-      return {
+      const updatedState = {
         ...state,
         messages: [...state.messages, usecaseMessage],
         generatedUsecases: generatedResult.usecases,
         error: undefined, // Clear error on success
       }
+
+      // Save artifacts if usecases are successfully generated
+      await saveArtifacts(updatedState, repositories, assistantRole)
+
+      return updatedState
     },
     async (error) => {
       await logAssistantMessage(

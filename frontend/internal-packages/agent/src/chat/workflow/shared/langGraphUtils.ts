@@ -2,7 +2,6 @@ import { Annotation, MessagesAnnotation } from '@langchain/langgraph'
 import type { Schema } from '@liam-hq/db-structure'
 import type { Usecase } from '../../../langchain/agents/qaGenerateUsecaseAgent/agent'
 import type { Repositories } from '../../../repositories'
-import type { NodeLogger } from '../../../utils/nodeLogger'
 
 /**
  * Default recursion limit for LangGraph workflow execution.
@@ -11,10 +10,10 @@ import type { NodeLogger } from '../../../utils/nodeLogger'
  * Important: Node retries do NOT count toward this limit. The limit only
  * applies to transitions between nodes.
  *
- * The workflow has 9 nodes:
- * - Normal execution: 10 transitions (START → 9 nodes → END)
+ * The workflow has 8 nodes:
+ * - Normal execution: 9 transitions (START → 8 nodes → END)
  * - With error loops: May have additional transitions when errors occur
- *   (e.g., validateSchema → designSchema, reviewDeliverables → analyzeRequirements)
+ *   (e.g., validateSchema → designSchema)
  *
  * Setting this to 20 ensures:
  * - Complete workflow execution under normal conditions
@@ -60,8 +59,5 @@ export const createAnnotations = () => {
 
     // Repository dependencies for data access
     repositories: Annotation<Repositories>,
-
-    // Logging functionality
-    logger: Annotation<NodeLogger>,
   })
 }

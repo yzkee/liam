@@ -2,6 +2,7 @@ import { executeQuery } from '@liam-hq/pglite-server'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Repositories } from '../../../repositories'
+import { InMemoryRepository } from '../../../repositories/InMemoryRepository'
 import type { WorkflowState } from '../types'
 import { validateSchemaNode } from './validateSchemaNode'
 
@@ -10,14 +11,6 @@ vi.mock('@liam-hq/pglite-server', () => ({
 }))
 
 describe('validateSchemaNode', () => {
-  const mockLogger = {
-    debug: vi.fn(),
-    log: vi.fn(),
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-  }
-
   const createMockState = (
     overrides?: Partial<WorkflowState>,
   ): WorkflowState => {
@@ -35,31 +28,9 @@ describe('validateSchemaNode', () => {
     }
   }
 
-  const createMockRepositories = (): Repositories => {
+  const createRepositories = (): Repositories => {
     return {
-      schema: {
-        updateTimelineItem: vi.fn(),
-        getSchema: vi.fn(),
-        getDesignSession: vi.fn(),
-        createEmptyPatchVersion: vi.fn(),
-        updateVersion: vi.fn(),
-        createTimelineItem: vi.fn().mockResolvedValue({
-          success: true,
-          timelineItem: { id: 'mock-timeline-id' },
-        }),
-        createArtifact: vi.fn(),
-        updateArtifact: vi.fn(),
-        getArtifact: vi.fn(),
-        createValidationQuery: vi.fn().mockResolvedValue({
-          success: true,
-          queryId: 'mock-query-id',
-        }),
-        createValidationResults: vi.fn().mockResolvedValue({
-          success: true,
-        }),
-        createWorkflowRun: vi.fn(),
-        updateWorkflowRunStatus: vi.fn(),
-      },
+      schema: new InMemoryRepository(),
     }
   }
 
@@ -73,9 +44,9 @@ describe('validateSchemaNode', () => {
       ddlStatements: '',
     })
 
-    const repositories = createMockRepositories()
+    const repositories = createRepositories()
     const result = await validateSchemaNode(state, {
-      configurable: { repositories, logger: mockLogger },
+      configurable: { repositories },
     })
 
     expect(executeQuery).not.toHaveBeenCalled()
@@ -103,9 +74,9 @@ describe('validateSchemaNode', () => {
       ddlStatements: '',
     })
 
-    const repositories = createMockRepositories()
+    const repositories = createRepositories()
     const result = await validateSchemaNode(state, {
-      configurable: { repositories, logger: mockLogger },
+      configurable: { repositories },
     })
 
     expect(executeQuery).toHaveBeenCalledWith(
@@ -136,9 +107,9 @@ describe('validateSchemaNode', () => {
       dmlStatements: '',
     })
 
-    const repositories = createMockRepositories()
+    const repositories = createRepositories()
     const result = await validateSchemaNode(state, {
-      configurable: { repositories, logger: mockLogger },
+      configurable: { repositories },
     })
 
     expect(executeQuery).toHaveBeenCalledWith(
@@ -179,9 +150,9 @@ describe('validateSchemaNode', () => {
       dmlStatements: 'INSERT INTO users VALUES (1);',
     })
 
-    const repositories = createMockRepositories()
+    const repositories = createRepositories()
     const result = await validateSchemaNode(state, {
-      configurable: { repositories, logger: mockLogger },
+      configurable: { repositories },
     })
 
     expect(executeQuery).toHaveBeenCalledWith(
@@ -222,9 +193,9 @@ describe('validateSchemaNode', () => {
       dmlStatements: 'INSERT INTO invalid_table VALUES (1);',
     })
 
-    const repositories = createMockRepositories()
+    const repositories = createRepositories()
     const result = await validateSchemaNode(state, {
-      configurable: { repositories, logger: mockLogger },
+      configurable: { repositories },
     })
 
     expect(result.dmlExecutionSuccessful).toBeUndefined()
@@ -237,9 +208,9 @@ describe('validateSchemaNode', () => {
       dmlStatements: '   ',
     })
 
-    const repositories = createMockRepositories()
+    const repositories = createRepositories()
     const result = await validateSchemaNode(state, {
-      configurable: { repositories, logger: mockLogger },
+      configurable: { repositories },
     })
 
     expect(executeQuery).not.toHaveBeenCalled()

@@ -7,7 +7,11 @@ type Props = {
 }
 
 export const MenuButton = ({ ref }: Props) => {
-  const { open, toggleSidebar } = useSidebar()
+  const sidebarResult = useSidebar()
+  if (sidebarResult.isErr()) {
+    throw sidebarResult.error
+  }
+  const { open, toggleSidebar } = sidebarResult.value
 
   const handleClick = useCallback(() => {
     toggleSidebar()

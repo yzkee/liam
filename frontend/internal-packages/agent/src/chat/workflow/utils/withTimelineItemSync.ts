@@ -6,6 +6,7 @@ import {
 } from '@langchain/core/messages'
 import type { Database } from '@liam-hq/db'
 import type { SchemaRepository } from '../../../repositories/types'
+import { isMessageContentError } from './toolMessageUtils'
 
 type TimelineSyncContext = {
   designSessionId: string
@@ -21,10 +22,7 @@ async function handleAIMessage(
 ): Promise<void> {
   const result = await context.repositories.schema.createTimelineItem({
     designSessionId: context.designSessionId,
-    content:
-      typeof message.content === 'string'
-        ? message.content
-        : JSON.stringify(message.content),
+    content: message.text,
     type: 'assistant',
     role: context.assistantRole || 'db',
   })
@@ -40,10 +38,7 @@ async function handleHumanMessage(
 ): Promise<void> {
   const result = await context.repositories.schema.createTimelineItem({
     designSessionId: context.designSessionId,
-    content:
-      typeof message.content === 'string'
-        ? message.content
-        : JSON.stringify(message.content),
+    content: message.text,
     type: 'user',
     userId: context.userId,
   })
@@ -60,12 +55,9 @@ async function handleToolMessage(
   message: ToolMessage,
   context: TimelineSyncContext,
 ): Promise<void> {
-  const content =
-    typeof message.content === 'string'
-      ? message.content
-      : JSON.stringify(message.content)
+  const content = message.text
 
-  const isError = content.toLowerCase().includes('error')
+  const isError = isMessageContentError(content)
   const timelineType = isError ? 'error' : 'assistant'
 
   const result = isError

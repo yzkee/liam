@@ -4,17 +4,17 @@
   "version": "0.1.0",
   "main": "src/index.ts",
   "dependencies": {
-    "@octokit/auth-app": "7.2.1",
-    "@octokit/openapi-types": "25.0.0",
+    "@octokit/auth-app": "7.2.2",
+    "@octokit/openapi-types": "25.1.0",
     "@octokit/rest": "21.1.1",
     "@supabase/supabase-js": "2.49.8",
     "neverthrow": "8.2.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.0.6",
+    "@biomejs/biome": "2.1.1",
     "@liam-hq/configs": "workspace:*",
-    "@types/node": "22.16.0",
-    "eslint": "9.30.1",
+    "@types/node": "22.16.3",
+    "eslint": "9.31.0",
     "typescript": "5.8.3",
     "vitest": "3.2.4"
   },

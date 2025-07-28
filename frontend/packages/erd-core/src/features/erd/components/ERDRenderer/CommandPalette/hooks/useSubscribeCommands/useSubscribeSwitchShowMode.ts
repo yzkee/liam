@@ -12,21 +12,9 @@ export const useSubscribeShowModeCommand = () => {
       }
       if (event.code === 'Digit3' && event.shiftKey) {
         setShowMode('TABLE_NAME')
-
-        // biome-ignore lint/suspicious/noConsole: <explanation>
-        console.log('shift+3 is executed')
       }
       if (event.code === 'Digit4' && event.shiftKey) {
         setShowMode('KEY_ONLY')
-      }
-
-      // TODO: remove this line, this is for testing
-      // for investigation to resolve: https://github.com/liam-hq/liam/pull/2683#discussion_r2234827275
-      if (event.code === 'Digit5' && event.shiftKey) {
-        setShowMode('TABLE_NAME')
-
-        // biome-ignore lint/suspicious/noConsole: <explanation>
-        console.log('shift+5 is executed')
       }
     }
 

@@ -512,9 +512,6 @@ importers:
       '@supabase/supabase-js':
         specifier: 2.49.8
         version: 2.49.8
-      neverthrow:
-        specifier: 8.2.0
-        version: 8.2.0
     devDependencies:
       '@biomejs/biome':
         specifier: 2.1.1
@@ -887,7 +884,7 @@ importers:
         version: 8.2.0
       nuqs:
         specifier: 2.4.3
-        version: 2.4.3(next@15.3.5(@opentelemetry/api@1.9.0)(@playwright/test@1.54.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)
+        version: 2.4.3(next@15.3.5(@babel/core@7.28.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.54.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)
       pako:
         specifier: 2.1.0
         version: 2.1.0
@@ -13722,7 +13719,7 @@ snapshots:
       cross-spawn: 7.0.6
       eventsource: 3.0.7
       express: 5.1.0(supports-color@10.0.0)
-      express-rate-limit: 7.5.1(express@5.1.0(supports-color@10.0.0))
+      express-rate-limit: 7.5.1(express@5.1.0)
       pkce-challenge: 5.0.0
       raw-body: 3.0.0
       zod: 3.25.76
@@ -18548,7 +18545,7 @@ snapshots:
 
   expr-eval@2.0.2: {}
 
-  express-rate-limit@7.5.1(express@5.1.0(supports-color@10.0.0)):
+  express-rate-limit@7.5.1(express@5.1.0):
     dependencies:
       express: 5.1.0(supports-color@10.0.0)
 
@@ -21023,7 +21020,7 @@ snapshots:
     dependencies:
       boolbase: 1.0.0
 
-  nuqs@2.4.3(next@15.3.5(@opentelemetry/api@1.9.0)(@playwright/test@1.54.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0):
+  nuqs@2.4.3(next@15.3.5(@babel/core@7.28.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.54.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0):
     dependencies:
       mitt: 3.0.1
       react: 19.1.0

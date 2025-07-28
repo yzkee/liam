@@ -1,6 +1,5 @@
 import { createAppAuth } from '@octokit/auth-app'
 import { Octokit } from '@octokit/rest'
-import { errAsync, ResultAsync } from 'neverthrow'
 import type { FileChange } from './types'
 
 const createOctokit = async (installationId: number) => {
@@ -148,27 +147,6 @@ export async function getRepositoriesByInstallationId(installationId: number) {
 
   return data
 }
-
-type RepoData = Awaited<ReturnType<Octokit['repos']['get']>>['data']
-
-export const getRepository = (
-  projectId: string,
-  installationId: number,
-): ResultAsync<RepoData, Error> => {
-  const [owner, repo] = projectId.split('/')
-  if (!owner || !repo) {
-    return errAsync(new Error('Invalid project ID format'))
-  }
-
-  return ResultAsync.fromPromise(createOctokit(installationId), (error) =>
-    error instanceof Error ? error : new Error(String(error)),
-  ).andThen((octokit) =>
-    ResultAsync.fromPromise(octokit.repos.get({ owner, repo }), (error) =>
-      error instanceof Error ? error : new Error(String(error)),
-    ).map((res) => res.data),
-  )
-}
-
 /**
  * Gets file content and SHA from GitHub repository
  * @returns Object containing content and SHA

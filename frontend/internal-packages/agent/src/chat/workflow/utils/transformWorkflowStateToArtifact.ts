@@ -9,6 +9,33 @@ import type { Repositories } from '../../../repositories'
 import type { WorkflowState } from '../types'
 
 /**
+ * Map workflow-level DML operations to individual use cases
+ */
+const mapDmlOperationsToUsecases = (
+  usecases: Usecase[],
+  workflowDmlOperations: WorkflowState['dmlOperations'],
+): Usecase[] => {
+  if (!workflowDmlOperations || workflowDmlOperations.length === 0) {
+    return usecases
+  }
+
+  return usecases.map((usecase) => {
+    const usecaseDmlOperations = workflowDmlOperations
+      .filter((dmlOp) => dmlOp.useCaseId === usecase.id)
+      .map((dmlOp) => ({
+        operation_type: dmlOp.operation_type,
+        sql: dmlOp.sql,
+        dml_execution_logs: [],
+      }))
+
+    return {
+      ...usecase,
+      dmlOperations: usecaseDmlOperations,
+    }
+  })
+}
+
+/**
  * Convert analyzed requirements to artifact requirements
  */
 const convertAnalyzedRequirementsToArtifact = (
@@ -112,9 +139,12 @@ export const transformWorkflowStateToArtifact = (
     ? convertAnalyzedRequirementsToArtifact(state.analyzedRequirements)
     : []
 
-  // Then merge in use cases if they exist
   if (state.generatedUsecases && state.generatedUsecases.length > 0) {
-    mergeUseCasesIntoRequirements(requirements, state.generatedUsecases)
+    const usecasesWithDmlOperations = mapDmlOperationsToUsecases(
+      state.generatedUsecases,
+      state.dmlOperations,
+    )
+    mergeUseCasesIntoRequirements(requirements, usecasesWithDmlOperations)
   }
 
   return {

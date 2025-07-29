@@ -70,8 +70,31 @@ describe('validateSchemaNode', () => {
     vi.mocked(executeQuery).mockResolvedValue(mockResults)
 
     const state = createMockState({
-      dmlStatements: 'INSERT INTO users VALUES (1, "test");',
       ddlStatements: '',
+      dmlOperations: [
+        {
+          useCaseId: 'usecase-1',
+          operation_type: 'INSERT',
+          sql: 'INSERT INTO users VALUES (1, "test");',
+        },
+      ],
+      generatedUsecases: [
+        {
+          id: 'usecase-1',
+          requirementType: 'functional',
+          requirementCategory: 'data_management',
+          requirement: 'Insert user data',
+          title: 'Insert User',
+          description: 'Insert a new user record',
+          dmlOperations: [
+            {
+              operation_type: 'INSERT',
+              sql: 'INSERT INTO users VALUES (1, "test");',
+              dml_execution_logs: [],
+            },
+          ],
+        },
+      ],
     })
 
     const repositories = createRepositories()
@@ -119,8 +142,8 @@ describe('validateSchemaNode', () => {
     expect(result.dmlExecutionSuccessful).toBe(true)
   })
 
-  it('should combine and execute DDL and DML together', async () => {
-    const mockResults: SqlResult[] = [
+  it('should execute DDL first then DML individually', async () => {
+    const ddlMockResults: SqlResult[] = [
       {
         success: true,
         sql: 'CREATE TABLE users (id INT);',
@@ -131,6 +154,9 @@ describe('validateSchemaNode', () => {
           timestamp: new Date().toISOString(),
         },
       },
+    ]
+
+    const dmlMockResults: SqlResult[] = [
       {
         success: true,
         sql: 'INSERT INTO users VALUES (1);',
@@ -143,11 +169,36 @@ describe('validateSchemaNode', () => {
       },
     ]
 
-    vi.mocked(executeQuery).mockResolvedValue(mockResults)
+    vi.mocked(executeQuery)
+      .mockResolvedValueOnce(ddlMockResults)
+      .mockResolvedValueOnce(dmlMockResults)
 
     const state = createMockState({
       ddlStatements: 'CREATE TABLE users (id INT);',
-      dmlStatements: 'INSERT INTO users VALUES (1);',
+      dmlOperations: [
+        {
+          useCaseId: 'usecase-1',
+          operation_type: 'INSERT',
+          sql: 'INSERT INTO users VALUES (1);',
+        },
+      ],
+      generatedUsecases: [
+        {
+          id: 'usecase-1',
+          requirementType: 'functional',
+          requirementCategory: 'data_management',
+          requirement: 'Insert user data',
+          title: 'Insert User',
+          description: 'Insert a new user record',
+          dmlOperations: [
+            {
+              operation_type: 'INSERT',
+              sql: 'INSERT INTO users VALUES (1);',
+              dml_execution_logs: [],
+            },
+          ],
+        },
+      ],
     })
 
     const repositories = createRepositories()
@@ -155,15 +206,22 @@ describe('validateSchemaNode', () => {
       configurable: { repositories },
     })
 
-    expect(executeQuery).toHaveBeenCalledWith(
+    expect(executeQuery).toHaveBeenCalledTimes(2)
+    expect(executeQuery).toHaveBeenNthCalledWith(
+      1,
       'session-id',
-      'CREATE TABLE users (id INT);\nINSERT INTO users VALUES (1);',
+      'CREATE TABLE users (id INT);',
+    )
+    expect(executeQuery).toHaveBeenNthCalledWith(
+      2,
+      'session-id',
+      'INSERT INTO users VALUES (1);',
     )
     expect(result.dmlExecutionSuccessful).toBe(true)
   })
 
   it('should handle execution errors', async () => {
-    const mockResults: SqlResult[] = [
+    const ddlMockResults: SqlResult[] = [
       {
         success: true,
         sql: 'CREATE TABLE users (id INT);',
@@ -174,6 +232,9 @@ describe('validateSchemaNode', () => {
           timestamp: new Date().toISOString(),
         },
       },
+    ]
+
+    const dmlMockResults: SqlResult[] = [
       {
         success: false,
         sql: 'INSERT INTO invalid_table VALUES (1);',
@@ -186,11 +247,36 @@ describe('validateSchemaNode', () => {
       },
     ]
 
-    vi.mocked(executeQuery).mockResolvedValue(mockResults)
+    vi.mocked(executeQuery)
+      .mockResolvedValueOnce(ddlMockResults)
+      .mockResolvedValueOnce(dmlMockResults)
 
     const state = createMockState({
       ddlStatements: 'CREATE TABLE users (id INT);',
-      dmlStatements: 'INSERT INTO invalid_table VALUES (1);',
+      dmlOperations: [
+        {
+          useCaseId: 'usecase-1',
+          operation_type: 'INSERT',
+          sql: 'INSERT INTO invalid_table VALUES (1);',
+        },
+      ],
+      generatedUsecases: [
+        {
+          id: 'usecase-1',
+          requirementType: 'functional',
+          requirementCategory: 'data_management',
+          requirement: 'Insert invalid data',
+          title: 'Insert Invalid Data',
+          description: 'Attempt to insert data into invalid table',
+          dmlOperations: [
+            {
+              operation_type: 'INSERT',
+              sql: 'INSERT INTO invalid_table VALUES (1);',
+              dml_execution_logs: [],
+            },
+          ],
+        },
+      ],
     })
 
     const repositories = createRepositories()

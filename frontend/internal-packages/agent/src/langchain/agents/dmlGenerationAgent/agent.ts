@@ -1,5 +1,6 @@
 import { type BaseMessage, SystemMessage } from '@langchain/core/messages'
 import { ChatOpenAI } from '@langchain/openai'
+import { dmlOperationSchema } from '@liam-hq/artifact'
 import { toJsonSchema } from '@valibot/to-json-schema'
 import { ResultAsync } from 'neverthrow'
 import * as v from 'valibot'
@@ -12,15 +13,8 @@ const DMLGenerationAgentInputSchema = v.object({
   schemaContext: v.string(),
 })
 
-const DmlOperationSchema = v.object({
-  useCaseId: v.string(),
-  operation_type: v.picklist(['INSERT', 'UPDATE', 'DELETE', 'SELECT']),
-  sql: v.string(),
-  description: v.optional(v.string()),
-})
-
 const DMLGenerationAgentOutputSchema = v.object({
-  dmlOperations: v.array(DmlOperationSchema),
+  dmlOperations: v.array(dmlOperationSchema),
 })
 
 type DMLGenerationAgentInput = v.InferInput<
@@ -73,20 +67,18 @@ export class DMLGenerationAgent
       }
     }
 
-    const parseResult = ResultAsync.fromPromise(
-      Promise.resolve(v.parse(DMLGenerationAgentOutputSchema, result.value)),
-      (error: unknown) => new Error(`Parsing failed: ${String(error)}`),
+    const parseResult = v.safeParse(
+      DMLGenerationAgentOutputSchema,
+      result.value,
     )
 
-    const finalResult = await parseResult
-
-    if (finalResult.isErr()) {
-      console.error('Error parsing DML operations result:', finalResult.error)
+    if (!parseResult.success) {
+      console.error('Error parsing DML operations result:', parseResult.issues)
       return {
         dmlOperations: [],
       }
     }
 
-    return finalResult.value
+    return parseResult.output
   }
 }

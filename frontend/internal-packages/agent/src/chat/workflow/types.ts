@@ -1,14 +1,8 @@
 import type { BaseMessage } from '@langchain/core/messages'
+import type { DmlOperation } from '@liam-hq/artifact'
 import type { Schema } from '@liam-hq/db-structure'
 import type { Usecase } from '../../langchain/agents/qaGenerateUsecaseAgent/agent'
 import type { Repositories } from '../../repositories'
-
-type DmlOperation = {
-  useCaseId: string
-  operation_type: 'INSERT' | 'UPDATE' | 'DELETE' | 'SELECT'
-  sql: string
-  description?: string | undefined
-}
 
 export type WorkflowState = {
   messages: BaseMessage[]

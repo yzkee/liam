@@ -51,6 +51,15 @@ export const createAnnotations = () => {
 
     ddlStatements: Annotation<string | undefined>,
     dmlStatements: Annotation<string | undefined>,
+    dmlOperations: Annotation<
+      | Array<{
+          useCaseId: string
+          operation_type: 'INSERT' | 'UPDATE' | 'DELETE' | 'SELECT'
+          sql: string
+          description?: string | undefined
+        }>
+      | undefined
+    >,
 
     // DDL execution retry mechanism
     shouldRetryWithDesignSchema: Annotation<boolean | undefined>,

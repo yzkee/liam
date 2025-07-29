@@ -1,3 +1,7 @@
+import { type BaseMessage, SystemMessage } from '@langchain/core/messages'
+import { ChatOpenAI } from '@langchain/openai'
+import { toJsonSchema } from '@valibot/to-json-schema'
+import { ResultAsync } from 'neverthrow'
 import * as v from 'valibot'
 import type { ChatAgent } from '../../utils/types'
 import { formatDMLGenerationPrompts } from './prompts'
@@ -8,8 +12,15 @@ const DMLGenerationAgentInputSchema = v.object({
   schemaContext: v.string(),
 })
 
+const DmlOperationSchema = v.object({
+  useCaseId: v.string(),
+  operation_type: v.picklist(['INSERT', 'UPDATE', 'DELETE', 'SELECT']),
+  sql: v.string(),
+  description: v.optional(v.string()),
+})
+
 const DMLGenerationAgentOutputSchema = v.object({
-  dmlStatements: v.string(),
+  dmlOperations: v.array(DmlOperationSchema),
 })
 
 type DMLGenerationAgentInput = v.InferInput<
@@ -25,7 +36,7 @@ export class DMLGenerationAgent
   async generate(
     input: DMLGenerationAgentInput,
   ): Promise<DMLGenerationAgentOutput> {
-    formatDMLGenerationPrompts({
+    const { systemMessage, humanMessage } = formatDMLGenerationPrompts({
       schema: input.schemaSQL,
       requirements: input.formattedUseCases,
       chat_history: '',
@@ -33,10 +44,49 @@ export class DMLGenerationAgent
         'Generate comprehensive DML statements for testing the provided schema.',
     })
 
-    // TODO: Integrate with LLM using systemMessage and humanMessage
+    const model = new ChatOpenAI({
+      model: 'gpt-4o',
+      temperature: 0.1,
+    })
 
-    return {
-      dmlStatements: '-- DML statements will be generated here',
+    const messages: BaseMessage[] = [
+      new SystemMessage(systemMessage),
+      new SystemMessage(humanMessage),
+    ]
+
+    const modelWithStructuredOutput = model.withStructuredOutput(
+      toJsonSchema(DMLGenerationAgentOutputSchema),
+      {
+        name: 'dml_operations',
+      },
+    )
+
+    const result = await ResultAsync.fromPromise(
+      modelWithStructuredOutput.invoke(messages),
+      (error: unknown) => new Error(`LLM invocation failed: ${String(error)}`),
+    )
+
+    if (result.isErr()) {
+      console.error('Error generating structured DML operations:', result.error)
+      return {
+        dmlOperations: [],
+      }
     }
+
+    const parseResult = ResultAsync.fromPromise(
+      Promise.resolve(v.parse(DMLGenerationAgentOutputSchema, result.value)),
+      (error: unknown) => new Error(`Parsing failed: ${String(error)}`),
+    )
+
+    const finalResult = await parseResult
+
+    if (finalResult.isErr()) {
+      console.error('Error parsing DML operations result:', finalResult.error)
+      return {
+        dmlOperations: [],
+      }
+    }
+
+    return finalResult.value
   }
 }

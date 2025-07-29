@@ -3,6 +3,13 @@ import type { Schema } from '@liam-hq/db-structure'
 import type { Usecase } from '../../langchain/agents/qaGenerateUsecaseAgent/agent'
 import type { Repositories } from '../../repositories'
 
+type DmlOperation = {
+  useCaseId: string
+  operation_type: 'INSERT' | 'UPDATE' | 'DELETE' | 'SELECT'
+  sql: string
+  description?: string | undefined
+}
+
 export type WorkflowState = {
   messages: BaseMessage[]
   userInput: string
@@ -22,6 +29,7 @@ export type WorkflowState = {
 
   ddlStatements?: string | undefined
   dmlStatements?: string | undefined
+  dmlOperations?: DmlOperation[] | undefined
 
   // DDL execution retry mechanism
   shouldRetryWithDesignSchema?: boolean | undefined

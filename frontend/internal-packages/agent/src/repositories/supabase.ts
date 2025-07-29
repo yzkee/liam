@@ -53,7 +53,8 @@ export class SupabaseSchemaRepository implements SchemaRepository {
     // Fetch design session with timeline items
     const { data, error } = await this.client
       .from('design_sessions')
-      .select(`
+      .select(
+        `
         organization_id,
         timeline_items (
           id,
@@ -68,7 +69,8 @@ export class SupabaseSchemaRepository implements SchemaRepository {
           assistant_role,
           query_result_id
         )
-      `)
+      `,
+      )
       .eq('id', designSessionId)
       .order('created_at', {
         ascending: true,

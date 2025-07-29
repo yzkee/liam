@@ -564,6 +564,9 @@ importers:
       '@trigger.dev/sdk':
         specifier: 4.0.0-v4-beta.22
         version: 4.0.0-v4-beta.22(zod@3.25.76)
+      neverthrow:
+        specifier: 8.2.0
+        version: 8.2.0
     devDependencies:
       '@biomejs/biome':
         specifier: 2.1.1
@@ -17815,7 +17818,7 @@ snapshots:
     dependencies:
       cipher-base: 1.0.6
       inherits: 2.0.4
-      ripemd160: 2.0.1
+      ripemd160: 2.0.2
       sha.js: 2.4.12
 
   create-hash@1.2.0:

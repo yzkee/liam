@@ -14,21 +14,35 @@ import {
 } from './constants'
 import styles from './Output.module.css'
 
-type Props = ComponentProps<typeof VersionDropdown> & {
+type BaseProps = ComponentProps<typeof VersionDropdown> & {
   designSessionId: string
   schema: Schema
   prevSchema: Schema
   sqlReviewComments: ReviewComment[]
 }
 
+type ControlledProps = BaseProps & {
+  activeTab: string
+  onTabChange: (value: string) => void
+}
+
+type UncontrolledProps = BaseProps & {
+  activeTab?: never
+  onTabChange?: never
+}
+
+type Props = ControlledProps | UncontrolledProps
+
 export const Output: FC<Props> = ({
   designSessionId,
   schema,
   prevSchema,
   sqlReviewComments,
+  activeTab,
+  onTabChange,
   ...propsForVersionDropdown
 }) => {
-  const [tabValue, setTabValue] = useState<OutputTabValue>(DEFAULT_OUTPUT_TAB)
+  const [internalTabValue, setInternalTabValue] = useState<OutputTabValue>(DEFAULT_OUTPUT_TAB)
 
   const isTabValue = (value: string): value is OutputTabValue => {
     return Object.values(OUTPUT_TABS).some((tabValue) => tabValue === value)
@@ -36,15 +50,20 @@ export const Output: FC<Props> = ({
 
   const handleChangeValue = useCallback((value: string) => {
     if (isTabValue(value)) {
-      setTabValue(value)
+      setInternalTabValue(value)
     }
   }, [])
+
+  // Use external control if provided, otherwise use internal state
+  const isControlled = activeTab !== undefined
+  const tabValue = isControlled && isTabValue(activeTab) ? (activeTab as OutputTabValue) : internalTabValue
+  const handleTabChange = isControlled ? onTabChange : handleChangeValue
 
   return (
     <TabsRoot
       value={tabValue}
       className={styles.tabsRoot}
-      onValueChange={handleChangeValue}
+      onValueChange={handleTabChange}
     >
       <Header
         schema={schema}

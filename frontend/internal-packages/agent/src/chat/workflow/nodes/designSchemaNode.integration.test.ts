@@ -109,7 +109,10 @@ describe('designSchemaNode -> executeDdlNode integration', () => {
     )
     const mockInvokeDesignAgent = vi.mocked(invokeDesignAgent)
     mockInvokeDesignAgent.mockResolvedValue(
-      ok(new AIMessage('Created users table with id and name fields')),
+      ok({
+        response: new AIMessage('Created users table with id and name fields'),
+        reasoning: null,
+      }),
     )
 
     const initialState = createMockState(initialSchema)
@@ -221,7 +224,10 @@ describe('designSchemaNode -> executeDdlNode integration', () => {
     )
     const mockInvokeDesignAgent = vi.mocked(invokeDesignAgent)
     mockInvokeDesignAgent.mockResolvedValue(
-      ok(new AIMessage('Repository will fail')),
+      ok({
+        response: new AIMessage('Repository will fail'),
+        reasoning: null,
+      }),
     )
 
     // Mock agent invocation failure

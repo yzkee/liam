@@ -1,17 +1,20 @@
 import { type BaseMessage, SystemMessage } from '@langchain/core/messages'
 import { ChatOpenAI } from '@langchain/openai'
+import { dmlOperationSchema } from '@liam-hq/artifact'
 import { toJsonSchema } from '@valibot/to-json-schema'
+import { v4 as uuidv4 } from 'uuid'
 import * as v from 'valibot'
 import { QA_GENERATE_USECASE_SYSTEM_MESSAGE } from './prompts'
 
 // Single usecase schema
 const usecaseSchema = v.object({
-  // TODO: Replace with IDs (UUID) when DB is implemented
+  id: v.string(), // UUID
   requirementType: v.picklist(['functional', 'non_functional']), // Type of requirement
   requirementCategory: v.string(), // Category of the requirement
   requirement: v.string(), // Content/text of the specific requirement
   title: v.string(),
   description: v.string(),
+  dmlOperations: v.array(dmlOperationSchema), // DML operations array
 })
 
 // Response schema for structured output
@@ -41,6 +44,14 @@ export class QAGenerateUsecaseAgent {
     ]
 
     const rawResponse = await this.usecaseModel.invoke(allMessages)
-    return v.parse(usecaseGenerationSchema, rawResponse)
+    const parsedResponse = v.parse(usecaseGenerationSchema, rawResponse)
+
+    const usecasesWithIds = parsedResponse.usecases.map((usecase) => ({
+      ...usecase,
+      id: uuidv4(),
+      dmlOperations: [], // Initialize as empty array
+    }))
+
+    return { usecases: usecasesWithIds }
   }
 }

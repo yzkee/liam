@@ -47,11 +47,13 @@ describe('prepareDmlNode', () => {
     const state = createMockState({
       generatedUsecases: [
         {
+          id: 'test-id-1',
           requirementType: 'functional',
           requirementCategory: 'User Management',
           requirement: 'Users should be able to register',
           title: 'User Registration',
           description: 'Allow users to create new accounts',
+          dmlOperations: [],
         },
       ],
     })
@@ -103,11 +105,13 @@ describe('prepareDmlNode', () => {
       ddlStatements: 'CREATE TABLE users (id INT);',
       generatedUsecases: [
         {
+          id: 'test-id-1',
           requirementType: 'functional',
           requirementCategory: 'User Management',
           requirement: 'Users should be able to register',
           title: 'User Registration',
           description: 'Allow users to create new accounts',
+          dmlOperations: [],
         },
       ],
     })
@@ -124,11 +128,13 @@ describe('prepareDmlNode', () => {
       ddlStatements: 'CREATE TABLE users (id INT);',
       generatedUsecases: [
         {
+          id: 'test-id-1',
           requirementType: 'functional',
           requirementCategory: 'User Management',
           requirement: 'Users should be able to register',
           title: 'User Registration',
           description: 'Allow users to create new accounts',
+          dmlOperations: [],
         },
       ],
       schemaData: {

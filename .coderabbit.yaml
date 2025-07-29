@@ -18,6 +18,7 @@ reviews:
   suggested_reviewers: true
   poem: true
   abort_on_close: true
+  drafts: true
 
 chat:
   auto_reply: true

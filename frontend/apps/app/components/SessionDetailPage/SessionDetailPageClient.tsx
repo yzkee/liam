@@ -2,7 +2,7 @@
 
 import type { Schema } from '@liam-hq/db-structure'
 import clsx from 'clsx'
-import { type FC, useCallback, useState } from 'react'
+import { type FC, useCallback } from 'react'
 import { Chat } from './components/Chat'
 import { Output } from './components/Output'
 import { useRealtimeArtifact } from './components/Output/components/Artifact/hooks/useRealtimeArtifact'
@@ -65,17 +65,6 @@ export const SessionDetailPageClient: FC<Props> = ({
     ),
   )
 
-  const [, setQuickFixMessage] = useState<string>('')
-
-  const handleQuickFix = useCallback((comment: string) => {
-    const fixMessage = `Please fix the following issue pointed out by the QA Agent:
-
-"${comment}"
-
-Please suggest a specific solution to resolve this problem.`
-    setQuickFixMessage(fixMessage)
-  }, [])
-
   const hasSelectedVersion = selectedVersion !== null
 
   // Use realtime artifact hook to monitor artifact changes
@@ -115,7 +104,6 @@ Please suggest a specific solution to resolve this problem.`
                 schema={displayedSchema}
                 prevSchema={prevSchema}
                 schemaUpdatesReviewComments={SCHEMA_UPDATES_REVIEW_COMMENTS}
-                onQuickFix={handleQuickFix}
                 versions={versions}
                 selectedVersion={selectedVersion}
                 onSelectedVersionChange={handleChangeSelectedVersion}

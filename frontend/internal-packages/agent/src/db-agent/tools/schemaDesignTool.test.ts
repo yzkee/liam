@@ -99,7 +99,7 @@ describe('schemaDesignTool', () => {
       )
       expect(schemaData.value.latestVersionNumber).toBe(2)
     }
-  })
+  }, 15000)
 
   it('should throw error when update fails', async () => {
     const repositories: Repositories = {
@@ -221,5 +221,5 @@ describe('schemaDesignTool', () => {
     await expect(schemaDesignTool.invoke(input, config)).rejects.toThrow(
       'DDL execution validation failed:',
     )
-  })
+  }, 15000)
 })

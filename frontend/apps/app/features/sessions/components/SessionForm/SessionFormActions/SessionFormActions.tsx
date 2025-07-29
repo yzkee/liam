@@ -16,6 +16,7 @@ type Props = {
   onFileSelect?: (files: FileList) => void
   onSubmit?: () => void
   onCancel?: () => void
+  onDeepModelingToggle?: (isActive: boolean) => void
 }
 
 export const SessionFormActions: FC<Props> = ({
@@ -26,14 +27,21 @@ export const SessionFormActions: FC<Props> = ({
   onFileSelect,
   onSubmit,
   onCancel,
+  onDeepModelingToggle,
 }) => {
   const [isDeepModelingActive, setIsDeepModelingActive] = useState(false)
+
+  const handleDeepModelingToggle = () => {
+    const newState = !isDeepModelingActive
+    setIsDeepModelingActive(newState)
+    onDeepModelingToggle?.(newState)
+  }
 
   return (
     <div className={styles.container}>
       <DeepModelingToggle
         isActive={isDeepModelingActive}
-        onClick={() => setIsDeepModelingActive((prev) => !prev)}
+        onClick={handleDeepModelingToggle}
         disabled={isPending}
       >
         Deep Modeling

@@ -23,6 +23,7 @@ type Props = {
   isPending: boolean
   formAction: (formData: FormData) => void
   isTransitioning?: boolean
+  onDeepModelingToggle?: (isActive: boolean) => void
 }
 
 export const URLSessionFormPresenter: FC<Props> = ({
@@ -30,6 +31,7 @@ export const URLSessionFormPresenter: FC<Props> = ({
   isPending,
   formAction,
   isTransitioning = false,
+  onDeepModelingToggle,
 }) => {
   const [urlPath, setUrlPath] = useState('')
   const [textContent, setTextContent] = useState('')
@@ -317,6 +319,7 @@ export const URLSessionFormPresenter: FC<Props> = ({
               hasContent={hasContent}
               onFileSelect={handleFileSelect}
               onCancel={handleResetForm}
+              onDeepModelingToggle={onDeepModelingToggle}
             />
           </div>
         </div>

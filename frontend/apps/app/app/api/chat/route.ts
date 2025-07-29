@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto'
 import {
   type DeepModelingPayload,
   deepModelingWorkflowTask,
+  designProcessWorkflowTask,
 } from '@liam-hq/jobs'
 import { idempotencyKeys } from '@trigger.dev/sdk'
 import { NextResponse } from 'next/server'
@@ -11,6 +12,7 @@ import { createClient } from '@/libs/db/server'
 const chatRequestSchema = v.object({
   userInput: v.pipe(v.string(), v.minLength(1, 'Message is required')),
   designSessionId: v.pipe(v.string(), v.uuid('Invalid design session ID')),
+  isDeepModelingEnabled: v.optional(v.boolean(), false),
 })
 
 export async function POST(request: Request) {
@@ -121,10 +123,16 @@ export async function POST(request: Request) {
     `chat-${validationResult.output.designSessionId}-${payloadHash}`,
   )
 
-  // Trigger the Deep Modeling workflow with idempotency key
-  await deepModelingWorkflowTask.trigger(jobPayload, {
-    idempotencyKey,
-  })
+  // Trigger the appropriate workflow based on Deep Modeling toggle
+  if (validationResult.output.isDeepModelingEnabled) {
+    await deepModelingWorkflowTask.trigger(jobPayload, {
+      idempotencyKey,
+    })
+  } else {
+    await designProcessWorkflowTask.trigger(jobPayload, {
+      idempotencyKey,
+    })
+  }
 
   return NextResponse.json({
     success: true,

@@ -18,6 +18,7 @@ type Props = {
   isPending: boolean
   formAction: (formData: FormData) => void
   isTransitioning?: boolean
+  onDeepModelingToggle?: (isActive: boolean) => void
 }
 
 // Helper function to handle file processing
@@ -46,6 +47,7 @@ export const UploadSessionFormPresenter: FC<Props> = ({
   isPending,
   formAction,
   isTransitioning = false,
+  onDeepModelingToggle,
 }) => {
   const [isHovered, setIsHovered] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -240,6 +242,7 @@ export const UploadSessionFormPresenter: FC<Props> = ({
               hasContent={hasContent}
               onFileSelect={handleFileSelect}
               onCancel={handleReset}
+              onDeepModelingToggle={onDeepModelingToggle}
             />
           </div>
         </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import type { Json } from '@liam-hq/db'
+import type { Json, Tables } from '@liam-hq/db'
 import { operationsSchema } from '@liam-hq/db-structure'
 import {
   ArrowRight,
@@ -19,7 +19,6 @@ import {
   useTransition,
 } from 'react'
 import * as v from 'valibot'
-import type { Version } from '@/components/SessionDetailPage/types'
 import { createClient } from '@/libs/db/client'
 import styles from './VersionMessage.module.css'
 
@@ -82,22 +81,27 @@ const parsePatchOperations = (
   })
 }
 
+type BuildingSchemaVersion = Pick<
+  Tables<'building_schema_versions'>,
+  'patch' | 'number' | 'id'
+>
+
 type Props = {
   buildingSchemaVersionId: string
-  onView?: (version: Version) => void
+  onView?: (versionId: string) => void
 }
 
 export const VersionMessage: FC<Props> = ({
   buildingSchemaVersionId,
   onView,
 }) => {
-  const [version, setVersion] = useState<Version | null>(null)
+  const [version, setVersion] = useState<BuildingSchemaVersion | null>(null)
   const [isPending, startTransition] = useTransition()
   const [isExpanded, setIsExpanded] = useState(false)
 
   const handleClick = useCallback(() => {
     if (!version) return
-    onView?.(version)
+    onView?.(version.id)
   }, [version, onView])
 
   useEffect(() => {
@@ -105,7 +109,7 @@ export const VersionMessage: FC<Props> = ({
       const supabase = createClient()
       const { data, error } = await supabase
         .from('building_schema_versions')
-        .select('id, number, patch, reverse_patch, building_schema_id')
+        .select('id, number, patch')
         .eq('id', buildingSchemaVersionId)
         .single()
 

@@ -15,7 +15,7 @@ type Props = {
   designSessionId: string
   timelineItems: TimelineItemEntry[]
   onMessageSend: (message: TimelineItemEntry) => void
-  onVersionView?: (version: import('../../types').Version) => void
+  onVersionView: (versionId: string) => void
   onRetry?: () => void
   isLoading?: boolean
   isStreaming?: boolean
@@ -134,8 +134,9 @@ export const Chat: FC<Props> = ({
                 key={message.id}
                 {...message}
                 showHeader={messageIndex === 0}
-                {...(message.type === 'schema_version' &&
-                  onVersionView && { onView: onVersionView })}
+                {...(message.type === 'schema_version' && {
+                  onView: onVersionView,
+                })}
               />
             ))
           }
@@ -145,8 +146,7 @@ export const Chat: FC<Props> = ({
               key={item.id}
               {...item}
               {...(item.type === 'error' && { onRetry })}
-              {...(item.type === 'schema_version' &&
-                onVersionView && { onView: onVersionView })}
+              {...(item.type === 'schema_version' && { onView: onVersionView })}
             />
           )
         })}

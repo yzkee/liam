@@ -38,12 +38,17 @@ export const SessionFormActions: FC<Props> = ({
       >
         Deep Modeling
       </DeepModelingToggle>
-      <MicButton onClick={onMicClick || (() => {})} disabled={isPending} />
-      <AttachButton
-        onClick={onAttachClick || (() => {})}
-        onFileSelect={onFileSelect}
-        disabled={isPending}
-      />
+      {/* Temporarily hidden - Issue #5166: Hide voice input and file attachment UI */}
+      {false && (
+        <MicButton onClick={onMicClick || (() => {})} disabled={isPending} />
+      )}
+      {false && (
+        <AttachButton
+          onClick={onAttachClick || (() => {})}
+          onFileSelect={onFileSelect}
+          disabled={isPending}
+        />
+      )}
       <ActionButton
         hasContent={hasContent}
         isPending={isPending}

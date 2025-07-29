@@ -1,5 +1,10 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
-import { aColumn, aSchema, aTable } from '@liam-hq/db-structure'
+import {
+  aColumn,
+  aForeignKeyConstraint,
+  aSchema,
+  aTable,
+} from '@liam-hq/db-structure'
 import { describe, expect, it, vi } from 'vitest'
 import type { Repositories } from '../../repositories'
 import { InMemoryRepository } from '../../repositories/InMemoryRepository'
@@ -203,14 +208,27 @@ describe('schemaDesignTool', () => {
       operations: [
         {
           op: 'add',
-          path: '/tables/invalid_table',
+          path: '/tables/users',
           value: aTable({
-            name: 'invalid_table',
+            name: 'users',
             columns: {
               id: aColumn({
                 name: 'id',
-                type: 'invalid_type',
+                type: 'integer',
                 notNull: true,
+              }),
+              department_id: aColumn({
+                name: 'department_id',
+                type: 'integer',
+                notNull: true,
+              }),
+            },
+            constraints: {
+              fk_department: aForeignKeyConstraint({
+                name: 'fk_department',
+                columnNames: ['department_id'],
+                targetTableName: 'nonexistent_table',
+                targetColumnNames: ['id'],
               }),
             },
           }),

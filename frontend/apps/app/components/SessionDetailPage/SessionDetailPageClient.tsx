@@ -58,6 +58,13 @@ export const SessionDetailPageClient: FC<Props> = ({
     [setSelectedVersion],
   )
 
+  const handleViewVersion = useCallback((versionId: string) => {
+    const version = versions.find((version) => version.id === versionId)
+    if (!version) return
+
+    setSelectedVersion(version)
+  }, [])
+
   const { timelineItems, addOrUpdateTimelineItem } = useRealtimeTimelineItems(
     designSessionId,
     designSessionWithTimelineItems.timeline_items.map((timelineItem) =>
@@ -105,6 +112,7 @@ Please suggest a specific solution to resolve this problem.`
             designSessionId={designSessionId}
             timelineItems={timelineItems}
             onMessageSend={addOrUpdateTimelineItem}
+            onVersionView={handleViewVersion}
           />
         </div>
         {hasSelectedVersion && (

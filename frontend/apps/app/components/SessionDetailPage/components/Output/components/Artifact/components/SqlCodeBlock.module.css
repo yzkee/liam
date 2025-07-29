@@ -1,0 +1,17 @@
+.container {
+  background: var(--color-background);
+  border-radius: var(--border-radius-sm);
+  overflow: hidden;
+}
+
+.container pre {
+  margin: 0 !important;
+  padding: var(--spacing-3) !important;
+  background: var(--color-background) !important;
+  font-size: var(--font-size-sm) !important;
+  line-height: var(--line-height-relaxed) !important;
+}
+
+.container code {
+  font-family: var(--font-family-mono) !important;
+}

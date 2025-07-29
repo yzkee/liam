@@ -1,9 +1,8 @@
 'use client'
 
 import type { FC } from 'react'
-import { Artifact } from './Artifact'
+import { StructuredArtifact } from './components'
 import { useRealtimeArtifact } from './hooks/useRealtimeArtifact'
-import { formatArtifactToMarkdown } from './utils/formatArtifactToMarkdown'
 
 type Props = {
   designSessionId: string
@@ -24,8 +23,5 @@ export const ArtifactContainer: FC<Props> = ({ designSessionId }) => {
     return <div>No artifact available yet</div>
   }
 
-  // Convert artifact data to markdown format
-  const markdownContent = formatArtifactToMarkdown(artifact)
-
-  return <Artifact doc={markdownContent} />
+  return <StructuredArtifact artifact={artifact} />
 }

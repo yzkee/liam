@@ -1,0 +1,4 @@
+.badge {
+  font-size: var(--font-size-xs);
+  white-space: nowrap;
+}

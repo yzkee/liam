@@ -1,6 +1,8 @@
 import { type BaseMessage, SystemMessage } from '@langchain/core/messages'
 import type { Runnable } from '@langchain/core/runnables'
 import { ChatOpenAI } from '@langchain/openai'
+import { dmlOperationSchema } from '@liam-hq/artifact'
+import { v4 as uuidv4 } from 'uuid'
 import * as v from 'valibot'
 import { reasoningSchema } from '../../utils/schema'
 import type { Reasoning } from '../../utils/types'
@@ -45,12 +47,13 @@ const USECASE_GENERATION_SCHEMA = {
 
 // Single usecase schema
 const usecaseSchema = v.object({
-  // TODO: Replace with IDs (UUID) when DB is implemented
+  id: v.pipe(v.string(), v.uuid()), // UUID
   requirementType: v.picklist(['functional', 'non_functional']), // Type of requirement
   requirementCategory: v.string(), // Category of the requirement
   requirement: v.string(), // Content/text of the specific requirement
   title: v.string(),
   description: v.string(),
+  dmlOperations: v.array(dmlOperationSchema), // DML operations array
 })
 
 // Response schema for structured output
@@ -107,11 +110,19 @@ export class QAGenerateUsecaseAgent {
     )
     const reasoning = parsedReasoning.success ? parsedReasoning.output : null
 
+    const parsedResponse = v.parse(
+      usecaseGenerationSchema,
+      raw.additional_kwargs['parsed'],
+    )
+
+    const usecasesWithIds = parsedResponse.usecases.map((usecase) => ({
+      ...usecase,
+      id: uuidv4(),
+      dmlOperations: [],
+    }))
+
     return {
-      response: v.parse(
-        usecaseGenerationSchema,
-        raw.additional_kwargs['parsed'],
-      ),
+      response: { usecases: usecasesWithIds },
       reasoning,
     }
   }

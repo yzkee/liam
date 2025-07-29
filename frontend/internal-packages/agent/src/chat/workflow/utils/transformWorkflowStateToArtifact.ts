@@ -1,5 +1,6 @@
 import type {
   Artifact,
+  DmlOperation,
   FunctionalRequirement,
   NonFunctionalRequirement,
 } from '@liam-hq/artifact'
@@ -48,10 +49,10 @@ const convertAnalyzedRequirementsToArtifact = (
  */
 const mapUseCasesToRequirements = (
   usecase: Usecase,
-): { title: string; description: string; dml_operations: never[] } => ({
+): { title: string; description: string; dml_operations: DmlOperation[] } => ({
   title: usecase.title,
   description: usecase.description,
-  dml_operations: [], // Empty for now - to be populated when DML tracking is added
+  dml_operations: usecase.dmlOperations, // Use the actual dmlOperations from usecase
 })
 
 /**

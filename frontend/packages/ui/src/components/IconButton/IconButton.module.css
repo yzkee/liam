@@ -7,9 +7,14 @@
   border-radius: var(--border-radius-base);
   transition: background-color var(--default-hover-animation-duration)
     var(--default-timing-function);
+  cursor: pointer !important;
 }
 
-.iconWrapper:hover {
+.iconWrapper:disabled {
+  cursor: not-allowed !important;
+}
+
+.iconWrapper:not(:disabled):hover {
   background-color: var(--pane-background-active);
 
   .icon > svg {
@@ -17,7 +22,7 @@
   }
 }
 
-.iconWrapper.hoverBackground:hover {
+.iconWrapper.hoverBackground:not(:disabled):hover {
   background-color: var(--overlay-10);
 }
 

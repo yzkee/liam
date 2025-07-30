@@ -53,7 +53,8 @@ export class SupabaseSchemaRepository implements SchemaRepository {
     // Fetch design session with timeline items
     const { data, error } = await this.client
       .from('design_sessions')
-      .select(`
+      .select(
+        `
         organization_id,
         timeline_items (
           id,
@@ -68,7 +69,8 @@ export class SupabaseSchemaRepository implements SchemaRepository {
           assistant_role,
           query_result_id
         )
-      `)
+      `,
+      )
       .eq('id', designSessionId)
       .order('created_at', {
         ascending: true,
@@ -266,17 +268,29 @@ export class SupabaseSchemaRepository implements SchemaRepository {
       }
     }
 
-    const currentContent = JSON.parse(JSON.stringify(validationResult.output))
+    let currentContent = JSON.parse(JSON.stringify(validationResult.output))
 
     // Apply all patches in order
     for (const patchArray of patchArrayHistory) {
-      // Apply each operation in the patch to currentContent
-      applyPatchOperations(currentContent, patchArray)
+      const result = applyPatchOperations(currentContent, patchArray)
+      if (result.isErr()) {
+        return {
+          success: false,
+          error: `Failed to apply patch operations: ${result.error.message}`,
+        }
+      }
+      currentContent = result.value
     }
 
     // Now apply the new patch to get the new content
-    const newContent = JSON.parse(JSON.stringify(currentContent))
-    applyPatchOperations(newContent, patch)
+    const newContentResult = applyPatchOperations(currentContent, patch)
+    if (newContentResult.isErr()) {
+      return {
+        success: false,
+        error: `Failed to apply new patch operations: ${newContentResult.error.message}`,
+      }
+    }
+    const newContent = newContentResult.value
 
     // Validate the new schema structure before proceeding
     const newSchemaValidationResult = v.safeParse(schemaSchema, newContent)

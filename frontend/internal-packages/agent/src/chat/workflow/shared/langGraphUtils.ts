@@ -15,12 +15,13 @@ import type { Repositories } from '../../../repositories'
  * - With error loops: May have additional transitions when errors occur
  *   (e.g., validateSchema → designSchema)
  *
- * Setting this to 20 ensures:
+ * Setting this to 100 ensures:
  * - Complete workflow execution under normal conditions
- * - Sufficient headroom for error handling loops
- * - Protection against infinite loops
+ * - Ample headroom for complex error handling loops and retries
+ * - Protection against infinite loops while allowing for complex workflows
+ * - Sufficient capacity for finding optimal workflow patterns
  */
-export const DEFAULT_RECURSION_LIMIT = 20
+export const DEFAULT_RECURSION_LIMIT = 100
 
 /**
  * Create LangGraph-compatible annotations (shared)

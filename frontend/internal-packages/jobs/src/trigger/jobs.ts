@@ -11,14 +11,20 @@ export const analyzeRepositoryTask = task({
 
     const result = await processRepositoryAnalysis(payload)
 
+    if (result.isErr()) {
+      throw result.error
+    }
+
+    const { processedFiles, errors } = result.value
+
     logger.log('Repository analysis completed:', {
-      processedFiles: result.processedFiles,
-      errorCount: result.errors.length,
+      processedFiles: processedFiles,
+      errorCount: errors.length, // TODO: fix this
     })
 
-    if (result.errors.length > 0) {
+    if (errors.length > 0) {
       logger.warn('Repository analysis completed with errors:', {
-        errors: result.errors,
+        errors: errors,
       })
     }
 

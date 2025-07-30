@@ -1,47 +1,31 @@
 import { AIMessage, HumanMessage, ToolMessage } from '@langchain/core/messages'
 import type { Database } from '@liam-hq/db'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import type { SchemaRepository } from '../../../repositories/types'
+import { describe, expect, it, vi } from 'vitest'
+import { InMemoryRepository } from '../../../repositories/InMemoryRepository'
 import { withTimelineItemSync } from './withTimelineItemSync'
 
 describe('withTimelineItemSync', () => {
-  let mockCreateTimelineItem: ReturnType<typeof vi.fn>
-  let mockConsoleError: ReturnType<typeof vi.spyOn>
-  let mockRepository: { schema: SchemaRepository }
-
   const createContext = (
     assistantRole?: Database['public']['Enums']['assistant_role_enum'],
   ) => {
-    const context = {
+    const repository = new InMemoryRepository({
+      designSessions: {
+        'test-session-id': {
+          organization_id: 'test-org-id',
+          timeline_items: [],
+        },
+      },
+    })
+
+    return {
       designSessionId: 'test-session-id',
       organizationId: 'test-org-id',
       userId: 'test-user-id',
-      repositories: mockRepository,
+      repositories: { schema: repository },
+      repository, // Return repository for test access
       ...(assistantRole && { assistantRole }),
     }
-    return context
   }
-
-  beforeEach(() => {
-    mockCreateTimelineItem = vi.fn().mockResolvedValue({ success: true })
-    mockRepository = {
-      schema: {
-        createTimelineItem: mockCreateTimelineItem,
-        getSchema: vi.fn(),
-        getDesignSession: vi.fn(),
-        createVersion: vi.fn(),
-        updateTimelineItem: vi.fn(),
-        createArtifact: vi.fn(),
-        updateArtifact: vi.fn(),
-        getArtifact: vi.fn(),
-        createValidationQuery: vi.fn(),
-        createValidationResults: vi.fn(),
-        createWorkflowRun: vi.fn(),
-        updateWorkflowRunStatus: vi.fn(),
-      },
-    }
-    mockConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
-  })
 
   describe('AIMessage handling', () => {
     it('should create assistant timeline item with correct parameters', async () => {
@@ -50,11 +34,14 @@ describe('withTimelineItemSync', () => {
 
       const result = await withTimelineItemSync(message, context)
 
-      expect(mockCreateTimelineItem).toHaveBeenCalledWith({
-        designSessionId: 'test-session-id',
+      const timelineItems =
+        context.repository.getTimelineItems('test-session-id')
+      expect(timelineItems).toHaveLength(1)
+      expect(timelineItems[0]).toMatchObject({
         content: 'Test AI response',
         type: 'assistant',
-        role: 'pm',
+        assistant_role: 'pm',
+        design_session_id: 'test-session-id',
       })
       expect(result).toBe(message)
     })
@@ -65,11 +52,14 @@ describe('withTimelineItemSync', () => {
 
       await withTimelineItemSync(message, context)
 
-      expect(mockCreateTimelineItem).toHaveBeenCalledWith({
-        designSessionId: 'test-session-id',
+      const timelineItems =
+        context.repository.getTimelineItems('test-session-id')
+      expect(timelineItems).toHaveLength(1)
+      expect(timelineItems[0]).toMatchObject({
         content: 'Test AI response',
         type: 'assistant',
-        role: 'db',
+        assistant_role: 'db',
+        design_session_id: 'test-session-id',
       })
     })
   })
@@ -81,11 +71,14 @@ describe('withTimelineItemSync', () => {
 
       const result = await withTimelineItemSync(message, context)
 
-      expect(mockCreateTimelineItem).toHaveBeenCalledWith({
-        designSessionId: 'test-session-id',
+      const timelineItems =
+        context.repository.getTimelineItems('test-session-id')
+      expect(timelineItems).toHaveLength(1)
+      expect(timelineItems[0]).toMatchObject({
         content: 'User input message',
         type: 'user',
-        userId: 'test-user-id',
+        user_id: 'test-user-id',
+        design_session_id: 'test-session-id',
       })
       expect(result).toBe(message)
     })
@@ -101,10 +94,13 @@ describe('withTimelineItemSync', () => {
 
       const result = await withTimelineItemSync(message, context)
 
-      expect(mockCreateTimelineItem).toHaveBeenCalledWith({
-        designSessionId: 'test-session-id',
+      const timelineItems =
+        context.repository.getTimelineItems('test-session-id')
+      expect(timelineItems).toHaveLength(1)
+      expect(timelineItems[0]).toMatchObject({
         content: 'Error: Something went wrong',
         type: 'error',
+        design_session_id: 'test-session-id',
       })
       expect(result).toBe(message)
     })
@@ -118,16 +114,20 @@ describe('withTimelineItemSync', () => {
 
       const result = await withTimelineItemSync(message, context)
 
-      expect(mockCreateTimelineItem).toHaveBeenCalledWith({
-        designSessionId: 'test-session-id',
+      const timelineItems =
+        context.repository.getTimelineItems('test-session-id')
+      expect(timelineItems).toHaveLength(1)
+      expect(timelineItems[0]).toMatchObject({
         content: 'Tool execution successful',
         type: 'assistant',
-        role: 'qa',
+        assistant_role: 'qa',
+        design_session_id: 'test-session-id',
       })
       expect(result).toBe(message)
     })
 
     it('should detect error case-insensitively', async () => {
+      const context = createContext()
       const testCases = [
         'ERROR: Something failed',
         'An Error occurred',
@@ -135,19 +135,22 @@ describe('withTimelineItemSync', () => {
         'System ERROR detected',
       ]
 
-      for (const content of testCases) {
+      for (let i = 0; i < testCases.length; i++) {
+        const content = testCases[i]!
         const message = new ToolMessage({
           content,
           tool_call_id: 'test-call-id',
         })
-        const context = createContext()
 
         await withTimelineItemSync(message, context)
 
-        expect(mockCreateTimelineItem).toHaveBeenCalledWith({
-          designSessionId: 'test-session-id',
+        const timelineItems =
+          context.repository.getTimelineItems('test-session-id')
+        expect(timelineItems).toHaveLength(i + 1)
+        expect(timelineItems[i]).toMatchObject({
           content,
           type: 'error',
+          design_session_id: 'test-session-id',
         })
       }
     })
@@ -166,10 +169,13 @@ describe('withTimelineItemSync', () => {
 
       await withTimelineItemSync(message, context)
 
-      expect(mockCreateTimelineItem).toHaveBeenCalledWith({
-        designSessionId: 'test-session-id',
+      const timelineItems =
+        context.repository.getTimelineItems('test-session-id')
+      expect(timelineItems).toHaveLength(1)
+      expect(timelineItems[0]).toMatchObject({
         content: complexContent,
         type: 'error',
+        design_session_id: 'test-session-id',
       })
     })
   })
@@ -191,68 +197,109 @@ describe('withTimelineItemSync', () => {
       expect(aiResult).toBe(aiMessage)
       expect(humanResult).toBe(humanMessage)
       expect(toolResult).toBe(toolMessage)
+
+      // Verify all timeline items were created
+      const timelineItems =
+        context.repository.getTimelineItems('test-session-id')
+      expect(timelineItems).toHaveLength(3)
     })
   })
 
   describe('error handling', () => {
     it('should log error and continue when createTimelineItem fails for AIMessage', async () => {
+      const mockConsoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
       const message = new AIMessage('Test message')
-      const context = createContext()
-      const error = new Error('Database connection failed')
 
-      mockCreateTimelineItem.mockResolvedValue({
+      // Create a repository that will fail
+      const failingRepository = new InMemoryRepository()
+      vi.spyOn(failingRepository, 'createTimelineItem').mockResolvedValue({
         success: false,
-        error: error.message,
+        error: 'Database connection failed',
       })
+
+      const context = {
+        designSessionId: 'test-session-id',
+        organizationId: 'test-org-id',
+        userId: 'test-user-id',
+        repositories: { schema: failingRepository },
+      }
 
       const result = await withTimelineItemSync(message, context)
 
       expect(mockConsoleError).toHaveBeenCalledWith(
         'Failed to create timeline item for AIMessage:',
-        error.message,
+        'Database connection failed',
       )
       expect(result).toBe(message)
+
+      mockConsoleError.mockRestore()
     })
 
     it('should log error and continue when createTimelineItem fails for HumanMessage', async () => {
+      const mockConsoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
       const message = new HumanMessage('Test message')
-      const context = createContext()
-      const error = new Error('Network timeout')
 
-      mockCreateTimelineItem.mockResolvedValue({
+      // Create a repository that will fail
+      const failingRepository = new InMemoryRepository()
+      vi.spyOn(failingRepository, 'createTimelineItem').mockResolvedValue({
         success: false,
-        error: error.message,
+        error: 'Network timeout',
       })
+
+      const context = {
+        designSessionId: 'test-session-id',
+        organizationId: 'test-org-id',
+        userId: 'test-user-id',
+        repositories: { schema: failingRepository },
+      }
 
       const result = await withTimelineItemSync(message, context)
 
       expect(mockConsoleError).toHaveBeenCalledWith(
         'Failed to create timeline item for HumanMessage:',
-        error.message,
+        'Network timeout',
       )
       expect(result).toBe(message)
+
+      mockConsoleError.mockRestore()
     })
 
     it('should log error and continue when createTimelineItem fails for ToolMessage', async () => {
+      const mockConsoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
       const message = new ToolMessage({
         content: 'Error: Tool failed',
         tool_call_id: 'test-id',
       })
-      const context = createContext()
-      const error = new Error('Validation failed')
 
-      mockCreateTimelineItem.mockResolvedValue({
+      // Create a repository that will fail
+      const failingRepository = new InMemoryRepository()
+      vi.spyOn(failingRepository, 'createTimelineItem').mockResolvedValue({
         success: false,
-        error: error.message,
+        error: 'Validation failed',
       })
+
+      const context = {
+        designSessionId: 'test-session-id',
+        organizationId: 'test-org-id',
+        userId: 'test-user-id',
+        repositories: { schema: failingRepository },
+      }
 
       const result = await withTimelineItemSync(message, context)
 
       expect(mockConsoleError).toHaveBeenCalledWith(
         'Failed to create timeline item for ToolMessage (error):',
-        error.message,
+        'Validation failed',
       )
       expect(result).toBe(message)
+
+      mockConsoleError.mockRestore()
     })
   })
 })

@@ -14,7 +14,6 @@ type Props = ComponentProps<typeof Header> & {
   schema: Schema
   prevSchema: Schema
   schemaUpdatesReviewComments: ReviewComment[]
-  onQuickFix?: (comment: string) => void
 }
 
 export const Output: FC<Props> = ({
@@ -22,7 +21,6 @@ export const Output: FC<Props> = ({
   schema,
   prevSchema,
   schemaUpdatesReviewComments,
-  onQuickFix,
   ...propsForHeader
 }) => {
   return (
@@ -39,7 +37,6 @@ export const Output: FC<Props> = ({
           currentSchema={schema}
           prevSchema={prevSchema}
           comments={schemaUpdatesReviewComments}
-          onQuickFix={onQuickFix}
         />
       </TabsContent>
       <TabsContent value={OUTPUT_TABS.ARTIFACT} className={styles.tabsContent}>

@@ -121,11 +121,23 @@ export async function analyzeRequirementsNode(
   )
 
   return analysisResult.match(
-    async (result) => {
+    async ({ response, reasoning }) => {
       const analyzedRequirements = {
-        businessRequirement: result.businessRequirement,
-        functionalRequirements: result.functionalRequirements,
-        nonFunctionalRequirements: result.nonFunctionalRequirements,
+        businessRequirement: response.businessRequirement,
+        functionalRequirements: response.functionalRequirements,
+        nonFunctionalRequirements: response.nonFunctionalRequirements,
+      }
+
+      // Log reasoning summary if available
+      if (reasoning?.summary && reasoning.summary.length > 0) {
+        for (const summaryItem of reasoning.summary) {
+          await logAssistantMessage(
+            state,
+            repositories,
+            summaryItem.text,
+            assistantRole,
+          )
+        }
       }
 
       // Create complete message with all analyzed requirements and sync to timeline

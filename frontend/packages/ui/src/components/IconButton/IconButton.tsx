@@ -40,6 +40,9 @@ export const IconButton = ({
     .with('default', () => '')
     .with('hoverBackground', () => styles.hoverBackground)
     .exhaustive()
+
+  const { className, ...rest } = props
+
   return (
     <TooltipProvider>
       <TooltipRoot>
@@ -47,18 +50,24 @@ export const IconButton = ({
           <button
             ref={ref}
             type="button"
-            className={clsx(styles.iconWrapper, variantClassName)}
-            {...props}
+            className={clsx(
+              styles.iconWrapper,
+              variantClassName,
+              props.className,
+            )}
+            {...rest}
           >
             <span className={clsx(styles.icon, sizeClassName)}>{icon}</span>
             {children && <span>{children}</span>}
           </button>
         </TooltipTrigger>
-        <TooltipPortal>
-          <TooltipContent side={tooltipSide} sideOffset={4}>
-            {tooltipContent}
-          </TooltipContent>
-        </TooltipPortal>
+        {!props.disabled && (
+          <TooltipPortal>
+            <TooltipContent side={tooltipSide} sideOffset={4}>
+              {tooltipContent}
+            </TooltipContent>
+          </TooltipPortal>
+        )}
       </TooltipRoot>
     </TooltipProvider>
   )

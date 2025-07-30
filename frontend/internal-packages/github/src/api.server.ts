@@ -147,23 +147,6 @@ export async function getRepositoriesByInstallationId(installationId: number) {
 
   return data
 }
-
-export const getRepository = async (
-  projectId: string,
-  installationId: number,
-) => {
-  const [owner, repo] = projectId.split('/')
-  if (!owner || !repo) throw new Error('Invalid project ID format')
-
-  const octokit = await createOctokit(installationId)
-  const { data } = await octokit.repos.get({
-    owner,
-    repo,
-  })
-
-  return data
-}
-
 /**
  * Gets file content and SHA from GitHub repository
  * @returns Object containing content and SHA

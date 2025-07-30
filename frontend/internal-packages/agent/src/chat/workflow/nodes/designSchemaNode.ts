@@ -25,13 +25,6 @@ export async function designSchemaNode(
   }
   const { repositories } = configurableResult.value
 
-  await logAssistantMessage(
-    state,
-    repositories,
-    'Designing your database structure to meet the identified requirements...',
-    assistantRole,
-  )
-
   const schemaText = convertSchemaToText(state.schemaData)
 
   // Use existing messages
@@ -57,8 +50,22 @@ export async function designSchemaNode(
     }
   }
 
+  const { response, reasoning } = invokeResult.value
+
+  // Log reasoning summary if available
+  if (reasoning?.summary && reasoning.summary.length > 0) {
+    for (const summaryItem of reasoning.summary) {
+      await logAssistantMessage(
+        state,
+        repositories,
+        summaryItem.text,
+        assistantRole,
+      )
+    }
+  }
+
   // Apply timeline sync to the message and clear retry flags
-  const syncedMessage = await withTimelineItemSync(invokeResult.value, {
+  const syncedMessage = await withTimelineItemSync(response, {
     designSessionId: state.designSessionId,
     organizationId: state.organizationId || '',
     userId: state.userId,

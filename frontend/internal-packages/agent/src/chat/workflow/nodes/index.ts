@@ -1,5 +1,4 @@
 export { analyzeRequirementsNode } from './analyzeRequirementsNode'
-export { designSchemaNode } from './designSchemaNode'
 export { finalizeArtifactsNode } from './finalizeArtifactsNode'
 export { generateUsecaseNode } from './generateUsecaseNode'
 export { prepareDmlNode } from './prepareDmlNode'

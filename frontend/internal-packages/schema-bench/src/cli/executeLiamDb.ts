@@ -84,7 +84,10 @@ async function loadInputFiles(): Promise<
       )
     }
 
-    inputs.push({ caseId, input: validationResult.output })
+    inputs.push({
+      caseId,
+      input: validationResult.output satisfies LiamDbExecutorInput,
+    })
   }
 
   return ok(inputs)

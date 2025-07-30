@@ -415,6 +415,7 @@ export const createWorkflowState = (setupData: CreateWorkflowStateInput) => {
     designSessionId: designSession.id,
     userId: user.id,
     recursionLimit: 100, // Higher limit for deep modeling
+    retryCount: {}, // Initialize retry count for nodes
   }
 
   return okAsync({

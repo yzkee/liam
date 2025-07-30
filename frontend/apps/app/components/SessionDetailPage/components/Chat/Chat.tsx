@@ -6,6 +6,7 @@ import type { TimelineItemEntry } from '../../types'
 import styles from './Chat.module.css'
 import { ChatInput } from './components/ChatInput'
 import { TimelineItem } from './components/TimelineItem'
+import { WorkflowRunningIndicator } from './components/WorkflowRunningIndicator'
 import { sendChatMessage } from './services'
 import { generateTimelineItemId } from './services/timelineItemHelpers'
 import { useScrollToBottom } from './useScrollToBottom'
@@ -17,7 +18,7 @@ type Props = {
   onMessageSend: (message: TimelineItemEntry) => void
   onVersionView: (versionId: string) => void
   onRetry?: () => void
-  isLoading?: boolean
+  isWorkflowRunning?: boolean
 }
 
 export const Chat: FC<Props> = ({
@@ -27,7 +28,7 @@ export const Chat: FC<Props> = ({
   onMessageSend,
   onVersionView,
   onRetry,
-  isLoading = false,
+  isWorkflowRunning = false,
 }) => {
   const { containerRef } = useScrollToBottom<HTMLDivElement>(
     timelineItems.length,
@@ -146,17 +147,11 @@ export const Chat: FC<Props> = ({
             />
           )
         })}
-        {isLoading && (
-          <div className={styles.loadingIndicator}>
-            <div className={styles.loadingDot} />
-            <div className={styles.loadingDot} />
-            <div className={styles.loadingDot} />
-          </div>
-        )}
+        {isWorkflowRunning && <WorkflowRunningIndicator />}
       </div>
       <ChatInput
         onSendMessage={handleSendMessage}
-        isWorkflowRunning={isLoading}
+        isWorkflowRunning={isWorkflowRunning}
         schema={schemaData}
       />
     </div>

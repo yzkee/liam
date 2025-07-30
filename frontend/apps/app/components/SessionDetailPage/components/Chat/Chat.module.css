@@ -40,37 +40,29 @@
   background-color: var(--scrollbar-thumb-background-hover);
 }
 
-.loadingIndicator {
+.workflowRunning {
   display: flex;
-  justify-content: center;
-  margin: 12px 0;
-  gap: 4px;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: var(--spacing-2) var(--spacing-3);
+  background-color: rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  animation: fadeIn 0.3s ease-in-out;
 }
 
-.loadingDot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: var(--global-foreground-subtle);
-  animation: pulse 1.5s infinite ease-in-out;
+.workflowRunningText {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
-.loadingDot:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.loadingDot:nth-child(3) {
-  animation-delay: 0.4s;
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 0.4;
-    transform: scale(0.8);
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
   }
-  50% {
+  to {
     opacity: 1;
-    transform: scale(1);
+    transform: translateY(0);
   }
 }

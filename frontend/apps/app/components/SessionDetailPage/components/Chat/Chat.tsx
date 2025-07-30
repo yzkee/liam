@@ -18,8 +18,6 @@ type Props = {
   onVersionView: (versionId: string) => void
   onRetry?: () => void
   isLoading?: boolean
-  isStreaming?: boolean
-  onCancelStream?: () => void
 }
 
 export const Chat: FC<Props> = ({
@@ -30,8 +28,6 @@ export const Chat: FC<Props> = ({
   onVersionView,
   onRetry,
   isLoading = false,
-  isStreaming = false,
-  onCancelStream,
 }) => {
   const { containerRef } = useScrollToBottom<HTMLDivElement>(
     timelineItems.length,
@@ -160,9 +156,8 @@ export const Chat: FC<Props> = ({
       </div>
       <ChatInput
         onSendMessage={handleSendMessage}
-        isLoading={isLoading}
+        isWorkflowRunning={isLoading}
         schema={schemaData}
-        onCancel={isStreaming ? onCancelStream : undefined}
       />
     </div>
   )

@@ -20,7 +20,6 @@ import {
   useState,
 } from 'react'
 import styles from './ChatInput.module.css'
-import { CancelButton } from './components/CancelButton'
 import {
   type MentionItem,
   MentionSuggestor,
@@ -32,21 +31,19 @@ import { insertMentionAtCursor } from './utils/insertMention'
 import { isRegularKey } from './utils/isRegularKey'
 
 type Props = {
-  isLoading: boolean
+  isWorkflowRunning: boolean
   error?: boolean
   initialMessage?: string
   schema: Schema
   onSendMessage: (message: string) => void
-  onCancel?: () => void
 }
 
 export const ChatInput: FC<Props> = ({
-  isLoading,
+  isWorkflowRunning,
   error = false,
   initialMessage = '',
   schema,
   onSendMessage,
-  onCancel,
 }) => {
   const mentionSuggestorRef = useRef<MentionSuggestorHandle>(null)
   const mentionSuggestorId = useId()
@@ -107,19 +104,17 @@ export const ChatInput: FC<Props> = ({
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
-    if (isLoading) {
-      onCancel?.()
-    } else if (hasContent) {
-      // If not loading and has content, send message
-      onSendMessage(message)
-      setMessage('')
-      setTimeout(() => {
-        const textarea = textareaRef.current
-        if (textarea) {
-          textarea.style.height = '24px'
-        }
-      }, 0)
-    }
+
+    if (isWorkflowRunning || !hasContent) return
+
+    onSendMessage(message)
+    setMessage('')
+    setTimeout(() => {
+      const textarea = textareaRef.current
+      if (textarea) {
+        textarea.style.height = '24px'
+      }
+    }, 0)
   }
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -158,8 +153,8 @@ export const ChatInput: FC<Props> = ({
       <form
         className={clsx(
           styles.inputContainer,
-          isLoading && styles.disabled,
-          isLoading && styles.loading,
+          isWorkflowRunning && styles.disabled,
+          isWorkflowRunning && styles.loading,
           error && styles.error,
         )}
         onSubmit={handleSubmit}
@@ -175,7 +170,7 @@ export const ChatInput: FC<Props> = ({
                 ref={textareaRef}
                 value={message}
                 placeholder="Build or ask anything, @ to mention schema tables"
-                disabled={isLoading}
+                disabled={isWorkflowRunning}
                 className={styles.input}
                 rows={1}
                 data-error={error ? 'true' : undefined}
@@ -212,19 +207,11 @@ export const ChatInput: FC<Props> = ({
             </PopoverPortal>
           </PopoverRoot>
         </div>
-        {isLoading ? (
-          <CancelButton
-            hasContent={true}
-            onClick={handleSubmit}
-            disabled={false}
-          />
-        ) : (
-          <SendButton
-            hasContent={hasContent}
-            onClick={handleSubmit}
-            disabled={isLoading || error}
-          />
-        )}
+        <SendButton
+          hasContent={hasContent}
+          disabled={isWorkflowRunning || error}
+          onClick={handleSubmit}
+        />
       </form>
     </div>
   )

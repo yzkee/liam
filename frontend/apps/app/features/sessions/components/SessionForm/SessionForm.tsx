@@ -1,12 +1,6 @@
 'use client'
 
-import {
-  type FC,
-  useActionState,
-  useEffect,
-  useState,
-  useTransition,
-} from 'react'
+import { type FC, useActionState, useEffect, useTransition } from 'react'
 import type { Projects } from '@/components/CommonLayout/AppBar/ProjectsDropdownMenu/services/getProjects'
 import { createSession } from '../../actions/createSession'
 import { getBranches } from '../../actions/getBranches'
@@ -19,7 +13,6 @@ type Props = {
 
 export const SessionForm: FC<Props> = ({ projects, defaultProjectId }) => {
   const [, startTransition] = useTransition()
-  const [isDeepModelingEnabled, setIsDeepModelingEnabled] = useState(false)
   const [state, formAction, isPending] = useActionState(createSession, {
     success: false,
   })
@@ -35,11 +28,6 @@ export const SessionForm: FC<Props> = ({ projects, defaultProjectId }) => {
       formData.append('projectId', projectId)
       branchesAction(formData)
     })
-  }
-
-  const handleFormAction = (formData: FormData) => {
-    formData.append('isDeepModelingEnabled', isDeepModelingEnabled.toString())
-    formAction(formData)
   }
 
   // Auto-load branches when a default project is provided (e.g., from ProjectSessionsPage)
@@ -64,8 +52,7 @@ export const SessionForm: FC<Props> = ({ projects, defaultProjectId }) => {
       formError={state.error}
       isPending={isPending}
       onProjectChange={handleProjectChange}
-      formAction={handleFormAction}
-      onDeepModelingToggle={setIsDeepModelingEnabled}
+      formAction={formAction}
     />
   )
 }

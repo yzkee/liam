@@ -24,7 +24,6 @@ type Props = {
   onProjectChange: (projectId: string) => void
   formAction: (formData: FormData) => void
   isTransitioning?: boolean
-  onDeepModelingToggle?: (isActive: boolean) => void
 }
 
 export const GitHubSessionFormPresenter: FC<Props> = ({
@@ -38,7 +37,6 @@ export const GitHubSessionFormPresenter: FC<Props> = ({
   onProjectChange,
   formAction,
   isTransitioning = false,
-  onDeepModelingToggle,
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const formRef = useRef<HTMLFormElement>(null)
@@ -207,7 +205,6 @@ export const GitHubSessionFormPresenter: FC<Props> = ({
               hasContent={hasContent}
               onFileSelect={handleFileSelect}
               onCancel={() => window.location.reload()}
-              onDeepModelingToggle={onDeepModelingToggle}
             />
           </div>
         </form>

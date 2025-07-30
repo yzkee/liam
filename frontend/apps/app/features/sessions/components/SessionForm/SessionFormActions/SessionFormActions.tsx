@@ -1,7 +1,6 @@
 'use client'
 
 import type { FC } from 'react'
-import { useState } from 'react'
 import { ActionButton } from '../ActionButton'
 import { AttachButton } from '../AttachButton'
 import { DeepModelingToggle } from '../DeepModelingToggle'
@@ -16,7 +15,6 @@ type Props = {
   onFileSelect?: (files: FileList) => void
   onSubmit?: () => void
   onCancel?: () => void
-  onDeepModelingToggle?: (isActive: boolean) => void
 }
 
 export const SessionFormActions: FC<Props> = ({
@@ -27,23 +25,10 @@ export const SessionFormActions: FC<Props> = ({
   onFileSelect,
   onSubmit,
   onCancel,
-  onDeepModelingToggle,
 }) => {
-  const [isDeepModelingActive, setIsDeepModelingActive] = useState(false)
-
-  const handleDeepModelingToggle = () => {
-    const newState = !isDeepModelingActive
-    setIsDeepModelingActive(newState)
-    onDeepModelingToggle?.(newState)
-  }
-
   return (
     <div className={styles.container}>
-      <DeepModelingToggle
-        isActive={isDeepModelingActive}
-        onClick={handleDeepModelingToggle}
-        disabled={isPending}
-      >
+      <DeepModelingToggle name="isDeepModelingEnabled" disabled={isPending}>
         Deep Modeling
       </DeepModelingToggle>
       <MicButton onClick={onMicClick || (() => {})} disabled={isPending} />

@@ -60,6 +60,13 @@ export async function prepareDmlNode(
   }
   const { repositories } = configurableResult.value
 
+  await logAssistantMessage(
+    state,
+    repositories,
+    'Creating sample data to test your database design...',
+    assistantRole,
+  )
+
   // Check if we have required inputs
   if (!state.ddlStatements) {
     await logAssistantMessage(

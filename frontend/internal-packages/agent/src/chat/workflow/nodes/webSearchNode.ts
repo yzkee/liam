@@ -26,6 +26,13 @@ export async function webSearchNode(
   }
   const { repositories } = configurableResult.value
 
+  await logAssistantMessage(
+    state,
+    repositories,
+    'Researching best practices for your specific database needs...',
+    assistantRole,
+  )
+
   // Create LLM with web search tool binding
   // Note: web_search_preview is an OpenAI-specific tool type
   const webSearchTool = { type: 'web_search_preview' } as const

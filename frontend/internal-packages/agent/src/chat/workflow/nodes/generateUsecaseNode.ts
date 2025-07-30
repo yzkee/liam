@@ -67,6 +67,13 @@ export async function generateUsecaseNode(
   }
   const { repositories } = configurableResult.value
 
+  await logAssistantMessage(
+    state,
+    repositories,
+    'Creating test scenarios to validate your database design...',
+    assistantRole,
+  )
+
   // Check if we have analyzed requirements
   if (!state.analyzedRequirements) {
     const errorMessage =

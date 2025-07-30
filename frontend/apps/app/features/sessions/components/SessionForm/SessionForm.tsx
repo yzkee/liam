@@ -4,7 +4,7 @@ import { type FC, useActionState, useEffect, useTransition } from 'react'
 import type { Projects } from '@/components/CommonLayout/AppBar/ProjectsDropdownMenu/services/getProjects'
 import { createSession } from '../../actions/createSession'
 import { getBranches } from '../../actions/getBranches'
-import { getSchemaFilePath } from './actions/getSchemaFilePath/getSchemaFilePath'
+import { getSchemaFilePath } from './actions/getSchemaFilePath'
 import { SessionFormPresenter } from './SessionFormPresenter'
 
 type Props = {

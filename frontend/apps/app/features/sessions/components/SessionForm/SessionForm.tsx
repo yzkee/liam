@@ -25,7 +25,7 @@ export const SessionForm: FC<Props> = ({ projects, defaultProjectId }) => {
 
   const [schemaPathState, schemaPathAction] = useActionState(
     getSchemaFilePath,
-    { path: null, loading: false },
+    { path: null },
   )
 
   const handleProjectChange = (projectId: string) => {

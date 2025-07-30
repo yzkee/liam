@@ -4,7 +4,6 @@ import { fetchSchemaFilePath } from './fetchSchemaFilePath'
 
 type SchemaFilePathState = {
   path: string | null
-  loading: boolean
   error?: string
 }
 
@@ -15,14 +14,14 @@ export async function getSchemaFilePath(
   const projectId = formData.get('projectId')
 
   if (!projectId || typeof projectId !== 'string') {
-    return { path: null, loading: false }
+    return { path: null }
   }
 
   const { data, error } = await fetchSchemaFilePath(projectId)
 
   if (error) {
-    return { path: null, loading: false, error }
+    return { path: null, error }
   }
 
-  return { path: data, loading: false }
+  return { path: data }
 }

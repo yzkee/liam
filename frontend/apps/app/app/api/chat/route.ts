@@ -124,15 +124,12 @@ export async function POST(request: Request) {
   )
 
   // Trigger the appropriate workflow based on Deep Modeling toggle
-  if (validationResult.output.isDeepModelingEnabled) {
-    await deepModelingWorkflowTask.trigger(jobPayload, {
-      idempotencyKey,
-    })
-  } else {
-    await designProcessWorkflowTask.trigger(jobPayload, {
-      idempotencyKey,
-    })
-  }
+  const task = validationResult.output.isDeepModelingEnabled
+    ? deepModelingWorkflowTask
+    : designProcessWorkflowTask
+  await task.trigger(jobPayload, {
+    idempotencyKey,
+  })
 
   return NextResponse.json({
     success: true,

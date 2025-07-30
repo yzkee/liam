@@ -295,15 +295,12 @@ export async function createSession(
 
   // Trigger the appropriate workflow based on Deep Modeling toggle
   try {
-    if (isDeepModelingEnabled) {
-      await deepModelingWorkflowTask.trigger(chatPayload, {
-        idempotencyKey,
-      })
-    } else {
-      await designProcessWorkflowTask.trigger(chatPayload, {
-        idempotencyKey,
-      })
-    }
+    const task = isDeepModelingEnabled
+      ? deepModelingWorkflowTask
+      : designProcessWorkflowTask
+    await task.trigger(chatPayload, {
+      idempotencyKey,
+    })
   } catch (error) {
     console.error('Error triggering chat processing job:', error)
     return { success: false, error: 'Failed to trigger chat processing job' }

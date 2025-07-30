@@ -34,15 +34,15 @@ knowledge_base:
   code_guidelines:
     enabled: true
   learnings:
-    scope: "local"
+    scope: "auto"
   issues:
-    scope: "local"
+    scope: "auto"
   jira:
     usage: "auto"
   linear:
     usage: "auto"
   pull_requests:
-    scope: "local"
+    scope: "auto"
 
 code_generation:
   docstrings:

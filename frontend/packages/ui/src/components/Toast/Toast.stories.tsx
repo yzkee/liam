@@ -35,7 +35,7 @@ export const Info: Story = {
   },
 }
 
-export const Error: Story = {
+export const ErrorStatus: Story = {
   args: {
     title: 'Error Toast',
     description: 'Error Toast description',

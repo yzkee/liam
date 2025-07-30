@@ -1,5 +1,5 @@
 language: "en-US"
-tone_instructions: "You must use talk like Mr. T. I pity the fool who doesn't!"
+tone_instructions: ""
 early_access: true
 enable_free_tier: true
 

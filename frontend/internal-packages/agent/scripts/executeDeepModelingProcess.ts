@@ -1,10 +1,11 @@
 #!/usr/bin/env tsx
 
 import type { BaseMessage } from '@langchain/core/messages'
+import { HumanMessage } from '@langchain/core/messages'
 import type { Result } from 'neverthrow'
 import { err, ok } from 'neverthrow'
 import { isToolMessageError } from '../src/chat/workflow/utils/toolMessageUtils'
-import { deepModeling } from '../src/deepModeling'
+import { createGraph } from '../src/createGraph'
 import {
   createBuildingSchema,
   createDesignSession,
@@ -16,6 +17,7 @@ import {
   showHelp,
   validateEnvironment,
 } from './shared/scriptUtils'
+import { processStreamChunk } from './shared/streamingUtils'
 import type { Logger } from './shared/types'
 
 const currentLogLevel = getLogLevel()
@@ -61,33 +63,57 @@ const executeDeepModelingProcess = async (): Promise<Result<void, Error>> => {
     .andThen(createWorkflowState)
 
   if (setupResult.isErr()) return err(setupResult.error)
-  const { repositories, workflowState } = setupResult.value
+  const { repositories, workflowState: setupWorkflowState } = setupResult.value
 
-  // Execute deep modeling workflow
+  // Convert the setup result to proper WorkflowState format
+  const workflowState = {
+    userInput: setupWorkflowState.userInput,
+    messages: [new HumanMessage(setupWorkflowState.userInput)],
+    schemaData: setupWorkflowState.schemaData,
+    buildingSchemaId: setupWorkflowState.buildingSchemaId,
+    latestVersionNumber: setupWorkflowState.latestVersionNumber,
+    designSessionId: setupWorkflowState.designSessionId,
+    userId: setupWorkflowState.userId,
+    organizationId: setupWorkflowState.organizationId,
+    retryCount: {},
+  }
+
+  // Execute workflow with streaming
   const config = {
     configurable: {
       repositories,
-      logger: {
-        ...logger,
-        log: logger.info,
-      },
+      logger,
+      buildingSchemaId: workflowState.buildingSchemaId,
+      latestVersionNumber: workflowState.latestVersionNumber,
     },
   }
+  const graph = createGraph()
 
   logger.info('Starting Deep Modeling workflow execution...')
-  logger.info(`Input: "${workflowState.userInput.substring(0, 100)}..."`)
-  logger.info(
-    `Initial tables: ${Object.keys(workflowState.schemaData.tables).length}`,
-  )
 
-  const result = await deepModeling(workflowState, config)
+  // Use streaming with proper async iterator handling
+  const streamResult = await (async () => {
+    const stream = await graph.stream(workflowState, {
+      configurable: config.configurable,
+      recursionLimit: setupWorkflowState.recursionLimit,
+      streamMode: 'values',
+    })
 
-  if (result.isErr()) {
-    logger.error(`Deep Modeling workflow failed: ${result.error.message}`)
-    return err(result.error)
+    let finalResult = null
+
+    for await (const chunk of stream) {
+      processStreamChunk(logger, chunk)
+      finalResult = chunk
+    }
+
+    return finalResult
+  })()
+
+  if (!streamResult) {
+    return err(new Error('No result received from workflow'))
   }
 
-  const finalWorkflowState = result.value
+  const finalWorkflowState = streamResult
   logger.info('Deep Modeling workflow completed successfully')
 
   // Log actual messages content

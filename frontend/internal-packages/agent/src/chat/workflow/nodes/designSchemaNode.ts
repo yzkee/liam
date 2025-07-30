@@ -26,13 +26,6 @@ export async function designSchemaNode(
   }
   const { repositories } = configurableResult.value
 
-  await logAssistantMessage(
-    state,
-    repositories,
-    'Designing your database structure to meet the identified requirements...',
-    assistantRole,
-  )
-
   const schemaText = convertSchemaToText(state.schemaData)
 
   // Log appropriate message for DDL retry case

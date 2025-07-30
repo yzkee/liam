@@ -104,13 +104,6 @@ export async function analyzeRequirementsNode(
   }
   const { repositories } = configurableResult.value
 
-  await logAssistantMessage(
-    state,
-    repositories,
-    'Breaking down your request into structured requirements...',
-    assistantRole,
-  )
-
   const pmAnalysisAgent = new PMAnalysisAgent()
 
   const retryCount = state.retryCount['analyzeRequirementsNode'] ?? 0

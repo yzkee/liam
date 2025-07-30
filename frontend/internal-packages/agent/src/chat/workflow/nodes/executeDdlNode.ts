@@ -27,13 +27,6 @@ export async function executeDdlNode(
   }
   const { repositories } = configurableResult.value
 
-  await logAssistantMessage(
-    state,
-    repositories,
-    'Building your database with the optimized structure...',
-    assistantRole,
-  )
-
   // Generate DDL from schema data
   const result = postgresqlSchemaDeparser(state.schemaData)
 

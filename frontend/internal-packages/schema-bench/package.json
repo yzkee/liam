@@ -21,9 +21,9 @@
     "vitest": "3.2.4"
   },
   "scripts": {
-    "evaluateSchema": "node --experimental-strip-types src/cli/evaluateSchema.ts",
+    "evaluateSchema": "tsx src/cli/evaluateSchema.ts",
     "executeLiamDB": "tsx src/cli/executeLiamDb.ts",
-    "executeOpenai": "node --experimental-strip-types src/cli/executeOpenai.ts",
+    "executeOpenai": "tsx src/cli/executeOpenai.ts",
     "fmt": "concurrently \"pnpm:fmt:*\"",
     "fmt:biome": "biome check --write --unsafe .",
     "fmt:eslint": "eslint --fix .",
@@ -31,7 +31,7 @@
     "lint:biome": "biome check .",
     "lint:eslint": "eslint .",
     "lint:tsc": "tsc --noEmit",
-    "setupWorkspace": "node --experimental-strip-types src/cli/setupWorkspace.ts",
+    "setupWorkspace": "tsx src/cli/setupWorkspace.ts",
     "test": "vitest --watch=false --passWithNoTests"
   }
 }

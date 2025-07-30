@@ -1,6 +1,6 @@
 export const OUTPUT_TABS = {
   ERD: 'erd',
-  SCHEMA_UPDATES: 'schema-updates',
+  SQL: 'sql',
   ARTIFACT: 'artifact',
 } as const
 
@@ -13,7 +13,7 @@ type OutputTab = {
 
 export const OUTPUT_TABS_LIST: OutputTab[] = [
   { value: OUTPUT_TABS.ERD, label: 'ERD' },
-  { value: OUTPUT_TABS.SCHEMA_UPDATES, label: 'Schema Updates' },
+  { value: OUTPUT_TABS.SQL, label: 'SQL' },
   { value: OUTPUT_TABS.ARTIFACT, label: 'Artifact' },
 ]
 

@@ -93,3 +93,11 @@ export const HoverBackground: Story = {
     variant: 'hoverBackground',
   },
 }
+
+export const Disabled: Story = {
+  args: {
+    icon: <Plus />,
+    tooltipContent: 'This button is disabled',
+    disabled: true,
+  },
+}

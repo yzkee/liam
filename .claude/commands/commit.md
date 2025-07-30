@@ -1,6 +1,7 @@
 Let's commit the changes.
 
 **Split large changes**: If changes touch multiple concerns, split them into separate commits
+**Write a commit message that matches the content of your change**: Clearly describe what was changed in this commit.
 
 - Use gitmoji (optional, recommended): Write commit messages using the emoji (e.g., ✨) itself, not the textual representation (e.g., `:sparkles:`)
 

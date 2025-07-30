@@ -44,6 +44,9 @@ export const DeepModelingToggle: FC<Props> = ({
         type="checkbox"
         name={name}
         checked={isActive}
+        // Empty onChange handler required to suppress React warning about controlled component
+        // The actual state change is handled by the button's onClick handler
+        onChange={() => {}}
         className={styles.hiddenInput}
       />
       <button

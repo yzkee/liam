@@ -25,7 +25,7 @@ export const Output: FC<Props> = ({
 }) => {
   return (
     <TabsRoot defaultValue={DEFAULT_OUTPUT_TAB} className={styles.tabsRoot}>
-      <Header {...propsForHeader} />
+      <Header schema={schema} {...propsForHeader} />
       <TabsContent value={OUTPUT_TABS.ERD} className={styles.tabsContent}>
         <ERD schema={schema} prevSchema={prevSchema} />
       </TabsContent>

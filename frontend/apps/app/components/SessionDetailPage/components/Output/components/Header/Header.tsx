@@ -1,3 +1,4 @@
+import type { Schema } from '@liam-hq/db-structure'
 import type { ComponentProps, FC } from 'react'
 import { TabsList, TabsTrigger } from '@/components'
 import { ARTIFACT_TAB, ERD_SCHEMA_TABS_LIST } from '../../constants'
@@ -5,9 +6,11 @@ import { ExportDropdown } from './ExportDropdown'
 import styles from './Header.module.css'
 import { VersionDropdown } from './VersionDropdown'
 
-type Props = ComponentProps<typeof VersionDropdown>
+type Props = ComponentProps<typeof VersionDropdown> & {
+  schema: Schema
+}
 
-export const Header: FC<Props> = ({ ...propsForVersionDropdown }) => {
+export const Header: FC<Props> = ({ schema, ...propsForVersionDropdown }) => {
   return (
     <div className={styles.wrapper}>
       <TabsList className={styles.tabsList}>
@@ -34,7 +37,7 @@ export const Header: FC<Props> = ({ ...propsForVersionDropdown }) => {
         </TabsTrigger>
       </TabsList>
       <div className={styles.tail}>
-        <ExportDropdown />
+        <ExportDropdown schema={schema} />
       </div>
     </div>
   )

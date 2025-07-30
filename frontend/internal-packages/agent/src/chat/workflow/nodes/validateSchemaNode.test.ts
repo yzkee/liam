@@ -83,7 +83,11 @@ describe('validateSchemaNode', () => {
       'session-id',
       'INSERT INTO users VALUES (1, "test");',
     )
-    expect(result.dmlExecutionSuccessful).toBe(true)
+    expect(
+      'dmlExecutionSuccessful' in result
+        ? result.dmlExecutionSuccessful
+        : undefined,
+    ).toBe(true)
   })
 
   it('should execute only DDL when DML is empty', async () => {
@@ -116,7 +120,11 @@ describe('validateSchemaNode', () => {
       'session-id',
       'CREATE TABLE users (id INT);',
     )
-    expect(result.dmlExecutionSuccessful).toBe(true)
+    expect(
+      'dmlExecutionSuccessful' in result
+        ? result.dmlExecutionSuccessful
+        : undefined,
+    ).toBe(true)
   })
 
   it('should combine and execute DDL and DML together', async () => {
@@ -159,7 +167,11 @@ describe('validateSchemaNode', () => {
       'session-id',
       'CREATE TABLE users (id INT);\nINSERT INTO users VALUES (1);',
     )
-    expect(result.dmlExecutionSuccessful).toBe(true)
+    expect(
+      'dmlExecutionSuccessful' in result
+        ? result.dmlExecutionSuccessful
+        : undefined,
+    ).toBe(true)
   })
 
   it('should handle execution errors', async () => {
@@ -198,8 +210,14 @@ describe('validateSchemaNode', () => {
       configurable: { repositories },
     })
 
-    expect(result.dmlExecutionSuccessful).toBeUndefined()
-    expect(result.dmlExecutionErrors).toContain('Table not found')
+    expect(
+      'dmlExecutionSuccessful' in result
+        ? result.dmlExecutionSuccessful
+        : undefined,
+    ).toBeUndefined()
+    expect(
+      'dmlExecutionErrors' in result ? result.dmlExecutionErrors : undefined,
+    ).toContain('Table not found')
   })
 
   it('should trim whitespace from statements', async () => {

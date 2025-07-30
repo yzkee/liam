@@ -1,7 +1,9 @@
 import { AIMessage, HumanMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
+import type { Command } from '@langchain/langgraph'
 import type { Database } from '@liam-hq/db'
 import { invokeDesignAgent } from '../../../langchain/agents/databaseSchemaBuildAgent/agent'
+import { handleImmediateError } from '../../../shared/workflowSetup'
 import { convertSchemaToText } from '../../../utils/convertSchemaToText'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
@@ -15,14 +17,11 @@ import { withTimelineItemSync } from '../utils/withTimelineItemSync'
 export async function designSchemaNode(
   state: WorkflowState,
   config: RunnableConfig,
-): Promise<WorkflowState> {
+): Promise<WorkflowState | Command> {
   const assistantRole: Database['public']['Enums']['assistant_role_enum'] = 'db'
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
-    return {
-      ...state,
-      error: configurableResult.error,
-    }
+    throw configurableResult.error
   }
   const { repositories } = configurableResult.value
 
@@ -59,18 +58,18 @@ export async function designSchemaNode(
   })
 
   if (invokeResult.isErr()) {
-    // Create a human message for error feedback to avoid reasoning API issues
-    // Using HumanMessage prevents the "reasoning without required following item" error
-    const errorFeedbackMessage = new HumanMessage({
-      content: `The previous attempt failed with the following error: ${invokeResult.error.message}. Please try a different approach to resolve the issue.`,
+    await logAssistantMessage(
+      state,
+      repositories,
+      'Unable to complete the database design. There may be conflicts in the requirements...',
+      assistantRole,
+    )
+    return await handleImmediateError(invokeResult.error, {
+      nodeId: 'designSchemaNode',
+      designSessionId: state.designSessionId,
+      workflowRunId: '', // Will be handled by workflow setup
+      repositories,
     })
-
-    // Return state with error feedback as HumanMessage for self-recovery
-    return {
-      ...state,
-      messages: [errorFeedbackMessage],
-      error: invokeResult.error,
-    }
   }
 
   const { response, reasoning } = invokeResult.value

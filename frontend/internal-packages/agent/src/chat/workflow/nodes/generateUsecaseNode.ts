@@ -1,9 +1,11 @@
 import { AIMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
+import type { Command } from '@langchain/langgraph'
 import type { Database } from '@liam-hq/db'
 import { ResultAsync } from 'neverthrow'
 import { QAGenerateUsecaseAgent } from '../../../langchain/agents'
 import type { Repositories } from '../../../repositories'
+import { handleImmediateError } from '../../../shared/workflowSetup'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 import { logAssistantMessage } from '../utils/timelineLogger'
@@ -56,14 +58,11 @@ async function saveArtifacts(
 export async function generateUsecaseNode(
   state: WorkflowState,
   config: RunnableConfig,
-): Promise<WorkflowState> {
+): Promise<WorkflowState | Command> {
   const assistantRole: Database['public']['Enums']['assistant_role_enum'] = 'qa'
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
-    return {
-      ...state,
-      error: configurableResult.error,
-    }
+    throw configurableResult.error
   }
   const { repositories } = configurableResult.value
 
@@ -86,15 +85,15 @@ export async function generateUsecaseNode(
       assistantRole,
     )
 
-    return {
-      ...state,
-      error: new Error(errorMessage),
-    }
+    return await handleImmediateError(new Error(errorMessage), {
+      nodeId: 'generateUsecaseNode',
+      designSessionId: state.designSessionId,
+      workflowRunId: '', // Will be handled by workflow setup
+      repositories,
+    })
   }
 
   const qaAgent = new QAGenerateUsecaseAgent()
-
-  const retryCount = state.retryCount['generateUsecaseNode'] ?? 0
 
   // Use state.messages directly - includes error messages and all context
   const usecaseResult = await ResultAsync.fromPromise(
@@ -134,7 +133,6 @@ export async function generateUsecaseNode(
         ...state,
         messages: [usecaseMessage],
         generatedUsecases: response.usecases,
-        error: undefined, // Clear error on success
       }
 
       // Save artifacts if usecases are successfully generated
@@ -150,15 +148,12 @@ export async function generateUsecaseNode(
         assistantRole,
       )
 
-      // Increment retry count and set error
-      return {
-        ...state,
-        error: error,
-        retryCount: {
-          ...state.retryCount,
-          ['generateUsecaseNode']: retryCount + 1,
-        },
-      }
+      return await handleImmediateError(error, {
+        nodeId: 'generateUsecaseNode',
+        designSessionId: state.designSessionId,
+        workflowRunId: '', // Will be handled by workflow setup
+        repositories,
+      })
     },
   )
 }

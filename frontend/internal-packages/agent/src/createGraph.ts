@@ -62,7 +62,9 @@ export const createGraph = () => {
       (state) => {
         // success → finalizeArtifacts
         // dml error or test fail → dbAgent
-        return state.error ? 'dbAgent' : 'finalizeArtifacts'
+        return state.dmlExecutionSuccessful === false
+          ? 'dbAgent'
+          : 'finalizeArtifacts'
       },
       {
         dbAgent: 'dbAgent',

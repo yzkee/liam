@@ -1,9 +1,9 @@
 import { AIMessage, HumanMessage } from '@langchain/core/messages'
 import { RunCollectorCallbackHandler } from '@langchain/core/tracers/run_collector'
 import type { CompiledStateGraph } from '@langchain/langgraph'
+import { Command, END } from '@langchain/langgraph'
 import { err, ok, ResultAsync } from 'neverthrow'
 import { v4 as uuidv4 } from 'uuid'
-import { finalizeArtifactsNode } from '../chat/workflow/nodes'
 import { DEFAULT_RECURSION_LIMIT } from '../chat/workflow/shared/langGraphUtils'
 import type {
   WorkflowConfigurable,
@@ -113,6 +113,39 @@ export const setupWorkflowState = (
 }
 
 /**
+ * Handle immediate error recording and workflow stopping
+ * This creates a timeline item immediately and stops the workflow using Command pattern
+ */
+export const handleImmediateError = async (
+  error: Error,
+  context: {
+    nodeId: string
+    designSessionId: string
+    workflowRunId: string
+    repositories: WorkflowConfigurable['repositories']
+  },
+): Promise<Command> => {
+  const { nodeId, designSessionId, workflowRunId, repositories } = context
+
+  await repositories.schema.createTimelineItem({
+    designSessionId,
+    content: `Error in ${nodeId}: ${error.message}`,
+    type: 'error',
+  })
+
+  // Update workflow run status to error
+  await repositories.schema.updateWorkflowRunStatus({
+    workflowRunId,
+    status: 'error',
+  })
+
+  return new Command({
+    update: {},
+    goto: END,
+  })
+}
+
+/**
  * Execute workflow with proper error handling and finalization
  * This wraps the workflow execution with error handling, status updates, and artifact finalization
  *
@@ -151,37 +184,7 @@ export const executeWorkflowWithTracking = <
     (error) => new Error(String(error)),
   )
 
-  // 2. Update status to error
-  const updateErrorStatus = (result: { error?: Error }) =>
-    ResultAsync.fromPromise(
-      repositories.schema.updateWorkflowRunStatus({
-        workflowRunId,
-        status: 'error',
-      }),
-      (error) => new Error(String(error)),
-    ).map(() => result)
-
-  // 3. Finalize artifacts for error case
-  const finalizeArtifacts = (result: { error?: Error }) =>
-    ResultAsync.fromPromise(
-      finalizeArtifactsNode(
-        { ...workflowState, error: result.error },
-        {
-          configurable: { repositories },
-        },
-      ),
-      (error) => new Error(String(error)),
-    ).andThen((finalizedResult) =>
-      err(
-        new Error(
-          finalizedResult.error?.message ||
-            result.error?.message ||
-            'Workflow execution failed',
-        ),
-      ),
-    )
-
-  // 4. Update status to success
+  // 2. Update status to success
   const updateSuccessStatus = (result: unknown) =>
     ResultAsync.fromPromise(
       repositories.schema.updateWorkflowRunStatus({
@@ -191,16 +194,24 @@ export const executeWorkflowWithTracking = <
       (error) => new Error(String(error)),
     ).map(() => result)
 
-  // 5. Validate and return successful result
+  // 3. Validate and return successful result
   const validateAndReturnResult = (result: unknown) =>
     isWorkflowState(result)
       ? ok(ok(result))
       : err(new Error('Invalid workflow result'))
 
-  // 6. Chain everything together
+  // 4. Chain everything together
   return executeWorkflow.andThen((result) => {
     if (hasError(result) && result.error) {
-      return updateErrorStatus(result).andThen(finalizeArtifacts)
+      return ResultAsync.fromPromise(
+        handleImmediateError(result.error, {
+          nodeId: 'workflow_execution',
+          designSessionId: workflowState.designSessionId,
+          workflowRunId,
+          repositories,
+        }),
+        (error) => new Error(String(error)),
+      ).andThen(() => err(result.error || new Error('Unknown workflow error')))
     }
     return updateSuccessStatus(result).andThen(validateAndReturnResult)
   })

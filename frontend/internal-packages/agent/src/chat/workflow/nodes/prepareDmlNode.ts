@@ -1,4 +1,5 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
+import type { Command } from '@langchain/langgraph'
 import type { Database } from '@liam-hq/db'
 import { DMLGenerationAgent } from '../../../langchain/agents/dmlGenerationAgent/agent'
 import type { Usecase } from '../../../langchain/agents/qaGenerateUsecaseAgent/agent'
@@ -49,14 +50,11 @@ function formatUseCases(useCases: Usecase[]): string {
 export async function prepareDmlNode(
   state: WorkflowState,
   config: RunnableConfig,
-): Promise<WorkflowState> {
+): Promise<WorkflowState | Command> {
   const assistantRole: Database['public']['Enums']['assistant_role_enum'] = 'db'
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
-    return {
-      ...state,
-      error: configurableResult.error,
-    }
+    throw configurableResult.error
   }
   const { repositories } = configurableResult.value
 

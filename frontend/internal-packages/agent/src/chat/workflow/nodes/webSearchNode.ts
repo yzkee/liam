@@ -1,5 +1,6 @@
 import { AIMessage, SystemMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
+import type { Command } from '@langchain/langgraph'
 import { ChatOpenAI } from '@langchain/openai'
 import type { Database } from '@liam-hq/db'
 import { ResultAsync } from 'neverthrow'
@@ -15,14 +16,11 @@ import { withTimelineItemSync } from '../utils/withTimelineItemSync'
 export async function webSearchNode(
   state: WorkflowState,
   config: RunnableConfig,
-): Promise<WorkflowState> {
+): Promise<WorkflowState | Command> {
   const assistantRole: Database['public']['Enums']['assistant_role_enum'] = 'pm'
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
-    return {
-      ...state,
-      error: configurableResult.error,
-    }
+    throw configurableResult.error
   }
   const { repositories } = configurableResult.value
 
@@ -85,7 +83,6 @@ Provide a concise summary of the most relevant findings.`
         ...state,
         messages: [searchMessage],
         webSearchResults: searchContent,
-        error: undefined, // Clear error on success
       }
     },
     async (_error) => {

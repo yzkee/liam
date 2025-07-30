@@ -1,7 +1,6 @@
 #!/usr/bin/env tsx
 
 import type { BaseMessage } from '@langchain/core/messages'
-import { HumanMessage } from '@langchain/core/messages'
 import type { Result } from 'neverthrow'
 import { err, ok } from 'neverthrow'
 import { isToolMessageError } from '../src/chat/workflow/utils/toolMessageUtils'
@@ -63,41 +62,16 @@ const executeDeepModelingProcess = async (): Promise<Result<void, Error>> => {
     .andThen(createWorkflowState)
 
   if (setupResult.isErr()) return err(setupResult.error)
-  const { repositories, workflowState: setupWorkflowState } = setupResult.value
-
-  // Convert the setup result to proper WorkflowState format
-  const workflowState = {
-    userInput: setupWorkflowState.userInput,
-    messages: [new HumanMessage(setupWorkflowState.userInput)],
-    schemaData: setupWorkflowState.schemaData,
-    buildingSchemaId: setupWorkflowState.buildingSchemaId,
-    latestVersionNumber: setupWorkflowState.latestVersionNumber,
-    designSessionId: setupWorkflowState.designSessionId,
-    userId: setupWorkflowState.userId,
-    organizationId: setupWorkflowState.organizationId,
-    retryCount: {},
-  }
+  const { workflowState, options } = setupResult.value
 
   // Execute workflow with streaming
-  const config = {
-    configurable: {
-      repositories,
-      logger,
-      buildingSchemaId: workflowState.buildingSchemaId,
-      latestVersionNumber: workflowState.latestVersionNumber,
-    },
-  }
   const graph = createGraph()
 
   logger.info('Starting Deep Modeling workflow execution...')
 
   // Use streaming with proper async iterator handling
   const streamResult = await (async () => {
-    const stream = await graph.stream(workflowState, {
-      configurable: config.configurable,
-      recursionLimit: setupWorkflowState.recursionLimit,
-      streamMode: 'values',
-    })
+    const stream = await graph.stream(workflowState, options)
 
     let finalResult = null
 

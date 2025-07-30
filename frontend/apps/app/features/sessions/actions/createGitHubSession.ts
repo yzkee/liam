@@ -12,68 +12,16 @@ import {
 } from '@liam-hq/jobs'
 import { idempotencyKeys } from '@trigger.dev/sdk'
 import { redirect } from 'next/navigation'
-import * as v from 'valibot'
 import { getOrganizationId } from '@/features/organizations/services/getOrganizationId'
 import { createClient } from '@/libs/db/server'
-
-type CreateSessionState = {
-  success: boolean
-  error?: string
-}
-
-// A pipe that transforms an empty string to null.
-const emptyStringToNull = v.pipe(
-  v.string(),
-  v.transform((input) => (input === '' ? null : input)),
-)
-
-const FormDataSchema = v.object({
-  projectId: v.optional(v.nullable(emptyStringToNull)),
-  parentDesignSessionId: v.optional(v.nullable(emptyStringToNull)),
-  gitSha: v.optional(v.nullable(v.string())),
-  initialMessage: v.pipe(
-    v.string(),
-    v.minLength(1, 'Initial message is required'),
-  ),
-  isDeepModelingEnabled: v.optional(
-    v.pipe(
-      v.string(),
-      v.transform((input) => input === 'true'),
-    ),
-    'false',
-  ),
-})
-
-type RepositoryData = {
-  name: string
-  owner: string
-  github_installation_identifier: number
-}
-
-type ProjectData = {
-  id: string
-  project_repository_mappings: {
-    github_repositories: RepositoryData
-  }[]
-}
-
-type SchemaFilePathData = {
-  path: string
-  format: 'schemarb' | 'postgres' | 'prisma' | 'tbls'
-}
-
-function parseFormData(
-  formData: FormData,
-): v.SafeParseResult<typeof FormDataSchema> {
-  const rawData = {
-    projectId: formData.get('projectId'),
-    parentDesignSessionId: formData.get('parentDesignSessionId'),
-    gitSha: formData.get('gitSha'),
-    initialMessage: formData.get('initialMessage'),
-  }
-
-  return v.safeParse(FormDataSchema, rawData)
-}
+import {
+  type CreateSessionState,
+  GitHubFormDataSchema,
+  type ProjectData,
+  parseFormData,
+  type RepositoryData,
+  type SchemaFilePathData,
+} from './sessionActionTypes'
 
 async function getCurrentUserId(
   supabase: SupabaseClientType,
@@ -197,11 +145,11 @@ async function processSchema(
   }
 }
 
-export async function createSession(
+export async function createGitHubSession(
   _prevState: CreateSessionState,
   formData: FormData,
 ): Promise<CreateSessionState> {
-  const parsedFormDataResult = parseFormData(formData)
+  const parsedFormDataResult = parseFormData(formData, GitHubFormDataSchema)
   if (!parsedFormDataResult.success) {
     return { success: false, error: 'Invalid form data' }
   }

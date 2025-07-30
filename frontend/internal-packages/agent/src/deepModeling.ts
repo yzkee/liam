@@ -1,7 +1,5 @@
 import { AIMessage, HumanMessage } from '@langchain/core/messages'
 import { RunCollectorCallbackHandler } from '@langchain/core/tracers/run_collector'
-import type { Schema } from '@liam-hq/db-structure'
-import type { Result } from 'neverthrow'
 import { err, ok } from 'neverthrow'
 import { v4 as uuidv4 } from 'uuid'
 import { WORKFLOW_ERROR_MESSAGES } from './chat/workflow/constants'
@@ -10,30 +8,17 @@ import { DEFAULT_RECURSION_LIMIT } from './chat/workflow/shared/langGraphUtils'
 import type { WorkflowConfigurable, WorkflowState } from './chat/workflow/types'
 import { withTimelineItemSync } from './chat/workflow/utils/withTimelineItemSync'
 import { createGraph } from './createGraph'
-
-export type DeepModelingParams = {
-  userInput: string
-  schemaData: Schema
-  history: [string, string][]
-  organizationId: string
-  buildingSchemaId: string
-  latestVersionNumber: number
-  designSessionId: string
-  userId: string
-  recursionLimit?: number
-}
-
-export type DeepModelingResult = Result<WorkflowState, Error>
+import type { AgentWorkflowParams, AgentWorkflowResult } from './types'
 
 /**
  * Execute Deep Modeling workflow
  */
 export const deepModeling = async (
-  params: DeepModelingParams,
+  params: AgentWorkflowParams,
   config: {
     configurable: WorkflowConfigurable
   },
-): Promise<DeepModelingResult> => {
+): Promise<AgentWorkflowResult> => {
   const {
     userInput,
     schemaData,

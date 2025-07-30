@@ -22,6 +22,15 @@ export const UserMessage: FC<UserMessageProps> = ({
   timestamp,
   userName,
 }) => {
+  const userInitial = userName
+    ? userName
+        .split(' ')
+        .map((name) => name.charAt(0))
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
+    : initial || 'U'
+
   // Format timestamp if it exists - use explicit locale and timezone for consistency
   const formattedTime = timestamp
     ? timestamp.toLocaleTimeString('en-US', {
@@ -38,7 +47,7 @@ export const UserMessage: FC<UserMessageProps> = ({
         {avatarSrc ? (
           <AvatarWithImage src={avatarSrc} alt={avatarAlt} size="sm" />
         ) : (
-          <Avatar initial={initial} size="sm" user="you" />
+          <Avatar initial={userInitial} size="sm" user="you" />
         )}
         <span className={styles.userName}>{userName || 'User Name'}</span>
         {formattedTime && (

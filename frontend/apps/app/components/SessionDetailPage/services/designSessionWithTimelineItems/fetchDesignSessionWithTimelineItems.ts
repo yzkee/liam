@@ -21,6 +21,11 @@ export const fetchDesignSessionWithTimelineItems = async (
           building_schema_version_id,
           query_result_id,
           assistant_role,
+          users (
+            id,
+            name,
+            email
+          ),
           validation_queries!query_result_id (
             id,
             query_string,

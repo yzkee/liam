@@ -35,8 +35,12 @@ export const TimelineItem: FC<Props> = (props) => {
         />
       </AgentMessage>
     ))
-    .with({ type: 'user' }, ({ content, timestamp }) => (
-      <UserMessage content={content} timestamp={timestamp} />
+    .with({ type: 'user' }, ({ content, timestamp, userName }) => (
+      <UserMessage
+        content={content}
+        timestamp={timestamp}
+        userName={userName}
+      />
     ))
     .with({ type: 'assistant_log' }, ({ content, role }) => (
       <AgentMessage

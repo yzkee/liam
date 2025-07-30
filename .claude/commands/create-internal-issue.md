@@ -17,7 +17,8 @@ Create a new issue in the route06/liam-internal repository using the GitHub CLI.
    - Detailed body with background, requirements, and technical considerations
    - Use proper markdown formatting
 
-Use the `gh issue create` command with the appropriate repository flag to create the issue. Write the issue title and body in Japanese.
+Use the `gh issue create --repo route06/liam-internal` command to create the issue.  
+Write both the issue title **and** body in Japanese.
 
 ### Arguments
 $ARGUMENTS

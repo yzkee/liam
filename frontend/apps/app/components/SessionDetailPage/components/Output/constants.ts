@@ -1,6 +1,6 @@
 export const OUTPUT_TABS = {
   ERD: 'erd',
-  SCHEMA_UPDATES: 'schema-updates',
+  SQL: 'sql',
   ARTIFACT: 'artifact',
 } as const
 
@@ -18,7 +18,7 @@ export const ARTIFACT_TAB: OutputTab = {
 
 export const ERD_SCHEMA_TABS_LIST: OutputTab[] = [
   { value: OUTPUT_TABS.ERD, label: 'ERD' },
-  { value: OUTPUT_TABS.SCHEMA_UPDATES, label: 'Schema Updates' },
+  { value: OUTPUT_TABS.SQL, label: 'SQL' },
 ]
 
 export const DEFAULT_OUTPUT_TAB = OUTPUT_TABS.ERD

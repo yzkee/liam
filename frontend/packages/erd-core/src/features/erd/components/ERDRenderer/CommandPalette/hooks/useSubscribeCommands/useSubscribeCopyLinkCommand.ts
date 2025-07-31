@@ -1,6 +1,14 @@
+import { useCopy } from '@liam-hq/ui'
 import { useEffect } from 'react'
 
 export const useSubscribeCopyLinkCommand = () => {
+  const { copy } = useCopy({
+    toast: {
+      success: 'Link copied!',
+      error: 'Failed to copy link',
+    },
+  })
+
   // Copy page link when ⌘C is pressed
   useEffect(() => {
     const down = (event: KeyboardEvent) => {
@@ -11,13 +19,11 @@ export const useSubscribeCopyLinkCommand = () => {
 
         event.preventDefault()
         const url = window.location.href
-        navigator.clipboard.writeText(url)
-
-        // TODO: show something to tell copy is done
+        copy(url)
       }
     }
 
     document.addEventListener('keydown', down)
     return () => document.removeEventListener('keydown', down)
-  }, [])
+  }, [copy])
 }

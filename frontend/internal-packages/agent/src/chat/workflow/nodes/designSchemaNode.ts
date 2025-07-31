@@ -1,3 +1,4 @@
+import { AIMessage, HumanMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import type { Database } from '@liam-hq/db'
 import { invokeDesignAgent } from '../../../langchain/agents/databaseSchemaBuildAgent/agent'
@@ -27,8 +28,28 @@ export async function designSchemaNode(
 
   const schemaText = convertSchemaToText(state.schemaData)
 
-  // Use existing messages
-  const messages = [...state.messages]
+  // Remove reasoning field from AIMessages to avoid API issues
+  // This prevents the "reasoning without required following item" error
+  const messages = state.messages.map((msg) => {
+    if (msg instanceof AIMessage) {
+      // Create a new AIMessage without the reasoning field
+      // Clone the message but exclude reasoning if it exists
+      const { content, additional_kwargs, response_metadata } = msg
+      const cleanedKwargs = { ...additional_kwargs }
+
+      // Remove reasoning from additional_kwargs if it exists
+      if ('reasoning' in cleanedKwargs) {
+        delete cleanedKwargs['reasoning']
+      }
+
+      return new AIMessage({
+        content,
+        additional_kwargs: cleanedKwargs,
+        response_metadata,
+      })
+    }
+    return msg
+  })
 
   const invokeResult = await invokeDesignAgent({ schemaText }, messages, {
     buildingSchemaId: state.buildingSchemaId,
@@ -38,14 +59,16 @@ export async function designSchemaNode(
   })
 
   if (invokeResult.isErr()) {
-    await logAssistantMessage(
-      state,
-      repositories,
-      'Unable to complete the database design. There may be conflicts in the requirements...',
-      assistantRole,
-    )
+    // Create a human message for error feedback to avoid reasoning API issues
+    // Using HumanMessage prevents the "reasoning without required following item" error
+    const errorFeedbackMessage = new HumanMessage({
+      content: `The previous attempt failed with the following error: ${invokeResult.error.message}. Please try a different approach to resolve the issue.`,
+    })
+
+    // Return state with error feedback as HumanMessage for self-recovery
     return {
       ...state,
+      messages: [errorFeedbackMessage],
       error: invokeResult.error,
     }
   }

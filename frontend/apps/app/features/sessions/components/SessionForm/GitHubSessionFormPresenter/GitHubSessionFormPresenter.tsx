@@ -24,6 +24,7 @@ type Props = {
   onProjectChange: (projectId: string) => void
   formAction: (formData: FormData) => void
   isTransitioning?: boolean
+  schemaFilePath: string | null
 }
 
 export const GitHubSessionFormPresenter: FC<Props> = ({
@@ -37,6 +38,7 @@ export const GitHubSessionFormPresenter: FC<Props> = ({
   onProjectChange,
   formAction,
   isTransitioning = false,
+  schemaFilePath,
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const formRef = useRef<HTMLFormElement>(null)
@@ -87,7 +89,7 @@ export const GitHubSessionFormPresenter: FC<Props> = ({
   const handleRemoveAttachment = (index: number) => {
     setAttachments((prev) => {
       const updated = [...prev]
-      URL.revokeObjectURL(updated[index].url)
+      URL.revokeObjectURL(updated[index]?.url ?? '')
       updated.splice(index, 1)
       return updated
     })
@@ -196,7 +198,13 @@ export const GitHubSessionFormPresenter: FC<Props> = ({
                     disabled={isPending}
                     isLoading={isBranchesLoading}
                   />
-                  <SchemaDisplay schemaName="database.sql" />
+                  <SchemaDisplay
+                    schemaName={
+                      schemaFilePath
+                        ? schemaFilePath.split('/').pop() || 'database.sql'
+                        : 'database.sql'
+                    }
+                  />
                 </>
               )}
             </div>

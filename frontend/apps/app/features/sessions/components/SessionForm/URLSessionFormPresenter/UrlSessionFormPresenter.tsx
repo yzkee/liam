@@ -214,7 +214,7 @@ export const URLSessionFormPresenter: FC<Props> = ({
         <input type="hidden" name="schemaFormat" value={selectedFormat} />
         <div className={styles.inputSection}>
           <div className={styles.urlInputWrapper}>
-            <div className={styles.inputContainer}>
+            <div className={styles.inputContainer ?? ''}>
               <input
                 id="schemaUrl"
                 name="schemaUrl"
@@ -240,7 +240,7 @@ export const URLSessionFormPresenter: FC<Props> = ({
                   onClick={handleRemoveSchema}
                   variant="transparent"
                   size="sm"
-                  className={styles.clearButton}
+                  className={styles.clearButton ?? ''}
                   aria-label="Clear input"
                 />
               )}
@@ -284,8 +284,8 @@ export const URLSessionFormPresenter: FC<Props> = ({
         </div>
         <div
           className={clsx(
-            styles.inputSection,
-            attachmentDragActive && styles.dragActive,
+            styles.inputSection ?? '',
+            attachmentDragActive && (styles.dragActive ?? ''),
           )}
           onDragEnter={handleAttachmentDrag}
           onDragLeave={handleAttachmentDrag}
@@ -296,7 +296,7 @@ export const URLSessionFormPresenter: FC<Props> = ({
             attachments={attachments}
             onRemove={handleRemoveAttachment}
           />
-          <div className={styles.textareaWrapper}>
+          <div className={styles.textareaWrapper ?? ''}>
             <textarea
               id="message"
               ref={textareaRef}
@@ -305,7 +305,7 @@ export const URLSessionFormPresenter: FC<Props> = ({
               value={textContent}
               onChange={handleTextareaChange}
               onKeyDown={handleEnterKeySubmission}
-              className={styles.textarea}
+              className={styles.textarea ?? ''}
               disabled={isPending}
               rows={4}
             />

@@ -142,9 +142,9 @@ export const UploadSessionFormPresenter: FC<Props> = ({
     <div
       className={clsx(
         styles.container,
-        isPending && styles.pending,
+        isPending && (styles.pending ?? ''),
         formError && styles.error,
-        (attachmentDragActive || schemaDragActive) && styles.dragActive,
+        (attachmentDragActive || schemaDragActive) && (styles.dragActive ?? ''),
       )}
     >
       <form
@@ -155,8 +155,8 @@ export const UploadSessionFormPresenter: FC<Props> = ({
         {selectedFile && schemaStatus === 'valid' && selectedFormat && (
           <input type="hidden" name="schemaFormat" value={selectedFormat} />
         )}
-        <div className={styles.uploadSection}>
-          <div className={styles.uploadContainer}>
+        <div className={styles.uploadSection ?? ''}>
+          <div className={styles.uploadContainer ?? ''}>
             <DropZone
               isPending={isPending}
               schemaDragActive={schemaDragActive}
@@ -208,8 +208,8 @@ export const UploadSessionFormPresenter: FC<Props> = ({
         <div className={styles.divider} />
         <div
           className={clsx(
-            styles.inputSection,
-            attachmentDragActive ? styles.dragActive : '',
+            styles.inputSection ?? '',
+            attachmentDragActive ? (styles.dragActive ?? '') : '',
           )}
           onDragEnter={handleAttachmentDrag}
           onDragLeave={handleAttachmentDrag}
@@ -220,7 +220,7 @@ export const UploadSessionFormPresenter: FC<Props> = ({
             attachments={attachments}
             onRemove={handleRemoveAttachment}
           />
-          <div className={styles.textareaWrapper}>
+          <div className={styles.textareaWrapper ?? ''}>
             <textarea
               ref={textareaRef}
               name="message"
@@ -228,7 +228,7 @@ export const UploadSessionFormPresenter: FC<Props> = ({
               value={textContent}
               onChange={handleTextareaChange}
               onKeyDown={handleEnterKeySubmission}
-              className={styles.textarea}
+              className={styles.textarea ?? ''}
               disabled={isPending}
               rows={4}
             />

@@ -23,6 +23,7 @@ const mapDmlOperationsToUsecases = (
     const usecaseDmlOperations = workflowDmlOperations
       .filter((dmlOp) => dmlOp.useCaseId === usecase.id)
       .map((dmlOp) => ({
+        useCaseId: dmlOp.useCaseId,
         operation_type: dmlOp.operation_type,
         sql: dmlOp.sql,
         dml_execution_logs: [],

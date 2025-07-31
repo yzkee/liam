@@ -49,7 +49,10 @@ export const AnimatedChatDemo = ({
     }
 
     const timer = setTimeout(() => {
-      setTimelineItems((prev) => [...prev, ITEMS[currentIndex]])
+      const nextItem = ITEMS[currentIndex]
+      if (nextItem) {
+        setTimelineItems((prev) => [...prev, nextItem])
+      }
       setCurrentIndex((prev) => prev + 1)
     }, animationInterval)
 

@@ -19,7 +19,7 @@ export async function generateOrganizationNameFromUser(): Promise<
   } else if (userData.user.user_metadata?.name) {
     username = userData.user.user_metadata.name
   } else if (userData.user.email) {
-    username = userData.user.email.split('@')[0]
+    username = userData.user.email.split('@')[0] ?? 'User'
   } else {
     username = 'User'
   }

@@ -1,5 +1,22 @@
 # @liam-hq/erd-core
 
+## 0.5.0
+
+### Minor Changes
+
+- [#2683](https://github.com/liam-hq/liam/pull/2683) - - ✨ Add support for shortcut commands / Thanks [@tnyo43](https://github.com/tnyo43)!
+  - support Copy Link by ⌘C
+  - support Zoom to Fit by ⇧1
+  - support Switch show mode:
+    - show all fields by ⇧2
+    - show table name by ⇧3
+    - show key only by ⇧4
+  - support Tidy up by ⇧T
+
+### Patch Changes
+
+- [#2792](https://github.com/liam-hq/liam/pull/2792) - 🐛 fix(ui): fix Toast component styles / Thanks [@tnyo43](https://github.com/tnyo43)!
+
 ## 0.4.3
 
 ### Patch Changes

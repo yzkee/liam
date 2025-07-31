@@ -83,7 +83,7 @@ Provide a concise summary of the most relevant findings.`
 
       return {
         ...state,
-        messages: [...state.messages, searchMessage],
+        messages: [searchMessage],
         webSearchResults: searchContent,
         error: undefined, // Clear error on success
       }
@@ -115,7 +115,7 @@ Provide a concise summary of the most relevant findings.`
 
       return {
         ...state,
-        messages: [...state.messages, errorMessage],
+        messages: [errorMessage],
         webSearchResults: undefined,
         retryCount: {
           ...state.retryCount,

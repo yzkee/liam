@@ -64,12 +64,6 @@ export async function designSchemaNode(
   })
 
   if (invokeResult.isErr()) {
-    await logAssistantMessage(
-      state,
-      repositories,
-      'Unable to complete the database design. There may be conflicts in the requirements...',
-      assistantRole,
-    )
     return await handleImmediateError(invokeResult.error, {
       nodeId: 'designSchemaNode',
       designSessionId: state.designSessionId,

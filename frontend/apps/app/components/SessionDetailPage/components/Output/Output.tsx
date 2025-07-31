@@ -42,7 +42,8 @@ export const Output: FC<Props> = ({
   onTabChange,
   ...propsForVersionDropdown
 }) => {
-  const [internalTabValue, setInternalTabValue] = useState<OutputTabValue>(DEFAULT_OUTPUT_TAB)
+  const [internalTabValue, setInternalTabValue] =
+    useState<OutputTabValue>(DEFAULT_OUTPUT_TAB)
 
   const isTabValue = (value: string): value is OutputTabValue => {
     return Object.values(OUTPUT_TABS).some((tabValue) => tabValue === value)
@@ -56,7 +57,8 @@ export const Output: FC<Props> = ({
 
   // Use external control if provided, otherwise use internal state
   const isControlled = activeTab !== undefined
-  const tabValue = isControlled && isTabValue(activeTab) ? (activeTab as OutputTabValue) : internalTabValue
+  const tabValue =
+    isControlled && isTabValue(activeTab) ? activeTab : internalTabValue
   const handleTabChange = isControlled ? onTabChange : handleChangeValue
 
   return (

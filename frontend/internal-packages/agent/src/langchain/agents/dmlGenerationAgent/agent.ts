@@ -61,6 +61,9 @@ export class DMLGenerationAgent
     )
 
     if (result.isErr()) {
+      // TODO: Implement retry logic for LLM invocation failures
+      // Consider adding exponential backoff and maximum retry attempts
+      // Estimated implementation: ~10 lines of code for retry loop with backoff
       console.error('Error generating structured DML operations:', result.error)
       return {
         dmlOperations: [],

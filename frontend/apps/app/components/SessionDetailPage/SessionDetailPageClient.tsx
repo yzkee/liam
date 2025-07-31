@@ -100,6 +100,7 @@ export const SessionDetailPageClient: FC<Props> = ({
             schemaData={displayedSchema}
             designSessionId={designSessionId}
             timelineItems={timelineItems}
+            isWorkflowRunning={status === 'pending'}
             onMessageSend={addOrUpdateTimelineItem}
             onVersionView={handleViewVersion}
           />

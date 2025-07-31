@@ -85,6 +85,10 @@
   color: var(--overlay-30);
 }
 
+.input:disabled {
+  cursor: not-allowed;
+}
+
 .inputWrapper {
   display: flex;
   flex: 1;

@@ -1,19 +1,12 @@
 'use client'
 
-import {
-  Check,
-  Copy,
-  IconButton,
-  syntaxCodeTagProps,
-  syntaxCustomStyle,
-  syntaxTheme,
-} from '@liam-hq/ui'
+import { syntaxCodeTagProps, syntaxCustomStyle, syntaxTheme } from '@liam-hq/ui'
 import type { FC, HTMLAttributes, ReactNode } from 'react'
-import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import rehypeRaw from 'rehype-raw'
 import remarkGfm from 'remark-gfm'
+import { CopyButton } from '../shared/CopyButton'
 import styles from './Artifact.module.css'
 import { type DMLBlock, ExecutableDMLBlock } from './ExecutableDMLBlock'
 import { SeverityBadge } from './SeverityBadge'
@@ -28,27 +21,10 @@ type Props = {
 }
 
 export const Artifact: FC<Props> = ({ doc }) => {
-  const [isCopied, setIsCopied] = useState(false)
-
-  const handleCopyMarkdown = async () => {
-    try {
-      await navigator.clipboard.writeText(doc)
-      setIsCopied(true)
-      setTimeout(() => setIsCopied(false), 2000)
-    } catch (error) {
-      console.error('Failed to copy markdown:', error)
-    }
-  }
-
   return (
     <div className={styles.container}>
       <div className={styles.head}>
-        <IconButton
-          size="md"
-          icon={isCopied ? <Check /> : <Copy />}
-          tooltipContent={isCopied ? 'Copied!' : 'Copy Markdown'}
-          onClick={handleCopyMarkdown}
-        />
+        <CopyButton textToCopy={doc} tooltipLabel="Copy Markdown" />
       </div>
       <div className={styles.body}>
         <ReactMarkdown

@@ -1,4 +1,4 @@
-import { LayoutGrid, Settings } from '@liam-hq/ui/src/icons'
+import { LayoutGrid, Settings } from '@liam-hq/ui'
 import type { FC } from 'react'
 import { LiamLogoMark, LiamMigrationLogo } from '@/logos'
 import type { Organization } from '../services/getOrganization'

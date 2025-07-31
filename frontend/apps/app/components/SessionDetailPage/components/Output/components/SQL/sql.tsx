@@ -3,6 +3,7 @@
 import type { Schema } from '@liam-hq/db-structure'
 import type { FC } from 'react'
 import type { ReviewComment } from '@/components/SessionDetailPage/types'
+import { CopyButton } from '../shared/CopyButton'
 import { useSql } from './hooks/useSql'
 import { MigrationsViewer } from './MigrationsViewer'
 import styles from './SQL.module.css'
@@ -25,6 +26,12 @@ export const SQL: FC<Props> = ({
 
   return (
     <section className={styles.section}>
+      <div className={styles.head}>
+        <CopyButton
+          textToCopy={cumulativeDdl}
+          tooltipLabel="Copy Migration Diff"
+        />
+      </div>
       <div className={styles.body}>
         <MigrationsViewer
           showDiff

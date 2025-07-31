@@ -1,29 +1,21 @@
-import { Copy, SidebarMenuButton, SidebarMenuItem, useToast } from '@liam-hq/ui'
+import { Copy, SidebarMenuButton, SidebarMenuItem } from '@liam-hq/ui'
+import { useCopy } from '@liam-hq/ui/hooks'
 import { type FC, useCallback } from 'react'
 import { clickLogEvent } from '@/features/gtm/utils'
 import { useVersionOrThrow } from '@/providers'
 import styles from './CopyLinkButton.module.css'
 
 export const CopyLinkButton: FC = () => {
-  const toast = useToast()
   const { version } = useVersionOrThrow()
+  const { copy } = useCopy({
+    toast: {
+      success: 'Link copied!',
+      error: 'URL copy failed',
+    },
+  })
 
   const handleCopyUrl = useCallback(() => {
-    navigator.clipboard
-      .writeText(window.location.href)
-      .then(() => {
-        toast({
-          title: 'Link copied!',
-          status: 'success',
-        })
-      })
-      .catch((err) => {
-        console.error(err)
-        toast({
-          title: 'URL copy failed',
-          status: 'error',
-        })
-      })
+    copy(window.location.href)
 
     clickLogEvent({
       element: 'copyLinkButton',
@@ -32,7 +24,7 @@ export const CopyLinkButton: FC = () => {
       gitHash: version.gitHash,
       appEnv: version.envName,
     })
-  }, [toast, version])
+  }, [copy, version])
 
   return (
     <SidebarMenuItem>

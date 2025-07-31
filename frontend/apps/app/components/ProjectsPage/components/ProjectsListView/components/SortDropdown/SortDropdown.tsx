@@ -1,14 +1,14 @@
 'use client'
 
-import { ChevronDown } from '@liam-hq/ui'
 import {
+  ChevronDown,
   DropdownMenuContent,
   DropdownMenuPortal,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuRoot,
   DropdownMenuTrigger,
-} from '@liam-hq/ui/src/components/DropdownMenu/DropdownMenu'
+} from '@liam-hq/ui'
 import { type FC, useState } from 'react'
 import styles from './SortDropdown.module.css'
 

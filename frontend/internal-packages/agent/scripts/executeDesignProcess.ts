@@ -1,16 +1,12 @@
 #!/usr/bin/env tsx
 
 import { HumanMessage } from '@langchain/core/messages'
-import { END, START, StateGraph } from '@langchain/langgraph'
 import type { SupabaseClientType } from '@liam-hq/db'
 import type { Schema } from '@liam-hq/db-structure'
 import type { Result } from 'neverthrow'
 import { err, ok, okAsync } from 'neverthrow'
-import { designSchemaNode } from '../src/chat/workflow/nodes/designSchemaNode'
-import { createAnnotations } from '../src/chat/workflow/shared/langGraphUtils'
 import type { WorkflowState } from '../src/chat/workflow/types'
-import { invokeSchemaDesignToolNode } from '../src/db-agent/nodes/invokeSchemaDesignToolNode'
-import { routeAfterDesignSchema } from '../src/db-agent/routing/routeAfterDesignSchema'
+import { createDbAgentGraph } from '../src/db-agent/createDbAgentGraph'
 import type { createSupabaseRepositories } from '../src/repositories/factory'
 import {
   createBuildingSchema,
@@ -29,30 +25,10 @@ const currentLogLevel = getLogLevel()
 const logger = createLogger(currentLogLevel)
 
 /**
- * Create simplified LangGraph with only designSchema and invokeSchemaDesignTool nodes
+ * Create DB Agent graph for database schema design
  */
 const createSimplifiedGraph = () => {
-  const ChatStateAnnotation = createAnnotations()
-  const graph = new StateGraph(ChatStateAnnotation)
-
-  // Add only the nodes we need
-  graph
-    .addNode('designSchema', designSchemaNode, {
-      retryPolicy: { maxAttempts: 3 },
-    })
-    .addNode('invokeSchemaDesignTool', invokeSchemaDesignToolNode, {
-      retryPolicy: { maxAttempts: 3 },
-    })
-
-    // Simple workflow: START -> designSchema -> conditional -> invokeSchemaDesignTool -> END
-    .addEdge(START, 'designSchema')
-    .addEdge('invokeSchemaDesignTool', 'designSchema')
-    .addConditionalEdges('designSchema', routeAfterDesignSchema, {
-      invokeSchemaDesignTool: 'invokeSchemaDesignTool',
-      executeDDL: END, // In simplified version, skip DDL and go to complete
-    })
-
-  return graph.compile()
+  return createDbAgentGraph()
 }
 
 /**
@@ -111,7 +87,14 @@ const executeDesignProcess = async (): Promise<Result<void, Error>> => {
   const { repositories, workflowState } = setupResult.value
 
   // Execute workflow
-  const config = { configurable: { repositories, logger } }
+  const config = {
+    configurable: {
+      repositories,
+      logger,
+      buildingSchemaId: workflowState.buildingSchemaId,
+      latestVersionNumber: workflowState.latestVersionNumber,
+    },
+  }
   const graph = createSimplifiedGraph()
 
   logger.info('Starting AI workflow execution...')
@@ -120,7 +103,7 @@ const executeDesignProcess = async (): Promise<Result<void, Error>> => {
   const streamResult = await (async () => {
     const stream = await graph.stream(workflowState, {
       configurable: config.configurable,
-      recursionLimit: 10,
+      recursionLimit: 100,
       streamMode: 'values',
     })
 

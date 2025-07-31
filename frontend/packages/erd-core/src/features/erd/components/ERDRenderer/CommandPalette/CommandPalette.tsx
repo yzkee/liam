@@ -12,8 +12,11 @@ import { type FC, useEffect } from 'react'
 import styles from './CommandPalette.module.css'
 import { CommandPaletteContent } from './CommandPaletteContent'
 import { useCommandPalette } from './CommandPaletteProvider'
+import { useSubscribeCommands } from './hooks'
 
 export const CommandPalette: FC = () => {
+  useSubscribeCommands()
+
   const commandPaletteResult = useCommandPalette()
   if (commandPaletteResult.isErr()) {
     throw commandPaletteResult.error

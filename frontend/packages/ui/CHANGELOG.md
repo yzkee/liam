@@ -1,5 +1,11 @@
 # @liam-hq/ui
 
+## 0.0.17
+
+### Patch Changes
+
+- [#2792](https://github.com/liam-hq/liam/pull/2792) - 🐛 fix(ui): fix Toast component styles / Thanks [@tnyo43](https://github.com/tnyo43)!
+
 ## 0.0.16
 
 ### Patch Changes

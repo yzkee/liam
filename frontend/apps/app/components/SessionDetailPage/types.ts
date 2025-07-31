@@ -30,6 +30,11 @@ export type TimelineItem = Pick<
   | 'assistant_role'
   | 'query_result_id'
 > & {
+  users?: {
+    id: string
+    name: string
+    email: string
+  } | null
   validation_queries?: {
     id: string
     query_string: string
@@ -70,6 +75,7 @@ type BaseTimelineItemEntry = {
 
 export type UserTimelineItemEntry = BaseTimelineItemEntry & {
   type: 'user'
+  userName?: string
 }
 
 export type AssistantTimelineItemEntry = BaseTimelineItemEntry & {
@@ -80,6 +86,7 @@ export type AssistantTimelineItemEntry = BaseTimelineItemEntry & {
 export type SchemaVersionTimelineItemEntry = BaseTimelineItemEntry & {
   type: 'schema_version'
   buildingSchemaVersionId: string
+  onView?: (versionId: string) => void
 }
 
 export type ErrorTimelineItemEntry = BaseTimelineItemEntry & {

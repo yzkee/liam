@@ -8,7 +8,7 @@
     "module": "esnext",
     "noPropertyAccessFromIndexSignature": false,
     "exactOptionalPropertyTypes": false,
-    "noUncheckedIndexedAccess": false,
+    "noUncheckedIndexedAccess": true,
     "plugins": [
       {
         "name": "next"

@@ -2,6 +2,8 @@ import { type BaseMessage, SystemMessage } from '@langchain/core/messages'
 import type { Runnable } from '@langchain/core/runnables'
 import { ChatOpenAI } from '@langchain/openai'
 import * as v from 'valibot'
+import { reasoningSchema } from '../../utils/schema'
+import type { Reasoning } from '../../utils/types'
 import { PM_ANALYSIS_SYSTEM_MESSAGE } from './prompts'
 
 // Direct JsonSchema definition instead of using toJsonSchema
@@ -46,17 +48,6 @@ const requirementsAnalysisSchema = v.strictObject({
   nonFunctionalRequirements: v.record(v.string(), v.array(v.string())),
 })
 type AnalysisResponse = v.InferOutput<typeof requirementsAnalysisSchema>
-
-const reasoningSchema = v.object({
-  type: v.literal('reasoning'),
-  summary: v.array(
-    v.object({
-      type: v.literal('summary_text'),
-      text: v.string(),
-    }),
-  ),
-})
-type Reasoning = v.InferOutput<typeof reasoningSchema>
 
 type RunInput = (BaseMessage | SystemMessage)[]
 

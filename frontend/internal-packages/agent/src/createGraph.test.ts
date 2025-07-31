@@ -9,28 +9,20 @@ graph TD;
 	__start__([<p>__start__</p>]):::first
 	webSearch(webSearch)
 	analyzeRequirements(analyzeRequirements)
-	designSchema(designSchema)
-	invokeSchemaDesignTool(invokeSchemaDesignTool)
-	executeDDL(executeDDL)
+	dbAgent(dbAgent)
 	generateUsecase(generateUsecase)
 	prepareDML(prepareDML)
 	validateSchema(validateSchema)
 	finalizeArtifacts(finalizeArtifacts)
 	__end__([<p>__end__</p>]):::last
 	__start__ --> webSearch;
-	analyzeRequirements --> designSchema;
-	executeDDL --> generateUsecase;
+	analyzeRequirements --> dbAgent;
+	dbAgent --> generateUsecase;
 	finalizeArtifacts --> __end__;
 	generateUsecase --> prepareDML;
-	invokeSchemaDesignTool --> designSchema;
 	prepareDML --> validateSchema;
 	webSearch --> analyzeRequirements;
-	designSchema -.-> invokeSchemaDesignTool;
-	designSchema -.-> executeDDL;
-	executeDDL -.-> designSchema;
-	executeDDL -.-> finalizeArtifacts;
-	executeDDL -.-> generateUsecase;
-	validateSchema -.-> designSchema;
+	validateSchema -.-> dbAgent;
 	validateSchema -.-> finalizeArtifacts;
 	classDef default fill:#f2f0ff,line-height:1.2;
 	classDef first fill-opacity:0;

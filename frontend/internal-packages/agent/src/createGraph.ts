@@ -1,8 +1,6 @@
 import { END, START, StateGraph } from '@langchain/langgraph'
 import {
   analyzeRequirementsNode,
-  designSchemaNode,
-  executeDdlNode,
   finalizeArtifactsNode,
   generateUsecaseNode,
   prepareDmlNode,
@@ -10,8 +8,7 @@ import {
   webSearchNode,
 } from './chat/workflow/nodes'
 import { createAnnotations } from './chat/workflow/shared/langGraphUtils'
-import { invokeSchemaDesignToolNode } from './db-agent/nodes/invokeSchemaDesignToolNode'
-import { routeAfterDesignSchema } from './db-agent/routing/routeAfterDesignSchema'
+import { createDbAgentGraph } from './db-agent/createDbAgentGraph'
 
 /**
  * Retry policy configuration for all nodes
@@ -27,6 +24,9 @@ export const createGraph = () => {
   const ChatStateAnnotation = createAnnotations()
   const graph = new StateGraph(ChatStateAnnotation)
 
+  // Create DB Agent subgraph
+  const dbAgentSubgraph = createDbAgentGraph()
+
   graph
     .addNode('webSearch', webSearchNode, {
       retryPolicy: RETRY_POLICY,
@@ -34,15 +34,7 @@ export const createGraph = () => {
     .addNode('analyzeRequirements', analyzeRequirementsNode, {
       retryPolicy: RETRY_POLICY,
     })
-    .addNode('designSchema', designSchemaNode, {
-      retryPolicy: RETRY_POLICY,
-    })
-    .addNode('invokeSchemaDesignTool', invokeSchemaDesignToolNode, {
-      retryPolicy: RETRY_POLICY,
-    })
-    .addNode('executeDDL', executeDdlNode, {
-      retryPolicy: RETRY_POLICY,
-    })
+    .addNode('dbAgent', dbAgentSubgraph)
     .addNode('generateUsecase', generateUsecaseNode, {
       retryPolicy: RETRY_POLICY,
     })
@@ -58,46 +50,22 @@ export const createGraph = () => {
 
     .addEdge(START, 'webSearch')
     .addEdge('webSearch', 'analyzeRequirements')
-    .addEdge('analyzeRequirements', 'designSchema')
-    .addEdge('invokeSchemaDesignTool', 'designSchema')
-    .addConditionalEdges('designSchema', routeAfterDesignSchema, {
-      invokeSchemaDesignTool: 'invokeSchemaDesignTool',
-      executeDDL: 'executeDDL',
-    })
-    .addEdge('executeDDL', 'generateUsecase')
+    .addEdge('analyzeRequirements', 'dbAgent')
+    .addEdge('dbAgent', 'generateUsecase')
     .addEdge('generateUsecase', 'prepareDML')
     .addEdge('prepareDML', 'validateSchema')
     .addEdge('finalizeArtifacts', END)
-
-    // Conditional edge for executeDDL - retry with designSchema if DDL execution fails
-    .addConditionalEdges(
-      'executeDDL',
-      (state) => {
-        if (state.shouldRetryWithDesignSchema) {
-          return 'designSchema'
-        }
-        if (state.ddlExecutionFailed) {
-          return 'finalizeArtifacts'
-        }
-        return 'generateUsecase'
-      },
-      {
-        designSchema: 'designSchema',
-        finalizeArtifacts: 'finalizeArtifacts',
-        generateUsecase: 'generateUsecase',
-      },
-    )
 
     // Conditional edges for validation results
     .addConditionalEdges(
       'validateSchema',
       (state) => {
         // success → finalizeArtifacts
-        // dml error or test fail → designSchema
-        return state.error ? 'designSchema' : 'finalizeArtifacts'
+        // dml error or test fail → dbAgent
+        return state.error ? 'dbAgent' : 'finalizeArtifacts'
       },
       {
-        designSchema: 'designSchema',
+        dbAgent: 'dbAgent',
         finalizeArtifacts: 'finalizeArtifacts',
       },
     )

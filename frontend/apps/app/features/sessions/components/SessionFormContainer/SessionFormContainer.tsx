@@ -1,3 +1,5 @@
+'use client'
+
 import { type FC, useEffect, useRef, useState } from 'react'
 import type { Projects } from '@/components/CommonLayout/AppBar/ProjectsDropdownMenu/services/getProjects'
 import { createAccessibleOpacityTransition } from '@/utils/accessibleTransitions'

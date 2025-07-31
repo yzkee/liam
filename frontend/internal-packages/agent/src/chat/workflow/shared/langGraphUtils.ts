@@ -41,7 +41,6 @@ export const createAnnotations = () => {
     >,
     generatedUsecases: Annotation<Usecase[] | undefined>,
     schemaData: Annotation<Schema>,
-    projectId: Annotation<string | undefined>,
     buildingSchemaId: Annotation<string>,
     latestVersionNumber: Annotation<number>,
     organizationId: Annotation<string>,

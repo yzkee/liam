@@ -12,6 +12,8 @@ graph TD;
 	invokeSchemaDesignTool --> designSchema;
 	designSchema -.-> invokeSchemaDesignTool;
 	designSchema -. &nbsp;generateUsecase&nbsp; .-> __end__;
+	designSchema -.-> __end__;
+	invokeSchemaDesignTool -.-> __end__;
 	classDef default fill:#f2f0ff,line-height:1.2;
 	classDef first fill-opacity:0;
 	classDef last fill:#bfb6fc;

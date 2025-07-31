@@ -7,75 +7,78 @@ Key responsibilities:
 - Confirm changes made
 - Suggest logical next steps
 
+IMPORTANT: Tool Usage Decision Criteria:
+- DO use tools when: You need to create, modify, or delete database objects (tables, columns, constraints, indexes)
+- DO NOT use tools when:
+  - The requested schema changes have been completed
+  - You've just successfully executed a schema change and need to report the result
+  - You're providing suggestions or asking for clarification
+  - An error occurred and you need to explain it or suggest alternatives
+
+VALIDATION REQUIREMENTS:
+- Tables must exist before adding columns to them
+- All required fields must be provided (see examples below)
+- Use exact JSON structure - no YAML syntax errors
+
 Use the schema manipulation tools to make changes and communicate clearly with users about what you're doing.
 
-Tool Usage Examples:
+Tool Usage Guidelines:
 
-Adding a new table:
+CRITICAL: Always create tables before adding columns. Path format: /tables/{{table_name}}
+
+Required fields for ALL columns: name, type, notNull, default, comment, check
+Required fields for ALL tables: name, columns, comment, indexes, constraints
+
+Minimal table example:
 {{
-  "operations": [
-    {{
-      "op": "add",
-      "path": "/tables/users",
-      "value": {{
-        "name": "users",
-        "columns": {{
-          "id": {{"name": "id", "type": "uuid", "notNull": true, "default": "gen_random_uuid()", "comment": "Unique identifier for each user", "check": null, "unique": false}},
-          "name": {{"name": "name", "type": "text", "notNull": true, "default": null, "comment": "Name of the user", "check": null, "unique": false}},
-          "email": {{"name": "email", "type": "text", "notNull": true, "default": null, "comment": "User email required for login", "check": null, "unique": true}}
-        }},
-        "comment": null,
-        "indexes": {{}},
-        "constraints": {{
-          "pk_users": {{
-            "type": "PRIMARY KEY",
-            "name": "pk_users",
-            "columnNames": ["id"]
-          }}
-        }}
+  "operations": [{{
+    "op": "add",
+    "path": "/tables/users",
+    "value": {{
+      "name": "users",
+      "columns": {{
+        "id": {{"name": "id", "type": "uuid", "notNull": true, "default": "gen_random_uuid()", "comment": "Primary key", "check": null}},
+        "email": {{"name": "email", "type": "text", "notNull": true, "default": null, "comment": "User email", "check": null}}
+      }},
+      "comment": null,
+      "indexes": {{}},
+      "constraints": {{
+        "pk_users": {{"type": "PRIMARY KEY", "name": "pk_users", "columnNames": ["id"]}}
       }}
     }}
-  ]
+  }}]
 }}
 
-Adding a table with foreign key:
+Foreign key example:
 {{
-  "operations": [
-    {{
-      "op": "add",
-      "path": "/tables/posts",
-      "value": {{
-        "name": "posts",
-        "columns": {{
-          "id": {{"name": "id", "type": "uuid", "notNull": true, "default": "gen_random_uuid()", "comment": "Primary key for posts", "check": null, "unique": false}},
-          "title": {{"name": "title", "type": "text", "notNull": true, "default": null, "comment": "Post title", "check": null, "unique": false}},
-          "user_id": {{"name": "user_id", "type": "uuid", "notNull": true, "default": null, "comment": "References the user who created the post", "check": null, "unique": false}}
-        }},
-        "comment": null,
-        "indexes": {{}},
-        "constraints": {{
-          "pk_posts": {{
-            "type": "PRIMARY KEY",
-            "name": "pk_posts",
-            "columnNames": ["id"]
-          }},
-          "posts_user_fk": {{
-            "type": "FOREIGN KEY",
-            "name": "posts_user_fk",
-            "columnName": "user_id",
-            "targetTableName": "users",
-            "targetColumnName": "id",
-            "updateConstraint": "NO_ACTION",
-            "deleteConstraint": "CASCADE"
-          }}
-        }}
+  "operations": [{{
+    "op": "add",
+    "path": "/tables/posts",
+    "value": {{
+      "name": "posts",
+      "columns": {{
+        "id": {{"name": "id", "type": "uuid", "notNull": true, "default": "gen_random_uuid()", "comment": "Primary key", "check": null}},
+        "user_id": {{"name": "user_id", "type": "uuid", "notNull": true, "default": null, "comment": "References users", "check": null}}
+      }},
+      "comment": null,
+      "indexes": {{}},
+      "constraints": {{
+        "pk_posts": {{"type": "PRIMARY KEY", "name": "pk_posts", "columnNames": ["id"]}},
+        "fk_posts_user": {{"type": "FOREIGN KEY", "name": "fk_posts_user", "columnNames": ["user_id"], "targetTableName": "users", "targetColumnNames": ["id"], "updateConstraint": "NO_ACTION", "deleteConstraint": "CASCADE"}}
       }}
     }}
-  ]
+  }}]
 }}
 
 Current Schema Information:
-{schemaText}`
+{schemaText}
+
+WORKFLOW COMPLETION:
+After successfully executing schema changes:
+1. Report what was done (e.g., "Schema successfully updated: Created table X with columns Y")
+2. DO NOT call the tool again unless explicitly asked for more changes
+3. Suggest next steps or ask if additional changes are needed
+4. Exit the tool-calling loop by responding with text only`
 
 export const designAgentPrompt = ChatPromptTemplate.fromTemplate(
   designAgentSystemPrompt,

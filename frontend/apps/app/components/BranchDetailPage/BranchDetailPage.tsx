@@ -46,7 +46,7 @@ async function getBranchDetails(projectId: string) {
 
   return {
     ...project,
-    repository: project.project_repository_mappings[0].github_repositories,
+    repository: project.project_repository_mappings[0]?.github_repositories,
     schemaPath: transformedSchemaPath,
   }
 }

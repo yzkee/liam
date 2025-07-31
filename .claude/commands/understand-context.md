@@ -11,4 +11,8 @@ Then analyze the current work status including:
 - Untracked files
 - Staged changes
 
+If git status shows no changes, fallback to:
+- `gh pr diff` if current branch has an open PR
+- `git diff origin/main` if changes are pushed but no PR exists
+
 Provide a summary of the current work in progress.

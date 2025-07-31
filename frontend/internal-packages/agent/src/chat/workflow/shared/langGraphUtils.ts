@@ -1,4 +1,5 @@
 import { Annotation, MessagesAnnotation } from '@langchain/langgraph'
+import type { DmlOperation } from '@liam-hq/artifact'
 import type { Schema } from '@liam-hq/db-structure'
 import type { Usecase } from '../../../langchain/agents/qaGenerateUsecaseAgent/agent'
 import type { Repositories } from '../../../repositories'
@@ -15,12 +16,13 @@ import type { Repositories } from '../../../repositories'
  * - With error loops: May have additional transitions when errors occur
  *   (e.g., validateSchema → designSchema)
  *
- * Setting this to 20 ensures:
+ * Setting this to 100 ensures:
  * - Complete workflow execution under normal conditions
- * - Sufficient headroom for error handling loops
- * - Protection against infinite loops
+ * - Ample headroom for complex error handling loops and retries
+ * - Protection against infinite loops while allowing for complex workflows
+ * - Sufficient capacity for finding optimal workflow patterns
  */
-export const DEFAULT_RECURSION_LIMIT = 20
+export const DEFAULT_RECURSION_LIMIT = 100
 
 /**
  * Create LangGraph-compatible annotations (shared)
@@ -39,10 +41,8 @@ export const createAnnotations = () => {
     >,
     generatedUsecases: Annotation<Usecase[] | undefined>,
     schemaData: Annotation<Schema>,
-    projectId: Annotation<string | undefined>,
     buildingSchemaId: Annotation<string>,
     latestVersionNumber: Annotation<number>,
-    buildingSchemaVersionId: Annotation<string | undefined>,
     organizationId: Annotation<string>,
     userId: Annotation<string>,
     designSessionId: Annotation<string>,
@@ -51,15 +51,7 @@ export const createAnnotations = () => {
 
     ddlStatements: Annotation<string | undefined>,
     dmlStatements: Annotation<string | undefined>,
-    dmlOperations: Annotation<
-      | Array<{
-          useCaseId: string
-          operation_type: 'INSERT' | 'UPDATE' | 'DELETE' | 'SELECT'
-          sql: string
-          description?: string | undefined
-        }>
-      | undefined
-    >,
+    dmlOperations: Annotation<DmlOperation[] | undefined>,
 
     // DDL execution retry mechanism
     shouldRetryWithDesignSchema: Annotation<boolean | undefined>,

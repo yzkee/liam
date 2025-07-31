@@ -94,7 +94,7 @@ export const SessionModeSelector: FC<Props> = ({
         return
     }
 
-    onModeChange(modes[newIndex].mode)
+    onModeChange(modes[newIndex]?.mode ?? 'github')
   }
 
   return (

@@ -19,9 +19,12 @@ export const TimelineItem: FC<Props> = (props) => {
   const { showHeader = true, ...timelineItemProps } = props
 
   return match(timelineItemProps)
-    .with({ type: 'schema_version' }, ({ buildingSchemaVersionId }) => (
+    .with({ type: 'schema_version' }, ({ buildingSchemaVersionId, onView }) => (
       <AgentMessage state="default" assistantRole="db" showHeader={showHeader}>
-        <VersionMessage buildingSchemaVersionId={buildingSchemaVersionId} />
+        <VersionMessage
+          buildingSchemaVersionId={buildingSchemaVersionId}
+          onView={onView}
+        />
       </AgentMessage>
     ))
     .with({ type: 'query_result' }, ({ queryResultId, results }) => (
@@ -32,8 +35,12 @@ export const TimelineItem: FC<Props> = (props) => {
         />
       </AgentMessage>
     ))
-    .with({ type: 'user' }, ({ content, timestamp }) => (
-      <UserMessage content={content} timestamp={timestamp} />
+    .with({ type: 'user' }, ({ content, timestamp, userName }) => (
+      <UserMessage
+        content={content}
+        timestamp={timestamp}
+        userName={userName}
+      />
     ))
     .with({ type: 'assistant_log' }, ({ content, role }) => (
       <AgentMessage

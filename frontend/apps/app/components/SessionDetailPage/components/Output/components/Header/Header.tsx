@@ -1,20 +1,37 @@
 import type { Schema } from '@liam-hq/db-structure'
+import { TabsList, TabsTrigger } from '@liam-hq/ui'
+import clsx from 'clsx'
 import type { ComponentProps, FC } from 'react'
-import { TabsList, TabsTrigger } from '@/components'
-import { ARTIFACT_TAB, ERD_SCHEMA_TABS_LIST } from '../../constants'
+import {
+  ARTIFACT_TAB,
+  ERD_SCHEMA_TABS_LIST,
+  type OutputTabValue,
+} from '../../constants'
 import { ExportDropdown } from './ExportDropdown'
 import styles from './Header.module.css'
 import { VersionDropdown } from './VersionDropdown'
 
 type Props = ComponentProps<typeof VersionDropdown> & {
   schema: Schema
+  tabValue: OutputTabValue
 }
 
-export const Header: FC<Props> = ({ schema, ...propsForVersionDropdown }) => {
+export const Header: FC<Props> = ({
+  schema,
+  tabValue,
+  ...propsForVersionDropdown
+}) => {
   return (
     <div className={styles.wrapper}>
       <TabsList className={styles.tabsList}>
-        <div className={styles.erdSchemaTabsGroup}>
+        <div
+          className={clsx(styles.tab, styles.erdSchemaTabsGroup)}
+          data-state={
+            ERD_SCHEMA_TABS_LIST.some((tab) => tab.value === tabValue)
+              ? 'active'
+              : 'inactive'
+          }
+        >
           <div className={styles.erdSchemaTabs}>
             {ERD_SCHEMA_TABS_LIST.map((tab) => (
               <TabsTrigger
@@ -31,7 +48,7 @@ export const Header: FC<Props> = ({ schema, ...propsForVersionDropdown }) => {
         </div>
         <TabsTrigger
           value={ARTIFACT_TAB.value}
-          className={styles.artifactTrigger}
+          className={clsx(styles.tab, styles.artifactTrigger)}
         >
           {ARTIFACT_TAB.label}
         </TabsTrigger>

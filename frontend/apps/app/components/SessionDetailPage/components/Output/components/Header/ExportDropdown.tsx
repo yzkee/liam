@@ -15,7 +15,7 @@ import {
 } from '@liam-hq/ui'
 import { fromPromise } from 'neverthrow'
 import type { FC } from 'react'
-import { schemaToDdl } from '../SchemaUpdates/utils/schemaToDdl'
+import { schemaToDdl } from '../SQL/utils/schemaToDdl'
 import styles from './ExportDropdown.module.css'
 
 type Props = {

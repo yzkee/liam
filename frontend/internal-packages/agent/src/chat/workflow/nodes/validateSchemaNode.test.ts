@@ -76,6 +76,7 @@ describe('validateSchemaNode', () => {
           useCaseId: 'usecase-1',
           operation_type: 'INSERT',
           sql: 'INSERT INTO users VALUES (1, "test");',
+          dml_execution_logs: [],
         },
       ],
       generatedUsecases: [
@@ -88,6 +89,7 @@ describe('validateSchemaNode', () => {
           description: 'Insert a new user record',
           dmlOperations: [
             {
+              useCaseId: 'usecase-1',
               operation_type: 'INSERT',
               sql: 'INSERT INTO users VALUES (1, "test");',
               dml_execution_logs: [],
@@ -104,7 +106,7 @@ describe('validateSchemaNode', () => {
 
     expect(executeQuery).toHaveBeenCalledWith(
       'session-id',
-      'INSERT INTO users VALUES (1, "test");',
+      expect.stringContaining('INSERT INTO users VALUES (1, "test");'),
     )
     expect(result.dmlExecutionSuccessful).toBe(true)
   })
@@ -180,6 +182,7 @@ describe('validateSchemaNode', () => {
           useCaseId: 'usecase-1',
           operation_type: 'INSERT',
           sql: 'INSERT INTO users VALUES (1);',
+          dml_execution_logs: [],
         },
       ],
       generatedUsecases: [
@@ -192,6 +195,7 @@ describe('validateSchemaNode', () => {
           description: 'Insert a new user record',
           dmlOperations: [
             {
+              useCaseId: 'usecase-1',
               operation_type: 'INSERT',
               sql: 'INSERT INTO users VALUES (1);',
               dml_execution_logs: [],
@@ -207,15 +211,22 @@ describe('validateSchemaNode', () => {
     })
 
     expect(executeQuery).toHaveBeenCalledTimes(2)
+    // First call should be DDL only
     expect(executeQuery).toHaveBeenNthCalledWith(
       1,
       'session-id',
       'CREATE TABLE users (id INT);',
     )
+    // Second call should include both DDL and DML combined
     expect(executeQuery).toHaveBeenNthCalledWith(
       2,
       'session-id',
-      'INSERT INTO users VALUES (1);',
+      expect.stringContaining('CREATE TABLE users (id INT);'),
+    )
+    expect(executeQuery).toHaveBeenNthCalledWith(
+      2,
+      'session-id',
+      expect.stringContaining('INSERT INTO users VALUES (1);'),
     )
     expect(result.dmlExecutionSuccessful).toBe(true)
   })
@@ -258,6 +269,7 @@ describe('validateSchemaNode', () => {
           useCaseId: 'usecase-1',
           operation_type: 'INSERT',
           sql: 'INSERT INTO invalid_table VALUES (1);',
+          dml_execution_logs: [],
         },
       ],
       generatedUsecases: [
@@ -270,6 +282,7 @@ describe('validateSchemaNode', () => {
           description: 'Attempt to insert data into invalid table',
           dmlOperations: [
             {
+              useCaseId: 'usecase-1',
               operation_type: 'INSERT',
               sql: 'INSERT INTO invalid_table VALUES (1);',
               dml_execution_logs: [],
@@ -285,7 +298,8 @@ describe('validateSchemaNode', () => {
     })
 
     expect(result.dmlExecutionSuccessful).toBeUndefined()
-    expect(result.dmlExecutionErrors).toContain('Table not found')
+    expect(result.dmlExecutionErrors).toContain('SQL: UseCase:')
+    expect(result.dmlExecutionErrors).toContain('Error:')
   })
 
   it('should trim whitespace from statements', async () => {

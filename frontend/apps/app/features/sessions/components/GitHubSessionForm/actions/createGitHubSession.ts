@@ -1,19 +1,13 @@
 'use server'
 
-import { createHash } from 'node:crypto'
-import path from 'node:path'
 import type { SupabaseClientType } from '@liam-hq/db'
 import type { Schema } from '@liam-hq/db-structure'
-import { parse, setPrismWasmUrl } from '@liam-hq/db-structure/parser'
 import { getFileContent } from '@liam-hq/github'
-import {
-  deepModelingWorkflowTask,
-  designProcessWorkflowTask,
-} from '@liam-hq/jobs'
-import { idempotencyKeys } from '@trigger.dev/sdk'
-import { redirect } from 'next/navigation'
-import { getOrganizationId } from '@/features/organizations/services/getOrganizationId'
 import { createClient } from '@/libs/db/server'
+import {
+  createSessionWithSchema,
+  parseSchemaContent,
+} from '../../shared/services/sessionCreationHelpers'
 import {
   type CreateSessionState,
   GitHubFormDataSchema,
@@ -22,13 +16,6 @@ import {
   type RepositoryData,
   type SchemaFilePathData,
 } from '../../shared/validation/sessionFormValidation'
-
-async function getCurrentUserId(
-  supabase: SupabaseClientType,
-): Promise<string | null> {
-  const { data: userData } = await supabase.auth.getUser()
-  return userData?.user?.id || null
-}
 
 async function getProject(
   supabase: SupabaseClientType,
@@ -87,19 +74,7 @@ async function getRepositoryInfo(
   return { success: true, schemaFilePathData, repository }
 }
 
-async function parseSchemaFromContent(
-  content: string,
-  format: SchemaFilePathData['format'],
-): Promise<Schema | CreateSessionState> {
-  setPrismWasmUrl(path.resolve(process.cwd(), 'prism.wasm'))
-  const { value: parsedSchema, errors } = await parse(content, format)
-  if (errors && errors.length > 0) {
-    return { success: false, error: 'Failed to parse schema' }
-  }
-  return parsedSchema
-}
-
-async function processSchema(
+async function processGitHubSchema(
   project: ProjectData | null,
   requestGitSha: string | null | undefined,
   supabase: SupabaseClientType,
@@ -131,7 +106,7 @@ async function processSchema(
     return { success: false, error: 'Failed to get schema content' }
   }
 
-  const schemaResult = await parseSchemaFromContent(
+  const schemaResult = await parseSchemaContent(
     content,
     schemaFilePathData.format,
   )
@@ -163,16 +138,6 @@ export async function createGitHubSession(
   } = parsedFormDataResult.output
 
   const supabase = await createClient()
-  const currentUserId = await getCurrentUserId(supabase)
-  if (!currentUserId) {
-    return { success: false, error: 'Authentication required' }
-  }
-
-  const organizationId = await getOrganizationId()
-  if (!organizationId) {
-    return { success: false, error: 'Organization not found' }
-  }
-
   let project: ProjectData | null = null
   if (projectId) {
     const projectResult = await getProject(supabase, projectId)
@@ -182,82 +147,23 @@ export async function createGitHubSession(
     project = projectResult.data
   }
 
-  const { data: designSession, error: insertError } = await supabase
-    .from('design_sessions')
-    .insert({
-      name: `Design Session - ${new Date().toISOString()}`,
-      project_id: projectId,
-      organization_id: organizationId,
-      created_by_user_id: currentUserId,
-      parent_design_session_id: parentDesignSessionId,
-    })
-    .select()
-    .single()
-
-  if (insertError) {
-    console.error('Error creating design session:', insertError)
-    return { success: false, error: 'Failed to create design session' }
-  }
-
-  // Process schema
-  const schemaResult = await processSchema(project, gitSha, supabase)
+  const schemaResult = await processGitHubSchema(project, gitSha, supabase)
   if ('success' in schemaResult) {
     return schemaResult
   }
   const { schema, schemaFilePath } = schemaResult
 
-  const { data: buildingSchema, error: buildingSchemaError } = await supabase
-    .from('building_schemas')
-    .insert({
-      design_session_id: designSession.id,
-      organization_id: organizationId,
-      schema: JSON.parse(JSON.stringify(schema)),
-      initial_schema_snapshot: JSON.parse(JSON.stringify(schema)),
-      schema_file_path: schemaFilePath,
-      git_sha: gitSha,
-    })
-    .select()
-    .single()
-
-  if (buildingSchemaError || !buildingSchema) {
-    console.error('Error creating building schema:', buildingSchemaError)
-    return { success: false, error: 'Failed to create building schema' }
-  }
-
-  // Trigger the chat processing job for the initial message
-  const history: [string, string][] = []
-  const chatPayload = {
-    userInput: initialMessage,
-    history,
-    organizationId,
-    buildingSchemaId: buildingSchema.id,
-    latestVersionNumber: 0,
-    designSessionId: designSession.id,
-    userId: currentUserId,
-  }
-
-  // Generate idempotency key based on the payload
-  const payloadHash = createHash('sha256')
-    .update(JSON.stringify(chatPayload))
-    .digest('hex')
-
-  const idempotencyKey = await idempotencyKeys.create(
-    `chat-${designSession.id}-${payloadHash}`,
+  return await createSessionWithSchema(
+    {
+      projectId,
+      parentDesignSessionId,
+      gitSha,
+      initialMessage,
+      isDeepModelingEnabled,
+    },
+    {
+      schema,
+      schemaFilePath,
+    },
   )
-
-  // Trigger the appropriate workflow based on Deep Modeling toggle
-  try {
-    const task = isDeepModelingEnabled
-      ? deepModelingWorkflowTask
-      : designProcessWorkflowTask
-    await task.trigger(chatPayload, {
-      idempotencyKey,
-    })
-  } catch (error) {
-    console.error('Error triggering chat processing job:', error)
-    return { success: false, error: 'Failed to trigger chat processing job' }
-  }
-
-  // Redirect to the session page on successful creation
-  redirect(`/app/design_sessions/${designSession.id}`)
 }

@@ -36,6 +36,9 @@ export const GitHubFormDataSchema = v.object({
   gitSha: v.optional(v.nullable(v.string())),
 })
 
+// Schema format type
+export type SchemaFormat = 'postgres' | 'schemarb' | 'prisma' | 'tbls'
+
 // Upload-specific form schema
 export const UploadFormDataSchema = v.object({
   ...BaseFormDataSchema.entries,

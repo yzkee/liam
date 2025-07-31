@@ -1,10 +1,9 @@
 import { AIMessage, SystemMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
-import type { Command } from '@langchain/langgraph'
 import { ChatOpenAI } from '@langchain/openai'
 import type { Database } from '@liam-hq/db'
 import { ResultAsync } from 'neverthrow'
-import { handleConfigurationError } from '../../../shared/errorHandling'
+import { WorkflowTerminationError } from '../../../shared/errorHandling'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 import { logAssistantMessage } from '../utils/timelineLogger'
@@ -17,14 +16,14 @@ import { withTimelineItemSync } from '../utils/withTimelineItemSync'
 export async function webSearchNode(
   state: WorkflowState,
   config: RunnableConfig,
-): Promise<WorkflowState | Command> {
+): Promise<WorkflowState> {
   const assistantRole: Database['public']['Enums']['assistant_role_enum'] = 'pm'
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
-    return await handleConfigurationError(configurableResult.error, {
-      nodeId: 'webSearchNode',
-      designSessionId: state.designSessionId,
-    })
+    throw new WorkflowTerminationError(
+      configurableResult.error,
+      'webSearchNode',
+    )
   }
   const { repositories } = configurableResult.value
 

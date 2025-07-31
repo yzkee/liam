@@ -1,6 +1,5 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
-import type { Command } from '@langchain/langgraph'
-import { handleConfigurationError } from '../../../shared/errorHandling'
+import { WorkflowTerminationError } from '../../../shared/errorHandling'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 
@@ -12,13 +11,13 @@ import type { WorkflowState } from '../types'
 export async function finalizeArtifactsNode(
   state: WorkflowState,
   config: RunnableConfig,
-): Promise<WorkflowState | Command> {
+): Promise<WorkflowState> {
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
-    return await handleConfigurationError(configurableResult.error, {
-      nodeId: 'finalizeArtifactsNode',
-      designSessionId: state.designSessionId,
-    })
+    throw new WorkflowTerminationError(
+      configurableResult.error,
+      'finalizeArtifactsNode',
+    )
   }
 
   // Success case - workflow completed successfully

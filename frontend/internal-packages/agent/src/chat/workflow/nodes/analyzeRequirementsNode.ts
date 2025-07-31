@@ -1,14 +1,10 @@
 import { AIMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
-import type { Command } from '@langchain/langgraph'
 import type { Database } from '@liam-hq/db'
 import { ResultAsync } from 'neverthrow'
 import { PMAnalysisAgent } from '../../../langchain/agents'
 import type { Repositories } from '../../../repositories'
-import {
-  handleConfigurationError,
-  handleImmediateError,
-} from '../../../shared/errorHandling'
+import { WorkflowTerminationError } from '../../../shared/errorHandling'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 import { logAssistantMessage } from '../utils/timelineLogger'
@@ -98,14 +94,14 @@ async function saveArtifacts(
 export async function analyzeRequirementsNode(
   state: WorkflowState,
   config: RunnableConfig,
-): Promise<WorkflowState | Command> {
+): Promise<WorkflowState> {
   const assistantRole: Database['public']['Enums']['assistant_role_enum'] = 'pm'
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
-    return await handleConfigurationError(configurableResult.error, {
-      nodeId: 'analyzeRequirementsNode',
-      designSessionId: state.designSessionId,
-    })
+    throw new WorkflowTerminationError(
+      configurableResult.error,
+      'analyzeRequirementsNode',
+    )
   }
   const { repositories } = configurableResult.value
 
@@ -177,12 +173,7 @@ export async function analyzeRequirementsNode(
         assistantRole,
       )
 
-      return await handleImmediateError(error, {
-        nodeId: 'analyzeRequirementsNode',
-        designSessionId: state.designSessionId,
-        workflowRunId: '', // Will be handled by workflow setup
-        repositories,
-      })
+      throw new WorkflowTerminationError(error, 'analyzeRequirementsNode')
     },
   )
 }

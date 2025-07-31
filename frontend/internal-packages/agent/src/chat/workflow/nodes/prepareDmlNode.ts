@@ -1,9 +1,8 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
-import type { Command } from '@langchain/langgraph'
 import type { Database } from '@liam-hq/db'
 import { DMLGenerationAgent } from '../../../langchain/agents/dmlGenerationAgent/agent'
 import type { Usecase } from '../../../langchain/agents/qaGenerateUsecaseAgent/agent'
-import { handleConfigurationError } from '../../../shared/errorHandling'
+import { WorkflowTerminationError } from '../../../shared/errorHandling'
 import { convertSchemaToText } from '../../../utils/convertSchemaToText'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
@@ -51,14 +50,14 @@ function formatUseCases(useCases: Usecase[]): string {
 export async function prepareDmlNode(
   state: WorkflowState,
   config: RunnableConfig,
-): Promise<WorkflowState | Command> {
+): Promise<WorkflowState> {
   const assistantRole: Database['public']['Enums']['assistant_role_enum'] = 'db'
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
-    return await handleConfigurationError(configurableResult.error, {
-      nodeId: 'prepareDmlNode',
-      designSessionId: state.designSessionId,
-    })
+    throw new WorkflowTerminationError(
+      configurableResult.error,
+      'prepareDmlNode',
+    )
   }
   const { repositories } = configurableResult.value
 

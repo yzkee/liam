@@ -1,12 +1,8 @@
 import { AIMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
-import type { Command } from '@langchain/langgraph'
 import type { Database } from '@liam-hq/db'
 import { invokeDesignAgent } from '../../../langchain/agents/databaseSchemaBuildAgent/agent'
-import {
-  handleConfigurationError,
-  handleImmediateError,
-} from '../../../shared/errorHandling'
+import { WorkflowTerminationError } from '../../../shared/errorHandling'
 import { convertSchemaToText } from '../../../utils/convertSchemaToText'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
@@ -20,14 +16,14 @@ import { withTimelineItemSync } from '../utils/withTimelineItemSync'
 export async function designSchemaNode(
   state: WorkflowState,
   config: RunnableConfig,
-): Promise<WorkflowState | Command> {
+): Promise<WorkflowState> {
   const assistantRole: Database['public']['Enums']['assistant_role_enum'] = 'db'
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
-    return await handleConfigurationError(configurableResult.error, {
-      nodeId: 'designSchemaNode',
-      designSessionId: state.designSessionId,
-    })
+    throw new WorkflowTerminationError(
+      configurableResult.error,
+      'designSchemaNode',
+    )
   }
   const { repositories } = configurableResult.value
 
@@ -64,12 +60,7 @@ export async function designSchemaNode(
   })
 
   if (invokeResult.isErr()) {
-    return await handleImmediateError(invokeResult.error, {
-      nodeId: 'designSchemaNode',
-      designSessionId: state.designSessionId,
-      workflowRunId: '', // Will be handled by workflow setup
-      repositories,
-    })
+    throw new WorkflowTerminationError(invokeResult.error, 'designSchemaNode')
   }
 
   const { response, reasoning } = invokeResult.value

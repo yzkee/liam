@@ -1,9 +1,8 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
-import type { Command } from '@langchain/langgraph'
 import type { Database } from '@liam-hq/db'
 import { executeQuery } from '@liam-hq/pglite-server'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
-import { handleConfigurationError } from '../../../shared/errorHandling'
+import { WorkflowTerminationError } from '../../../shared/errorHandling'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 import { logAssistantMessage } from '../utils/timelineLogger'
@@ -15,14 +14,14 @@ import { logAssistantMessage } from '../utils/timelineLogger'
 export async function validateSchemaNode(
   state: WorkflowState,
   config: RunnableConfig,
-): Promise<WorkflowState | Command> {
+): Promise<WorkflowState> {
   const assistantRole: Database['public']['Enums']['assistant_role_enum'] = 'db'
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
-    return await handleConfigurationError(configurableResult.error, {
-      nodeId: 'validateSchemaNode',
-      designSessionId: state.designSessionId,
-    })
+    throw new WorkflowTerminationError(
+      configurableResult.error,
+      'validateSchemaNode',
+    )
   }
   const { repositories } = configurableResult.value
 

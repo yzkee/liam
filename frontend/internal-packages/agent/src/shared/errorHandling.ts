@@ -1,65 +1,32 @@
-import { Command, END } from '@langchain/langgraph'
-import type { WorkflowConfigurable } from '../chat/workflow/types'
-
 /**
- * Handle immediate error recording and workflow stopping
- * This creates a timeline item immediately and stops the workflow using Command pattern
+ * Custom error class for workflow termination
+ * This error should not be retried by the workflow engine
  */
-export const handleImmediateError = async (
-  error: Error,
-  context: {
-    nodeId: string
-    designSessionId: string
-    workflowRunId: string
-    repositories: WorkflowConfigurable['repositories']
-  },
-): Promise<Command> => {
-  const { nodeId, designSessionId, workflowRunId, repositories } = context
+export class WorkflowTerminationError extends Error {
+  public readonly nodeId: string
+  public readonly originalError: Error
 
-  await repositories.schema.createTimelineItem({
-    designSessionId,
-    content: `Error in ${nodeId}: ${error.message}`,
-    type: 'error',
-  })
-
-  // Update workflow run status to error
-  await repositories.schema.updateWorkflowRunStatus({
-    workflowRunId,
-    status: 'error',
-  })
-
-  return new Command({
-    update: {},
-    goto: END,
-  })
+  constructor(originalError: Error, nodeId: string) {
+    super(`Error in ${nodeId}: ${originalError.message}`)
+    this.name = 'WorkflowTerminationError'
+    this.nodeId = nodeId
+    this.originalError = originalError
+  }
 }
 
 /**
- * Handle configuration errors when repositories are not available
- * This is a fallback for cases where we can't access repositories.
- *
- * Note: We cannot call handleImmediateError here because configuration errors
- * typically mean that repositories is missing from the config, so we cannot
- * save timeline items to the database. We log to console instead for debugging.
+ * Retry policy configuration for all nodes
+ * WorkflowTerminationError should not be retried as it indicates
+ * intentional workflow termination due to unrecoverable errors
  */
-export const handleConfigurationError = async (
-  error: Error,
-  context: {
-    nodeId: string
-    designSessionId?: string
+export const RETRY_POLICY = {
+  maxAttempts: process.env['NODE_ENV'] === 'test' ? 1 : 3,
+  retryOn: (error: unknown) => {
+    // Don't retry WorkflowTerminationError - these are intentional terminations
+    if (error instanceof WorkflowTerminationError) {
+      return false
+    }
+    // Retry all other errors
+    return true
   },
-): Promise<Command> => {
-  const { nodeId, designSessionId } = context
-
-  // Log the configuration error to console for debugging
-  // Cannot save to timeline_items because repositories is not available
-  console.error(`Configuration error in ${nodeId}: ${error.message}`, {
-    designSessionId,
-    error,
-  })
-
-  return new Command({
-    update: {},
-    goto: END,
-  })
 }

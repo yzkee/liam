@@ -10,7 +10,6 @@ import type {
 } from '../chat/workflow/types'
 import { withTimelineItemSync } from '../chat/workflow/utils/withTimelineItemSync'
 import type { AgentWorkflowParams, AgentWorkflowResult } from '../types'
-import { handleImmediateError } from './errorHandling'
 
 /**
  * Shared workflow setup configuration
@@ -131,11 +130,7 @@ export const executeWorkflowWithTracking = <
     setupResult
   const { repositories } = configurable
 
-  // Type guards for safe type checking
-  const hasError = (obj: unknown): obj is { error?: Error } => {
-    return typeof obj === 'object' && obj !== null && 'error' in obj
-  }
-
+  // Type guard for safe type checking
   const isWorkflowState = (obj: unknown): obj is WorkflowState => {
     return typeof obj === 'object' && obj !== null
   }
@@ -169,17 +164,6 @@ export const executeWorkflowWithTracking = <
 
   // 4. Chain everything together
   return executeWorkflow.andThen((result) => {
-    if (hasError(result) && result.error) {
-      return ResultAsync.fromPromise(
-        handleImmediateError(result.error, {
-          nodeId: 'workflow_execution',
-          designSessionId: workflowState.designSessionId,
-          workflowRunId,
-          repositories,
-        }),
-        (error) => new Error(String(error)),
-      ).andThen(() => err(result.error || new Error('Unknown workflow error')))
-    }
     return updateSuccessStatus(result).andThen(validateAndReturnResult)
   })
 }

@@ -2,7 +2,7 @@ import type { BaseMessage } from '@langchain/core/messages'
 import { ToolMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { ToolNode } from '@langchain/langgraph/prebuilt'
-import type { Schema } from '@liam-hq/db-structure'
+import { postgresqlSchemaDeparser, type Schema } from '@liam-hq/db-structure'
 import type { ResultAsync } from 'neverthrow'
 import { getConfigurable } from '../../chat/workflow/shared/getConfigurable'
 import type { WorkflowState } from '../../chat/workflow/types'
@@ -102,11 +102,17 @@ export const invokeSchemaDesignToolNode = async (
     )
 
     if (schemaResult.isOk()) {
-      // Update workflow state with fresh schema data
+      // Generate DDL statements from the updated schema
+      const ddlResult = postgresqlSchemaDeparser(schemaResult.value.schema)
+      const ddlStatements =
+        ddlResult.errors.length > 0 ? undefined : ddlResult.value
+
+      // Update workflow state with fresh schema data and DDL statements
       updatedResult = {
         ...updatedResult,
         schemaData: schemaResult.value.schema,
         latestVersionNumber: schemaResult.value.latestVersionNumber,
+        ddlStatements,
       }
     } else {
       console.warn(

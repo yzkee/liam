@@ -26,9 +26,11 @@ export const createDbAgentGraph = () => {
   dbAgentGraph
     .addNode('designSchema', designSchemaNode, {
       retryPolicy: RETRY_POLICY,
+      ends: [END],
     })
     .addNode('invokeSchemaDesignTool', invokeSchemaDesignToolNode, {
       retryPolicy: RETRY_POLICY,
+      ends: [END],
     })
 
     .addEdge(START, 'designSchema')

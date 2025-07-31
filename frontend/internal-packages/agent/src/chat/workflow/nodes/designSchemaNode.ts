@@ -1,4 +1,4 @@
-import { AIMessage, HumanMessage } from '@langchain/core/messages'
+import { AIMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import type { Command } from '@langchain/langgraph'
 import type { Database } from '@liam-hq/db'

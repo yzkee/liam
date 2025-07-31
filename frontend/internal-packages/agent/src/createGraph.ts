@@ -30,22 +30,28 @@ export const createGraph = () => {
   graph
     .addNode('webSearch', webSearchNode, {
       retryPolicy: RETRY_POLICY,
+      ends: [END],
     })
     .addNode('analyzeRequirements', analyzeRequirementsNode, {
       retryPolicy: RETRY_POLICY,
+      ends: [END],
     })
     .addNode('dbAgent', dbAgentSubgraph)
     .addNode('generateUsecase', generateUsecaseNode, {
       retryPolicy: RETRY_POLICY,
+      ends: [END],
     })
     .addNode('prepareDML', prepareDmlNode, {
       retryPolicy: RETRY_POLICY,
+      ends: [END],
     })
     .addNode('validateSchema', validateSchemaNode, {
       retryPolicy: RETRY_POLICY,
+      ends: [END],
     })
     .addNode('finalizeArtifacts', finalizeArtifactsNode, {
       retryPolicy: RETRY_POLICY,
+      ends: [END],
     })
 
     .addEdge(START, 'webSearch')

@@ -8,7 +8,7 @@ import type { Repositories } from '../../../repositories'
 import {
   handleConfigurationError,
   handleImmediateError,
-} from '../../../shared/workflowSetup'
+} from '../../../shared/errorHandling'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 import { logAssistantMessage } from '../utils/timelineLogger'

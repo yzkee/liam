@@ -6,7 +6,7 @@ import { invokeDesignAgent } from '../../../langchain/agents/databaseSchemaBuild
 import {
   handleConfigurationError,
   handleImmediateError,
-} from '../../../shared/workflowSetup'
+} from '../../../shared/errorHandling'
 import { convertSchemaToText } from '../../../utils/convertSchemaToText'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'

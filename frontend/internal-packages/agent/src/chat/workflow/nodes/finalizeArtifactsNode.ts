@@ -1,6 +1,6 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
 import type { Command } from '@langchain/langgraph'
-import { handleConfigurationError } from '../../../shared/workflowSetup'
+import { handleConfigurationError } from '../../../shared/errorHandling'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 

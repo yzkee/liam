@@ -42,6 +42,8 @@ export const convertTimelineItemToTimelineItemEntry = (
         ...baseItem,
         type: 'assistant',
         role: item.assistant_role ?? 'db',
+        // TODO: Backend needs to provide artifact_action field
+        artifactAction: item.artifact_action,
       }),
     )
     .with(
@@ -57,6 +59,8 @@ export const convertTimelineItemToTimelineItemEntry = (
         ...baseItem,
         type: 'assistant_log',
         role: item.assistant_role ?? 'db',
+        // TODO: Backend needs to provide artifact_action field
+        artifactAction: item.artifact_action,
       }),
     )
     .with(

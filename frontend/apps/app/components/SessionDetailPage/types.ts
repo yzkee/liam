@@ -46,6 +46,10 @@ export type TimelineItem = Pick<
       executed_at: string
     }>
   } | null
+  // TODO: Backend needs to add artifact_action field to timeline_items table
+  // This field should be set to 'created' when PM agent creates requirements artifact
+  // and 'updated' when QA agent adds use cases to the artifact
+  artifact_action?: 'created' | 'updated' | null
 }
 
 export type DesignSessionWithTimelineItems = Pick<
@@ -81,6 +85,7 @@ export type UserTimelineItemEntry = BaseTimelineItemEntry & {
 export type AssistantTimelineItemEntry = BaseTimelineItemEntry & {
   type: 'assistant'
   role: AssistantRole
+  artifactAction?: 'created' | 'updated' | null
 }
 
 export type SchemaVersionTimelineItemEntry = BaseTimelineItemEntry & {
@@ -97,6 +102,7 @@ export type ErrorTimelineItemEntry = BaseTimelineItemEntry & {
 export type AssistantLogTimelineItemEntry = BaseTimelineItemEntry & {
   type: 'assistant_log'
   role: AssistantRole
+  artifactAction?: 'created' | 'updated' | null
 }
 
 export type QueryResultTimelineItemEntry = BaseTimelineItemEntry & {

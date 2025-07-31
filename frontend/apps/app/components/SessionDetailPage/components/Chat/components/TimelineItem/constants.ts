@@ -1,13 +1,4 @@
 /**
- * Predefined messages triggered by artifact-related events
- */
-export const ARTIFACT_TRIGGER_MESSAGES = {
-  REQUIREMENTS_ANALYZED: 'Your requirements have been analyzed and saved',
-  USE_CASES_SAVED:
-    'Your use cases have been saved and are ready for implementation',
-} as const
-
-/**
  * Role identifier for the project manager agent
  * Fixed value: 'pm' - must match backend API values
  */

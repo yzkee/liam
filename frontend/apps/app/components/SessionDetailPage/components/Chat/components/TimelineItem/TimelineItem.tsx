@@ -10,11 +10,7 @@ import { QueryResultMessage } from './components/QueryResultMessage'
 import { UserMessage } from './components/UserMessage'
 import { VersionMessage } from './components/VersionMessage'
 import { ViewLink } from './components/ViewLink'
-import {
-  ARTIFACT_TRIGGER_MESSAGES,
-  PM_AGENT_ROLE,
-  QA_AGENT_ROLE,
-} from './constants'
+import { PM_AGENT_ROLE, QA_AGENT_ROLE } from './constants'
 
 type Props = PropsWithChildren &
   TimelineItemEntry & {
@@ -22,37 +18,30 @@ type Props = PropsWithChildren &
     onArtifactLinkClick?: () => void
   }
 
-type AgentRole = typeof PM_AGENT_ROLE | typeof QA_AGENT_ROLE
-
 type ViewLinkConfig = {
   text: string
 }
 
-type ViewLinkKey = `${AgentRole}:${string}`
-
-const viewLinkConfigMap: Record<ViewLinkKey, ViewLinkConfig> = {
-  [`${PM_AGENT_ROLE}:${ARTIFACT_TRIGGER_MESSAGES.REQUIREMENTS_ANALYZED}`]: {
-    text: 'View Requirements',
-  },
-  [`${QA_AGENT_ROLE}:${ARTIFACT_TRIGGER_MESSAGES.USE_CASES_SAVED}`]: {
-    text: 'View Use Cases',
-  },
-}
-
-const isAgentRole = (role: string): role is AgentRole => {
-  return role === PM_AGENT_ROLE || role === QA_AGENT_ROLE
-}
-
 const getViewLinkConfig = (
-  content: string,
   role: string,
+  artifactAction?: 'created' | 'updated' | null,
 ): ViewLinkConfig | null => {
-  if (!isAgentRole(role)) {
+  // Only show link when artifact was created or updated in this message
+  if (!artifactAction || artifactAction === null) {
     return null
   }
 
-  const key: ViewLinkKey = `${role}:${content}`
-  return viewLinkConfigMap[key] || null
+  // TODO: Once backend implements artifact_action field, remove the following comment
+  // Currently this feature requires backend to track when artifacts are created/updated
+  if (role === PM_AGENT_ROLE) {
+    return { text: 'View Requirements' }
+  }
+
+  if (role === QA_AGENT_ROLE) {
+    return { text: 'View Use Cases' }
+  }
+
+  return null
 }
 
 export const TimelineItem: FC<Props> = (props) => {
@@ -82,8 +71,8 @@ export const TimelineItem: FC<Props> = (props) => {
         userName={userName}
       />
     ))
-    .with({ type: 'assistant_log' }, ({ content, role }) => {
-      const viewLinkConfig = getViewLinkConfig(content, role)
+    .with({ type: 'assistant_log' }, ({ content, role, artifactAction }) => {
+      const viewLinkConfig = getViewLinkConfig(role, artifactAction)
       return (
         <AgentMessage
           state="default"
@@ -101,30 +90,33 @@ export const TimelineItem: FC<Props> = (props) => {
         </AgentMessage>
       )
     })
-    .with({ type: 'assistant' }, ({ content, role, timestamp, children }) => {
-      const viewLinkConfig = getViewLinkConfig(content, role)
-      return (
-        <AgentMessage
-          state="default"
-          assistantRole={role}
-          message={content}
-          time={timestamp.toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-          })}
-          showHeader={showHeader}
-        >
-          {children}
-          {viewLinkConfig && (
-            <ViewLink
-              text={viewLinkConfig.text}
-              onClick={onArtifactLinkClick}
-              ariaLabel={`Navigate to ${viewLinkConfig.text.toLowerCase()} tab`}
-            />
-          )}
-        </AgentMessage>
-      )
-    })
+    .with(
+      { type: 'assistant' },
+      ({ content, role, timestamp, children, artifactAction }) => {
+        const viewLinkConfig = getViewLinkConfig(role, artifactAction)
+        return (
+          <AgentMessage
+            state="default"
+            assistantRole={role}
+            message={content}
+            time={timestamp.toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+            showHeader={showHeader}
+          >
+            {children}
+            {viewLinkConfig && (
+              <ViewLink
+                text={viewLinkConfig.text}
+                onClick={onArtifactLinkClick}
+                ariaLabel={`Navigate to ${viewLinkConfig.text.toLowerCase()} tab`}
+              />
+            )}
+          </AgentMessage>
+        )
+      },
+    )
     .with({ type: 'error' }, ({ content, onRetry }) => (
       <AgentMessage state="default" assistantRole="db" showHeader={showHeader}>
         <ErrorMessage message={content} onRetry={onRetry} />

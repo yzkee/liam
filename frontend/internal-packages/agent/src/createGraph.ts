@@ -9,13 +9,7 @@ import {
 } from './chat/workflow/nodes'
 import { createAnnotations } from './chat/workflow/shared/langGraphUtils'
 import { createDbAgentGraph } from './db-agent/createDbAgentGraph'
-
-/**
- * Retry policy configuration for all nodes
- */
-const RETRY_POLICY = {
-  maxAttempts: process.env['NODE_ENV'] === 'test' ? 1 : 3,
-}
+import { RETRY_POLICY } from './shared/errorHandling'
 
 /**
  * Create and configure the LangGraph workflow
@@ -30,28 +24,22 @@ export const createGraph = () => {
   graph
     .addNode('webSearch', webSearchNode, {
       retryPolicy: RETRY_POLICY,
-      ends: [END],
     })
     .addNode('analyzeRequirements', analyzeRequirementsNode, {
       retryPolicy: RETRY_POLICY,
-      ends: [END],
     })
     .addNode('dbAgent', dbAgentSubgraph)
     .addNode('generateUsecase', generateUsecaseNode, {
       retryPolicy: RETRY_POLICY,
-      ends: [END],
     })
     .addNode('prepareDML', prepareDmlNode, {
       retryPolicy: RETRY_POLICY,
-      ends: [END],
     })
     .addNode('validateSchema', validateSchemaNode, {
       retryPolicy: RETRY_POLICY,
-      ends: [END],
     })
     .addNode('finalizeArtifacts', finalizeArtifactsNode, {
       retryPolicy: RETRY_POLICY,
-      ends: [END],
     })
 
     .addEdge(START, 'webSearch')

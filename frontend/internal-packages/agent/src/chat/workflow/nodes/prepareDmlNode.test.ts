@@ -15,7 +15,14 @@ describe('prepareDmlNode', () => {
     vi.mocked(DMLGenerationAgent).mockImplementation(() => {
       const agent = {
         generate: vi.fn().mockResolvedValue({
-          dmlStatements: '-- Generated DML statements',
+          dmlOperations: [
+            {
+              useCaseId: 'test-id-1',
+              operation_type: 'INSERT',
+              sql: "INSERT INTO users (id, name) VALUES (1, 'Test User')",
+              description: 'Create test user',
+            },
+          ],
         }),
       }
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -63,6 +70,7 @@ describe('prepareDmlNode', () => {
     })
 
     expect(result.dmlStatements).toBeUndefined()
+    expect(result.dmlOperations).toBeUndefined()
   })
 
   it('should return state unchanged when use cases are missing', async () => {
@@ -75,6 +83,7 @@ describe('prepareDmlNode', () => {
     })
 
     expect(result.dmlStatements).toBeUndefined()
+    expect(result.dmlOperations).toBeUndefined()
   })
 
   it('should return state unchanged when use cases array is empty', async () => {
@@ -88,13 +97,14 @@ describe('prepareDmlNode', () => {
     })
 
     expect(result.dmlStatements).toBeUndefined()
+    expect(result.dmlOperations).toBeUndefined()
   })
 
   it('should handle empty DML generation result', async () => {
     vi.mocked(DMLGenerationAgent).mockImplementationOnce(() => {
       const agent = {
         generate: vi.fn().mockResolvedValue({
-          dmlStatements: '',
+          dmlOperations: [],
         }),
       }
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -121,6 +131,7 @@ describe('prepareDmlNode', () => {
     })
 
     expect(result.dmlStatements).toBeUndefined()
+    expect(result.dmlOperations).toBeUndefined()
   })
 
   it('should process schema with convertSchemaToText', async () => {

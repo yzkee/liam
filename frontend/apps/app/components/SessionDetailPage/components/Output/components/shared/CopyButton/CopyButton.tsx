@@ -1,8 +1,7 @@
 'use client'
 
-import { Check, Copy, IconButton } from '@liam-hq/ui'
+import { Check, Copy, IconButton, useCopy } from '@liam-hq/ui'
 import type { FC } from 'react'
-import { useState } from 'react'
 
 type Props = {
   textToCopy: string
@@ -15,16 +14,10 @@ export const CopyButton: FC<Props> = ({
   tooltipLabel,
   size = 'md',
 }) => {
-  const [isCopied, setIsCopied] = useState(false)
+  const { isCopied, copy } = useCopy()
 
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(textToCopy)
-      setIsCopied(true)
-      setTimeout(() => setIsCopied(false), 2000)
-    } catch (error) {
-      console.error('Failed to copy text:', error)
-    }
+  const handleCopy = () => {
+    copy(textToCopy)
   }
 
   return (

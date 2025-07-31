@@ -10,7 +10,14 @@ import {
   ChevronRight,
 } from '@liam-hq/ui'
 import clsx from 'clsx'
-import { type FC, Fragment, useEffect, useState, useTransition } from 'react'
+import {
+  type FC,
+  Fragment,
+  useCallback,
+  useEffect,
+  useState,
+  useTransition,
+} from 'react'
 import * as v from 'valibot'
 import { createClient } from '@/libs/db/client'
 import styles from './VersionMessage.module.css'
@@ -81,7 +88,7 @@ type BuildingSchemaVersion = Pick<
 
 type Props = {
   buildingSchemaVersionId: string
-  onView?: () => void
+  onView?: (versionId: string) => void
 }
 
 export const VersionMessage: FC<Props> = ({
@@ -91,6 +98,11 @@ export const VersionMessage: FC<Props> = ({
   const [version, setVersion] = useState<BuildingSchemaVersion | null>(null)
   const [isPending, startTransition] = useTransition()
   const [isExpanded, setIsExpanded] = useState(false)
+
+  const handleClick = useCallback(() => {
+    if (!version) return
+    onView?.(version.id)
+  }, [version, onView])
 
   useEffect(() => {
     startTransition(async () => {
@@ -162,7 +174,7 @@ export const VersionMessage: FC<Props> = ({
           <Button
             variant="outline-secondary"
             size="xs"
-            onClick={onView}
+            onClick={handleClick}
             className={styles.viewButton}
           >
             View

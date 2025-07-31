@@ -1,4 +1,3 @@
-import { HumanMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import type { Database } from '@liam-hq/db'
 import { invokeDesignAgent } from '../../../langchain/agents/databaseSchemaBuildAgent/agent'
@@ -26,39 +25,15 @@ export async function designSchemaNode(
   }
   const { repositories } = configurableResult.value
 
-  await logAssistantMessage(
-    state,
-    repositories,
-    'Designing your database structure to meet the identified requirements...',
-    assistantRole,
-  )
-
   const schemaText = convertSchemaToText(state.schemaData)
 
-  // Log appropriate message for DDL retry case
-  if (state.shouldRetryWithDesignSchema && state.ddlExecutionFailureReason) {
-    await logAssistantMessage(
-      state,
-      repositories,
-      'Redesigning schema to fix DDL execution errors...',
-      assistantRole,
-    )
-  }
-
-  // Use existing messages, or add DDL failure context if retrying
-  let messages = [...state.messages]
-  if (state.shouldRetryWithDesignSchema && state.ddlExecutionFailureReason) {
-    const ddlRetryMessage = new HumanMessage(
-      `The following DDL execution failed: ${state.ddlExecutionFailureReason}
-Original request: ${state.userInput}
-Please fix this issue by analyzing the schema and adding any missing constraints, primary keys, or other required schema elements to resolve the DDL execution error.`,
-    )
-    messages = [...messages, ddlRetryMessage]
-  }
+  // Use existing messages
+  const messages = [...state.messages]
 
   const invokeResult = await invokeDesignAgent({ schemaText }, messages, {
     buildingSchemaId: state.buildingSchemaId,
     latestVersionNumber: state.latestVersionNumber,
+    designSessionId: state.designSessionId,
     repositories,
   })
 
@@ -75,8 +50,22 @@ Please fix this issue by analyzing the schema and adding any missing constraints
     }
   }
 
+  const { response, reasoning } = invokeResult.value
+
+  // Log reasoning summary if available
+  if (reasoning?.summary && reasoning.summary.length > 0) {
+    for (const summaryItem of reasoning.summary) {
+      await logAssistantMessage(
+        state,
+        repositories,
+        summaryItem.text,
+        assistantRole,
+      )
+    }
+  }
+
   // Apply timeline sync to the message and clear retry flags
-  const syncedMessage = await withTimelineItemSync(invokeResult.value, {
+  const syncedMessage = await withTimelineItemSync(response, {
     designSessionId: state.designSessionId,
     organizationId: state.organizationId || '',
     userId: state.userId,
@@ -88,7 +77,5 @@ Please fix this issue by analyzing the schema and adding any missing constraints
     ...state,
     messages: [syncedMessage],
     latestVersionNumber: state.latestVersionNumber + 1,
-    shouldRetryWithDesignSchema: undefined,
-    ddlExecutionFailureReason: undefined,
   }
 }

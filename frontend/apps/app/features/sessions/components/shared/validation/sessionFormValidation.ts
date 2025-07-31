@@ -1,5 +1,3 @@
-'use server'
-
 import * as v from 'valibot'
 
 export type CreateSessionState = {

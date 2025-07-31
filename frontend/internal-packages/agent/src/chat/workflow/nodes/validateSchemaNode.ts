@@ -3,6 +3,7 @@ import type { Command } from '@langchain/langgraph'
 import type { Database } from '@liam-hq/db'
 import { executeQuery } from '@liam-hq/pglite-server'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
+import { handleConfigurationError } from '../../../shared/workflowSetup'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 import { logAssistantMessage } from '../utils/timelineLogger'
@@ -18,7 +19,10 @@ export async function validateSchemaNode(
   const assistantRole: Database['public']['Enums']['assistant_role_enum'] = 'db'
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
-    throw configurableResult.error
+    return await handleConfigurationError(configurableResult.error, {
+      nodeId: 'validateSchemaNode',
+      designSessionId: state.designSessionId,
+    })
   }
   const { repositories } = configurableResult.value
 

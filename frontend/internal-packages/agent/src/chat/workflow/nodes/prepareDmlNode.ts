@@ -3,6 +3,7 @@ import type { Command } from '@langchain/langgraph'
 import type { Database } from '@liam-hq/db'
 import { DMLGenerationAgent } from '../../../langchain/agents/dmlGenerationAgent/agent'
 import type { Usecase } from '../../../langchain/agents/qaGenerateUsecaseAgent/agent'
+import { handleConfigurationError } from '../../../shared/workflowSetup'
 import { convertSchemaToText } from '../../../utils/convertSchemaToText'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
@@ -54,7 +55,10 @@ export async function prepareDmlNode(
   const assistantRole: Database['public']['Enums']['assistant_role_enum'] = 'db'
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
-    throw configurableResult.error
+    return await handleConfigurationError(configurableResult.error, {
+      nodeId: 'prepareDmlNode',
+      designSessionId: state.designSessionId,
+    })
   }
   const { repositories } = configurableResult.value
 

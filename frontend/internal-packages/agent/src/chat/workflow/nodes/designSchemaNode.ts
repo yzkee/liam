@@ -3,7 +3,10 @@ import type { RunnableConfig } from '@langchain/core/runnables'
 import type { Command } from '@langchain/langgraph'
 import type { Database } from '@liam-hq/db'
 import { invokeDesignAgent } from '../../../langchain/agents/databaseSchemaBuildAgent/agent'
-import { handleImmediateError } from '../../../shared/workflowSetup'
+import {
+  handleConfigurationError,
+  handleImmediateError,
+} from '../../../shared/workflowSetup'
 import { convertSchemaToText } from '../../../utils/convertSchemaToText'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
@@ -21,7 +24,10 @@ export async function designSchemaNode(
   const assistantRole: Database['public']['Enums']['assistant_role_enum'] = 'db'
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
-    throw configurableResult.error
+    return await handleConfigurationError(configurableResult.error, {
+      nodeId: 'designSchemaNode',
+      designSessionId: state.designSessionId,
+    })
   }
   const { repositories } = configurableResult.value
 

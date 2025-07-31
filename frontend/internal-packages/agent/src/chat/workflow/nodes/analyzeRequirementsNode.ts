@@ -5,7 +5,10 @@ import type { Database } from '@liam-hq/db'
 import { ResultAsync } from 'neverthrow'
 import { PMAnalysisAgent } from '../../../langchain/agents'
 import type { Repositories } from '../../../repositories'
-import { handleImmediateError } from '../../../shared/workflowSetup'
+import {
+  handleConfigurationError,
+  handleImmediateError,
+} from '../../../shared/workflowSetup'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 import { logAssistantMessage } from '../utils/timelineLogger'
@@ -99,7 +102,10 @@ export async function analyzeRequirementsNode(
   const assistantRole: Database['public']['Enums']['assistant_role_enum'] = 'pm'
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
-    throw configurableResult.error
+    return await handleConfigurationError(configurableResult.error, {
+      nodeId: 'analyzeRequirementsNode',
+      designSessionId: state.designSessionId,
+    })
   }
   const { repositories } = configurableResult.value
 

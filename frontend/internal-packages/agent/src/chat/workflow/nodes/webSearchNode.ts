@@ -4,6 +4,7 @@ import type { Command } from '@langchain/langgraph'
 import { ChatOpenAI } from '@langchain/openai'
 import type { Database } from '@liam-hq/db'
 import { ResultAsync } from 'neverthrow'
+import { handleConfigurationError } from '../../../shared/workflowSetup'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 import { logAssistantMessage } from '../utils/timelineLogger'
@@ -20,7 +21,10 @@ export async function webSearchNode(
   const assistantRole: Database['public']['Enums']['assistant_role_enum'] = 'pm'
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
-    throw configurableResult.error
+    return await handleConfigurationError(configurableResult.error, {
+      nodeId: 'webSearchNode',
+      designSessionId: state.designSessionId,
+    })
   }
   const { repositories } = configurableResult.value
 

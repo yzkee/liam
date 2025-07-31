@@ -146,6 +146,36 @@ export const handleImmediateError = async (
 }
 
 /**
+ * Handle configuration errors when repositories are not available
+ * This is a fallback for cases where we can't access repositories.
+ *
+ * Note: We cannot call handleImmediateError here because configuration errors
+ * typically mean that repositories is missing from the config, so we cannot
+ * save timeline items to the database. We log to console instead for debugging.
+ */
+export const handleConfigurationError = async (
+  error: Error,
+  context: {
+    nodeId: string
+    designSessionId?: string
+  },
+): Promise<Command> => {
+  const { nodeId, designSessionId } = context
+
+  // Log the configuration error to console for debugging
+  // Cannot save to timeline_items because repositories is not available
+  console.error(`Configuration error in ${nodeId}: ${error.message}`, {
+    designSessionId,
+    error,
+  })
+
+  return new Command({
+    update: {},
+    goto: END,
+  })
+}
+
+/**
  * Execute workflow with proper error handling and finalization
  * This wraps the workflow execution with error handling, status updates, and artifact finalization
  *

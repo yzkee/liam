@@ -7,7 +7,6 @@ import styles from './UserMessage.module.css'
 
 type UserMessageProps = {
   content: string
-  initial?: string
   avatarSrc?: string
   avatarAlt?: string
   timestamp?: Date
@@ -16,7 +15,6 @@ type UserMessageProps = {
 
 export const UserMessage: FC<UserMessageProps> = ({
   content,
-  initial = '',
   avatarSrc,
   avatarAlt = 'User avatar',
   timestamp,
@@ -25,11 +23,12 @@ export const UserMessage: FC<UserMessageProps> = ({
   const userInitial = userName
     ? userName
         .split(' ')
+        .filter((name) => name.trim().length > 0) // Filter out empty or whitespace-only parts
         .map((name) => name.charAt(0))
         .join('')
         .toUpperCase()
-        .slice(0, 2)
-    : initial || 'U'
+        .slice(0, 2) || 'U' // Fallback to 'U' if no valid initials
+    : 'U'
 
   // Format timestamp if it exists - use explicit locale and timezone for consistency
   const formattedTime = timestamp

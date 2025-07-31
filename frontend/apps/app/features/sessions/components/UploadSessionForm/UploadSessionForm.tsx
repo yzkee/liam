@@ -1,7 +1,7 @@
 'use client'
 
 import { type FC, useActionState } from 'react'
-import { createUploadSession } from '../../actions/createUploadSession'
+import { createUploadSession } from './actions/createUploadSession'
 import { UploadSessionFormPresenter } from './UploadSessionFormPresenter'
 
 type Props = Record<string, never>

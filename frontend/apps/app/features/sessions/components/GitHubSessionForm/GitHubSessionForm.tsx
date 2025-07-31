@@ -2,8 +2,8 @@
 
 import { type FC, useActionState, useEffect, useTransition } from 'react'
 import type { Projects } from '@/components/CommonLayout/AppBar/ProjectsDropdownMenu/services/getProjects'
-import { createGitHubSession } from '../../actions/createGitHubSession'
-import { getBranches } from '../../actions/getBranches'
+import { createGitHubSession } from './actions/createGitHubSession'
+import { getBranches } from './actions/getBranches'
 import { getSchemaFilePath } from './actions/getSchemaFilePath'
 import { GitHubSessionFormPresenter } from './GitHubSessionFormPresenter'
 

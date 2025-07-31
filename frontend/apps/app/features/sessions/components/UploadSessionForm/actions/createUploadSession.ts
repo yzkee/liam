@@ -16,8 +16,8 @@ import { createClient } from '@/libs/db/server'
 import {
   type CreateSessionState,
   parseFormData,
-  UrlFormDataSchema,
-} from './sessionActionTypes'
+  UploadFormDataSchema,
+} from '../../shared/validation/sessionFormValidation'
 
 async function getCurrentUserId(
   supabase: SupabaseClientType,
@@ -26,37 +26,31 @@ async function getCurrentUserId(
   return userData?.user?.id || null
 }
 
-async function fetchSchemaFromUrl(
-  url: string,
+async function parseSchemaFromFile(
+  file: File,
   format: 'schemarb' | 'postgres' | 'prisma' | 'tbls',
 ): Promise<Schema | CreateSessionState> {
   try {
     setPrismWasmUrl(path.resolve(process.cwd(), 'prism.wasm'))
-
-    const response = await fetch(url)
-    if (!response.ok) {
-      return { success: false, error: 'Failed to fetch schema from URL' }
-    }
-
-    const content = await response.text()
+    const content = await file.text()
     const { value: parsedSchema, errors } = await parse(content, format)
 
     if (errors && errors.length > 0) {
-      return { success: false, error: 'Failed to parse schema from URL' }
+      return { success: false, error: 'Failed to parse schema file' }
     }
 
     return parsedSchema
   } catch (error) {
-    console.error('Error fetching schema from URL:', error)
-    return { success: false, error: 'Failed to fetch schema from URL' }
+    console.error('Error parsing schema file:', error)
+    return { success: false, error: 'Failed to read schema file' }
   }
 }
 
-export async function createUrlSession(
+export async function createUploadSession(
   _prevState: CreateSessionState,
   formData: FormData,
 ): Promise<CreateSessionState> {
-  const parsedFormDataResult = parseFormData(formData, UrlFormDataSchema)
+  const parsedFormDataResult = parseFormData(formData, UploadFormDataSchema)
   if (!parsedFormDataResult.success) {
     return { success: false, error: 'Invalid form data' }
   }
@@ -65,7 +59,7 @@ export async function createUrlSession(
     parentDesignSessionId,
     initialMessage,
     isDeepModelingEnabled,
-    schemaUrl,
+    schemaFile,
     schemaFormat,
   } = parsedFormDataResult.output
 
@@ -85,7 +79,7 @@ export async function createUrlSession(
     .from('design_sessions')
     .insert({
       name: `Design Session - ${new Date().toISOString()}`,
-      project_id: null, // URL sessions don't have a project
+      project_id: null, // Upload sessions don't have a project
       organization_id: organizationId,
       created_by_user_id: currentUserId,
       parent_design_session_id: parentDesignSessionId,
@@ -98,14 +92,14 @@ export async function createUrlSession(
     return { success: false, error: 'Failed to create design session' }
   }
 
-  // Fetch and parse the schema from URL
-  const schemaResult = await fetchSchemaFromUrl(schemaUrl, schemaFormat)
+  // Parse the uploaded schema file
+  const schemaResult = await parseSchemaFromFile(schemaFile, schemaFormat)
   if ('success' in schemaResult) {
     return schemaResult
   }
   const schema = schemaResult
 
-  // Create building schema with fetched URL content
+  // Create building schema with uploaded file content
   const { data: buildingSchema, error: buildingSchemaError } = await supabase
     .from('building_schemas')
     .insert({
@@ -113,8 +107,8 @@ export async function createUrlSession(
       organization_id: organizationId,
       schema: JSON.parse(JSON.stringify(schema)),
       initial_schema_snapshot: JSON.parse(JSON.stringify(schema)),
-      schema_file_path: schemaUrl,
-      git_sha: null, // No git SHA for URL-based schemas
+      schema_file_path: schemaFile.name,
+      git_sha: null, // No git SHA for uploaded files
     })
     .select()
     .single()

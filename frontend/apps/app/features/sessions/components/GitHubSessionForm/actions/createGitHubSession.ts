@@ -21,7 +21,7 @@ import {
   parseFormData,
   type RepositoryData,
   type SchemaFilePathData,
-} from './sessionActionTypes'
+} from '../../shared/validation/sessionFormValidation'
 
 async function getCurrentUserId(
   supabase: SupabaseClientType,

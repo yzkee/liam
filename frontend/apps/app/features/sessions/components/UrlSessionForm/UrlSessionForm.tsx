@@ -1,7 +1,7 @@
 'use client'
 
 import { type FC, useActionState } from 'react'
-import { createUrlSession } from '../../actions/createUrlSession'
+import { createUrlSession } from './actions/createUrlSession'
 import { URLSessionFormPresenter } from './URLSessionFormPresenter'
 
 type Props = Record<string, never>

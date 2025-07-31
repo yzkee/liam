@@ -69,12 +69,8 @@ describe('prepareDmlNode', () => {
       configurable: { repositories: state.repositories },
     })
 
-    expect(
-      'dmlStatements' in result ? result.dmlStatements : undefined,
-    ).toBeUndefined()
-    expect(
-      'dmlOperations' in result ? result.dmlOperations : undefined,
-    ).toBeUndefined()
+    expect(result.dmlStatements).toBeUndefined()
+    expect(result.dmlOperations).toBeUndefined()
   })
 
   it('should return state unchanged when use cases are missing', async () => {
@@ -86,12 +82,8 @@ describe('prepareDmlNode', () => {
       configurable: { repositories: state.repositories },
     })
 
-    expect(
-      'dmlStatements' in result ? result.dmlStatements : undefined,
-    ).toBeUndefined()
-    expect(
-      'dmlOperations' in result ? result.dmlOperations : undefined,
-    ).toBeUndefined()
+    expect(result.dmlStatements).toBeUndefined()
+    expect(result.dmlOperations).toBeUndefined()
   })
 
   it('should return state unchanged when use cases array is empty', async () => {
@@ -104,12 +96,8 @@ describe('prepareDmlNode', () => {
       configurable: { repositories: state.repositories },
     })
 
-    expect(
-      'dmlStatements' in result ? result.dmlStatements : undefined,
-    ).toBeUndefined()
-    expect(
-      'dmlOperations' in result ? result.dmlOperations : undefined,
-    ).toBeUndefined()
+    expect(result.dmlStatements).toBeUndefined()
+    expect(result.dmlOperations).toBeUndefined()
   })
 
   it('should handle empty DML generation result', async () => {
@@ -142,12 +130,8 @@ describe('prepareDmlNode', () => {
       configurable: { repositories: state.repositories },
     })
 
-    expect(
-      'dmlStatements' in result ? result.dmlStatements : undefined,
-    ).toBeUndefined()
-    expect(
-      'dmlOperations' in result ? result.dmlOperations : undefined,
-    ).toBeUndefined()
+    expect(result.dmlStatements).toBeUndefined()
+    expect(result.dmlOperations).toBeUndefined()
   })
 
   it('should process schema with convertSchemaToText', async () => {

@@ -192,7 +192,7 @@ export const PGlitePlayground = ({
     if (sectionIndex === -1) return
 
     const section = dmlSections[sectionIndex]
-    if (!isConnected || !section.dmlInput.trim()) return
+    if (!isConnected || !section?.dmlInput.trim()) return
 
     try {
       // Execute DML using server-side PGlite instance
@@ -200,10 +200,13 @@ export const PGlitePlayground = ({
 
       setDmlSections((prev) => {
         const newSections = [...prev]
-        newSections[sectionIndex] = {
-          ...newSections[sectionIndex],
-          results: [...newSections[sectionIndex].results, ...results],
-          dmlInput: '', // Clear input
+        const currentSection = newSections[sectionIndex]
+        if (currentSection) {
+          newSections[sectionIndex] = {
+            ...currentSection,
+            results: [...(currentSection.results ?? []), ...results],
+            dmlInput: '', // Clear input
+          }
         }
         return newSections
       })
@@ -224,10 +227,13 @@ export const PGlitePlayground = ({
 
       setDmlSections((prev) => {
         const newSections = [...prev]
-        newSections[sectionIndex] = {
-          ...newSections[sectionIndex],
-          results: [...newSections[sectionIndex].results, errorResult],
-          dmlInput: '', // Clear input
+        const currentSection = newSections[sectionIndex]
+        if (currentSection) {
+          newSections[sectionIndex] = {
+            ...currentSection,
+            results: [...(currentSection.results ?? []), errorResult],
+            dmlInput: '', // Clear input
+          }
         }
         return newSections
       })
@@ -307,10 +313,13 @@ export const PGlitePlayground = ({
             if (sectionIndex === -1) return prev
 
             const newSections = [...prev]
-            newSections[sectionIndex] = {
-              ...newSections[sectionIndex],
-              results,
-              dmlInput: '', // Clear input after execution
+            const currentSection = newSections[sectionIndex]
+            if (currentSection) {
+              newSections[sectionIndex] = {
+                ...currentSection,
+                results,
+                dmlInput: '', // Clear input after execution
+              }
             }
             return newSections
           })
@@ -334,10 +343,13 @@ export const PGlitePlayground = ({
             if (sectionIndex === -1) return prev
 
             const newSections = [...prev]
-            newSections[sectionIndex] = {
-              ...newSections[sectionIndex],
-              results: [errorResult],
-              dmlInput: '', // Clear input after execution
+            const currentSection = newSections[sectionIndex]
+            if (currentSection) {
+              newSections[sectionIndex] = {
+                ...currentSection,
+                results: [errorResult],
+                dmlInput: '', // Clear input after execution
+              }
             }
             return newSections
           })
@@ -351,9 +363,12 @@ export const PGlitePlayground = ({
         // Update the query
         setDmlSections((prev) => {
           const newSections = [...prev]
-          newSections[index] = {
-            ...newSections[index],
-            dmlInput: query,
+          const currentSection = newSections[index]
+          if (currentSection) {
+            newSections[index] = {
+              ...currentSection,
+              dmlInput: query,
+            }
           }
           return newSections
         })
@@ -364,10 +379,13 @@ export const PGlitePlayground = ({
 
           setDmlSections((prev) => {
             const newSections = [...prev]
-            newSections[index] = {
-              ...newSections[index],
-              results: [...newSections[index].results, ...results],
-              dmlInput: '', // Clear input after execution
+            const currentSection = newSections[index]
+            if (currentSection) {
+              newSections[index] = {
+                ...currentSection,
+                results: [...(currentSection.results ?? []), ...results],
+                dmlInput: '', // Clear input after execution
+              }
             }
             return newSections
           })
@@ -388,10 +406,13 @@ export const PGlitePlayground = ({
 
           setDmlSections((prev) => {
             const newSections = [...prev]
-            newSections[index] = {
-              ...newSections[index],
-              results: [...newSections[index].results, errorResult],
-              dmlInput: '', // Clear input after execution
+            const currentSection = newSections[index]
+            if (currentSection) {
+              newSections[index] = {
+                ...currentSection,
+                results: [...(currentSection.results ?? []), errorResult],
+                dmlInput: '', // Clear input after execution
+              }
             }
             return newSections
           })
@@ -406,7 +427,7 @@ export const PGlitePlayground = ({
       // Get DML results for specific section
       getDMLResults: (index: number) => {
         if (index < 0 || index >= dmlSections.length) return null
-        return dmlSections[index].results
+        return dmlSections[index]?.results ?? []
       },
     }),
     [sessionId, isConnected, ddlState, dmlSections],

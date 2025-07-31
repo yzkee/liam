@@ -87,10 +87,10 @@ export const getFormatFromUrl = (url: string): FormatType => {
   // Parse URL to extract pathname without query params and fragments
   const pathname = URL.canParse(url)
     ? new URL(url).pathname
-    : url.split('?')[0].split('#')[0]
+    : (url.split('?')[0]?.split('#')[0] ?? '')
 
   // Extract extension from pathname
-  const extension = pathname.split('.').pop()?.toLowerCase()
+  const extension = pathname?.split('.').pop()?.toLowerCase()
 
   switch (extension) {
     case 'sql':

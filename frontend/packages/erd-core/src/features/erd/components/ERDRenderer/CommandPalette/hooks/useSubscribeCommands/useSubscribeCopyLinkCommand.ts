@@ -1,4 +1,4 @@
-import { useCopy } from '@liam-hq/ui'
+import { useCopy } from '@liam-hq/ui/hooks'
 import { useEffect } from 'react'
 
 export const useSubscribeCopyLinkCommand = () => {

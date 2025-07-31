@@ -1,6 +1,6 @@
 'use client'
 
-import { useCopy } from '@liam-hq/ui'
+import { useCopy } from '@liam-hq/ui/hooks'
 import {
   Tabs as FumadocsTabs,
   type TabsProps as FumadocsTabsProps,

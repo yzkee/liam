@@ -5,8 +5,8 @@ import {
   TooltipProvider,
   TooltipRoot,
   TooltipTrigger,
-  useCopy,
 } from '@liam-hq/ui'
+import { useCopy } from '@liam-hq/ui/hooks'
 import { type FC, useCallback } from 'react'
 import { clickLogEvent } from '@/features/gtm/utils'
 import { useVersionOrThrow } from '@/providers'

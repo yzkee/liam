@@ -1,6 +1,7 @@
 'use client'
 
-import { Check, Copy, IconButton, useCopy } from '@liam-hq/ui'
+import { Check, Copy, IconButton } from '@liam-hq/ui'
+import { useCopy } from '@liam-hq/ui/hooks'
 import type { FC } from 'react'
 
 type Props = {

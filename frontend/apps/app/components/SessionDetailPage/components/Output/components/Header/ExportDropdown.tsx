@@ -58,7 +58,7 @@ export const ExportDropdown: FC<Props> = ({ schema }) => {
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline-secondary"
-          size="sm"
+          size="md"
           leftIcon={<Download size={16} />}
           rightIcon={<ChevronDown size={16} />}
           className={styles.button}

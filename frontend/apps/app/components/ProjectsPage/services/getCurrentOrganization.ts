@@ -36,7 +36,7 @@ export const getCurrentOrganization = async (
     return null
   }
 
-  return organizationMembers[0].organizations
+  return organizationMembers[0]?.organizations ?? null
 }
 
 export const getUserOrganizations = async () => {

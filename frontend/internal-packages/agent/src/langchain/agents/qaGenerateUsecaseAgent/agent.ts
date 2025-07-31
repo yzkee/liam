@@ -118,7 +118,6 @@ export class QAGenerateUsecaseAgent {
     const usecasesWithIds = parsedResponse.usecases.map((usecase) => ({
       ...usecase,
       id: uuidv4(),
-      dmlOperations: [],
     }))
 
     return {

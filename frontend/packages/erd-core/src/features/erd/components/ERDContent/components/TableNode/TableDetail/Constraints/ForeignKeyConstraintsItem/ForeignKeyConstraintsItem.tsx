@@ -22,7 +22,7 @@ export const ForeignKeyConstraintsItem: React.FC<Props> = ({
       <GridTableHeader>{foreignKeyConstraint.name}</GridTableHeader>
       <GridTableItem>
         <GridTableDt>
-          Column{foreignKeyConstraint.columnNames.length > 1 ? 's' : ''}
+          Column{foreignKeyConstraint.columnNames.length === 1 ? '' : 's'}
         </GridTableDt>
         <GridTableDd>{foreignKeyConstraint.columnNames.join(', ')}</GridTableDd>
       </GridTableItem>

@@ -14,18 +14,19 @@ describe('DMLGenerationAgent', () => {
     expect(typeof agent.generate).toBe('function')
   })
 
-  it('should return dmlStatements from generate method', async () => {
+  it('should return dmlOperations from generate method', async () => {
     const agent = new DMLGenerationAgent()
     const input = {
       schemaSQL: 'CREATE TABLE users (id INT PRIMARY KEY);',
-      formattedUseCases: 'User registration use case',
+      formattedUseCases:
+        'ID: test-uuid-123 | User registration use case: Allow users to create accounts',
       schemaContext: 'Mock schema context',
     }
 
     const result = await agent.generate(input)
 
     expect(result).toBeDefined()
-    expect(result.dmlStatements).toBeDefined()
-    expect(typeof result.dmlStatements).toBe('string')
+    expect(result.dmlOperations).toBeDefined()
+    expect(Array.isArray(result.dmlOperations)).toBe(true)
   })
 })

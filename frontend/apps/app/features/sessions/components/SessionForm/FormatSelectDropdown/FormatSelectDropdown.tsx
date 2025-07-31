@@ -32,9 +32,15 @@ export const FormatSelectDropdown: FC<FormatSelectDropdownProps> = ({
   selectedFormat,
   onFormatChange,
 }) => {
+  const defaultOption: FormatOption = {
+    format: 'postgres',
+    label: 'SQL',
+  }
+
   const selectedOption =
     formatOptions.find((option) => option.format === selectedFormat) ||
-    formatOptions[0]
+    formatOptions[0] ||
+    defaultOption
 
   const handleSelectFormat = (format: FormatType) => {
     onFormatChange(format)

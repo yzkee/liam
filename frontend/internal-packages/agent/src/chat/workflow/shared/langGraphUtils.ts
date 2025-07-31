@@ -1,6 +1,8 @@
 import { Annotation, MessagesAnnotation } from '@langchain/langgraph'
+import type { DmlOperation } from '@liam-hq/artifact'
 import type { Schema } from '@liam-hq/db-structure'
 import type { Usecase } from '../../../langchain/agents/qaGenerateUsecaseAgent/agent'
+import type { Repositories } from '../../../repositories'
 
 /**
  * Default recursion limit for LangGraph workflow execution.
@@ -39,7 +41,6 @@ export const createAnnotations = () => {
     >,
     generatedUsecases: Annotation<Usecase[] | undefined>,
     schemaData: Annotation<Schema>,
-    projectId: Annotation<string | undefined>,
     buildingSchemaId: Annotation<string>,
     latestVersionNumber: Annotation<number>,
     organizationId: Annotation<string>,
@@ -50,5 +51,14 @@ export const createAnnotations = () => {
 
     ddlStatements: Annotation<string | undefined>,
     dmlStatements: Annotation<string | undefined>,
+    dmlOperations: Annotation<DmlOperation[] | undefined>,
+
+    // DDL execution retry mechanism
+    shouldRetryWithDesignSchema: Annotation<boolean | undefined>,
+    ddlExecutionFailed: Annotation<boolean | undefined>,
+    ddlExecutionFailureReason: Annotation<string | undefined>,
+
+    // Repository dependencies for data access
+    repositories: Annotation<Repositories>,
   })
 }

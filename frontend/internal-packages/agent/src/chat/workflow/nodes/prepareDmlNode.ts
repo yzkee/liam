@@ -24,13 +24,13 @@ function formatUseCases(useCases: Usecase[]): string {
     {},
   )
 
-  // Format grouped use cases
+  // Format grouped use cases with UUIDs
   const formattedGroups = Object.entries(groupedUseCases).map(
     ([category, cases]) => {
       const formattedCases = cases
         .map(
           (uc) =>
-            `  - ${uc.title}: ${uc.description}${
+            `  - ID: ${uc.id} | ${uc.title}: ${uc.description}${
               uc.requirement ? ` (Requirement: ${uc.requirement})` : ''
             }`,
         )
@@ -105,7 +105,7 @@ export async function prepareDmlNode(
   })
 
   // Validate result
-  if (!result.dmlStatements || result.dmlStatements.trim().length === 0) {
+  if (!result.dmlOperations || result.dmlOperations.length === 0) {
     await logAssistantMessage(
       state,
       repositories,
@@ -115,8 +115,19 @@ export async function prepareDmlNode(
     return state
   }
 
+  // Convert structured operations back to string format for backward compatibility
+  const dmlStatements = result.dmlOperations
+    .map((op) => {
+      const header = op.description
+        ? `-- ${op.description}`
+        : `-- ${op.operation_type} operation for use case ${op.useCaseId}`
+      return `${header}\n${op.sql};`
+    })
+    .join('\n\n')
+
   return {
     ...state,
-    dmlStatements: result.dmlStatements,
+    dmlStatements,
+    dmlOperations: result.dmlOperations,
   }
 }

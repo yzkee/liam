@@ -30,9 +30,10 @@ export const convertTimelineItemToTimelineItemEntry = (
     )
     .with(
       { type: 'user' },
-      (): UserTimelineItemEntry => ({
+      (item): UserTimelineItemEntry => ({
         ...baseItem,
         type: 'user',
+        userName: item.users?.name,
       }),
     )
     .with(

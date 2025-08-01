@@ -46,6 +46,10 @@ export type TimelineItem = Pick<
       executed_at: string
     }>
   } | null
+  // TODO: Backend needs to add artifact_action field to timeline_items table
+  // This field should be set to 'created' when PM agent creates requirements artifact
+  // and 'updated' when QA agent adds use cases to the artifact
+  artifact_action?: 'created' | 'updated' | null
 }
 
 export type DesignSessionWithTimelineItems = Pick<
@@ -71,6 +75,8 @@ type BaseTimelineItemEntry = {
     | 'assistant_log'
     | 'query_result'
   timestamp: Date
+  // Backend artifact_action field - used to determine when to show view links
+  artifactAction?: 'created' | 'updated' | null
 }
 
 export type UserTimelineItemEntry = BaseTimelineItemEntry & {

@@ -16,6 +16,7 @@ export {
   columnRelatedDiffItemSchema,
   schemaDiffItemsSchema,
   tableDiffItemSchema,
+  tableNameDiffItemSchema,
   tableRelatedDiffItemSchema,
 } from './diff/index.js'
 export { applyPatchOperations, operationsSchema } from './operation/index.js'

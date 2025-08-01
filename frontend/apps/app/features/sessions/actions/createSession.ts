@@ -70,6 +70,7 @@ function parseFormData(
     parentDesignSessionId: formData.get('parentDesignSessionId'),
     gitSha: formData.get('gitSha'),
     initialMessage: formData.get('initialMessage'),
+    isDeepModelingEnabled: formData.get('isDeepModelingEnabled'),
   }
 
   return v.safeParse(FormDataSchema, rawData)

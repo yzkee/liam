@@ -19,6 +19,7 @@ type Props = {
   onVersionView: (versionId: string) => void
   onRetry?: () => void
   isWorkflowRunning?: boolean
+  onArtifactLinkClick: () => void
 }
 
 export const Chat: FC<Props> = ({
@@ -29,6 +30,7 @@ export const Chat: FC<Props> = ({
   onVersionView,
   onRetry,
   isWorkflowRunning = false,
+  onArtifactLinkClick,
 }) => {
   const { containerRef } = useScrollToBottom<HTMLDivElement>(
     timelineItems.length,
@@ -136,6 +138,7 @@ export const Chat: FC<Props> = ({
                 {...(message.type === 'schema_version' && {
                   onView: onVersionView,
                 })}
+                onArtifactLinkClick={onArtifactLinkClick}
               />
             ))
           }
@@ -146,6 +149,7 @@ export const Chat: FC<Props> = ({
               {...item}
               {...(item.type === 'error' && { onRetry })}
               {...(item.type === 'schema_version' && { onView: onVersionView })}
+              onArtifactLinkClick={onArtifactLinkClick}
             />
           )
         })}

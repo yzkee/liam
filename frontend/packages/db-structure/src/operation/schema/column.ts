@@ -8,6 +8,26 @@ const columnNamePathSchema = v.pipe(
   v.string(),
   v.regex(PATH_PATTERNS.COLUMN_NAME),
 )
+const columnTypePathSchema = v.pipe(
+  v.string(),
+  v.regex(PATH_PATTERNS.COLUMN_TYPE),
+)
+const columnCommentPathSchema = v.pipe(
+  v.string(),
+  v.regex(PATH_PATTERNS.COLUMN_COMMENT),
+)
+const columnCheckPathSchema = v.pipe(
+  v.string(),
+  v.regex(PATH_PATTERNS.COLUMN_CHECK),
+)
+const columnNotNullPathSchema = v.pipe(
+  v.string(),
+  v.regex(PATH_PATTERNS.COLUMN_NOT_NULL),
+)
+const columnDefaultPathSchema = v.pipe(
+  v.string(),
+  v.regex(PATH_PATTERNS.COLUMN_DEFAULT),
+)
 
 // Add column operation
 const addColumnOperationSchema = v.pipe(
@@ -56,6 +76,56 @@ const renameColumnOperationSchema = v.pipe(
   v.description('Rename existing column'),
 )
 
+// Replace column type operation
+const replaceColumnTypeOperationSchema = v.pipe(
+  v.object({
+    op: v.literal('replace'),
+    path: columnTypePathSchema,
+    value: v.string(),
+  }),
+  v.description('Replace column type'),
+)
+
+// Replace column comment operation
+const replaceColumnCommentOperationSchema = v.pipe(
+  v.object({
+    op: v.literal('replace'),
+    path: columnCommentPathSchema,
+    value: v.union([v.string(), v.null()]),
+  }),
+  v.description('Replace column comment'),
+)
+
+// Replace column check constraint operation
+const replaceColumnCheckOperationSchema = v.pipe(
+  v.object({
+    op: v.literal('replace'),
+    path: columnCheckPathSchema,
+    value: v.string(),
+  }),
+  v.description('Replace column check constraint'),
+)
+
+// Replace column notNull operation
+const replaceColumnNotNullOperationSchema = v.pipe(
+  v.object({
+    op: v.literal('replace'),
+    path: columnNotNullPathSchema,
+    value: v.boolean(),
+  }),
+  v.description('Replace column notNull constraint'),
+)
+
+// Replace column default operation
+const replaceColumnDefaultOperationSchema = v.pipe(
+  v.object({
+    op: v.literal('replace'),
+    path: columnDefaultPathSchema,
+    value: v.union([v.string(), v.null()]),
+  }),
+  v.description('Replace column default value'),
+)
+
 export type RenameColumnOperation = v.InferOutput<
   typeof renameColumnOperationSchema
 >
@@ -71,4 +141,9 @@ export const columnOperations = [
   addColumnOperationSchema,
   removeColumnOperationSchema,
   renameColumnOperationSchema,
+  replaceColumnTypeOperationSchema,
+  replaceColumnCommentOperationSchema,
+  replaceColumnCheckOperationSchema,
+  replaceColumnNotNullOperationSchema,
+  replaceColumnDefaultOperationSchema,
 ]

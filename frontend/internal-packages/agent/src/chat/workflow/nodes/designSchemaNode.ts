@@ -3,7 +3,6 @@ import type { RunnableConfig } from '@langchain/core/runnables'
 import type { Database } from '@liam-hq/db'
 import { invokeDesignAgent } from '../../../langchain/agents/databaseSchemaBuildAgent/agent'
 import { convertSchemaToText } from '../../../utils/convertSchemaToText'
-import { extractToolCallIds } from '../../../utils/messageHelpers'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 import { logAssistantMessage } from '../utils/timelineLogger'
@@ -18,26 +17,6 @@ export async function designSchemaNode(
   config: RunnableConfig,
 ): Promise<WorkflowState> {
   const assistantRole: Database['public']['Enums']['assistant_role_enum'] = 'db'
-
-  // Debug: Log incoming state
-  if (process.env['NODE_ENV'] !== 'production') {
-    // biome-ignore lint/suspicious/noConsole: Debug logging
-    console.log('[DEBUG] designSchemaNode - Incoming state:', {
-      messageCount: state.messages.length,
-      messageTypes: state.messages.map((m) => m._getType()),
-      lastMessage: state.messages[state.messages.length - 1],
-      toolCallsInMessages: state.messages.map((m, idx) => ({
-        index: idx,
-        type: m._getType(),
-        hasToolCalls:
-          'tool_calls' in m &&
-          Array.isArray(m.tool_calls) &&
-          m.tool_calls.length > 0,
-        toolCallIds: 'tool_calls' in m ? extractToolCallIds(m.tool_calls) : [],
-      })),
-    })
-  }
-
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
     return {
@@ -51,7 +30,7 @@ export async function designSchemaNode(
 
   // Remove reasoning field from AIMessages to avoid API issues
   // This prevents the "reasoning without required following item" error
-  const messages = state.messages.map((msg, idx) => {
+  const messages = state.messages.map((msg) => {
     if (msg instanceof AIMessage) {
       // Create a new AIMessage without the reasoning field
       // Clone the message but exclude reasoning if it exists
@@ -68,22 +47,6 @@ export async function designSchemaNode(
       // Remove reasoning from additional_kwargs if it exists
       if ('reasoning' in cleanedKwargs) {
         delete cleanedKwargs['reasoning']
-      }
-
-      // Debug: Log tool_calls preservation
-      if (
-        process.env['NODE_ENV'] !== 'production' &&
-        tool_calls &&
-        tool_calls.length > 0
-      ) {
-        // biome-ignore lint/suspicious/noConsole: Debug logging
-        console.log(
-          `[DEBUG] designSchemaNode - Preserving tool_calls for message ${idx}:`,
-          {
-            originalToolCalls: tool_calls,
-            toolCallIds: tool_calls.map((tc) => tc.id),
-          },
-        )
       }
 
       // Preserve all other message properties including tool_calls

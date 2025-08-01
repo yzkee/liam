@@ -1,5 +1,7 @@
-import { Button, Callout, Input } from '@liam-hq/ui'
 import {
+  Button,
+  Callout,
+  Input,
   ModalActions,
   ModalClose,
   ModalContent,
@@ -8,7 +10,7 @@ import {
   ModalPortal,
   ModalRoot,
   ModalTitle,
-} from '@liam-hq/ui/src/components/Modal/Modal'
+} from '@liam-hq/ui'
 import styles from './DeleteConfirmationModal.module.css'
 
 type DeleteConfirmationModalProps = {

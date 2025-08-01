@@ -1,1 +1,0 @@
-export { StructuredArtifact } from './StructuredArtifact'

@@ -62,6 +62,16 @@ const replaceConstraintDeleteOperationSchema = v.pipe(
   v.description('Replace constraint delete action'),
 )
 
+export type ReplaceConstraintDeleteOperation = v.InferOutput<
+  typeof replaceConstraintDeleteOperationSchema
+>
+
+export const isReplaceConstraintDeleteOperation = (
+  operation: Operation,
+): operation is ReplaceConstraintDeleteOperation => {
+  return v.safeParse(replaceConstraintDeleteOperationSchema, operation).success
+}
+
 const replaceConstraintUpdateOperationSchema = v.pipe(
   v.object({
     op: v.literal('replace'),
@@ -70,6 +80,16 @@ const replaceConstraintUpdateOperationSchema = v.pipe(
   }),
   v.description('Replace constraint update action'),
 )
+
+export type ReplaceConstraintUpdateOperation = v.InferOutput<
+  typeof replaceConstraintUpdateOperationSchema
+>
+
+export const isReplaceConstraintUpdateOperation = (
+  operation: Operation,
+): operation is ReplaceConstraintUpdateOperation => {
+  return v.safeParse(replaceConstraintUpdateOperationSchema, operation).success
+}
 
 export const constraintOperations = [
   addConstraintOperationSchema,

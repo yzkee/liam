@@ -129,11 +129,56 @@ const replaceColumnDefaultOperationSchema = v.pipe(
 export type RenameColumnOperation = v.InferOutput<
   typeof renameColumnOperationSchema
 >
+export type ReplaceColumnTypeOperation = v.InferOutput<
+  typeof replaceColumnTypeOperationSchema
+>
+export type ReplaceColumnCommentOperation = v.InferOutput<
+  typeof replaceColumnCommentOperationSchema
+>
+export type ReplaceColumnCheckOperation = v.InferOutput<
+  typeof replaceColumnCheckOperationSchema
+>
+export type ReplaceColumnNotNullOperation = v.InferOutput<
+  typeof replaceColumnNotNullOperationSchema
+>
+export type ReplaceColumnDefaultOperation = v.InferOutput<
+  typeof replaceColumnDefaultOperationSchema
+>
 
 export const isRenameColumnOperation = (
   operation: Operation,
 ): operation is RenameColumnOperation => {
   return v.safeParse(renameColumnOperationSchema, operation).success
+}
+
+export const isReplaceColumnTypeOperation = (
+  operation: Operation,
+): operation is ReplaceColumnTypeOperation => {
+  return v.safeParse(replaceColumnTypeOperationSchema, operation).success
+}
+
+export const isReplaceColumnCommentOperation = (
+  operation: Operation,
+): operation is ReplaceColumnCommentOperation => {
+  return v.safeParse(replaceColumnCommentOperationSchema, operation).success
+}
+
+export const isReplaceColumnCheckOperation = (
+  operation: Operation,
+): operation is ReplaceColumnCheckOperation => {
+  return v.safeParse(replaceColumnCheckOperationSchema, operation).success
+}
+
+export const isReplaceColumnNotNullOperation = (
+  operation: Operation,
+): operation is ReplaceColumnNotNullOperation => {
+  return v.safeParse(replaceColumnNotNullOperationSchema, operation).success
+}
+
+export const isReplaceColumnDefaultOperation = (
+  operation: Operation,
+): operation is ReplaceColumnDefaultOperation => {
+  return v.safeParse(replaceColumnDefaultOperationSchema, operation).success
 }
 
 // Export all column operations

@@ -55,6 +55,9 @@ export type RemoveTableOperation = v.InferOutput<
 export type ReplaceTableNameOperation = v.InferOutput<
   typeof replaceTableNameOperationSchema
 >
+export type ReplaceTableCommentOperation = v.InferOutput<
+  typeof replaceTableCommentOperationSchema
+>
 
 export const isAddTableOperation = (
   operation: Operation,
@@ -72,6 +75,12 @@ export const isReplaceTableNameOperation = (
   operation: Operation,
 ): operation is ReplaceTableNameOperation => {
   return v.safeParse(replaceTableNameOperationSchema, operation).success
+}
+
+export const isReplaceTableCommentOperation = (
+  operation: Operation,
+): operation is ReplaceTableCommentOperation => {
+  return v.safeParse(replaceTableCommentOperationSchema, operation).success
 }
 
 export const tableOperations = [

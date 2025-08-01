@@ -79,7 +79,9 @@ export const UploadSessionFormPresenter: FC<Props> = ({
 
   // Calculate hasContent for Enter key submission
   const hasContent =
-    !!selectedFile || textContent.trim().length > 0 || attachments.length > 0
+    (!!selectedFile && schemaStatus === 'valid') ||
+    textContent.trim().length > 0 ||
+    attachments.length > 0
   const handleEnterKeySubmission = useEnterKeySubmission(
     hasContent,
     isPending,

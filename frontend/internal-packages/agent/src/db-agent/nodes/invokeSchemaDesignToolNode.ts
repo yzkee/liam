@@ -70,13 +70,15 @@ export const invokeSchemaDesignToolNode = async (
   })
 
   // Sync all ToolMessages to timeline
-  const messages = result.messages
-  if (!Array.isArray(messages)) {
+  const resultMessages = result.messages
+  if (!Array.isArray(resultMessages)) {
     return result
   }
 
-  const syncedMessages = await Promise.all(
-    messages.map(async (message: BaseMessage) => {
+  // The ToolNode returns only the new ToolMessages, not the full message history
+  // We need to append these to the existing messages, not replace them
+  const newToolMessages = await Promise.all(
+    resultMessages.map(async (message: BaseMessage) => {
       return await withTimelineItemSync(message, {
         designSessionId: state.designSessionId,
         organizationId: state.organizationId || '',
@@ -87,14 +89,16 @@ export const invokeSchemaDesignToolNode = async (
     }),
   )
 
+  // Append the new tool messages to the existing state messages
+  const allMessages = [...state.messages, ...newToolMessages]
+
   // Check if schemaDesignTool was executed successfully and update workflow state
   let updatedResult = {
     ...state,
-    ...result,
-    messages: syncedMessages,
+    messages: allMessages,
   }
 
-  if (wasSchemaDesignToolSuccessful(syncedMessages)) {
+  if (wasSchemaDesignToolSuccessful(newToolMessages)) {
     // Fetch the updated schema from database
     const schemaResult = await fetchUpdatedSchemaWithResult(
       repositories,

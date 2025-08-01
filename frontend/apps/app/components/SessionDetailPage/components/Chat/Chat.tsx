@@ -19,7 +19,7 @@ type Props = {
   onVersionView: (versionId: string) => void
   onRetry?: () => void
   isWorkflowRunning?: boolean
-  onArtifactLinkClick?: () => void
+  onArtifactLinkClick: () => void
 }
 
 export const Chat: FC<Props> = ({

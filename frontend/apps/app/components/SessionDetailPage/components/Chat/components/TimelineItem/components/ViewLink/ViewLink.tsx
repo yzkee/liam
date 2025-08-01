@@ -8,7 +8,7 @@ type ViewLinkProps = {
   /**
    * The text to display in the link
    */
-  text?: string
+  text: string
   /**
    * Callback function when the link is clicked
    */
@@ -22,11 +22,7 @@ type ViewLinkProps = {
 /**
  * A link component for navigating to different views or sections
  */
-export const ViewLink: FC<ViewLinkProps> = ({
-  text = 'View Artifact',
-  onClick,
-  ariaLabel,
-}) => {
+export const ViewLink: FC<ViewLinkProps> = ({ text, onClick, ariaLabel }) => {
   return (
     <div className={styles.viewLinkContainer}>
       <Button

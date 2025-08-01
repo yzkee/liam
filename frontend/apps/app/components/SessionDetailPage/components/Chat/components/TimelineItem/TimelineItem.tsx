@@ -15,7 +15,7 @@ import { PM_AGENT_ROLE, QA_AGENT_ROLE } from './constants'
 type Props = PropsWithChildren &
   TimelineItemEntry & {
     showHeader?: boolean
-    onArtifactLinkClick?: () => void
+    onArtifactLinkClick: () => void
   }
 
 type ViewLinkConfig = {

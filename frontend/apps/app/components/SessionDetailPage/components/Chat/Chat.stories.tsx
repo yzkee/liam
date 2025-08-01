@@ -42,6 +42,7 @@ export const Default: Story = {
     timelineItems: ITEMS,
     onMessageSend: () => {},
     onVersionView: () => {},
+    onArtifactLinkClick: () => {},
   },
 }
 
@@ -52,6 +53,7 @@ export const AnimatedDemo: Story = {
     timelineItems: ITEMS,
     onMessageSend: () => {},
     onVersionView: () => {},
+    onArtifactLinkClick: () => {},
   },
   render: (props) => <AnimatedChatDemo {...props} />,
 }

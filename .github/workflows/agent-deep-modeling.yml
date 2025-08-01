@@ -68,7 +68,7 @@ jobs:
         continue-on-error: true
 
       - name: Post execution log to PR
-        uses: marocchino/sticky-pull-request-comment@v2
+        uses: marocchino/sticky-pull-request-comment@331f8f5b4215f0445d3c07b4967662a32a2d3e31 # v2.9.0
         with:
           header: agent-deep-modeling-execution
           path: execution_log.md

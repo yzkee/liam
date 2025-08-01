@@ -26,7 +26,8 @@ const mapDmlOperationsToUsecases = (
         useCaseId: dmlOp.useCaseId,
         operation_type: dmlOp.operation_type,
         sql: dmlOp.sql,
-        dml_execution_logs: [],
+        description: dmlOp.description,
+        dml_execution_logs: dmlOp.dml_execution_logs || [],
       }))
 
     return {

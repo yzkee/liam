@@ -96,7 +96,7 @@ export async function designSchemaNode(
     // Return state with error feedback as HumanMessage for self-recovery
     return {
       ...state,
-      messages: [...messages, errorFeedbackMessage],
+      messages: [errorFeedbackMessage],
       error: invokeResult.error,
     }
   }
@@ -126,7 +126,7 @@ export async function designSchemaNode(
 
   return {
     ...state,
-    messages: [...messages, syncedMessage],
+    messages: [syncedMessage],
     latestVersionNumber: state.latestVersionNumber + 1,
   }
 }

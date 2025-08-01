@@ -9,9 +9,9 @@ import {
 import type { FC, ReactNode } from 'react'
 import type { FormatType } from '../../../../../components/FormatIcon/FormatIcon'
 import { FormatIcon } from '../../../../../components/FormatIcon/FormatIcon'
-import { FormatSelectDropdown } from '../FormatSelectDropdown'
+import { FormatSelectDropdown } from '../../shared/FormatSelectDropdown'
+import { ViewErrorsCollapsible } from '../../shared/ViewErrorsCollapsible'
 import { SchemaLink } from '../SchemaLink'
-import { ViewErrorsCollapsible } from '../ViewErrorsCollapsible'
 import styles from './SchemaInfoSection.module.css'
 
 // Helper function to parse error message and wrap code in backticks with Code component

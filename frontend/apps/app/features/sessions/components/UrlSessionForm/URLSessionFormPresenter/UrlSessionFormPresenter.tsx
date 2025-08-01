@@ -3,13 +3,16 @@ import clsx from 'clsx'
 import { type ChangeEvent, type FC, useRef, useState } from 'react'
 import type { FormatType } from '../../../../../components/FormatIcon/FormatIcon'
 import { createAccessibleOpacityTransition } from '../../../../../utils/accessibleTransitions'
-import { AttachmentsContainer } from '../AttachmentsContainer'
-import { useAutoResizeTextarea } from '../hooks/useAutoResizeTextarea'
-import { useEnterKeySubmission } from '../hooks/useEnterKeySubmission'
-import { useFileAttachments } from '../hooks/useFileAttachments'
-import { useFileDragAndDrop } from '../hooks/useFileDragAndDrop'
-import { SchemaInfoSection, type SchemaStatus } from '../SchemaInfoSection'
-import { SessionFormActions } from '../SessionFormActions'
+import {
+  SchemaInfoSection,
+  type SchemaStatus,
+} from '../../GitHubSessionForm/SchemaInfoSection'
+import { AttachmentsContainer } from '../../shared/AttachmentsContainer'
+import { useAutoResizeTextarea } from '../../shared/hooks/useAutoResizeTextarea'
+import { useEnterKeySubmission } from '../../shared/hooks/useEnterKeySubmission'
+import { useFileAttachments } from '../../shared/hooks/useFileAttachments'
+import { useFileDragAndDrop } from '../../shared/hooks/useFileDragAndDrop'
+import { SessionFormActions } from '../../shared/SessionFormActions'
 import {
   fetchSchemaFromUrl,
   getFileNameFromUrl,

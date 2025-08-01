@@ -2,19 +2,22 @@
 
 import { type FC, useActionState, useEffect, useTransition } from 'react'
 import type { Projects } from '@/components/CommonLayout/AppBar/ProjectsDropdownMenu/services/getProjects'
-import { createSession } from '../../actions/createSession'
-import { getBranches } from '../../actions/getBranches'
+import { createGitHubSession } from './actions/createGitHubSession'
+import { getBranches } from './actions/getBranches'
 import { getSchemaFilePath } from './actions/getSchemaFilePath'
-import { SessionFormPresenter } from './SessionFormPresenter'
+import { GitHubSessionFormPresenter } from './GitHubSessionFormPresenter'
 
 type Props = {
   projects: Projects
   defaultProjectId?: string
 }
 
-export const SessionForm: FC<Props> = ({ projects, defaultProjectId }) => {
+export const GitHubSessionForm: FC<Props> = ({
+  projects,
+  defaultProjectId,
+}) => {
   const [, startTransition] = useTransition()
-  const [state, formAction, isPending] = useActionState(createSession, {
+  const [state, formAction, isPending] = useActionState(createGitHubSession, {
     success: false,
   })
 
@@ -51,7 +54,7 @@ export const SessionForm: FC<Props> = ({ projects, defaultProjectId }) => {
   }, [defaultProjectId, projects, branchesAction, schemaPathAction])
 
   return (
-    <SessionFormPresenter
+    <GitHubSessionFormPresenter
       projects={projects}
       defaultProjectId={defaultProjectId}
       branches={branchesState.branches}
@@ -62,6 +65,7 @@ export const SessionForm: FC<Props> = ({ projects, defaultProjectId }) => {
       onProjectChange={handleProjectChange}
       formAction={formAction}
       schemaFilePath={schemaPathState.path}
+      isTransitioning={false}
     />
   )
 }

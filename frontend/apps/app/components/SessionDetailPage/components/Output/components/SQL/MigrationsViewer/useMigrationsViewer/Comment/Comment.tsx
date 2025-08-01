@@ -12,9 +12,9 @@ type Props = {
 }
 
 const severityClassMap: Record<SeverityLevel, string> = {
-  High: styles.high,
-  Medium: styles.medium,
-  Low: styles.low,
+  High: styles.high ?? '',
+  Medium: styles.medium ?? '',
+  Low: styles.low ?? '',
 }
 
 export const Comment: FC<Props> = ({ level, comment, onQuickFix }) => {

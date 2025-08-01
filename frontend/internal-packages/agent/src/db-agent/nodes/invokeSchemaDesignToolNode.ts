@@ -8,6 +8,7 @@ import { getConfigurable } from '../../chat/workflow/shared/getConfigurable'
 import type { WorkflowState } from '../../chat/workflow/types'
 import { withTimelineItemSync } from '../../chat/workflow/utils/withTimelineItemSync'
 import type { Repositories } from '../../repositories'
+import { extractToolCallDetails } from '../../utils/messageHelpers'
 import { schemaDesignTool } from '../tools/schemaDesignTool'
 
 /**
@@ -70,6 +71,27 @@ export const invokeSchemaDesignToolNode = async (
 
   const toolNode = new ToolNode<{ messages: BaseMessage[] }>([schemaDesignTool])
 
+  // Debug: Check for tool calls in the last message
+  if (process.env['NODE_ENV'] !== 'production') {
+    const lastMessage = state.messages[state.messages.length - 1]
+    // biome-ignore lint/suspicious/noConsole: Debug logging
+    console.log(
+      '[DEBUG] invokeSchemaDesignToolNode - Before ToolNode invoke:',
+      {
+        lastMessageType: lastMessage?._getType(),
+        hasToolCalls:
+          lastMessage &&
+          'tool_calls' in lastMessage &&
+          Array.isArray(lastMessage.tool_calls) &&
+          lastMessage.tool_calls.length > 0,
+        toolCallDetails:
+          lastMessage && 'tool_calls' in lastMessage
+            ? extractToolCallDetails(lastMessage.tool_calls)
+            : [],
+      },
+    )
+  }
+
   const result = await toolNode.invoke(state, {
     configurable: {
       ...config.configurable,
@@ -103,6 +125,21 @@ export const invokeSchemaDesignToolNode = async (
   // We need to append these to the existing messages, not replace them
   const newToolMessages = await Promise.all(
     resultMessages.map(async (message: BaseMessage) => {
+      // Debug: Log tool message details
+      if (process.env['NODE_ENV'] !== 'production' && isToolMessage(message)) {
+        // biome-ignore lint/suspicious/noConsole: Debug logging
+        console.log(
+          '[DEBUG] invokeSchemaDesignToolNode - Processing ToolMessage:',
+          {
+            tool_call_id: message.tool_call_id,
+            name: message.name,
+            contentPreview:
+              typeof message.content === 'string'
+                ? message.content.substring(0, 100)
+                : message.content,
+          },
+        )
+      }
       return await withTimelineItemSync(message, {
         designSessionId: state.designSessionId,
         organizationId: state.organizationId || '',

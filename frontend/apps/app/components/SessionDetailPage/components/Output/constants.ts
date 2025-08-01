@@ -4,7 +4,7 @@ export const OUTPUT_TABS = {
   ARTIFACT: 'artifact',
 } as const
 
-type OutputTabValue = (typeof OUTPUT_TABS)[keyof typeof OUTPUT_TABS]
+export type OutputTabValue = (typeof OUTPUT_TABS)[keyof typeof OUTPUT_TABS]
 
 type OutputTab = {
   value: OutputTabValue

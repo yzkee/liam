@@ -6,6 +6,7 @@ import type { TimelineItemEntry } from '../../types'
 import styles from './Chat.module.css'
 import { ChatInput } from './components/ChatInput'
 import { TimelineItem } from './components/TimelineItem'
+import { WorkflowRunningIndicator } from './components/WorkflowRunningIndicator'
 import { sendChatMessage } from './services'
 import { generateTimelineItemId } from './services/timelineItemHelpers'
 import { useScrollToBottom } from './useScrollToBottom'
@@ -17,9 +18,8 @@ type Props = {
   onMessageSend: (message: TimelineItemEntry) => void
   onVersionView: (versionId: string) => void
   onRetry?: () => void
-  isLoading?: boolean
-  isStreaming?: boolean
-  onCancelStream?: () => void
+  isWorkflowRunning?: boolean
+  onArtifactLinkClick: () => void
 }
 
 export const Chat: FC<Props> = ({
@@ -29,9 +29,8 @@ export const Chat: FC<Props> = ({
   onMessageSend,
   onVersionView,
   onRetry,
-  isLoading = false,
-  isStreaming = false,
-  onCancelStream,
+  isWorkflowRunning = false,
+  onArtifactLinkClick,
 }) => {
   const { containerRef } = useScrollToBottom<HTMLDivElement>(
     timelineItems.length,
@@ -139,6 +138,7 @@ export const Chat: FC<Props> = ({
                 {...(message.type === 'schema_version' && {
                   onView: onVersionView,
                 })}
+                onArtifactLinkClick={onArtifactLinkClick}
               />
             ))
           }
@@ -149,22 +149,16 @@ export const Chat: FC<Props> = ({
               {...item}
               {...(item.type === 'error' && { onRetry })}
               {...(item.type === 'schema_version' && { onView: onVersionView })}
+              onArtifactLinkClick={onArtifactLinkClick}
             />
           )
         })}
-        {isLoading && (
-          <div className={styles.loadingIndicator}>
-            <div className={styles.loadingDot} />
-            <div className={styles.loadingDot} />
-            <div className={styles.loadingDot} />
-          </div>
-        )}
+        {isWorkflowRunning && <WorkflowRunningIndicator />}
       </div>
       <ChatInput
         onSendMessage={handleSendMessage}
-        isLoading={isLoading}
+        isWorkflowRunning={isWorkflowRunning}
         schema={schemaData}
-        onCancel={isStreaming ? onCancelStream : undefined}
       />
     </div>
   )

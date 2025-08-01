@@ -1,5 +1,6 @@
 'use client'
 
+import { useCopy } from '@liam-hq/ui/hooks'
 import {
   Tabs as FumadocsTabs,
   type TabsProps as FumadocsTabsProps,
@@ -32,12 +33,14 @@ type TabProps = PropsWithChildren<ComponentProps<typeof TabsContent>> & {
 }
 
 export const Tab = ({ children, copyable, ...props }: TabProps) => {
+  const { copy } = useCopy()
+
   return (
     <TabsContent {...props} className="relative group">
       {children}
       {copyable && typeof children === 'string' && (
         <CopyButton
-          onCopy={() => navigator.clipboard.writeText(children)}
+          onCopy={() => copy(children)}
           className="absolute top-3 right-3"
         />
       )}

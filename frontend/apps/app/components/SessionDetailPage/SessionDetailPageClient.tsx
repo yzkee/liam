@@ -2,10 +2,11 @@
 
 import type { Schema } from '@liam-hq/db-structure'
 import clsx from 'clsx'
-import { type FC, useCallback } from 'react'
+import { type FC, useCallback, useState } from 'react'
 import { Chat } from './components/Chat'
 import { Output } from './components/Output'
 import { useRealtimeArtifact } from './components/Output/components/Artifact/hooks/useRealtimeArtifact'
+import { OUTPUT_TABS } from './components/Output/constants'
 import { OutputPlaceholder } from './components/OutputPlaceholder'
 import { useRealtimeTimelineItems } from './hooks/useRealtimeTimelineItems'
 import { useRealtimeVersionsWithSchema } from './hooks/useRealtimeVersionsWithSchema'
@@ -72,6 +73,12 @@ export const SessionDetailPageClient: FC<Props> = ({
     ),
   )
 
+  const [activeTab, setActiveTab] = useState<string | undefined>(undefined)
+
+  const handleArtifactLinkClick = useCallback(() => {
+    setActiveTab(OUTPUT_TABS.ARTIFACT)
+  }, [])
+
   const hasSelectedVersion = selectedVersion !== null
 
   // Use realtime artifact hook to monitor artifact changes
@@ -100,22 +107,38 @@ export const SessionDetailPageClient: FC<Props> = ({
             schemaData={displayedSchema}
             designSessionId={designSessionId}
             timelineItems={timelineItems}
+            isWorkflowRunning={status === 'pending'}
             onMessageSend={addOrUpdateTimelineItem}
             onVersionView={handleViewVersion}
+            onArtifactLinkClick={handleArtifactLinkClick}
           />
         </div>
         {hasSelectedVersion && (
           <div className={styles.outputSection}>
             {shouldShowOutput ? (
-              <Output
-                designSessionId={designSessionId}
-                schema={displayedSchema}
-                prevSchema={prevSchema}
-                sqlReviewComments={SQL_REVIEW_COMMENTS}
-                versions={versions}
-                selectedVersion={selectedVersion}
-                onSelectedVersionChange={handleChangeSelectedVersion}
-              />
+              activeTab !== undefined ? (
+                <Output
+                  designSessionId={designSessionId}
+                  schema={displayedSchema}
+                  prevSchema={prevSchema}
+                  sqlReviewComments={SQL_REVIEW_COMMENTS}
+                  versions={versions}
+                  selectedVersion={selectedVersion}
+                  onSelectedVersionChange={handleChangeSelectedVersion}
+                  activeTab={activeTab}
+                  onTabChange={setActiveTab}
+                />
+              ) : (
+                <Output
+                  designSessionId={designSessionId}
+                  schema={displayedSchema}
+                  prevSchema={prevSchema}
+                  sqlReviewComments={SQL_REVIEW_COMMENTS}
+                  versions={versions}
+                  selectedVersion={selectedVersion}
+                  onSelectedVersionChange={handleChangeSelectedVersion}
+                />
+              )
             ) : (
               <OutputPlaceholder />
             )}

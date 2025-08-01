@@ -1,11 +1,16 @@
 {
   "name": "@liam-hq/ui",
   "license": "Apache-2.0",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "publishConfig": {
     "access": "public"
   },
   "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./hooks": "./src/hooks/index.ts",
+    "./src/styles/globals.css": "./src/styles/globals.css"
+  },
   "dependencies": {
     "@radix-ui/react-collapsible": "1.1.11",
     "@radix-ui/react-context-menu": "2.2.15",

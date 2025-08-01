@@ -4,6 +4,7 @@ import {
   MessageOptionButtons,
 } from '@/components/SessionDetailPage/components/Chat/components/TimelineItem/components/AgentMessage/components/MessageOptionButtons/MessageOptionButtons'
 import { ProcessIndicator } from '../ProcessIndicator'
+import { ViewLink } from '../ViewLink'
 import { AgentMessage } from './AgentMessage'
 
 const meta = {
@@ -513,6 +514,38 @@ export const BuildAfterOptionSelectedCompleteCollapsed: Story = {
         primaryActionLabel="View Schema"
         secondaryActionLabel="Close"
         initialExpanded={false}
+      />
+    ),
+  },
+}
+
+export const PMWithRequirementsAnalyzed: Story = {
+  args: {
+    state: 'default',
+    message: 'Your requirements have been analyzed and saved',
+    time: '14:30',
+    assistantRole: 'pm',
+    children: (
+      <ViewLink
+        text="View Requirements"
+        ariaLabel="Navigate to requirements tab"
+        onClick={() => {}}
+      />
+    ),
+  },
+}
+
+export const QAWithUseCasesSaved: Story = {
+  args: {
+    state: 'default',
+    message: 'Your use cases have been saved and are ready for implementation',
+    time: '14:35',
+    assistantRole: 'qa',
+    children: (
+      <ViewLink
+        text="View Use Cases"
+        ariaLabel="Navigate to use cases tab"
+        onClick={() => {}}
       />
     ),
   },

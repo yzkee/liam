@@ -15,25 +15,29 @@
 }
 
 .wrapper.info {
-  background: var(--info-background);
+  color: var(--toast-info-foreground);
+  background: var(--toast-info-background);
   border-color: var(--color-teal-800);
-  box-shadow: 0 0 20px 0 rgb(247 80 73 / 40%);
+  box-shadow: 0 0 20px 0 rgb(20 188 255 / 40%);
 }
 
 .wrapper.error {
-  background: var(--error-background);
+  color: var(--toast-error-foreground);
+  background: var(--toast-error-background);
   border-color: var(--color-red-500);
   box-shadow: 0 0 20px 0 rgb(247 80 73 / 40%);
 }
 
 .wrapper.success {
-  background: var(--success-background);
+  color: var(--toast-success-foreground);
+  background: var(--toast-success-background);
   border-color: var(--color-green-400);
   box-shadow: 0 0 20px 0 rgb(29 237 131 / 40%);
 }
 
 .wrapper.warning {
-  background: var(--warning-background);
+  color: var(--toast-warning-foreground);
+  background: var(--toast-warning-background);
   border-color: var(--color-gold-alpha-100);
   box-shadow: 0 0 20px 0 rgb(255 191 54 / 40%);
 }
@@ -64,42 +68,10 @@
   color: var(--color-gray-1000);
 }
 
-.wrapper.info .title {
-  color: var(--info-foreground);
-}
-
-.wrapper.error .title {
-  color: var(--error-foreground);
-}
-
-.wrapper.success .title {
-  color: var(--success-foreground);
-}
-
-.wrapper.warning .title {
-  color: var(--warning-foreground);
-}
-
 .description {
   font-size: var(--font-size-3);
   font-weight: 500;
   color: var(--color-gray-400);
-}
-
-.wrapper.info .description {
-  color: var(--info-foreground);
-}
-
-.wrapper.error .description {
-  color: var(--error-foreground);
-}
-
-.wrapper.success .description {
-  color: var(--success-foreground);
-}
-
-.wrapper.warning .description {
-  color: var(--warning-foreground);
 }
 
 .viewport {

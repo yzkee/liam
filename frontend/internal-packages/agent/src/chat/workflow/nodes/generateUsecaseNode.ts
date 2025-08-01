@@ -132,7 +132,7 @@ export async function generateUsecaseNode(
 
       const updatedState = {
         ...state,
-        messages: [...state.messages, usecaseMessage],
+        messages: [usecaseMessage],
         generatedUsecases: response.usecases,
         error: undefined, // Clear error on success
       }

@@ -58,6 +58,16 @@ export const invokeSchemaDesignToolNode = async (
   }
   const { repositories } = configurableResult.value
 
+  // Debug: Log the incoming state
+  if (process.env['NODE_ENV'] !== 'production') {
+    // biome-ignore lint/suspicious/noConsole: Debug logging
+    console.log('[DEBUG] invokeSchemaDesignToolNode - Incoming state:', {
+      messageCount: state.messages.length,
+      lastMessageType: state.messages[state.messages.length - 1]?._getType(),
+      lastMessage: state.messages[state.messages.length - 1],
+    })
+  }
+
   const toolNode = new ToolNode<{ messages: BaseMessage[] }>([schemaDesignTool])
 
   const result = await toolNode.invoke(state, {
@@ -68,6 +78,20 @@ export const invokeSchemaDesignToolNode = async (
       designSessionId: state.designSessionId,
     },
   })
+
+  // Debug: Log what ToolNode returned
+  if (process.env['NODE_ENV'] !== 'production') {
+    // biome-ignore lint/suspicious/noConsole: Debug logging
+    console.log('[DEBUG] invokeSchemaDesignToolNode - ToolNode result:', {
+      hasMessages: 'messages' in result,
+      resultMessagesCount: Array.isArray(result.messages)
+        ? result.messages.length
+        : 0,
+      resultMessageTypes: Array.isArray(result.messages)
+        ? result.messages.map((m) => m._getType())
+        : [],
+    })
+  }
 
   // Sync all ToolMessages to timeline
   const resultMessages = result.messages
@@ -91,6 +115,17 @@ export const invokeSchemaDesignToolNode = async (
 
   // Append the new tool messages to the existing state messages
   const allMessages = [...state.messages, ...newToolMessages]
+
+  // Debug: Log the final message state
+  if (process.env['NODE_ENV'] !== 'production') {
+    // biome-ignore lint/suspicious/noConsole: Debug logging
+    console.log('[DEBUG] invokeSchemaDesignToolNode - Final state:', {
+      originalMessageCount: state.messages.length,
+      newToolMessageCount: newToolMessages.length,
+      finalMessageCount: allMessages.length,
+      finalMessageTypes: allMessages.map((m) => m._getType()),
+    })
+  }
 
   // Check if schemaDesignTool was executed successfully and update workflow state
   let updatedResult = {

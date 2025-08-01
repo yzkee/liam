@@ -30,10 +30,19 @@ const processFile = (
   setSelectedFile: (file: File) => void,
   setDetectedFormat: (format: FormatType | null) => void,
   setSelectedFormat: (format: FormatType | null) => void,
+  fileInputRef: React.RefObject<HTMLInputElement | null>,
 ) => {
   const isValid = isValidFileExtension(file.name)
   setSchemaStatus(isValid ? 'valid' : 'invalid')
   setSelectedFile(file)
+
+  // Create a new FileList and set it to the input element
+  const dataTransfer = new DataTransfer()
+  dataTransfer.items.add(file)
+  if (fileInputRef.current) {
+    fileInputRef.current.files = dataTransfer.files
+  }
+
   if (isValid) {
     const format = getFileFormat(file.name)
     setDetectedFormat(format)
@@ -87,6 +96,7 @@ export const UploadSessionFormPresenter: FC<Props> = ({
         setSelectedFile,
         setDetectedFormat,
         setSelectedFormat,
+        fileInputRef,
       )
     }
   }
@@ -113,6 +123,7 @@ export const UploadSessionFormPresenter: FC<Props> = ({
         setSelectedFile,
         setDetectedFormat,
         setSelectedFormat,
+        fileInputRef,
       )
     }
   }

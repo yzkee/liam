@@ -243,8 +243,9 @@ export const InteractiveWithError: Story = {
       setTimeout(() => {
         setIsPending(false)
         // Error for empty message
-        const message = formData.get('initialMessage') as string
-        if (!message?.trim()) {
+        const message = formData.get('initialMessage')
+        const messageString = typeof message === 'string' ? message : ''
+        if (!messageString?.trim()) {
           setFormError('Please enter a valid message.')
         } else {
           setFormError(

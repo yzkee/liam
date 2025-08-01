@@ -14,11 +14,13 @@ import { VersionDropdown } from './VersionDropdown'
 type Props = ComponentProps<typeof VersionDropdown> & {
   schema: Schema
   tabValue: OutputTabValue
+  artifactDoc?: string
 }
 
 export const Header: FC<Props> = ({
   schema,
   tabValue,
+  artifactDoc,
   ...propsForVersionDropdown
 }) => {
   return (
@@ -54,7 +56,7 @@ export const Header: FC<Props> = ({
         </TabsTrigger>
       </TabsList>
       <div className={styles.tail}>
-        <ExportDropdown schema={schema} />
+        <ExportDropdown schema={schema} artifactDoc={artifactDoc} />
       </div>
     </div>
   )

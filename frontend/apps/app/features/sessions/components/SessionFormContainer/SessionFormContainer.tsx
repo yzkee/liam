@@ -1,42 +1,22 @@
+'use client'
+
 import { type FC, useEffect, useRef, useState } from 'react'
 import type { Projects } from '@/components/CommonLayout/AppBar/ProjectsDropdownMenu/services/getProjects'
 import { createAccessibleOpacityTransition } from '@/utils/accessibleTransitions'
-import { GitHubSessionFormPresenter } from './GitHubSessionFormPresenter'
-import styles from './SessionFormPresenter.module.css'
+import { GitHubSessionForm } from '../GitHubSessionForm'
+import { UploadSessionForm } from '../UploadSessionForm'
+import { UrlSessionForm } from '../UrlSessionForm'
+import styles from './SessionFormContainer.module.css'
 import { type SessionMode, SessionModeSelector } from './SessionModeSelector'
-import { UploadSessionFormPresenter } from './UploadSessionFormPresenter'
-import { URLSessionFormPresenter } from './URLSessionFormPresenter'
-
-type Branch = {
-  name: string
-  sha: string
-  protected: boolean
-}
 
 type Props = {
   projects: Projects
   defaultProjectId?: string
-  branches: Branch[]
-  isBranchesLoading: boolean
-  branchesError?: string
-  formError?: string
-  isPending: boolean
-  onProjectChange: (projectId: string) => void
-  formAction: (formData: FormData) => void
-  schemaFilePath: string | null
 }
 
-export const SessionFormPresenter: FC<Props> = ({
+export const SessionFormContainer: FC<Props> = ({
   projects,
   defaultProjectId,
-  branches,
-  isBranchesLoading,
-  branchesError,
-  formError,
-  isPending,
-  onProjectChange,
-  formAction,
-  schemaFilePath,
 }) => {
   const [mode, setMode] = useState<SessionMode>('github')
   const [isTransitioning, setIsTransitioning] = useState(false)
@@ -140,18 +120,9 @@ export const SessionFormPresenter: FC<Props> = ({
             aria-labelledby="github-tab"
             style={createAccessibleOpacityTransition(!isTransitioning)}
           >
-            <GitHubSessionFormPresenter
+            <GitHubSessionForm
               projects={projects}
               defaultProjectId={defaultProjectId}
-              branches={branches}
-              isBranchesLoading={isBranchesLoading}
-              branchesError={branchesError}
-              formError={formError}
-              isPending={isPending}
-              onProjectChange={onProjectChange}
-              formAction={formAction}
-              isTransitioning={isTransitioning}
-              schemaFilePath={schemaFilePath}
             />
           </div>
         )}
@@ -162,12 +133,7 @@ export const SessionFormPresenter: FC<Props> = ({
             aria-labelledby="upload-tab"
             style={createAccessibleOpacityTransition(!isTransitioning)}
           >
-            <UploadSessionFormPresenter
-              formError={formError}
-              isPending={isPending}
-              formAction={formAction}
-              isTransitioning={isTransitioning}
-            />
+            <UploadSessionForm />
           </div>
         )}
         {mode === 'url' && (
@@ -177,12 +143,7 @@ export const SessionFormPresenter: FC<Props> = ({
             aria-labelledby="url-tab"
             style={createAccessibleOpacityTransition(!isTransitioning)}
           >
-            <URLSessionFormPresenter
-              formError={formError}
-              isPending={isPending}
-              formAction={formAction}
-              isTransitioning={isTransitioning}
-            />
+            <UrlSessionForm />
           </div>
         )}
       </div>

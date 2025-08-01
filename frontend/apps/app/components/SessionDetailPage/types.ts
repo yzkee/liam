@@ -75,6 +75,8 @@ type BaseTimelineItemEntry = {
     | 'assistant_log'
     | 'query_result'
   timestamp: Date
+  // Backend artifact_action field - used to determine when to show view links
+  artifactAction?: 'created' | 'updated' | null
 }
 
 export type UserTimelineItemEntry = BaseTimelineItemEntry & {
@@ -85,7 +87,6 @@ export type UserTimelineItemEntry = BaseTimelineItemEntry & {
 export type AssistantTimelineItemEntry = BaseTimelineItemEntry & {
   type: 'assistant'
   role: AssistantRole
-  artifactAction?: 'created' | 'updated' | null
 }
 
 export type SchemaVersionTimelineItemEntry = BaseTimelineItemEntry & {
@@ -102,7 +103,6 @@ export type ErrorTimelineItemEntry = BaseTimelineItemEntry & {
 export type AssistantLogTimelineItemEntry = BaseTimelineItemEntry & {
   type: 'assistant_log'
   role: AssistantRole
-  artifactAction?: 'created' | 'updated' | null
 }
 
 export type QueryResultTimelineItemEntry = BaseTimelineItemEntry & {

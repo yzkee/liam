@@ -15,6 +15,7 @@ import { SessionFormActions } from '../../shared/SessionFormActions'
 import { DropZone } from './DropZone'
 import styles from './UploadSessionFormPresenter.module.css'
 import { getFileFormat, isValidFileExtension } from './utils/fileValidation'
+import { calculateHasContent } from './utils/hasContentCalculation'
 
 type Props = {
   formError?: string
@@ -78,10 +79,12 @@ export const UploadSessionFormPresenter: FC<Props> = ({
   } = useFileAttachments()
 
   // Calculate hasContent for Enter key submission
-  const hasContent =
-    (!!selectedFile && schemaStatus === 'valid') ||
-    textContent.trim().length > 0 ||
-    attachments.length > 0
+  const hasContent = calculateHasContent({
+    selectedFile,
+    schemaStatus,
+    textContent,
+    attachments,
+  })
   const handleEnterKeySubmission = useEnterKeySubmission(
     hasContent,
     isPending,

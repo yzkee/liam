@@ -237,7 +237,7 @@ export const UploadSessionFormPresenter: FC<Props> = ({
           <div className={styles.textareaWrapper ?? ''}>
             <textarea
               ref={textareaRef}
-              name="message"
+              name="initialMessage"
               placeholder="Enter your database design instructions. For example: Design a database for an e-commerce site that manages users, products, and orders..."
               value={textContent}
               onChange={handleTextareaChange}

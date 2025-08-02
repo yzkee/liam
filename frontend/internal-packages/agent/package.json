@@ -5,7 +5,7 @@
   "main": "src/index.ts",
   "dependencies": {
     "@langchain/community": "0.3.49",
-    "@langchain/core": "0.3.62",
+    "@langchain/core": "0.3.66",
     "@langchain/langgraph": "0.3.10",
     "@langchain/openai": "0.5.18",
     "@liam-hq/artifact": "workspace:*",

@@ -466,7 +466,7 @@
 .executionLogTimestamp {
   color: var(--global-mute-text);
   font-family: var(--code-font);
-  font-size: 12px;
+  font-size: var(--font-size-2);
   white-space: nowrap;
   flex-shrink: 0;
   margin-left: auto;
@@ -475,7 +475,7 @@
 .body .executionLogSuccess {
   color: var(--severity-positive-100) !important;
   font-family: var(--code-font);
-  font-size: 12px;
+  font-size: var(--font-size-3);
 }
 
 .body .executionLogFailed {
@@ -489,7 +489,6 @@
   margin-top: var(--spacing-6) !important;
   margin-bottom: 0 !important;
   padding-left: var(--spacing-1) !important;
-  font-weight: 600;
   font-size: var(--font-size-4);
 }
 
@@ -531,6 +530,7 @@
 .body ul:has(.executionLogItem) {
   padding-left: var(--spacing-1) !important;
   list-style: none !important;
+  padding-bottom: var(--spacing-5);
 }
 
 /* Execution Logs list items */

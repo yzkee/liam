@@ -33,6 +33,88 @@ export const Artifact: FC<Props> = ({ doc }) => {
               remarkPlugins={[remarkGfm]}
               rehypePlugins={[rehypeRaw]}
               components={{
+                p(props) {
+                  const { children, ...rest } = props
+
+                  // Extract text content from children
+                  const extractText = (node: unknown): string => {
+                    if (typeof node === 'string') return node
+                    if (Array.isArray(node))
+                      return node.map(extractText).join('')
+                    if (
+                      node &&
+                      typeof node === 'object' &&
+                      'props' in node &&
+                      // @ts-expect-error - React children can be any type
+                      node.props?.children
+                    )
+                      // @ts-expect-error - React children can be any type
+                      return extractText(node.props.children)
+                    return ''
+                  }
+
+                  const text = extractText(children)
+
+                  // Check if this paragraph contains "Execution Logs:"
+                  if (text.includes('Execution Logs:')) {
+                    return (
+                      <p className={styles.executionLogsHeading} {...rest}>
+                        {children}
+                      </p>
+                    )
+                  }
+
+                  return <p {...rest}>{children}</p>
+                },
+                li(props) {
+                  const { children, ...rest } = props
+
+                  // Extract text content from children
+                  const extractText = (node: unknown): string => {
+                    if (typeof node === 'string') return node
+                    if (Array.isArray(node))
+                      return node.map(extractText).join('')
+                    if (
+                      node &&
+                      typeof node === 'object' &&
+                      'props' in node &&
+                      // @ts-expect-error - React children can be any type
+                      node.props?.children
+                    )
+                      // @ts-expect-error - React children can be any type
+                      return extractText(node.props.children)
+                    return ''
+                  }
+
+                  const text = extractText(children)
+
+                  // Check if this is an execution log entry
+                  const executionLogMatch = text.match(
+                    /^(.+?):\s*(✅ Success|❌ Failed)\s*-\s*(.+)$/,
+                  )
+                  if (executionLogMatch) {
+                    const [, timestamp, status, message] = executionLogMatch
+                    const isSuccess = status?.includes('✅ Success')
+                    return (
+                      <li className={styles.executionLogItem} {...rest}>
+                        <span
+                          className={
+                            isSuccess
+                              ? styles.executionLogSuccess
+                              : styles.executionLogFailed
+                          }
+                        >
+                          {status} - {message}
+                        </span>
+                        <span className={styles.executionLogTimestamp}>
+                          {timestamp}
+                        </span>
+                      </li>
+                    )
+                  }
+
+                  return <li {...rest}>{children}</li>
+                },
                 code(props: CodeProps) {
                   const { children, className, ...rest } = props
                   const match = /language-(\w+)/.exec(className || '')

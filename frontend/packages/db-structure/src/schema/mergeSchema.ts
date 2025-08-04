@@ -1,5 +1,12 @@
 import { err, ok, type Result } from 'neverthrow'
-import type { Columns, Schema, Table, Tables } from './schema.js'
+import type {
+  Columns,
+  Constraints,
+  Indexes,
+  Schema,
+  Table,
+  Tables,
+} from './schema.js'
 
 const getRemovedColumns = (
   beforeColumns: Columns,
@@ -12,6 +19,35 @@ const getRemovedColumns = (
     }
   }
   return removedColumns
+}
+
+const getRemovedIndexes = (
+  beforeIndexes: Indexes,
+  afterIndexes: Indexes,
+): Indexes => {
+  const removedIndexes: Indexes = {}
+  for (const indexName in beforeIndexes) {
+    if (!(indexName in afterIndexes) && beforeIndexes[indexName]) {
+      removedIndexes[indexName] = beforeIndexes[indexName]
+    }
+  }
+  return removedIndexes
+}
+
+const getRemovedConstraints = (
+  beforeConstraints: Constraints,
+  afterConstraints: Constraints,
+): Constraints => {
+  const removedConstraints: Constraints = {}
+  for (const constraintName in beforeConstraints) {
+    if (
+      !(constraintName in afterConstraints) &&
+      beforeConstraints[constraintName]
+    ) {
+      removedConstraints[constraintName] = beforeConstraints[constraintName]
+    }
+  }
+  return removedConstraints
 }
 
 const mergeTable = (
@@ -37,6 +73,24 @@ const mergeTable = (
     mergedTable.columns = {
       ...(mergedTable.columns || {}),
       ...removedColumns,
+    }
+
+    const removedIndexes = getRemovedIndexes(
+      beforeTable.indexes,
+      afterTable.indexes,
+    )
+    mergedTable.indexes = {
+      ...(mergedTable.indexes || {}),
+      ...removedIndexes,
+    }
+
+    const removedConstraints = getRemovedConstraints(
+      beforeTable.constraints,
+      afterTable.constraints,
+    )
+    mergedTable.constraints = {
+      ...(mergedTable.constraints || {}),
+      ...removedConstraints,
     }
   }
 

@@ -32,25 +32,10 @@ type TraceEnvironmentInfo = {
     timezone: string
   }
 
-  // Application Context
-  app: {
-    memory_usage: NodeJS.MemoryUsage
-    uptime: number
-    pid: number
-  }
-
   // Git Context
   git: {
     branch: string
     commit: string
-    dirty: boolean
-  }
-
-  // Performance Context
-  performance: {
-    cpu_usage: NodeJS.CpuUsage
-    memory_heap_used: number
-    memory_heap_total: number
   }
 }
 
@@ -101,23 +86,6 @@ const getCurrentCommit = (): Result<string, Error> => {
 }
 
 /**
- * Check if Git working directory is dirty using Result type
- */
-const isGitDirty = (): Result<boolean, Error> => {
-  return Result.fromThrowable(
-    () => {
-      const status = execSync('git status --porcelain', {
-        encoding: 'utf8',
-        timeout: 5000,
-        stdio: ['ignore', 'pipe', 'ignore'],
-      }).trim()
-      return status.length > 0
-    },
-    (error) => new Error(`Failed to check git status: ${String(error)}`),
-  )()
-}
-
-/**
  * Get LangGraph version from package.json using Result type
  */
 const getLangGraphVersion = (): Result<string, Error> => {
@@ -134,12 +102,23 @@ const getLangGraphVersion = (): Result<string, Error> => {
 }
 
 /**
+ * Get environment name with proper preview/production detection
+ */
+const getEnvironmentName = (): string => {
+  // Use NEXT_PUBLIC_ENV_NAME first (can be 'preview' or 'production')
+  const nextPublicEnv = process.env['NEXT_PUBLIC_ENV_NAME']
+  if (nextPublicEnv) {
+    return nextPublicEnv
+  }
+
+  // Fallback to NODE_ENV
+  return process.env['NODE_ENV'] || 'development'
+}
+
+/**
  * Collect all environment information
  */
 const collectEnvironmentInfo = (): TraceEnvironmentInfo => {
-  const memoryUsage = process.memoryUsage()
-  const cpuUsage = process.cpuUsage()
-
   return {
     runtime: {
       name: 'node',
@@ -148,7 +127,7 @@ const collectEnvironmentInfo = (): TraceEnvironmentInfo => {
       arch: process.arch,
     },
     environment: {
-      name: process.env['NODE_ENV'] || 'development',
+      name: getEnvironmentName(),
       region: process.env['VERCEL_REGION'] || process.env['AWS_REGION'],
       nodeEnv: process.env['NODE_ENV'],
     },
@@ -157,20 +136,9 @@ const collectEnvironmentInfo = (): TraceEnvironmentInfo => {
       hostname: os.hostname(),
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     },
-    app: {
-      memory_usage: memoryUsage,
-      uptime: process.uptime(),
-      pid: process.pid,
-    },
     git: {
       branch: getCurrentBranch().unwrapOr('unknown'),
       commit: getCurrentCommit().unwrapOr('unknown'),
-      dirty: isGitDirty().unwrapOr(false),
-    },
-    performance: {
-      cpu_usage: cpuUsage,
-      memory_heap_used: memoryUsage.heapUsed,
-      memory_heap_total: memoryUsage.heapTotal,
     },
   }
 }

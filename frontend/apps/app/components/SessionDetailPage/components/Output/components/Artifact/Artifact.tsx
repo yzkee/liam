@@ -9,7 +9,14 @@ import remarkGfm from 'remark-gfm'
 import { CopyButton } from '../shared/CopyButton'
 import styles from './Artifact.module.css'
 import { TableOfContents } from './TableOfContents/TableOfContents'
-import { generateHeadingId } from './utils'
+import {
+  EXECUTION_SECTION_TITLE,
+  FAILURE_ICON,
+  FAILURE_STATUS,
+  generateHeadingId,
+  SUCCESS_ICON,
+  SUCCESS_STATUS,
+} from './utils'
 
 type CodeProps = {
   className?: string
@@ -55,8 +62,8 @@ export const Artifact: FC<Props> = ({ doc }) => {
 
                   const text = extractText(children)
 
-                  // Check if this paragraph contains "Execution Logs:"
-                  if (text.includes('Execution Logs:')) {
+                  // Check if this paragraph contains execution section title
+                  if (text.includes(`${EXECUTION_SECTION_TITLE}:`)) {
                     return (
                       <p className={styles.executionLogsHeading} {...rest}>
                         {children}
@@ -89,12 +96,15 @@ export const Artifact: FC<Props> = ({ doc }) => {
                   const text = extractText(children)
 
                   // Check if this is an execution log entry
-                  const executionLogMatch = text.match(
-                    /^(.+?):\s*(✅ Success|❌ Failed)\s*-\s*(.+)$/,
+                  const successPattern = `${SUCCESS_ICON} ${SUCCESS_STATUS}`
+                  const failurePattern = `${FAILURE_ICON} ${FAILURE_STATUS}`
+                  const executionLogPattern = new RegExp(
+                    `^(.+?):\\s*(${successPattern}|${failurePattern})\\s*-\\s*(.+)$`,
                   )
+                  const executionLogMatch = text.match(executionLogPattern)
                   if (executionLogMatch) {
                     const [, timestamp, status, message] = executionLogMatch
-                    const isSuccess = status?.includes('✅ Success')
+                    const isSuccess = status?.includes(successPattern)
                     return (
                       <li className={styles.executionLogItem} {...rest}>
                         <span

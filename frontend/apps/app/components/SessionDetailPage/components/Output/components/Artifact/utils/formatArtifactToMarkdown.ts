@@ -1,4 +1,5 @@
 import type { Artifact, DmlOperation, UseCase } from '@liam-hq/artifact'
+import { EXECUTION_SECTION_TITLE, FAILURE_ICON, SUCCESS_ICON } from '../utils'
 
 function formatDmlOperation(operation: DmlOperation): string {
   const sections: string[] = []
@@ -19,11 +20,11 @@ function formatDmlOperation(operation: DmlOperation): string {
   // Execution logs
   if (operation.dml_execution_logs.length > 0) {
     sections.push('')
-    sections.push('**Execution History:**')
+    sections.push(`**${EXECUTION_SECTION_TITLE}:**`)
     sections.push('')
 
     operation.dml_execution_logs.forEach((log) => {
-      const statusIcon = log.success ? '✅' : '❌'
+      const statusIcon = log.success ? SUCCESS_ICON : FAILURE_ICON
       const executedAt = new Date(log.executed_at).toLocaleString('en-US', {
         year: 'numeric',
         month: '2-digit',

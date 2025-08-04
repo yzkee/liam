@@ -16,6 +16,7 @@ export {
   columnTypeDiffItemSchema,
   constraintColumnNameDiffItemSchema,
   constraintDeleteConstraintDiffItemSchema,
+  constraintDetailDiffItemSchema,
   constraintDiffItemSchema,
   constraintNameDiffItemSchema,
   constraintTargetColumnNameDiffItemSchema,

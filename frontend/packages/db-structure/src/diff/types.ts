@@ -236,7 +236,7 @@ export type ConstraintDeleteConstraintDiffItem = InferOutput<
   typeof constraintDeleteConstraintDiffItemSchema
 >
 
-const constraintDetailDiffItemSchema = object({
+export const constraintDetailDiffItemSchema = object({
   ...baseSchemaDiffItemSchema.entries,
   kind: literal('constraint-detail'),
   data: checkConstraintDetailSchema,

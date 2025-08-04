@@ -2,6 +2,7 @@ import { AIMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import type { Database } from '@liam-hq/db'
 import { ResultAsync } from 'neverthrow'
+import * as v from 'valibot'
 import { getConfigurable } from '../../chat/workflow/shared/getConfigurable'
 import type { WorkflowState } from '../../chat/workflow/types'
 import { logAssistantMessage } from '../../chat/workflow/utils/timelineLogger'
@@ -13,13 +14,25 @@ import { withTimelineItemSync } from '../../chat/workflow/utils/withTimelineItem
 import type { Repositories } from '../../repositories'
 import { WorkflowTerminationError } from '../../shared/errorHandling'
 
+// Valibot schema for validating analyzedRequirements structure
+const analyzedRequirementsSchema = v.object({
+  businessRequirement: v.string(),
+  functionalRequirements: v.record(v.string(), v.array(v.string())),
+  nonFunctionalRequirements: v.record(v.string(), v.array(v.string())),
+})
+
+type ValidatedAnalyzedRequirements = v.InferOutput<
+  typeof analyzedRequirementsSchema
+>
+
 // Analysis content is now parsed and available in state.analyzedRequirements
 
 /**
  * Format analyzed requirements into a structured string
+ * @param analyzedRequirements - Validated analyzed requirements object
  */
 const formatAnalyzedRequirements = (
-  analyzedRequirements: NonNullable<WorkflowState['analyzedRequirements']>,
+  analyzedRequirements: ValidatedAnalyzedRequirements,
 ): string => {
   const formatRequirements = (
     requirements: Record<string, string[]>,
@@ -121,11 +134,32 @@ export async function saveRequirementToArtifactNode(
     }
   }
 
+  // Validate analyzedRequirements structure before processing
+  const validationResult = v.safeParse(
+    analyzedRequirementsSchema,
+    state.analyzedRequirements,
+  )
+  if (!validationResult.success) {
+    const validationErrorMessage = `Invalid analyzedRequirements structure: ${validationResult.issues.map((issue) => `${issue.path?.join('.')}: ${issue.message}`).join(', ')}`
+
+    await logAssistantMessage(
+      state,
+      repositories,
+      `Error validating requirements structure: ${validationErrorMessage}`,
+      assistantRole,
+    )
+
+    return {
+      ...state,
+      analyzedRequirements: undefined, // Reset so the workflow can retry
+    }
+  }
+
   // Process the analysis and save artifacts
   const processResult = await ResultAsync.fromPromise(
     (async () => {
-      // Use the already parsed analyzedRequirements
-      const analyzedRequirements = state.analyzedRequirements!
+      // Use the validated analyzedRequirements
+      const analyzedRequirements = validationResult.output
 
       // 3. Create complete message with all analyzed requirements and sync to timeline
       const completeMessage = await withTimelineItemSync(

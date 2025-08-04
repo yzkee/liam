@@ -3,6 +3,8 @@ import * as v from 'valibot'
 // Export these schema definitions
 export const columnNameSchema = v.string()
 
+export const columnTypeSchema = v.string()
+
 export const columnDefaultSchema = v.nullable(
   v.union([v.string(), v.number(), v.boolean()]),
 )
@@ -19,7 +21,7 @@ export const constraintNameSchema = v.string()
 
 export const columnSchema = v.object({
   name: columnNameSchema,
-  type: v.string(),
+  type: columnTypeSchema,
   default: columnDefaultSchema,
   check: columnCheckSchema,
   notNull: columnNotNullSchema,

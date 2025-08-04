@@ -17,6 +17,8 @@ export const convertTimelineItemToTimelineItemEntry = (
     id: timelineItem.id,
     content: timelineItem.content,
     timestamp: new Date(timelineItem.created_at),
+    // Include artifact_action from backend if available
+    artifactAction: timelineItem.artifact_action,
   }
 
   return match(timelineItem)

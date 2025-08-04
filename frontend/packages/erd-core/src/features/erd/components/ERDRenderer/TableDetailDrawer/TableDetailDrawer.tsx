@@ -1,5 +1,5 @@
 import { DrawerContent, DrawerPortal, DrawerRoot } from '@liam-hq/ui'
-import { type FC, type PropsWithChildren, useCallback } from 'react'
+import { type FC, type PropsWithChildren, useCallback, useMemo } from 'react'
 import { useSchemaOrThrow, useUserEditingOrThrow } from '@/stores'
 import { TableDetail } from '../../ERDContent/components/TableNode/TableDetail'
 import styles from './TableDetailDrawer.module.css'
@@ -32,10 +32,14 @@ export const TableDetailDrawerRoot: FC<PropsWithChildren> = ({ children }) => {
 }
 
 export const TableDetailDrawer: FC = () => {
-  const { current } = useSchemaOrThrow()
+  const { current, merged } = useSchemaOrThrow()
+  const { showDiff, activeTableName } = useUserEditingOrThrow()
 
-  const { activeTableName } = useUserEditingOrThrow()
-  const table = current.tables[activeTableName ?? '']
+  const schema = useMemo(() => {
+    return showDiff && merged ? merged : current
+  }, [showDiff, merged, current])
+
+  const table = schema.tables[activeTableName ?? '']
   const ariaDescribedBy =
     table?.comment == null
       ? {

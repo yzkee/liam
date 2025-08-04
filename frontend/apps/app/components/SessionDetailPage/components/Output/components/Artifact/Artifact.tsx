@@ -9,6 +9,7 @@ import remarkGfm from 'remark-gfm'
 import { CopyButton } from '../shared/CopyButton'
 import styles from './Artifact.module.css'
 import { TableOfContents } from './TableOfContents/TableOfContents'
+import { generateHeadingId } from './utils'
 
 type CodeProps = {
   className?: string
@@ -25,7 +26,7 @@ export const Artifact: FC<Props> = ({ doc }) => {
       <div className={styles.head}>
         <CopyButton textToCopy={doc} tooltipLabel="Copy Markdown" />
       </div>
-      <div className={styles.contentWrapper}>
+      <div className={styles.contentWrapper} data-artifact-content>
         <div className={styles.bodyWrapper}>
           <div className={styles.body}>
             <ReactMarkdown
@@ -57,10 +58,7 @@ export const Artifact: FC<Props> = ({ doc }) => {
                 },
                 h1: ({ children, ...props }) => {
                   const text = String(children)
-                  const id = text
-                    .toLowerCase()
-                    .replace(/[^\w]+/g, '-')
-                    .replace(/(^-|-$)/g, '')
+                  const id = generateHeadingId(text)
                   return (
                     <h1 id={id} {...props}>
                       {children}
@@ -69,10 +67,7 @@ export const Artifact: FC<Props> = ({ doc }) => {
                 },
                 h2: ({ children, ...props }) => {
                   const text = String(children)
-                  const id = text
-                    .toLowerCase()
-                    .replace(/[^\w]+/g, '-')
-                    .replace(/(^-|-$)/g, '')
+                  const id = generateHeadingId(text)
                   return (
                     <h2 id={id} {...props}>
                       {children}
@@ -81,10 +76,7 @@ export const Artifact: FC<Props> = ({ doc }) => {
                 },
                 h3: ({ children, ...props }) => {
                   const text = String(children)
-                  const id = text
-                    .toLowerCase()
-                    .replace(/[^\w]+/g, '-')
-                    .replace(/(^-|-$)/g, '')
+                  const id = generateHeadingId(text)
                   return (
                     <h3 id={id} {...props}>
                       {children}
@@ -93,10 +85,7 @@ export const Artifact: FC<Props> = ({ doc }) => {
                 },
                 h4: ({ children, ...props }) => {
                   const text = String(children)
-                  const id = text
-                    .toLowerCase()
-                    .replace(/[^\w]+/g, '-')
-                    .replace(/(^-|-$)/g, '')
+                  const id = generateHeadingId(text)
                   return (
                     <h4 id={id} {...props}>
                       {children}
@@ -105,10 +94,7 @@ export const Artifact: FC<Props> = ({ doc }) => {
                 },
                 h5: ({ children, ...props }) => {
                   const text = String(children)
-                  const id = text
-                    .toLowerCase()
-                    .replace(/[^\w]+/g, '-')
-                    .replace(/(^-|-$)/g, '')
+                  const id = generateHeadingId(text)
                   return (
                     <h5 id={id} {...props}>
                       {children}

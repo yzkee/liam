@@ -2,6 +2,7 @@
 
 import clsx from 'clsx'
 import { type FC, useEffect, useState } from 'react'
+import { generateHeadingId } from '../utils'
 import styles from './TableOfContents.module.css'
 
 type TocItem = {
@@ -14,13 +15,6 @@ type Props = {
   content: string
 }
 
-const createId = (text: string) => {
-  return text
-    .toLowerCase()
-    .replace(/[^\w]+/g, '-')
-    .replace(/(^-|-$)/g, '')
-}
-
 const parseHeading = (line: string): TocItem | null => {
   const headingMatch = line.match(/^(#{1,5})\s+(.+)$/)
   if (!headingMatch) return null
@@ -30,7 +24,7 @@ const parseHeading = (line: string): TocItem | null => {
   if (!levelMatch || !text) return null
 
   const level = levelMatch.length
-  const id = createId(text)
+  const id = generateHeadingId(text)
 
   return { id, text, level }
 }
@@ -61,7 +55,7 @@ export const TableOfContents: FC<Props> = ({ content }) => {
   useEffect(() => {
     const handleScroll = () => {
       // Search for headings within Artifact content
-      const contentWrapper = document.querySelector('[class*="contentWrapper"]')
+      const contentWrapper = document.querySelector('[data-artifact-content]')
       if (!contentWrapper) {
         return
       }
@@ -120,10 +114,19 @@ export const TableOfContents: FC<Props> = ({ content }) => {
             <button
               type="button"
               onClick={() => handleClick(item.id)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  handleClick(item.id)
+                }
+              }}
               className={clsx(
                 styles.link,
                 activeId === item.id && styles.active,
               )}
+              tabIndex={0}
+              aria-label={`Navigate to ${item.text}`}
+              aria-current={activeId === item.id ? 'location' : undefined}
             >
               {item.text}
             </button>

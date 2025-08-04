@@ -1,17 +1,24 @@
 .container {
-  display: grid;
-  grid-template-rows: auto 1fr;
+  display: flex;
+  flex-direction: column;
   width: 100%;
   height: 100%;
   gap: var(--spacing-2);
+  padding: var(--spacing-4);
+  background-color: var(--global-background);
+  border-radius: 8px;
+  box-shadow: var(--shadow-level-1);
+  overflow: hidden;
 }
 
 .head {
   display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: flex-end;
-  padding: var(--spacing-1) var(--spacing-2);
-  border-bottom: solid 1px var(--pane-border);
+  width: 100%;
+  padding-bottom: var(--spacing-2);
+  border-bottom: 1px solid var(--global-border);
 }
 
 .title {
@@ -27,23 +34,32 @@
   gap: var(--spacing-1);
 }
 
-.body {
+.contentWrapper {
+  display: flex;
+  gap: var(--spacing-8);
   width: 100%;
-  max-width: 100%;
-  min-height: 0;
-  overflow-y: scroll;
+  justify-content: center;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.bodyWrapper {
+  flex: 0 1 720px; /* Fixed 720px content width, shrinks on smaller screens */
+  width: 100%;
+}
+
+.body {
   padding: var(--spacing-4);
   font-family: var(--main-font);
   font-weight: 400;
-  font-size: var(--font-size-4);
-  line-height: 1.8em;
+  font-size: 0.925rem; /* 14.8px - optimal for readability */
+  line-height: 1.75;
   color: var(--global-body-text);
   word-wrap: break-word;
   overflow-wrap: break-word;
   word-break: break-word;
-  scrollbar-color: var(--scrollbar-thumb-background)
-    var(--scrollbar-track-background);
-  scrollbar-width: var(--scrollbar-width);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Exclude code blocks from text wrapping */
@@ -53,9 +69,17 @@
   word-wrap: normal !important;
   overflow-wrap: normal !important;
   word-break: normal !important;
+  white-space: pre !important;
 }
 
-/* Headings */
+/* Additional rule for code blocks using syntax highlighter */
+.body :global([class*='language-']) {
+  word-wrap: normal !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+}
+
+/* Global header styles */
 .body :global(h1),
 .body :global(h2),
 .body :global(h3),
@@ -64,9 +88,8 @@
 .body :global(h6) {
   margin-top: 1.5rem;
   margin-bottom: 1rem;
-  font-weight: 600;
   line-height: 1.25;
-  color: var(--global-body-text);
+  color: var(--global-foreground);
 }
 
 /* First element spacing adjustments */
@@ -74,54 +97,83 @@
   margin-top: 0;
 }
 
+/* Business Requirement (h1) */
 .body :global(h1) {
-  margin: 0.67em 0;
-  font-weight: 600;
-  padding-bottom: 0.3em;
-  font-size: 2em;
+  margin: var(--spacing-10) 0 var(--spacing-6) 0;
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  color: var(--global-foreground);
   border-bottom: 1px solid var(--global-border);
+  padding-bottom: var(--spacing-3);
 }
 
+/* Requirements, Functional Requirements (h2) */
 .body :global(h2) {
-  font-weight: 600;
-  padding-bottom: 0.3em;
-  font-size: 1.5em;
-  border-bottom: 1px solid var(--global-border);
+  margin: var(--spacing-10) 0 var(--spacing-4) 0;
+  font-weight: 700;
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  letter-spacing: -0.015em;
+  color: var(--global-foreground);
+  border-bottom: 1px solid var(--global-border-subtle);
+  padding-bottom: var(--spacing-2);
 }
 
+/* Functional/Non-Functional Requirements Categories (h3) */
 .body :global(h3) {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
   font-weight: 600;
-  font-size: 1.25em;
+  font-size: 1.2em;
+  line-height: 1.65;
+  letter-spacing: -0.01em;
+  color: var(--global-foreground);
 }
 
+/* Individual Requirements (h4) */
 .body :global(h4) {
+  margin-top: 1.2em;
+  margin-bottom: 0.4em;
   font-weight: 600;
-  font-size: 1em;
+  font-size: 1.1em;
+  line-height: 1.6;
+  color: var(--global-foreground);
 }
 
+/* Use Cases (h5) */
 .body :global(h5) {
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
   font-weight: 600;
-  font-size: 0.875em;
+  font-size: 1.05em;
+  line-height: 1.5;
+  color: var(--global-foreground);
 }
 
+/* DML Operations (h6) */
 .body :global(h6) {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
   font-weight: 600;
-  font-size: 0.85em;
-  color: var(--global-body-text-subtle);
+  font-size: 0.9em;
+  line-height: 1.4;
+  color: var(--global-foreground);
 }
 
 /* Paragraphs */
 .body :global(p) {
-  margin-top: 0;
-  margin-bottom: var(--spacing-2);
+  margin: 0 0 var(--spacing-4) 0;
+  line-height: 1.75;
 }
 
 /* Lists */
 .body :global(ul),
 .body :global(ol) {
-  margin-top: 0;
-  margin-bottom: var(--spacing-2);
-  padding-left: 2em;
+  margin: var(--spacing-4) 0;
+  padding-left: var(--spacing-6);
+  line-height: 1.75;
 }
 
 .body :global(ul) {
@@ -132,32 +184,33 @@
   list-style-type: decimal;
 }
 
-.body :global(ol ol),
-.body :global(ul ol) {
-  list-style-type: lower-roman;
-}
-
 .body :global(ul ul),
 .body :global(ol ul) {
   list-style-type: circle;
 }
 
-.body :global(ul ul ul),
-.body :global(ul ol ul),
-.body :global(ol ul ul),
-.body :global(ol ol ul) {
-  list-style-type: square;
+.body :global(ol ol),
+.body :global(ul ol) {
+  list-style-type: lower-roman;
 }
 
+.body :global(ul ul ul),
 .body :global(ul ul ol),
+.body :global(ul ol ul),
 .body :global(ul ol ol),
+.body :global(ol ul ul),
 .body :global(ol ul ol),
+.body :global(ol ol ul),
 .body :global(ol ol ol) {
   list-style-type: lower-alpha;
 }
 
-.body :global(li + li) {
-  margin-top: 0.25em;
+.body :global(li) {
+  margin-bottom: var(--spacing-2);
+}
+
+.body :global(li:last-child) {
+  margin-bottom: 0;
 }
 
 /* Code */
@@ -168,82 +221,105 @@
   font-size: 85%;
   white-space: break-spaces;
   background-color: var(--global-foreground-subtle);
-  border-radius: var(--border-radius-small);
+  border-radius: 6px;
   font-family: var(--code-font);
 }
 
-/* Inline code within paragraphs and other elements */
-.body :global(p > code),
-.body :global(li > code),
-.body :global(h1 > code),
-.body :global(h2 > code),
-.body :global(h3 > code),
-.body :global(h4 > code),
-.body :global(h5 > code),
-.body :global(h6 > code),
-.body :global(a > code),
-.body :global(em > code),
-.body :global(strong > code) {
-  display: inline;
-  padding: 0.1em 0.3em;
-  vertical-align: baseline;
-  color: #e3e3e3;
-  background-color: var(--overlay-10);
-  border-radius: 3px;
-  font-family: var(--code-font, monospace);
-  font-size: 85%;
-}
-
 .body :global(pre) {
+  margin-top: 0;
   margin-bottom: var(--spacing-2);
-  width: 100%;
-  max-width: 100%;
-  position: relative;
-  overflow-x: auto;
-  border-radius: var(--border-radius-base);
+  font-family: var(--code-font);
+  font-size: 12px;
+  word-wrap: normal;
 }
 
-/* Add a subtle scrollbar for code blocks that overflow */
-.body :global(pre::-webkit-scrollbar) {
-  height: var(--scrollbar-webkit-height);
-  background-color: var(--scrollbar-track-background);
-}
-
-.body :global(pre::-webkit-scrollbar-thumb) {
-  background-color: var(--scrollbar-thumb-background-hover);
-  border-radius: var(--scrollbar-webkit-thumb-border-radius);
-}
-
-.body :global(pre::-webkit-scrollbar-track) {
-  background-color: var(--scrollbar-track-background);
-}
-
-.body :global(pre code) {
-  display: inline-block;
-  max-width: 100%;
+.body :global(pre code),
+.body :global(pre tt) {
+  display: inline;
   padding: 0;
   margin: 0;
   overflow: visible;
   line-height: inherit;
-  word-wrap: normal !important;
-  word-break: normal !important;
-  white-space: pre !important;
+  word-wrap: normal;
   background-color: transparent;
   border: 0;
-  font-size: 12px;
+  font-size: 100%;
 }
 
-/* Ensure SyntaxHighlighter's container displays properly */
-.body :global(pre > div) {
-  white-space: pre !important;
-  overflow-x: auto !important;
-  word-wrap: normal !important;
-  word-break: normal !important;
+/* Tables */
+.body :global(table) {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow: auto;
+  margin-top: 0;
+  margin-bottom: var(--spacing-2);
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+.body :global(table th),
+.body :global(table td) {
+  padding: 6px 13px;
+  border: 1px solid var(--global-border);
+}
+
+.body :global(table th) {
+  font-weight: 600;
+  background-color: var(--global-background-subtle);
+}
+
+.body :global(table tr) {
+  background-color: var(--global-background);
+}
+
+.body :global(table tr:nth-child(2n)) {
+  background-color: var(--global-background-subtle);
+}
+
+/* Blockquotes */
+.body :global(blockquote) {
+  padding: 0 1em;
+  color: var(--global-body-text-subtle);
+  border-left: 0.25em solid var(--global-border);
+  margin: 0 0 var(--spacing-2) 0;
+}
+
+.body :global(blockquote > :first-child) {
+  margin-top: 0;
+}
+
+.body :global(blockquote > :last-child) {
+  margin-bottom: 0;
+}
+
+/* Horizontal Rules */
+.body :global(hr) {
+  height: 0.25em;
+  padding: 0;
+  margin: 24px 0;
+  background-color: var(--global-border);
+  border: 0;
+}
+
+/* Images */
+.body :global(img) {
+  max-width: 100%;
+  height: auto;
+  box-sizing: content-box;
+  background-color: var(--global-background);
+}
+
+.body :global(img[align='right']) {
+  padding-left: 20px;
+}
+
+.body :global(img[align='left']) {
+  padding-right: 20px;
 }
 
 /* Links */
 .body :global(a) {
-  background-color: transparent;
   color: var(--primary-accent);
   text-decoration: none;
 }
@@ -252,140 +328,106 @@
   text-decoration: underline;
 }
 
-/* Images */
-.body :global(img) {
-  border-style: none;
-  max-width: 100%;
-  box-sizing: content-box;
-  border-radius: var(--border-radius-base);
+/* Input checkbox */
+.body :global(input[type='checkbox']) {
+  margin: 0 0.2em 0.25em -1.4em;
+  vertical-align: middle;
 }
 
-/* Blockquotes */
-.body :global(blockquote) {
-  margin: 0 0 var(--spacing-2) 0;
-  padding: 0 var(--spacing-2);
-  color: var(--global-body-text-subtle);
-  border-left: 0.25em solid var(--global-border);
-}
-
-.body :global(blockquote) > :global(:first-child) {
-  margin-top: 0;
-}
-
-.body :global(blockquote) > :global(:last-child) {
-  margin-bottom: 0;
-}
-
-/* Tables */
-.body :global(table) {
-  border-spacing: 0;
-  border-collapse: separate;
-  display: block;
-  width: 100%;
-  max-width: 100%;
-  overflow-x: auto;
-  margin-bottom: var(--spacing-3);
+/* Keyboard */
+.body :global(kbd) {
+  display: inline-block;
+  padding: 3px 5px;
+  font-size: 11px;
+  line-height: 10px;
+  color: var(--global-foreground);
+  vertical-align: middle;
+  background-color: var(--global-background-subtle);
   border: 1px solid var(--global-border);
-  border-radius: var(--border-radius-base);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  box-shadow: inset 0 -1px 0 var(--global-border);
+  font-family: var(--code-font);
 }
 
-/* Table scrollbar styling */
-.body :global(table::-webkit-scrollbar) {
-  height: var(--scrollbar-webkit-height);
-  background-color: var(--scrollbar-track-background);
-}
-
-.body :global(table::-webkit-scrollbar-thumb) {
-  background-color: var(--scrollbar-thumb-background-hover);
-  border-radius: var(--scrollbar-webkit-thumb-border-radius);
-}
-
-.body :global(table::-webkit-scrollbar-track) {
-  background-color: var(--scrollbar-track-background);
-}
-
-.body :global(table th) {
-  font-weight: 600;
-  background-color: var(--global-foreground-subtle);
-  color: var(--global-body-text);
-  text-align: left;
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  border-bottom: 2px solid var(--global-border);
-}
-
-.body :global(table th),
-.body :global(table td) {
-  padding: var(--spacing-1half) var(--spacing-2);
-  border: 1px solid var(--global-border);
-  border-top: none;
-  border-left: none;
-}
-
-.body :global(table th:last-child),
-.body :global(table td:last-child) {
-  border-right: none;
-}
-
-.body :global(table tr:last-child td) {
-  border-bottom: none;
-}
-
-.body :global(table tr) {
-  background-color: var(--global-background);
-  transition: background-color 0.15s ease;
-}
-
-.body :global(table tr:nth-child(2n)) {
-  background-color: rgba(var(--global-foreground-subtle-rgb, 0, 0, 0), 0.3);
-}
-
-.body :global(table tr:hover) {
-  background-color: rgba(var(--primary-accent-rgb, 0, 0, 0), 0.05);
-}
-
-/* Horizontal Rule */
-.body :global(hr) {
-  box-sizing: content-box;
-  overflow: hidden;
-  background: transparent;
-  border-bottom: 1px solid var(--global-border);
-  height: 0.25em;
+/* Definition Lists */
+.body :global(dl) {
   padding: 0;
-  margin: var(--spacing-3) 0;
-  background-color: var(--global-border);
-  border: 0;
+  margin-top: 0;
+  margin-bottom: var(--spacing-2);
 }
 
-/* Emphasis */
-.body :global(strong) {
+.body :global(dl dt) {
+  padding: 0;
+  margin-top: var(--spacing-2);
+  font-size: 1em;
+  font-style: italic;
   font-weight: 600;
 }
 
-.body :global(em) {
-  font-style: italic;
-}
-
-/* Strikethrough */
-.body :global(del) {
-  text-decoration: line-through;
-}
-
-/* Details/Summary */
-.body :global(details) {
+.body :global(dl dd) {
+  padding: 0 var(--spacing-2);
   margin-bottom: var(--spacing-2);
-  border: 1px solid var(--global-border);
-  border-radius: var(--border-radius-base);
-  padding: var(--spacing-2);
+  margin-left: 0;
+}
+
+/* Superscript and Subscript */
+.body :global(sup),
+.body :global(sub) {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+.body :global(sup) {
+  top: -0.5em;
+}
+
+.body :global(sub) {
+  bottom: -0.25em;
+}
+
+/* Task lists */
+.body :global(.task-list-item) {
+  list-style-type: none;
+  position: relative;
+  padding-left: 1.5em;
+}
+
+.body :global(.task-list-item input[type='checkbox']) {
+  margin: 0 0.2em 0.25em -1.5em;
+  vertical-align: middle;
+}
+
+/* Mark */
+.body :global(mark) {
+  background-color: #fff8c5;
+  color: var(--global-foreground);
+  padding: 0.2em 0;
+}
+
+/* Abbreviation */
+.body :global(abbr) {
+  text-decoration: underline dotted;
+  cursor: help;
+}
+
+.body :global(abbr[title]) {
+  border-bottom: none;
+  text-decoration: underline dotted;
+}
+
+/* Details and Summary */
+.body :global(details) {
+  display: block;
+  margin-bottom: var(--spacing-2);
 }
 
 .body :global(summary) {
+  display: list-item;
   cursor: pointer;
   font-weight: 600;
-  padding: var(--spacing-1) 0;
-  color: var(--global-body-text);
+  margin-bottom: var(--spacing-1);
 }
 
 .body :global(summary:hover) {
@@ -395,4 +437,109 @@
 .body :global(details[open] summary) {
   margin-bottom: var(--spacing-2);
   border-bottom: 1px solid var(--global-border);
+}
+
+/* Section spacing */
+.body :global(section + section) {
+  margin-top: 32px;
+}
+
+/* Use Case titles styling */
+.body :global(ol > li > strong:first-child) {
+  font-weight: 600;
+  color: var(--global-foreground);
+}
+
+/* DML Operations list styling */
+.body :global(ul ul) {
+  margin-top: 8px;
+}
+
+/* Execution Logs section */
+.body :global(ul ul li) {
+  font-family: var(--code-font);
+  font-size: var(--font-size-3);
+  color: var(--global-body-text-subtle);
+}
+
+/* Execution log styling */
+.executionLogTimestamp {
+  color: var(--global-mute-text);
+  font-family: var(--code-font);
+  font-size: 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.body .executionLogSuccess {
+  color: var(--severity-positive-100) !important;
+  font-family: var(--code-font);
+  font-size: 12px;
+}
+
+.body .executionLogFailed {
+  color: var(--danger-high-contrast-text) !important;
+  font-family: var(--code-font);
+  font-size: 12px;
+}
+
+/* Execution Logs heading styling */
+.executionLogsHeading {
+  margin-top: var(--spacing-6) !important;
+  margin-bottom: 0 !important;
+  padding-left: var(--spacing-1) !important;
+  font-weight: 600;
+  font-size: var(--font-size-4);
+}
+
+/* Non-functional requirements section */
+.body :global(h3) {
+  position: relative;
+}
+
+/* DML Operations list */
+.body :global(.dml-operations-list) {
+  padding-left: var(--spacing-6);
+  margin: var(--spacing-2) 0;
+}
+
+/* DML Operation item styling */
+.body :global(.dml-operation-item) {
+  margin-bottom: var(--spacing-4);
+}
+
+.body :global(.dml-operation-item strong) {
+  font-size: 13px;
+  color: var(--global-foreground);
+}
+
+/* Execution Logs label styling */
+.body :global(.execution-logs-label) {
+  font-size: 13px;
+  display: block;
+}
+
+/* Execution Logs list */
+.body :global(.execution-logs-list) {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+/* Override padding for execution logs ul - target ul containing executionLogItem */
+.body ul:has(.executionLogItem) {
+  padding-left: var(--spacing-1) !important;
+  list-style: none !important;
+}
+
+/* Execution Logs list items */
+.executionLogItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--spacing-4);
+  list-style: none;
+  margin: 0;
+  padding-left: 0;
 }

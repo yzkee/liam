@@ -22,6 +22,7 @@ graph TD;
 	prepareDML --> validateSchema;
 	saveRequirementToArtifact --> dbAgent;
 	analyzeRequirements -.-> saveRequirementToArtifact;
+	analyzeRequirements -.-> finalizeArtifacts;
 	validateSchema -.-> dbAgent;
 	validateSchema -.-> finalizeArtifacts;
 	analyzeRequirements -.-> analyzeRequirements;

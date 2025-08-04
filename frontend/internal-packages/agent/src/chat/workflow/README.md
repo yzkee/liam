@@ -23,6 +23,7 @@ graph TD;
 	prepareDML --> validateSchema;
 	saveRequirementToArtifact --> dbAgent;
 	analyzeRequirements -.-> saveRequirementToArtifact;
+	analyzeRequirements -.-> finalizeArtifacts;
 	validateSchema -.-> dbAgent;
 	validateSchema -.-> finalizeArtifacts;
 	analyzeRequirements -.-> analyzeRequirements;
@@ -146,7 +147,7 @@ graph.addNode('dbAgent', dbAgentSubgraph) // No retry policy - handled internall
 
 ### Conditional Edge Logic
 
-- **analyzeRequirements**: Routes to `saveRequirementToArtifact` when requirements are successfully analyzed, retries `analyzeRequirements` if `analyzedRequirements` is still undefined
+- **analyzeRequirements**: Routes to `saveRequirementToArtifact` when requirements are successfully analyzed, retries `analyzeRequirements` with retry count tracking (max 3 attempts), fallback to `finalizeArtifacts` when max retries exceeded
 - **saveRequirementToArtifact**: Always routes to `dbAgent` after processing artifacts (workflow termination node pattern)
 - **dbAgent**: DB Agent subgraph handles internal routing between designSchema and invokeSchemaDesignTool nodes, routes to `generateUsecase` on completion
 - **validateSchema**: Routes to `finalizeArtifacts` on success, `dbAgent` on validation error

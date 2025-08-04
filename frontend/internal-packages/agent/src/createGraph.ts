@@ -53,15 +53,26 @@ export const createGraph = () => {
     .addConditionalEdges(
       'analyzeRequirements',
       (state) => {
-        // If analyzedRequirements is still undefined → retry analyzeRequirements
-        // Otherwise → proceed to saveRequirementToArtifact node
-        return state.analyzedRequirements === undefined
-          ? 'analyzeRequirements'
-          : 'saveRequirementToArtifact'
+        const MAX_RETRIES = 3
+        const retryCount = state.retryCount['analyzeRequirements'] || 0
+
+        // If analyzedRequirements is defined → proceed to saveRequirementToArtifact
+        if (state.analyzedRequirements !== undefined) {
+          return 'saveRequirementToArtifact'
+        }
+
+        // If max retries exceeded → fallback to finalizeArtifacts
+        if (retryCount >= MAX_RETRIES) {
+          return 'finalizeArtifacts'
+        }
+
+        // Otherwise → retry analyzeRequirements
+        return 'analyzeRequirements'
       },
       {
         analyzeRequirements: 'analyzeRequirements',
         saveRequirementToArtifact: 'saveRequirementToArtifact',
+        finalizeArtifacts: 'finalizeArtifacts',
       },
     )
 

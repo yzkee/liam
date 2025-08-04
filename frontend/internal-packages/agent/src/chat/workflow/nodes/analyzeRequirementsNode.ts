@@ -67,14 +67,27 @@ export async function analyzeRequirementsNode(
       }
     },
     async (error) => {
+      const currentRetryCount = state.retryCount['analyzeRequirements'] || 0
+      const newRetryCount = currentRetryCount + 1
+
       await logAssistantMessage(
         state,
         repositories,
-        'Having trouble understanding your requirements. Let me try a different approach...',
+        `Having trouble understanding your requirements (attempt ${newRetryCount}): ${error.message}. Let me try a different approach...`,
         assistantRole,
       )
 
-      throw new WorkflowTerminationError(error, 'analyzeRequirementsNode')
+      // Instead of throwing, return state with incremented retry count
+      // This allows conditional routing to decide whether to retry or fallback
+      return {
+        ...state,
+        retryCount: {
+          ...state.retryCount,
+          analyzeRequirements: newRetryCount,
+        },
+        // Keep analyzedRequirements undefined so conditional routing works
+        analyzedRequirements: undefined,
+      }
     },
   )
 }

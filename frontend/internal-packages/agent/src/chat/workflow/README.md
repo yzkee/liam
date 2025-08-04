@@ -9,6 +9,7 @@ A **LangGraph implementation** for processing chat messages in the LIAM applicat
 graph TD;
 	__start__([<p>__start__</p>]):::first
 	analyzeRequirements(analyzeRequirements)
+	saveRequirementToArtifact(saveRequirementToArtifact)
 	dbAgent(dbAgent)
 	generateUsecase(generateUsecase)
 	prepareDML(prepareDML)
@@ -16,13 +17,15 @@ graph TD;
 	finalizeArtifacts(finalizeArtifacts)
 	__end__([<p>__end__</p>]):::last
 	__start__ --> analyzeRequirements;
-	analyzeRequirements --> dbAgent;
 	dbAgent --> generateUsecase;
 	finalizeArtifacts --> __end__;
 	generateUsecase --> prepareDML;
 	prepareDML --> validateSchema;
+	saveRequirementToArtifact --> dbAgent;
+	analyzeRequirements -.-> saveRequirementToArtifact;
 	validateSchema -.-> dbAgent;
 	validateSchema -.-> finalizeArtifacts;
+	analyzeRequirements -.-> analyzeRequirements;
 	classDef default fill:#f2f0ff,line-height:1.2;
 	classDef first fill-opacity:0;
 	classDef last fill:#bfb6fc;
@@ -74,11 +77,12 @@ interface WorkflowState {
 ## Nodes
 
 1. **analyzeRequirements**: Organizes and clarifies requirements from user input (performed by pmAnalysisAgent)
-2. **dbAgent**: DB Agent subgraph that handles database schema design - contains designSchema and invokeSchemaDesignTool nodes (performed by dbAgent)
-3. **generateUsecase**: Creates use cases for testing with automatic timeline sync (performed by qaAgent)
-4. **prepareDML**: Generates DML statements for testing (performed by qaAgent)
-5. **validateSchema**: Executes DML and validates schema (performed by qaAgent)
-6. **finalizeArtifacts**: Generates and saves comprehensive artifacts to database, handles error timeline items (performed by dbAgentArtifactGen)
+2. **saveRequirementToArtifact**: Processes analyzed requirements, saves artifacts to database, and syncs timeline (performed by pmAgent)
+3. **dbAgent**: DB Agent subgraph that handles database schema design - contains designSchema and invokeSchemaDesignTool nodes (performed by dbAgent)
+4. **generateUsecase**: Creates use cases for testing with automatic timeline sync (performed by qaAgent)
+5. **prepareDML**: Generates DML statements for testing (performed by qaAgent)
+6. **validateSchema**: Executes DML and validates schema (performed by qaAgent)
+7. **finalizeArtifacts**: Generates and saves comprehensive artifacts to database, handles error timeline items (performed by dbAgentArtifactGen)
 
 ## DB Agent Subgraph
 
@@ -142,6 +146,8 @@ graph.addNode('dbAgent', dbAgentSubgraph) // No retry policy - handled internall
 
 ### Conditional Edge Logic
 
+- **analyzeRequirements**: Routes to `saveRequirementToArtifact` when requirements are successfully analyzed, retries `analyzeRequirements` if `analyzedRequirements` is still undefined
+- **saveRequirementToArtifact**: Always routes to `dbAgent` after processing artifacts (workflow termination node pattern)
 - **dbAgent**: DB Agent subgraph handles internal routing between designSchema and invokeSchemaDesignTool nodes, routes to `generateUsecase` on completion
 - **validateSchema**: Routes to `finalizeArtifacts` on success, `dbAgent` on validation error
 

@@ -8,6 +8,7 @@ describe('createGraph', () => {
 graph TD;
 	__start__([<p>__start__</p>]):::first
 	analyzeRequirements(analyzeRequirements)
+	saveRequirementToArtifact(saveRequirementToArtifact)
 	dbAgent(dbAgent)
 	generateUsecase(generateUsecase)
 	prepareDML(prepareDML)
@@ -15,13 +16,15 @@ graph TD;
 	finalizeArtifacts(finalizeArtifacts)
 	__end__([<p>__end__</p>]):::last
 	__start__ --> analyzeRequirements;
-	analyzeRequirements --> dbAgent;
 	dbAgent --> generateUsecase;
 	finalizeArtifacts --> __end__;
 	generateUsecase --> prepareDML;
 	prepareDML --> validateSchema;
+	saveRequirementToArtifact --> dbAgent;
+	analyzeRequirements -.-> saveRequirementToArtifact;
 	validateSchema -.-> dbAgent;
 	validateSchema -.-> finalizeArtifacts;
+	analyzeRequirements -.-> analyzeRequirements;
 	classDef default fill:#f2f0ff,line-height:1.2;
 	classDef first fill-opacity:0;
 	classDef last fill:#bfb6fc;

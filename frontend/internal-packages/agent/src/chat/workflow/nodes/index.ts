@@ -1,3 +1,4 @@
+export { saveRequirementToArtifactNode } from '../../../pm-agent/nodes/saveRequirementToArtifactNode'
 export { analyzeRequirementsNode } from './analyzeRequirementsNode'
 export { finalizeArtifactsNode } from './finalizeArtifactsNode'
 export { generateUsecaseNode } from './generateUsecaseNode'

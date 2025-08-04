@@ -10,6 +10,7 @@ import { tool } from '@langchain/core/tools'
 import { ChatOpenAI } from '@langchain/openai'
 import { err, ok, type Result, ResultAsync } from 'neverthrow'
 import * as v from 'valibot'
+// Remove saveRequirementTool import - now handled as separate workflow node
 import { reasoningSchema } from '../../utils/schema'
 import type { Reasoning } from '../../utils/types'
 import { type AnalysisResponse, JsonParser } from './jsonParser'
@@ -92,7 +93,7 @@ export class PMAnalysisAgent {
   private jsonParser: JsonParser
 
   constructor() {
-    // Store tool separately instead of binding it
+    // Store tools separately instead of binding them
     this.webSearchTool = this.createWebSearchTool()
     this.jsonParser = new JsonParser()
   }
@@ -209,6 +210,8 @@ export class PMAnalysisAgent {
     )
   }
 
+  // Removed executeSaveRequirementTool - now handled as separate workflow node
+
   private extractReasoning(finalResponse: ModelResponse): Reasoning | null {
     const reasoningData = finalResponse.additional_kwargs?.['reasoning']
     if (!reasoningData) {
@@ -286,6 +289,7 @@ export class PMAnalysisAgent {
             }),
           )
         }
+        // Removed save_requirement_to_artifact tool execution - now handled as separate workflow node
       }
 
       // Create AIMessage from the response that contains tool_calls

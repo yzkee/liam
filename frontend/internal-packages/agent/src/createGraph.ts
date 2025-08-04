@@ -4,6 +4,7 @@ import {
   finalizeArtifactsNode,
   generateUsecaseNode,
   prepareDmlNode,
+  saveRequirementToArtifactNode,
   validateSchemaNode,
 } from './chat/workflow/nodes'
 import { createAnnotations } from './chat/workflow/shared/langGraphUtils'
@@ -24,6 +25,9 @@ export const createGraph = () => {
     .addNode('analyzeRequirements', analyzeRequirementsNode, {
       retryPolicy: RETRY_POLICY,
     })
+    .addNode('saveRequirementToArtifact', saveRequirementToArtifactNode, {
+      retryPolicy: RETRY_POLICY,
+    })
     .addNode('dbAgent', dbAgentSubgraph)
     .addNode('generateUsecase', generateUsecaseNode, {
       retryPolicy: RETRY_POLICY,
@@ -39,11 +43,27 @@ export const createGraph = () => {
     })
 
     .addEdge(START, 'analyzeRequirements')
-    .addEdge('analyzeRequirements', 'dbAgent')
+    .addEdge('saveRequirementToArtifact', 'dbAgent')
     .addEdge('dbAgent', 'generateUsecase')
     .addEdge('generateUsecase', 'prepareDML')
     .addEdge('prepareDML', 'validateSchema')
     .addEdge('finalizeArtifacts', END)
+
+    // Conditional edges for requirements analysis
+    .addConditionalEdges(
+      'analyzeRequirements',
+      (state) => {
+        // If analyzedRequirements is still undefined → retry analyzeRequirements
+        // Otherwise → proceed to saveRequirementToArtifact node
+        return state.analyzedRequirements === undefined
+          ? 'analyzeRequirements'
+          : 'saveRequirementToArtifact'
+      },
+      {
+        analyzeRequirements: 'analyzeRequirements',
+        saveRequirementToArtifact: 'saveRequirementToArtifact',
+      },
+    )
 
     // Conditional edges for validation results
     .addConditionalEdges(

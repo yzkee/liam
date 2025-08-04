@@ -26,7 +26,11 @@ export {
   tableNameDiffItemSchema,
   tableRelatedDiffItemSchema,
 } from './diff/index.js'
-export { applyPatchOperations, operationsSchema } from './operation/index.js'
+export {
+  applyPatchOperations,
+  type Operation,
+  operationsSchema,
+} from './operation/index.js'
 export type { ProcessError } from './parser.js'
 export {
   aColumn,

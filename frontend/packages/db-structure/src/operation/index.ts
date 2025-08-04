@@ -1,2 +1,2 @@
 export { applyPatchOperations } from './applyPatchOperations.js'
-export { operationsSchema } from './schema/index.js'
+export { type Operation, operationsSchema } from './schema/index.js'

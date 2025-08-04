@@ -137,15 +137,10 @@ export class PMAnalysisAgent {
                   })
 
                   // Get the final response with search results
+                  // Only include the AI response with tool calls and the tool result
                   const followUpResult = await searchModel.invoke([
-                    new SystemMessage(
-                      'You are a web search assistant. Use the web search tool to find relevant information. Search thoroughly and provide comprehensive results.',
-                    ),
-                    new HumanMessage(
-                      `Search the web for information about: ${query}`,
-                    ),
                     result, // Include the original response with tool calls
-                    toolMessage,
+                    toolMessage, // Include the tool execution result
                   ])
 
                   // Extract content from the follow-up result

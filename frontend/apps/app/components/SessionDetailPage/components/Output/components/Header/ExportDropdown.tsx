@@ -2,6 +2,10 @@
 
 import type { Schema } from '@liam-hq/db-structure'
 import {
+  type Operation,
+  postgresqlOperationDeparser,
+} from '@liam-hq/db-structure'
+import {
   Button,
   ChevronDown,
   Copy,
@@ -21,18 +25,37 @@ import styles from './ExportDropdown.module.css'
 type Props = {
   schema: Schema
   artifactDoc?: string
+  cumulativeOperations: Operation[]
 }
 
-const generateAIPrompt = (schema: Schema, artifactDoc: string): string => {
-  const schemaResult = schemaToDdl(schema)
+const generateCumulativeDDL = (operations: Operation[]): string => {
+  const ddlStatements: string[] = []
+
+  for (const operation of operations) {
+    const result = postgresqlOperationDeparser(operation)
+    if (result.errors.length === 0 && result.value.trim()) {
+      ddlStatements.push(result.value)
+    }
+  }
+
+  return ddlStatements.join('\n\n')
+}
+
+const generateAIPrompt = (
+  _schema: Schema,
+  artifactDoc: string,
+  cumulativeOperations: Operation[],
+): string => {
+  // Generate cumulative DDL diff
+  const ddlContent = generateCumulativeDDL(cumulativeOperations)
 
   return `# Database Schema Design
 
 ${artifactDoc}
 
-## SQL Schema
+## Schema Evolution (DDL Changes)
 \`\`\`sql
-${schemaResult.ddl}\`\`\`
+${ddlContent}\`\`\`
 
 ## Implementation Guidance
 Please implement according to this design. Use the above requirements analysis and SQL schema as reference to create appropriate database design and application implementation.
@@ -43,13 +66,17 @@ Please implement according to this design. Use the above requirements analysis a
 `
 }
 
-export const ExportDropdown: FC<Props> = ({ schema, artifactDoc }) => {
+export const ExportDropdown: FC<Props> = ({
+  schema,
+  artifactDoc,
+  cumulativeOperations,
+}) => {
   const toast = useToast()
 
   const handleCopyAIPrompt = async () => {
     if (!artifactDoc) return
 
-    const prompt = generateAIPrompt(schema, artifactDoc)
+    const prompt = generateAIPrompt(schema, artifactDoc, cumulativeOperations)
     const clipboardResult = await fromPromise(
       navigator.clipboard.writeText(prompt),
       (error) =>
@@ -117,7 +144,7 @@ export const ExportDropdown: FC<Props> = ({ schema, artifactDoc }) => {
       </DropdownMenuTrigger>
       <DropdownMenuPortal>
         <DropdownMenuContent align="end" sideOffset={8}>
-          {artifactDoc && (
+          {artifactDoc && cumulativeOperations.length > 0 && (
             <DropdownMenuItem
               leftIcon={<FileText size={16} />}
               onSelect={handleCopyAIPrompt}

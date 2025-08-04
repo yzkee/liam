@@ -158,10 +158,10 @@ export async function saveRequirementToArtifactNode(
   // Process the analysis and save artifacts
   const processResult = await ResultAsync.fromPromise(
     (async () => {
-      // Use the validated analyzedRequirements
+      // 1. Use the validated analyzedRequirements
       const analyzedRequirements = validationResult.output
 
-      // 3. Create complete message with all analyzed requirements and sync to timeline
+      // 2. Create complete message with all analyzed requirements and sync to timeline
       const completeMessage = await withTimelineItemSync(
         new AIMessage({
           content: formatAnalyzedRequirements(analyzedRequirements),
@@ -176,14 +176,14 @@ export async function saveRequirementToArtifactNode(
         },
       )
 
-      // 4. Create updated state
+      // 3. Create updated state
       const updatedState = {
         ...state,
         messages: [...state.messages, completeMessage],
         analyzedRequirements,
       }
 
-      // 5. Save artifacts
+      // 4. Save artifacts
       await saveArtifacts(updatedState, repositories, assistantRole)
 
       return {

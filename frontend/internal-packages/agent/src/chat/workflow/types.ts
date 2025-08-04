@@ -16,7 +16,6 @@ export type WorkflowState = {
     | undefined
   generatedUsecases?: Usecase[] | undefined
   schemaData: Schema
-  error?: Error | undefined
   retryCount: Record<string, number>
 
   ddlStatements?: string | undefined

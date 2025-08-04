@@ -3,7 +3,7 @@ import type { RunnableConfig } from '@langchain/core/runnables'
 import { ChatOpenAI } from '@langchain/openai'
 import type { Database } from '@liam-hq/db'
 import { ResultAsync } from 'neverthrow'
-import type { Repositories } from '../../../repositories'
+import { WorkflowTerminationError } from '../../../shared/errorHandling'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 import { logAssistantMessage } from '../utils/timelineLogger'
@@ -39,37 +39,9 @@ Keep the summary informative but concise, focusing on the key achievements and d
 }
 
 /**
- * Handle workflow errors and save error timeline items
- */
-async function handleWorkflowError(
-  state: WorkflowState,
-  repositories: Repositories,
-): Promise<{
-  errorToReturn: string | undefined
-}> {
-  if (state.error) {
-    const errorMessage = `Sorry, an error occurred during processing: ${state.error.message}`
-    const saveResult = await repositories.schema.createTimelineItem({
-      designSessionId: state.designSessionId,
-      content: errorMessage,
-      type: 'error',
-    })
-
-    if (!saveResult.success) {
-      return {
-        errorToReturn: `Failed to save error timeline item: ${saveResult.error}`,
-      }
-    }
-    return { errorToReturn: state.error.message }
-  }
-
-  // Success case - workflow completed successfully
-  return { errorToReturn: undefined }
-}
-
-/**
  * Finalize Artifacts Node - Generate & Save Artifacts and Final Summary
  * Performed by dbAgentArtifactGen
+ * Note: Error handling is now done immediately at error occurrence, not here
  */
 export async function finalizeArtifactsNode(
   state: WorkflowState,
@@ -77,21 +49,13 @@ export async function finalizeArtifactsNode(
 ): Promise<WorkflowState> {
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
-    return {
-      ...state,
-      error: configurableResult.error,
-    }
+    throw new WorkflowTerminationError(
+      configurableResult.error,
+      'finalizeArtifactsNode',
+    )
   }
-  const { repositories } = configurableResult.value
-  const { errorToReturn } = await handleWorkflowError(state, repositories)
 
-  // If there was an error, return early without generating summary
-  if (errorToReturn) {
-    return {
-      ...state,
-      error: new Error(errorToReturn),
-    }
-  }
+  const { repositories } = configurableResult.value
 
   // Generate workflow summary for successful workflows
   const assistantRole: Database['public']['Enums']['assistant_role_enum'] = 'db'
@@ -122,7 +86,6 @@ export async function finalizeArtifactsNode(
     (summaryMessage) => ({
       ...state,
       messages: [summaryMessage],
-      error: undefined,
     }),
     async (error) => {
       await logAssistantMessage(
@@ -132,10 +95,7 @@ export async function finalizeArtifactsNode(
         assistantRole,
       )
 
-      return {
-        ...state,
-        error,
-      }
+      throw new WorkflowTerminationError(error, 'finalizeArtifactsNode')
     },
   )
 }

@@ -3,6 +3,7 @@ import type { RunnableConfig } from '@langchain/core/runnables'
 import type { Database } from '@liam-hq/db'
 import { PMAnalysisAgent } from '../../../langchain/agents'
 import type { Repositories } from '../../../repositories'
+import { WorkflowTerminationError } from '../../../shared/errorHandling'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 import { logAssistantMessage } from '../utils/timelineLogger'
@@ -96,10 +97,10 @@ export async function analyzeRequirementsNode(
   const assistantRole: Database['public']['Enums']['assistant_role_enum'] = 'pm'
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
-    return {
-      ...state,
-      error: configurableResult.error,
-    }
+    throw new WorkflowTerminationError(
+      configurableResult.error,
+      'analyzeRequirementsNode',
+    )
   }
   const { repositories } = configurableResult.value
 
@@ -111,8 +112,6 @@ export async function analyzeRequirementsNode(
   )
 
   const pmAnalysisAgent = new PMAnalysisAgent()
-
-  const retryCount = state.retryCount['analyzeRequirementsNode'] ?? 0
 
   const analysisResult = await pmAnalysisAgent.generate(state.messages)
 
@@ -159,7 +158,6 @@ export async function analyzeRequirementsNode(
         ...state,
         messages: [completeMessage],
         analyzedRequirements,
-        error: undefined, // Clear error on success
       }
 
       // Save artifacts if requirements are successfully analyzed
@@ -175,14 +173,7 @@ export async function analyzeRequirementsNode(
         assistantRole,
       )
 
-      return {
-        ...state,
-        error,
-        retryCount: {
-          ...state.retryCount,
-          ['analyzeRequirementsNode']: retryCount + 1,
-        },
-      }
+      throw new WorkflowTerminationError(error, 'analyzeRequirementsNode')
     },
   )
 }

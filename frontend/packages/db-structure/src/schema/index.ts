@@ -32,6 +32,7 @@ export {
   columnNameSchema,
   columnNotNullSchema,
   columnSchema,
+  columnTypeSchema,
   commentSchema,
   constraintNameSchema,
   constraintSchema,

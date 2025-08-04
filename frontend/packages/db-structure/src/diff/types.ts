@@ -14,6 +14,7 @@ import {
   columnNameSchema,
   columnNotNullSchema,
   columnSchema,
+  columnTypeSchema,
   commentSchema,
   constraintNameSchema,
   constraintSchema,
@@ -78,6 +79,14 @@ const columnNameDiffItemSchema = object({
   columnId: string(),
 })
 export type ColumnNameDiffItem = InferOutput<typeof columnNameDiffItemSchema>
+
+const columnTypeDiffItemSchema = object({
+  ...baseSchemaDiffItemSchema.entries,
+  kind: literal('column-type'),
+  data: columnTypeSchema,
+  columnId: string(),
+})
+export type ColumnTypeDiffItem = InferOutput<typeof columnTypeDiffItemSchema>
 
 const columnCommentDiffItemSchema = object({
   ...baseSchemaDiffItemSchema.entries,
@@ -249,6 +258,7 @@ export type TableRelatedDiffItem = InferOutput<
 export const columnRelatedDiffItemSchema = union([
   columnDiffItemSchema,
   columnNameDiffItemSchema,
+  columnTypeDiffItemSchema,
   columnCommentDiffItemSchema,
   columnDefaultDiffItemSchema,
   columnCheckDiffItemSchema,

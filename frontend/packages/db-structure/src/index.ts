@@ -15,6 +15,7 @@ export {
   buildSchemaDiff,
   columnRelatedDiffItemSchema,
   schemaDiffItemsSchema,
+  tableDiffItemSchema,
   tableRelatedDiffItemSchema,
 } from './diff/index.js'
 export { applyPatchOperations, operationsSchema } from './operation/index.js'

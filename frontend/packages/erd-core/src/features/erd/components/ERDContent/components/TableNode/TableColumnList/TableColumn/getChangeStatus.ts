@@ -1,17 +1,10 @@
 import {
   type ChangeStatus,
-  type ColumnRelatedDiffItem,
   columnRelatedDiffItemSchema,
   type SchemaDiffItem,
-  tableRelatedDiffItemSchema,
+  tableDiffItemSchema,
 } from '@liam-hq/db-structure'
 import { safeParse } from 'valibot'
-
-const isColumnRelatedDiffItem = (
-  item: SchemaDiffItem,
-): item is ColumnRelatedDiffItem => {
-  return safeParse(columnRelatedDiffItemSchema, item).success
-}
 
 type Params = {
   tableId: string
@@ -24,20 +17,37 @@ export function getChangeStatus({
   columnId,
   diffItems,
 }: Params): ChangeStatus {
-  const tableRelatedItems = diffItems.filter((d) => d.tableId === tableId)
-  const tableRelatedItem = tableRelatedItems.find((item) => {
-    const parsed = safeParse(tableRelatedDiffItemSchema, item)
+  const filteredDiffItems = diffItems.filter((d) => d.tableId === tableId)
+
+  // Priority 1: Check for table-level changes (added/removed)
+  // If the table itself has been added or removed, return that status immediately
+  const tableRelatedDiffItem = filteredDiffItems.find((item) => {
+    const parsed = safeParse(tableDiffItemSchema, item)
     return parsed.success
   })
 
-  if (tableRelatedItem) {
-    return tableRelatedItem.status
+  if (tableRelatedDiffItem) {
+    return tableRelatedDiffItem.status
   }
 
-  const filteredDiffItems = diffItems.filter((d) => isColumnRelatedDiffItem(d))
-  const columnRelatedItem = filteredDiffItems.find(
-    (d) => d.tableId === tableId && d.columnId === columnId,
-  )
+  const columnRelatedDiffItems = filteredDiffItems.filter((item) => {
+    const parsed = safeParse(columnRelatedDiffItemSchema, item)
+    return parsed.success && parsed.output.columnId === columnId
+  })
 
-  return columnRelatedItem?.status ?? 'unchanged'
+  if (columnRelatedDiffItems.length === 0) {
+    return 'unchanged'
+  }
+
+  // Collect all unique statuses from column changes
+  const statuses = columnRelatedDiffItems.map((item) => item.status)
+  const uniqueStatuses = new Set(statuses)
+
+  // All columns have the same change status
+  if (uniqueStatuses.size === 1 && statuses[0] !== undefined) {
+    return statuses[0]
+  }
+
+  // Mixed statuses indicate the table has been modified
+  return 'modified'
 }

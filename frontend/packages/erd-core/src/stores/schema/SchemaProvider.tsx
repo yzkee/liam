@@ -23,13 +23,16 @@ export const SchemaProvider: FC<Props> = ({ children, current, previous }) => {
       tables: {},
     }
     const diffItems = buildSchemaDiff(previous ?? emptySchema, current)
+    const filteredDiffItems = diffItems.filter(
+      (item) => item.status !== 'unchanged',
+    )
     const merged = previous ? mergeSchemas(previous, current) : current
 
     return {
       current,
       previous,
       merged,
-      diffItems,
+      diffItems: filteredDiffItems,
     }
   }, [current, previous])
 

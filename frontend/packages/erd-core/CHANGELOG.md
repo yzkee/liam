@@ -1,5 +1,14 @@
 # @liam-hq/erd-core
 
+## 0.6.0
+
+### Minor Changes
+
+- [#2852](https://github.com/liam-hq/liam/pull/2852) - ✨ add CommandPalette component / Thanks [@tnyo43](https://github.com/tnyo43)!
+- open with ⌘K / Ctrl+K
+- search tables
+- click to view in ERD
+
 ## 0.5.0
 
 ### Minor Changes

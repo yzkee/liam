@@ -1,5 +1,21 @@
 # @liam-hq/cli
 
+## 0.7.0
+
+### Minor Changes
+
+- [#2867](https://github.com/liam-hq/liam/pull/2867) - - ✨ Enhanced generated ERD files with CommandPalette / Thanks [@MH4GF](https://github.com/MH4GF)!
+  - CLI-generated ERD files now include search functionality (⌘K / Ctrl+K)
+  - Improved user experience for exploring large database schemas
+  - Better accessibility and navigation in generated static HTML files
+
+### Patch Changes
+
+- [#2852](https://github.com/liam-hq/liam/pull/2852) - ✨ add CommandPalette component / Thanks [@tnyo43](https://github.com/tnyo43)!
+- open with ⌘K / Ctrl+K
+- search tables
+- click to view in ERD
+
 ## 0.6.6
 
 ### Patch Changes

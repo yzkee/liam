@@ -3,22 +3,17 @@ import {
   type Constraints,
   isPrimaryKey,
 } from '@liam-hq/db-structure'
-import {
-  DiamondFillIcon,
-  DiamondIcon,
-  GridTableDd,
-  GridTableDt,
-  GridTableItem,
-  GridTableRoot,
-  GridTableRow,
-  KeyRound,
-} from '@liam-hq/ui'
+import { GridTableRoot } from '@liam-hq/ui'
 import clsx from 'clsx'
 import { type FC, useMemo } from 'react'
 import { useDiffStyle } from '@/features/diff/hooks/useDiffStyle'
 import { useSchemaOrThrow, useUserEditingOrThrow } from '@/stores'
 import styles from './ColumnsItem.module.css'
+import { Comment } from './Comment'
+import { Default } from './Default'
 import { getChangeStatus } from './getChangeStatus'
+import { NotNull } from './NotNull'
+import { PrimaryKey } from './PrimaryKey'
 import { Type } from './Type'
 
 type Props = {
@@ -45,38 +40,14 @@ export const ColumnsItem: FC<Props> = ({ tableId, column, constraints }) => {
   return (
     <div className={clsx(styles.wrapper, diffStyle)}>
       <h3 className={styles.heading}>{column.name}</h3>
-      {column.comment && <p className={styles.comment}>{column.comment}</p>}
+      {column.comment && <Comment tableId={tableId} column={column} />}
       <GridTableRoot>
         <Type tableId={tableId} column={column} />
-        {column.default !== null && (
-          <GridTableItem>
-            <GridTableDt>Default</GridTableDt>
-            <GridTableDd>{column.default}</GridTableDd>
-          </GridTableItem>
-        )}
+        <Default tableId={tableId} column={column} />
         {isPrimaryKey(column.name, constraints) && (
-          <GridTableItem>
-            <GridTableRow>
-              <KeyRound className={styles.primaryKeyIcon} />
-              Primary Key
-            </GridTableRow>
-          </GridTableItem>
+          <PrimaryKey tableId={tableId} columnName={column.name} />
         )}
-        {column.notNull ? (
-          <GridTableItem>
-            <GridTableRow>
-              <DiamondFillIcon className={styles.diamondIcon} />
-              Not-null
-            </GridTableRow>
-          </GridTableItem>
-        ) : (
-          <GridTableItem>
-            <GridTableRow>
-              <DiamondIcon className={styles.diamondIcon} />
-              Nullable
-            </GridTableRow>
-          </GridTableItem>
-        )}
+        <NotNull tableId={tableId} column={column} />
       </GridTableRoot>
     </div>
   )

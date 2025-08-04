@@ -1,4 +1,4 @@
-import type { Columns as ColumnsType, Constraints } from '@liam-hq/db-structure'
+import type { Table } from '@liam-hq/db-structure'
 import { Rows3 as Rows3Icon } from '@liam-hq/ui'
 import type { FC } from 'react'
 import { CollapsibleHeader } from '../CollapsibleHeader'
@@ -6,13 +6,12 @@ import styles from './Columns.module.css'
 import { ColumnsItem } from './ColumnsItem'
 
 type Props = {
-  columns: ColumnsType
-  constraints: Constraints
+  table: Table
 }
 
-export const Columns: FC<Props> = ({ columns, constraints }) => {
+export const Columns: FC<Props> = ({ table }) => {
   // NOTE: 300px is the height of one item in the list(when comments are lengthy)
-  const contentMaxHeight = Object.keys(columns).length * 300
+  const contentMaxHeight = Object.keys(table.columns).length * 300
   return (
     <CollapsibleHeader
       title="Columns"
@@ -21,9 +20,13 @@ export const Columns: FC<Props> = ({ columns, constraints }) => {
       stickyTopHeight={0}
       contentMaxHeight={contentMaxHeight}
     >
-      {Object.entries(columns).map(([key, column]) => (
+      {Object.entries(table.columns).map(([key, column]) => (
         <div className={styles.itemWrapper} key={key}>
-          <ColumnsItem column={column} constraints={constraints} />
+          <ColumnsItem
+            tableId={table.name}
+            column={column}
+            constraints={table.constraints}
+          />
         </div>
       ))}
     </CollapsibleHeader>

@@ -42,7 +42,6 @@ const generateCumulativeDDL = (operations: Operation[]): string => {
 }
 
 const generateAIPrompt = (
-  _schema: Schema,
   artifactDoc: string,
   cumulativeOperations: Operation[],
 ): string => {
@@ -76,7 +75,7 @@ export const ExportDropdown: FC<Props> = ({
   const handleCopyAIPrompt = async () => {
     if (!artifactDoc) return
 
-    const prompt = generateAIPrompt(schema, artifactDoc, cumulativeOperations)
+    const prompt = generateAIPrompt(artifactDoc, cumulativeOperations)
     const clipboardResult = await fromPromise(
       navigator.clipboard.writeText(prompt),
       (error) =>

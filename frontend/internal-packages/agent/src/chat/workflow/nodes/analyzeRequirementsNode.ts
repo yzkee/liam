@@ -1,7 +1,6 @@
 import { AIMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import type { Database } from '@liam-hq/db'
-import { ResultAsync } from 'neverthrow'
 import { PMAnalysisAgent } from '../../../langchain/agents'
 import type { Repositories } from '../../../repositories'
 import { getConfigurable } from '../shared/getConfigurable'
@@ -115,22 +114,23 @@ export async function analyzeRequirementsNode(
 
   const retryCount = state.retryCount['analyzeRequirementsNode'] ?? 0
 
-  const analysisResult = await ResultAsync.fromPromise(
-    pmAnalysisAgent.generate(state.messages),
-    (error) => (error instanceof Error ? error : new Error(String(error))),
-  )
+  const analysisResult = await pmAnalysisAgent.generate(state.messages)
 
   return analysisResult.match(
-    async ({ response, reasoning }) => {
+    async (analysisData) => {
       const analyzedRequirements = {
-        businessRequirement: response.businessRequirement,
-        functionalRequirements: response.functionalRequirements,
-        nonFunctionalRequirements: response.nonFunctionalRequirements,
+        businessRequirement: analysisData.response.businessRequirement,
+        functionalRequirements: analysisData.response.functionalRequirements,
+        nonFunctionalRequirements:
+          analysisData.response.nonFunctionalRequirements,
       }
 
       // Log reasoning summary if available
-      if (reasoning?.summary && reasoning.summary.length > 0) {
-        for (const summaryItem of reasoning.summary) {
+      if (
+        analysisData.reasoning?.summary &&
+        analysisData.reasoning.summary.length > 0
+      ) {
+        for (const summaryItem of analysisData.reasoning.summary) {
           await logAssistantMessage(
             state,
             repositories,

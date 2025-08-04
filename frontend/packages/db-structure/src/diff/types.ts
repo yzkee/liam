@@ -279,7 +279,7 @@ export type IndexRelatedDiffItem = InferOutput<
   typeof indexRelatedDiffItemSchema
 >
 
-const constraintRelatedDiffItemSchema = union([
+export const constraintRelatedDiffItemSchema = union([
   constraintDiffItemSchema,
   constraintNameDiffItemSchema,
   constraintColumnNameDiffItemSchema,

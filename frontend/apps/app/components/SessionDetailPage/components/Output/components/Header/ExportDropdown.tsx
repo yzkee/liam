@@ -52,7 +52,7 @@ const generateAIPrompt = (
 
 ${artifactDoc}
 
-## Schema Evolution (DDL Changes)
+## Schema Migrations
 \`\`\`sql
 ${ddlContent}\`\`\`
 

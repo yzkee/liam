@@ -40,7 +40,7 @@ const baseSchemaDiffItemSchema = object({
   tableId: string(),
 })
 
-const tableDiffItemSchema = object({
+export const tableDiffItemSchema = object({
   ...baseSchemaDiffItemSchema.entries,
   kind: literal('table'),
   data: tableSchema,

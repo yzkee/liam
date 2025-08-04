@@ -8,7 +8,13 @@ export type {
   TableRelatedDiffItem,
 } from './types.js'
 export {
+  columnCommentDiffItemSchema,
+  columnDefaultDiffItemSchema,
+  columnDiffItemSchema,
+  columnNotNullDiffItemSchema,
   columnRelatedDiffItemSchema,
+  columnTypeDiffItemSchema,
+  constraintDiffItemSchema,
   schemaDiffItemsSchema,
   tableCommentDiffItemSchema,
   tableDiffItemSchema,

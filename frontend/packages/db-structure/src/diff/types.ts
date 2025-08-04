@@ -64,7 +64,7 @@ export type TableCommentDiffItem = InferOutput<
   typeof tableCommentDiffItemSchema
 >
 
-const columnDiffItemSchema = object({
+export const columnDiffItemSchema = object({
   ...baseSchemaDiffItemSchema.entries,
   kind: literal('column'),
   data: columnSchema,
@@ -80,7 +80,7 @@ const columnNameDiffItemSchema = object({
 })
 export type ColumnNameDiffItem = InferOutput<typeof columnNameDiffItemSchema>
 
-const columnTypeDiffItemSchema = object({
+export const columnTypeDiffItemSchema = object({
   ...baseSchemaDiffItemSchema.entries,
   kind: literal('column-type'),
   data: columnTypeSchema,
@@ -88,7 +88,7 @@ const columnTypeDiffItemSchema = object({
 })
 export type ColumnTypeDiffItem = InferOutput<typeof columnTypeDiffItemSchema>
 
-const columnCommentDiffItemSchema = object({
+export const columnCommentDiffItemSchema = object({
   ...baseSchemaDiffItemSchema.entries,
   kind: literal('column-comment'),
   data: commentSchema,
@@ -98,7 +98,7 @@ export type ColumnCommentDiffItem = InferOutput<
   typeof columnCommentDiffItemSchema
 >
 
-const columnDefaultDiffItemSchema = object({
+export const columnDefaultDiffItemSchema = object({
   ...baseSchemaDiffItemSchema.entries,
   kind: literal('column-default'),
   data: columnDefaultSchema,
@@ -116,7 +116,7 @@ const columnCheckDiffItemSchema = object({
 })
 export type ColumnCheckDiffItem = InferOutput<typeof columnCheckDiffItemSchema>
 
-const columnNotNullDiffItemSchema = object({
+export const columnNotNullDiffItemSchema = object({
   ...baseSchemaDiffItemSchema.entries,
   kind: literal('column-not-null'),
   data: columnNotNullSchema,
@@ -168,7 +168,7 @@ const indexTypeDiffItemSchema = object({
 })
 export type IndexTypeDiffItem = InferOutput<typeof indexTypeDiffItemSchema>
 
-const constraintDiffItemSchema = object({
+export const constraintDiffItemSchema = object({
   ...baseSchemaDiffItemSchema.entries,
   kind: literal('constraint'),
   data: constraintSchema,

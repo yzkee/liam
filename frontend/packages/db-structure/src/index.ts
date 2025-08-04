@@ -13,7 +13,13 @@ export type {
 } from './diff/index.js'
 export {
   buildSchemaDiff,
+  columnCommentDiffItemSchema,
+  columnDefaultDiffItemSchema,
+  columnDiffItemSchema,
+  columnNotNullDiffItemSchema,
   columnRelatedDiffItemSchema,
+  columnTypeDiffItemSchema,
+  constraintDiffItemSchema,
   schemaDiffItemsSchema,
   tableCommentDiffItemSchema,
   tableDiffItemSchema,

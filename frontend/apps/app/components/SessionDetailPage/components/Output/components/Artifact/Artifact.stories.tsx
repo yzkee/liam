@@ -161,7 +161,7 @@ WHERE product_id = 'PROD-001'
   AND warehouse_id = 'WH-EAST';
 \`\`\`
 
-**Execution Logs:**
+**Execution History:**
 - 12/28/2024, 10:30:45 AM: ✅ Success - Updated 1 row(s) in 23ms
 - 12/28/2024, 09:15:22 AM: ✅ Success - Updated 1 row(s) in 18ms
 - 12/27/2024, 03:45:10 PM: ❌ Failed - Lock timeout exceeded after 5000ms
@@ -175,7 +175,7 @@ VALUES
 ('TXN-' || gen_random_uuid(), 'PROD-001', -50, 'SHIPMENT', CURRENT_TIMESTAMP);
 \`\`\`
 
-**Execution Logs:**
+**Execution History:**
 - 12/28/2024, 10:30:46 AM: ✅ Success - Inserted 1 row(s) in 15ms
 - 12/28/2024, 09:15:23 AM: ✅ Success - Inserted 1 row(s) in 12ms
 

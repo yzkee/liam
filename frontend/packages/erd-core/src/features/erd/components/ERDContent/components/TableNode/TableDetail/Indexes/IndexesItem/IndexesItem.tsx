@@ -2,7 +2,6 @@ import type { Index } from '@liam-hq/db-structure'
 import {
   GridTableDd,
   GridTableDt,
-  GridTableHeader,
   GridTableItem,
   GridTableRoot,
 } from '@liam-hq/ui'
@@ -12,6 +11,7 @@ import { useDiffStyle } from '@/features/diff/hooks/useDiffStyle'
 import { useSchemaOrThrow, useUserEditingOrThrow } from '@/stores'
 import { getChangeStatus } from './getChangeStatus'
 import styles from './IndexesItem.module.css'
+import { Name } from './Name'
 
 type Props = {
   tableId: string
@@ -37,7 +37,7 @@ export const IndexesItem: FC<Props> = ({ tableId, index }) => {
   return (
     <div className={clsx(styles.wrapper, diffStyle)}>
       <GridTableRoot>
-        <GridTableHeader>{index.name}</GridTableHeader>
+        <Name tableId={tableId} index={index} />
         {index.type && index.type.toLowerCase() !== HIDE_INDEX_TYPE && (
           <GridTableItem>
             <GridTableDt>Type</GridTableDt>

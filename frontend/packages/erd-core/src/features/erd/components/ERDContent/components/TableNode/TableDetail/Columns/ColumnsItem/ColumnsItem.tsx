@@ -19,6 +19,7 @@ import { useDiffStyle } from '@/features/diff/hooks/useDiffStyle'
 import { useSchemaOrThrow, useUserEditingOrThrow } from '@/stores'
 import styles from './ColumnsItem.module.css'
 import { getChangeStatus } from './getChangeStatus'
+import { Type } from './Type'
 
 type Props = {
   tableId: string
@@ -46,10 +47,7 @@ export const ColumnsItem: FC<Props> = ({ tableId, column, constraints }) => {
       <h3 className={styles.heading}>{column.name}</h3>
       {column.comment && <p className={styles.comment}>{column.comment}</p>}
       <GridTableRoot>
-        <GridTableItem>
-          <GridTableDt>Type</GridTableDt>
-          <GridTableDd>{column.type}</GridTableDd>
-        </GridTableItem>
+        <Type tableId={tableId} column={column} />
         {column.default !== null && (
           <GridTableItem>
             <GridTableDt>Default</GridTableDt>

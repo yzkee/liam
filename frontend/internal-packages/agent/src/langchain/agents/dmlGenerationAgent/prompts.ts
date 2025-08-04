@@ -48,131 +48,50 @@ You are a senior QA engineer specializing in database testing and data generatio
 
 • **Best Practices**:
   - Always use transactions for data safety
-  - Include comments explaining the test scenario
   - Format SQL for readability
   - Group related statements together
-  - Provide rollback statements when appropriate
 
 ## Output Format:
 
-Structure your response as follows:
+You must return a structured JSON response with the following format:
 
-\`\`\`sql
--- ================================================================
--- DML Generation for [Schema Name]
--- Generated: [Current Date]
--- Purpose: [Brief description of test scenarios]
--- ================================================================
+{
+  "dmlOperations": [
+    {
+      "useCaseId": "uuid-of-use-case",
+      "operation_type": "INSERT|UPDATE|DELETE|SELECT",
+      "sql": "SQL statement here",
+      "description": "Optional description of what this operation tests"
+    }
+  ]
+}
 
--- ----------------------------------------------------------------
--- Section 1: Initial Data Setup (INSERT)
--- ----------------------------------------------------------------
+## Important Requirements:
 
--- Table: [table_name]
--- Scenario: [What this data tests]
-INSERT INTO table_name (column1, column2, ...) VALUES
-  (value1, value2, ...),
-  (value1, value2, ...);
+1. **Use Case Mapping**: Each DML operation MUST include a "useCaseId" that corresponds to one of the use case UUIDs provided in the requirements section.
+2. **Operation Types**: Use only these values: "INSERT", "UPDATE", "DELETE", "SELECT"
+3. **SQL Quality**: Ensure all SQL statements are syntactically correct and properly formatted
+4. **Comprehensive Coverage**: Generate multiple operations per use case to thoroughly test the scenario
+5. **Realistic Data**: Use meaningful, realistic test data that reflects real-world usage patterns
 
--- ----------------------------------------------------------------
--- Section 2: Data Modifications (UPDATE)
--- ----------------------------------------------------------------
+## Example Response:
 
--- Scenario: [What this update tests]
-UPDATE table_name
-SET column1 = value1
-WHERE condition;
-
--- ----------------------------------------------------------------
--- Section 3: Data Validation (SELECT)
--- ----------------------------------------------------------------
-
--- Query: [What this query validates]
-SELECT ...
-FROM ...
-WHERE ...;
-
--- ----------------------------------------------------------------
--- Section 4: Cleanup Operations (DELETE) - Optional
--- ----------------------------------------------------------------
-
--- Scenario: [What this deletion tests]
-DELETE FROM table_name
-WHERE condition;
-
--- ----------------------------------------------------------------
--- Rollback Script (if needed)
--- ----------------------------------------------------------------
-\`\`\`
-
-## Example:
-
-For a simple e-commerce schema with users, products, and orders:
-
-\`\`\`sql
--- ================================================================
--- DML Generation for E-commerce Test Data
--- Generated: 2024-12-09
--- Purpose: Comprehensive testing of user orders and product relationships
--- ================================================================
-
--- ----------------------------------------------------------------
--- Section 1: Initial Data Setup (INSERT)
--- ----------------------------------------------------------------
-
--- Table: users
--- Scenario: Diverse user profiles including edge cases
-INSERT INTO users (id, email, name, created_at) VALUES
-  (1, 'john.doe@example.com', 'John Doe', '2024-01-15 10:00:00'),
-  (2, 'jane.smith@example.com', 'Jane Smith', '2024-02-20 14:30:00'),
-  (3, 'test.user@example.com', 'Test User with Very Long Name That Tests Character Limits', '2024-03-01 09:00:00'),
-  (4, 'intl.user@example.com', 'Müller José García', '2024-03-15 11:00:00'),
-  (5, 'special.chars@example.com', 'O''Brien & Co.', '2024-04-01 16:00:00');
-
--- Table: products
--- Scenario: Various product types with different price points
-INSERT INTO products (id, name, price, stock_quantity) VALUES
-  (1, 'Basic T-Shirt', 19.99, 100),
-  (2, 'Premium Jacket', 199.99, 25),
-  (3, 'Clearance Item', 0.99, 500),
-  (4, 'High-End Watch', 9999.99, 5),
-  (5, 'Out of Stock Item', 49.99, 0);
-
--- ----------------------------------------------------------------
--- Section 2: Data Modifications (UPDATE)
--- ----------------------------------------------------------------
-
--- Scenario: Price adjustment for seasonal sale
-UPDATE products
-SET price = price * 0.8, -- 20% discount
-    updated_at = CURRENT_TIMESTAMP
-WHERE id IN (1, 2);
-
--- Scenario: Bulk inventory update after shipment
-UPDATE products
-SET stock_quantity = stock_quantity - 10
-WHERE stock_quantity > 10;
-
--- ----------------------------------------------------------------
--- Section 3: Data Validation (SELECT)
--- ----------------------------------------------------------------
-
--- Query: Verify user distribution
-SELECT COUNT(*) as total_users,
-       COUNT(DISTINCT EXTRACT(MONTH FROM created_at)) as active_months
-FROM users;
-
--- Query: Check product inventory status
-SELECT 
-  CASE 
-    WHEN stock_quantity = 0 THEN 'Out of Stock'
-    WHEN stock_quantity < 10 THEN 'Low Stock'
-    ELSE 'In Stock'
-  END as status,
-  COUNT(*) as product_count
-FROM products
-GROUP BY status;
-\`\`\`
+{
+  "dmlOperations": [
+    {
+      "useCaseId": "550e8400-e29b-41d4-a716-446655440000",
+      "operation_type": "INSERT",
+      "sql": "INSERT INTO users (id, email, name, created_at) VALUES (1, 'john.doe@example.com', 'John Doe', '2024-01-15 10:00:00');",
+      "description": "Create test user for registration scenario"
+    },
+    {
+      "useCaseId": "550e8400-e29b-41d4-a716-446655440000",
+      "operation_type": "SELECT",
+      "sql": "SELECT * FROM users WHERE email = 'john.doe@example.com';",
+      "description": "Verify user was created successfully"
+    }
+  ]
+}
 `
 
 const DML_GENERATION_HUMAN_MESSAGE_TEMPLATE = `

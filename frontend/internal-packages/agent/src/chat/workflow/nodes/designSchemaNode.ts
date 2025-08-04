@@ -1,4 +1,4 @@
-import { HumanMessage } from '@langchain/core/messages'
+import { AIMessage, HumanMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import type { Database } from '@liam-hq/db'
 import { invokeDesignAgent } from '../../../langchain/agents/databaseSchemaBuildAgent/agent'
@@ -26,57 +26,97 @@ export async function designSchemaNode(
   }
   const { repositories } = configurableResult.value
 
-  await logAssistantMessage(
-    state,
-    repositories,
-    'Designing your database structure to meet the identified requirements...',
-    assistantRole,
-  )
-
   const schemaText = convertSchemaToText(state.schemaData)
 
-  // Log appropriate message for DDL retry case
-  if (state.shouldRetryWithDesignSchema && state.ddlExecutionFailureReason) {
-    await logAssistantMessage(
-      state,
-      repositories,
-      'Redesigning schema to fix DDL execution errors...',
-      assistantRole,
-    )
-  }
+  // Remove reasoning field from AIMessages to avoid API issues
+  // This prevents the "reasoning without required following item" error
+  const messages = state.messages.map((msg) => {
+    if (msg instanceof AIMessage) {
+      // Create a new AIMessage without the reasoning field
+      // Clone the message but exclude reasoning if it exists
+      const {
+        content,
+        additional_kwargs,
+        response_metadata,
+        tool_calls,
+        invalid_tool_calls,
+        usage_metadata,
+      } = msg
+      const cleanedKwargs = { ...additional_kwargs }
 
-  // Use existing messages, or add DDL failure context if retrying
-  let messages = [...state.messages]
-  if (state.shouldRetryWithDesignSchema && state.ddlExecutionFailureReason) {
-    const ddlRetryMessage = new HumanMessage(
-      `The following DDL execution failed: ${state.ddlExecutionFailureReason}
-Original request: ${state.userInput}
-Please fix this issue by analyzing the schema and adding any missing constraints, primary keys, or other required schema elements to resolve the DDL execution error.`,
-    )
-    messages = [...messages, ddlRetryMessage]
-  }
+      // Remove reasoning from additional_kwargs if it exists
+      if ('reasoning' in cleanedKwargs) {
+        delete cleanedKwargs['reasoning']
+      }
+
+      // Preserve all other message properties including tool_calls
+      const aiMessageFields: {
+        content: typeof content
+        additional_kwargs: typeof cleanedKwargs
+        response_metadata: typeof response_metadata
+        tool_calls?: typeof tool_calls
+        invalid_tool_calls?: typeof invalid_tool_calls
+        usage_metadata?: typeof usage_metadata
+      } = {
+        content,
+        additional_kwargs: cleanedKwargs,
+        response_metadata,
+      }
+
+      // Only add optional fields if they are defined
+      if (tool_calls !== undefined) {
+        aiMessageFields.tool_calls = tool_calls
+      }
+      if (invalid_tool_calls !== undefined) {
+        aiMessageFields.invalid_tool_calls = invalid_tool_calls
+      }
+      if (usage_metadata !== undefined) {
+        aiMessageFields.usage_metadata = usage_metadata
+      }
+
+      return new AIMessage(aiMessageFields)
+    }
+    return msg
+  })
 
   const invokeResult = await invokeDesignAgent({ schemaText }, messages, {
     buildingSchemaId: state.buildingSchemaId,
     latestVersionNumber: state.latestVersionNumber,
+    designSessionId: state.designSessionId,
     repositories,
   })
 
   if (invokeResult.isErr()) {
-    await logAssistantMessage(
-      state,
-      repositories,
-      'Unable to complete the database design. There may be conflicts in the requirements...',
-      assistantRole,
-    )
+    // Create a human message for error feedback to avoid reasoning API issues
+    // Using HumanMessage prevents the "reasoning without required following item" error
+    const errorFeedbackMessage = new HumanMessage({
+      content: `The previous attempt failed with the following error: ${invokeResult.error.message}. Please try a different approach to resolve the issue.`,
+    })
+
+    // Return state with error feedback as HumanMessage for self-recovery
     return {
       ...state,
+      messages: [errorFeedbackMessage],
       error: invokeResult.error,
     }
   }
 
+  const { response, reasoning } = invokeResult.value
+
+  // Log reasoning summary if available
+  if (reasoning?.summary && reasoning.summary.length > 0) {
+    for (const summaryItem of reasoning.summary) {
+      await logAssistantMessage(
+        state,
+        repositories,
+        summaryItem.text,
+        assistantRole,
+      )
+    }
+  }
+
   // Apply timeline sync to the message and clear retry flags
-  const syncedMessage = await withTimelineItemSync(invokeResult.value, {
+  const syncedMessage = await withTimelineItemSync(response, {
     designSessionId: state.designSessionId,
     organizationId: state.organizationId || '',
     userId: state.userId,
@@ -88,7 +128,5 @@ Please fix this issue by analyzing the schema and adding any missing constraints
     ...state,
     messages: [syncedMessage],
     latestVersionNumber: state.latestVersionNumber + 1,
-    shouldRetryWithDesignSchema: undefined,
-    ddlExecutionFailureReason: undefined,
   }
 }

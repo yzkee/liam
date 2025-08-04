@@ -84,42 +84,41 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   args: {
     onSendMessage: () => {},
-    isLoading: false,
+    isWorkflowRunning: false,
     error: false,
     schema: dummySchema,
   },
   parameters: {
     docs: {
       description: {
-        story: 'Default state showing the SendButton when not loading.',
+        story: 'Default state showing the SendButton.',
       },
     },
   },
 }
 
-// Loading state with CancelButton
-export const Loading: Story = {
+// Workflow running state
+export const WorkflowRunning: Story = {
   args: {
     onSendMessage: () => {},
-    isLoading: true,
+    isWorkflowRunning: true,
     error: false,
     schema: dummySchema,
   },
   parameters: {
     docs: {
       description: {
-        story:
-          'Loading state showing the CancelButton instead of the SendButton. The border color remains default and no box shadow is applied.',
+        story: 'Workflow running state where the input is disabled.',
       },
     },
   },
 }
 
-// Loading state with content and CancelButton
-export const LoadingWithContent: Story = {
+// Workflow running state with content
+export const WorkflowRunningWithContent: Story = {
   args: {
     onSendMessage: () => {},
-    isLoading: true,
+    isWorkflowRunning: true,
     error: false,
     initialMessage: 'This message is being processed...',
     schema: dummySchema,
@@ -128,7 +127,7 @@ export const LoadingWithContent: Story = {
     docs: {
       description: {
         story:
-          'Loading state with content showing the CancelButton instead of the SendButton. The border color remains default and no box shadow is applied.',
+          'Workflow running state with content where the input is disabled.',
       },
     },
   },
@@ -138,7 +137,7 @@ export const LoadingWithContent: Story = {
 export const WithError: Story = {
   args: {
     onSendMessage: () => {},
-    isLoading: false,
+    isWorkflowRunning: false,
     error: true,
     initialMessage: 'This message has an error that needs to be fixed.',
     schema: dummySchema,
@@ -146,7 +145,7 @@ export const WithError: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Error state showing the SendButton when not loading.',
+        story: 'Error state showing the SendButton disabled.',
       },
     },
   },
@@ -156,7 +155,7 @@ export const WithError: Story = {
 export const Filled: Story = {
   args: {
     onSendMessage: () => {},
-    isLoading: false,
+    isWorkflowRunning: false,
     error: false,
     initialMessage: 'Proposed schema changes for adding a chat function.',
     schema: dummySchema,
@@ -164,7 +163,7 @@ export const Filled: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Filled state showing the SendButton when not loading.',
+        story: 'Filled state showing the SendButton enabled.',
       },
     },
   },
@@ -176,7 +175,7 @@ export const Interactive: Story = {
     onSendMessage: (msg: string) => {
       alert(`Message sent: ${msg}`)
     },
-    isLoading: false,
+    isWorkflowRunning: false,
     error: false,
     initialMessage: '',
     schema: dummySchema,
@@ -185,7 +184,7 @@ export const Interactive: Story = {
     docs: {
       description: {
         story:
-          'Interactive demo showing the ChatInput component with SendButton by default. When a message is sent, it would typically switch to the loading state with CancelButton in a real application.',
+          'Interactive demo showing the ChatInput component with SendButton. When a message is sent, it would typically switch to the workflow running state in a real application.',
       },
     },
   },

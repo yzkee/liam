@@ -2,6 +2,14 @@ import { Document } from '@langchain/core/documents'
 import { OpenAIEmbeddings } from '@langchain/openai'
 import { getFileContent } from '@liam-hq/github'
 import { logger } from '@trigger.dev/sdk/v3'
+import {
+  err,
+  errAsync,
+  ok,
+  okAsync,
+  type Result,
+  ResultAsync,
+} from 'neverthrow'
 import { createClient } from '../libs/supabase'
 
 export type RepositoryAnalysisPayload = {
@@ -125,7 +133,9 @@ const getRepositoryFileTree = async (
  * Get error message from any error type
  */
 const getErrorMessage = (error: unknown, context: string): string => {
-  return `${context}: ${error instanceof Error ? error.message : 'Unknown error'}`
+  return `${context}: ${
+    error instanceof Error ? error.message : 'Unknown error'
+  }`
 }
 
 /**
@@ -281,32 +291,45 @@ const createLangChainDocuments = (
 /**
  * Validate OpenAI API key
  */
-const validateOpenAIKey = (): string => {
+const validateOpenAIKey = (): Result<string, Error> => {
   const openAIApiKey = process.env['OPENAI_API_KEY']
 
   if (!openAIApiKey) {
-    throw new Error(
-      'Valid OpenAI API key is required for generating embeddings',
+    return err(
+      new Error('Valid OpenAI API key is required for generating embeddings'),
     )
   }
 
-  return openAIApiKey
+  return ok(openAIApiKey)
 }
 
 /**
  * Insert a single document into Supabase
  */
+function isSupabaseError(error: unknown): error is {
+  message?: string
+  code?: string
+  details?: string
+} {
+  return typeof error === 'object' && error !== null && 'message' in error
+}
+
 const insertDocumentToSupabase = async (
-  supabase: ReturnType<typeof createClient>,
+  supabaseResult: ReturnType<typeof createClient>,
   documentContent: string,
   metadata: RepositoryDocumentMetadata,
   vector: number[],
-): Promise<boolean> => {
+): Promise<Result<boolean, Error>> => {
+  if (supabaseResult.isErr()) {
+    return errAsync(supabaseResult.error)
+  }
+
+  const supabase = supabaseResult.value
   // @ts-ignore - Type inconsistencies with Supabase schema definitions
   const { error } = await supabase.from('documents').insert([
     {
       content: documentContent,
-      metadata,
+      metadata: metadata,
       embedding: vector,
       updated_at: metadata.updated_at,
       organization_id: metadata.organization_id || '',
@@ -314,17 +337,31 @@ const insertDocumentToSupabase = async (
   ])
 
   if (error) {
-    const errorMessage = `Document insertion failed: ${error.message} ${error.code} ${error.details}`
-    logger.error(errorMessage)
-    throw new Error(errorMessage)
+    let message = 'Document insertion failed'
+    if (isSupabaseError(error)) {
+      message = `Document insertion failed: ${error.message} ${error.code} ${error.details}`
+    }
+    logger.error(message)
+    return errAsync(new Error(message))
   }
 
-  return true
+  return okAsync(true)
 }
 
 /**
  * Process a batch of documents
  */
+function isRepositoryDocumentMetadata(
+  value: unknown,
+): value is RepositoryDocumentMetadata {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'repository_id' in value &&
+    'project_id' in value
+  )
+}
+
 const processBatch = async (
   batch: Document[],
   embeddings: OpenAIEmbeddings,
@@ -334,8 +371,8 @@ const processBatch = async (
   try {
     // Generate embeddings for the batch
     const texts = batch.map((doc) => doc.pageContent)
-    const metadatas = batch.map(
-      (doc) => doc.metadata as RepositoryDocumentMetadata,
+    const metadatas = batch.map((doc) =>
+      isRepositoryDocumentMetadata(doc.metadata) ? doc.metadata : null,
     )
     const vectors = await embeddings.embedDocuments(texts)
 
@@ -406,8 +443,14 @@ const saveDocumentsToVectorStore = async (
     // Validate OpenAI API key
     const openAIApiKey = validateOpenAIKey()
 
+    if (openAIApiKey.isErr()) {
+      throw openAIApiKey.error
+    }
+
     // Initialize OpenAI embeddings
-    const embeddings = new OpenAIEmbeddings({ openAIApiKey })
+    const embeddings = new OpenAIEmbeddings({
+      openAIApiKey: openAIApiKey.value,
+    })
     const supabase = createClient()
 
     // Process documents in batches to avoid overwhelming the API
@@ -555,7 +598,9 @@ const processAndSaveDocuments = async (
  */
 export const processRepositoryAnalysis = async (
   payload: RepositoryAnalysisPayload,
-): Promise<{ processedFiles: number; errors: string[] }> => {
+): Promise<
+  ResultAsync<{ processedFiles: number; errors: string[] }, Error>
+> => {
   const {
     projectId,
     repositoryId,
@@ -570,48 +615,52 @@ export const processRepositoryAnalysis = async (
   const repositoryFullName = `${repositoryOwner}/${repositoryName}`
   const errors: string[] = []
 
-  try {
-    const documentFiles: DocumentFile[] = []
+  return ResultAsync.fromPromise(
+    (async () => {
+      const documentFiles: DocumentFile[] = []
 
-    // 1. Fetch essential files (README.md, ABOUT.md)
-    const { files: essentialFiles, count: essentialCount } =
-      await fetchEssentialFiles(repositoryFullName, installationId, errors)
-    documentFiles.push(...essentialFiles)
+      // 1. Fetch essential files (README.md, ABOUT.md)
+      const { files: essentialFiles, count: essentialCount } =
+        await fetchEssentialFiles(repositoryFullName, installationId, errors)
+      documentFiles.push(...essentialFiles)
 
-    // 2. Fetch documentation files
-    const { files: docFiles, count: docsCount } = await fetchDocumentationFiles(
-      repositoryOwner,
-      repositoryName,
-      repositoryFullName,
-      installationId,
-      errors,
-    )
-    documentFiles.push(...docFiles)
+      // 2. Fetch documentation files
+      const { files: docFiles, count: docsCount } =
+        await fetchDocumentationFiles(
+          repositoryOwner,
+          repositoryName,
+          repositoryFullName,
+          installationId,
+          errors,
+        )
+      documentFiles.push(...docFiles)
 
-    // 3. Process and save documents
-    const { processedFiles, totalChunks } = await processAndSaveDocuments(
-      documentFiles,
-      projectId,
-      repositoryId,
-      repositoryOwner,
-      repositoryName,
-      organizationId,
-      errors,
-    )
+      // 3. Process and save documents
+      const { processedFiles, totalChunks } = await processAndSaveDocuments(
+        documentFiles,
+        projectId,
+        repositoryId,
+        repositoryOwner,
+        repositoryName,
+        organizationId,
+        errors,
+      )
 
-    // Summary log
-    logger.log(`📊 Repository scan completed:
-  ✅ Found files: ${documentFiles.length}
-  ❌ Missing files: ${errors.length}
-  📁 Essential: ${essentialCount}
-  📚 Docs: ${docsCount}
-  🧩 Total chunks: ${totalChunks}
-  💾 Processed: ${processedFiles}`)
+      // Summary log
+      logger.log(`📊 Repository scan completed:
+    ✅ Found files: ${documentFiles.length}
+    ❌ Missing files: ${errors.length}
+    📁 Essential: ${essentialCount}
+    📚 Docs: ${docsCount}
+    🧩 Total chunks: ${totalChunks}
+    💾 Processed: ${processedFiles}`)
 
-    return { processedFiles, errors }
-  } catch (error) {
-    const errorMessage = getErrorMessage(error, 'Repository analysis failed')
-    logger.error(errorMessage)
-    throw new Error(errorMessage)
-  }
+      return { processedFiles, errors }
+    })(),
+    (error) => {
+      const errorMessage = getErrorMessage(error, 'Repository analysis failed')
+      logger.error(errorMessage)
+      return new Error(errorMessage)
+    },
+  )
 }

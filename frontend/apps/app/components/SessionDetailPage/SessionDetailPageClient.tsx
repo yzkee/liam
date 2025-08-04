@@ -6,11 +6,12 @@ import { type FC, useCallback, useState } from 'react'
 import { Chat } from './components/Chat'
 import { Output } from './components/Output'
 import { useRealtimeArtifact } from './components/Output/components/Artifact/hooks/useRealtimeArtifact'
+import { OUTPUT_TABS } from './components/Output/constants'
 import { OutputPlaceholder } from './components/OutputPlaceholder'
 import { useRealtimeTimelineItems } from './hooks/useRealtimeTimelineItems'
 import { useRealtimeVersionsWithSchema } from './hooks/useRealtimeVersionsWithSchema'
 import { useRealtimeWorkflowRuns } from './hooks/useRealtimeWorkflowRuns'
-import { SCHEMA_UPDATES_REVIEW_COMMENTS } from './mock'
+import { SQL_REVIEW_COMMENTS } from './mock'
 import styles from './SessionDetailPage.module.css'
 import { convertTimelineItemToTimelineItemEntry } from './services/convertTimelineItemToTimelineItemEntry'
 import type {
@@ -58,6 +59,13 @@ export const SessionDetailPageClient: FC<Props> = ({
     [setSelectedVersion],
   )
 
+  const handleViewVersion = useCallback((versionId: string) => {
+    const version = versions.find((version) => version.id === versionId)
+    if (!version) return
+
+    setSelectedVersion(version)
+  }, [])
+
   const { timelineItems, addOrUpdateTimelineItem } = useRealtimeTimelineItems(
     designSessionId,
     designSessionWithTimelineItems.timeline_items.map((timelineItem) =>
@@ -65,15 +73,10 @@ export const SessionDetailPageClient: FC<Props> = ({
     ),
   )
 
-  const [, setQuickFixMessage] = useState<string>('')
+  const [activeTab, setActiveTab] = useState<string | undefined>(undefined)
 
-  const handleQuickFix = useCallback((comment: string) => {
-    const fixMessage = `Please fix the following issue pointed out by the QA Agent:
-
-"${comment}"
-
-Please suggest a specific solution to resolve this problem.`
-    setQuickFixMessage(fixMessage)
+  const handleArtifactLinkClick = useCallback(() => {
+    setActiveTab(OUTPUT_TABS.ARTIFACT)
   }, [])
 
   const hasSelectedVersion = selectedVersion !== null
@@ -104,22 +107,38 @@ Please suggest a specific solution to resolve this problem.`
             schemaData={displayedSchema}
             designSessionId={designSessionId}
             timelineItems={timelineItems}
+            isWorkflowRunning={status === 'pending'}
             onMessageSend={addOrUpdateTimelineItem}
+            onVersionView={handleViewVersion}
+            onArtifactLinkClick={handleArtifactLinkClick}
           />
         </div>
         {hasSelectedVersion && (
           <div className={styles.outputSection}>
             {shouldShowOutput ? (
-              <Output
-                designSessionId={designSessionId}
-                schema={displayedSchema}
-                prevSchema={prevSchema}
-                schemaUpdatesReviewComments={SCHEMA_UPDATES_REVIEW_COMMENTS}
-                onQuickFix={handleQuickFix}
-                versions={versions}
-                selectedVersion={selectedVersion}
-                onSelectedVersionChange={handleChangeSelectedVersion}
-              />
+              activeTab !== undefined ? (
+                <Output
+                  designSessionId={designSessionId}
+                  schema={displayedSchema}
+                  prevSchema={prevSchema}
+                  sqlReviewComments={SQL_REVIEW_COMMENTS}
+                  versions={versions}
+                  selectedVersion={selectedVersion}
+                  onSelectedVersionChange={handleChangeSelectedVersion}
+                  activeTab={activeTab}
+                  onTabChange={setActiveTab}
+                />
+              ) : (
+                <Output
+                  designSessionId={designSessionId}
+                  schema={displayedSchema}
+                  prevSchema={prevSchema}
+                  sqlReviewComments={SQL_REVIEW_COMMENTS}
+                  versions={versions}
+                  selectedVersion={selectedVersion}
+                  onSelectedVersionChange={handleChangeSelectedVersion}
+                />
+              )
             ) : (
               <OutputPlaceholder />
             )}

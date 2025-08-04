@@ -41,6 +41,8 @@ export const Default: Story = {
     designSessionId: 'design-session-id',
     timelineItems: ITEMS,
     onMessageSend: () => {},
+    onVersionView: () => {},
+    onArtifactLinkClick: () => {},
   },
 }
 
@@ -50,6 +52,8 @@ export const AnimatedDemo: Story = {
     designSessionId: 'design-session-id',
     timelineItems: ITEMS,
     onMessageSend: () => {},
+    onVersionView: () => {},
+    onArtifactLinkClick: () => {},
   },
   render: (props) => <AnimatedChatDemo {...props} />,
 }

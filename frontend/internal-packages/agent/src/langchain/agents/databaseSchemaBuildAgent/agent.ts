@@ -5,19 +5,29 @@ import {
 } from '@langchain/core/messages'
 import { ChatOpenAI } from '@langchain/openai'
 import { ok, ResultAsync } from 'neverthrow'
+import * as v from 'valibot'
 import type { ToolConfigurable } from '../../../db-agent/getToolConfigurable'
 import { schemaDesignTool } from '../../../db-agent/tools/schemaDesignTool'
+import { reasoningSchema } from '../../utils/schema'
+import type { Reasoning } from '../../utils/types'
 import { type DesignAgentPromptVariables, designAgentPrompt } from './prompts'
 
 const model = new ChatOpenAI({
   model: 'o4-mini',
+  reasoning: { effort: 'high', summary: 'detailed' },
+  useResponsesApi: true,
 }).bindTools([schemaDesignTool])
+
+type DesignAgentResult = {
+  response: AIMessage
+  reasoning: Reasoning | null
+}
 
 export const invokeDesignAgent = (
   variables: DesignAgentPromptVariables,
   messages: BaseMessage[],
   configurable: ToolConfigurable,
-): ResultAsync<AIMessage, Error> => {
+): ResultAsync<DesignAgentResult, Error> => {
   const formatPrompt = ResultAsync.fromSafePromise(
     designAgentPrompt.format(variables),
   )
@@ -29,5 +39,16 @@ export const invokeDesignAgent = (
     (error) => new Error(`Failed to invoke design agent: ${error}`),
   )
 
-  return formatPrompt.andThen(invoke).andThen((response) => ok(response))
+  return formatPrompt.andThen(invoke).andThen((response) => {
+    const parsedReasoning = v.safeParse(
+      reasoningSchema,
+      response.additional_kwargs['reasoning'],
+    )
+    const reasoning = parsedReasoning.success ? parsedReasoning.output : null
+
+    return ok({
+      response,
+      reasoning,
+    })
+  })
 }

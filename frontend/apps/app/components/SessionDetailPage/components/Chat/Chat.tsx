@@ -6,6 +6,7 @@ import type { TimelineItemEntry } from '../../types'
 import styles from './Chat.module.css'
 import { ChatInput } from './components/ChatInput'
 import { TimelineItem } from './components/TimelineItem'
+import { WorkflowRunningIndicator } from './components/WorkflowRunningIndicator'
 import { sendChatMessage } from './services'
 import { generateTimelineItemId } from './services/timelineItemHelpers'
 import { useScrollToBottom } from './useScrollToBottom'
@@ -15,10 +16,10 @@ type Props = {
   designSessionId: string
   timelineItems: TimelineItemEntry[]
   onMessageSend: (message: TimelineItemEntry) => void
+  onVersionView: (versionId: string) => void
   onRetry?: () => void
-  isLoading?: boolean
-  isStreaming?: boolean
-  onCancelStream?: () => void
+  isWorkflowRunning?: boolean
+  onArtifactLinkClick: () => void
 }
 
 export const Chat: FC<Props> = ({
@@ -26,10 +27,10 @@ export const Chat: FC<Props> = ({
   designSessionId,
   timelineItems,
   onMessageSend,
+  onVersionView,
   onRetry,
-  isLoading = false,
-  isStreaming = false,
-  onCancelStream,
+  isWorkflowRunning = false,
+  onArtifactLinkClick,
 }) => {
   const { containerRef } = useScrollToBottom<HTMLDivElement>(
     timelineItems.length,
@@ -98,7 +99,9 @@ export const Chat: FC<Props> = ({
     const currentRole = getEffectiveRole(item)
 
     if (Array.isArray(lastItem) && lastItem.length > 0) {
-      const lastRole = getEffectiveRole(lastItem[0])
+      const firstItem = lastItem[0]
+      if (!firstItem) return acc
+      const lastRole = getEffectiveRole(firstItem)
       if (lastRole === currentRole) {
         lastItem.push(item)
         return acc
@@ -132,6 +135,10 @@ export const Chat: FC<Props> = ({
                 key={message.id}
                 {...message}
                 showHeader={messageIndex === 0}
+                {...(message.type === 'schema_version' && {
+                  onView: onVersionView,
+                })}
+                onArtifactLinkClick={onArtifactLinkClick}
               />
             ))
           }
@@ -141,22 +148,17 @@ export const Chat: FC<Props> = ({
               key={item.id}
               {...item}
               {...(item.type === 'error' && { onRetry })}
+              {...(item.type === 'schema_version' && { onView: onVersionView })}
+              onArtifactLinkClick={onArtifactLinkClick}
             />
           )
         })}
-        {isLoading && (
-          <div className={styles.loadingIndicator}>
-            <div className={styles.loadingDot} />
-            <div className={styles.loadingDot} />
-            <div className={styles.loadingDot} />
-          </div>
-        )}
+        {isWorkflowRunning && <WorkflowRunningIndicator />}
       </div>
       <ChatInput
         onSendMessage={handleSendMessage}
-        isLoading={isLoading}
+        isWorkflowRunning={isWorkflowRunning}
         schema={schemaData}
-        onCancel={isStreaming ? onCancelStream : undefined}
       />
     </div>
   )

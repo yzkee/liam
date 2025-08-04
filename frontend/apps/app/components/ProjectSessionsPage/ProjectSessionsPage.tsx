@@ -1,6 +1,8 @@
 import { MessagesSquare } from '@liam-hq/ui'
 import type { FC } from 'react'
-import { SessionFormContainer } from '@/features/sessions/components/SessionForm'
+import { getProjects } from '@/components/CommonLayout/AppBar/ProjectsDropdownMenu/services/getProjects'
+import { getOrganizationId } from '@/features/organizations/services/getOrganizationId'
+import { SessionFormContainer } from '@/features/sessions/components/SessionFormContainer'
 import styles from './ProjectSessionsPage.module.css'
 import { SessionItem } from './SessionItem'
 import { fetchProjectSessions } from './services/fetchProjectSessions'
@@ -11,6 +13,9 @@ type Props = {
 
 export const ProjectSessionsPage: FC<Props> = async ({ projectId }) => {
   const sessions = await fetchProjectSessions(projectId)
+  const organizationId = await getOrganizationId()
+  const projectsResponse = await getProjects(organizationId)
+  const projects = projectsResponse.data || []
 
   return (
     <div className={styles.container}>
@@ -23,7 +28,10 @@ export const ProjectSessionsPage: FC<Props> = async ({ projectId }) => {
 
       <div className={styles.formSection}>
         <h3 className={styles.formTitle}>Create New Session</h3>
-        <SessionFormContainer defaultProjectId={projectId} />
+        <SessionFormContainer
+          projects={projects}
+          defaultProjectId={projectId}
+        />
       </div>
 
       {sessions.length > 0 ? (

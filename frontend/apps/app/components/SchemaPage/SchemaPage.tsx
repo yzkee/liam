@@ -48,7 +48,8 @@ async function getERDEditorContent({
     .eq('path', schemaFilePath)
     .single()
 
-  const repository = project?.project_repository_mappings[0].github_repositories
+  const repository =
+    project?.project_repository_mappings[0]?.github_repositories
   if (
     !repository?.github_installation_identifier ||
     !repository.owner ||

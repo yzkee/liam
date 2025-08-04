@@ -2,6 +2,7 @@ import { executeQuery } from '@liam-hq/pglite-server'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Repositories } from '../../../repositories'
+import { InMemoryRepository } from '../../../repositories/InMemoryRepository'
 import type { WorkflowState } from '../types'
 import { validateSchemaNode } from './validateSchemaNode'
 
@@ -27,30 +28,9 @@ describe('validateSchemaNode', () => {
     }
   }
 
-  const createMockRepositories = (): Repositories => {
+  const createRepositories = (): Repositories => {
     return {
-      schema: {
-        updateTimelineItem: vi.fn(),
-        getSchema: vi.fn(),
-        getDesignSession: vi.fn(),
-        createVersion: vi.fn(),
-        createTimelineItem: vi.fn().mockResolvedValue({
-          success: true,
-          timelineItem: { id: 'mock-timeline-id' },
-        }),
-        createArtifact: vi.fn(),
-        updateArtifact: vi.fn(),
-        getArtifact: vi.fn(),
-        createValidationQuery: vi.fn().mockResolvedValue({
-          success: true,
-          queryId: 'mock-query-id',
-        }),
-        createValidationResults: vi.fn().mockResolvedValue({
-          success: true,
-        }),
-        createWorkflowRun: vi.fn(),
-        updateWorkflowRunStatus: vi.fn(),
-      },
+      schema: new InMemoryRepository(),
     }
   }
 
@@ -64,7 +44,7 @@ describe('validateSchemaNode', () => {
       ddlStatements: '',
     })
 
-    const repositories = createMockRepositories()
+    const repositories = createRepositories()
     const result = await validateSchemaNode(state, {
       configurable: { repositories },
     })
@@ -90,18 +70,43 @@ describe('validateSchemaNode', () => {
     vi.mocked(executeQuery).mockResolvedValue(mockResults)
 
     const state = createMockState({
-      dmlStatements: 'INSERT INTO users VALUES (1, "test");',
       ddlStatements: '',
+      dmlOperations: [
+        {
+          useCaseId: 'usecase-1',
+          operation_type: 'INSERT',
+          sql: 'INSERT INTO users VALUES (1, "test");',
+          dml_execution_logs: [],
+        },
+      ],
+      generatedUsecases: [
+        {
+          id: 'usecase-1',
+          requirementType: 'functional',
+          requirementCategory: 'data_management',
+          requirement: 'Insert user data',
+          title: 'Insert User',
+          description: 'Insert a new user record',
+          dmlOperations: [
+            {
+              useCaseId: 'usecase-1',
+              operation_type: 'INSERT',
+              sql: 'INSERT INTO users VALUES (1, "test");',
+              dml_execution_logs: [],
+            },
+          ],
+        },
+      ],
     })
 
-    const repositories = createMockRepositories()
+    const repositories = createRepositories()
     const result = await validateSchemaNode(state, {
       configurable: { repositories },
     })
 
     expect(executeQuery).toHaveBeenCalledWith(
       'session-id',
-      'INSERT INTO users VALUES (1, "test");',
+      expect.stringContaining('INSERT INTO users VALUES (1, "test");'),
     )
     expect(result.dmlExecutionSuccessful).toBe(true)
   })
@@ -127,7 +132,7 @@ describe('validateSchemaNode', () => {
       dmlStatements: '',
     })
 
-    const repositories = createMockRepositories()
+    const repositories = createRepositories()
     const result = await validateSchemaNode(state, {
       configurable: { repositories },
     })
@@ -139,8 +144,8 @@ describe('validateSchemaNode', () => {
     expect(result.dmlExecutionSuccessful).toBe(true)
   })
 
-  it('should combine and execute DDL and DML together', async () => {
-    const mockResults: SqlResult[] = [
+  it('should execute DDL first then DML individually', async () => {
+    const ddlMockResults: SqlResult[] = [
       {
         success: true,
         sql: 'CREATE TABLE users (id INT);',
@@ -151,6 +156,9 @@ describe('validateSchemaNode', () => {
           timestamp: new Date().toISOString(),
         },
       },
+    ]
+
+    const dmlMockResults: SqlResult[] = [
       {
         success: true,
         sql: 'INSERT INTO users VALUES (1);',
@@ -163,27 +171,68 @@ describe('validateSchemaNode', () => {
       },
     ]
 
-    vi.mocked(executeQuery).mockResolvedValue(mockResults)
+    vi.mocked(executeQuery)
+      .mockResolvedValueOnce(ddlMockResults)
+      .mockResolvedValueOnce(dmlMockResults)
 
     const state = createMockState({
       ddlStatements: 'CREATE TABLE users (id INT);',
-      dmlStatements: 'INSERT INTO users VALUES (1);',
+      dmlOperations: [
+        {
+          useCaseId: 'usecase-1',
+          operation_type: 'INSERT',
+          sql: 'INSERT INTO users VALUES (1);',
+          dml_execution_logs: [],
+        },
+      ],
+      generatedUsecases: [
+        {
+          id: 'usecase-1',
+          requirementType: 'functional',
+          requirementCategory: 'data_management',
+          requirement: 'Insert user data',
+          title: 'Insert User',
+          description: 'Insert a new user record',
+          dmlOperations: [
+            {
+              useCaseId: 'usecase-1',
+              operation_type: 'INSERT',
+              sql: 'INSERT INTO users VALUES (1);',
+              dml_execution_logs: [],
+            },
+          ],
+        },
+      ],
     })
 
-    const repositories = createMockRepositories()
+    const repositories = createRepositories()
     const result = await validateSchemaNode(state, {
       configurable: { repositories },
     })
 
-    expect(executeQuery).toHaveBeenCalledWith(
+    expect(executeQuery).toHaveBeenCalledTimes(2)
+    // First call should be DDL only
+    expect(executeQuery).toHaveBeenNthCalledWith(
+      1,
       'session-id',
-      'CREATE TABLE users (id INT);\nINSERT INTO users VALUES (1);',
+      'CREATE TABLE users (id INT);',
+    )
+    // Second call should include both DDL and DML combined
+    expect(executeQuery).toHaveBeenNthCalledWith(
+      2,
+      'session-id',
+      expect.stringContaining('CREATE TABLE users (id INT);'),
+    )
+    expect(executeQuery).toHaveBeenNthCalledWith(
+      2,
+      'session-id',
+      expect.stringContaining('INSERT INTO users VALUES (1);'),
     )
     expect(result.dmlExecutionSuccessful).toBe(true)
   })
 
   it('should handle execution errors', async () => {
-    const mockResults: SqlResult[] = [
+    const ddlMockResults: SqlResult[] = [
       {
         success: true,
         sql: 'CREATE TABLE users (id INT);',
@@ -194,6 +243,9 @@ describe('validateSchemaNode', () => {
           timestamp: new Date().toISOString(),
         },
       },
+    ]
+
+    const dmlMockResults: SqlResult[] = [
       {
         success: false,
         sql: 'INSERT INTO invalid_table VALUES (1);',
@@ -206,20 +258,48 @@ describe('validateSchemaNode', () => {
       },
     ]
 
-    vi.mocked(executeQuery).mockResolvedValue(mockResults)
+    vi.mocked(executeQuery)
+      .mockResolvedValueOnce(ddlMockResults)
+      .mockResolvedValueOnce(dmlMockResults)
 
     const state = createMockState({
       ddlStatements: 'CREATE TABLE users (id INT);',
-      dmlStatements: 'INSERT INTO invalid_table VALUES (1);',
+      dmlOperations: [
+        {
+          useCaseId: 'usecase-1',
+          operation_type: 'INSERT',
+          sql: 'INSERT INTO invalid_table VALUES (1);',
+          dml_execution_logs: [],
+        },
+      ],
+      generatedUsecases: [
+        {
+          id: 'usecase-1',
+          requirementType: 'functional',
+          requirementCategory: 'data_management',
+          requirement: 'Insert invalid data',
+          title: 'Insert Invalid Data',
+          description: 'Attempt to insert data into invalid table',
+          dmlOperations: [
+            {
+              useCaseId: 'usecase-1',
+              operation_type: 'INSERT',
+              sql: 'INSERT INTO invalid_table VALUES (1);',
+              dml_execution_logs: [],
+            },
+          ],
+        },
+      ],
     })
 
-    const repositories = createMockRepositories()
+    const repositories = createRepositories()
     const result = await validateSchemaNode(state, {
       configurable: { repositories },
     })
 
     expect(result.dmlExecutionSuccessful).toBeUndefined()
-    expect(result.dmlExecutionErrors).toContain('Table not found')
+    expect(result.dmlExecutionErrors).toContain('SQL: UseCase:')
+    expect(result.dmlExecutionErrors).toContain('Error:')
   })
 
   it('should trim whitespace from statements', async () => {
@@ -228,7 +308,7 @@ describe('validateSchemaNode', () => {
       dmlStatements: '   ',
     })
 
-    const repositories = createMockRepositories()
+    const repositories = createRepositories()
     const result = await validateSchemaNode(state, {
       configurable: { repositories },
     })

@@ -3,7 +3,8 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--spacing-2);
-  padding: var(--spacing-2);
+  padding: 0 var(--spacing-2);
+  background-color: var(--pane-background);
   border-bottom: 1px solid var(--global-border);
 }
 
@@ -11,29 +12,107 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
+  height: 100%;
+  padding-top: var(--spacing-2);
 }
 
-.tabsTrigger {
+.tab {
+  position: relative;
+  height: 40px;
+  border-top-left-radius: var(--border-radius-lg);
+  border-top-right-radius: var(--border-radius-lg);
+  color: var(--global-foreground);
+  transition: background-color var(--default-hover-animation-duration)
+    var(--default-timing-function);
+}
+
+.tab::before,
+.tab::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  width: 4px;
+  height: 4px;
+  background-color: transparent;
+  mask-mode: alpha;
+  mask-repeat: no-repeat;
+}
+
+.tab::before {
+  left: -4px;
+  mask-image: radial-gradient(
+    circle 4px at top left,
+    transparent 0 4px,
+    black 4px 100%
+  );
+}
+.tab::after {
+  right: -4px;
+  mask-image: radial-gradient(
+    circle 4px at top right,
+    transparent 0 4px,
+    black 4px 100%
+  );
+}
+
+.tab:hover,
+.tab:hover::before,
+.tab:hover::after,
+.tab[data-state='active'],
+.tab[data-state='active']::before,
+.tab[data-state='active']::after {
+  background-color: var(--pane-background-active);
+}
+
+.erdSchemaTabsGroup {
   display: flex;
   align-items: center;
-  justify-content: center;
-  height: 1.75rem;
+  gap: var(--spacing-1);
+  padding: var(--spacing-1half);
+}
+
+.erdSchemaTabsGroup[data-state='active'] {
+  background-color: var(--pane-background-active);
+}
+
+.erdSchemaTabs {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  height: 100%;
+}
+
+.erdSchemaTrigger {
+  height: 100%;
   padding: 0 var(--spacing-2);
   border-radius: var(--border-radius-base);
   font-size: var(--font-size-4);
-  border: solid 1px var(--pane-border);
+  color: var(--global-foreground);
+  transition: background-color var(--default-hover-animation-duration)
+    var(--default-timing-function);
 }
 
-.tabsTrigger[data-state='active'] {
-  background-color: var(--button-background-active);
-}
-
-.tabsTrigger:hover {
+.erdSchemaTrigger:hover,
+.erdSchemaTrigger[data-state='active'] {
   background-color: var(--button-background-hover);
+}
+
+.divider {
+  width: 1px;
+  height: 1rem;
+  background-color: var(--overlay-10);
+}
+
+.artifactTrigger {
+  padding: 0 var(--spacing-3);
+  font-size: var(--font-size-4);
+  line-height: 1;
+  color: var(--global-foreground);
 }
 
 .tail {
   display: flex;
   align-items: center;
-  gap: var(--spacing-2);
+  height: 100%;
+  padding: var(--spacing-2) 0;
 }

@@ -103,10 +103,22 @@ export async function generateUsecaseNode(
   )
 
   return await usecaseResult.match(
-    async (generatedResult) => {
+    async ({ response, reasoning }) => {
+      // Log reasoning summary if available
+      if (reasoning?.summary && reasoning.summary.length > 0) {
+        for (const summaryItem of reasoning.summary) {
+          await logAssistantMessage(
+            state,
+            repositories,
+            summaryItem.text,
+            assistantRole,
+          )
+        }
+      }
+
       const usecaseMessage = await withTimelineItemSync(
         new AIMessage({
-          content: `Generated ${generatedResult.usecases.length} use cases for testing and validation`,
+          content: `Generated ${response.usecases.length} use cases for testing and validation`,
           name: 'QAGenerateUsecaseAgent',
         }),
         {
@@ -120,8 +132,8 @@ export async function generateUsecaseNode(
 
       const updatedState = {
         ...state,
-        messages: [...state.messages, usecaseMessage],
-        generatedUsecases: generatedResult.usecases,
+        messages: [usecaseMessage],
+        generatedUsecases: response.usecases,
         error: undefined, // Clear error on success
       }
 

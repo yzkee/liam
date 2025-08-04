@@ -62,7 +62,10 @@ export const MentionSuggestor = ({
       e.preventDefault()
 
       const idx = Number(e.currentTarget.dataset.index)
-      onSelect(matches[idx], false)
+      const selectedMatch = matches[idx]
+      if (selectedMatch) {
+        onSelect(selectedMatch, false)
+      }
     },
     [matches, onSelect],
   )
@@ -95,7 +98,10 @@ export const MentionSuggestor = ({
           // Only process if there are items to select
           if (matches.length > 0) {
             e.preventDefault()
-            onSelect(matches[highlightedIndex], true)
+            const selectedMatch = matches[highlightedIndex]
+            if (selectedMatch) {
+              onSelect(selectedMatch, true)
+            }
           }
           break
         case 'Escape':

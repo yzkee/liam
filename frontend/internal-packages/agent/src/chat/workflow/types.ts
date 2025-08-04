@@ -1,4 +1,5 @@
 import type { BaseMessage } from '@langchain/core/messages'
+import type { DmlOperation } from '@liam-hq/artifact'
 import type { Schema } from '@liam-hq/db-structure'
 import type { Usecase } from '../../langchain/agents/qaGenerateUsecaseAgent/agent'
 import type { Repositories } from '../../repositories'
@@ -16,17 +17,12 @@ export type WorkflowState = {
     | undefined
   generatedUsecases?: Usecase[] | undefined
   schemaData: Schema
-  projectId?: string | undefined
   error?: Error | undefined
   retryCount: Record<string, number>
 
   ddlStatements?: string | undefined
   dmlStatements?: string | undefined
-
-  // DDL execution retry mechanism
-  shouldRetryWithDesignSchema?: boolean | undefined
-  ddlExecutionFailed?: boolean | undefined
-  ddlExecutionFailureReason?: string | undefined
+  dmlOperations?: DmlOperation[] | undefined
 
   // DML execution results
   dmlExecutionSuccessful?: boolean | undefined
@@ -35,7 +31,6 @@ export type WorkflowState = {
   // Schema update fields
   buildingSchemaId: string
   latestVersionNumber: number
-  buildingSchemaVersionId?: string | undefined
   organizationId: string
   userId: string
 

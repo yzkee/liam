@@ -1,17 +1,17 @@
 import type { Index } from '@liam-hq/db-structure'
-import {
-  GridTableDd,
-  GridTableDt,
-  GridTableItem,
-  GridTableRoot,
-} from '@liam-hq/ui'
+import { GridTableRoot } from '@liam-hq/ui'
 import clsx from 'clsx'
 import { type FC, useMemo } from 'react'
 import { useDiffStyle } from '@/features/diff/hooks/useDiffStyle'
 import { useSchemaOrThrow, useUserEditingOrThrow } from '@/stores'
+import { Columns } from './Columns'
 import { getChangeStatus } from './getChangeStatus'
 import styles from './IndexesItem.module.css'
 import { Name } from './Name'
+import { Type } from './Type'
+import { Unique } from './Unique'
+
+const HIDE_INDEX_TYPE = 'btree'
 
 type Props = {
   tableId: string
@@ -19,7 +19,6 @@ type Props = {
 }
 
 export const IndexesItem: FC<Props> = ({ tableId, index }) => {
-  const HIDE_INDEX_TYPE = 'btree'
   const { diffItems } = useSchemaOrThrow()
   const { showDiff } = useUserEditingOrThrow()
 
@@ -39,33 +38,10 @@ export const IndexesItem: FC<Props> = ({ tableId, index }) => {
       <GridTableRoot>
         <Name tableId={tableId} index={index} />
         {index.type && index.type.toLowerCase() !== HIDE_INDEX_TYPE && (
-          <GridTableItem>
-            <GridTableDt>Type</GridTableDt>
-            <GridTableDd>{index.type}</GridTableDd>
-          </GridTableItem>
+          <Type tableId={tableId} index={index} />
         )}
-        {!!index.columns.length && (
-          <GridTableItem>
-            <GridTableDt>
-              {index.columns.length === 1 ? 'Column' : 'Columns'}
-            </GridTableDt>
-            <GridTableDd>
-              {index.columns.length === 1 ? (
-                index.columns[0]
-              ) : (
-                <ol className={styles.list}>
-                  {index.columns.map((column) => (
-                    <li key={column}>{column}</li>
-                  ))}
-                </ol>
-              )}
-            </GridTableDd>
-          </GridTableItem>
-        )}
-        <GridTableItem>
-          <GridTableDt>Unique</GridTableDt>
-          <GridTableDd>{index.unique ? 'Yes' : 'No'}</GridTableDd>
-        </GridTableItem>
+        {!!index.columns.length && <Columns tableId={tableId} index={index} />}
+        <Unique tableId={tableId} index={index} />
       </GridTableRoot>
     </div>
   )

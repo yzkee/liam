@@ -5,6 +5,7 @@ import { ResultAsync } from 'neverthrow'
 import { QAGenerateUsecaseAgent } from '../../../langchain/agents'
 import type { Repositories } from '../../../repositories'
 import { WorkflowTerminationError } from '../../../shared/errorHandling'
+import { removeReasoningFromMessages } from '../../../utils/messageCleanup'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 import { logAssistantMessage } from '../utils/timelineLogger'
@@ -95,9 +96,12 @@ export async function generateUsecaseNode(
 
   const qaAgent = new QAGenerateUsecaseAgent()
 
-  // Use state.messages directly - includes error messages and all context
+  // Remove reasoning field from AIMessages to avoid API issues
+  // This prevents the "reasoning without required following item" error
+  const cleanedMessages = removeReasoningFromMessages(state.messages)
+
   const usecaseResult = await ResultAsync.fromPromise(
-    qaAgent.generate(state.messages),
+    qaAgent.generate(cleanedMessages),
     (error) => (error instanceof Error ? error : new Error(String(error))),
   )
 

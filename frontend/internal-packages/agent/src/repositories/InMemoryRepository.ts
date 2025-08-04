@@ -57,6 +57,8 @@ type InMemoryRepositoryOptions = {
 
 export class InMemoryRepository implements SchemaRepository {
   private state: InMemoryRepositoryState
+  // Used by generateId method
+  // biome-ignore lint/correctness/noUnusedPrivateClassMembers: used by generateId method
   private idCounter = 1
 
   constructor(options: InMemoryRepositoryOptions = {}) {

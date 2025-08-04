@@ -15,7 +15,7 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   args: {
     name: 'default-toggle',
-    defaultChecked: false,
+    defaultChecked: true,
     children: 'Deep Modeling',
   },
 }
@@ -31,7 +31,7 @@ export const Active: Story = {
 export const Interactive: Story = {
   args: {
     name: 'interactive-toggle',
-    defaultChecked: false,
+    defaultChecked: true,
     children: 'Deep Modeling',
   },
   render: (args) => {

@@ -12,7 +12,7 @@ import { createClient } from '@/libs/db/server'
 const chatRequestSchema = v.object({
   userInput: v.pipe(v.string(), v.minLength(1, 'Message is required')),
   designSessionId: v.pipe(v.string(), v.uuid('Invalid design session ID')),
-  isDeepModelingEnabled: v.optional(v.boolean(), false),
+  isDeepModelingEnabled: v.optional(v.boolean(), true),
 })
 
 export async function POST(request: Request) {

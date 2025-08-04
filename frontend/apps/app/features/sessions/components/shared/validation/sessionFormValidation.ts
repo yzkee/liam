@@ -23,7 +23,7 @@ const BaseFormDataSchema = v.object({
       v.string(),
       v.transform((input) => input === 'true'),
     ),
-    'false',
+    'true',
   ),
 })
 

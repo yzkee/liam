@@ -174,6 +174,109 @@ describe('mergeSchemas', () => {
     })
   })
 
+  describe('indexes merging', () => {
+    it('should keep removed indexes from before schema', () => {
+      const beforeSchema = createSchema({
+        tables: {
+          users: createTable({
+            name: 'users',
+            indexes: {
+              users_email_idx: {
+                name: 'users_email_idx',
+                unique: true,
+                columns: ['email'],
+                type: 'btree',
+              },
+              users_name_idx: {
+                name: 'users_name_idx',
+                unique: false,
+                columns: ['name'],
+                type: 'btree',
+              },
+            },
+          }),
+        },
+      })
+
+      const afterSchema = createSchema({
+        tables: {
+          users: createTable({
+            name: 'users',
+            indexes: {
+              users_name_idx: {
+                name: 'users_name_idx',
+                unique: false,
+                columns: ['name'],
+                type: 'btree',
+              },
+              // users_email_idx is removed
+            },
+          }),
+        },
+      })
+
+      const result = mergeSchemas(beforeSchema, afterSchema)
+
+      expect(result.tables['users']?.indexes).toHaveProperty('users_name_idx')
+      expect(result.tables['users']?.indexes).toHaveProperty('users_email_idx') // Should still exist from before
+    })
+  })
+
+  describe('constraints merging', () => {
+    it('should keep removed constraints from before schema', () => {
+      const beforeSchema = createSchema({
+        tables: {
+          users: createTable({
+            name: 'users',
+            constraints: {
+              users_pkey: {
+                type: 'PRIMARY KEY',
+                name: 'users_pkey',
+                columnNames: ['id'],
+              },
+              users_email_unique: {
+                type: 'UNIQUE',
+                name: 'users_email_unique',
+                columnNames: ['email'],
+              },
+              users_age_check: {
+                type: 'CHECK',
+                name: 'users_age_check',
+                detail: 'age > 0',
+              },
+            },
+          }),
+        },
+      })
+
+      const afterSchema = createSchema({
+        tables: {
+          users: createTable({
+            name: 'users',
+            constraints: {
+              users_pkey: {
+                type: 'PRIMARY KEY',
+                name: 'users_pkey',
+                columnNames: ['id'],
+              },
+              // users_email_unique and users_age_check are removed
+            },
+          }),
+        },
+      })
+
+      const result = mergeSchemas(beforeSchema, afterSchema)
+
+      expect(result.tables['users']?.constraints).toHaveProperty('users_pkey')
+      expect(result.tables['users']?.constraints).toHaveProperty(
+        'users_email_unique',
+      ) // Should still exist from before
+      expect(result.tables['users']?.constraints).toHaveProperty(
+        'users_age_check',
+      ) // Should still exist from before
+    })
+  })
+
   describe('complex merge scenarios', () => {
     it('should handle complex column changes', () => {
       const beforeSchema = createSchema({

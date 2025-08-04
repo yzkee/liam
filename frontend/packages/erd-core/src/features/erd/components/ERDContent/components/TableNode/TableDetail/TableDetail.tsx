@@ -81,7 +81,7 @@ export const TableDetail: FC<Props> = ({ table }) => {
       <div className={styles.body}>
         {table.comment && <Comment table={table} />}
         <Columns table={table} />
-        <Indexes indexes={table.indexes} />
+        <Indexes tableId={table.name} indexes={table.indexes} />
         <Constraints constraints={table.constraints} />
         <div className={styles.relatedTables}>
           <RelatedTables

@@ -5,10 +5,11 @@ import { CollapsibleHeader } from '../CollapsibleHeader'
 import { IndexesItem } from './IndexesItem'
 
 type Props = {
+  tableId: string
   indexes: IndexesType
 }
 
-export const Indexes: FC<Props> = ({ indexes }) => {
+export const Indexes: FC<Props> = ({ tableId, indexes }) => {
   const contentMaxHeight = Object.keys(indexes).length * 400
 
   return (
@@ -22,7 +23,7 @@ export const Indexes: FC<Props> = ({ indexes }) => {
       contentMaxHeight={contentMaxHeight}
     >
       {Object.entries(indexes).map(([key, index]) => (
-        <IndexesItem key={key} index={index} />
+        <IndexesItem key={key} tableId={tableId} index={index} />
       ))}
     </CollapsibleHeader>
   )

@@ -126,7 +126,7 @@ export type ColumnNotNullDiffItem = InferOutput<
   typeof columnNotNullDiffItemSchema
 >
 
-const indexDiffItemSchema = object({
+export const indexDiffItemSchema = object({
   ...baseSchemaDiffItemSchema.entries,
   kind: literal('index'),
   data: indexSchema,
@@ -134,7 +134,7 @@ const indexDiffItemSchema = object({
 })
 export type IndexDiffItem = InferOutput<typeof indexDiffItemSchema>
 
-const indexNameDiffItemSchema = object({
+export const indexNameDiffItemSchema = object({
   ...baseSchemaDiffItemSchema.entries,
   kind: literal('index-name'),
   data: indexNameSchema,
@@ -142,7 +142,7 @@ const indexNameDiffItemSchema = object({
 })
 export type IndexNameDiffItem = InferOutput<typeof indexNameDiffItemSchema>
 
-const indexUniqueDiffItemSchema = object({
+export const indexUniqueDiffItemSchema = object({
   ...baseSchemaDiffItemSchema.entries,
   kind: literal('index-unique'),
   data: indexUniqueSchema,
@@ -150,7 +150,7 @@ const indexUniqueDiffItemSchema = object({
 })
 export type IndexUniqueDiffItem = InferOutput<typeof indexUniqueDiffItemSchema>
 
-const indexColumnsDiffItemSchema = object({
+export const indexColumnsDiffItemSchema = object({
   ...baseSchemaDiffItemSchema.entries,
   kind: literal('index-columns'),
   data: indexColumnsSchema,
@@ -160,7 +160,7 @@ export type IndexColumnsDiffItem = InferOutput<
   typeof indexColumnsDiffItemSchema
 >
 
-const indexTypeDiffItemSchema = object({
+export const indexTypeDiffItemSchema = object({
   ...baseSchemaDiffItemSchema.entries,
   kind: literal('index-type'),
   data: indexTypeSchema,
@@ -268,7 +268,7 @@ export type ColumnRelatedDiffItem = InferOutput<
   typeof columnRelatedDiffItemSchema
 >
 
-const indexRelatedDiffItemSchema = union([
+export const indexRelatedDiffItemSchema = union([
   indexDiffItemSchema,
   indexNameDiffItemSchema,
   indexUniqueDiffItemSchema,

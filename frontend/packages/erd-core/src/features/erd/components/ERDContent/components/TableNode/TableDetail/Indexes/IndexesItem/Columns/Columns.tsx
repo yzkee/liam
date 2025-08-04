@@ -1,24 +1,18 @@
 import type { Index } from '@liam-hq/db-structure'
-import { GridTableRoot } from '@liam-hq/ui'
+import { GridTableDd, GridTableDt, GridTableItem } from '@liam-hq/ui'
 import clsx from 'clsx'
 import { type FC, useMemo } from 'react'
 import { useDiffStyle } from '@/features/diff/hooks/useDiffStyle'
 import { useSchemaOrThrow, useUserEditingOrThrow } from '@/stores'
-import { Columns } from './Columns'
+import styles from './Columns.module.css'
 import { getChangeStatus } from './getChangeStatus'
-import styles from './IndexesItem.module.css'
-import { Name } from './Name'
-import { Type } from './Type'
-import { Unique } from './Unique'
-
-const HIDE_INDEX_TYPE = 'btree'
 
 type Props = {
   tableId: string
   index: Index
 }
 
-export const IndexesItem: FC<Props> = ({ tableId, index }) => {
+export const Columns: FC<Props> = ({ tableId, index }) => {
   const { diffItems } = useSchemaOrThrow()
   const { showDiff } = useUserEditingOrThrow()
 
@@ -34,15 +28,21 @@ export const IndexesItem: FC<Props> = ({ tableId, index }) => {
   const diffStyle = useDiffStyle(showDiff, changeStatus)
 
   return (
-    <div className={clsx(styles.wrapper, diffStyle)}>
-      <GridTableRoot>
-        <Name tableId={tableId} index={index} />
-        {index.type && index.type.toLowerCase() !== HIDE_INDEX_TYPE && (
-          <Type tableId={tableId} index={index} />
+    <GridTableItem className={clsx(diffStyle)}>
+      <GridTableDt>
+        {index.columns.length === 1 ? 'Column' : 'Columns'}
+      </GridTableDt>
+      <GridTableDd>
+        {index.columns.length === 1 ? (
+          index.columns[0]
+        ) : (
+          <ol className={styles.list}>
+            {index.columns.map((column) => (
+              <li key={column}>{column}</li>
+            ))}
+          </ol>
         )}
-        {!!index.columns.length && <Columns tableId={tableId} index={index} />}
-        <Unique tableId={tableId} index={index} />
-      </GridTableRoot>
-    </div>
+      </GridTableDd>
+    </GridTableItem>
   )
 }

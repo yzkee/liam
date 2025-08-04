@@ -3,10 +3,3 @@
   gap: var(--spacing-2);
   padding: var(--spacing-4);
 }
-
-.list {
-  list-style-type: decimal;
-  padding-left: 1rem;
-  margin: 0;
-  width: 100%;
-}

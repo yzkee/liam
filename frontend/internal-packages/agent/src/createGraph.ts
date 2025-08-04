@@ -4,8 +4,8 @@ import {
   finalizeArtifactsNode,
   generateUsecaseNode,
   prepareDmlNode,
+  saveRequirementToArtifactNode,
   validateSchemaNode,
-  webSearchNode,
 } from './chat/workflow/nodes'
 import { createAnnotations } from './chat/workflow/shared/langGraphUtils'
 import { createDbAgentGraph } from './db-agent/createDbAgentGraph'
@@ -22,10 +22,10 @@ export const createGraph = () => {
   const dbAgentSubgraph = createDbAgentGraph()
 
   graph
-    .addNode('webSearch', webSearchNode, {
+    .addNode('analyzeRequirements', analyzeRequirementsNode, {
       retryPolicy: RETRY_POLICY,
     })
-    .addNode('analyzeRequirements', analyzeRequirementsNode, {
+    .addNode('saveRequirementToArtifact', saveRequirementToArtifactNode, {
       retryPolicy: RETRY_POLICY,
     })
     .addNode('dbAgent', dbAgentSubgraph)
@@ -42,13 +42,39 @@ export const createGraph = () => {
       retryPolicy: RETRY_POLICY,
     })
 
-    .addEdge(START, 'webSearch')
-    .addEdge('webSearch', 'analyzeRequirements')
-    .addEdge('analyzeRequirements', 'dbAgent')
+    .addEdge(START, 'analyzeRequirements')
+    .addEdge('saveRequirementToArtifact', 'dbAgent')
     .addEdge('dbAgent', 'generateUsecase')
     .addEdge('generateUsecase', 'prepareDML')
     .addEdge('prepareDML', 'validateSchema')
     .addEdge('finalizeArtifacts', END)
+
+    // Conditional edges for requirements analysis
+    .addConditionalEdges(
+      'analyzeRequirements',
+      (state) => {
+        const MAX_RETRIES = 3
+        const retryCount = state.retryCount['analyzeRequirements'] || 0
+
+        // If analyzedRequirements is defined → proceed to saveRequirementToArtifact
+        if (state.analyzedRequirements !== undefined) {
+          return 'saveRequirementToArtifact'
+        }
+
+        // If max retries exceeded → fallback to finalizeArtifacts
+        if (retryCount >= MAX_RETRIES) {
+          return 'finalizeArtifacts'
+        }
+
+        // Otherwise → retry analyzeRequirements
+        return 'analyzeRequirements'
+      },
+      {
+        analyzeRequirements: 'analyzeRequirements',
+        saveRequirementToArtifact: 'saveRequirementToArtifact',
+        finalizeArtifacts: 'finalizeArtifacts',
+      },
+    )
 
     // Conditional edges for validation results
     .addConditionalEdges(

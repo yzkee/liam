@@ -8,23 +8,25 @@ A **LangGraph implementation** for processing chat messages in the LIAM applicat
 %%{init: {'flowchart': {'curve': 'linear'}}}%%
 graph TD;
 	__start__([<p>__start__</p>]):::first
-	webSearch(webSearch)
 	analyzeRequirements(analyzeRequirements)
+	saveRequirementToArtifact(saveRequirementToArtifact)
 	dbAgent(dbAgent)
 	generateUsecase(generateUsecase)
 	prepareDML(prepareDML)
 	validateSchema(validateSchema)
 	finalizeArtifacts(finalizeArtifacts)
 	__end__([<p>__end__</p>]):::last
-	__start__ --> webSearch;
-	analyzeRequirements --> dbAgent;
+	__start__ --> analyzeRequirements;
 	dbAgent --> generateUsecase;
 	finalizeArtifacts --> __end__;
 	generateUsecase --> prepareDML;
 	prepareDML --> validateSchema;
-	webSearch --> analyzeRequirements;
+	saveRequirementToArtifact --> dbAgent;
+	analyzeRequirements -.-> saveRequirementToArtifact;
+	analyzeRequirements -.-> finalizeArtifacts;
 	validateSchema -.-> dbAgent;
 	validateSchema -.-> finalizeArtifacts;
+	analyzeRequirements -.-> analyzeRequirements;
 	classDef default fill:#f2f0ff,line-height:1.2;
 	classDef first fill-opacity:0;
 	classDef last fill:#bfb6fc;
@@ -75,8 +77,8 @@ interface WorkflowState {
 
 ## Nodes
 
-1. **webSearch**: Performs initial research and gathers relevant information (performed by pmAgent)
-2. **analyzeRequirements**: Organizes and clarifies requirements from user input (performed by pmAnalysisAgent)
+1. **analyzeRequirements**: Organizes and clarifies requirements from user input (performed by pmAnalysisAgent)
+2. **saveRequirementToArtifact**: Processes analyzed requirements, saves artifacts to database, and syncs timeline (performed by pmAgent)
 3. **dbAgent**: DB Agent subgraph that handles database schema design - contains designSchema and invokeSchemaDesignTool nodes (performed by dbAgent)
 4. **generateUsecase**: Creates use cases for testing with automatic timeline sync (performed by qaAgent)
 5. **prepareDML**: Generates DML statements for testing (performed by qaAgent)
@@ -145,6 +147,8 @@ graph.addNode('dbAgent', dbAgentSubgraph) // No retry policy - handled internall
 
 ### Conditional Edge Logic
 
+- **analyzeRequirements**: Routes to `saveRequirementToArtifact` when requirements are successfully analyzed, retries `analyzeRequirements` with retry count tracking (max 3 attempts), fallback to `finalizeArtifacts` when max retries exceeded
+- **saveRequirementToArtifact**: Always routes to `dbAgent` after processing artifacts (workflow termination node pattern)
 - **dbAgent**: DB Agent subgraph handles internal routing between designSchema and invokeSchemaDesignTool nodes, routes to `generateUsecase` on completion
 - **validateSchema**: Routes to `finalizeArtifacts` on success, `dbAgent` on validation error
 
@@ -164,7 +168,7 @@ graph.addNode('dbAgent', dbAgentSubgraph) // No retry policy - handled internall
 ### Implementation Details
 
 - **User Message Sync**: User input is synchronized in `deepModeling.ts` before workflow execution
-- **AI Message Sync**: All workflow nodes (webSearch, analyzeRequirements, dbAgent subgraph, generateUsecase) automatically sync their AI responses
+- **AI Message Sync**: All workflow nodes (analyzeRequirements, dbAgent subgraph, generateUsecase) automatically sync their AI responses
 - **Non-blocking**: Timeline synchronization is asynchronous and non-blocking to ensure workflow performance
 - **Utility Function**: `withTimelineItemSync()` provides consistent message synchronization across all nodes
 

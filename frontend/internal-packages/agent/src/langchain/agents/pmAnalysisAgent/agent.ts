@@ -1,12 +1,12 @@
 import {
   AIMessage,
   type BaseMessage,
+  HumanMessage,
   SystemMessage,
   ToolMessage,
 } from '@langchain/core/messages'
 import type { DynamicStructuredTool } from '@langchain/core/tools'
 import { tool } from '@langchain/core/tools'
-import { createReactAgent } from '@langchain/langgraph/prebuilt'
 import { ChatOpenAI } from '@langchain/openai'
 import { err, ok, type Result, ResultAsync } from 'neverthrow'
 import * as v from 'valibot'
@@ -18,14 +18,6 @@ import { PM_ANALYSIS_SYSTEM_MESSAGE } from './prompts'
 type AnalysisWithReasoning = {
   response: AnalysisResponse
   reasoning: Reasoning | null
-}
-
-type SearchResult = {
-  messages?: Array<{
-    _type?: string
-    name?: string
-    content: unknown
-  }>
 }
 
 type ToolCall = {
@@ -43,35 +35,6 @@ type ModelResponse = {
 // Type guard functions
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
-}
-
-function isSearchResultMessage(
-  value: unknown,
-): value is NonNullable<SearchResult['messages']>[0] {
-  return (
-    isRecord(value) &&
-    'content' in value &&
-    (value['_type'] === undefined || typeof value['_type'] === 'string') &&
-    (value['name'] === undefined || typeof value['name'] === 'string')
-  )
-}
-
-function isSearchResult(value: unknown): value is SearchResult {
-  if (!isRecord(value)) return false
-
-  if ('messages' in value) {
-    const messages = value['messages']
-    return Array.isArray(messages) && messages.every(isSearchResultMessage)
-  }
-
-  return true // Allow empty objects or objects without messages
-}
-
-function toSearchResult(value: unknown): SearchResult {
-  if (isSearchResult(value)) {
-    return value
-  }
-  return { messages: [] }
 }
 
 function isToolCall(value: unknown): value is ToolCall {
@@ -143,25 +106,63 @@ export class PMAnalysisAgent {
 
         const searchResult = await ResultAsync.fromPromise(
           (async () => {
-            // Use gpt-4o-mini specifically for web search
+            // Create ChatOpenAI with web search tool binding
             const searchModel = new ChatOpenAI({
               model: 'gpt-4o-mini',
               temperature: 0.3,
-            })
+            }).bindTools([{ type: 'web_search_preview' }])
 
-            // Create a temporary agent for web search
-            const searchAgent = createReactAgent({
-              llm: searchModel,
-              tools: [{ type: 'web_search_preview' }],
-            })
+            // Use custom prompt instead of createReactAgent default
+            const result = await searchModel.invoke([
+              new SystemMessage(
+                'You are a web search assistant. Use the web search tool to find relevant information. Search thoroughly and provide comprehensive results.',
+              ),
+              new HumanMessage(
+                `Search the web for information about: ${query}`,
+              ),
+            ])
 
-            const result = await searchAgent.invoke({
-              messages: [`Search the web for: ${query}`],
-            })
+            // Process tool calls if any were made
+            if (result.tool_calls && result.tool_calls.length > 0) {
+              let searchResults = ''
 
-            // Extract search results from the response
-            const searchResult: SearchResult = toSearchResult(result)
-            return this.extractSearchResults(searchResult)
+              // Execute each tool call
+              for (const toolCall of result.tool_calls) {
+                if (toolCall.name === 'web_search_preview') {
+                  // Create a ToolMessage to continue the conversation with tool results
+                  const toolMessage = new ToolMessage({
+                    content: 'Search executed',
+                    tool_call_id: toolCall.id || '',
+                  })
+
+                  // Get the final response with search results
+                  const followUpResult = await searchModel.invoke([
+                    new SystemMessage(
+                      'You are a web search assistant. Use the web search tool to find relevant information. Search thoroughly and provide comprehensive results.',
+                    ),
+                    new HumanMessage(
+                      `Search the web for information about: ${query}`,
+                    ),
+                    result, // Include the original response with tool calls
+                    toolMessage,
+                  ])
+
+                  // Extract content from the follow-up result
+                  const content = this.convertContentToString(
+                    followUpResult.content,
+                  )
+                  searchResults += content + '\n'
+                }
+              }
+
+              return searchResults || `Web search completed for: ${query}`
+            }
+
+            // If no tool calls were made, return the direct response
+            return (
+              this.convertContentToString(result.content) ||
+              `No web search performed for: ${query}`
+            )
           })(),
           (error) =>
             error instanceof Error ? error : new Error(String(error)),
@@ -191,41 +192,6 @@ export class PMAnalysisAgent {
         },
       },
     )
-  }
-
-  private extractSearchResults(searchResult: SearchResult): string {
-    if (
-      !searchResult ||
-      !searchResult.messages ||
-      !Array.isArray(searchResult.messages)
-    ) {
-      return 'No search results available'
-    }
-
-    // Find tool messages with web search results
-    const toolResults = searchResult.messages
-      .filter(
-        (msg) => msg._type === 'tool' && msg.name === 'web_search_preview',
-      )
-      .map((msg) => msg.content)
-      .filter(
-        (content): content is string =>
-          content != null && typeof content === 'string',
-      )
-
-    if (toolResults.length > 0) {
-      return toolResults.join('\n\n')
-    }
-
-    // Fallback: get the last message content
-    const lastMessage = searchResult.messages[searchResult.messages.length - 1]
-    if (lastMessage?.content) {
-      return typeof lastMessage.content === 'string'
-        ? lastMessage.content
-        : JSON.stringify(lastMessage.content)
-    }
-
-    return 'No search results found'
   }
 
   private async executeWebSearchTool(toolCall: ToolCall): Promise<string> {

@@ -47,14 +47,14 @@ export const tableDiffItemSchema = object({
 })
 export type TableDiffItem = InferOutput<typeof tableDiffItemSchema>
 
-const tableNameDiffItemSchema = object({
+export const tableNameDiffItemSchema = object({
   ...baseSchemaDiffItemSchema.entries,
   kind: literal('table-name'),
   data: tableNameSchema,
 })
 export type TableNameDiffItem = InferOutput<typeof tableNameDiffItemSchema>
 
-const tableCommentDiffItemSchema = object({
+export const tableCommentDiffItemSchema = object({
   ...baseSchemaDiffItemSchema.entries,
   kind: literal('table-comment'),
   data: commentSchema,

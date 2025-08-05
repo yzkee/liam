@@ -23,13 +23,13 @@ export async function generateMetadata(): Promise<Metadata> {
   const headersList = await headers()
   const urlPath = headersList.get('x-url-path') || ''
 
-  const isAppPath = urlPath.startsWith('/app')
+  const isErdPath = urlPath.startsWith('/erd') && !urlPath.startsWith('/erd/p/')
 
-  if (isAppPath) {
+  if (isErdPath) {
     return {
-      title: 'Liam DB',
+      title: 'Liam ERD',
       description:
-        'Build and manage your database schemas with Liam DB. Create, visualize, and collaborate on database designs.',
+        'Automatically generates beautiful and easy-to-read ER diagrams from your database.',
       openGraph: {
         siteName: 'Liam',
         type: 'website',
@@ -41,9 +41,9 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 
   return {
-    title: 'Liam ERD',
+    title: 'Liam DB',
     description:
-      'Automatically generates beautiful and easy-to-read ER diagrams from your database.',
+      'Build and manage your database schemas with Liam DB. Create, visualize, and collaborate on database designs.',
     openGraph: {
       siteName: 'Liam',
       type: 'website',

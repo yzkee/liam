@@ -8,7 +8,6 @@ import type {
   WorkflowConfigurable,
   WorkflowState,
 } from '../chat/workflow/types'
-import { withTimelineItemSync } from '../chat/workflow/utils/withTimelineItemSync'
 import type { AgentWorkflowParams, AgentWorkflowResult } from '../types'
 import { WorkflowTerminationError } from './errorHandling'
 
@@ -62,15 +61,8 @@ export const setupWorkflowState = (
 
   const workflowRunId = uuidv4()
 
-  const setupMessage = ResultAsync.fromPromise(
-    withTimelineItemSync(new HumanMessage(userInput), {
-      designSessionId,
-      organizationId,
-      userId,
-      repositories,
-    }),
-    (error) => new Error(String(error)),
-  ).andThen((message) => ok([...messages, message]))
+  const userMessage = new HumanMessage(userInput)
+  const allMessages = [...messages, userMessage]
 
   const createWorkflowRun = ResultAsync.fromPromise(
     repositories.schema.createWorkflowRun({
@@ -85,31 +77,29 @@ export const setupWorkflowState = (
     return ok(createWorkflowRun)
   })
 
-  return ResultAsync.combine([setupMessage, createWorkflowRun]).andThen(
-    ([messages]) => {
-      const runCollector = new RunCollectorCallbackHandler()
-      return ok({
-        workflowState: {
-          userInput: userInput,
-          messages,
-          schemaData,
-          organizationId,
-          buildingSchemaId,
-          latestVersionNumber,
-          designSessionId,
-          userId,
-          retryCount: {},
-        },
-        workflowRunId,
-        runCollector,
-        configurable: {
-          repositories,
-          buildingSchemaId,
-          latestVersionNumber,
-        },
-      })
-    },
-  )
+  return createWorkflowRun.andThen((_workflowRunResult) => {
+    const runCollector = new RunCollectorCallbackHandler()
+    return ok({
+      workflowState: {
+        userInput: userInput,
+        messages: allMessages,
+        schemaData,
+        organizationId,
+        buildingSchemaId,
+        latestVersionNumber,
+        designSessionId,
+        userId,
+        retryCount: {},
+      },
+      workflowRunId,
+      runCollector,
+      configurable: {
+        repositories,
+        buildingSchemaId,
+        latestVersionNumber,
+      },
+    })
+  })
 }
 
 /**

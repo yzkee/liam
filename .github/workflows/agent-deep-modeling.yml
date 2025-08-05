@@ -8,6 +8,7 @@ on:
       - 'frontend/internal-packages/db/**'
       - 'frontend/packages/db-structure/**'
       - 'frontend/packages/pglite-server/**'
+      - '.github/workflows/agent-deep-modeling.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

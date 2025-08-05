@@ -77,6 +77,7 @@ export const Output: FC<Props> = ({
         schema={schema}
         tabValue={tabValue}
         artifactDoc={artifactDoc}
+        hasArtifact={!!artifact}
         {...propsForVersionDropdown}
       />
       <TabsContent value={OUTPUT_TABS.ERD} className={styles.tabsContent}>

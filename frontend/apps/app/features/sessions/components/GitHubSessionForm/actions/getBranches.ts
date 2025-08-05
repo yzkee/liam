@@ -72,5 +72,12 @@ export async function getBranches(
     sha: branch.commit.sha,
   }))
 
+  branchesWithSha.sort((a, b) => {
+    if (a.protected && !b.protected) return -1
+    if (!a.protected && b.protected) return 1
+
+    return a.name.localeCompare(b.name)
+  })
+
   return { branches: branchesWithSha, loading: false }
 }

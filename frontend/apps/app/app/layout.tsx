@@ -1,7 +1,6 @@
 import clsx from 'clsx'
 import type { Metadata } from 'next'
 import { Inter, Montserrat } from 'next/font/google'
-import { headers } from 'next/headers'
 import type React from 'react'
 import './globals.css'
 import { ToastProvider } from '@liam-hq/ui'
@@ -19,39 +18,17 @@ const montserrat = Montserrat({
 
 const imageUrl = '/assets/liam_erd.png'
 
-export async function generateMetadata(): Promise<Metadata> {
-  const headersList = await headers()
-  const urlPath = headersList.get('x-url-path') || ''
-
-  const isErdPath = urlPath.startsWith('/erd') && !urlPath.startsWith('/erd/p/')
-
-  if (isErdPath) {
-    return {
-      title: 'Liam ERD',
-      description:
-        'Automatically generates beautiful and easy-to-read ER diagrams from your database.',
-      openGraph: {
-        siteName: 'Liam',
-        type: 'website',
-        locale: 'en_US',
-        images: imageUrl,
-      },
-      twitter: {},
-    }
-  }
-
-  return {
-    title: 'Liam DB',
-    description:
-      'Build and manage your database schemas with Liam DB. Create, visualize, and collaborate on database designs.',
-    openGraph: {
-      siteName: 'Liam',
-      type: 'website',
-      locale: 'en_US',
-      images: imageUrl,
-    },
-    twitter: {},
-  }
+export const metadata: Metadata = {
+  title: 'Liam DB',
+  description:
+    'Build and manage your database schemas with Liam DB. Create, visualize, and collaborate on database designs.',
+  openGraph: {
+    siteName: 'Liam',
+    type: 'website',
+    locale: 'en_US',
+    images: imageUrl,
+  },
+  twitter: {},
 }
 
 export default function RootLayout({

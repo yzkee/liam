@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowRight, useToast } from '@liam-hq/ui'
+import { LogOut, useToast } from '@liam-hq/ui'
 import { useRouter } from 'next/navigation'
 import { type FC, useCallback } from 'react'
 import {
@@ -56,7 +56,7 @@ export const UserDropdown: FC<Props> = ({ avatarUrl }) => {
       </DropdownMenuTrigger>
       <DropdownMenuPortal>
         <DropdownMenuContent align="end" sideOffset={5}>
-          <DropdownMenuItem leftIcon={<ArrowRight />} onClick={handleLogout}>
+          <DropdownMenuItem leftIcon={<LogOut />} onClick={handleLogout}>
             Logout
           </DropdownMenuItem>
         </DropdownMenuContent>

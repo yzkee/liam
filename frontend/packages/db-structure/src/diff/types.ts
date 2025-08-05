@@ -176,7 +176,7 @@ export const constraintDiffItemSchema = object({
 })
 export type ConstraintDiffItem = InferOutput<typeof constraintDiffItemSchema>
 
-const constraintNameDiffItemSchema = object({
+export const constraintNameDiffItemSchema = object({
   ...baseSchemaDiffItemSchema.entries,
   kind: literal('constraint-name'),
   data: constraintNameSchema,
@@ -186,7 +186,7 @@ export type ConstraintNameDiffItem = InferOutput<
   typeof constraintNameDiffItemSchema
 >
 
-const constraintColumnNameDiffItemSchema = object({
+export const constraintColumnNameDiffItemSchema = object({
   ...baseSchemaDiffItemSchema.entries,
   kind: literal('constraint-column-name'),
   data: columnNameSchema,
@@ -196,7 +196,7 @@ export type ConstraintColumnNameDiffItem = InferOutput<
   typeof constraintColumnNameDiffItemSchema
 >
 
-const constraintTargetTableNameDiffItemSchema = object({
+export const constraintTargetTableNameDiffItemSchema = object({
   ...baseSchemaDiffItemSchema.entries,
   kind: literal('constraint-target-table-name'),
   data: tableNameSchema,
@@ -206,7 +206,7 @@ export type ConstraintTargetTableNameDiffItem = InferOutput<
   typeof constraintTargetTableNameDiffItemSchema
 >
 
-const constraintTargetColumnNameDiffItemSchema = object({
+export const constraintTargetColumnNameDiffItemSchema = object({
   ...baseSchemaDiffItemSchema.entries,
   kind: literal('constraint-target-column-name'),
   data: columnNameSchema,
@@ -216,7 +216,7 @@ export type ConstraintTargetColumnNameDiffItem = InferOutput<
   typeof constraintTargetColumnNameDiffItemSchema
 >
 
-const constraintUpdateConstraintDiffItemSchema = object({
+export const constraintUpdateConstraintDiffItemSchema = object({
   ...baseSchemaDiffItemSchema.entries,
   kind: literal('constraint-update-constraint'),
   data: foreignKeyConstraintReferenceOptionSchema,
@@ -226,7 +226,7 @@ export type ConstraintUpdateConstraintDiffItem = InferOutput<
   typeof constraintUpdateConstraintDiffItemSchema
 >
 
-const constraintDeleteConstraintDiffItemSchema = object({
+export const constraintDeleteConstraintDiffItemSchema = object({
   ...baseSchemaDiffItemSchema.entries,
   kind: literal('constraint-delete-constraint'),
   data: foreignKeyConstraintReferenceOptionSchema,
@@ -236,7 +236,7 @@ export type ConstraintDeleteConstraintDiffItem = InferOutput<
   typeof constraintDeleteConstraintDiffItemSchema
 >
 
-const constraintDetailDiffItemSchema = object({
+export const constraintDetailDiffItemSchema = object({
   ...baseSchemaDiffItemSchema.entries,
   kind: literal('constraint-detail'),
   data: checkConstraintDetailSchema,
@@ -279,7 +279,7 @@ export type IndexRelatedDiffItem = InferOutput<
   typeof indexRelatedDiffItemSchema
 >
 
-const constraintRelatedDiffItemSchema = union([
+export const constraintRelatedDiffItemSchema = union([
   constraintDiffItemSchema,
   constraintNameDiffItemSchema,
   constraintColumnNameDiffItemSchema,

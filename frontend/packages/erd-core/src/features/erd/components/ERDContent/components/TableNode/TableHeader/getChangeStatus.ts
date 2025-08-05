@@ -1,6 +1,8 @@
 import {
   type ChangeStatus,
   columnRelatedDiffItemSchema,
+  constraintRelatedDiffItemSchema,
+  indexRelatedDiffItemSchema,
   type SchemaDiffItem,
   tableRelatedDiffItemSchema,
 } from '@liam-hq/db-structure'
@@ -29,6 +31,24 @@ export function getChangeStatus({ tableId, diffItems }: Params): ChangeStatus {
   })
 
   if (hasColumnRelatedItem) {
+    return 'modified'
+  }
+
+  const hasIndexRelatedItem = filteredDiffItems.some((item) => {
+    const parsed = safeParse(indexRelatedDiffItemSchema, item)
+    return parsed.success
+  })
+
+  if (hasIndexRelatedItem) {
+    return 'modified'
+  }
+
+  const hasConstraintRelatedItem = filteredDiffItems.some((item) => {
+    const parsed = safeParse(constraintRelatedDiffItemSchema, item)
+    return parsed.success
+  })
+
+  if (hasConstraintRelatedItem) {
     return 'modified'
   }
 

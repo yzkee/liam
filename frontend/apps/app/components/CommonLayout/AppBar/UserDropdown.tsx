@@ -10,7 +10,7 @@ import {
   DropdownMenuRoot,
   DropdownMenuTrigger,
 } from '@/components'
-import { ArrowRight } from '@/icons'
+import { ArrowRight } from '@liam-hq/ui'
 import { createClient } from '@/libs/db/client'
 
 type Props = {

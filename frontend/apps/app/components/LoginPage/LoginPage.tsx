@@ -20,7 +20,7 @@ export async function LoginPage() {
         <div className={styles.card}>
           <div className={styles.titleWrapper}>
             <LiamLogoMark className={styles.logoMark} />
-            <h1 className={styles.title}>Sign in to Liam Migration</h1>
+            <h1 className={styles.title}>Sign in to Liam DB</h1>
           </div>
 
           <div className={styles.oauthList}>

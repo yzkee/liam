@@ -18,6 +18,7 @@ type Props = ComponentProps<typeof VersionDropdown> & {
   schema: Schema
   tabValue: OutputTabValue
   artifactDoc?: string
+  hasArtifact?: boolean
 }
 
 const generateCumulativeOperations = (
@@ -46,6 +47,7 @@ export const Header: FC<Props> = ({
   schema,
   tabValue,
   artifactDoc,
+  hasArtifact,
   ...propsForVersionDropdown
 }) => {
   const { versions, selectedVersion } = propsForVersionDropdown
@@ -81,12 +83,14 @@ export const Header: FC<Props> = ({
           <div className={styles.divider} />
           <VersionDropdown {...propsForVersionDropdown} />
         </div>
-        <TabsTrigger
-          value={ARTIFACT_TAB.value}
-          className={clsx(styles.tab, styles.artifactTrigger)}
-        >
-          {ARTIFACT_TAB.label}
-        </TabsTrigger>
+        {hasArtifact && (
+          <TabsTrigger
+            value={ARTIFACT_TAB.value}
+            className={clsx(styles.tab, styles.artifactTrigger)}
+          >
+            {ARTIFACT_TAB.label}
+          </TabsTrigger>
+        )}
       </TabsList>
       <div className={styles.tail}>
         <ExportDropdown

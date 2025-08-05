@@ -2,6 +2,7 @@
 
 import { createHash } from 'node:crypto'
 import path from 'node:path'
+import { createSupabaseRepositories } from '@liam-hq/agent'
 import type { SupabaseClientType } from '@liam-hq/db'
 import {
   deepModelingWorkflowTask,
@@ -103,20 +104,18 @@ const triggerChatWorkflow = async (
   currentUserId: string,
 ): Promise<CreateSessionState | null> => {
   const supabase = await createClient()
+  const repositories = createSupabaseRepositories(supabase)
 
   // Save initial user message to timeline before triggering workflow
-  const { error: timelineError } = await supabase
-    .from('timeline_items')
-    .insert({
-      design_session_id: designSessionId,
-      content: initialMessage,
-      type: 'user',
-      user_id: currentUserId,
-      updated_at: new Date().toISOString(),
-    })
+  const userMessageResult = await repositories.schema.createTimelineItem({
+    designSessionId,
+    content: initialMessage,
+    type: 'user',
+    userId: currentUserId,
+  })
 
-  if (timelineError) {
-    console.error('Error saving initial user message:', timelineError)
+  if (!userMessageResult.success) {
+    console.error('Error saving initial user message:', userMessageResult.error)
     return { success: false, error: 'Failed to save initial user message' }
   }
 

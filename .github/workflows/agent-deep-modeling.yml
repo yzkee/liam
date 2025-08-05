@@ -44,7 +44,7 @@ jobs:
           ./scripts/extract-supabase-service-key.sh
 
       - name: Build db-structure package
-        run: pnpm build --filter @liam-hq/db-structure
+        run: pnpm build
 
       - name: Execute deep modeling process
         id: deep-modeling

@@ -48,6 +48,8 @@ jobs:
 
       - name: Execute deep modeling process
         id: deep-modeling
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           echo "## 🤖 Agent Deep Modeling Execution" > execution_log.md
           echo "" >> execution_log.md

@@ -1,5 +1,5 @@
-import type { Schema } from '@liam-hq/db-structure'
-import { type Operation, operationsSchema } from '@liam-hq/db-structure'
+import type { Schema } from '@liam-hq/schema'
+import { type Operation, operationsSchema } from '@liam-hq/schema'
 import { TabsList, TabsTrigger } from '@liam-hq/ui'
 import clsx from 'clsx'
 import type { ComponentProps, FC } from 'react'

@@ -1,4 +1,4 @@
-import type { PrimaryKeyConstraint } from '@liam-hq/db-structure'
+import type { PrimaryKeyConstraint } from '@liam-hq/schema'
 import { GridTableRoot } from '@liam-hq/ui'
 import { type FC, useMemo } from 'react'
 import { useDiffStyle } from '@/features/diff/hooks/useDiffStyle'

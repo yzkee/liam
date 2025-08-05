@@ -4,7 +4,7 @@ import {
   aForeignKeyConstraint,
   aSchema,
   aTable,
-} from '@liam-hq/db-structure'
+} from '@liam-hq/schema'
 import { describe, expect, it, vi } from 'vitest'
 import type { Repositories } from '../../repositories'
 import { InMemoryRepository } from '../../repositories/InMemoryRepository'

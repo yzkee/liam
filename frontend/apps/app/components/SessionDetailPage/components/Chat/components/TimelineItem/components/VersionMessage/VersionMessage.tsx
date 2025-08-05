@@ -1,7 +1,7 @@
 'use client'
 
 import type { Json, Tables } from '@liam-hq/db'
-import { operationsSchema } from '@liam-hq/db-structure'
+import { operationsSchema } from '@liam-hq/schema'
 import {
   ArrowRight,
   Button,

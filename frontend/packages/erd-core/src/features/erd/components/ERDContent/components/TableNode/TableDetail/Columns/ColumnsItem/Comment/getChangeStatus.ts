@@ -2,7 +2,7 @@ import {
   type ChangeStatus,
   columnCommentDiffItemSchema,
   type SchemaDiffItem,
-} from '@liam-hq/db-structure'
+} from '@liam-hq/schema'
 import { safeParse } from 'valibot'
 
 type Params = {

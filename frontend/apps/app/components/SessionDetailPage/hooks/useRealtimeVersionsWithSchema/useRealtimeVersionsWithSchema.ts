@@ -1,7 +1,7 @@
 'use client'
 
 import { buildingSchemaVersionsSchema } from '@liam-hq/db'
-import { type Schema, schemaSchema } from '@liam-hq/db-structure'
+import { type Schema, schemaSchema } from '@liam-hq/schema'
 import { useCallback, useEffect, useState, useTransition } from 'react'
 import * as v from 'valibot'
 import { createClient } from '@/libs/db/client'

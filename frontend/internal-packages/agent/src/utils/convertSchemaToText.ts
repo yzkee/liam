@@ -1,4 +1,4 @@
-import { isPrimaryKey, type Schema } from '@liam-hq/db-structure'
+import { isPrimaryKey, type Schema } from '@liam-hq/schema'
 
 // Convert table data to text document
 const tableToDocument = (

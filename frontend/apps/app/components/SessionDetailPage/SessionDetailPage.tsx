@@ -1,5 +1,5 @@
-import type { Schema } from '@liam-hq/db-structure'
-import { schemaSchema } from '@liam-hq/db-structure'
+import type { Schema } from '@liam-hq/schema'
+import { schemaSchema } from '@liam-hq/schema'
 import { err, ok, type Result } from 'neverthrow'
 import type { FC } from 'react'
 import { safeParse } from 'valibot'

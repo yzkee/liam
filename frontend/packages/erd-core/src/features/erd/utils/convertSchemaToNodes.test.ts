@@ -5,7 +5,7 @@ import {
   aTable,
   aUniqueConstraint,
   type Schema,
-} from '@liam-hq/db-structure'
+} from '@liam-hq/schema'
 import { describe, expect, it } from 'vitest'
 import { NON_RELATED_TABLE_GROUP_NODE_ID, zIndex } from '../constants'
 import { convertSchemaToNodes } from './convertSchemaToNodes'

@@ -1,4 +1,4 @@
-import type { Column } from '@liam-hq/db-structure'
+import type { Column } from '@liam-hq/schema'
 import { GridTableDd, GridTableDt, GridTableItem } from '@liam-hq/ui'
 import { type FC, useMemo } from 'react'
 import { useDiffStyle } from '@/features/diff/hooks/useDiffStyle'

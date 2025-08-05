@@ -1,4 +1,4 @@
-import { schemaDiffItemsSchema, schemaSchema } from '@liam-hq/db-structure'
+import { schemaDiffItemsSchema, schemaSchema } from '@liam-hq/schema'
 import { createContext } from 'react'
 import * as v from 'valibot'
 

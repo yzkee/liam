@@ -1,9 +1,11 @@
+'use client'
+
+import { useRouter } from 'next/navigation'
 import type { FC } from 'react'
-import { DropdownMenuRoot, DropdownMenuTrigger } from '@/components'
-import { ChevronsUpDown } from '@/icons'
+import { BranchCombobox } from '@/components/shared/BranchCombobox'
+import { urlgen } from '@/libs/routes'
 import styles from './BranchDropdownMenu.module.css'
-import { Content } from './Content'
-import { type Branch, getBranches } from './services/getBranches'
+import { getBranches } from './services/getBranches'
 
 type Props = {
   currentProjectId: string
@@ -23,32 +25,50 @@ export const BranchDropdownMenu: FC<Props> = async ({
     return null
   }
 
+  const comboboxBranches = branches.map((branch) => ({
+    name: branch.name,
+    sha: branch.name,
+    protected: branch.protected,
+  }))
+
   return (
-    <DropdownMenuRoot>
-      <Trigger currentBranch={currentBranch} />
-      <Content
-        currentBranch={currentBranch}
-        branches={branches}
-        currentProjectId={currentProjectId}
-      />
-    </DropdownMenuRoot>
+    <BranchDropdownMenuClient
+      branches={comboboxBranches}
+      currentBranchName={currentBranch.name}
+      currentProjectId={currentProjectId}
+    />
   )
 }
 
-type TriggerProps = {
-  currentBranch: Branch
+type ClientProps = {
+  branches: Array<{ name: string; sha: string; protected: boolean }>
+  currentBranchName: string
+  currentProjectId: string
 }
 
-const Trigger: FC<TriggerProps> = ({ currentBranch }) => {
+const BranchDropdownMenuClient: FC<ClientProps> = ({
+  branches,
+  currentBranchName,
+  currentProjectId,
+}) => {
+  const router = useRouter()
+
+  const handleBranchChange = (branchName: string) => {
+    router.push(
+      urlgen('projects/[projectId]/ref/[branchOrCommit]', {
+        projectId: currentProjectId,
+        branchOrCommit: branchName,
+      }),
+    )
+  }
+
   return (
-    <DropdownMenuTrigger className={styles.trigger}>
-      <div className={styles.nameAndTag}>
-        <span className={styles.name}>{currentBranch.name}</span>
-        {currentBranch.protected && (
-          <span className={styles.tag}>production</span>
-        )}
-      </div>
-      <ChevronsUpDown className={styles.chevronIcon} />
-    </DropdownMenuTrigger>
+    <BranchCombobox
+      branches={branches}
+      selectedBranchSha={currentBranchName}
+      onBranchChange={handleBranchChange}
+      placeholder="Search branches..."
+      className={styles.trigger}
+    />
   )
 }

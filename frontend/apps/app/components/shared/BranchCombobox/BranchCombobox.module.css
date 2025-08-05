@@ -1,0 +1,148 @@
+.container {
+  position: relative;
+  width: 100%;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border: 1px solid var(--overlay-20);
+  border-radius: 6px;
+  background: var(--background);
+  cursor: pointer;
+  min-height: 36px;
+  transition: border-color 0.2s ease;
+}
+
+.trigger:hover:not(.disabled) {
+  border-color: var(--overlay-30);
+}
+
+.trigger.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.branchIcon {
+  width: 16px;
+  height: 16px;
+  color: var(--overlay-60);
+  flex-shrink: 0;
+}
+
+.branchName {
+  color: var(--text);
+  font-size: 14px;
+  flex: 1;
+  text-align: left;
+}
+
+.chevronIcon {
+  width: 16px;
+  height: 16px;
+  color: var(--overlay-60);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.chevronIcon.open {
+  transform: rotate(180deg);
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: var(--background);
+  border: 1px solid var(--overlay-20);
+  border-radius: 6px;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  margin-top: 4px;
+}
+
+.searchContainer {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--overlay-10);
+  gap: 8px;
+}
+
+.searchIcon {
+  width: 16px;
+  height: 16px;
+  color: var(--overlay-60);
+  flex-shrink: 0;
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.searchInput::placeholder {
+  color: var(--overlay-60);
+}
+
+.list {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.item:hover {
+  background: var(--overlay-5);
+}
+
+.item[data-selected='true'] {
+  background: var(--overlay-10);
+}
+
+.item.selected {
+  background: var(--overlay-10);
+}
+
+.itemIcon {
+  width: 16px;
+  height: 16px;
+  color: var(--overlay-60);
+  flex-shrink: 0;
+}
+
+.itemLabel {
+  flex: 1;
+  color: var(--text);
+}
+
+.empty {
+  padding: 16px 12px;
+  text-align: center;
+  color: var(--overlay-60);
+  font-size: 14px;
+}

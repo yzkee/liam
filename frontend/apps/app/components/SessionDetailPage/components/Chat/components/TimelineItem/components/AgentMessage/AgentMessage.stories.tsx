@@ -522,7 +522,7 @@ export const BuildAfterOptionSelectedCompleteCollapsed: Story = {
 export const PMWithRequirementsAnalyzed: Story = {
   args: {
     state: 'default',
-    message: 'Requirements analysis completed successfully',
+    message: 'Your requirements have been analyzed and saved',
     time: '14:30',
     assistantRole: 'pm',
     children: (

@@ -1,4 +1,4 @@
-# @liam-hq/db-structure
+# @liam-hq/schema
 
 ## 0.4.4
 

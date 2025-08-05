@@ -1,4 +1,4 @@
-import type { Column } from '@liam-hq/db-structure'
+import type { Column } from '@liam-hq/schema'
 import {
   DiamondFillIcon,
   DiamondIcon,

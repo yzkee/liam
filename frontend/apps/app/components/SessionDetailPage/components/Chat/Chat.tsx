@@ -1,6 +1,6 @@
 'use client'
 
-import type { Schema } from '@liam-hq/db-structure'
+import type { Schema } from '@liam-hq/schema'
 import { type FC, useTransition } from 'react'
 import type { TimelineItemEntry } from '../../types'
 import styles from './Chat.module.css'

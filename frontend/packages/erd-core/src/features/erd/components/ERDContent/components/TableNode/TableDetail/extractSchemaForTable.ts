@@ -1,5 +1,5 @@
-import type { Schema, Table, Tables } from '@liam-hq/db-structure'
-import { constraintsToRelationships } from '@liam-hq/db-structure'
+import type { Schema, Table, Tables } from '@liam-hq/schema'
+import { constraintsToRelationships } from '@liam-hq/schema'
 
 export const extractSchemaForTable = (table: Table, schema: Schema): Schema => {
   const relationships = constraintsToRelationships(schema.tables)

@@ -1,4 +1,4 @@
-import type { Index } from '@liam-hq/db-structure'
+import type { Index } from '@liam-hq/schema'
 import { GridTableRoot } from '@liam-hq/ui'
 import clsx from 'clsx'
 import { type FC, useMemo } from 'react'

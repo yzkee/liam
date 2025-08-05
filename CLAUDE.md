@@ -69,7 +69,7 @@ For database migration and type generation workflows, see [`docs/migrationOpsCon
 - **frontend/apps/docs** - Documentation site (`@liam-hq/docs`)
 - **frontend/packages/cli** - Command-line tool (`@liam-hq/cli`)
 - **frontend/packages/erd-core** - Core ERD visualization (`@liam-hq/erd-core`)
-- **frontend/packages/db-structure** - Database schema parser (`@liam-hq/db-structure`)
+- **frontend/packages/schema** - Database schema parser (`@liam-hq/schema`)
 - **frontend/packages/ui** - UI component library (`@liam-hq/ui`)
 - **frontend/packages/github** - GitHub API integration (`@liam-hq/github`)
 - **frontend/packages/jobs** - Background jobs with Trigger.dev (`@liam-hq/jobs`)
@@ -84,7 +84,7 @@ For database migration and type generation workflows, see [`docs/migrationOpsCon
 - **Jobs**: Trigger.dev for background processing
 
 ### Data Flow
-1. Schema files are parsed by `@liam-hq/db-structure`
+1. Schema files are parsed by `@liam-hq/schema`
 2. ERD visualization is handled by `@liam-hq/erd-core` using React Flow
 3. UI components from `@liam-hq/ui` provide consistent design
 4. GitHub integration via `@liam-hq/github` for PR reviews

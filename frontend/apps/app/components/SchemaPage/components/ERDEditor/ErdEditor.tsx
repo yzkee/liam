@@ -1,7 +1,7 @@
 'use client'
 
-import type { Schema } from '@liam-hq/db-structure'
 import { ErdRendererProvider } from '@liam-hq/erd-core/nextjs'
+import type { Schema } from '@liam-hq/schema'
 import type { ComponentProps, FC } from 'react'
 import { parse } from 'valibot'
 import { ERDRenderer } from '@/features'

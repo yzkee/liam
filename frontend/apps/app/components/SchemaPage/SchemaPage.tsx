@@ -1,6 +1,6 @@
 import path from 'node:path'
-import { parse, setPrismWasmUrl } from '@liam-hq/db-structure/parser'
 import { getFileContent } from '@liam-hq/github'
+import { parse, setPrismWasmUrl } from '@liam-hq/schema/parser'
 import * as Sentry from '@sentry/nextjs'
 import { cookies } from 'next/headers'
 import type { ComponentProps, FC } from 'react'

@@ -1,4 +1,5 @@
 export * from './GithubLogo'
+export * from './LiamDbLogo'
 export * from './LiamLogo'
 export * from './LiamLogoMark'
 export * from './LiamMigrationLogo'

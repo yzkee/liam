@@ -30,13 +30,6 @@ export const UserDropdown: FC<Props> = ({ avatarUrl }) => {
   const router = useRouter()
 
   const handleLogout = useCallback(async () => {
-    // Show loading toast immediately
-    toast({
-      title: 'Logging out...',
-      description: 'Please wait while we log you out.',
-      status: 'info',
-    })
-
     // Perform logout on client side
     const supabase = createClient()
     const { error } = await supabase.auth.signOut()

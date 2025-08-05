@@ -7,6 +7,7 @@ import { parse } from 'valibot'
 import { ERDRenderer } from '@/features'
 import { VersionProvider } from '@/providers'
 import { versionSchema } from '@/schemas'
+import { CreateDesignSessionButton } from '../CreateDesignSessionButton'
 import styles from './ERDEditor.module.css'
 
 type Props = {
@@ -23,6 +24,8 @@ export const ERDEditor: FC<Props> = ({
   errorObjects,
   defaultSidebarOpen,
   defaultPanelSizes = [20, 80],
+  projectId,
+  branchOrCommit,
 }) => {
   const versionData = {
     version: '0.1.0', // NOTE: no maintained version for ERD Web
@@ -33,6 +36,14 @@ export const ERDEditor: FC<Props> = ({
   }
   const version = parse(versionSchema, versionData)
 
+  const customActions =
+    projectId && branchOrCommit ? (
+      <CreateDesignSessionButton
+        projectId={projectId}
+        branchOrCommit={branchOrCommit}
+      />
+    ) : null
+
   return (
     <div className={styles.wrapper}>
       <VersionProvider version={version}>
@@ -41,6 +52,7 @@ export const ERDEditor: FC<Props> = ({
             defaultSidebarOpen={defaultSidebarOpen}
             defaultPanelSizes={defaultPanelSizes}
             errorObjects={errorObjects}
+            customToolbarActions={customActions}
           />
         </ErdRendererProvider>
       </VersionProvider>

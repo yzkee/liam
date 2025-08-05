@@ -11,11 +11,13 @@ Execute schema benchmark comparison between LiamDB and OpenAI models.
 
 ## Usage
 ```
-/benchmark LiamDB
-/benchmark openai
+/benchmark-execute LiamDB
+/benchmark-execute openai
 ```
 
 ## Execution
+
+**Important**: When using the Bash tool for these commands, always set the timeout parameter to the maximum value (600000ms / 10 minutes) as benchmark operations can be time-intensive.
 
 First, I'll clean up any existing workspace and set up a fresh benchmark environment:
 

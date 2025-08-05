@@ -84,8 +84,7 @@ async function saveArtifacts(
     repositories,
   )
 
-  if (artifactResult.success) {
-  } else {
+  if (!artifactResult.success) {
     await logAssistantMessage(
       state,
       repositories,

@@ -102,6 +102,24 @@ const triggerChatWorkflow = async (
   organizationId: string,
   currentUserId: string,
 ): Promise<CreateSessionState | null> => {
+  const supabase = await createClient()
+
+  // Save initial user message to timeline before triggering workflow
+  const { error: timelineError } = await supabase
+    .from('timeline_items')
+    .insert({
+      design_session_id: designSessionId,
+      content: initialMessage,
+      type: 'user',
+      user_id: currentUserId,
+      updated_at: new Date().toISOString(),
+    })
+
+  if (timelineError) {
+    console.error('Error saving initial user message:', timelineError)
+    return { success: false, error: 'Failed to save initial user message' }
+  }
+
   const history: [string, string][] = []
   const chatPayload = {
     userInput: initialMessage,

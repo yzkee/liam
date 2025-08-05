@@ -57,7 +57,7 @@ export function InvitationCard({
                 <strong className={styles.organizationName}>
                   {organizationName}
                 </strong>{' '}
-                organization on Liam Migration.
+                organization on Liam DB.
                 <br />
                 Please accept the invitation below to join.
               </div>

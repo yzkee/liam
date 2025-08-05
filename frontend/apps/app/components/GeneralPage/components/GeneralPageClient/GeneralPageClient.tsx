@@ -90,8 +90,8 @@ export function GeneralPageClient({
                 className={styles.input}
               />
               <p className={styles.helperText}>
-                This is your team's visible name within Liam Migration. For
-                example, the name of your company or team.
+                This is your team's visible name within Liam DB. For example,
+                the name of your company or team.
               </p>
             </div>
           </div>
@@ -121,7 +121,7 @@ export function GeneralPageClient({
             <div className={styles.inputContainer}>
               <p className={styles.dangerText}>
                 Permanently remove your organization and all of its contents
-                from the Liam Migration.
+                from the Liam DB.
                 <br />
                 This action is not reversible — please continue with caution.
               </p>

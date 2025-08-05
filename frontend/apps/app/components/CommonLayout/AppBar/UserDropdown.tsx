@@ -1,6 +1,7 @@
 'use client'
 
 import { ArrowRight, useToast } from '@liam-hq/ui'
+import { useRouter } from 'next/navigation'
 import { type FC, useCallback } from 'react'
 import {
   AvatarWithImage,
@@ -26,6 +27,7 @@ const deleteCookie = (name: string) => {
 
 export const UserDropdown: FC<Props> = ({ avatarUrl }) => {
   const toast = useToast()
+  const router = useRouter()
 
   const handleLogout = useCallback(async () => {
     // Show loading toast immediately
@@ -44,7 +46,7 @@ export const UserDropdown: FC<Props> = ({ avatarUrl }) => {
       deleteCookie('organizationId')
 
       // Redirect with success parameter
-      window.location.href = '/app/login?logout=success'
+      router.push('/app/login?logout=success')
     } else {
       toast({
         title: 'Logout failed',
@@ -52,7 +54,7 @@ export const UserDropdown: FC<Props> = ({ avatarUrl }) => {
         status: 'error',
       })
     }
-  }, [toast])
+  }, [toast, router])
 
   return (
     <DropdownMenuRoot>

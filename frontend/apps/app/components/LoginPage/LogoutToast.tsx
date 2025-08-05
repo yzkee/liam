@@ -1,11 +1,12 @@
 'use client'
 
 import { useToast } from '@liam-hq/ui'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect } from 'react'
 
 export function LogoutToast() {
   const toast = useToast()
+  const router = useRouter()
   const searchParams = useSearchParams()
 
   useEffect(() => {
@@ -19,9 +20,9 @@ export function LogoutToast() {
 
       // Clean up the URL to remove the logout parameter
       const newUrl = window.location.pathname
-      window.history.replaceState({}, '', newUrl)
+      router.replace(newUrl)
     }
-  }, [searchParams, toast])
+  }, [searchParams, toast, router])
 
   return null
 }

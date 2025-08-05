@@ -3,12 +3,12 @@
 import { createHash } from 'node:crypto'
 import path from 'node:path'
 import type { SupabaseClientType } from '@liam-hq/db'
-import type { Schema } from '@liam-hq/db-structure'
-import { parse, setPrismWasmUrl } from '@liam-hq/db-structure/parser'
 import {
   deepModelingWorkflowTask,
   designProcessWorkflowTask,
 } from '@liam-hq/jobs'
+import type { Schema } from '@liam-hq/schema'
+import { parse, setPrismWasmUrl } from '@liam-hq/schema/parser'
 import { idempotencyKeys } from '@trigger.dev/sdk'
 import { redirect } from 'next/navigation'
 import { getOrganizationId } from '@/features/organizations/services/getOrganizationId'

@@ -1,4 +1,4 @@
-import { aTable } from '@liam-hq/db-structure'
+import { aTable } from '@liam-hq/schema'
 import { cleanup, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ReactFlowProvider } from '@xyflow/react'

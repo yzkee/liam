@@ -8,6 +8,7 @@
     var(--spacing-2);
   background-color: var(--global-muted-background);
   border-radius: var(--border-radius-base);
+  border-bottom: 1px solid var(--pane-border);
 }
 
 .leftSection {

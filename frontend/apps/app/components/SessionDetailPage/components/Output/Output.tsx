@@ -1,4 +1,4 @@
-import type { Schema } from '@liam-hq/db-structure'
+import type { Schema } from '@liam-hq/schema'
 import { type ComponentProps, type FC, useCallback, useState } from 'react'
 import { TabsContent, TabsRoot } from '@/components'
 import type { ReviewComment } from '../../types'
@@ -77,6 +77,7 @@ export const Output: FC<Props> = ({
         schema={schema}
         tabValue={tabValue}
         artifactDoc={artifactDoc}
+        hasArtifact={!!artifact}
         {...propsForVersionDropdown}
       />
       <TabsContent value={OUTPUT_TABS.ERD} className={styles.tabsContent}>

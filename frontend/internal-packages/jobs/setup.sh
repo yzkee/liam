@@ -3,7 +3,7 @@
 # Copy required WASM and data files for PGlite and Ruby Prism
 
 # Copy prism.wasm from db-structure package
-PRISM_WASM_SOURCE="../../packages/db-structure/node_modules/@ruby/prism/src/prism.wasm"
+PRISM_WASM_SOURCE="../../packages/schema/node_modules/@ruby/prism/src/prism.wasm"
 if [ -f "$PRISM_WASM_SOURCE" ]; then
     cp "$PRISM_WASM_SOURCE" prism.wasm
     echo "✓ Copied prism.wasm"

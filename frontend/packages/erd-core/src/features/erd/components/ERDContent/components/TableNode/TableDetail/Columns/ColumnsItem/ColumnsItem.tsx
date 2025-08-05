@@ -1,8 +1,4 @@
-import {
-  type Column,
-  type Constraints,
-  isPrimaryKey,
-} from '@liam-hq/db-structure'
+import { type Column, type Constraints, isPrimaryKey } from '@liam-hq/schema'
 import { GridTableRoot } from '@liam-hq/ui'
 import clsx from 'clsx'
 import { type FC, useMemo } from 'react'

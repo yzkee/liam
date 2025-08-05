@@ -1,14 +1,14 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { tool } from '@langchain/core/tools'
 import type { JSONSchema } from '@langchain/core/utils/json_schema'
+import { executeQuery } from '@liam-hq/pglite-server'
+import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import {
   applyPatchOperations,
   operationsSchema,
   postgresqlSchemaDeparser,
   type Schema,
-} from '@liam-hq/db-structure'
-import { executeQuery } from '@liam-hq/pglite-server'
-import type { SqlResult } from '@liam-hq/pglite-server/src/types'
+} from '@liam-hq/schema'
 import { toJsonSchema } from '@valibot/to-json-schema'
 import type { Operation } from 'fast-json-patch'
 import { fromThrowable } from 'neverthrow'

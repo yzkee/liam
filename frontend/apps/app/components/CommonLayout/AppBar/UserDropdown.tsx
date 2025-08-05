@@ -1,6 +1,6 @@
 'use client'
 
-import { useToast } from '@liam-hq/ui'
+import { ArrowRight, useToast } from '@liam-hq/ui'
 import { type FC, useCallback } from 'react'
 import {
   AvatarWithImage,
@@ -10,11 +10,18 @@ import {
   DropdownMenuRoot,
   DropdownMenuTrigger,
 } from '@/components'
-import { ArrowRight } from '@liam-hq/ui'
 import { createClient } from '@/libs/db/client'
 
 type Props = {
   avatarUrl: string
+}
+
+// Helper function to delete cookie
+const deleteCookie = (name: string) => {
+  const expires = 'Thu, 01 Jan 1970 00:00:00 UTC'
+  const cookie = `${name}=; expires=${expires}; path=/;`
+  // biome-ignore lint/suspicious/noDocumentCookie: Required for cookie deletion
+  document.cookie = cookie
 }
 
 export const UserDropdown: FC<Props> = ({ avatarUrl }) => {
@@ -33,6 +40,9 @@ export const UserDropdown: FC<Props> = ({ avatarUrl }) => {
     const { error } = await supabase.auth.signOut()
 
     if (!error) {
+      // Delete organizationId cookie
+      deleteCookie('organizationId')
+
       // Redirect with success parameter
       window.location.href = '/app/login?logout=success'
     } else {

@@ -102,7 +102,7 @@ const triggerChatWorkflow = async (
   designSessionId: string,
   organizationId: string,
   currentUserId: string,
-): Promise<CreateSessionState | null> => {
+): Promise<CreateSessionState> => {
   const supabase = await createClient()
   const repositories = createSupabaseRepositories(supabase)
 
@@ -150,7 +150,7 @@ const triggerChatWorkflow = async (
     return { success: false, error: 'Failed to trigger chat processing job' }
   }
 
-  return null
+  return { success: true }
 }
 
 export const parseSchemaContent = async (
@@ -211,7 +211,7 @@ export const createSessionWithSchema = async (
   }
   const buildingSchema = buildingSchemaResult
 
-  const workflowError = await triggerChatWorkflow(
+  const workflowResult = await triggerChatWorkflow(
     params.initialMessage,
     params.isDeepModelingEnabled,
     buildingSchema.id,
@@ -219,8 +219,8 @@ export const createSessionWithSchema = async (
     organizationId,
     currentUserId,
   )
-  if (workflowError) {
-    return workflowError
+  if (!workflowResult.success) {
+    return workflowResult
   }
 
   redirect(`/app/design_sessions/${designSession.id}`)

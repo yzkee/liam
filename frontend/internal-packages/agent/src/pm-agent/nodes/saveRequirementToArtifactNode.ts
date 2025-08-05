@@ -84,14 +84,7 @@ async function saveArtifacts(
     repositories,
   )
 
-  if (artifactResult.success) {
-    await logAssistantMessage(
-      state,
-      repositories,
-      'Your requirements have been analyzed and saved',
-      assistantRole,
-    )
-  } else {
+  if (!artifactResult.success) {
     await logAssistantMessage(
       state,
       repositories,

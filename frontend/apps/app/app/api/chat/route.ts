@@ -68,8 +68,12 @@ export async function POST(request: Request) {
   })
 
   if (!userMessageResult.success) {
+    console.error('Failed to save user message:', userMessageResult.error)
     return NextResponse.json(
-      { error: 'Failed to save user message' },
+      {
+        error: 'Failed to save user message',
+        details: userMessageResult.error,
+      },
       { status: 500 },
     )
   }

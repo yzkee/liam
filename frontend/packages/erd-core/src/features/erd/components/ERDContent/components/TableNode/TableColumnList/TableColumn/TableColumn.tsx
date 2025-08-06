@@ -95,8 +95,7 @@ export const TableColumn: FC<TableColumnProps> = ({
   isHighlightedTable,
 }) => {
   const { showDiff } = useUserEditingOrThrow()
-
-  const { diffItems } = useSchemaOrThrow()
+  const { operations } = useSchemaOrThrow()
 
   // Only calculate diff-related values when showDiff is true
   const changeStatus = useMemo(() => {
@@ -104,9 +103,9 @@ export const TableColumn: FC<TableColumnProps> = ({
     return getChangeStatus({
       tableId: table.name,
       columnId: column.name,
-      diffItems: diffItems ?? [],
+      operations: operations ?? [],
     })
-  }, [showDiff, table.name, column.name, diffItems])
+  }, [showDiff, table.name, column.name, operations])
 
   const diffStyle = useMemo(() => {
     if (!showDiff || !changeStatus) return undefined

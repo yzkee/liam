@@ -49,7 +49,11 @@ export {
 export { PATH_PATTERNS } from './operation/constants.js'
 export {
   applyPatchOperations,
+  getColumnRelatedChangeStatus,
+  getConstraintRelatedChangeStatus,
+  getIndexRelatedChangeStatus,
   getOperations,
+  getTableRelatedChangeStatus,
   type Operation,
   operationsSchema,
 } from './operation/index.js'

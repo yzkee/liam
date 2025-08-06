@@ -115,7 +115,8 @@
   height: 32px;
   background: var(--global-background);
   border-radius: var(--border-radius-base);
-  transition: background-color var(--default-hover-animation-duration) var(--default-timing-function);
+  transition: background-color var(--default-hover-animation-duration)
+    var(--default-timing-function);
 }
 
 .item:hover,

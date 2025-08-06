@@ -726,4 +726,5 @@ function getPrimaryKeyInfo(table: Table, models: readonly DMMF.Model[]) {
   return primaryKeyField
 }
 
+// TODO: Add enum parsing support for Prisma schemas
 export const processor: Processor = (str) => parsePrismaSchema(str)

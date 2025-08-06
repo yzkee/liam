@@ -419,4 +419,5 @@ function extractDefaultValue(
   return value
 }
 
+// TODO: Add enum parsing support for tbls schemas
 export const processor: Processor = (str) => parseTblsSchema(str)

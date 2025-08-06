@@ -10,6 +10,9 @@ export const postgresqlSchemaDeparser: SchemaDeparser = (schema: Schema) => {
   const ddlStatements: string[] = []
   const errors: { message: string }[] = []
 
+  // TODO: Add enum deparser support
+  // Generate CREATE TYPE enum statements before tables
+
   // 1. Generate CREATE TABLE statements for each table
   for (const table of Object.values(schema.tables) satisfies Table[]) {
     const createTableDDL = generateCreateTableStatement(table)

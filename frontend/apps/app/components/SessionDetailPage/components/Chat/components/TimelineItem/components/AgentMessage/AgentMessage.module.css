@@ -39,6 +39,7 @@
   gap: var(--spacing-1);
   width: 100%;
   max-width: 100%;
+  position: relative;
 }
 
 .messageText {
@@ -596,4 +597,18 @@
 
 .progressIcon {
   color: var(--global-foreground);
+}
+
+.copyButtonWrapper {
+  position: absolute;
+  top: var(--spacing-1);
+  right: var(--spacing-1);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.messageContent:hover .copyButtonWrapper {
+  opacity: 1;
+  pointer-events: auto;
 }

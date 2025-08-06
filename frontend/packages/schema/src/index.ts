@@ -28,6 +28,12 @@ export {
   constraintTargetColumnNameDiffItemSchema,
   constraintTargetTableNameDiffItemSchema,
   constraintUpdateConstraintDiffItemSchema,
+  getColumnChangeStatus,
+  getConstraintChangeStatus,
+  getIndexChangeStatus,
+  getTableChangeStatus,
+  getTableConstraintsChangeStatus,
+  getTableIndexesChangeStatus,
   indexColumnsDiffItemSchema,
   indexDiffItemSchema,
   indexNameDiffItemSchema,
@@ -40,8 +46,10 @@ export {
   tableNameDiffItemSchema,
   tableRelatedDiffItemSchema,
 } from './diff/index.js'
+export { PATH_PATTERNS } from './operation/constants.js'
 export {
   applyPatchOperations,
+  getOperations,
   type Operation,
   operationsSchema,
 } from './operation/index.js'

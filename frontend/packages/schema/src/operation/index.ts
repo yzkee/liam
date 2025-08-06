@@ -5,7 +5,12 @@ export {
 } from './schema/index.js'
 export {
   applyPatchOperations,
+  getColumnCommentChangeStatus,
+  getColumnDefaultChangeStatus,
+  getColumnNotNullChangeStatus,
   getColumnRelatedChangeStatus,
+  getColumnTypeChangeStatus,
+  getConstraintColumnNamesChangeStatus,
   getConstraintRelatedChangeStatus,
   getIndexRelatedChangeStatus,
   getOperations,

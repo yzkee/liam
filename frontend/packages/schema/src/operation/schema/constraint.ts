@@ -91,9 +91,34 @@ export const isReplaceConstraintUpdateOperation = (
   return v.safeParse(replaceConstraintUpdateOperationSchema, operation).success
 }
 
+const constraintColumnNamesArrayPathSchema = v.pipe(
+  v.string(),
+  v.regex(PATH_PATTERNS.CONSTRAINT_COLUMN_NAMES_ARRAY),
+)
+
+const replaceConstraintColumnNamesArrayOperationSchema = v.pipe(
+  v.object({
+    op: v.literal('replace'),
+    path: constraintColumnNamesArrayPathSchema,
+    value: v.string(),
+  }),
+  v.description('Replace constraint column name in array'),
+)
+
+export type ReplaceConstraintColumnNamesArrayOperation = v.InferOutput<
+  typeof replaceConstraintColumnNamesArrayOperationSchema
+>
+
+export const isReplaceConstraintColumnNamesArrayOperation = (
+  operation: Operation,
+): operation is ReplaceConstraintColumnNamesArrayOperation => {
+  return v.safeParse(replaceConstraintColumnNamesArrayOperationSchema, operation).success
+}
+
 export const constraintOperations = [
   addConstraintOperationSchema,
   removeConstraintOperationSchema,
   replaceConstraintDeleteOperationSchema,
   replaceConstraintUpdateOperationSchema,
+  replaceConstraintColumnNamesArrayOperationSchema,
 ]

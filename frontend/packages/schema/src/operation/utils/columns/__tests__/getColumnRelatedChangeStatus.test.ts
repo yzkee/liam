@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { Operation } from '../../schema/index.js'
+import type { Operation } from '../../../schema/index.js'
 import { getColumnRelatedChangeStatus } from '../getColumnRelatedChangeStatus.js'
 
 // Mock column data for tests

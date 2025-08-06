@@ -6,7 +6,7 @@ on:
       - 'frontend/internal-packages/agent/**'
       - 'frontend/internal-packages/artifact/**'
       - 'frontend/internal-packages/db/**'
-      - 'frontend/packages/db-structure/**'
+      - 'frontend/packages/schema/**'
       - 'frontend/packages/pglite-server/**'
       - '.github/workflows/agent-deep-modeling.yml'
 
@@ -43,8 +43,8 @@ jobs:
           ./scripts/extract-supabase-anon-key.sh
           ./scripts/extract-supabase-service-key.sh
 
-      - name: Build db-structure package
-        run: pnpm build
+      - name: Build schema package
+        run: pnpm build --filter @liam-hq/schema
 
       - name: Execute deep modeling process
         id: deep-modeling

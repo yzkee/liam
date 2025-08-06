@@ -1,6 +1,6 @@
 import { resolve } from 'node:path'
 import { createClient, type SupabaseClientType } from '@liam-hq/db'
-import type { Schema } from '@liam-hq/db-structure'
+import type { Schema } from '@liam-hq/schema'
 import { config } from 'dotenv'
 import type { Result } from 'neverthrow'
 import { err, errAsync, ok, okAsync, ResultAsync } from 'neverthrow'

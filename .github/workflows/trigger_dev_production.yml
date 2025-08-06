@@ -6,7 +6,7 @@ on:
     paths:
       - .github/workflows/trigger_dev_production.yml
       - frontend/internal-packages/jobs/**
-      - frontend/packages/db-structure/**
+      - frontend/packages/schema/**
       - frontend/packages/github/**
       - frontend/internal-packages/db/**
       - frontend/internal-packages/agent/**

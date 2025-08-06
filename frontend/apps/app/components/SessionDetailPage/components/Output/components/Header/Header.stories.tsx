@@ -1,4 +1,4 @@
-import { aSchema } from '@liam-hq/db-structure'
+import { aSchema } from '@liam-hq/schema'
 import { TabsRoot } from '@liam-hq/ui'
 import type { Meta, StoryObj } from '@storybook/react'
 import { type ComponentProps, type FC, useCallback, useState } from 'react'

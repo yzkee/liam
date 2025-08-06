@@ -2,13 +2,13 @@ import type { Artifact } from '@liam-hq/artifact'
 import { artifactSchema } from '@liam-hq/artifact'
 import type { SupabaseClientType } from '@liam-hq/db'
 import type { Json } from '@liam-hq/db/supabase/database.types'
-import type { Schema } from '@liam-hq/db-structure'
+import type { SqlResult } from '@liam-hq/pglite-server/src/types'
+import type { Schema } from '@liam-hq/schema'
 import {
   applyPatchOperations,
   operationsSchema,
   schemaSchema,
-} from '@liam-hq/db-structure'
-import type { SqlResult } from '@liam-hq/pglite-server/src/types'
+} from '@liam-hq/schema'
 import { compare } from 'fast-json-patch'
 import { errAsync, okAsync, ResultAsync } from 'neverthrow'
 import * as v from 'valibot'

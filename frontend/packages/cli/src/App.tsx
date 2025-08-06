@@ -1,4 +1,3 @@
-import { type Schema, schemaSchema } from '@liam-hq/db-structure'
 import {
   ERDRenderer,
   ErdRendererProvider,
@@ -7,6 +6,7 @@ import {
   VersionProvider,
   versionSchema,
 } from '@liam-hq/erd-core'
+import { type Schema, schemaSchema } from '@liam-hq/schema'
 
 import { useEffect, useState } from 'react'
 import * as v from 'valibot'

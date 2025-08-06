@@ -2,7 +2,7 @@
 
 import { HumanMessage } from '@langchain/core/messages'
 import type { SupabaseClientType } from '@liam-hq/db'
-import type { Schema } from '@liam-hq/db-structure'
+import type { Schema } from '@liam-hq/schema'
 import type { Result } from 'neverthrow'
 import { err, ok, okAsync } from 'neverthrow'
 import type { WorkflowState } from '../src/chat/workflow/types'

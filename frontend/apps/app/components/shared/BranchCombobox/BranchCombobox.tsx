@@ -39,6 +39,7 @@ export const BranchCombobox: FC<Props> = ({
     width: 0,
   })
   const triggerRef = useRef<HTMLButtonElement>(null)
+  const listRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const branch = branches.find((b) => b.sha === selectedBranchSha) || null
@@ -56,6 +57,12 @@ export const BranchCombobox: FC<Props> = ({
   const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
     if (event.key === 'Escape') {
       setOpen(false)
+    }
+  }, [])
+
+  const handleInputChange = useCallback(() => {
+    if (listRef.current) {
+      listRef.current.scrollTo({ top: 0 })
     }
   }, [])
 
@@ -129,9 +136,10 @@ export const BranchCombobox: FC<Props> = ({
                 placeholder={placeholder}
                 className={styles.searchInput}
                 autoFocus
+                onValueChange={handleInputChange}
               />
             </div>
-            <Command.List className={styles.list}>
+            <Command.List ref={listRef} className={styles.list}>
               <Command.Empty className={styles.empty}>
                 No branches found.
               </Command.Empty>

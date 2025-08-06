@@ -15,8 +15,8 @@ type Props = {
   errorObjects: ComponentProps<typeof ERDRenderer>['errorObjects']
   defaultSidebarOpen: boolean
   defaultPanelSizes?: number[]
-  projectId?: string
-  branchOrCommit?: string
+  projectId: string
+  branchOrCommit: string
 }
 
 export const ERDEditor: FC<Props> = ({
@@ -36,13 +36,12 @@ export const ERDEditor: FC<Props> = ({
   }
   const version = parse(versionSchema, versionData)
 
-  const customActions =
-    projectId && branchOrCommit ? (
-      <CreateDesignSessionButton
-        projectId={projectId}
-        branchOrCommit={branchOrCommit}
-      />
-    ) : null
+  const customActions = (
+    <CreateDesignSessionButton
+      projectId={projectId}
+      branchOrCommit={branchOrCommit}
+    />
+  )
 
   return (
     <div className={styles.wrapper}>

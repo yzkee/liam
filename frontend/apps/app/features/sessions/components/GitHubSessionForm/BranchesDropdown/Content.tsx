@@ -43,7 +43,7 @@ export const Content: FC<Props> = ({
           />
           {branches.map((branch) => (
             <BranchRadioItem
-              key={branch.sha}
+              key={`${branch.sha}-${branch.name}`}
               value={branch.sha}
               label={branch.name}
               showIcon={true}

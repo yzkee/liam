@@ -14,7 +14,6 @@ import { type DesignAgentPromptVariables, designAgentPrompt } from './prompts'
 
 const model = new ChatOpenAI({
   model: 'o4-mini',
-  reasoning: { effort: 'high', summary: 'detailed' },
   useResponsesApi: true,
 }).bindTools([schemaDesignTool])
 

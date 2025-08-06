@@ -9,5 +9,7 @@ export {
   getConstraintRelatedChangeStatus,
   getIndexRelatedChangeStatus,
   getOperations,
+  getTableChangeStatus,
+  getTableCommentChangeStatus,
   getTableRelatedChangeStatus,
 } from './utils/index.js'

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { Operation } from '../../schema/index.js'
+import type { Operation } from '../../../index.js'
 import { getTableRelatedChangeStatus } from '../getTableRelatedChangeStatus.js'
 
 // Mock table data for tests

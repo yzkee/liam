@@ -56,8 +56,11 @@ export const setupWorkflowState = (
     userId,
   } = params
 
-  const { repositories } = config.configurable
+  const { repositories, thread_id } = config.configurable
 
+  // TODO(MH4GF): Remove this history-to-messages conversion once checkpointer is implemented
+  // When thread_id checkpoint functionality is working, message history will be
+  // automatically restored from the checkpoint storage, making this manual conversion unnecessary
   // Convert history to BaseMessage objects (synchronous)
   const messages = history.map(([role, content]) => {
     return role === 'assistant'
@@ -126,6 +129,7 @@ export const setupWorkflowState = (
         runCollector,
         configurable: {
           repositories,
+          thread_id,
           buildingSchemaId,
           latestVersionNumber,
         },

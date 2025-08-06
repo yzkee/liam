@@ -1,3 +1,5 @@
+import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
+import { MemorySaver } from '@langchain/langgraph-checkpoint'
 import type { Artifact } from '@liam-hq/artifact'
 import type { Tables } from '@liam-hq/db/supabase/database.types'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
@@ -57,11 +59,14 @@ type InMemoryRepositoryOptions = {
 
 export class InMemoryRepository implements SchemaRepository {
   private state: InMemoryRepositoryState
+  public checkpointer: BaseCheckpointSaver
   // Used by generateId method
   // biome-ignore lint/correctness/noUnusedPrivateClassMembers: used by generateId method
   private idCounter = 1
 
   constructor(options: InMemoryRepositoryOptions = {}) {
+    // Initialize in-memory checkpointer
+    this.checkpointer = new MemorySaver()
     this.state = {
       schemas: new Map(),
       designSessions: new Map(),

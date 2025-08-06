@@ -14,7 +14,10 @@ export const designProcessWorkflowTask = task({
       throw supabaseClientResult.error
     }
 
-    const repositories = createSupabaseRepositories(supabaseClientResult.value)
+    const repositories = createSupabaseRepositories(
+      supabaseClientResult.value,
+      payload.organizationId,
+    )
 
     const schemaResult = await repositories.schema
       .getSchema(payload.designSessionId)

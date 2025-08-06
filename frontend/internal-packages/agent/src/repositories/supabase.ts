@@ -1,3 +1,4 @@
+import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
 import type { Artifact } from '@liam-hq/artifact'
 import { artifactSchema } from '@liam-hq/artifact'
 import type { SupabaseClientType } from '@liam-hq/db'
@@ -12,6 +13,7 @@ import {
 import { compare } from 'fast-json-patch'
 import { errAsync, okAsync, ResultAsync } from 'neverthrow'
 import * as v from 'valibot'
+import { SupabaseCheckpointSaver } from '../checkpoint/SupabaseCheckpointSaver'
 import { ensurePathStructure } from '../utils/pathPreparation'
 import type {
   ArtifactResult,
@@ -38,13 +40,18 @@ const artifactToJson = (artifact: Artifact): Json => {
 }
 
 /**
- * Supabase implementation of SchemaRepository
+ * Supabase implementation of SchemaRepository with checkpoint functionality
  */
 export class SupabaseSchemaRepository implements SchemaRepository {
   private client: SupabaseClientType
+  public checkpointer: BaseCheckpointSaver
 
-  constructor(client: SupabaseClientType) {
+  constructor(client: SupabaseClientType, organizationId: string) {
     this.client = client
+    this.checkpointer = new SupabaseCheckpointSaver({
+      client: this.client,
+      options: { organizationId },
+    })
   }
 
   async getDesignSession(

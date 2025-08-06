@@ -74,7 +74,7 @@ describe('schemaDesignTool', () => {
     const result = await schemaDesignTool.invoke(input, config)
 
     expect(result).toBe(
-      'Schema successfully updated. The operations have been applied to the database schema, DDL validation passed, and new version created.',
+      'Schema successfully updated. The operations have been applied to the database schema, DDL validation successful (1/1 statements executed successfully), and new version created.',
     )
 
     // Verify the schema was actually updated in the repository by schemaDesignTool
@@ -185,7 +185,7 @@ describe('schemaDesignTool', () => {
     // With actual PGlite, empty operations on empty schema should succeed
     const result = await schemaDesignTool.invoke(input, config)
     expect(result).toBe(
-      'Schema successfully updated. The operations have been applied to the database schema, DDL validation passed, and new version created.',
+      'Schema successfully updated. The operations have been applied to the database schema, DDL validation successful (0/0 statements executed successfully), and new version created.',
     )
   })
 

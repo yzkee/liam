@@ -19,17 +19,17 @@ type Props = {
 }
 
 export const IndexesItem: FC<Props> = ({ tableId, index }) => {
-  const { diffItems } = useSchemaOrThrow()
+  const { operations } = useSchemaOrThrow()
   const { showDiff } = useUserEditingOrThrow()
 
   const changeStatus = useMemo(() => {
     if (!showDiff) return undefined
     return getChangeStatus({
       tableId,
-      diffItems: diffItems ?? [],
+      operations: operations ?? [],
       indexId: index.name,
     })
-  }, [showDiff, tableId, diffItems, index.name])
+  }, [showDiff, tableId, operations, index.name])
 
   const diffStyle = useDiffStyle(showDiff, changeStatus)
 

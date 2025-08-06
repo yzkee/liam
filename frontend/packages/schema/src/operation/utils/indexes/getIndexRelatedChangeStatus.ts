@@ -1,6 +1,6 @@
-import { PATH_PATTERNS } from '../constants.js'
-import type { Operation } from '../schema/index.js'
-import { determineChangeStatus } from './determineChangeStatus.js'
+import { PATH_PATTERNS } from '../../constants.js'
+import type { Operation } from '../../schema/index.js'
+import { determineChangeStatus } from '../determineChangeStatus.js'
 
 const INDEX_RELATED_PATH_PATTERN = [
   PATH_PATTERNS.INDEX_BASE,

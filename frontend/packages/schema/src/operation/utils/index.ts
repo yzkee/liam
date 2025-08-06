@@ -8,8 +8,14 @@ export {
 } from './columns/index.js'
 export { getConstraintColumnNamesChangeStatus } from './constraints/index.js'
 export { getConstraintRelatedChangeStatus } from './getConstraintRelatedChangeStatus.js'
-export { getIndexRelatedChangeStatus } from './getIndexRelatedChangeStatus.js'
 export { getOperations } from './getOperations.js'
+export {
+  getIndexColumnsChangeStatus,
+  getIndexNameChangeStatus,
+  getIndexRelatedChangeStatus,
+  getIndexTypeChangeStatus,
+  getIndexUniqueChangeStatus,
+} from './indexes/index.js'
 export {
   getTableChangeStatus,
   getTableCommentChangeStatus,

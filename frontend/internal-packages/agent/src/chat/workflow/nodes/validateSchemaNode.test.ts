@@ -46,7 +46,7 @@ describe('validateSchemaNode', () => {
 
     const repositories = createRepositories()
     const result = await validateSchemaNode(state, {
-      configurable: { repositories },
+      configurable: { repositories, thread_id: 'test-thread' },
     })
 
     expect(executeQuery).not.toHaveBeenCalled()
@@ -101,7 +101,7 @@ describe('validateSchemaNode', () => {
 
     const repositories = createRepositories()
     const result = await validateSchemaNode(state, {
-      configurable: { repositories },
+      configurable: { repositories, thread_id: 'test-thread' },
     })
 
     expect(executeQuery).toHaveBeenCalledWith(
@@ -134,7 +134,7 @@ describe('validateSchemaNode', () => {
 
     const repositories = createRepositories()
     const result = await validateSchemaNode(state, {
-      configurable: { repositories },
+      configurable: { repositories, thread_id: 'test-thread' },
     })
 
     expect(executeQuery).toHaveBeenCalledWith(
@@ -207,7 +207,7 @@ describe('validateSchemaNode', () => {
 
     const repositories = createRepositories()
     const result = await validateSchemaNode(state, {
-      configurable: { repositories },
+      configurable: { repositories, thread_id: 'test-thread' },
     })
 
     expect(executeQuery).toHaveBeenCalledTimes(2)
@@ -294,7 +294,7 @@ describe('validateSchemaNode', () => {
 
     const repositories = createRepositories()
     const result = await validateSchemaNode(state, {
-      configurable: { repositories },
+      configurable: { repositories, thread_id: 'test-thread' },
     })
 
     expect(result.dmlExecutionSuccessful).toBeUndefined()
@@ -310,7 +310,7 @@ describe('validateSchemaNode', () => {
 
     const repositories = createRepositories()
     const result = await validateSchemaNode(state, {
-      configurable: { repositories },
+      configurable: { repositories, thread_id: 'test-thread' },
     })
 
     expect(executeQuery).not.toHaveBeenCalled()

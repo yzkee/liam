@@ -66,7 +66,10 @@ describe('prepareDmlNode', () => {
     })
 
     const result = await prepareDmlNode(state, {
-      configurable: { repositories: state.repositories },
+      configurable: {
+        repositories: state.repositories,
+        thread_id: 'test-thread',
+      },
     })
 
     expect(result.dmlStatements).toBeUndefined()
@@ -79,7 +82,10 @@ describe('prepareDmlNode', () => {
     })
 
     const result = await prepareDmlNode(state, {
-      configurable: { repositories: state.repositories },
+      configurable: {
+        repositories: state.repositories,
+        thread_id: 'test-thread',
+      },
     })
 
     expect(result.dmlStatements).toBeUndefined()
@@ -93,7 +99,10 @@ describe('prepareDmlNode', () => {
     })
 
     const result = await prepareDmlNode(state, {
-      configurable: { repositories: state.repositories },
+      configurable: {
+        repositories: state.repositories,
+        thread_id: 'test-thread',
+      },
     })
 
     expect(result.dmlStatements).toBeUndefined()
@@ -127,7 +136,10 @@ describe('prepareDmlNode', () => {
     })
 
     const result = await prepareDmlNode(state, {
-      configurable: { repositories: state.repositories },
+      configurable: {
+        repositories: state.repositories,
+        thread_id: 'test-thread',
+      },
     })
 
     expect(result.dmlStatements).toBeUndefined()
@@ -179,7 +191,10 @@ describe('prepareDmlNode', () => {
     })
 
     await prepareDmlNode(state, {
-      configurable: { repositories: state.repositories },
+      configurable: {
+        repositories: state.repositories,
+        thread_id: 'test-thread',
+      },
     })
 
     // Verify convertSchemaToText produces correct output

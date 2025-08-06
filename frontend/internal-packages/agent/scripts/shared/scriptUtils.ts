@@ -139,7 +139,8 @@ const createDatabaseConnection = (): Result<
     )
   }
   const supabaseClient = createClient(supabaseUrl, supabaseKey)
-  const repositories = createSupabaseRepositories(supabaseClient)
+  // TODO(MH4GF): Create repositories with proper organizationId after organization is fetched
+  const repositories = createSupabaseRepositories(supabaseClient, 'temp-org-id')
 
   return ok({ supabaseClient, repositories })
 }
@@ -436,7 +437,10 @@ export const createWorkflowState = (
 
   // Use shared setupWorkflowState function
   return setupWorkflowState(workflowParams, {
-    configurable: { repositories },
+    configurable: {
+      repositories,
+      thread_id: designSession.id,
+    },
   }).map((workflowSetupResult) => ({
     workflowState: workflowSetupResult.workflowState,
     options: {

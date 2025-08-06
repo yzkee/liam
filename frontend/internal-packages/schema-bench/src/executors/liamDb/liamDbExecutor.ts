@@ -41,6 +41,7 @@ export async function execute(
   const config = {
     configurable: {
       repositories,
+      thread_id: 'demo-design-session',
     },
   }
 

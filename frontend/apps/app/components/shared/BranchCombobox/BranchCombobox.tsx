@@ -144,7 +144,7 @@ export const BranchCombobox: FC<Props> = ({
                 No branches found.
               </Command.Empty>
               <Command.Group>
-                {branches.map((branch, index) => (
+                {branches.map((branch) => (
                   <Command.Item
                     key={`${branch.sha}-${branch.name}`}
                     value={`${branch.name} ${branch.sha}`}

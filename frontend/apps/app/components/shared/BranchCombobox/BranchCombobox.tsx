@@ -3,7 +3,7 @@
 import { ChevronDown, Code, GitBranch, Search } from '@liam-hq/ui'
 import clsx from 'clsx'
 import { Command } from 'cmdk'
-import { type FC, useCallback, useEffect, useState } from 'react'
+import { type FC, useCallback, useEffect, useRef, useState } from 'react'
 import styles from './BranchCombobox.module.css'
 
 export type Branch = {
@@ -33,6 +33,12 @@ export const BranchCombobox: FC<Props> = ({
 }) => {
   const [open, setOpen] = useState(false)
   const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null)
+  const [dropdownPosition, setDropdownPosition] = useState({
+    top: 0,
+    left: 0,
+    width: 0,
+  })
+  const triggerRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     const branch = branches.find((b) => b.sha === selectedBranchSha) || null
@@ -55,6 +61,14 @@ export const BranchCombobox: FC<Props> = ({
 
   const handleTriggerClick = useCallback(() => {
     if (!disabled && !isLoading) {
+      if (!open && triggerRef.current) {
+        const rect = triggerRef.current.getBoundingClientRect()
+        setDropdownPosition({
+          top: rect.bottom + window.scrollY,
+          left: rect.left + window.scrollX,
+          width: rect.width,
+        })
+      }
       setOpen(!open)
     }
   }, [disabled, isLoading, open])
@@ -78,6 +92,7 @@ export const BranchCombobox: FC<Props> = ({
     <div className={clsx(styles.container, className)} data-combobox>
       <Command onKeyDown={handleKeyDown}>
         <button
+          ref={triggerRef}
           type="button"
           className={clsx(styles.trigger, disabled && styles.disabled)}
           onClick={handleTriggerClick}
@@ -100,7 +115,14 @@ export const BranchCombobox: FC<Props> = ({
         </button>
 
         {open && (
-          <div className={styles.dropdown}>
+          <div
+            className={styles.dropdown}
+            style={{
+              top: `${dropdownPosition.top}px`,
+              left: `${dropdownPosition.left}px`,
+              width: `${dropdownPosition.width}px`,
+            }}
+          >
             <div className={styles.searchContainer}>
               <Search className={styles.searchIcon} />
               <Command.Input
@@ -114,9 +136,9 @@ export const BranchCombobox: FC<Props> = ({
                 No branches found.
               </Command.Empty>
               <Command.Group>
-                {branches.map((branch) => (
+                {branches.map((branch, index) => (
                   <Command.Item
-                    key={branch.sha}
+                    key={`${branch.name}-${index}`}
                     value={`${branch.name} ${branch.sha}`}
                     onSelect={() => handleSelect(branch.sha)}
                     className={clsx(

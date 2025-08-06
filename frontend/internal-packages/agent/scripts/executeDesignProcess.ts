@@ -68,6 +68,7 @@ const createWorkflowState = (
   // Empty schema for testing - let AI design from scratch
   const sampleSchema: Schema = {
     tables: {},
+    enums: {},
   }
 
   // Use custom user input if provided, otherwise use default

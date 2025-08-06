@@ -93,4 +93,5 @@ const tables = (override?: Tables): Tables => {
 
 export const aSchema = (override?: Partial<Schema>): Schema => ({
   tables: tables(override?.tables),
+  enums: override?.enums ?? {},
 })

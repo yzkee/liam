@@ -13,6 +13,7 @@ describe('buildTableNameDiffItem', () => {
   const mockTableId = 'table1'
 
   const baseSchema: Schema = {
+    enums: {},
     tables: {
       table1: {
         name: 'Table 1',

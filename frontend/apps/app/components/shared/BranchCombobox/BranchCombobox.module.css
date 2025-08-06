@@ -13,6 +13,7 @@
   background: var(--background);
   cursor: pointer;
   min-height: 36px;
+  max-width: 100%;
   transition: border-color 0.2s ease;
 }
 
@@ -30,6 +31,7 @@
   align-items: center;
   gap: 8px;
   flex: 1;
+  min-width: 0;
 }
 
 .branchIcon {
@@ -47,6 +49,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .chevronIcon {

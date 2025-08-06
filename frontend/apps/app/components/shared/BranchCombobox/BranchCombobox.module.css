@@ -40,10 +40,13 @@
 }
 
 .branchName {
-  color: var(--text);
-  font-size: 14px;
+  color: var(--global-foreground);
+  font-size: var(--font-size-2);
   flex: 1;
   text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .chevronIcon {
@@ -60,13 +63,11 @@
 
 .dropdown {
   position: fixed;
-  z-index: 9999;
-  background: var(--background);
-  border: 1px solid var(--overlay-20);
-  border-radius: 6px;
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  z-index: var(--z-index-dropdown-menu);
+  background: var(--global-background);
+  border: 1px solid var(--dropdown-border);
+  border-radius: var(--border-radius-base);
+  box-shadow: 0 4px 20px 0 rgb(0 0 0 / 40%);
   margin-top: 4px;
   min-width: 200px;
 }
@@ -91,8 +92,8 @@
   border: none;
   outline: none;
   background: transparent;
-  color: var(--text);
-  font-size: 14px;
+  color: var(--global-foreground);
+  font-size: var(--font-size-2);
 }
 
 .searchInput::placeholder {
@@ -107,23 +108,27 @@
 .item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2);
   cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.2s ease;
+  font-size: var(--font-size-2);
+  height: 32px;
+  background: var(--global-background);
+  border-radius: var(--border-radius-base);
+  transition: background-color var(--default-hover-animation-duration) var(--default-timing-function);
 }
 
-.item:hover {
-  background: var(--overlay-5);
+.item:hover,
+.item:focus {
+  background-color: var(--dropdown-background-hover);
 }
 
 .item[data-selected='true'] {
-  background: var(--overlay-10);
+  background-color: var(--dropdown-background-active);
 }
 
 .item.selected {
-  background: var(--overlay-10);
+  background-color: var(--dropdown-background-active);
 }
 
 .itemIcon {
@@ -135,12 +140,15 @@
 
 .itemLabel {
   flex: 1;
-  color: var(--text);
+  color: var(--global-foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .empty {
-  padding: 16px 12px;
+  padding: var(--spacing-4) var(--spacing-3);
   text-align: center;
   color: var(--overlay-60);
-  font-size: 14px;
+  font-size: var(--font-size-2);
 }

@@ -15,6 +15,9 @@ const chatRequestSchema = v.object({
   isDeepModelingEnabled: v.optional(v.boolean(), true),
 })
 
+// https://vercel.com/docs/functions/configuring-functions/duration#maximum-duration-for-different-runtimes
+export const maxDuration = 300
+
 export async function POST(request: Request) {
   const requestBody = await request.json()
   const validationResult = v.safeParse(chatRequestSchema, requestBody)

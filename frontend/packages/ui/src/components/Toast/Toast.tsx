@@ -65,12 +65,12 @@ export const ToastProvider = ({ children }: PropsWithChildren) => {
   const { toastItem, createToastItem, closeToastItem } = useToastDisplay()
 
   return (
-    <RadixToast.Provider>
-      <ToastContext.Provider value={createToastItem}>
-        {children}
+    <ToastContext.Provider value={createToastItem}>
+      {children}
+      <RadixToast.Provider>
         {toastItem && <Toast {...toastItem} onOpenChange={closeToastItem} />}
         <RadixToast.Viewport className={styles.viewport} />
-      </ToastContext.Provider>
-    </RadixToast.Provider>
+      </RadixToast.Provider>
+    </ToastContext.Provider>
   )
 }

@@ -27,6 +27,17 @@ type SessionCreationParams = {
   gitSha?: string | null
 }
 
+const generateSessionName = (initialMessage: string): string => {
+  const cleanMessage = initialMessage.trim().replace(/\s+/g, ' ')
+
+  if (!cleanMessage || cleanMessage.length < 3) {
+    return `Design Session - ${new Date().toISOString()}`
+  }
+
+  const truncated = cleanMessage.slice(0, 20)
+  return truncated.length < cleanMessage.length ? `${truncated}...` : truncated
+}
+
 type SchemaSource = {
   schema: Schema
   schemaFilePath: string | null
@@ -48,7 +59,7 @@ const createDesignSession = async (
   const { data: designSession, error: insertError } = await supabase
     .from('design_sessions')
     .insert({
-      name: `Design Session - ${new Date().toISOString()}`,
+      name: generateSessionName(params.initialMessage),
       project_id: params.projectId,
       organization_id: organizationId,
       created_by_user_id: currentUserId,

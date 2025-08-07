@@ -25,6 +25,7 @@ describe('evaluateSchema', () => {
   let tempDir: string
 
   const mockSchema: Schema = {
+    enums: {},
     tables: {
       users: {
         name: 'users',

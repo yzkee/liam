@@ -10,6 +10,7 @@ import type {
 } from '../chat/workflow/types'
 import type { AgentWorkflowParams, AgentWorkflowResult } from '../types'
 import { WorkflowTerminationError } from './errorHandling'
+import { createEnhancedTraceData } from './traceEnhancer'
 
 /**
  * Shared workflow setup configuration
@@ -28,6 +29,10 @@ export type WorkflowSetupResult = {
   configurable: WorkflowConfigurable & {
     buildingSchemaId: string
     latestVersionNumber: number
+  }
+  traceEnhancement: {
+    tags: string[]
+    metadata: Record<string, unknown>
   }
 }
 
@@ -50,8 +55,11 @@ export const setupWorkflowState = (
     userId,
   } = params
 
-  const { repositories } = config.configurable
+  const { repositories, thread_id } = config.configurable
 
+  // TODO(MH4GF): Remove this history-to-messages conversion once checkpointer is implemented
+  // When thread_id checkpoint functionality is working, message history will be
+  // automatically restored from the checkpoint storage, making this manual conversion unnecessary
   // Convert history to BaseMessage objects (synchronous)
   const messages = history.map(([role, content]) => {
     return role === 'assistant'
@@ -77,8 +85,25 @@ export const setupWorkflowState = (
     return ok(createWorkflowRun)
   })
 
-  return createWorkflowRun.andThen((_workflowRunResult) => {
+  return createWorkflowRun.andThen(() => {
     const runCollector = new RunCollectorCallbackHandler()
+
+    // Enhanced tracing with environment and developer context
+    const traceEnhancement = createEnhancedTraceData(
+      workflowRunId,
+      'agent-workflow',
+      [`organization:${organizationId}`, `session:${designSessionId}`],
+      {
+        workflow: {
+          building_schema_id: buildingSchemaId,
+          design_session_id: designSessionId,
+          user_id: userId,
+          organization_id: organizationId,
+          version_number: latestVersionNumber,
+        },
+      },
+    )
+
     return ok({
       workflowState: {
         userInput: userInput,
@@ -95,9 +120,11 @@ export const setupWorkflowState = (
       runCollector,
       configurable: {
         repositories,
+        thread_id,
         buildingSchemaId,
         latestVersionNumber,
       },
+      traceEnhancement,
     })
   })
 }
@@ -117,8 +144,13 @@ export const executeWorkflowWithTracking = <
   setupResult: WorkflowSetupResult,
   recursionLimit: number = DEFAULT_RECURSION_LIMIT,
 ): ResultAsync<AgentWorkflowResult, Error> => {
-  const { workflowState, workflowRunId, runCollector, configurable } =
-    setupResult
+  const {
+    workflowState,
+    workflowRunId,
+    runCollector,
+    configurable,
+    traceEnhancement,
+  } = setupResult
   const { repositories } = configurable
 
   // Type guard for safe type checking
@@ -126,13 +158,15 @@ export const executeWorkflowWithTracking = <
     return typeof obj === 'object' && obj !== null
   }
 
-  // 1. Execute the workflow
+  // 1. Execute the workflow with enhanced tracing
   const executeWorkflow = ResultAsync.fromPromise(
     compiled.invoke(workflowState, {
       recursionLimit,
       configurable,
       runId: workflowRunId,
       callbacks: [runCollector],
+      tags: traceEnhancement.tags,
+      metadata: traceEnhancement.metadata,
     }),
     (error) => {
       // WorkflowTerminationError means the workflow was intentionally terminated

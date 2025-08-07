@@ -126,11 +126,12 @@ const CHUNK_SIZE = 500
 /**
  * Processes SQL statements and constructs a schema.
  */
+// TODO: Add enum parsing support for PostgreSQL schemas
 export const processor: Processor = async (
   sql: string,
   chunkSize = CHUNK_SIZE,
 ) => {
-  const schema: Schema = { tables: {} }
+  const schema: Schema = { tables: {}, enums: {} }
 
   const parseErrors: ProcessError[] = []
 

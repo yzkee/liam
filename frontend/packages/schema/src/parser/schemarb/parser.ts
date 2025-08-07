@@ -706,6 +706,7 @@ class SchemaFinder extends Visitor {
         acc[table.name] = table
         return acc
       }, {}),
+      enums: {},
     }
     return schema
   }
@@ -833,4 +834,5 @@ async function parseRubySchema(schemaString: string): Promise<ProcessResult> {
   }
 }
 
+// TODO: Add enum parsing support for schemarb schemas
 export const processor: Processor = (str) => parseRubySchema(str)

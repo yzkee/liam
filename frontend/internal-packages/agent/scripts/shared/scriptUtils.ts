@@ -139,7 +139,8 @@ const createDatabaseConnection = (): Result<
     )
   }
   const supabaseClient = createClient(supabaseUrl, supabaseKey)
-  const repositories = createSupabaseRepositories(supabaseClient)
+  // TODO(MH4GF): Create repositories with proper organizationId after organization is fetched
+  const repositories = createSupabaseRepositories(supabaseClient, 'temp-org-id')
 
   return ok({ supabaseClient, repositories })
 }
@@ -234,7 +235,7 @@ export const createBuildingSchema = (
   },
 ) => {
   const { supabaseClient, organization, designSession } = sessionData
-  const initialSchema: Schema = { tables: {} }
+  const initialSchema: Schema = { tables: {}, enums: {} }
 
   return ResultAsync.fromPromise(
     supabaseClient
@@ -417,6 +418,7 @@ export const createWorkflowState = (
   // Empty schema for testing - let AI design from scratch
   const sampleSchema: Schema = {
     tables: {},
+    enums: {},
   }
 
   const userInput = getBusinessManagementSystemUserInput()
@@ -436,7 +438,10 @@ export const createWorkflowState = (
 
   // Use shared setupWorkflowState function
   return setupWorkflowState(workflowParams, {
-    configurable: { repositories },
+    configurable: {
+      repositories,
+      thread_id: designSession.id,
+    },
   }).map((workflowSetupResult) => ({
     workflowState: workflowSetupResult.workflowState,
     options: {

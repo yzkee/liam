@@ -146,12 +146,12 @@ const parseDrizzleSchemaString = (
     )
 
     return Promise.resolve({
-      value: { tables },
+      value: { tables, enums: {} },
       errors,
     })
   } catch (error) {
     return Promise.resolve({
-      value: { tables: {} },
+      value: { tables: {}, enums: {} },
       errors: [
         new Error(
           `Error parsing Drizzle schema: ${error instanceof Error ? error.message : String(error)}`,

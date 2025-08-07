@@ -1,13 +1,11 @@
 import { fromPromise } from 'neverthrow'
 import { useCallback, useState } from 'react'
-import type { ToastPosition } from '../components/Toast/types'
 import { useToast } from '../components/Toast/useToast'
 
 type UseCopyOptions = {
   toast?: {
     success: string
     error: string
-    position?: ToastPosition
   }
   resetDelay?: number
 }
@@ -20,7 +18,7 @@ type UseCopyReturn = {
 export const useCopy = (options: UseCopyOptions = {}): UseCopyReturn => {
   const { toast: toastMessages, resetDelay = 2000 } = options
   const [isCopied, setIsCopied] = useState(false)
-  const toast = useToast(toastMessages?.position)
+  const toast = useToast()
 
   const copy = useCallback(
     async (text: string) => {

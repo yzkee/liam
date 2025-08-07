@@ -2,13 +2,7 @@ import { useCopy } from '@liam-hq/ui/hooks'
 import { useEffect } from 'react'
 
 export const useSubscribeCopyLinkCommand = () => {
-  const { copy } = useCopy({
-    toast: {
-      success: 'Link copied!',
-      error: 'URL copy failed',
-      position: 'command-palette',
-    },
-  })
+  const { copy } = useCopy()
 
   // Copy page link when ⌘C is pressed
   useEffect(() => {
@@ -21,6 +15,8 @@ export const useSubscribeCopyLinkCommand = () => {
         event.preventDefault()
         const url = window.location.href
         copy(url)
+
+        // TODO: show something to tell copy is done
       }
     }
 

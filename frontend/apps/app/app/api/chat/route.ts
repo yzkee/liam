@@ -59,7 +59,7 @@ export async function POST(request: Request) {
 
   const organizationId = designSession.organization_id
 
-  const repositories = createSupabaseRepositories(supabase)
+  const repositories = createSupabaseRepositories(supabase, organizationId)
   const userMessageResult = await repositories.schema.createTimelineItem({
     designSessionId: validationResult.output.designSessionId,
     content: validationResult.output.userInput,

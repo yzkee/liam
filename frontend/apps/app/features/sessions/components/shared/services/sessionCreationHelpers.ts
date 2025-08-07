@@ -115,7 +115,7 @@ const triggerChatWorkflow = async (
   currentUserId: string,
 ): Promise<CreateSessionState> => {
   const supabase = await createClient()
-  const repositories = createSupabaseRepositories(supabase)
+  const repositories = createSupabaseRepositories(supabase, organizationId)
 
   // Save initial user message to timeline before triggering workflow
   const userMessageResult = await repositories.schema.createTimelineItem({

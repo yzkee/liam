@@ -27,7 +27,10 @@ export const deepModelingWorkflowTask = task({
     if (supabaseClientResult.isErr()) {
       return errAsync(supabaseClientResult.error)
     }
-    const repositories = createSupabaseRepositories(supabaseClientResult.value)
+    const repositories = createSupabaseRepositories(
+      supabaseClientResult.value,
+      payload.organizationId,
+    )
 
     return repositories.schema
       .getSchema(payload.designSessionId)
@@ -41,6 +44,7 @@ export const deepModelingWorkflowTask = task({
           deepModeling(deepModelingParams, {
             configurable: {
               repositories,
+              thread_id: payload.designSessionId,
             },
           }),
           (err) => new Error(String(err)),

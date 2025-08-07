@@ -18,6 +18,13 @@ export const parse = (
   str: string,
   format: SupportedFormat,
 ): Promise<ProcessResult> => {
+  // TODO: Add enum schema parsing support for all parser formats
+  // Currently only drizzle parser supports enum parsing
+  // Need to implement enum parsing for:
+  // - prisma: Parse enum definitions from Prisma schema
+  // - postgres: Parse CREATE TYPE enum statements from SQL
+  // - tbls: Parse enum information from tbls JSON schema
+  // - schemarb: Parse enum definitions from Ruby schema files
   switch (format) {
     case 'schemarb':
       return schemarbProcessor(str)

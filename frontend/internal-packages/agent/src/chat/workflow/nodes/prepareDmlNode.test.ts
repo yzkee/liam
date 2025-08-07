@@ -38,7 +38,7 @@ describe('prepareDmlNode', () => {
     return {
       messages: [],
       userInput: 'test',
-      schemaData: { tables: {} },
+      schemaData: { tables: {}, enums: {} },
       buildingSchemaId: 'test-id',
       latestVersionNumber: 1,
       organizationId: 'test-org-id',
@@ -66,7 +66,10 @@ describe('prepareDmlNode', () => {
     })
 
     const result = await prepareDmlNode(state, {
-      configurable: { repositories: state.repositories },
+      configurable: {
+        repositories: state.repositories,
+        thread_id: 'test-thread',
+      },
     })
 
     expect(result.dmlStatements).toBeUndefined()
@@ -79,7 +82,10 @@ describe('prepareDmlNode', () => {
     })
 
     const result = await prepareDmlNode(state, {
-      configurable: { repositories: state.repositories },
+      configurable: {
+        repositories: state.repositories,
+        thread_id: 'test-thread',
+      },
     })
 
     expect(result.dmlStatements).toBeUndefined()
@@ -93,7 +99,10 @@ describe('prepareDmlNode', () => {
     })
 
     const result = await prepareDmlNode(state, {
-      configurable: { repositories: state.repositories },
+      configurable: {
+        repositories: state.repositories,
+        thread_id: 'test-thread',
+      },
     })
 
     expect(result.dmlStatements).toBeUndefined()
@@ -127,7 +136,10 @@ describe('prepareDmlNode', () => {
     })
 
     const result = await prepareDmlNode(state, {
-      configurable: { repositories: state.repositories },
+      configurable: {
+        repositories: state.repositories,
+        thread_id: 'test-thread',
+      },
     })
 
     expect(result.dmlStatements).toBeUndefined()
@@ -175,11 +187,15 @@ describe('prepareDmlNode', () => {
             indexes: {},
           },
         },
+        enums: {},
       },
     })
 
     await prepareDmlNode(state, {
-      configurable: { repositories: state.repositories },
+      configurable: {
+        repositories: state.repositories,
+        thread_id: 'test-thread',
+      },
     })
 
     // Verify convertSchemaToText produces correct output

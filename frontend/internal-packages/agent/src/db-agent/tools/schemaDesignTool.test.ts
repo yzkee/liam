@@ -22,6 +22,7 @@ describe('schemaDesignTool', () => {
       latestVersionNumber,
       designSessionId,
       repositories: testRepositories,
+      thread_id: 'test-thread',
       logger: {
         log: vi.fn(),
         debug: vi.fn(),

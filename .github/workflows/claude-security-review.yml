@@ -19,9 +19,6 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Setup pnpm
-        uses: ./.github/actions/pnpm-setup
-
       - name: Run Claude Code Security Review
         uses: anthropics/claude-code-security-review@c19afa74097b892109a6598b94297280ce7d1beb
         with:

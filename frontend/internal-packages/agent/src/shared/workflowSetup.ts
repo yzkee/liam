@@ -8,7 +8,6 @@ import type {
   WorkflowConfigurable,
   WorkflowState,
 } from '../chat/workflow/types'
-import { withTimelineItemSync } from '../chat/workflow/utils/withTimelineItemSync'
 import type { AgentWorkflowParams, AgentWorkflowResult } from '../types'
 import { WorkflowTerminationError } from './errorHandling'
 import { createEnhancedTraceData } from './traceEnhancer'
@@ -70,15 +69,8 @@ export const setupWorkflowState = (
 
   const workflowRunId = uuidv4()
 
-  const setupMessage = ResultAsync.fromPromise(
-    withTimelineItemSync(new HumanMessage(userInput), {
-      designSessionId,
-      organizationId,
-      userId,
-      repositories,
-    }),
-    (error) => new Error(String(error)),
-  ).andThen((message) => ok([...messages, message]))
+  const userMessage = new HumanMessage(userInput)
+  const allMessages = [...messages, userMessage]
 
   const createWorkflowRun = ResultAsync.fromPromise(
     repositories.schema.createWorkflowRun({
@@ -93,50 +85,48 @@ export const setupWorkflowState = (
     return ok(createWorkflowRun)
   })
 
-  return ResultAsync.combine([setupMessage, createWorkflowRun]).andThen(
-    ([messages]) => {
-      const runCollector = new RunCollectorCallbackHandler()
+  return createWorkflowRun.andThen(() => {
+    const runCollector = new RunCollectorCallbackHandler()
 
-      // Enhanced tracing with environment and developer context
-      const traceEnhancement = createEnhancedTraceData(
-        workflowRunId,
-        'agent-workflow',
-        [`organization:${organizationId}`, `session:${designSessionId}`],
-        {
-          workflow: {
-            building_schema_id: buildingSchemaId,
-            design_session_id: designSessionId,
-            user_id: userId,
-            organization_id: organizationId,
-            version_number: latestVersionNumber,
-          },
+    // Enhanced tracing with environment and developer context
+    const traceEnhancement = createEnhancedTraceData(
+      workflowRunId,
+      'agent-workflow',
+      [`organization:${organizationId}`, `session:${designSessionId}`],
+      {
+        workflow: {
+          building_schema_id: buildingSchemaId,
+          design_session_id: designSessionId,
+          user_id: userId,
+          organization_id: organizationId,
+          version_number: latestVersionNumber,
         },
-      )
+      },
+    )
 
-      return ok({
-        workflowState: {
-          userInput: userInput,
-          messages,
-          schemaData,
-          organizationId,
-          buildingSchemaId,
-          latestVersionNumber,
-          designSessionId,
-          userId,
-          retryCount: {},
-        },
-        workflowRunId,
-        runCollector,
-        configurable: {
-          repositories,
-          thread_id,
-          buildingSchemaId,
-          latestVersionNumber,
-        },
-        traceEnhancement,
-      })
-    },
-  )
+    return ok({
+      workflowState: {
+        userInput: userInput,
+        messages: allMessages,
+        schemaData,
+        organizationId,
+        buildingSchemaId,
+        latestVersionNumber,
+        designSessionId,
+        userId,
+        retryCount: {},
+      },
+      workflowRunId,
+      runCollector,
+      configurable: {
+        repositories,
+        thread_id,
+        buildingSchemaId,
+        latestVersionNumber,
+      },
+      traceEnhancement,
+    })
+  })
 }
 
 /**

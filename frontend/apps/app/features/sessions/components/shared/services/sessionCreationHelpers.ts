@@ -2,6 +2,7 @@
 
 import { createHash } from 'node:crypto'
 import path from 'node:path'
+import { createSupabaseRepositories } from '@liam-hq/agent'
 import type { SupabaseClientType } from '@liam-hq/db'
 import {
   deepModelingWorkflowTask,
@@ -112,7 +113,23 @@ const triggerChatWorkflow = async (
   designSessionId: string,
   organizationId: string,
   currentUserId: string,
-): Promise<CreateSessionState | null> => {
+): Promise<CreateSessionState> => {
+  const supabase = await createClient()
+  const repositories = createSupabaseRepositories(supabase, organizationId)
+
+  // Save initial user message to timeline before triggering workflow
+  const userMessageResult = await repositories.schema.createTimelineItem({
+    designSessionId,
+    content: initialMessage,
+    type: 'user',
+    userId: currentUserId,
+  })
+
+  if (!userMessageResult.success) {
+    console.error('Error saving initial user message:', userMessageResult.error)
+    return { success: false, error: 'Failed to save initial user message' }
+  }
+
   const history: [string, string][] = []
   const chatPayload = {
     userInput: initialMessage,
@@ -144,7 +161,7 @@ const triggerChatWorkflow = async (
     return { success: false, error: 'Failed to trigger chat processing job' }
   }
 
-  return null
+  return { success: true }
 }
 
 export const parseSchemaContent = async (
@@ -205,7 +222,7 @@ export const createSessionWithSchema = async (
   }
   const buildingSchema = buildingSchemaResult
 
-  const workflowError = await triggerChatWorkflow(
+  const workflowResult = await triggerChatWorkflow(
     params.initialMessage,
     params.isDeepModelingEnabled,
     buildingSchema.id,
@@ -213,8 +230,8 @@ export const createSessionWithSchema = async (
     organizationId,
     currentUserId,
   )
-  if (workflowError) {
-    return workflowError
+  if (!workflowResult.success) {
+    return workflowResult
   }
 
   redirect(`/app/design_sessions/${designSession.id}`)

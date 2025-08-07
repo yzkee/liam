@@ -86,6 +86,9 @@ importers:
       '@lezer/highlight':
         specifier: 1.2.1
         version: 1.2.1
+      '@liam-hq/agent':
+        specifier: workspace:*
+        version: link:../../internal-packages/agent
       '@liam-hq/artifact':
         specifier: workspace:*
         version: link:../../internal-packages/artifact

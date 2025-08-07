@@ -1073,6 +1073,19 @@ $$;
 
 ALTER FUNCTION "public"."update_building_schema"("p_schema_id" "uuid", "p_schema_schema" "jsonb", "p_schema_version_patch" "jsonb", "p_schema_version_reverse_patch" "jsonb", "p_latest_schema_version_number" integer, "p_message_content" "text") OWNER TO "postgres";
 
+
+CREATE OR REPLACE FUNCTION "public"."update_checkpoints_updated_at"() RETURNS "trigger"
+    LANGUAGE "plpgsql"
+    AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."update_checkpoints_updated_at"() OWNER TO "postgres";
+
 SET default_tablespace = '';
 
 SET default_table_access_method = "heap";
@@ -1118,6 +1131,140 @@ CREATE TABLE IF NOT EXISTS "public"."building_schemas" (
 
 
 ALTER TABLE "public"."building_schemas" OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."checkpoint_blobs" (
+    "thread_id" "text" NOT NULL,
+    "checkpoint_ns" "text" DEFAULT ''::"text" NOT NULL,
+    "channel" "text" NOT NULL,
+    "version" "text" NOT NULL,
+    "type" "text" NOT NULL,
+    "blob" "bytea",
+    "organization_id" "text" NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"()
+);
+
+
+ALTER TABLE "public"."checkpoint_blobs" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."checkpoint_blobs" IS 'Stores channel values (state data) for checkpoints';
+
+
+
+COMMENT ON COLUMN "public"."checkpoint_blobs"."channel" IS 'Name of the channel containing state data';
+
+
+
+COMMENT ON COLUMN "public"."checkpoint_blobs"."version" IS 'Version number for channel value tracking';
+
+
+
+COMMENT ON COLUMN "public"."checkpoint_blobs"."type" IS 'Type hint for deserialization';
+
+
+
+COMMENT ON COLUMN "public"."checkpoint_blobs"."blob" IS 'Binary serialized data';
+
+
+
+CREATE TABLE IF NOT EXISTS "public"."checkpoint_migrations" (
+    "v" integer NOT NULL,
+    "organization_id" "text" NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"()
+);
+
+
+ALTER TABLE "public"."checkpoint_migrations" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."checkpoint_migrations" IS 'Tracks applied checkpoint system migrations';
+
+
+
+COMMENT ON COLUMN "public"."checkpoint_migrations"."v" IS 'Migration version number';
+
+
+
+CREATE TABLE IF NOT EXISTS "public"."checkpoint_writes" (
+    "thread_id" "text" NOT NULL,
+    "checkpoint_ns" "text" DEFAULT ''::"text" NOT NULL,
+    "checkpoint_id" "text" NOT NULL,
+    "task_id" "text" NOT NULL,
+    "idx" integer NOT NULL,
+    "channel" "text" NOT NULL,
+    "type" "text",
+    "blob" "bytea" NOT NULL,
+    "organization_id" "text" NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"()
+);
+
+
+ALTER TABLE "public"."checkpoint_writes" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."checkpoint_writes" IS 'Stores pending write operations for checkpoints';
+
+
+
+COMMENT ON COLUMN "public"."checkpoint_writes"."task_id" IS 'Identifier of the task that generated this write';
+
+
+
+COMMENT ON COLUMN "public"."checkpoint_writes"."idx" IS 'Index for ordering multiple writes from the same task';
+
+
+
+COMMENT ON COLUMN "public"."checkpoint_writes"."channel" IS 'Target channel for the write operation';
+
+
+
+CREATE TABLE IF NOT EXISTS "public"."checkpoints" (
+    "thread_id" "text" NOT NULL,
+    "checkpoint_ns" "text" DEFAULT ''::"text" NOT NULL,
+    "checkpoint_id" "text" NOT NULL,
+    "parent_checkpoint_id" "text",
+    "checkpoint" "jsonb" NOT NULL,
+    "metadata" "jsonb" DEFAULT '{}'::"jsonb" NOT NULL,
+    "organization_id" "text" NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"(),
+    "updated_at" timestamp with time zone DEFAULT "now"()
+);
+
+
+ALTER TABLE "public"."checkpoints" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."checkpoints" IS 'Stores LangGraph checkpoint metadata for workflow state persistence';
+
+
+
+COMMENT ON COLUMN "public"."checkpoints"."thread_id" IS 'Unique identifier for the workflow thread';
+
+
+
+COMMENT ON COLUMN "public"."checkpoints"."checkpoint_ns" IS 'Namespace for checkpoint isolation within a thread';
+
+
+
+COMMENT ON COLUMN "public"."checkpoints"."checkpoint_id" IS 'Unique identifier for this checkpoint';
+
+
+
+COMMENT ON COLUMN "public"."checkpoints"."parent_checkpoint_id" IS 'Reference to parent checkpoint for version history';
+
+
+
+COMMENT ON COLUMN "public"."checkpoints"."checkpoint" IS 'Serialized checkpoint data including versions and metadata';
+
+
+
+COMMENT ON COLUMN "public"."checkpoints"."metadata" IS 'Custom metadata attached to the checkpoint';
+
+
+
+COMMENT ON COLUMN "public"."checkpoints"."organization_id" IS 'Organization ID for multi-tenant isolation';
+
 
 
 CREATE TABLE IF NOT EXISTS "public"."design_sessions" (
@@ -1522,6 +1669,26 @@ ALTER TABLE ONLY "public"."building_schemas"
 
 
 
+ALTER TABLE ONLY "public"."checkpoint_blobs"
+    ADD CONSTRAINT "checkpoint_blobs_pkey" PRIMARY KEY ("thread_id", "checkpoint_ns", "channel", "version", "organization_id");
+
+
+
+ALTER TABLE ONLY "public"."checkpoint_migrations"
+    ADD CONSTRAINT "checkpoint_migrations_pkey" PRIMARY KEY ("v");
+
+
+
+ALTER TABLE ONLY "public"."checkpoint_writes"
+    ADD CONSTRAINT "checkpoint_writes_pkey" PRIMARY KEY ("thread_id", "checkpoint_ns", "checkpoint_id", "task_id", "idx", "organization_id");
+
+
+
+ALTER TABLE ONLY "public"."checkpoints"
+    ADD CONSTRAINT "checkpoints_pkey" PRIMARY KEY ("thread_id", "checkpoint_ns", "checkpoint_id", "organization_id");
+
+
+
 ALTER TABLE ONLY "public"."design_sessions"
     ADD CONSTRAINT "design_sessions_pkey" PRIMARY KEY ("id");
 
@@ -1724,6 +1891,46 @@ CREATE INDEX "idx_building_schemas_design_session_created" ON "public"."building
 
 
 
+CREATE INDEX "idx_checkpoint_blobs_organization_id" ON "public"."checkpoint_blobs" USING "btree" ("organization_id");
+
+
+
+CREATE INDEX "idx_checkpoint_blobs_thread_id" ON "public"."checkpoint_blobs" USING "btree" ("thread_id", "checkpoint_ns");
+
+
+
+CREATE INDEX "idx_checkpoint_migrations_organization_id" ON "public"."checkpoint_migrations" USING "btree" ("organization_id");
+
+
+
+CREATE INDEX "idx_checkpoint_writes_checkpoint" ON "public"."checkpoint_writes" USING "btree" ("thread_id", "checkpoint_ns", "checkpoint_id");
+
+
+
+CREATE INDEX "idx_checkpoint_writes_organization_id" ON "public"."checkpoint_writes" USING "btree" ("organization_id");
+
+
+
+CREATE INDEX "idx_checkpoint_writes_task" ON "public"."checkpoint_writes" USING "btree" ("task_id");
+
+
+
+CREATE INDEX "idx_checkpoints_created_at" ON "public"."checkpoints" USING "btree" ("created_at" DESC);
+
+
+
+CREATE INDEX "idx_checkpoints_organization_id" ON "public"."checkpoints" USING "btree" ("organization_id");
+
+
+
+CREATE INDEX "idx_checkpoints_parent" ON "public"."checkpoints" USING "btree" ("parent_checkpoint_id") WHERE ("parent_checkpoint_id" IS NOT NULL);
+
+
+
+CREATE INDEX "idx_checkpoints_thread_id" ON "public"."checkpoints" USING "btree" ("thread_id", "checkpoint_ns");
+
+
+
 CREATE INDEX "idx_messages_design_session_created_at" ON "public"."timeline_items" USING "btree" ("design_session_id", "created_at" DESC);
 
 
@@ -1917,6 +2124,10 @@ CREATE OR REPLACE TRIGGER "set_workflow_runs_updated_at_trigger" BEFORE UPDATE O
 
 
 CREATE OR REPLACE TRIGGER "update_artifacts_updated_at_trigger" BEFORE UPDATE ON "public"."artifacts" FOR EACH ROW EXECUTE FUNCTION "public"."update_artifacts_updated_at"();
+
+
+
+CREATE OR REPLACE TRIGGER "update_checkpoints_updated_at_trigger" BEFORE UPDATE ON "public"."checkpoints" FOR EACH ROW EXECUTE FUNCTION "public"."update_checkpoints_updated_at"();
 
 
 
@@ -4425,6 +4636,12 @@ GRANT ALL ON FUNCTION "public"."update_building_schema"("p_schema_id" "uuid", "p
 
 
 
+GRANT ALL ON FUNCTION "public"."update_checkpoints_updated_at"() TO "anon";
+GRANT ALL ON FUNCTION "public"."update_checkpoints_updated_at"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."update_checkpoints_updated_at"() TO "service_role";
+
+
+
 GRANT ALL ON FUNCTION "public"."vector_accum"(double precision[], "public"."vector") TO "postgres";
 GRANT ALL ON FUNCTION "public"."vector_accum"(double precision[], "public"."vector") TO "anon";
 GRANT ALL ON FUNCTION "public"."vector_accum"(double precision[], "public"."vector") TO "authenticated";
@@ -4623,6 +4840,30 @@ GRANT ALL ON TABLE "public"."building_schema_versions" TO "service_role";
 GRANT ALL ON TABLE "public"."building_schemas" TO "anon";
 GRANT ALL ON TABLE "public"."building_schemas" TO "authenticated";
 GRANT ALL ON TABLE "public"."building_schemas" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."checkpoint_blobs" TO "anon";
+GRANT ALL ON TABLE "public"."checkpoint_blobs" TO "authenticated";
+GRANT ALL ON TABLE "public"."checkpoint_blobs" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."checkpoint_migrations" TO "anon";
+GRANT ALL ON TABLE "public"."checkpoint_migrations" TO "authenticated";
+GRANT ALL ON TABLE "public"."checkpoint_migrations" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."checkpoint_writes" TO "anon";
+GRANT ALL ON TABLE "public"."checkpoint_writes" TO "authenticated";
+GRANT ALL ON TABLE "public"."checkpoint_writes" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."checkpoints" TO "anon";
+GRANT ALL ON TABLE "public"."checkpoints" TO "authenticated";
+GRANT ALL ON TABLE "public"."checkpoints" TO "service_role";
 
 
 

@@ -169,6 +169,132 @@ export type Database = {
           },
         ]
       }
+      checkpoint_blobs: {
+        Row: {
+          blob: string | null
+          channel: string
+          checkpoint_ns: string
+          created_at: string | null
+          organization_id: string
+          thread_id: string
+          type: string
+          version: string
+        }
+        Insert: {
+          blob?: string | null
+          channel: string
+          checkpoint_ns?: string
+          created_at?: string | null
+          organization_id: string
+          thread_id: string
+          type: string
+          version: string
+        }
+        Update: {
+          blob?: string | null
+          channel?: string
+          checkpoint_ns?: string
+          created_at?: string | null
+          organization_id?: string
+          thread_id?: string
+          type?: string
+          version?: string
+        }
+        Relationships: []
+      }
+      checkpoint_migrations: {
+        Row: {
+          created_at: string | null
+          organization_id: string
+          v: number
+        }
+        Insert: {
+          created_at?: string | null
+          organization_id: string
+          v: number
+        }
+        Update: {
+          created_at?: string | null
+          organization_id?: string
+          v?: number
+        }
+        Relationships: []
+      }
+      checkpoint_writes: {
+        Row: {
+          blob: string
+          channel: string
+          checkpoint_id: string
+          checkpoint_ns: string
+          created_at: string | null
+          idx: number
+          organization_id: string
+          task_id: string
+          thread_id: string
+          type: string | null
+        }
+        Insert: {
+          blob: string
+          channel: string
+          checkpoint_id: string
+          checkpoint_ns?: string
+          created_at?: string | null
+          idx: number
+          organization_id: string
+          task_id: string
+          thread_id: string
+          type?: string | null
+        }
+        Update: {
+          blob?: string
+          channel?: string
+          checkpoint_id?: string
+          checkpoint_ns?: string
+          created_at?: string | null
+          idx?: number
+          organization_id?: string
+          task_id?: string
+          thread_id?: string
+          type?: string | null
+        }
+        Relationships: []
+      }
+      checkpoints: {
+        Row: {
+          checkpoint: Json
+          checkpoint_id: string
+          checkpoint_ns: string
+          created_at: string | null
+          metadata: Json
+          organization_id: string
+          parent_checkpoint_id: string | null
+          thread_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          checkpoint: Json
+          checkpoint_id: string
+          checkpoint_ns?: string
+          created_at?: string | null
+          metadata?: Json
+          organization_id: string
+          parent_checkpoint_id?: string | null
+          thread_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          checkpoint?: Json
+          checkpoint_id?: string
+          checkpoint_ns?: string
+          created_at?: string | null
+          metadata?: Json
+          organization_id?: string
+          parent_checkpoint_id?: string | null
+          thread_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       design_sessions: {
         Row: {
           created_at: string

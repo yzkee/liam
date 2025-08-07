@@ -13,6 +13,11 @@ const config: StorybookConfig = {
       files: '**/*.stories.@(jsx|tsx|mdx)',
       titlePrefix: 'ui',
     },
+    {
+      directory: '../../../packages/erd-core/src',
+      files: '**/*.stories.@(jsx|tsx|mdx)',
+      titlePrefix: 'erd-core',
+    },
   ],
   addons: [
     '@storybook/addon-links',
@@ -38,6 +43,26 @@ const config: StorybookConfig = {
           '../../../apps/app/components/SessionDetailPage/components/Chat/components/TimelineItem/components/VersionMessage/VersionMessage.mock.tsx',
         ),
       }
+
+      if (!config.resolve.plugins) {
+        config.resolve.plugins = []
+      }
+      
+      config.resolve.plugins.push({
+        apply: (resolver: any) => {
+          resolver.hooks.resolve.tapAsync('ErdCoreAliasPlugin', (request: any, resolveContext: any, callback: any) => {
+            if (request.context?.issuer?.includes('packages/erd-core') && request.request?.startsWith('@/')) {
+              const erdCorePath = path.resolve(__dirname, '../../../packages/erd-core/src')
+              const newRequest = {
+                ...request,
+                request: request.request.replace('@/', erdCorePath + '/')
+              }
+              return resolver.doResolve(resolver.hooks.resolve, newRequest, null, resolveContext, callback)
+            }
+            callback()
+          })
+        }
+      })
     }
     return config
   },

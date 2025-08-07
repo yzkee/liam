@@ -54,6 +54,30 @@ export const ToastContext = createContext<{
   commandPaletteToast: () => {},
 })
 
+export const HeaderToastViewportProvider = ({
+  children,
+}: PropsWithChildren) => {
+  return (
+    <RadixToast.Provider>
+      {children}
+      <RadixToast.Viewport className={clsx(styles.viewport, styles.header)} />
+    </RadixToast.Provider>
+  )
+}
+
+export const CommandPaletteToastViewportProvider = ({
+  children,
+}: PropsWithChildren) => {
+  return (
+    <RadixToast.Provider>
+      {children}
+      <RadixToast.Viewport
+        className={clsx(styles.viewport, styles.commandPalette)}
+      />
+    </RadixToast.Provider>
+  )
+}
+
 const useToastDisplay = () => {
   const [toastItem, setToastItem] = useState<ToastItem | null>(null)
   const closeToastItem = useCallback(() => {
@@ -87,23 +111,19 @@ export const ToastProvider = ({ children }: PropsWithChildren) => {
       }}
     >
       {children}
-      <RadixToast.Provider>
+      <HeaderToastViewportProvider>
         {headerToastItem && (
           <Toast {...headerToastItem} onOpenChange={closeHeaderToastItem} />
         )}
-        <RadixToast.Viewport className={clsx(styles.viewport, styles.header)} />
-      </RadixToast.Provider>
-      <RadixToast.Provider>
+      </HeaderToastViewportProvider>
+      <CommandPaletteToastViewportProvider>
         {commandPaletteToastItem && (
           <Toast
             {...commandPaletteToastItem}
             onOpenChange={closeCommandPaletteToastItem}
           />
         )}
-        <RadixToast.Viewport
-          className={clsx(styles.viewport, styles.commandPalette)}
-        />
-      </RadixToast.Provider>
+      </CommandPaletteToastViewportProvider>
     </ToastContext.Provider>
   )
 }

@@ -1,7 +1,8 @@
+import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
 import type { Artifact } from '@liam-hq/artifact'
 import type { Database, Tables } from '@liam-hq/db/supabase/database.types'
-import type { Schema } from '@liam-hq/db-structure'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
+import type { Schema } from '@liam-hq/schema'
 import type { Operation } from 'fast-json-patch'
 import type { ResultAsync } from 'neverthrow'
 
@@ -197,6 +198,11 @@ export type SchemaRepository = {
   updateWorkflowRunStatus(
     params: UpdateWorkflowRunStatusParams,
   ): Promise<WorkflowRunResult>
+
+  /**
+   * The checkpoint saver instance
+   */
+  checkpointer: BaseCheckpointSaver
 }
 
 /**

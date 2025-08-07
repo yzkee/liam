@@ -1,4 +1,4 @@
-import type { Table } from '@liam-hq/db-structure'
+import type { Table } from '@liam-hq/schema'
 import {
   DrawerClose,
   DrawerTitle,

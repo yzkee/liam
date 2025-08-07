@@ -9,7 +9,7 @@ import {
   constraintUpdateConstraintDiffItemSchema,
   type SchemaDiffItem,
   tableDiffItemSchema,
-} from '@liam-hq/db-structure'
+} from '@liam-hq/schema'
 import { safeParse, union } from 'valibot'
 
 type Params = {

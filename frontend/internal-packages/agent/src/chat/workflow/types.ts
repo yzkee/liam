@@ -1,6 +1,6 @@
 import type { BaseMessage } from '@langchain/core/messages'
 import type { DmlOperation } from '@liam-hq/artifact'
-import type { Schema } from '@liam-hq/db-structure'
+import type { Schema } from '@liam-hq/schema'
 import type { Usecase } from '../../langchain/agents/qaGenerateUsecaseAgent/agent'
 import type { Repositories } from '../../repositories'
 
@@ -41,4 +41,8 @@ export type WorkflowState = {
  */
 export type WorkflowConfigurable = {
   repositories: Repositories
+  /**
+   * Thread ID for checkpoint functionality (maps to designSessionId)
+   */
+  thread_id: string
 }

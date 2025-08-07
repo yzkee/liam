@@ -3,7 +3,7 @@ import {
   type Column,
   isPrimaryKey,
   type Table,
-} from '@liam-hq/db-structure'
+} from '@liam-hq/schema'
 import { DiamondFillIcon, DiamondIcon, KeyRound, Link } from '@liam-hq/ui'
 import { Handle, Position } from '@xyflow/react'
 import clsx from 'clsx'

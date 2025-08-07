@@ -18,7 +18,12 @@ export const invokeDbAgent = (
   _config: { repositories: WorkflowConfigurable['repositories'] },
 ): ResultAsync<AgentWorkflowResult, Error> => {
   const { recursionLimit = DEFAULT_RECURSION_LIMIT } = params
-  const config = { configurable: { repositories: _config.repositories } }
+  const config = {
+    configurable: {
+      repositories: _config.repositories,
+      thread_id: params.designSessionId,
+    },
+  }
   const compiled = createDbAgentGraph()
 
   // Setup workflow state with message conversion and timeline sync

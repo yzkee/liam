@@ -3,7 +3,7 @@ import {
   mergeSchemas,
   type Schema,
   schemaSchema,
-} from '@liam-hq/db-structure'
+} from '@liam-hq/schema'
 import { type FC, type PropsWithChildren, useMemo } from 'react'
 import * as v from 'valibot'
 import { SchemaContext, type SchemaContextValue } from './context'
@@ -21,6 +21,7 @@ export const SchemaProvider: FC<Props> = ({ children, current, previous }) => {
   const computedSchema: SchemaContextValue = useMemo(() => {
     const emptySchema: Schema = {
       tables: {},
+      enums: {},
     }
     const diffItems = buildSchemaDiff(previous ?? emptySchema, current)
     const filteredDiffItems = diffItems.filter(

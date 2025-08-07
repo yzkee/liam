@@ -5,7 +5,7 @@ import {
   indexRelatedDiffItemSchema,
   type SchemaDiffItem,
   tableRelatedDiffItemSchema,
-} from '@liam-hq/db-structure'
+} from '@liam-hq/schema'
 import { safeParse } from 'valibot'
 
 type Params = {

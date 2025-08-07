@@ -1,17 +1,15 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { tool } from '@langchain/core/tools'
 import type { JSONSchema } from '@langchain/core/utils/json_schema'
+import { executeQuery } from '@liam-hq/pglite-server'
+import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import {
   applyPatchOperations,
   operationsSchema,
   postgresqlSchemaDeparser,
   type Schema,
-} from '@liam-hq/db-structure'
-import { executeQuery } from '@liam-hq/pglite-server'
-import type { SqlResult } from '@liam-hq/pglite-server/src/types'
+} from '@liam-hq/schema'
 import { toJsonSchema } from '@valibot/to-json-schema'
-import type { Operation } from 'fast-json-patch'
-import { fromThrowable } from 'neverthrow'
 import * as v from 'valibot'
 import { getToolConfigurable } from '../getToolConfigurable'
 
@@ -22,24 +20,6 @@ const schemaDesignToolSchema = v.object({
 // toJsonSchema returns a JSONSchema7, which is not assignable to JSONSchema
 // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 const toolSchema = toJsonSchema(schemaDesignToolSchema) as JSONSchema
-
-const applySchemaOperations = (
-  schema: Schema,
-  operations: Operation[],
-): void => {
-  const applyOperationsResult = fromThrowable(
-    () => applyPatchOperations(schema, operations),
-    (error) => (error instanceof Error ? error.message : 'Unknown error'),
-  )()
-
-  if (applyOperationsResult.isErr()) {
-    // LangGraph tool nodes require throwing errors to trigger retry mechanism
-    // eslint-disable-next-line no-throw-error/no-throw-error
-    throw new Error(
-      `Failed to apply schema operations: ${applyOperationsResult.error}. Please check the operations format and try again.`,
-    )
-  }
-}
 
 const validateAndExecuteDDL = async (
   schema: Schema,
@@ -116,14 +96,22 @@ export const schemaDesignTool = tool(
       )
     }
 
-    // Apply operations to current schema to get the updated schema
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const currentSchema = structuredClone(schemaResult.value.schema) as Schema
-    applySchemaOperations(currentSchema, parsed.output.operations)
+    const applyResult = applyPatchOperations(
+      schemaResult.value.schema,
+      parsed.output.operations,
+    )
+
+    if (applyResult.isErr()) {
+      // LangGraph tool nodes require throwing errors to trigger retry mechanism
+      // eslint-disable-next-line no-throw-error/no-throw-error
+      throw new Error(
+        'Could not retrieve current schema for DDL validation. Please check the schema ID and try again.',
+      )
+    }
 
     // Validate DDL by generating and executing it
     const { ddlStatements, results } = await validateAndExecuteDDL(
-      currentSchema,
+      applyResult.value,
       designSessionId,
     )
 
@@ -179,7 +167,12 @@ export const schemaDesignTool = tool(
       )
     }
 
-    return 'Schema successfully updated. The operations have been applied to the database schema, DDL validation passed, and new version created.'
+    const successfulStatements = results.filter(
+      (result) => result.success,
+    ).length
+    const totalStatements = results.length
+
+    return `Schema successfully updated. The operations have been applied to the database schema, DDL validation successful (${successfulStatements}/${totalStatements} statements executed successfully), and new version created.`
   },
   {
     name: 'schemaDesignTool',

@@ -6,7 +6,7 @@
   "dependencies": {
     "@huggingface/transformers": "3.3.3",
     "@liam-hq/agent": "workspace:*",
-    "@liam-hq/db-structure": "workspace:*",
+    "@liam-hq/schema": "workspace:*",
     "dotenv": "16.5.0",
     "langsmith": "0.3.46",
     "neverthrow": "8.2.0",

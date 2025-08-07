@@ -3,7 +3,7 @@ import { SupabaseVectorStore as LangchainSupabaseVectorStore } from '@langchain/
 import { Document } from '@langchain/core/documents'
 import { OpenAIEmbeddings } from '@langchain/openai'
 import { createClient } from '@liam-hq/db'
-import type { Schema } from '@liam-hq/db-structure'
+import type { Schema } from '@liam-hq/schema'
 import { convertSchemaToText } from '../utils/convertSchemaToText'
 
 /**

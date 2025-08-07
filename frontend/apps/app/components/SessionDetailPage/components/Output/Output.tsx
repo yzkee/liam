@@ -1,4 +1,4 @@
-import type { Schema } from '@liam-hq/db-structure'
+import type { Schema } from '@liam-hq/schema'
 import { type ComponentProps, type FC, useCallback, useState } from 'react'
 import { TabsContent, TabsRoot } from '@/components'
 import type { ReviewComment } from '../../types'

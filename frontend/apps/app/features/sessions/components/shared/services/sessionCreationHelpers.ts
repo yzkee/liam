@@ -2,13 +2,14 @@
 
 import { createHash } from 'node:crypto'
 import path from 'node:path'
+import { createSupabaseRepositories } from '@liam-hq/agent'
 import type { SupabaseClientType } from '@liam-hq/db'
-import type { Schema } from '@liam-hq/db-structure'
-import { parse, setPrismWasmUrl } from '@liam-hq/db-structure/parser'
 import {
   deepModelingWorkflowTask,
   designProcessWorkflowTask,
 } from '@liam-hq/jobs'
+import type { Schema } from '@liam-hq/schema'
+import { parse, setPrismWasmUrl } from '@liam-hq/schema/parser'
 import { idempotencyKeys } from '@trigger.dev/sdk'
 import { redirect } from 'next/navigation'
 import { getOrganizationId } from '@/features/organizations/services/getOrganizationId'
@@ -25,6 +26,17 @@ type SessionCreationParams = {
   projectId?: string | null
   schemaFilePath?: string | null
   gitSha?: string | null
+}
+
+const generateSessionName = (initialMessage: string): string => {
+  const cleanMessage = initialMessage.trim().replace(/\s+/g, ' ')
+
+  if (!cleanMessage || cleanMessage.length < 3) {
+    return `Design Session - ${new Date().toISOString()}`
+  }
+
+  const truncated = cleanMessage.slice(0, 20)
+  return truncated.length < cleanMessage.length ? `${truncated}...` : truncated
 }
 
 type SchemaSource = {
@@ -48,7 +60,7 @@ const createDesignSession = async (
   const { data: designSession, error: insertError } = await supabase
     .from('design_sessions')
     .insert({
-      name: `Design Session - ${new Date().toISOString()}`,
+      name: generateSessionName(params.initialMessage),
       project_id: params.projectId,
       organization_id: organizationId,
       created_by_user_id: currentUserId,
@@ -101,7 +113,23 @@ const triggerChatWorkflow = async (
   designSessionId: string,
   organizationId: string,
   currentUserId: string,
-): Promise<CreateSessionState | null> => {
+): Promise<CreateSessionState> => {
+  const supabase = await createClient()
+  const repositories = createSupabaseRepositories(supabase, organizationId)
+
+  // Save initial user message to timeline before triggering workflow
+  const userMessageResult = await repositories.schema.createTimelineItem({
+    designSessionId,
+    content: initialMessage,
+    type: 'user',
+    userId: currentUserId,
+  })
+
+  if (!userMessageResult.success) {
+    console.error('Error saving initial user message:', userMessageResult.error)
+    return { success: false, error: 'Failed to save initial user message' }
+  }
+
   const history: [string, string][] = []
   const chatPayload = {
     userInput: initialMessage,
@@ -133,7 +161,7 @@ const triggerChatWorkflow = async (
     return { success: false, error: 'Failed to trigger chat processing job' }
   }
 
-  return null
+  return { success: true }
 }
 
 export const parseSchemaContent = async (
@@ -194,7 +222,7 @@ export const createSessionWithSchema = async (
   }
   const buildingSchema = buildingSchemaResult
 
-  const workflowError = await triggerChatWorkflow(
+  const workflowResult = await triggerChatWorkflow(
     params.initialMessage,
     params.isDeepModelingEnabled,
     buildingSchema.id,
@@ -202,8 +230,8 @@ export const createSessionWithSchema = async (
     organizationId,
     currentUserId,
   )
-  if (workflowError) {
-    return workflowError
+  if (!workflowResult.success) {
+    return workflowResult
   }
 
   redirect(`/app/design_sessions/${designSession.id}`)

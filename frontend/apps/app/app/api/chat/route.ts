@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto'
+import { createSupabaseRepositories } from '@liam-hq/agent'
 import {
   type DeepModelingPayload,
   deepModelingWorkflowTask,
@@ -57,6 +58,25 @@ export async function POST(request: Request) {
   }
 
   const organizationId = designSession.organization_id
+
+  const repositories = createSupabaseRepositories(supabase, organizationId)
+  const userMessageResult = await repositories.schema.createTimelineItem({
+    designSessionId: validationResult.output.designSessionId,
+    content: validationResult.output.userInput,
+    type: 'user',
+    userId,
+  })
+
+  if (!userMessageResult.success) {
+    console.error('Failed to save user message:', userMessageResult.error)
+    return NextResponse.json(
+      {
+        error: 'Failed to save user message',
+        details: userMessageResult.error,
+      },
+      { status: 500 },
+    )
+  }
 
   const { data: buildingSchema, error: buildingSchemaError } = await supabase
     .from('building_schemas')

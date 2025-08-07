@@ -1,4 +1,5 @@
 import { END, START, StateGraph } from '@langchain/langgraph'
+import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
 import {
   analyzeRequirementsNode,
   finalizeArtifactsNode,
@@ -13,13 +14,15 @@ import { RETRY_POLICY } from './shared/errorHandling'
 
 /**
  * Create and configure the LangGraph workflow
+ *
+ * @param checkpointer - Optional checkpoint saver for persistent state management
  */
-export const createGraph = () => {
+export const createGraph = (checkpointer?: BaseCheckpointSaver) => {
   const ChatStateAnnotation = createAnnotations()
   const graph = new StateGraph(ChatStateAnnotation)
 
-  // Create DB Agent subgraph
-  const dbAgentSubgraph = createDbAgentGraph()
+  // Create DB Agent subgraph with checkpoint support
+  const dbAgentSubgraph = createDbAgentGraph(checkpointer)
 
   graph
     .addNode('analyzeRequirements', analyzeRequirementsNode, {
@@ -92,5 +95,5 @@ export const createGraph = () => {
       },
     )
 
-  return graph.compile()
+  return checkpointer ? graph.compile({ checkpointer }) : graph.compile()
 }

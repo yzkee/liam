@@ -89,16 +89,16 @@ export const AgentMessage: FC<AgentMessageProps> = ({
               <span className={styles.messageText}>
                 <MarkdownContent content={message} />
               </span>
-              {message && (
-                <div className={styles.copyButtonWrapper}>
-                  <CopyButton
-                    textToCopy={message}
-                    tooltipLabel="Copy message"
-                    size="sm"
-                  />
-                </div>
-              )}
             </div>
+            {message && (
+              <div className={styles.copyButtonWrapper}>
+                <CopyButton
+                  textToCopy={message}
+                  tooltipLabel="Copy message"
+                  size="sm"
+                />
+              </div>
+            )}
           </div>
         )}
         {children}

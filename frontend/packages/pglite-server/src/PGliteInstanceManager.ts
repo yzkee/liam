@@ -1,5 +1,6 @@
 import { PGlite } from '@electric-sql/pglite'
 import type { RawStmt } from '@pgsql/types'
+import { errAsync, okAsync, ResultAsync } from 'neverthrow'
 // pg-query-emscripten does not have types, so we need to define them ourselves
 // @ts-expect-error
 import Module from 'pg-query-emscripten'
@@ -14,19 +15,50 @@ type PgQueryInstance = {
 let pgQueryInstance: PgQueryInstance | null = null
 
 // Initialize pg-query module once and reuse
-const getPgQueryInstance = async (): Promise<PgQueryInstance> => {
-  if (!pgQueryInstance) {
-    // Module constructor is untyped from pg-query-emscripten
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    pgQueryInstance = (await new Module()) as PgQueryInstance
+const getPgQueryInstance = (): ResultAsync<PgQueryInstance, Error> => {
+  if (pgQueryInstance) {
+    return okAsync(pgQueryInstance)
   }
-  return pgQueryInstance
+
+  return ResultAsync.fromPromise(
+    new Module(),
+    (error) => new Error(`Failed to initialize pg-query module: ${error}`),
+  )
+    .andThen((instance: unknown) => {
+      // Module constructor is untyped from pg-query-emscripten
+      // Type guard function to validate the instance
+      function isPgQueryInstance(obj: unknown): obj is PgQueryInstance {
+        return (
+          obj !== null &&
+          obj !== undefined &&
+          typeof obj === 'object' &&
+          'parse' in obj &&
+          typeof obj.parse === 'function'
+        )
+      }
+
+      if (isPgQueryInstance(instance)) {
+        pgQueryInstance = instance
+        return okAsync(pgQueryInstance)
+      }
+
+      return errAsync(
+        new Error('Invalid pg-query module instance: missing parse method'),
+      )
+    })
+    .mapErr((error) => {
+      pgQueryInstance = null
+      return error
+    })
 }
 
 // Inline the parse function to avoid import issues
 const parse = async (str: string): Promise<ParseResult> => {
-  const pgQuery = await getPgQueryInstance()
-  const result = pgQuery.parse(str)
+  const pgQueryResult = await getPgQueryInstance()
+  if (pgQueryResult.isErr()) {
+    throw pgQueryResult.error
+  }
+  const result = pgQueryResult.value.parse(str)
   return result
 }
 

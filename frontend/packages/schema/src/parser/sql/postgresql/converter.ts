@@ -737,7 +737,7 @@ export const convertToSchema = (
    * Handle COMMENT statement
    */
   function handleCommentStmt(commentStmt: CommentStmt): void {
-    // Skip if not a supported comment type
+    // Skip if not a supported comment type (only table, column, and type comments are supported)
     if (
       commentStmt.objtype !== 'OBJECT_TABLE' &&
       commentStmt.objtype !== 'OBJECT_COLUMN' &&
@@ -936,8 +936,15 @@ export const convertToSchema = (
   }
 
   /**
-   * Handle CREATE TYPE AS ENUM statement
+   * Handles a CREATE TYPE AS ENUM statement by extracting the enum name and values,
+   * and adding the enum to the enums collection. If the enum values are empty,
+   * the enum is still created with an empty values array. If the type name is missing
+   * or invalid, or if the enum name cannot be determined, the function returns early
+   * and does not create the enum.
+   *
+   * @param createEnumStmt The CREATE TYPE AS ENUM statement node to process.
    */
+
   function handleCreateEnumStmt(createEnumStmt: CreateEnumStmt): void {
     // Extract type name
     if (!createEnumStmt?.typeName || createEnumStmt.typeName.length === 0)
@@ -960,7 +967,7 @@ export const convertToSchema = (
       }
     }
 
-    // Create enum (even with empty values, unlike CompositeTypeStmt)
+    // Create enum even if it has empty values
     enums[enumName] = {
       name: enumName,
       values: enumValues,

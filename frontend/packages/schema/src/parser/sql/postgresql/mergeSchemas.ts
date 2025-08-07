@@ -15,4 +15,12 @@ export const mergeSchemas = (target: Schema, source: Schema) => {
       },
     }
   }
+
+  // Merge enums
+  for (const [enumName, enumObj] of Object.entries(source.enums)) {
+    target.enums[enumName] = {
+      ...target.enums[enumName],
+      ...enumObj,
+    }
+  }
 }

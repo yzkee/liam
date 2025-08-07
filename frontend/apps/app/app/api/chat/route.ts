@@ -99,12 +99,15 @@ export async function POST(request: Request) {
     .limit(1)
     .maybeSingle()
 
-  if (latestVersionError || !latestVersion) {
+  if (latestVersionError) {
     return NextResponse.json(
-      { error: 'Latest version not found for building schema' },
-      { status: 404 },
+      { error: 'Error fetching latest version' },
+      { status: 500 },
     )
   }
+
+  // If no version exists yet (initial state), use 0 as the version number
+  const latestVersionNumber = latestVersion?.number ?? 0
 
   const { data: timelineItems, error: timelineItemsError } = await supabase
     .from('timeline_items')
@@ -133,7 +136,7 @@ export async function POST(request: Request) {
         history,
         organizationId,
         buildingSchemaId: buildingSchema.id,
-        latestVersionNumber: latestVersion.number,
+        latestVersionNumber: latestVersionNumber,
         designSessionId: designSessionId,
         userId,
       }

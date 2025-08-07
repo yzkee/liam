@@ -6,8 +6,16 @@ export {
   getColumnRelatedChangeStatus,
   getColumnTypeChangeStatus,
 } from './columns/index.js'
-export { getConstraintColumnNamesChangeStatus } from './constraints/index.js'
-export { getConstraintRelatedChangeStatus } from './getConstraintRelatedChangeStatus.js'
+export {
+  getConstraintColumnNameChangeStatus,
+  getConstraintColumnNamesChangeStatus,
+  getConstraintDeleteConstraintChangeStatus,
+  getConstraintDetailChangeStatus,
+  getConstraintRelatedChangeStatus,
+  getConstraintTargetColumnNameChangeStatus,
+  getConstraintTargetTableNameChangeStatus,
+  getConstraintUpdateConstraintChangeStatus,
+} from './constraints/index.js'
 export { getOperations } from './getOperations.js'
 export {
   getIndexColumnsChangeStatus,

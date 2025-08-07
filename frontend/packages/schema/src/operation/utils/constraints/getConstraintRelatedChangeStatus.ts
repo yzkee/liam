@@ -1,10 +1,11 @@
-import { PATH_PATTERNS } from '../constants.js'
-import type { Operation } from '../schema/index.js'
-import { determineChangeStatus } from './determineChangeStatus.js'
+import { PATH_PATTERNS } from '../../constants.js'
+import type { Operation } from '../../schema/index.js'
+import { determineChangeStatus } from '../determineChangeStatus.js'
 
 const CONSTRAINT_RELATED_PATH_PATTERN = [
   PATH_PATTERNS.CONSTRAINT_BASE,
   PATH_PATTERNS.CONSTRAINT_NAME,
+  PATH_PATTERNS.CONSTRAINT_COLUMN_NAMES_ARRAY,
   PATH_PATTERNS.CONSTRAINT_TYPE,
   PATH_PATTERNS.CONSTRAINT_COLUMN_NAME,
   PATH_PATTERNS.CONSTRAINT_TARGET_TABLE_NAME,

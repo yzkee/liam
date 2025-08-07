@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { Operation } from '../../schema/index.js'
+import type { Operation } from '../../../schema/index.js'
 import { getConstraintRelatedChangeStatus } from '../getConstraintRelatedChangeStatus.js'
 
 // Mock constraint data for tests

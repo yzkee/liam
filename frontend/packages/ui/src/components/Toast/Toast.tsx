@@ -48,7 +48,7 @@ export const Toast: FC<Props> = ({
 
 export const ToastContext = createContext<ToastFn>(() => '')
 
-export const ToastProvider = ({ children }: PropsWithChildren) => {
+const useToastDisplay = () => {
   const [toastItem, setToastItem] = useState<ToastItem | null>(null)
   const closeToastItem = useCallback(() => {
     setToastItem((prev) => (prev === null ? null : { ...prev, isOpen: false }))
@@ -57,6 +57,12 @@ export const ToastProvider = ({ children }: PropsWithChildren) => {
     closeToastItem()
     window.setTimeout(() => setToastItem({ ...options, isOpen: true }), 100)
   }, [])
+
+  return { toastItem, createToastItem, closeToastItem }
+}
+
+export const ToastProvider = ({ children }: PropsWithChildren) => {
+  const { toastItem, createToastItem, closeToastItem } = useToastDisplay()
 
   return (
     <RadixToast.Provider>

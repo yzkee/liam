@@ -5,10 +5,27 @@ import type { RawStmt } from '@pgsql/types'
 import Module from 'pg-query-emscripten'
 import type { SqlResult } from './types'
 
+// Define the type for pg-query instance
+type PgQueryInstance = {
+  parse: (sql: string) => ParseResult
+}
+
+// Cache the pg-query module instance for better performance
+let pgQueryInstance: PgQueryInstance | null = null
+
+// Initialize pg-query module once and reuse
+const getPgQueryInstance = async (): Promise<PgQueryInstance> => {
+  if (!pgQueryInstance) {
+    // Module constructor is untyped from pg-query-emscripten
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    pgQueryInstance = (await new Module()) as PgQueryInstance
+  }
+  return pgQueryInstance
+}
+
 // Inline the parse function to avoid import issues
 const parse = async (str: string): Promise<ParseResult> => {
-  const pgQuery = await new Module()
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  const pgQuery = await getPgQueryInstance()
   const result = pgQuery.parse(str)
   return result
 }

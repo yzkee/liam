@@ -1,8 +1,14 @@
-import { describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
 import { PGliteInstanceManager } from './PGliteInstanceManager'
 
 describe('PGliteInstanceManager', () => {
   const manager = new PGliteInstanceManager()
+
+  // Warm up the pg-query-emscripten module before tests
+  beforeAll(async () => {
+    // Execute a simple query to initialize the parser
+    await manager.executeQuery('warmup', 'SELECT 1')
+  }, 30000)
 
   it('should handle single statement', async () => {
     const sql = 'SELECT 1;'

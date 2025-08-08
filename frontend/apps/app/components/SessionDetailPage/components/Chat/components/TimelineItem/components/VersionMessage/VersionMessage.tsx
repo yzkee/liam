@@ -19,7 +19,7 @@ import {
   useTransition,
 } from 'react'
 import * as v from 'valibot'
-import { createClient } from '@/libs/db/client'
+import { getVersionById } from '@/components/SessionDetailPage/services/getVersionById'
 import styles from './VersionMessage.module.css'
 
 /**
@@ -106,21 +106,14 @@ export const VersionMessage: FC<Props> = ({
 
   useEffect(() => {
     startTransition(async () => {
-      const supabase = createClient()
-      const { data, error } = await supabase
-        .from('building_schema_versions')
-        .select('id, number, patch')
-        .eq('id', buildingSchemaVersionId)
-        .single()
+      const data = await getVersionById(buildingSchemaVersionId)
 
-      if (error) {
-        console.error('Failed to fetch version:', error)
+      if (!data) {
+        console.error('Failed to fetch version')
         return
       }
 
-      if (data) {
-        setVersion(data)
-      }
+      setVersion(data)
     })
   }, [buildingSchemaVersionId])
 

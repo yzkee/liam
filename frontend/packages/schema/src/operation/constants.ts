@@ -19,6 +19,8 @@ export const PATH_PATTERNS = {
   CONSTRAINT_TYPE: /^\/tables\/([^/]+)\/constraints\/([^/]+)\/type$/,
   CONSTRAINT_COLUMN_NAME:
     /^\/tables\/([^/]+)\/constraints\/([^/]+)\/columnName$/,
+  CONSTRAINT_COLUMN_NAMES_ARRAY:
+    /^\/tables\/([^/]+)\/constraints\/([^/]+)\/columnNames\/(\d+)$/,
   CONSTRAINT_TARGET_TABLE_NAME:
     /^\/tables\/([^/]+)\/constraints\/([^/]+)\/targetTableName$/,
   CONSTRAINT_TARGET_COLUMN_NAME:

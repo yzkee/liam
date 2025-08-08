@@ -8,8 +8,48 @@ import {
   type CheckpointMetadata,
   type CheckpointTuple,
   type PendingWrite,
+  WRITES_IDX_MAP,
 } from '@langchain/langgraph-checkpoint'
-import type { SupabaseClientType } from '@liam-hq/db'
+import type { Database, Json, SupabaseClientType } from '@liam-hq/db'
+import { parseCheckpointMetadata, parseSerializedCheckpoint } from './schemas'
+import type { SerializedCheckpoint } from './types'
+
+/**
+ * Utility functions for BYTEA column handling in Supabase
+ *
+ * Supabase REST API requires Base64 encoding for BYTEA columns,
+ * and returns them as PostgreSQL hex format (e.g., '\x6465...')
+ */
+const ByteaUtils = {
+  /**
+   * Convert Uint8Array to Base64 string for Supabase BYTEA columns
+   */
+  uint8ArrayToBase64(uint8Array: Uint8Array): string {
+    const binaryString = Array.from(uint8Array)
+      .map((byte) => String.fromCharCode(byte))
+      .join('')
+    return btoa(binaryString)
+  },
+
+  /**
+   * Convert Base64 string to Uint8Array (from Supabase BYTEA)
+   */
+  base64ToUint8Array(base64: string): Uint8Array {
+    const binaryString = atob(base64)
+    const bytes = new Uint8Array(binaryString.length)
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i)
+    }
+    return bytes
+  },
+
+  /**
+   * Convert Uint8Array to string
+   */
+  uint8ArrayToString(uint8Array: Uint8Array): string {
+    return new TextDecoder().decode(uint8Array)
+  },
+}
 
 /**
  * Configuration options for SupabaseCheckpointSaver
@@ -32,85 +72,645 @@ type SupabaseCheckpointSaverConfig = {
 /**
  * Supabase implementation of LangGraph BaseCheckpointSaver
  *
- * TODO(MH4GF): Complete implementation of checkpoint functionality
- * This is a skeleton implementation - all methods need to be implemented
- * to provide persistent checkpoint storage for LangGraph workflows using Supabase.
+ * Provides persistent checkpoint storage for LangGraph workflows using Supabase.
+ * All data is isolated at the organization level for multi-tenancy support.
  *
- * Required features:
- * - Organization-level data isolation
- * - Checkpoint serialization/deserialization
- * - Session state persistence and retrieval
- * - Automatic cleanup capabilities
+ * ## Serialization Strategy
+ *
+ * This implementation uses the default BaseCheckpointSaver serializer, which:
+ * - Serializes data as JSON format with type information
+ * - Is optimized for PostgreSQL direct connections
+ * - Handles standard JavaScript types (objects, arrays, primitives)
+ *
+ * ## BYTEA Column Handling in Supabase
+ *
+ * When working with BYTEA columns through Supabase REST API:
+ * 1. **Writing**: Data should be Base64 encoded before sending
+ * 2. **Reading**: Supabase returns BYTEA as PostgreSQL hex format (e.g., '\x6465...')
+ * 3. **Conversion flow**:
+ *    - Write: JSON → serialize → Base64 → BYTEA (stored as hex internally)
+ *    - Read: BYTEA (hex) → decode hex → Base64 → deserialize → JSON
+ *
+ * Note: The default serializer handles JSON serialization, but Base64 encoding
+ * for BYTEA columns must be handled separately when interacting with Supabase.
  */
+
 export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
-  constructor(_config: SupabaseCheckpointSaverConfig) {
-    const serde = {}
+  private readonly client: SupabaseClientType
+  private readonly organizationId: string
 
-    // @ts-expect-error - TODO: Implement serde
-    super(serde)
+  constructor(config: SupabaseCheckpointSaverConfig) {
+    super()
 
-    // TODO(MH4GF): Initialize client and options properties for implementation
-    // this.client = config.client
-    // this.options = config.options
+    this.client = config.client
+    this.organizationId = config.options.organizationId
   }
 
-  async getTuple(
-    _config: RunnableConfig,
-  ): Promise<CheckpointTuple | undefined> {
-    // TODO(MH4GF): Implement getTuple method
-    // - Query supabase for checkpoint by config
-    // - Apply organization-level filtering
-    // - Return CheckpointTuple or undefined
-    // eslint-disable-next-line no-throw-error/no-throw-error
-    throw new Error('SupabaseCheckpointSaver.getTuple not implemented')
+  async getTuple(config: RunnableConfig): Promise<CheckpointTuple | undefined> {
+    const {
+      thread_id,
+      checkpoint_ns = '',
+      checkpoint_id,
+    } = config.configurable ?? {}
+
+    if (!thread_id) {
+      return undefined
+    }
+
+    // Build base checkpoint query without joins
+    const baseQuery = this.client
+      .from('checkpoints')
+      .select('*')
+      .eq('thread_id', thread_id)
+      .eq('checkpoint_ns', checkpoint_ns)
+
+    // Add checkpoint_id filter if provided, otherwise get latest
+    const query = checkpoint_id
+      ? baseQuery.eq('checkpoint_id', checkpoint_id).single()
+      : baseQuery.order('checkpoint_id', { ascending: false }).limit(1).single()
+
+    const { data: checkpointData, error } = await query
+
+    if (error || !checkpointData) {
+      return undefined
+    }
+
+    // Fetch checkpoint blobs separately
+    const { data: blobsData } = await this.client
+      .from('checkpoint_blobs')
+      .select('*')
+      .eq('thread_id', thread_id)
+      .eq('checkpoint_ns', checkpoint_ns)
+      .eq('organization_id', this.organizationId)
+
+    // Fetch checkpoint writes separately
+    const { data: writesData } = await this.client
+      .from('checkpoint_writes')
+      .select('*')
+      .eq('thread_id', thread_id)
+      .eq('checkpoint_ns', checkpoint_ns)
+      .eq('checkpoint_id', checkpointData.checkpoint_id)
+      .eq('organization_id', this.organizationId)
+
+    const checkpoint = await this._loadCheckpoint(
+      checkpointData,
+      blobsData || [],
+    )
+
+    // Load metadata
+    const metadata = await this._loadMetadata(checkpointData.metadata)
+
+    // Build configs
+    const finalConfig: RunnableConfig = {
+      configurable: {
+        thread_id,
+        checkpoint_ns,
+        checkpoint_id: checkpointData.checkpoint_id,
+      },
+    }
+
+    const parentConfig = checkpointData.parent_checkpoint_id
+      ? {
+          configurable: {
+            thread_id,
+            checkpoint_ns,
+            checkpoint_id: checkpointData.parent_checkpoint_id,
+          },
+        }
+      : undefined
+
+    // Load pending writes
+    const pendingWrites = await this._loadWrites(writesData || [])
+
+    const tuple: CheckpointTuple = {
+      config: finalConfig,
+      checkpoint,
+      metadata,
+      pendingWrites,
+    }
+
+    if (parentConfig) {
+      tuple.parentConfig = parentConfig
+    }
+
+    return tuple
   }
 
-  // biome-ignore lint/correctness/useYield: Skeleton implementation - will add yield statements during implementation
   async *list(
-    _config: RunnableConfig,
-    _options?: CheckpointListOptions,
+    config: RunnableConfig,
+    options?: CheckpointListOptions,
   ): AsyncGenerator<CheckpointTuple> {
-    // TODO(MH4GF): Implement list method
-    // - Query supabase with pagination support
-    // - Apply organization-level filtering
-    // - Yield CheckpointTuple items
-    // eslint-disable-next-line no-throw-error/no-throw-error
-    throw new Error('SupabaseCheckpointSaver.list not implemented')
+    const { filter, before, limit } = options ?? {}
+    const { thread_id, checkpoint_ns = '' } = config.configurable ?? {}
+
+    if (!thread_id) {
+      return
+    }
+
+    // Build base query without joins
+    let query = this.client
+      .from('checkpoints')
+      .select('*')
+      .eq('thread_id', thread_id)
+      .eq('checkpoint_ns', checkpoint_ns)
+      .eq('organization_id', this.organizationId)
+
+    // Apply filter
+    if (filter && Object.keys(filter).length > 0) {
+      // Metadata filter using JSONB containment
+      query = query.contains('metadata', filter)
+    }
+
+    // Apply before cursor
+    if (before?.configurable?.['checkpoint_id']) {
+      query = query.lt('checkpoint_id', before.configurable['checkpoint_id'])
+    }
+
+    // Order and limit
+    query = query.order('checkpoint_id', { ascending: false })
+    if (limit) {
+      query = query.limit(Number.parseInt(limit.toString(), 10))
+    }
+
+    const { data, error } = await query
+
+    if (error || !data) {
+      return
+    }
+
+    // Yield checkpoint tuples
+    for (const row of data) {
+      // Fetch checkpoint blobs separately for each row
+      const { data: blobsData } = await this.client
+        .from('checkpoint_blobs')
+        .select('*')
+        .eq('thread_id', row.thread_id)
+        .eq('checkpoint_ns', row.checkpoint_ns)
+        .eq('organization_id', this.organizationId)
+
+      // Fetch checkpoint writes separately for each row
+      const { data: writesData } = await this.client
+        .from('checkpoint_writes')
+        .select('*')
+        .eq('thread_id', row.thread_id)
+        .eq('checkpoint_ns', row.checkpoint_ns)
+        .eq('checkpoint_id', row.checkpoint_id)
+        .eq('organization_id', this.organizationId)
+
+      const checkpoint = await this._loadCheckpoint(row, blobsData || [])
+
+      const metadata = await this._loadMetadata(row.metadata)
+
+      const parentConfig = row.parent_checkpoint_id
+        ? {
+            configurable: {
+              thread_id: row.thread_id,
+              checkpoint_ns: row.checkpoint_ns,
+              checkpoint_id: row.parent_checkpoint_id,
+            },
+          }
+        : undefined
+
+      const tuple: CheckpointTuple = {
+        config: {
+          configurable: {
+            thread_id: row.thread_id,
+            checkpoint_ns: row.checkpoint_ns,
+            checkpoint_id: row.checkpoint_id,
+          },
+        },
+        checkpoint,
+        metadata,
+        pendingWrites: await this._loadWrites(writesData || []),
+      }
+
+      if (parentConfig) {
+        tuple.parentConfig = parentConfig
+      }
+
+      yield tuple
+    }
   }
 
   async put(
-    _config: RunnableConfig,
-    _checkpoint: Checkpoint,
-    _metadata: CheckpointMetadata,
-    _newVersions: ChannelVersions,
+    config: RunnableConfig,
+    checkpoint: Checkpoint,
+    metadata: CheckpointMetadata,
+    newVersions: ChannelVersions,
   ): Promise<RunnableConfig> {
-    // TODO(MH4GF): Implement put method
-    // - Serialize checkpoint data
-    // - Store in supabase with organization isolation
-    // - Return updated config
-    // eslint-disable-next-line no-throw-error/no-throw-error
-    throw new Error('SupabaseCheckpointSaver.put not implemented')
+    if (!config.configurable) {
+      // BaseCheckpointSaver expects exceptions to be thrown
+      // eslint-disable-next-line no-throw-error/no-throw-error
+      throw new Error('Missing "configurable" field in "config" param')
+    }
+
+    const { thread_id, checkpoint_ns = '', checkpoint_id } = config.configurable
+
+    const nextConfig: RunnableConfig = {
+      configurable: {
+        thread_id,
+        checkpoint_ns,
+        checkpoint_id: checkpoint.id,
+      },
+    }
+
+    // Serialize checkpoint
+    const serializedCheckpoint = this._dumpCheckpoint(checkpoint)
+    const serializedMetadata = await this._dumpMetadata(metadata)
+
+    // Insert checkpoint
+    // NOTE: These tables must exist in Supabase database
+    const checkpointInsert: Database['public']['Tables']['checkpoints']['Insert'] =
+      {
+        thread_id,
+        checkpoint_ns,
+        checkpoint_id: checkpoint.id,
+        parent_checkpoint_id: checkpoint_id || null,
+        checkpoint: JSON.parse(JSON.stringify(serializedCheckpoint)),
+        metadata: JSON.parse(JSON.stringify(serializedMetadata)),
+        organization_id: this.organizationId,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }
+
+    const { error: checkpointError } = await this.client
+      .from('checkpoints')
+      .upsert(checkpointInsert)
+
+    if (checkpointError) {
+      // BaseCheckpointSaver expects exceptions to be thrown
+      // eslint-disable-next-line no-throw-error/no-throw-error
+      throw new Error(`Failed to save checkpoint: ${checkpointError.message}`)
+    }
+
+    // Save channel blobs
+    const blobs = await this._dumpBlobs(
+      thread_id,
+      checkpoint_ns,
+      checkpoint.channel_values,
+      newVersions,
+    )
+
+    if (blobs.length > 0) {
+      const { error: blobError } = await this.client
+        .from('checkpoint_blobs')
+        .upsert(blobs)
+
+      if (blobError) {
+        // BaseCheckpointSaver expects exceptions to be thrown
+        // eslint-disable-next-line no-throw-error/no-throw-error
+        throw new Error(`Failed to save checkpoint blobs: ${blobError.message}`)
+      }
+    }
+
+    return nextConfig
   }
 
   async putWrites(
-    _config: RunnableConfig,
-    _writes: PendingWrite[],
-    _taskId: string,
+    config: RunnableConfig,
+    writes: PendingWrite[],
+    taskId: string,
   ): Promise<void> {
-    // TODO(MH4GF): Implement putWrites method
-    // - Store intermediate writes linked to checkpoint
-    // - Apply organization-level isolation
-    // eslint-disable-next-line no-throw-error/no-throw-error
-    throw new Error('SupabaseCheckpointSaver.putWrites not implemented')
+    const {
+      thread_id,
+      checkpoint_ns = '',
+      checkpoint_id,
+    } = config.configurable ?? {}
+
+    if (!thread_id || !checkpoint_id) {
+      // BaseCheckpointSaver expects exceptions to be thrown
+      // eslint-disable-next-line no-throw-error/no-throw-error
+      throw new Error('Missing thread_id or checkpoint_id in config')
+    }
+
+    const dumpedWrites = await this._dumpWrites(
+      thread_id,
+      checkpoint_ns,
+      checkpoint_id,
+      taskId,
+      writes,
+    )
+
+    if (dumpedWrites.length > 0) {
+      const { error } = await this.client
+        .from('checkpoint_writes')
+        .upsert(dumpedWrites)
+
+      if (error) {
+        // BaseCheckpointSaver expects exceptions to be thrown
+        // eslint-disable-next-line no-throw-error/no-throw-error
+        throw new Error(`Failed to save checkpoint writes: ${error.message}`)
+      }
+    }
   }
 
   override getNextVersion(
     current: number | undefined,
     _channel: ChannelProtocol,
   ): number {
-    // TODO(MH4GF): Implement getNextVersion method
-    // - Generate monotonically increasing version numbers
-    // - Consider organization-level versioning if needed
-    return (current || 0) + 1
+    return (current ?? 0) + 1
+  }
+
+  /**
+   * Helper method to load checkpoint from database row
+   */
+  private async _loadCheckpoint(
+    row: Database['public']['Tables']['checkpoints']['Row'],
+    blobs: Database['public']['Tables']['checkpoint_blobs']['Row'][],
+  ): Promise<Checkpoint> {
+    const checkpointData = parseSerializedCheckpoint(row.checkpoint)
+    const channelValues = await this._loadBlobs(blobs)
+    const channelVersions = this._convertVersionsToNumbers(
+      checkpointData.channel_versions,
+    )
+    const versionsSeen = this._convertVersionsSeenToNumbers(
+      checkpointData.versions_seen,
+    )
+
+    return {
+      v: checkpointData.v || 1,
+      id: checkpointData.id,
+      ts: checkpointData.ts,
+      channel_values: channelValues,
+      channel_versions: channelVersions,
+      versions_seen: versionsSeen,
+      pending_sends: [],
+    }
+  }
+
+  /**
+   * Convert channel versions to numbers
+   */
+  private _convertVersionsToNumbers(
+    versions?: Record<string, number | string>,
+  ): Record<string, number> {
+    const result: Record<string, number> = {}
+    if (!versions) return result
+
+    for (const [key, value] of Object.entries(versions)) {
+      result[key] =
+        typeof value === 'string' ? Number.parseInt(value, 10) : value
+    }
+    return result
+  }
+
+  /**
+   * Convert versions seen to numbers
+   */
+  private _convertVersionsSeenToNumbers(
+    versionsSeen?: Record<string, Record<string, number | string>>,
+  ): Record<string, Record<string, number>> {
+    const result: Record<string, Record<string, number>> = {}
+    if (!versionsSeen) return result
+
+    for (const [agent, versions] of Object.entries(versionsSeen)) {
+      result[agent] = {}
+      if (versions && typeof versions === 'object') {
+        for (const [key, value] of Object.entries(versions)) {
+          result[agent][key] =
+            typeof value === 'string' ? Number.parseInt(value, 10) : value
+        }
+      }
+    }
+    return result
+  }
+
+  /**
+   * Helper method to load channel values from blobs
+   *
+   * Key difference from PostgresSaver:
+   * - PostgresSaver receives [Uint8Array, Uint8Array, Uint8Array][] tuples
+   * - SupabaseCheckpointSaver receives structured row objects from REST API
+   *
+   * The Base64 conversion is required here because Supabase REST API
+   * cannot transmit raw binary data over HTTP/JSON protocol.
+   */
+  private async _loadBlobs(
+    blobs: Database['public']['Tables']['checkpoint_blobs']['Row'][],
+  ): Promise<Record<string, unknown>> {
+    if (!blobs || blobs.length === 0) {
+      return {}
+    }
+
+    const channelValues: Record<string, unknown> = {}
+
+    for (const blob of blobs) {
+      if (blob.type === 'empty' || !blob.blob) {
+        continue
+      }
+
+      // Convert Base64 string from Supabase REST API to Uint8Array
+      // This conversion is not needed in PostgresSaver as it receives binary directly
+      const uint8Array =
+        typeof blob.blob === 'string'
+          ? ByteaUtils.base64ToUint8Array(blob.blob)
+          : blob.blob
+      const value = await this.serde.loadsTyped(blob.type, uint8Array)
+      channelValues[blob.channel] = value
+    }
+
+    return channelValues
+  }
+
+  /**
+   * Helper method to load metadata
+   */
+  private async _loadMetadata(metadata: Json): Promise<CheckpointMetadata> {
+    // Parse and validate metadata, allowing flexible extra properties
+    return parseCheckpointMetadata(metadata)
+  }
+
+  /**
+   * Helper method to load pending writes
+   *
+   * Key difference from PostgresSaver:
+   * - PostgresSaver receives data as Uint8Array[] directly from pg library
+   * - SupabaseCheckpointSaver receives structured row objects from REST API
+   * - Supabase REST API returns BYTEA columns as Base64-encoded strings,
+   *   requiring conversion back to Uint8Array before deserialization
+   *
+   * This Base64 conversion is necessary because:
+   * 1. HTTP/JSON cannot safely transmit raw binary data
+   * 2. Supabase REST API automatically encodes BYTEA as Base64
+   * 3. Direct PostgreSQL connections (pg library) return BYTEA as binary
+   */
+  private async _loadWrites(
+    writes: Database['public']['Tables']['checkpoint_writes']['Row'][],
+  ): Promise<[string, string, unknown][]> {
+    if (!writes || writes.length === 0) {
+      return []
+    }
+
+    const pendingWrites: [string, string, unknown][] = []
+
+    for (const write of writes) {
+      if (!write.blob) continue
+
+      // Convert Base64 string from Supabase REST API to Uint8Array
+      // PostgresSaver doesn't need this as pg library returns binary directly
+      const uint8Array =
+        typeof write.blob === 'string'
+          ? ByteaUtils.base64ToUint8Array(write.blob)
+          : write.blob
+      const value = write.type
+        ? await this.serde.loadsTyped(write.type, uint8Array)
+        : ByteaUtils.uint8ArrayToString(uint8Array)
+
+      pendingWrites.push([write.task_id, write.channel, value])
+    }
+
+    return pendingWrites
+  }
+
+  /**
+   * Helper method to serialize checkpoint for storage
+   */
+  private _dumpCheckpoint(checkpoint: Checkpoint): SerializedCheckpoint {
+    const channelVersions = this._copyChannelVersions(
+      checkpoint.channel_versions,
+    )
+    const versionsSeen = this._copyVersionsSeen(checkpoint.versions_seen)
+
+    const serialized: SerializedCheckpoint = {
+      v: checkpoint.v || 1,
+      id: checkpoint.id,
+      ts: checkpoint.ts,
+      channel_versions: channelVersions,
+      versions_seen: versionsSeen,
+    }
+
+    // Don't store channel_values in checkpoint table
+    // They go to the blobs table instead
+
+    if (checkpoint.pending_sends && checkpoint.pending_sends.length > 0) {
+      serialized.pending_sends = checkpoint.pending_sends
+    }
+
+    return serialized
+  }
+
+  /**
+   * Copy channel versions for serialization
+   */
+  private _copyChannelVersions(
+    channelVersions?: ChannelVersions,
+  ): Record<string, number | string> {
+    const result: Record<string, number | string> = {}
+    if (!channelVersions) return result
+
+    for (const [key, value] of Object.entries(channelVersions)) {
+      result[key] = value
+    }
+    return result
+  }
+
+  /**
+   * Copy versions seen for serialization
+   */
+  private _copyVersionsSeen(
+    versionsSeen?: Record<string, ChannelVersions>,
+  ): Record<string, Record<string, number | string>> {
+    const result: Record<string, Record<string, number | string>> = {}
+    if (!versionsSeen) return result
+
+    for (const [agent, versions] of Object.entries(versionsSeen)) {
+      result[agent] = {}
+      if (versions && typeof versions === 'object') {
+        for (const [key, value] of Object.entries(versions)) {
+          result[agent][key] = value
+        }
+      }
+    }
+    return result
+  }
+
+  /**
+   * Helper method to serialize channel blobs
+   */
+  private async _dumpBlobs(
+    threadId: string,
+    checkpointNs: string,
+    values: Record<string, unknown>,
+    versions: ChannelVersions,
+  ): Promise<Database['public']['Tables']['checkpoint_blobs']['Insert'][]> {
+    if (!values || Object.keys(versions).length === 0) {
+      return []
+    }
+
+    const blobs: Database['public']['Tables']['checkpoint_blobs']['Insert'][] =
+      []
+
+    for (const [channel, version] of Object.entries(versions)) {
+      const value = values[channel]
+
+      if (value === undefined || value === null) {
+        blobs.push({
+          thread_id: threadId,
+          checkpoint_ns: checkpointNs,
+          channel,
+          version: version.toString(),
+          type: 'empty',
+          blob: null,
+          organization_id: this.organizationId,
+        })
+      } else {
+        const [type, serialized] = this.serde.dumpsTyped(value)
+
+        blobs.push({
+          thread_id: threadId,
+          checkpoint_ns: checkpointNs,
+          channel,
+          version: version.toString(),
+          type,
+          blob: ByteaUtils.uint8ArrayToBase64(serialized), // Convert to Base64 for Supabase BYTEA
+          organization_id: this.organizationId,
+        })
+      }
+    }
+
+    return blobs
+  }
+
+  /**
+   * Helper method to serialize metadata
+   */
+  private async _dumpMetadata(metadata: CheckpointMetadata): Promise<Json> {
+    // Serialize metadata to ensure it's compatible with Json type
+    return JSON.parse(JSON.stringify(metadata))
+  }
+
+  /**
+   * Helper method to serialize pending writes
+   */
+  private async _dumpWrites(
+    threadId: string,
+    checkpointNs: string,
+    checkpointId: string,
+    taskId: string,
+    writes: PendingWrite[],
+  ): Promise<Database['public']['Tables']['checkpoint_writes']['Insert'][]> {
+    const dumpedWrites: Database['public']['Tables']['checkpoint_writes']['Insert'][] =
+      []
+
+    for (let idx = 0; idx < writes.length; idx++) {
+      const write = writes[idx]
+      if (!write) continue
+      const [channel, value] = write
+      const [type, serialized] = this.serde.dumpsTyped(value)
+
+      dumpedWrites.push({
+        thread_id: threadId,
+        checkpoint_ns: checkpointNs,
+        checkpoint_id: checkpointId,
+        task_id: taskId,
+        idx: WRITES_IDX_MAP[channel] ?? idx,
+        channel,
+        type,
+        blob: ByteaUtils.uint8ArrayToBase64(serialized), // Convert to Base64 for Supabase BYTEA
+        organization_id: this.organizationId,
+      })
+    }
+
+    return dumpedWrites
   }
 }

@@ -43,6 +43,7 @@ export const Default: Story = {
     onMessageSend: () => {},
     onVersionView: () => {},
     onArtifactLinkClick: () => {},
+    isDeepModelingEnabled: false,
   },
 }
 
@@ -54,6 +55,7 @@ export const AnimatedDemo: Story = {
     onMessageSend: () => {},
     onVersionView: () => {},
     onArtifactLinkClick: () => {},
+    isDeepModelingEnabled: false,
   },
   render: (props) => <AnimatedChatDemo {...props} />,
 }

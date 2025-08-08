@@ -74,7 +74,6 @@ const parsePatchOperations = (
 }
 
 type Props = {
-  buildingSchemaVersionId: string
   version?: {
     id: string
     number: number
@@ -83,11 +82,7 @@ type Props = {
   onView?: (versionId: string) => void
 }
 
-export const VersionMessage: FC<Props> = ({
-  buildingSchemaVersionId,
-  version,
-  onView,
-}) => {
+export const VersionMessage: FC<Props> = ({ version, onView }) => {
   const [isExpanded, setIsExpanded] = useState(false)
 
   const handleClick = useCallback(() => {
@@ -132,7 +127,7 @@ export const VersionMessage: FC<Props> = ({
           onClick={toggleExpanded}
           aria-label={`${isExpanded ? 'Collapse' : 'Expand'} version ${displayVersionNumber} details`}
           aria-expanded={isExpanded}
-          id={`version-header-${buildingSchemaVersionId}`}
+          id={`version-header-${version?.id}`}
         >
           <div className={styles.collapseButton}>
             {isExpanded ? <ChevronDown /> : <ChevronRight />}
@@ -156,7 +151,7 @@ export const VersionMessage: FC<Props> = ({
       <div className={styles.divider} />
       <section
         className={clsx(styles.contentWrapper, isExpanded && styles.expanded)}
-        aria-labelledby={`version-header-${buildingSchemaVersionId}`}
+        aria-labelledby={`version-header-${version?.id}`}
       >
         <div className={styles.content}>
           {patchOperations.map((operation, index) => (
@@ -169,8 +164,7 @@ export const VersionMessage: FC<Props> = ({
             >
               <div className={styles.pathContainer}>
                 {operation.path.map((part, partIndex) => (
-                  // biome-ignore lint/suspicious/noArrayIndexKey: Path parts maintain their order
-                  <Fragment key={`${buildingSchemaVersionId}-${partIndex}`}>
+                  <Fragment key={`${version.id}-${partIndex}`}>
                     {partIndex > 0 && (
                       <div className={styles.arrowContainer}>
                         <ArrowRight />

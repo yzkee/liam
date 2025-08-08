@@ -28,4 +28,8 @@ export const PATH_PATTERNS = {
   CONSTRAINT_DELETE_CONSTRAINT:
     /^\/tables\/([^/]+)\/constraints\/([^/]+)\/deleteConstraint$/,
   CONSTRAINT_DETAIL: /^\/tables\/([^/]+)\/constraints\/([^/]+)\/detail$/,
+  ENUM_BASE: /^\/enums\/([^/]+)$/,
+  ENUM_NAME: /^\/enums\/([^/]+)\/name$/,
+  ENUM_VALUES: /^\/enums\/([^/]+)\/values$/,
+  ENUM_COMMENT: /^\/enums\/([^/]+)\/comment$/,
 } as const

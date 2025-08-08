@@ -1,6 +1,6 @@
 'use client'
 
-import type { Json, Tables } from '@liam-hq/db'
+import type { Database } from '@liam-hq/db'
 import { operationsSchema } from '@liam-hq/schema'
 import {
   ArrowRight,
@@ -10,16 +10,8 @@ import {
   ChevronRight,
 } from '@liam-hq/ui'
 import clsx from 'clsx'
-import {
-  type FC,
-  Fragment,
-  useCallback,
-  useEffect,
-  useState,
-  useTransition,
-} from 'react'
+import { type FC, Fragment, useCallback, useState } from 'react'
 import * as v from 'valibot'
-import { getVersionById } from '@/components/SessionDetailPage/services/getVersionById'
 import styles from './VersionMessage.module.css'
 
 /**
@@ -32,7 +24,7 @@ type StatusClass =
   | 'statusUnknown'
 
 const parsePatchOperations = (
-  patch: Json,
+  patch: Database['public']['Tables']['building_schema_versions']['Row']['patch'],
 ): Array<{
   path: string[]
   op: string
@@ -81,22 +73,21 @@ const parsePatchOperations = (
   })
 }
 
-type BuildingSchemaVersion = Pick<
-  Tables<'building_schema_versions'>,
-  'patch' | 'number' | 'id'
->
-
 type Props = {
   buildingSchemaVersionId: string
+  version?: {
+    id: string
+    number: number
+    patch: Database['public']['Tables']['building_schema_versions']['Row']['patch']
+  } | null
   onView?: (versionId: string) => void
 }
 
 export const VersionMessage: FC<Props> = ({
   buildingSchemaVersionId,
+  version,
   onView,
 }) => {
-  const [version, setVersion] = useState<BuildingSchemaVersion | null>(null)
-  const [isPending, startTransition] = useTransition()
   const [isExpanded, setIsExpanded] = useState(false)
 
   const handleClick = useCallback(() => {
@@ -104,20 +95,7 @@ export const VersionMessage: FC<Props> = ({
     onView?.(version.id)
   }, [version, onView])
 
-  useEffect(() => {
-    startTransition(async () => {
-      const data = await getVersionById(buildingSchemaVersionId)
-
-      if (!data) {
-        console.error('Failed to fetch version')
-        return
-      }
-
-      setVersion(data)
-    })
-  }, [buildingSchemaVersionId])
-
-  if (isPending || !version) {
+  if (!version) {
     return (
       <div className={styles.container}>
         <div className={styles.header}>
@@ -125,13 +103,13 @@ export const VersionMessage: FC<Props> = ({
             type="button"
             className={styles.headerButton}
             disabled
-            aria-label="Loading version details"
+            aria-label="Version not found"
             aria-expanded={false}
           >
             <div className={styles.collapseButton}>
               <ChevronRight />
             </div>
-            <span className={styles.versionNumber}>Loading version...</span>
+            <span className={styles.versionNumber}>Version not found</span>
           </button>
         </div>
       </div>

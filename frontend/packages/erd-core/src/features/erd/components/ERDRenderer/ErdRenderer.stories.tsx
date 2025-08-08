@@ -1,18 +1,34 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import '@xyflow/react/dist/style.css'
 import type React from 'react'
+import type { ComponentProps, FC, PropsWithChildren } from 'react'
+import { ErdRendererProvider, VersionProvider } from '@/providers'
+import { mockCurrentSchema } from '../../mocks'
 import { ERDRenderer } from './ErdRenderer'
-import { basicSchema } from './fixtures/schemas'
-import { MockProviders } from './mocks/providers'
+
+const mockVersion = {
+  version: '1.0.0',
+  gitHash: 'abc123def456',
+  envName: 'storybook',
+  date: '2024-01-01T00:00:00Z',
+  displayedOn: 'web' as const,
+}
+
+type ProvidersProps = PropsWithChildren &
+  ComponentProps<typeof ErdRendererProvider>
+
+const Providers: FC<ProvidersProps> = ({ children, ...props }) => {
+  return (
+    <VersionProvider version={mockVersion}>
+      <ErdRendererProvider {...props}>{children}</ErdRendererProvider>
+    </VersionProvider>
+  )
+}
 
 const meta = {
-  title: 'ERDRenderer/Basic',
   component: ERDRenderer,
   parameters: {
     layout: 'fullscreen',
-    backgrounds: {
-      default: 'dark',
-    },
   },
   argTypes: {
     defaultSidebarOpen: {
@@ -25,22 +41,18 @@ const meta = {
     },
   },
   decorators: [
-    (Story: React.ComponentType<any>, { args }: { args: any }) => (
-      <MockProviders
-        schema={{ current: basicSchema }}
-        showDiff={false}
-        defaultShowMode="ALL_FIELDS"
-      >
+    (Story) => (
+      <Providers schema={{ current: mockCurrentSchema }}>
         <div style={{ height: '100vh', width: '100vw' }}>
-          <Story {...args} />
+          <Story />
         </div>
-      </MockProviders>
+      </Providers>
     ),
   ],
 } satisfies Meta<typeof ERDRenderer>
 
 export default meta
-type Story = StoryObj<typeof ERDRenderer>
+type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
@@ -64,41 +76,31 @@ export const SidebarClosed: Story = {
 }
 
 export const TableNameMode: Story = {
-  args: {
-    defaultSidebarOpen: true,
-    withAppBar: false,
-  },
   decorators: [
-    (Story: React.ComponentType<any>, { args }: { args: any }) => (
-      <MockProviders
-        schema={{ current: basicSchema }}
-        showDiff={false}
+    (Story) => (
+      <Providers
         defaultShowMode="TABLE_NAME"
+        schema={{ current: mockCurrentSchema }}
       >
         <div style={{ height: '100vh', width: '100vw' }}>
-          <Story {...args} />
+          <Story />
         </div>
-      </MockProviders>
+      </Providers>
     ),
   ],
 }
 
 export const KeyOnlyMode: Story = {
-  args: {
-    defaultSidebarOpen: true,
-    withAppBar: false,
-  },
   decorators: [
-    (Story: React.ComponentType<any>, { args }: { args: any }) => (
-      <MockProviders
-        schema={{ current: basicSchema }}
-        showDiff={false}
+    (Story) => (
+      <Providers
         defaultShowMode="KEY_ONLY"
+        schema={{ current: mockCurrentSchema }}
       >
         <div style={{ height: '100vh', width: '100vw' }}>
-          <Story {...args} />
+          <Story />
         </div>
-      </MockProviders>
+      </Providers>
     ),
   ],
 }

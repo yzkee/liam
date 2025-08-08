@@ -1,6 +1,7 @@
 import type {
   AlterTableStmt,
   CommentStmt,
+  CreateEnumStmt,
   CreateStmt,
   IndexStmt,
   List,
@@ -15,6 +16,7 @@ import type {
   Columns,
   Constraint,
   Constraints,
+  Enum,
   ForeignKeyConstraint,
   ForeignKeyConstraintReferenceOption,
   Schema,
@@ -202,6 +204,7 @@ export const convertToSchema = (
   mainSchema: Schema,
 ): ProcessResult => {
   const tables: Record<string, Table> = {}
+  const enums: Record<string, Enum> = {}
   const errors: ProcessError[] = []
 
   function isCreateStmt(stmt: Node): stmt is { CreateStmt: CreateStmt } {
@@ -220,6 +223,12 @@ export const convertToSchema = (
     stmt: Node,
   ): stmt is { AlterTableStmt: AlterTableStmt } {
     return 'AlterTableStmt' in stmt
+  }
+
+  function isCreateEnumStmt(
+    stmt: Node,
+  ): stmt is { CreateEnumStmt: CreateEnumStmt } {
+    return 'CreateEnumStmt' in stmt
   }
 
   /**
@@ -728,14 +737,41 @@ export const convertToSchema = (
    * Handle COMMENT statement
    */
   function handleCommentStmt(commentStmt: CommentStmt): void {
-    // Skip if not a table or column comment
+    // Skip if not a supported comment type (only table, column, and type comments are supported)
     if (
       commentStmt.objtype !== 'OBJECT_TABLE' &&
-      commentStmt.objtype !== 'OBJECT_COLUMN'
+      commentStmt.objtype !== 'OBJECT_COLUMN' &&
+      commentStmt.objtype !== 'OBJECT_TYPE'
     )
       return
 
-    // Extract list items and comment
+    // Handle COMMENT ON TYPE (enum comments)
+    if (commentStmt.objtype === 'OBJECT_TYPE') {
+      // Get comment text
+      const comment = commentStmt.comment
+      if (!comment) return
+
+      // Extract TypeName for enum comments
+      const objectNode = commentStmt.object
+      if (!objectNode || !('TypeName' in objectNode)) return
+
+      const typeName = objectNode.TypeName
+      if (!typeName?.names || typeName.names.length === 0) return
+
+      const lastNameNode = typeName.names[typeName.names.length - 1]
+      if (!isStringNode(lastNameNode)) return
+
+      const enumName = lastNameNode.String.sval
+      if (!enumName) return
+
+      // Set comment on existing enum
+      if (enums[enumName]) {
+        enums[enumName].comment = comment
+      }
+      return
+    }
+
+    // Handle table and column comments (use existing list-based extraction)
     const result = extractCommentListItems(commentStmt)
     if (!result) return
 
@@ -900,6 +936,46 @@ export const convertToSchema = (
   }
 
   /**
+   * Handles a CREATE TYPE AS ENUM statement by extracting the enum name and values,
+   * and adding the enum to the enums collection. If the enum values are empty,
+   * the enum is still created with an empty values array. If the type name is missing
+   * or invalid, or if the enum name cannot be determined, the function returns early
+   * and does not create the enum.
+   *
+   * @param createEnumStmt The CREATE TYPE AS ENUM statement node to process.
+   */
+
+  function handleCreateEnumStmt(createEnumStmt: CreateEnumStmt): void {
+    // Extract type name
+    if (!createEnumStmt?.typeName || createEnumStmt.typeName.length === 0)
+      return
+
+    const lastNameNode =
+      createEnumStmt.typeName[createEnumStmt.typeName.length - 1]
+    if (!isStringNode(lastNameNode)) return
+
+    const enumName = lastNameNode.String.sval
+    if (!enumName) return
+
+    // Extract enum values
+    const enumValues: string[] = []
+    if (createEnumStmt.vals) {
+      for (const val of createEnumStmt.vals) {
+        if (isStringNode(val) && val.String.sval) {
+          enumValues.push(val.String.sval)
+        }
+      }
+    }
+
+    // Create enum even if it has empty values
+    enums[enumName] = {
+      name: enumName,
+      values: enumValues,
+      comment: null, // Will be set by COMMENT ON TYPE statements
+    }
+  }
+
+  /**
    * Handle ALTER TABLE statement
    */
   function handleAlterTableStmt(alterTableStmt: AlterTableStmt): void {
@@ -921,6 +997,7 @@ export const convertToSchema = (
     if (statement?.stmt === undefined) continue
 
     const stmt = statement.stmt
+
     if (isCreateStmt(stmt)) {
       handleCreateStmt(stmt.CreateStmt)
     } else if (isIndexStmt(stmt)) {
@@ -929,13 +1006,15 @@ export const convertToSchema = (
       handleCommentStmt(stmt.CommentStmt)
     } else if (isAlterTableStmt(stmt)) {
       handleAlterTableStmt(stmt.AlterTableStmt)
+    } else if (isCreateEnumStmt(stmt)) {
+      handleCreateEnumStmt(stmt.CreateEnumStmt)
     }
   }
 
   return {
     value: {
       tables,
-      enums: {},
+      enums,
     },
     errors,
   }

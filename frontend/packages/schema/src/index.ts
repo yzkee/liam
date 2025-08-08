@@ -36,6 +36,7 @@ export type { ProcessError } from './parser.js'
 export {
   aColumn,
   aForeignKeyConstraint,
+  anIndex,
   aSchema,
   aTable,
   aUniqueConstraint,

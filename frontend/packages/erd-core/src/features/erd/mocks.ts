@@ -461,10 +461,39 @@ export const mockModifiedColumnDefaultSchema: SchemaProviderValue = {
   }),
 }
 
+const usersTableWithIndexColumns = aTable({
+  name: 'users',
+  columns: {
+    id: aColumn({
+      name: 'id',
+      type: 'integer',
+      notNull: true,
+    }),
+    name: aColumn({
+      name: 'name',
+      type: 'varchar',
+      notNull: true,
+    }),
+    email: aColumn({
+      name: 'email',
+      type: 'varchar',
+      notNull: true,
+    }),
+    created_at: aColumn({
+      name: 'created_at',
+      type: 'timestamp',
+      notNull: true,
+      default: 'CURRENT_TIMESTAMP',
+    }),
+  },
+  constraints: {},
+})
+
 export const mockAddedIndex: SchemaProviderValue = {
   current: aSchema({
     tables: {
       users: aTable({
+        ...usersTableWithIndexColumns,
         indexes: {
           idx_users_email: anIndex({
             name: 'idx_users_email',
@@ -489,6 +518,7 @@ export const mockAddedIndex: SchemaProviderValue = {
   previous: aSchema({
     tables: {
       users: aTable({
+        ...usersTableWithIndexColumns,
         indexes: {
           idx_users_email: anIndex({
             name: 'idx_users_email',
@@ -506,6 +536,7 @@ export const mockRemovedIndex: SchemaProviderValue = {
   current: aSchema({
     tables: {
       users: aTable({
+        ...usersTableWithIndexColumns,
         indexes: {
           idx_users_email: anIndex({
             name: 'idx_users_email',
@@ -520,6 +551,7 @@ export const mockRemovedIndex: SchemaProviderValue = {
   previous: aSchema({
     tables: {
       users: aTable({
+        ...usersTableWithIndexColumns,
         indexes: {
           idx_users_email: anIndex({
             name: 'idx_users_email',
@@ -547,6 +579,7 @@ export const mockModifiedIndexUnique: SchemaProviderValue = {
   current: aSchema({
     tables: {
       users: aTable({
+        ...usersTableWithIndexColumns,
         indexes: {
           idx_users_email: anIndex({
             name: 'idx_users_email',
@@ -566,6 +599,7 @@ export const mockModifiedIndexUnique: SchemaProviderValue = {
   previous: aSchema({
     tables: {
       users: aTable({
+        ...usersTableWithIndexColumns,
         indexes: {
           idx_users_email: anIndex({
             name: 'idx_users_email',

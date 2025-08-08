@@ -120,7 +120,13 @@ export const TableColumn: FC<TableColumnProps> = ({
     isHighlightedTable && (isSource || !!targetCardinality)
 
   return (
-    <li className={clsx(styles.wrapper, showDiff && styles.wrapperWithDiff)}>
+    <li
+      className={clsx(
+        styles.wrapper,
+        showDiff && styles.wrapperWithDiff,
+        shouldHighlight && styles.highlightRelatedColumn,
+      )}
+    >
       {showDiff && changeStatus && (
         <div className={clsx(styles.diffBox, diffStyle)}>
           <DiffIcon changeStatus={changeStatus} />
@@ -129,11 +135,7 @@ export const TableColumn: FC<TableColumnProps> = ({
 
       <div
         key={column.name}
-        className={clsx(
-          styles.columnWrapper,
-          shouldHighlight && styles.highlightRelatedColumn,
-          showDiff && diffStyle,
-        )}
+        className={clsx(styles.columnWrapper, showDiff && diffStyle)}
       >
         <ColumnIcon
           table={table}

@@ -6,7 +6,7 @@
   "dependencies": {
     "@langchain/community": "0.3.49",
     "@langchain/core": "0.3.66",
-    "@langchain/langgraph": "0.3.10",
+    "@langchain/langgraph": "0.3.11",
     "@langchain/langgraph-checkpoint": "0.0.18",
     "@langchain/openai": "0.5.18",
     "@liam-hq/artifact": "workspace:*",

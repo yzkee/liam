@@ -17,7 +17,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.1.2",
     "@liam-hq/configs": "workspace:*",
-    "eslint": "9.31.0",
+    "eslint": "9.32.0",
     "vitest": "3.2.4"
   },
   "scripts": {

@@ -24,7 +24,7 @@
     "@sentry/esbuild-plugin": "3.5.0",
     "@types/node": "22.16.5",
     "dotenv": "16.5.0",
-    "eslint": "9.31.0",
+    "eslint": "9.32.0",
     "glob": "11.0.3",
     "trigger.dev": "4.0.0-v4-beta.22",
     "typescript": "5.8.3",

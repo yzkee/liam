@@ -1,6 +1,6 @@
 'use client'
 
-import type { Database } from '@liam-hq/db'
+import type { Tables } from '@liam-hq/db'
 import { operationsSchema } from '@liam-hq/schema'
 import {
   ArrowRight,
@@ -24,7 +24,7 @@ type StatusClass =
   | 'statusUnknown'
 
 const parsePatchOperations = (
-  patch: Database['public']['Tables']['building_schema_versions']['Row']['patch'],
+  patch: Tables<'building_schema_versions'>['patch'],
 ): Array<{
   path: string[]
   op: string
@@ -77,7 +77,7 @@ type Props = {
   version?: {
     id: string
     number: number
-    patch: Database['public']['Tables']['building_schema_versions']['Row']['patch']
+    patch: Tables<'building_schema_versions'>['patch']
   } | null
   onView?: (versionId: string) => void
 }

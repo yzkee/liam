@@ -197,10 +197,7 @@ export class SupabaseSchemaRepository implements SchemaRepository {
           // Update currentSchema with the patched result
           Object.assign(currentSchema, patchResult.value)
         } else {
-          console.warn(
-            `Failed to apply patch for version ${version.number}:`,
-            patchResult.error,
-          )
+          // Failed to apply patch for this version, continue with next
         }
       } else {
         console.warn(
@@ -213,8 +210,7 @@ export class SupabaseSchemaRepository implements SchemaRepository {
     // Validate and return as Schema type
     const validationResult = v.safeParse(schemaSchema, currentSchema)
     if (!validationResult.success) {
-      console.warn('Schema validation failed, using fallback schema')
-      console.warn('Validation errors:', validationResult.issues)
+      // Schema validation failed, using fallback schema
       return { tables: {}, enums: {} }
     }
 

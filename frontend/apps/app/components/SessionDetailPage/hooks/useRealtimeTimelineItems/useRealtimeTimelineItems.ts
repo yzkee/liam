@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from 'react'
 import * as v from 'valibot'
 import { createClient } from '@/libs/db/client'
 import { convertTimelineItemToTimelineItemEntry } from '../../services/convertTimelineItemToTimelineItemEntry'
+import { fetchVersionInfo } from '../../services/fetchVersionInfo'
 import type { TimelineItem, TimelineItemEntry } from '../../types'
 import { isDuplicateTimelineItem } from './utils/isDuplicateTimelineItem'
 
@@ -113,9 +114,32 @@ export function useRealtimeTimelineItems(
   )
 
   const handleNewTimelineItem = useCallback(
-    (newTimelineItem: TimelineItem) => {
+    async (newTimelineItem: TimelineItem) => {
       const timelineItemEntry =
         convertTimelineItemToTimelineItemEntry(newTimelineItem)
+
+      // If this is a schema_version timeline item and version info is missing, fetch it
+      if (
+        timelineItemEntry.type === 'schema_version' &&
+        !timelineItemEntry.version &&
+        timelineItemEntry.buildingSchemaVersionId
+      ) {
+        const supabase = createClient()
+        const versionInfo = await fetchVersionInfo(
+          supabase,
+          timelineItemEntry.buildingSchemaVersionId,
+        )
+
+        if (versionInfo) {
+          // Update the timeline item entry with the fetched version info
+          const updatedEntry = {
+            ...timelineItemEntry,
+            version: versionInfo,
+          }
+          addOrUpdateTimelineItem(updatedEntry)
+          return
+        }
+      }
 
       // TODO: Implement efficient duplicate checking - Use Set/Map for O(1) duplicate checking instead of O(n) array.some()
       // TODO: Implement smart auto-scroll - Consider user's scroll position and only auto-scroll when user is at bottom
@@ -145,7 +169,7 @@ export function useRealtimeTimelineItems(
 
           const updatedTimelineItem = parseResult.value
           if (updatedTimelineItem.design_session_id === designSessionId) {
-            handleNewTimelineItem(updatedTimelineItem)
+            handleNewTimelineItem(updatedTimelineItem).catch(handleError)
           }
         },
       )

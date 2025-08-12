@@ -10,8 +10,10 @@ import {
   ChevronRight,
 } from '@liam-hq/ui'
 import clsx from 'clsx'
-import { type FC, Fragment, useCallback, useState } from 'react'
+import { type FC, Fragment, useCallback, useEffect, useState } from 'react'
 import * as v from 'valibot'
+import { createClient } from '@/libs/db/client'
+import { fetchVersionInfo } from '../../../../../../services/fetchVersionInfo'
 import styles from './VersionMessage.module.css'
 
 /**
@@ -79,18 +81,49 @@ type Props = {
     number: number
     patch: Tables<'building_schema_versions'>['patch']
   } | null
+  buildingSchemaVersionId?: string
   onView?: (versionId: string) => void
 }
 
-export const VersionMessage: FC<Props> = ({ version, onView }) => {
+export const VersionMessage: FC<Props> = ({
+  version,
+  buildingSchemaVersionId,
+  onView,
+}) => {
   const [isExpanded, setIsExpanded] = useState(false)
+  const [fetchedVersion, setFetchedVersion] = useState<{
+    id: string
+    number: number
+    patch: Tables<'building_schema_versions'>['patch']
+  } | null>(null)
+
+  // Auto-fetch version info if not provided
+  useEffect(() => {
+    if (!version && buildingSchemaVersionId && !fetchedVersion) {
+      const fetchVersion = async () => {
+        const supabase = createClient()
+        const versionInfo = await fetchVersionInfo(
+          supabase,
+          buildingSchemaVersionId,
+        )
+        if (versionInfo) {
+          setFetchedVersion(versionInfo)
+        }
+      }
+      fetchVersion().catch((error) => {
+        console.error('Failed to fetch version info:', error)
+      })
+    }
+  }, [version, buildingSchemaVersionId, fetchedVersion])
+
+  const currentVersion = version || fetchedVersion
 
   const handleClick = useCallback(() => {
-    if (!version) return
-    onView?.(version.id)
-  }, [version, onView])
+    if (!currentVersion) return
+    onView?.(currentVersion.id)
+  }, [currentVersion, onView])
 
-  if (!version) {
+  if (!currentVersion) {
     return (
       <div className={styles.container}>
         <div className={styles.header}>
@@ -111,8 +144,8 @@ export const VersionMessage: FC<Props> = ({ version, onView }) => {
     )
   }
 
-  const displayVersionNumber = version.number
-  const patchOperations = parsePatchOperations(version.patch)
+  const displayVersionNumber = currentVersion.number
+  const patchOperations = parsePatchOperations(currentVersion.patch)
 
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded)
@@ -127,7 +160,7 @@ export const VersionMessage: FC<Props> = ({ version, onView }) => {
           onClick={toggleExpanded}
           aria-label={`${isExpanded ? 'Collapse' : 'Expand'} version ${displayVersionNumber} details`}
           aria-expanded={isExpanded}
-          id={`version-header-${version?.id}`}
+          id={`version-header-${currentVersion?.id}`}
         >
           <div className={styles.collapseButton}>
             {isExpanded ? <ChevronDown /> : <ChevronRight />}
@@ -151,12 +184,12 @@ export const VersionMessage: FC<Props> = ({ version, onView }) => {
       <div className={styles.divider} />
       <section
         className={clsx(styles.contentWrapper, isExpanded && styles.expanded)}
-        aria-labelledby={`version-header-${version?.id}`}
+        aria-labelledby={`version-header-${currentVersion?.id}`}
       >
         <div className={styles.content}>
           {patchOperations.map((operation, index) => (
             <div
-              key={`${version.id}-${index}`}
+              key={`${currentVersion.id}-${index}`}
               className={clsx(
                 styles.operationItem,
                 styles[operation.statusClass],
@@ -164,7 +197,7 @@ export const VersionMessage: FC<Props> = ({ version, onView }) => {
             >
               <div className={styles.pathContainer}>
                 {operation.path.map((part, partIndex) => (
-                  <Fragment key={`${version.id}-${partIndex}`}>
+                  <Fragment key={`${currentVersion.id}-${partIndex}`}>
                     {partIndex > 0 && (
                       <div className={styles.arrowContainer}>
                         <ArrowRight />

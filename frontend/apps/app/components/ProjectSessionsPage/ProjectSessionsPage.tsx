@@ -21,9 +21,9 @@ export const ProjectSessionsPage: FC<Props> = async ({ projectId }) => {
     <div className={styles.container}>
       <div className={styles.wrapper}>
         <h1 className={styles.title}>
-          Create a new session for
+          Create a new session
           <br />
-          this project
+          for this project
         </h1>
         <SessionFormContainer
           projects={projects}

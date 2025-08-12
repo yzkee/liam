@@ -20,6 +20,7 @@ type Props = {
   onRetry?: () => void
   isWorkflowRunning?: boolean
   onArtifactLinkClick: () => void
+  isDeepModelingEnabled: boolean
 }
 
 export const Chat: FC<Props> = ({
@@ -31,6 +32,7 @@ export const Chat: FC<Props> = ({
   onRetry,
   isWorkflowRunning = false,
   onArtifactLinkClick,
+  isDeepModelingEnabled,
 }) => {
   const { containerRef } = useScrollToBottom<HTMLDivElement>(
     timelineItems.length,
@@ -49,6 +51,7 @@ export const Chat: FC<Props> = ({
     await sendChatMessage({
       designSessionId,
       userInput: content,
+      isDeepModelingEnabled,
     })
   }
 

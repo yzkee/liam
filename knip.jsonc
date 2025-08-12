@@ -25,7 +25,8 @@
     "frontend/internal-packages/agent/src/vectorstore/supabaseVectorStore.ts",
     "frontend/internal-packages/agent/src/vectorstore/syncSchemaVectorStore.ts",
     // - Newly added enum schema definitions (will be used in future implementations)
-    "frontend/packages/schema/src/schema/schema.ts"
+    "frontend/packages/schema/src/schema/schema.ts",
+    "frontend/packages/schema/src/schema/index.ts"
   ],
 
 

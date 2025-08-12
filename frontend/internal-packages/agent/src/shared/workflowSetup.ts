@@ -1,7 +1,7 @@
 import { AIMessage, HumanMessage } from '@langchain/core/messages'
 import { RunCollectorCallbackHandler } from '@langchain/core/tracers/run_collector'
 import type { CompiledStateGraph } from '@langchain/langgraph'
-import { err, ok, ResultAsync } from 'neverthrow'
+import { err, errAsync, ok, okAsync, ResultAsync } from 'neverthrow'
 import { v4 as uuidv4 } from 'uuid'
 import { DEFAULT_RECURSION_LIMIT } from '../chat/workflow/shared/langGraphUtils'
 import type {
@@ -143,7 +143,7 @@ export const executeWorkflowWithTracking = <
   compiled: S,
   setupResult: WorkflowSetupResult,
   recursionLimit: number = DEFAULT_RECURSION_LIMIT,
-): ResultAsync<AgentWorkflowResult, Error> => {
+): AgentWorkflowResult => {
   const {
     workflowState,
     workflowRunId,
@@ -193,8 +193,8 @@ export const executeWorkflowWithTracking = <
 
   const validateAndReturnResult = (result: unknown) =>
     isWorkflowState(result)
-      ? ok(ok(result))
-      : err(new Error('Invalid workflow result'))
+      ? okAsync(result)
+      : errAsync(new Error('Invalid workflow result'))
 
   // 4. Handle WorkflowTerminationError - save timeline item and update status
   const saveTimelineItem = (error: WorkflowTerminationError) =>
@@ -207,11 +207,13 @@ export const executeWorkflowWithTracking = <
       (timelineError) => new Error(String(timelineError)),
     )
 
-  const handleWorkflowTermination = (error: WorkflowTerminationError) =>
+  const handleWorkflowTermination = (
+    error: WorkflowTerminationError,
+  ): AgentWorkflowResult =>
     ResultAsync.combine([
       saveTimelineItem(error),
       updateWorkflowStatus('error'),
-    ]).map(() => ok(workflowState))
+    ]).map(() => workflowState)
 
   // 5. Chain everything together
   return executeWorkflow

@@ -15,6 +15,10 @@ const constraintUpdatePathSchema = v.pipe(
   v.string(),
   v.regex(PATH_PATTERNS.CONSTRAINT_UPDATE_CONSTRAINT),
 )
+const constraintDetailPathSchema = v.pipe(
+  v.string(),
+  v.regex(PATH_PATTERNS.CONSTRAINT_DETAIL),
+)
 
 const addConstraintOperationSchema = v.pipe(
   v.object({
@@ -91,9 +95,34 @@ export const isReplaceConstraintUpdateOperation = (
   return v.safeParse(replaceConstraintUpdateOperationSchema, operation).success
 }
 
+const constraintColumnNamesArrayPathSchema = v.pipe(
+  v.string(),
+  v.regex(PATH_PATTERNS.CONSTRAINT_COLUMN_NAMES_ARRAY),
+)
+
+const replaceConstraintColumnNamesArrayOperationSchema = v.pipe(
+  v.object({
+    op: v.literal('replace'),
+    path: constraintColumnNamesArrayPathSchema,
+    value: v.string(),
+  }),
+  v.description('Replace constraint column name in array'),
+)
+
+const replaceConstraintDetailOperationSchema = v.pipe(
+  v.object({
+    op: v.literal('replace'),
+    path: constraintDetailPathSchema,
+    value: v.string(),
+  }),
+  v.description('Replace constraint detail'),
+)
+
 export const constraintOperations = [
   addConstraintOperationSchema,
   removeConstraintOperationSchema,
   replaceConstraintDeleteOperationSchema,
   replaceConstraintUpdateOperationSchema,
+  replaceConstraintColumnNamesArrayOperationSchema,
+  replaceConstraintDetailOperationSchema,
 ]

@@ -13,6 +13,7 @@ import type { DesignSessionWithTimelineItems, Version } from './types'
 
 type Props = {
   designSessionId: string
+  isDeepModelingEnabled: boolean
 }
 
 async function loadSessionData(designSessionId: string): Promise<
@@ -51,7 +52,10 @@ async function loadSessionData(designSessionId: string): Promise<
   })
 }
 
-export const SessionDetailPage: FC<Props> = async ({ designSessionId }) => {
+export const SessionDetailPage: FC<Props> = async ({
+  designSessionId,
+  isDeepModelingEnabled,
+}) => {
   const result = await loadSessionData(designSessionId)
 
   if (result.isErr()) {
@@ -80,6 +84,7 @@ export const SessionDetailPage: FC<Props> = async ({ designSessionId }) => {
       initialPrevSchema={initialPrevSchema}
       initialVersions={versions}
       initialWorkflowRunStatus={initialWorkflowRunStatus}
+      isDeepModelingEnabled={isDeepModelingEnabled}
     />
   )
 }

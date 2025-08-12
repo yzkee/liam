@@ -99,6 +99,7 @@ const createBuildingSchema = async (
     .single()
 
   if (buildingSchemaError || !buildingSchema) {
+    console.error('Building schema creation error:', buildingSchemaError)
     return { success: false, error: 'Failed to create building schema' }
   }
 
@@ -156,6 +157,7 @@ const triggerChatWorkflow = async (
       idempotencyKey,
     })
   } catch (error) {
+    console.error('Chat processing job trigger error:', error)
     return { success: false, error: 'Failed to trigger chat processing job' }
   }
 

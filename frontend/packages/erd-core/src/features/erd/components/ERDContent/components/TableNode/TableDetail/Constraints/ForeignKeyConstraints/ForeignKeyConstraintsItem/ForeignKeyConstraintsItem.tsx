@@ -19,17 +19,17 @@ export const ForeignKeyConstraintsItem: FC<Props> = ({
   tableId,
   foreignKeyConstraint,
 }) => {
-  const { diffItems } = useSchemaOrThrow()
+  const { operations } = useSchemaOrThrow()
   const { showDiff } = useUserEditingOrThrow()
 
   const changeStatus = useMemo(() => {
     if (!showDiff) return undefined
     return getChangeStatus({
       tableId,
-      diffItems: diffItems ?? [],
+      operations: operations ?? [],
       constraintId: foreignKeyConstraint.name,
     })
-  }, [showDiff, tableId, diffItems, foreignKeyConstraint.name])
+  }, [showDiff, tableId, operations, foreignKeyConstraint.name])
 
   const diffStyle = useDiffStyle(showDiff, changeStatus)
 

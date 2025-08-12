@@ -1,7 +1,7 @@
 import type { Operation } from 'fast-json-patch'
 import { describe, expect, it } from 'vitest'
 import { aSchema } from '../../schema/factories.js'
-import { applyPatchOperations } from '../applyPatchOperations.js'
+import { applyPatchOperations } from '../utils/applyPatchOperations.js'
 
 describe('applyPatchOperations', () => {
   describe('add operation', () => {

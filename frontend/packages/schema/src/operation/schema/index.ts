@@ -5,7 +5,7 @@ import { enumOperations } from './enum.js'
 import { indexOperations } from './indexOperations.js'
 import { tableOperations } from './table.js'
 
-const operationSchema = v.union([
+export const operationSchema = v.union([
   ...tableOperations,
   ...columnOperations,
   ...indexOperations,
@@ -18,3 +18,11 @@ export const operationsSchema = v.pipe(
   v.array(operationSchema),
   v.description('JSON Patch operations for database schema modifications'),
 )
+
+const changeStatusSchema = v.picklist([
+  'added',
+  'removed',
+  'modified',
+  'unchanged',
+])
+export type ChangeStatus = v.InferOutput<typeof changeStatusSchema>

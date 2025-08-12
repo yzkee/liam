@@ -1,5 +1,5 @@
 import type { Schema } from '@liam-hq/schema'
-import type { Result } from 'neverthrow'
+import type { ResultAsync } from 'neverthrow'
 import type { WorkflowState } from './chat/workflow/types'
 
 /**
@@ -20,4 +20,4 @@ export type AgentWorkflowParams = {
 /**
  * Result type for agent workflow execution
  */
-export type AgentWorkflowResult = Result<WorkflowState, Error>
+export type AgentWorkflowResult = ResultAsync<WorkflowState, Error>

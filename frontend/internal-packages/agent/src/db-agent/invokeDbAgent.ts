@@ -1,4 +1,3 @@
-import type { ResultAsync } from 'neverthrow'
 import { DEFAULT_RECURSION_LIMIT } from '../chat/workflow/shared/langGraphUtils'
 import type { WorkflowConfigurable } from '../chat/workflow/types'
 import {
@@ -15,15 +14,11 @@ import { createDbAgentGraph } from './createDbAgentGraph'
  */
 export const invokeDbAgent = (
   params: AgentWorkflowParams,
-  _config: { repositories: WorkflowConfigurable['repositories'] },
-): ResultAsync<AgentWorkflowResult, Error> => {
+  config: {
+    configurable: WorkflowConfigurable
+  },
+): AgentWorkflowResult => {
   const { recursionLimit = DEFAULT_RECURSION_LIMIT } = params
-  const config = {
-    configurable: {
-      repositories: _config.repositories,
-      thread_id: params.designSessionId,
-    },
-  }
   const compiled = createDbAgentGraph()
 
   // Setup workflow state with message conversion and timeline sync

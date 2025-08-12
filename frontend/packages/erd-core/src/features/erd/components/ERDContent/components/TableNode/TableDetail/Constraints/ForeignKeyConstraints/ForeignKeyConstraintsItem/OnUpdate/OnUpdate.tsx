@@ -11,17 +11,17 @@ type Props = {
 }
 
 export const OnUpdate: FC<Props> = ({ tableId, constraint }) => {
-  const { diffItems } = useSchemaOrThrow()
+  const { operations } = useSchemaOrThrow()
   const { showDiff } = useUserEditingOrThrow()
 
   const changeStatus = useMemo(() => {
     if (!showDiff) return undefined
     return getChangeStatus({
       tableId,
-      diffItems: diffItems ?? [],
+      operations: operations ?? [],
       constraintId: constraint.name,
     })
-  }, [showDiff, tableId, diffItems, constraint.name])
+  }, [showDiff, tableId, operations, constraint.name])
 
   const diffStyle = useDiffStyle(showDiff, changeStatus)
 

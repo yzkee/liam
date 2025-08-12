@@ -618,6 +618,74 @@ export const mockModifiedIndexUnique: SchemaProviderValue = {
   }),
 }
 
+export const mockModifiedIndexColumns: SchemaProviderValue = {
+  current: aSchema({
+    tables: {
+      users: aTable({
+        ...usersTableWithIndexColumns,
+        indexes: {
+          idx_users_composite: anIndex({
+            name: 'idx_users_composite',
+            columns: ['name', 'email', 'created_at'],
+            unique: false,
+          }),
+        },
+      }),
+    },
+    enums: {},
+  }),
+  previous: aSchema({
+    tables: {
+      users: aTable({
+        ...usersTableWithIndexColumns,
+        indexes: {
+          idx_users_composite: anIndex({
+            name: 'idx_users_composite',
+            columns: ['name', 'email'],
+            unique: false,
+          }),
+        },
+      }),
+    },
+    enums: {},
+  }),
+}
+
+export const mockModifiedIndexType: SchemaProviderValue = {
+  current: aSchema({
+    tables: {
+      users: aTable({
+        ...usersTableWithIndexColumns,
+        indexes: {
+          idx_users_email: anIndex({
+            name: 'idx_users_email',
+            columns: ['email'],
+            unique: false,
+            type: 'hash',
+          }),
+        },
+      }),
+    },
+    enums: {},
+  }),
+  previous: aSchema({
+    tables: {
+      users: aTable({
+        ...usersTableWithIndexColumns,
+        indexes: {
+          idx_users_email: anIndex({
+            name: 'idx_users_email',
+            columns: ['email'],
+            unique: false,
+            type: 'btree',
+          }),
+        },
+      }),
+    },
+    enums: {},
+  }),
+}
+
 export const mockAddedForeignKeyConstraint: SchemaProviderValue = {
   current: aSchema({
     tables: {

@@ -4,10 +4,6 @@ import { PATH_PATTERNS } from '../constants.js'
 import type { Operation } from './index.js'
 
 const indexPathSchema = v.pipe(v.string(), v.regex(PATH_PATTERNS.INDEX_BASE))
-const indexNamePathSchema = v.pipe(
-  v.string(),
-  v.regex(PATH_PATTERNS.INDEX_NAME),
-)
 const indexUniquePathSchema = v.pipe(
   v.string(),
   v.regex(PATH_PATTERNS.INDEX_UNIQUE),
@@ -15,6 +11,10 @@ const indexUniquePathSchema = v.pipe(
 const indexColumnsPathSchema = v.pipe(
   v.string(),
   v.regex(PATH_PATTERNS.INDEX_COLUMNS),
+)
+const indexColumnsElementPathSchema = v.pipe(
+  v.string(),
+  v.regex(PATH_PATTERNS.INDEX_COLUMNS_ELEMENT),
 )
 const indexTypePathSchema = v.pipe(
   v.string(),
@@ -58,16 +58,6 @@ export const isRemoveIndexOperation = (
   return v.safeParse(removeIndexOperationSchema, operation).success
 }
 
-// Replace index name operation
-const replaceIndexNameOperationSchema = v.pipe(
-  v.object({
-    op: v.literal('replace'),
-    path: indexNamePathSchema,
-    value: v.string(),
-  }),
-  v.description('Replace index name'),
-)
-
 // Replace index unique operation
 const replaceIndexUniqueOperationSchema = v.pipe(
   v.object({
@@ -98,12 +88,43 @@ const replaceIndexTypeOperationSchema = v.pipe(
   v.description('Replace index type'),
 )
 
+// Add index column element operation
+const addIndexColumnElementOperationSchema = v.pipe(
+  v.object({
+    op: v.literal('add'),
+    path: indexColumnsElementPathSchema,
+    value: v.string(),
+  }),
+  v.description('Add column to index columns array'),
+)
+
+// Remove index column element operation
+const removeIndexColumnElementOperationSchema = v.pipe(
+  v.object({
+    op: v.literal('remove'),
+    path: indexColumnsElementPathSchema,
+  }),
+  v.description('Remove column from index columns array'),
+)
+
+// Replace index column element operation
+const replaceIndexColumnElementOperationSchema = v.pipe(
+  v.object({
+    op: v.literal('replace'),
+    path: indexColumnsElementPathSchema,
+    value: v.string(),
+  }),
+  v.description('Replace column in index columns array'),
+)
+
 // Export all index operations
 export const indexOperations = [
   addIndexOperationSchema,
   removeIndexOperationSchema,
-  replaceIndexNameOperationSchema,
   replaceIndexUniqueOperationSchema,
   replaceIndexColumnsOperationSchema,
   replaceIndexTypeOperationSchema,
+  addIndexColumnElementOperationSchema,
+  removeIndexColumnElementOperationSchema,
+  replaceIndexColumnElementOperationSchema,
 ]

@@ -7,6 +7,7 @@ const INDEX_RELATED_PATH_PATTERN = [
   PATH_PATTERNS.INDEX_NAME,
   PATH_PATTERNS.INDEX_UNIQUE,
   PATH_PATTERNS.INDEX_COLUMNS,
+  PATH_PATTERNS.INDEX_COLUMNS_ELEMENT,
   PATH_PATTERNS.INDEX_TYPE,
 ]
 
@@ -33,5 +34,11 @@ export const getIndexRelatedChangeStatus = ({
     })
   })
 
-  return determineChangeStatus({ operations: filteredOperations })
+  return determineChangeStatus({
+    operations: filteredOperations,
+    customModificationChecker: (operations) =>
+      operations.some((op) =>
+        PATH_PATTERNS.INDEX_COLUMNS_ELEMENT.test(op.path),
+      ),
+  })
 }

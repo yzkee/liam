@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { PATH_PATTERNS } from '../../constants.js'
 import type { Operation } from '../../schema/index.js'
 import { determineChangeStatus } from '../determineChangeStatus.js'
 
@@ -145,5 +146,58 @@ describe('determineChangeStatus', () => {
       const result = determineChangeStatus({ operations })
       expect(result).toBe('added')
     })
+  })
+})
+
+describe('determineChangeStatus with customModificationChecker', () => {
+  it('should return "modified" when customModificationChecker returns true', () => {
+    const operations: Operation[] = [
+      {
+        op: 'add',
+        path: '/tables/users/indexes/idx_composite/columns/2',
+        value: 'created_at',
+      },
+    ]
+
+    const customChecker = (ops: Operation[]) =>
+      ops.some((op) => PATH_PATTERNS.INDEX_COLUMNS_ELEMENT.test(op.path))
+
+    const result = determineChangeStatus({
+      operations,
+      customModificationChecker: customChecker,
+    })
+    expect(result).toBe('modified')
+  })
+
+  it('should fallback to default logic when customModificationChecker returns false', () => {
+    const operations: Operation[] = [
+      {
+        op: 'add',
+        path: '/tables/users/indexes/idx_new',
+        value: { name: 'idx_new', columns: ['id'], unique: false, type: '' },
+      },
+    ]
+
+    const customChecker = (ops: Operation[]) =>
+      ops.some((op) => PATH_PATTERNS.INDEX_COLUMNS_ELEMENT.test(op.path))
+
+    const result = determineChangeStatus({
+      operations,
+      customModificationChecker: customChecker,
+    })
+    expect(result).toBe('added')
+  })
+
+  it('should work without customModificationChecker (backward compatibility)', () => {
+    const operations: Operation[] = [
+      {
+        op: 'replace',
+        path: '/tables/users/columns/id/type',
+        value: 'bigint',
+      },
+    ]
+
+    const result = determineChangeStatus({ operations })
+    expect(result).toBe('modified')
   })
 })

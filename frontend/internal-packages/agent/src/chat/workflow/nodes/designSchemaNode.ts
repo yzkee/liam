@@ -118,5 +118,9 @@ export async function designSchemaNode(
     ...state,
     messages: [syncedMessage],
     latestVersionNumber: state.latestVersionNumber + 1,
+    // Preserve DDL statements that may have been set by invokeSchemaDesignToolNode
+    ddlStatements: state.ddlStatements,
+    dmlStatements: state.dmlStatements,
+    dmlOperations: state.dmlOperations,
   }
 }

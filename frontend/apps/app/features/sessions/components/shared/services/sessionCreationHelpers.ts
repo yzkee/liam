@@ -1,16 +1,10 @@
 'use server'
 
-import { createHash } from 'node:crypto'
 import path from 'node:path'
 import { createSupabaseRepositories } from '@liam-hq/agent'
 import type { SupabaseClientType } from '@liam-hq/db'
-import {
-  deepModelingWorkflowTask,
-  designProcessWorkflowTask,
-} from '@liam-hq/jobs'
 import type { Schema } from '@liam-hq/schema'
 import { parse, setPrismWasmUrl } from '@liam-hq/schema/parser'
-import { idempotencyKeys } from '@trigger.dev/sdk'
 import { redirect } from 'next/navigation'
 import { getOrganizationId } from '@/features/organizations/services/getOrganizationId'
 import { createClient } from '@/libs/db/server'
@@ -106,10 +100,8 @@ const createBuildingSchema = async (
   return buildingSchema
 }
 
-const triggerChatWorkflow = async (
+const saveInitialMessage = async (
   initialMessage: string,
-  isDeepModelingEnabled: boolean,
-  buildingSchemaId: string,
   designSessionId: string,
   organizationId: string,
   currentUserId: string,
@@ -117,7 +109,7 @@ const triggerChatWorkflow = async (
   const supabase = await createClient()
   const repositories = createSupabaseRepositories(supabase, organizationId)
 
-  // Save initial user message to timeline before triggering workflow
+  // Save initial user message to timeline
   const userMessageResult = await repositories.schema.createTimelineItem({
     designSessionId,
     content: initialMessage,
@@ -130,40 +122,8 @@ const triggerChatWorkflow = async (
     return { success: false, error: 'Failed to save initial user message' }
   }
 
-  const history: [string, string][] = []
-  const chatPayload = {
-    userInput: initialMessage,
-    history,
-    organizationId,
-    buildingSchemaId,
-    latestVersionNumber: 0,
-    designSessionId,
-    userId: currentUserId,
-  }
-
-  const payloadHash = createHash('sha256')
-    .update(JSON.stringify(chatPayload))
-    .digest('hex')
-
-  const idempotencyKey = await idempotencyKeys.create(
-    `chat-${designSessionId}-${payloadHash}`,
-  )
-
-  try {
-    const task = isDeepModelingEnabled
-      ? deepModelingWorkflowTask
-      : designProcessWorkflowTask
-    await task.trigger(chatPayload, {
-      idempotencyKey,
-    })
-  } catch (error) {
-    console.error('Chat processing job trigger error:', error)
-    return { success: false, error: 'Failed to trigger chat processing job' }
-  }
-
   return { success: true }
 }
-
 export const parseSchemaContent = async (
   content: string,
   format: SchemaFormat,
@@ -220,19 +180,22 @@ export const createSessionWithSchema = async (
   if ('success' in buildingSchemaResult) {
     return buildingSchemaResult
   }
-  const buildingSchema = buildingSchemaResult
 
-  const workflowResult = await triggerChatWorkflow(
+  // Save the initial message to timeline
+  const messageResult = await saveInitialMessage(
     params.initialMessage,
-    params.isDeepModelingEnabled,
-    buildingSchema.id,
     designSession.id,
     organizationId,
     currentUserId,
   )
-  if (!workflowResult.success) {
-    return workflowResult
+  if (!messageResult.success) {
+    return messageResult
   }
 
-  redirect(`/app/design_sessions/${designSession.id}`)
+  // Just redirect without starting the workflow
+  // Pass isDeepModelingEnabled as query parameter
+  const queryParams = new URLSearchParams({
+    deepModeling: params.isDeepModelingEnabled.toString(),
+  })
+  redirect(`/app/design_sessions/${designSession.id}?${queryParams.toString()}`)
 }

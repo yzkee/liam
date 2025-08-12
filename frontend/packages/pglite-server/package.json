@@ -7,13 +7,17 @@
   },
   "main": "src/index.ts",
   "dependencies": {
-    "@electric-sql/pglite": "0.3.4"
+    "@electric-sql/pglite": "0.3.4",
+    "@pgsql/types": "15.1.1",
+    "neverthrow": "8.2.0",
+    "pg-query-emscripten": "5.1.0"
   },
   "devDependencies": {
     "@biomejs/biome": "2.1.2",
     "@liam-hq/configs": "workspace:*",
-    "eslint": "9.31.0",
-    "typescript": "5.8.3"
+    "eslint": "9.32.0",
+    "typescript": "5.8.3",
+    "vitest": "3.2.4"
   },
   "scripts": {
     "build": "tsc",
@@ -23,6 +27,7 @@
     "lint": "concurrently \"pnpm:lint:*\"",
     "lint:biome": "biome check .",
     "lint:eslint": "eslint .",
-    "lint:tsc": "tsc --noEmit"
+    "lint:tsc": "tsc --noEmit",
+    "test": "vitest"
   }
 }

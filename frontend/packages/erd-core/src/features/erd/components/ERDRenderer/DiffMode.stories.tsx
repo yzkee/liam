@@ -14,6 +14,8 @@ import {
   mockModifiedColumnDefaultSchema,
   mockModifiedColumnTypeSchema,
   mockModifiedForeignKeyConstraint,
+  mockModifiedIndexColumns,
+  mockModifiedIndexType,
   mockModifiedIndexUnique,
   mockModifiedTableSchema,
   mockPreviousSchema,
@@ -278,6 +280,38 @@ export const IndexUniqueModified: Story = {
         showDiff
         defaultShowMode="ALL_FIELDS"
         schema={mockModifiedIndexUnique}
+      >
+        <div style={{ height: '100vh', width: '100vw' }}>
+          <Story />
+        </div>
+      </Providers>
+    ),
+  ],
+}
+
+export const IndexColumnsModified: Story = {
+  decorators: [
+    (Story) => (
+      <Providers
+        showDiff
+        defaultShowMode="ALL_FIELDS"
+        schema={mockModifiedIndexColumns}
+      >
+        <div style={{ height: '100vh', width: '100vw' }}>
+          <Story />
+        </div>
+      </Providers>
+    ),
+  ],
+}
+
+export const IndexTypeModified: Story = {
+  decorators: [
+    (Story) => (
+      <Providers
+        showDiff
+        defaultShowMode="ALL_FIELDS"
+        schema={mockModifiedIndexType}
       >
         <div style={{ height: '100vh', width: '100vw' }}>
           <Story />

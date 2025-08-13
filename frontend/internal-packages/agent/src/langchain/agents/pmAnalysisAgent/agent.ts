@@ -110,7 +110,6 @@ export class PMAnalysisAgent {
             // Create ChatOpenAI with web search tool binding
             const searchModel = new ChatOpenAI({
               model: 'gpt-5',
-              temperature: 0.3,
             }).bindTools([{ type: 'web_search_preview' }])
 
             // Use custom prompt instead of createReactAgent default

@@ -18,7 +18,6 @@ function generateWorkflowSummary(
   // Create LLM for summary generation
   const llm = new ChatOpenAI({
     model: 'gpt-5',
-    temperature: 0.3,
   })
 
   // Create a summary prompt based on the workflow messages

@@ -37,6 +37,14 @@ function formatDefaultValue(value: string | number | boolean): string {
     if (isPostgreSQLFunction(value)) {
       return value // Don't quote function calls
     }
+
+    // Check if value is already quoted (handles enum values that might come pre-quoted)
+    const trimmedValue = value.trim()
+    if (trimmedValue.startsWith("'") && trimmedValue.endsWith("'")) {
+      // Value is already quoted, return as-is
+      return trimmedValue
+    }
+
     // Wrap string literals in single quotes
     return `'${value.replace(/'/g, "''")}'` // SQL escape
   }

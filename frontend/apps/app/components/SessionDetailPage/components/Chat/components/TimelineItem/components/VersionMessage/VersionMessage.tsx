@@ -74,7 +74,7 @@ const parsePatchOperations = (
 }
 
 type Props = {
-  version?: {
+  version: {
     id: string
     number: number
     patch: Tables<'building_schema_versions'>['patch']

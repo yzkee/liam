@@ -97,7 +97,7 @@ export type AssistantTimelineItemEntry = BaseTimelineItemEntry & {
 export type SchemaVersionTimelineItemEntry = BaseTimelineItemEntry & {
   type: 'schema_version'
   buildingSchemaVersionId: string
-  version?: {
+  version: {
     id: string
     number: number
     patch: Database['public']['Tables']['building_schema_versions']['Row']['patch']

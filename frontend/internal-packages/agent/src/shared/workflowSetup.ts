@@ -1,4 +1,4 @@
-import { AIMessage, HumanMessage } from '@langchain/core/messages'
+import { HumanMessage } from '@langchain/core/messages'
 import { RunCollectorCallbackHandler } from '@langchain/core/tracers/run_collector'
 import type { CompiledStateGraph } from '@langchain/langgraph'
 import { err, errAsync, ok, okAsync, ResultAsync } from 'neverthrow'
@@ -47,7 +47,6 @@ export const setupWorkflowState = (
   const {
     userInput,
     schemaData,
-    history,
     organizationId,
     buildingSchemaId,
     latestVersionNumber = 0,
@@ -57,20 +56,10 @@ export const setupWorkflowState = (
 
   const { repositories, thread_id } = config.configurable
 
-  // TODO(MH4GF): Remove this history-to-messages conversion once checkpointer is implemented
-  // When thread_id checkpoint functionality is working, message history will be
-  // automatically restored from the checkpoint storage, making this manual conversion unnecessary
-  // Convert history to BaseMessage objects (synchronous)
-  const messages = history.map(([role, content]) => {
-    return role === 'assistant'
-      ? new AIMessage(content)
-      : new HumanMessage(content)
-  })
-
   const workflowRunId = uuidv4()
 
   const userMessage = new HumanMessage(userInput)
-  const allMessages = [...messages, userMessage]
+  const allMessages = [userMessage]
 
   const createWorkflowRun = ResultAsync.fromPromise(
     repositories.schema.createWorkflowRun({

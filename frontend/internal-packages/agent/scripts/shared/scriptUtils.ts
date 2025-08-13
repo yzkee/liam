@@ -4,6 +4,7 @@ import type { Schema } from '@liam-hq/schema'
 import { config } from 'dotenv'
 import type { Result } from 'neverthrow'
 import { err, errAsync, ok, okAsync, ResultAsync } from 'neverthrow'
+import { DEFAULT_RECURSION_LIMIT } from '../../src/chat/workflow/shared/langGraphUtils'
 import { createSupabaseRepositories } from '../../src/repositories/factory'
 import type { WorkflowSetupResult } from '../../src/shared/workflowSetup'
 import { setupWorkflowState } from '../../src/shared/workflowSetup'
@@ -433,7 +434,7 @@ export const createWorkflowState = (
     latestVersionNumber: buildingSchema.latest_version_number,
     designSessionId: designSession.id,
     userId: user.id,
-    recursionLimit: 100, // Higher limit for deep modeling
+    recursionLimit: DEFAULT_RECURSION_LIMIT, // Higher limit for deep modeling
   }
 
   // Use shared setupWorkflowState function
@@ -446,7 +447,7 @@ export const createWorkflowState = (
     workflowState: workflowSetupResult.workflowState,
     options: {
       configurable: workflowSetupResult.configurable,
-      recursionLimit: 100,
+      recursionLimit: DEFAULT_RECURSION_LIMIT,
       streamMode: 'values' as const,
       callbacks: [workflowSetupResult.runCollector],
     },

@@ -5,6 +5,7 @@ import type { SupabaseClientType } from '@liam-hq/db'
 import type { Schema } from '@liam-hq/schema'
 import type { Result } from 'neverthrow'
 import { err, ok, okAsync } from 'neverthrow'
+import { DEFAULT_RECURSION_LIMIT } from '../src/chat/workflow/shared/langGraphUtils'
 import type { WorkflowState } from '../src/chat/workflow/types'
 import { createDbAgentGraph } from '../src/db-agent/createDbAgentGraph'
 import type { createSupabaseRepositories } from '../src/repositories/factory'
@@ -143,7 +144,7 @@ const executeDesignProcess = async (
   const streamResult = await (async () => {
     const stream = await graph.stream(workflowState, {
       configurable: config.configurable,
-      recursionLimit: 100,
+      recursionLimit: DEFAULT_RECURSION_LIMIT,
       streamMode: 'values',
     })
 

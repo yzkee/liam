@@ -10,10 +10,8 @@ import {
   ChevronRight,
 } from '@liam-hq/ui'
 import clsx from 'clsx'
-import { type FC, Fragment, useCallback, useEffect, useState } from 'react'
+import { type FC, Fragment, useCallback, useState } from 'react'
 import * as v from 'valibot'
-import { createClient } from '@/libs/db/client'
-import { fetchVersionInfo } from '../../../../../../services/fetchVersionInfo'
 import styles from './VersionMessage.module.css'
 
 /**
@@ -81,42 +79,12 @@ type Props = {
     number: number
     patch: Tables<'building_schema_versions'>['patch']
   } | null
-  buildingSchemaVersionId?: string
   onView?: (versionId: string) => void
 }
 
-export const VersionMessage: FC<Props> = ({
-  version,
-  buildingSchemaVersionId,
-  onView,
-}) => {
+export const VersionMessage: FC<Props> = ({ version, onView }) => {
   const [isExpanded, setIsExpanded] = useState(false)
-  const [fetchedVersion, setFetchedVersion] = useState<{
-    id: string
-    number: number
-    patch: Tables<'building_schema_versions'>['patch']
-  } | null>(null)
-
-  // Auto-fetch version info if not provided
-  useEffect(() => {
-    if (!version && buildingSchemaVersionId && !fetchedVersion) {
-      const fetchVersion = async () => {
-        const supabase = createClient()
-        const versionInfo = await fetchVersionInfo(
-          supabase,
-          buildingSchemaVersionId,
-        )
-        if (versionInfo) {
-          setFetchedVersion(versionInfo)
-        }
-      }
-      fetchVersion().catch((error) => {
-        console.error('Failed to fetch version info:', error)
-      })
-    }
-  }, [version, buildingSchemaVersionId, fetchedVersion])
-
-  const currentVersion = version || fetchedVersion
+  const currentVersion = version
 
   const handleClick = useCallback(() => {
     if (!currentVersion) return
@@ -131,13 +99,15 @@ export const VersionMessage: FC<Props> = ({
             type="button"
             className={styles.headerButton}
             disabled
-            aria-label="Version not found"
+            aria-label="Version information loading"
             aria-expanded={false}
           >
             <div className={styles.collapseButton}>
               <ChevronRight />
             </div>
-            <span className={styles.versionNumber}>Version not found</span>
+            <span className={styles.versionNumber}>
+              Version information loading...
+            </span>
           </button>
         </div>
       </div>

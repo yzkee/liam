@@ -1,12 +1,11 @@
 'use client'
 
-import { timelineItemsSchema } from '@liam-hq/db'
+import { type Database, timelineItemsSchema } from '@liam-hq/db'
 import { err, ok, type Result } from 'neverthrow'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import * as v from 'valibot'
 import { createClient } from '@/libs/db/client'
 import { convertTimelineItemToTimelineItemEntry } from '../../services/convertTimelineItemToTimelineItemEntry'
-import { fetchVersionInfo } from '../../services/fetchVersionInfo'
 import type { TimelineItem, TimelineItemEntry } from '../../types'
 import { isDuplicateTimelineItem } from './utils/isDuplicateTimelineItem'
 
@@ -16,6 +15,37 @@ const parseTimelineItem = (data: unknown): Result<TimelineItem, Error> => {
     return err(new Error('Invalid timeline item format'))
   }
   return ok(parsed.output)
+}
+
+type VersionData = {
+  id: string
+  number: number
+  patch: Database['public']['Tables']['building_schema_versions']['Row']['patch']
+}
+
+const parseVersionData = (data: unknown): VersionData | null => {
+  // biome-ignore lint/suspicious/noExplicitAny: Payload from Supabase has unknown type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions
+  const anyData = data as any
+  if (
+    anyData &&
+    typeof anyData === 'object' &&
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    typeof anyData.id === 'string' &&
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    typeof anyData.number === 'number' &&
+    'patch' in anyData
+  ) {
+    return {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      id: anyData.id,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      number: anyData.number,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      patch: anyData.patch,
+    }
+  }
+  return null
 }
 
 const findExistingTimelineItemIndex = (
@@ -77,6 +107,31 @@ export function useRealtimeTimelineItems(
   const [timelineItems, setTimelineItems] =
     useState<TimelineItemEntry[]>(initialTimelineItems)
 
+  // Store version information separately - initialize from initial timeline items
+  const [versions, setVersions] = useState<Map<string, VersionData>>(() => {
+    const initialVersions = new Map<string, VersionData>()
+    initialTimelineItems.forEach((item) => {
+      if (item.type === 'schema_version' && item.version) {
+        initialVersions.set(item.version.id, item.version)
+      }
+    })
+    return initialVersions
+  })
+
+  // Combine timeline items with current version information
+  const timelineItemsWithVersions = useMemo(() => {
+    return timelineItems.map((item) => {
+      if (item.type === 'schema_version' && item.buildingSchemaVersionId) {
+        const version = versions.get(item.buildingSchemaVersionId)
+        return {
+          ...item,
+          version: version || null,
+        }
+      }
+      return item
+    })
+  }, [timelineItems, versions])
+
   // Add or update timeline item with duplicate checking and optimistic update handling
   const addOrUpdateTimelineItem = useCallback(
     (newChatEntry: TimelineItemEntry) => {
@@ -117,32 +172,6 @@ export function useRealtimeTimelineItems(
     async (newTimelineItem: TimelineItem) => {
       const timelineItemEntry =
         convertTimelineItemToTimelineItemEntry(newTimelineItem)
-
-      // If this is a schema_version timeline item and version info is missing, fetch it
-      if (
-        timelineItemEntry.type === 'schema_version' &&
-        !timelineItemEntry.version &&
-        timelineItemEntry.buildingSchemaVersionId
-      ) {
-        const supabase = createClient()
-        const versionInfo = await fetchVersionInfo(
-          supabase,
-          timelineItemEntry.buildingSchemaVersionId,
-        )
-
-        if (versionInfo) {
-          // Update the timeline item entry with the fetched version info
-          const updatedEntry = {
-            ...timelineItemEntry,
-            version: versionInfo,
-          }
-          addOrUpdateTimelineItem(updatedEntry)
-          return
-        }
-      }
-
-      // TODO: Implement efficient duplicate checking - Use Set/Map for O(1) duplicate checking instead of O(n) array.some()
-      // TODO: Implement smart auto-scroll - Consider user's scroll position and only auto-scroll when user is at bottom
       addOrUpdateTimelineItem(timelineItemEntry)
     },
     [addOrUpdateTimelineItem],
@@ -150,7 +179,9 @@ export function useRealtimeTimelineItems(
 
   useEffect(() => {
     const supabase = createClient()
-    const channel = supabase
+
+    // Subscribe to timeline_items changes
+    const timelineChannel = supabase
       .channel(`timeline_items:${designSessionId}`)
       .on(
         'postgres_changes',
@@ -179,13 +210,39 @@ export function useRealtimeTimelineItems(
         }
       })
 
+    // Subscribe to building_schema_versions changes
+    const versionsChannel = supabase
+      .channel('building_schema_versions')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'building_schema_versions',
+        },
+        (payload) => {
+          const version = parseVersionData(payload.new)
+          if (version) {
+            setVersions((prev) => new Map(prev).set(version.id, version))
+          }
+        },
+      )
+      .subscribe((status) => {
+        if (status === 'CHANNEL_ERROR') {
+          handleError(
+            new Error('Failed to subscribe to building schema versions'),
+          )
+        }
+      })
+
     return () => {
-      channel.unsubscribe()
+      timelineChannel.unsubscribe()
+      versionsChannel.unsubscribe()
     }
   }, [designSessionId, handleError, handleNewTimelineItem])
 
   return {
-    timelineItems,
+    timelineItems: timelineItemsWithVersions,
     error,
     addOrUpdateTimelineItem,
   }

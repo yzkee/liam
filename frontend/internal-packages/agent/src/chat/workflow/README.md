@@ -187,7 +187,6 @@ const result = await deepModeling(
   {
     userInput:
       "Create a schema for a fitness tracking app with users, workout plans, exercise logs, and progress charts.",
-    history: [],
     schemaData: mySchemaData,
     organizationId: "my-organization-id",
     buildingSchemaId: "my-building-schema-id",

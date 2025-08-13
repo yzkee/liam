@@ -8,7 +8,6 @@ import type { WorkflowState } from './chat/workflow/types'
 export type AgentWorkflowParams = {
   userInput: string
   schemaData: Schema
-  history: [string, string][]
   organizationId: string
   buildingSchemaId: string
   latestVersionNumber: number

@@ -112,31 +112,12 @@ export async function POST(request: Request) {
   // If no version exists yet (initial state), use 0 as the version number
   const latestVersionNumber = latestVersion?.number ?? 0
 
-  const { data: timelineItems, error: timelineItemsError } = await supabase
-    .from('timeline_items')
-    .select('type, content')
-    .eq('design_session_id', designSessionId)
-    .order('created_at', { ascending: true })
-
-  if (timelineItemsError) {
-    return NextResponse.json(
-      { error: 'Failed to fetch timeline items' },
-      { status: 500 },
-    )
-  }
-
-  const history: [string, string][] = timelineItems.map((item) => [
-    item.type === 'user' ? 'Human' : 'AI',
-    item.content,
-  ])
-
   const result = await repositories.schema
     .getSchema(designSessionId)
     .andThen((data) => {
       const params: AgentWorkflowParams = {
         userInput: validationResult.output.userInput,
         schemaData: data.schema,
-        history,
         organizationId,
         buildingSchemaId: buildingSchema.id,
         latestVersionNumber: latestVersionNumber,

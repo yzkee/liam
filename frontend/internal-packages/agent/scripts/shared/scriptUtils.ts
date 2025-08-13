@@ -427,7 +427,6 @@ export const createWorkflowState = (
   const workflowParams: AgentWorkflowParams = {
     userInput,
     schemaData: sampleSchema,
-    history: [] satisfies [string, string][], // Empty history for initial run
     organizationId: organization.id,
     buildingSchemaId: buildingSchema.id,
     latestVersionNumber: buildingSchema.latest_version_number,

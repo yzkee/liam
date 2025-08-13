@@ -17,7 +17,10 @@ export const deepModeling = (
   },
 ): AgentWorkflowResult => {
   const { recursionLimit = DEFAULT_RECURSION_LIMIT } = params
-  const compiled = createGraph()
+  // Pass checkpointer from repositories to enable state persistence
+  const compiled = createGraph(
+    config.configurable.repositories.schema.checkpointer,
+  )
 
   // Setup workflow state with message conversion and timeline sync
   return setupWorkflowState(params, config).andThen((setupResult) => {

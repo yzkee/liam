@@ -1,6 +1,10 @@
 'use client'
 
-import { type Database, timelineItemsSchema } from '@liam-hq/db'
+import {
+  buildingSchemaVersionsSchema,
+  type Database,
+  timelineItemsSchema,
+} from '@liam-hq/db'
 import { err, ok, type Result } from 'neverthrow'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import * as v from 'valibot'
@@ -23,29 +27,16 @@ type VersionData = {
   patch: Database['public']['Tables']['building_schema_versions']['Row']['patch']
 }
 
-const parseVersionData = (data: unknown): VersionData | null => {
-  // biome-ignore lint/suspicious/noExplicitAny: Payload from Supabase has unknown type
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions
-  const anyData = data as any
-  if (
-    anyData &&
-    typeof anyData === 'object' &&
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    typeof anyData.id === 'string' &&
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    typeof anyData.number === 'number' &&
-    'patch' in anyData
-  ) {
-    return {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      id: anyData.id,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      number: anyData.number,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      patch: anyData.patch,
-    }
+const parseVersionData = (data: unknown): Result<VersionData, Error> => {
+  const parsed = v.safeParse(buildingSchemaVersionsSchema, data)
+  if (!parsed.success) {
+    return err(new Error('Invalid building schema version format'))
   }
-  return null
+  return ok({
+    id: parsed.output.id,
+    number: parsed.output.number,
+    patch: parsed.output.patch,
+  })
 }
 
 const findExistingTimelineItemIndex = (
@@ -221,9 +212,12 @@ export function useRealtimeTimelineItems(
           table: 'building_schema_versions',
         },
         (payload) => {
-          const version = parseVersionData(payload.new)
-          if (version) {
+          const parseResult = parseVersionData(payload.new)
+          if (parseResult.isOk()) {
+            const version = parseResult.value
             setVersions((prev) => new Map(prev).set(version.id, version))
+          } else {
+            handleError(parseResult.error)
           }
         },
       )

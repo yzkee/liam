@@ -46,7 +46,7 @@ function formatDefaultValue(value: string | number | boolean): string {
     }
 
     // Wrap string literals in single quotes
-    return `'${value.replace(/'/g, "''")}'` // SQL escape
+    return `'${trimmedValue.replace(/'/g, "''")}'` // SQL escape
   }
 
   if (typeof value === 'boolean') {

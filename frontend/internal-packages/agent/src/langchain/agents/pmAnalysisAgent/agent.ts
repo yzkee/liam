@@ -109,7 +109,7 @@ export class PMAnalysisAgent {
           (async () => {
             // Create ChatOpenAI with web search tool binding
             const searchModel = new ChatOpenAI({
-              model: 'gpt-4o-mini',
+              model: 'gpt-5-thinking',
               temperature: 0.3,
             }).bindTools([{ type: 'web_search_preview' }])
 
@@ -260,7 +260,7 @@ export class PMAnalysisAgent {
 
     // First model call with tools available (no reasoning to avoid API conflicts)
     const toolModel = new ChatOpenAI({
-      model: 'o4-mini',
+      model: 'gpt-5-thinking',
       // No reasoning configuration for tool execution phase
     })
     const modelWithTools = toolModel.bindTools([this.webSearchTool])
@@ -311,7 +311,7 @@ export class PMAnalysisAgent {
 
     // Always make final call with reasoning enabled for consistent reasoning output
     const finalModel = new ChatOpenAI({
-      model: 'o4-mini',
+      model: 'gpt-5-thinking',
       reasoning: { effort: 'high', summary: 'detailed' },
       useResponsesApi: true,
     })

@@ -39,7 +39,7 @@ export class DMLGenerationAgent
     })
 
     const model = new ChatOpenAI({
-      model: 'gpt-4o',
+      model: 'gpt-5',
       temperature: 0.1,
     })
 

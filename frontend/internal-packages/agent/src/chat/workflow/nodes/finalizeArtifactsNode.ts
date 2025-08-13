@@ -17,7 +17,7 @@ function generateWorkflowSummary(
 ): ResultAsync<AIMessage, Error> {
   // Create LLM for summary generation
   const llm = new ChatOpenAI({
-    model: 'gpt-4.1',
+    model: 'gpt-5',
     temperature: 0.3,
   })
 

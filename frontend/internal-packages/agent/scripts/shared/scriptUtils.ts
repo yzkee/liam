@@ -119,15 +119,9 @@ export const validateEnvironment = (): ResultAsync<void, Error> => {
 }
 
 /**
- * Create Supabase client and repositories
+ * Create Supabase client
  */
-const createDatabaseConnection = (): Result<
-  {
-    supabaseClient: SupabaseClientType
-    repositories: ReturnType<typeof createSupabaseRepositories>
-  },
-  Error
-> => {
+const createDatabaseConnection = (): Result<SupabaseClientType, Error> => {
   const supabaseUrl = process.env['NEXT_PUBLIC_SUPABASE_URL']
   const supabaseKey = process.env['SUPABASE_SERVICE_ROLE_KEY']
 
@@ -139,10 +133,7 @@ const createDatabaseConnection = (): Result<
     )
   }
   const supabaseClient = createClient(supabaseUrl, supabaseKey)
-  // TODO(MH4GF): Create repositories with proper organizationId after organization is fetched
-  const repositories = createSupabaseRepositories(supabaseClient, 'temp-org-id')
-
-  return ok({ supabaseClient, repositories })
+  return ok(supabaseClient)
 }
 
 /**
@@ -196,35 +187,35 @@ const getUser = async (
 /**
  * Create design session record
  */
-export const createDesignSession =
-  (sessionName: string) => (setupData: SetupDatabaseAndUserResult) => {
-    const { supabaseClient, organization, user } = setupData
+export const createDesignSession = (setupData: SetupDatabaseAndUserResult) => {
+  const { supabaseClient, organization, user } = setupData
+  const sessionName = `Design Session - ${new Date().toISOString()}`
 
-    return ResultAsync.fromPromise(
-      supabaseClient
-        .from('design_sessions')
-        .insert({
-          name: sessionName,
-          project_id: null, // No project for this session
-          organization_id: organization.id,
-          created_by_user_id: user.id,
-          parent_design_session_id: null,
-        })
-        .select()
-        .single(),
-      (error) => new Error(`Failed to create design session: ${error}`),
-    ).andThen(({ data: designSession, error: insertError }) => {
-      if (insertError || !designSession) {
-        return errAsync(
-          new Error(`Failed to create design session: ${insertError?.message}`),
-        )
-      }
-      return okAsync({
-        ...setupData,
-        designSession,
+  return ResultAsync.fromPromise(
+    supabaseClient
+      .from('design_sessions')
+      .insert({
+        name: sessionName,
+        project_id: null, // No project for this session
+        organization_id: organization.id,
+        created_by_user_id: user.id,
+        parent_design_session_id: null,
       })
+      .select()
+      .single(),
+    (error) => new Error(`Failed to create design session: ${error}`),
+  ).andThen(({ data: designSession, error: insertError }) => {
+    if (insertError || !designSession) {
+      return errAsync(
+        new Error(`Failed to create design session: ${insertError?.message}`),
+      )
+    }
+    return okAsync({
+      ...setupData,
+      designSession,
     })
-  }
+  })
+}
 
 /**
  * Create building schema record
@@ -271,7 +262,7 @@ export const createBuildingSchema = (
 
 type SupabaseRepositories = ReturnType<typeof createSupabaseRepositories>
 
-type SetupDatabaseAndUserResult = {
+export type SetupDatabaseAndUserResult = {
   supabaseClient: SupabaseClientType
   repositories: SupabaseRepositories
   organization: { id: string; name: string }
@@ -303,7 +294,7 @@ export const setupDatabaseAndUser =
     if (connectionResult.isErr()) {
       return errAsync(connectionResult.error)
     }
-    const { supabaseClient, repositories } = connectionResult.value
+    const supabaseClient = connectionResult.value
 
     logger.debug('Setting up database connections and user data')
 
@@ -333,6 +324,11 @@ export const setupDatabaseAndUser =
         }
         const user = userResult.value
         logger.debug('Found user:', { id: user.id, email: user.email })
+
+        const repositories = createSupabaseRepositories(
+          supabaseClient,
+          organization.id,
+        )
 
         return okAsync({
           supabaseClient,

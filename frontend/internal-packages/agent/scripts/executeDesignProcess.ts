@@ -1,13 +1,12 @@
 #!/usr/bin/env tsx
 
 import { HumanMessage } from '@langchain/core/messages'
-import type { SupabaseClientType } from '@liam-hq/db'
 import type { Schema } from '@liam-hq/schema'
 import type { Result } from 'neverthrow'
-import { err, ok, okAsync } from 'neverthrow'
+import { err, errAsync, ok, okAsync, ResultAsync } from 'neverthrow'
 import type { WorkflowState } from '../src/chat/workflow/types'
 import { createDbAgentGraph } from '../src/db-agent/createDbAgentGraph'
-import type { createSupabaseRepositories } from '../src/repositories/factory'
+import { hasHelpFlag, parseDesignProcessArgs } from './shared/argumentParser'
 import {
   createBuildingSchema,
   createDesignSession,
@@ -15,6 +14,7 @@ import {
   getBusinessManagementSystemUserInput,
   getLogLevel,
   logSchemaResults,
+  type SetupDatabaseAndUserResult,
   setupDatabaseAndUser,
   showHelp,
   validateEnvironment,
@@ -25,43 +25,122 @@ const currentLogLevel = getLogLevel()
 const logger = createLogger(currentLogLevel)
 
 /**
- * Parse command line arguments
+ * Fetch existing design session from database
  */
-const parseArgs = () => {
-  // TODO(MH4GF): Implement command line argument parsing for checkpoint functionality
-  // - Parse --prompt/-p for custom user input
-  // - Parse --thread-id/-t for session resumption
-  // - Support both --flag=value and --flag value formats
-  // - Add validation for argument values
-  return { prompt: undefined, threadId: undefined }
+const fetchDesignSession =
+  (threadId: string) => (setupData: SetupDatabaseAndUserResult) => {
+    const { supabaseClient } = setupData
+
+    return ResultAsync.fromPromise(
+      supabaseClient
+        .from('design_sessions')
+        .select('id, name')
+        .eq('id', threadId)
+        .single(),
+      (error) => new Error(`Failed to fetch design session: ${error}`),
+    ).andThen(({ data, error }) => {
+      if (error || !data) {
+        return errAsync(
+          new Error(
+            `Design session not found for thread ID ${threadId}: ${error?.message || 'No data'}`,
+          ),
+        )
+      }
+      logger.info(`Found design session: ${data.name}`)
+      return okAsync({
+        ...setupData,
+        designSession: data,
+      })
+    })
+  }
+
+/**
+ * Type for setup data with design session
+ */
+type SetupDataWithDesignSession = SetupDatabaseAndUserResult & {
+  designSession: { id: string; name: string }
 }
 
 /**
- * Create DB Agent graph for database schema design
+ * Fetch existing building schema from database with latest version number
  */
-const createSimplifiedGraph = (
-  _repositories: ReturnType<typeof createSupabaseRepositories>,
-) => {
-  // TODO(MH4GF): Integrate checkpointer for persistent workflow state
-  // return createDbAgentGraph(repositories.schema.checkpointer)
-  return createDbAgentGraph()
+const fetchBuildingSchema = (setupData: SetupDataWithDesignSession) => {
+  const { supabaseClient, designSession } = setupData
+
+  // First fetch the building schema
+  return ResultAsync.fromPromise(
+    supabaseClient
+      .from('building_schemas')
+      .select('id')
+      .eq('design_session_id', designSession.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single(),
+    (error) => new Error(`Failed to fetch building schema: ${error}`),
+  ).andThen(({ data: schemaData, error: schemaError }) => {
+    if (schemaError || !schemaData) {
+      return errAsync(
+        new Error(
+          `Building schema not found for design session ${designSession.id}: ${schemaError?.message || 'No data'}`,
+        ),
+      )
+    }
+
+    // Then fetch the latest version number
+    return ResultAsync.fromPromise(
+      supabaseClient
+        .from('building_schema_versions')
+        .select('number')
+        .eq('building_schema_id', schemaData.id)
+        .order('number', { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      (error) => new Error(`Failed to fetch building schema version: ${error}`),
+    ).andThen(({ data: versionData }) => {
+      // If no versions exist yet, use 0
+      const latestVersionNumber = versionData?.number ?? 0
+
+      logger.info(
+        `Found building schema: ${schemaData.id} (version: ${latestVersionNumber})`,
+      )
+
+      return okAsync({
+        ...setupData,
+        buildingSchema: {
+          id: schemaData.id,
+          latest_version_number: latestVersionNumber,
+        },
+      })
+    })
+  })
 }
 
 /**
- * Create minimal data for the workflow
+ * Find or create design session
  */
-type CreateWorkflowStateInput = {
-  supabaseClient: SupabaseClientType
-  repositories: ReturnType<typeof createSupabaseRepositories>
-  organization: { id: string; name: string }
+const findOrCreateDesignSession =
+  (resumeThreadId?: string) => (setupData: SetupDatabaseAndUserResult) => {
+    if (resumeThreadId) {
+      return fetchDesignSession(resumeThreadId)(setupData).andThen(
+        fetchBuildingSchema,
+      )
+    }
+
+    return createDesignSession(setupData).andThen(createBuildingSchema)
+  }
+
+/**
+ * Create workflow state
+ */
+type CreateWorkflowStateInput = SetupDatabaseAndUserResult & {
   buildingSchema: { id: string; latest_version_number: number }
   designSession: { id: string; name: string }
-  user: { id: string; email: string }
 }
 
 const createWorkflowState = (
   setupData: CreateWorkflowStateInput,
   customUserInput?: string,
+  _isResume = false,
 ) => {
   const { organization, buildingSchema, designSession, user } = setupData
 
@@ -98,27 +177,9 @@ const executeDesignProcess = async (
   customPrompt?: string,
   resumeThreadId?: string,
 ): Promise<Result<void, Error>> => {
-  // TODO(MH4GF): Implement thread_id-based session resumption using checkpointer
-  // - When resumeThreadId is provided, use findExistingSession to retrieve session state
-  // - Create workflow state with existing schema data instead of empty schema
-  // - Preserve session history and context through checkpoint system
-  // - Handle workflow configuration for resumed sessions
-  // - Add proper error handling for non-existent sessions
-
-  if (resumeThreadId) {
-    return err(
-      new Error(
-        'Session resumption not yet implemented - checkpoint functionality needed',
-      ),
-    )
-  }
-
-  // Create new session (existing implementation)
-  const sessionName = `Design Session - ${new Date().toISOString()}`
   const setupResult = await validateEnvironment()
     .andThen(setupDatabaseAndUser(logger))
-    .andThen(createDesignSession(sessionName))
-    .andThen(createBuildingSchema)
+    .andThen(findOrCreateDesignSession(resumeThreadId))
     .andThen((data) => createWorkflowState(data, customPrompt))
 
   if (setupResult.isErr()) return err(setupResult.error)
@@ -134,7 +195,7 @@ const executeDesignProcess = async (
       thread_id: workflowState.designSessionId,
     },
   }
-  const graph = createSimplifiedGraph(repositories)
+  const graph = createDbAgentGraph(repositories.schema.checkpointer)
 
   logger.info('Starting AI workflow execution...')
 
@@ -162,8 +223,12 @@ const executeDesignProcess = async (
 
   logger.info('Workflow completed')
 
-  // TODO(MH4GF): Add thread_id logging for session tracking
   // Log the thread_id for future reference when resuming sessions
+  const sessionThreadId = workflowState.designSessionId
+  logger.info(`Session thread ID: ${sessionThreadId}`)
+  logger.info(
+    `To resume this session later, use: --thread-id ${sessionThreadId}`,
+  )
 
   logSchemaResults(logger, streamResult.schemaData, currentLogLevel, undefined)
 
@@ -173,11 +238,10 @@ const executeDesignProcess = async (
 // Execute if this file is run directly
 if (require.main === module) {
   // Parse command line arguments
-  const { prompt, threadId } = parseArgs()
+  const { prompt, threadId } = parseDesignProcessArgs()
 
   // Show usage information
-  const args = process.argv.slice(2)
-  if (args.includes('--help') || args.includes('-h')) {
+  if (hasHelpFlag()) {
     showHelp(
       'executeDesignProcess.ts',
       `Executes the design process workflow for database schema generation.
@@ -200,12 +264,6 @@ if (require.main === module) {
   logger.info(
     `Starting design process execution (log level: ${currentLogLevel})`,
   )
-
-  // TODO(MH4GF): Add comprehensive checkpoint-aware execution flow
-  // - Handle threadId-based resumption with proper logging
-  // - Add custom prompt support for both new and resumed sessions
-  // - Log thread_id for future session resumption
-  // - Add session completion status tracking
 
   executeDesignProcess(prompt, threadId).then((result) => {
     if (result.isErr()) {

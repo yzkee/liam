@@ -13,7 +13,7 @@ import type { Reasoning } from '../../utils/types'
 import { type DesignAgentPromptVariables, designAgentPrompt } from './prompts'
 
 const model = new ChatOpenAI({
-  model: 'o4-mini',
+  model: 'gpt-5',
   useResponsesApi: true,
 }).bindTools([schemaDesignTool])
 

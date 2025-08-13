@@ -11,45 +11,14 @@ import {
   WRITES_IDX_MAP,
 } from '@langchain/langgraph-checkpoint'
 import type { Database, Json, SupabaseClientType } from '@liam-hq/db'
+import {
+  base64ToUint8Array,
+  hexToUint8Array,
+  uint8ArrayToBase64,
+  uint8ArrayToString,
+} from './byteaUtils'
 import { parseCheckpointMetadata, parseSerializedCheckpoint } from './schemas'
 import type { SerializedCheckpoint } from './types'
-
-/**
- * Utility functions for BYTEA column handling in Supabase
- *
- * Supabase REST API requires Base64 encoding for BYTEA columns,
- * and returns them as PostgreSQL hex format (e.g., '\x6465...')
- */
-const ByteaUtils = {
-  /**
-   * Convert Uint8Array to Base64 string for Supabase BYTEA columns
-   */
-  uint8ArrayToBase64(uint8Array: Uint8Array): string {
-    const binaryString = Array.from(uint8Array)
-      .map((byte) => String.fromCharCode(byte))
-      .join('')
-    return btoa(binaryString)
-  },
-
-  /**
-   * Convert Base64 string to Uint8Array (from Supabase BYTEA)
-   */
-  base64ToUint8Array(base64: string): Uint8Array {
-    const binaryString = atob(base64)
-    const bytes = new Uint8Array(binaryString.length)
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i)
-    }
-    return bytes
-  },
-
-  /**
-   * Convert Uint8Array to string
-   */
-  uint8ArrayToString(uint8Array: Uint8Array): string {
-    return new TextDecoder().decode(uint8Array)
-  },
-}
 
 /**
  * Configuration options for SupabaseCheckpointSaver
@@ -478,12 +447,10 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
   /**
    * Helper method to load channel values from blobs
    *
-   * Key difference from PostgresSaver:
-   * - PostgresSaver receives [Uint8Array, Uint8Array, Uint8Array][] tuples
-   * - SupabaseCheckpointSaver receives structured row objects from REST API
-   *
-   * The Base64 conversion is required here because Supabase REST API
-   * cannot transmit raw binary data over HTTP/JSON protocol.
+   * Supabase REST API specific implementation:
+   * - Receives structured row objects with BYTEA data as hex-encoded strings
+   * - Handles double encoding: hex -> base64 -> actual data
+   * - Always expects string type for blob data (never Uint8Array)
    */
   private async _loadBlobs(
     blobs: Database['public']['Tables']['checkpoint_blobs']['Row'][],
@@ -499,13 +466,14 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
         continue
       }
 
-      // Convert Base64 string from Supabase REST API to Uint8Array
-      // This conversion is not needed in PostgresSaver as it receives binary directly
-      const uint8Array =
-        typeof blob.blob === 'string'
-          ? ByteaUtils.base64ToUint8Array(blob.blob)
-          : blob.blob
-      const value = await this.serde.loadsTyped(blob.type, uint8Array)
+      // Convert BYTEA string from Supabase REST API
+      // Data flow: Hex (from Supabase) -> Base64 string -> Actual data
+      // All data is double-encoded through Supabase REST API
+      const hexDecoded = hexToUint8Array(blob.blob)
+      const base64String = uint8ArrayToString(hexDecoded)
+      const actualData = base64ToUint8Array(base64String)
+      const value = await this.serde.loadsTyped(blob.type, actualData)
+
       channelValues[blob.channel] = value
     }
 
@@ -523,16 +491,10 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
   /**
    * Helper method to load pending writes
    *
-   * Key difference from PostgresSaver:
-   * - PostgresSaver receives data as Uint8Array[] directly from pg library
-   * - SupabaseCheckpointSaver receives structured row objects from REST API
-   * - Supabase REST API returns BYTEA columns as Base64-encoded strings,
-   *   requiring conversion back to Uint8Array before deserialization
-   *
-   * This Base64 conversion is necessary because:
-   * 1. HTTP/JSON cannot safely transmit raw binary data
-   * 2. Supabase REST API automatically encodes BYTEA as Base64
-   * 3. Direct PostgreSQL connections (pg library) return BYTEA as binary
+   * Supabase REST API specific implementation:
+   * - Receives structured row objects with BYTEA data as hex-encoded strings
+   * - Handles double encoding: hex -> base64 -> actual data
+   * - Always expects string type for blob data (never Uint8Array)
    */
   private async _loadWrites(
     writes: Database['public']['Tables']['checkpoint_writes']['Row'][],
@@ -546,15 +508,16 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
     for (const write of writes) {
       if (!write.blob) continue
 
-      // Convert Base64 string from Supabase REST API to Uint8Array
-      // PostgresSaver doesn't need this as pg library returns binary directly
-      const uint8Array =
-        typeof write.blob === 'string'
-          ? ByteaUtils.base64ToUint8Array(write.blob)
-          : write.blob
+      // Convert BYTEA string from Supabase REST API
+      // Data flow: Hex (from Supabase) -> Base64 string -> Actual data
+      // All data is double-encoded through Supabase REST API
+      const hexDecoded = hexToUint8Array(write.blob)
+      const base64String = uint8ArrayToString(hexDecoded)
+      const uint8Array = base64ToUint8Array(base64String)
+
       const value = write.type
         ? await this.serde.loadsTyped(write.type, uint8Array)
-        : ByteaUtils.uint8ArrayToString(uint8Array)
+        : uint8ArrayToString(uint8Array)
 
       pendingWrites.push([write.task_id, write.channel, value])
     }
@@ -662,7 +625,7 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
           channel,
           version: version.toString(),
           type,
-          blob: ByteaUtils.uint8ArrayToBase64(serialized), // Convert to Base64 for Supabase BYTEA
+          blob: uint8ArrayToBase64(serialized), // Convert to Base64 for Supabase BYTEA
           organization_id: this.organizationId,
         })
       }
@@ -706,7 +669,7 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
         idx: WRITES_IDX_MAP[channel] ?? idx,
         channel,
         type,
-        blob: ByteaUtils.uint8ArrayToBase64(serialized), // Convert to Base64 for Supabase BYTEA
+        blob: uint8ArrayToBase64(serialized), // Convert to Base64 for Supabase BYTEA
         organization_id: this.organizationId,
       })
     }

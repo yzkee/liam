@@ -136,16 +136,32 @@ describe('SupabaseCheckpointSaver', () => {
         updated_at: '2025-01-06T10:00:00.000Z',
       }
 
+      // Simulate Supabase returning hex format for BYTEA columns
+      const messageBlobData = JSON.stringify(
+        checkpoint.channel_values?.['messages'],
+      )
+      const stateBlobData = JSON.stringify(checkpoint.channel_values?.['state'])
+
+      // Simulate Supabase's double encoding: JSON -> Base64 -> Hex
+      const messageBase64 = Buffer.from(messageBlobData).toString('base64')
+      const stateBase64 = Buffer.from(stateBlobData).toString('base64')
+
       const blobsData = [
         {
           channel: 'messages',
           type: 'json',
-          blob: btoa(JSON.stringify(checkpoint.channel_values?.['messages'])),
+          // Convert to hex format like Supabase does (Base64 string -> Hex)
+          blob: `\\x${Array.from(Buffer.from(messageBase64))
+            .map((b) => b.toString(16).padStart(2, '0'))
+            .join('')}`,
         },
         {
           channel: 'state',
           type: 'json',
-          blob: btoa(JSON.stringify(checkpoint.channel_values?.['state'])),
+          // Convert to hex format like Supabase does (Base64 string -> Hex)
+          blob: `\\x${Array.from(Buffer.from(stateBase64))
+            .map((b) => b.toString(16).padStart(2, '0'))
+            .join('')}`,
         },
       ]
 

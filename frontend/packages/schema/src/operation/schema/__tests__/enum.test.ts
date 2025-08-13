@@ -56,6 +56,20 @@ describe('enumOperations', () => {
       expect(result.success).toBe(false)
     })
 
+    it('should invalidate add operation when path and value.name do not match', () => {
+      const invalidOperation = {
+        ...validAddOperation,
+        path: '/enums/different_name',
+        value: {
+          name: 'status',
+          values: ['active', 'inactive'],
+          comment: null,
+        },
+      }
+      const result = v.safeParse(addEnumSchema, invalidOperation)
+      expect(result.success).toBe(false)
+    })
+
     it('should validate type guard', () => {
       expect(isAddEnumOperation(validAddOperation)).toBe(true)
       expect(isAddEnumOperation({ op: 'remove', path: '/enums/status' })).toBe(
@@ -118,6 +132,15 @@ describe('enumOperations', () => {
       expect(result.success).toBe(false)
     })
 
+    it('should invalidate replace name operation with empty name', () => {
+      const invalidOperation = {
+        ...validReplaceNameOperation,
+        value: '',
+      }
+      const result = v.safeParse(replaceNameSchema, invalidOperation)
+      expect(result.success).toBe(false)
+    })
+
     it('should validate type guard', () => {
       expect(isReplaceEnumNameOperation(validReplaceNameOperation)).toBe(true)
       expect(
@@ -151,6 +174,24 @@ describe('enumOperations', () => {
       const invalidOperation = {
         ...validReplaceValuesOperation,
         value: 'not-an-array',
+      }
+      const result = v.safeParse(replaceValuesSchema, invalidOperation)
+      expect(result.success).toBe(false)
+    })
+
+    it('should invalidate replace values operation with empty array', () => {
+      const invalidOperation = {
+        ...validReplaceValuesOperation,
+        value: [],
+      }
+      const result = v.safeParse(replaceValuesSchema, invalidOperation)
+      expect(result.success).toBe(false)
+    })
+
+    it('should invalidate replace values operation with duplicate values', () => {
+      const invalidOperation = {
+        ...validReplaceValuesOperation,
+        value: ['low', 'medium', 'low'],
       }
       const result = v.safeParse(replaceValuesSchema, invalidOperation)
       expect(result.success).toBe(false)
@@ -241,10 +282,12 @@ describe('enumOperations', () => {
       })
 
       for (const path of validPaths) {
+        // Extract enum name from path to match path/value.name consistency requirement
+        const enumName = path.replace('/enums/', '')
         const operation = {
           op: 'add' as const,
           path,
-          value: { name: 'test', values: ['a'], comment: null },
+          value: { name: enumName, values: ['a'], comment: null },
         }
         expect(v.safeParse(addEnumSchema, operation).success).toBe(true)
       }

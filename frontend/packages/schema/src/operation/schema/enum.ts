@@ -1,5 +1,5 @@
 import * as v from 'valibot'
-import { enumSchema } from '../../schema/index.js'
+import { enumNameSchema, enumSchema } from '../../schema/index.js'
 import { PATH_PATTERNS } from '../constants.js'
 import type { Operation } from './index.js'
 
@@ -20,6 +20,34 @@ const addEnumOperationSchema = v.pipe(
     path: enumPathSchema,
     value: enumSchema,
   }),
+  v.custom<{
+    op: 'add'
+    path: string
+    value: { name: string; values: string[]; comment: string | null }
+  }>((input: unknown) => {
+    // Type guard to ensure input has the expected shape
+    if (
+      typeof input !== 'object' ||
+      input === null ||
+      !('path' in input) ||
+      !('value' in input) ||
+      typeof input.path !== 'string' ||
+      typeof input.value !== 'object' ||
+      input.value === null ||
+      !('name' in input.value) ||
+      typeof input.value.name !== 'string'
+    ) {
+      return false
+    }
+
+    // Extract enum name from path: "/enums/{enumName}"
+    const pathMatch = input.path.match(/^\/enums\/(.+)$/)
+    if (!pathMatch) {
+      return false
+    }
+    const pathEnumName = pathMatch[1]
+    return pathEnumName === input.value.name
+  }, 'The enum name in the path must match the value.name field'),
   v.description('Add new enum with complete definition'),
 )
 
@@ -35,7 +63,7 @@ const replaceEnumNameOperationSchema = v.pipe(
   v.object({
     op: v.literal('replace'),
     path: enumNamePathSchema,
-    value: v.string(),
+    value: v.pipe(enumNameSchema, v.minLength(1)),
   }),
   v.description('Rename existing enum'),
 )
@@ -44,7 +72,17 @@ const replaceEnumValuesOperationSchema = v.pipe(
   v.object({
     op: v.literal('replace'),
     path: enumValuesPathSchema,
-    value: v.array(v.string()),
+    value: v.pipe(
+      v.array(v.string()),
+      v.minLength(1),
+      v.custom<string[]>((values: unknown) => {
+        if (!Array.isArray(values)) {
+          return false
+        }
+        const uniqueValues = new Set(values)
+        return uniqueValues.size === values.length
+      }, 'Enum values must be unique'),
+    ),
   }),
   v.description('Replace enum values'),
 )

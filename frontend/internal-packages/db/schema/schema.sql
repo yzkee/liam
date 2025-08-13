@@ -3879,7 +3879,6 @@ ALTER PUBLICATION "supabase_realtime" ADD TABLE ONLY "public"."workflow_runs";
 
 
 GRANT USAGE ON SCHEMA "public" TO "postgres";
-GRANT USAGE ON SCHEMA "public" TO "anon";
 GRANT USAGE ON SCHEMA "public" TO "authenticated";
 GRANT USAGE ON SCHEMA "public" TO "service_role";
 
@@ -4501,7 +4500,6 @@ GRANT ALL ON FUNCTION "public"."hamming_distance"(bit, bit) TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "anon";
 GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "service_role";
 
@@ -4562,7 +4560,6 @@ GRANT ALL ON FUNCTION "public"."invite_organization_member"("p_email" "text", "p
 
 
 REVOKE ALL ON FUNCTION "public"."is_current_user_org_member"("_org" "uuid") FROM PUBLIC;
-GRANT ALL ON FUNCTION "public"."is_current_user_org_member"("_org" "uuid") TO "anon";
 GRANT ALL ON FUNCTION "public"."is_current_user_org_member"("_org" "uuid") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."is_current_user_org_member"("_org" "uuid") TO "service_role";
 
@@ -4673,157 +4670,131 @@ GRANT ALL ON FUNCTION "public"."l2_normalize"("public"."vector") TO "service_rol
 
 
 
-GRANT ALL ON FUNCTION "public"."match_documents"("filter" "jsonb", "match_count" integer, "query_embedding" "public"."vector", "match_threshold" double precision) TO "anon";
 GRANT ALL ON FUNCTION "public"."match_documents"("filter" "jsonb", "match_count" integer, "query_embedding" "public"."vector", "match_threshold" double precision) TO "authenticated";
 GRANT ALL ON FUNCTION "public"."match_documents"("filter" "jsonb", "match_count" integer, "query_embedding" "public"."vector", "match_threshold" double precision) TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."prevent_delete_last_organization_member"() TO "anon";
 GRANT ALL ON FUNCTION "public"."prevent_delete_last_organization_member"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."prevent_delete_last_organization_member"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."set_artifacts_organization_id"() TO "anon";
 GRANT ALL ON FUNCTION "public"."set_artifacts_organization_id"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_artifacts_organization_id"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."set_building_schema_versions_organization_id"() TO "anon";
 GRANT ALL ON FUNCTION "public"."set_building_schema_versions_organization_id"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_building_schema_versions_organization_id"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."set_building_schemas_organization_id"() TO "anon";
 GRANT ALL ON FUNCTION "public"."set_building_schemas_organization_id"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_building_schemas_organization_id"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."set_design_sessions_organization_id"() TO "anon";
 GRANT ALL ON FUNCTION "public"."set_design_sessions_organization_id"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_design_sessions_organization_id"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."set_doc_file_paths_organization_id"() TO "anon";
 GRANT ALL ON FUNCTION "public"."set_doc_file_paths_organization_id"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_doc_file_paths_organization_id"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."set_github_pull_request_comments_organization_id"() TO "anon";
 GRANT ALL ON FUNCTION "public"."set_github_pull_request_comments_organization_id"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_github_pull_request_comments_organization_id"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."set_github_pull_requests_organization_id"() TO "anon";
 GRANT ALL ON FUNCTION "public"."set_github_pull_requests_organization_id"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_github_pull_requests_organization_id"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."set_knowledge_suggestion_doc_mappings_organization_id"() TO "anon";
 GRANT ALL ON FUNCTION "public"."set_knowledge_suggestion_doc_mappings_organization_id"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_knowledge_suggestion_doc_mappings_organization_id"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."set_knowledge_suggestions_organization_id"() TO "anon";
 GRANT ALL ON FUNCTION "public"."set_knowledge_suggestions_organization_id"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_knowledge_suggestions_organization_id"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."set_migration_pull_request_mappings_organization_id"() TO "anon";
 GRANT ALL ON FUNCTION "public"."set_migration_pull_request_mappings_organization_id"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_migration_pull_request_mappings_organization_id"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."set_migrations_organization_id"() TO "anon";
 GRANT ALL ON FUNCTION "public"."set_migrations_organization_id"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_migrations_organization_id"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."set_overall_review_knowledge_suggestion_mappings_organization_i"() TO "anon";
 GRANT ALL ON FUNCTION "public"."set_overall_review_knowledge_suggestion_mappings_organization_i"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_overall_review_knowledge_suggestion_mappings_organization_i"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."set_overall_reviews_organization_id"() TO "anon";
 GRANT ALL ON FUNCTION "public"."set_overall_reviews_organization_id"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_overall_reviews_organization_id"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."set_project_repository_mappings_organization_id"() TO "anon";
 GRANT ALL ON FUNCTION "public"."set_project_repository_mappings_organization_id"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_project_repository_mappings_organization_id"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."set_review_feedback_comments_organization_id"() TO "anon";
 GRANT ALL ON FUNCTION "public"."set_review_feedback_comments_organization_id"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_review_feedback_comments_organization_id"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."set_review_feedback_knowledge_suggestion_mappings_organization_"() TO "anon";
 GRANT ALL ON FUNCTION "public"."set_review_feedback_knowledge_suggestion_mappings_organization_"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_review_feedback_knowledge_suggestion_mappings_organization_"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."set_review_feedbacks_organization_id"() TO "anon";
 GRANT ALL ON FUNCTION "public"."set_review_feedbacks_organization_id"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_review_feedbacks_organization_id"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."set_review_suggestion_snippets_organization_id"() TO "anon";
 GRANT ALL ON FUNCTION "public"."set_review_suggestion_snippets_organization_id"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_review_suggestion_snippets_organization_id"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."set_schema_file_paths_organization_id"() TO "anon";
 GRANT ALL ON FUNCTION "public"."set_schema_file_paths_organization_id"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_schema_file_paths_organization_id"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."set_timeline_items_organization_id"() TO "anon";
 GRANT ALL ON FUNCTION "public"."set_timeline_items_organization_id"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_timeline_items_organization_id"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."set_validation_queries_organization_id"() TO "anon";
 GRANT ALL ON FUNCTION "public"."set_validation_queries_organization_id"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_validation_queries_organization_id"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."set_validation_results_organization_id"() TO "anon";
 GRANT ALL ON FUNCTION "public"."set_validation_results_organization_id"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_validation_results_organization_id"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."set_workflow_runs_organization_id"() TO "anon";
 GRANT ALL ON FUNCTION "public"."set_workflow_runs_organization_id"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_workflow_runs_organization_id"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."set_workflow_runs_updated_at"() TO "anon";
 GRANT ALL ON FUNCTION "public"."set_workflow_runs_updated_at"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."set_workflow_runs_updated_at"() TO "service_role";
 
@@ -4906,25 +4877,21 @@ GRANT ALL ON FUNCTION "public"."subvector"("public"."vector", integer, integer) 
 
 
 
-GRANT ALL ON FUNCTION "public"."sync_existing_users"() TO "anon";
 GRANT ALL ON FUNCTION "public"."sync_existing_users"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."sync_existing_users"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."update_artifacts_updated_at"() TO "anon";
 GRANT ALL ON FUNCTION "public"."update_artifacts_updated_at"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."update_artifacts_updated_at"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."update_building_schema"("p_schema_id" "uuid", "p_schema_schema" "jsonb", "p_schema_version_patch" "jsonb", "p_schema_version_reverse_patch" "jsonb", "p_latest_schema_version_number" integer, "p_message_content" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."update_building_schema"("p_schema_id" "uuid", "p_schema_schema" "jsonb", "p_schema_version_patch" "jsonb", "p_schema_version_reverse_patch" "jsonb", "p_latest_schema_version_number" integer, "p_message_content" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."update_building_schema"("p_schema_id" "uuid", "p_schema_schema" "jsonb", "p_schema_version_patch" "jsonb", "p_schema_version_reverse_patch" "jsonb", "p_latest_schema_version_number" integer, "p_message_content" "text") TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."update_checkpoints_updated_at"() TO "anon";
 GRANT ALL ON FUNCTION "public"."update_checkpoints_updated_at"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."update_checkpoints_updated_at"() TO "service_role";
 
@@ -5113,205 +5080,171 @@ GRANT ALL ON FUNCTION "public"."sum"("public"."vector") TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."artifacts" TO "anon";
 GRANT ALL ON TABLE "public"."artifacts" TO "authenticated";
 GRANT ALL ON TABLE "public"."artifacts" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."building_schema_versions" TO "anon";
 GRANT ALL ON TABLE "public"."building_schema_versions" TO "authenticated";
 GRANT ALL ON TABLE "public"."building_schema_versions" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."building_schemas" TO "anon";
 GRANT ALL ON TABLE "public"."building_schemas" TO "authenticated";
 GRANT ALL ON TABLE "public"."building_schemas" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."checkpoint_blobs" TO "anon";
 GRANT ALL ON TABLE "public"."checkpoint_blobs" TO "authenticated";
 GRANT ALL ON TABLE "public"."checkpoint_blobs" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."checkpoint_migrations" TO "anon";
 GRANT ALL ON TABLE "public"."checkpoint_migrations" TO "authenticated";
 GRANT ALL ON TABLE "public"."checkpoint_migrations" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."checkpoint_writes" TO "anon";
 GRANT ALL ON TABLE "public"."checkpoint_writes" TO "authenticated";
 GRANT ALL ON TABLE "public"."checkpoint_writes" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."checkpoints" TO "anon";
 GRANT ALL ON TABLE "public"."checkpoints" TO "authenticated";
 GRANT ALL ON TABLE "public"."checkpoints" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."design_sessions" TO "anon";
 GRANT ALL ON TABLE "public"."design_sessions" TO "authenticated";
 GRANT ALL ON TABLE "public"."design_sessions" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."doc_file_paths" TO "anon";
 GRANT ALL ON TABLE "public"."doc_file_paths" TO "authenticated";
 GRANT ALL ON TABLE "public"."doc_file_paths" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."documents" TO "anon";
 GRANT ALL ON TABLE "public"."documents" TO "authenticated";
 GRANT ALL ON TABLE "public"."documents" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."github_pull_request_comments" TO "anon";
 GRANT ALL ON TABLE "public"."github_pull_request_comments" TO "authenticated";
 GRANT ALL ON TABLE "public"."github_pull_request_comments" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."github_pull_requests" TO "anon";
 GRANT ALL ON TABLE "public"."github_pull_requests" TO "authenticated";
 GRANT ALL ON TABLE "public"."github_pull_requests" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."github_repositories" TO "anon";
 GRANT ALL ON TABLE "public"."github_repositories" TO "authenticated";
 GRANT ALL ON TABLE "public"."github_repositories" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."invitations" TO "anon";
 GRANT ALL ON TABLE "public"."invitations" TO "authenticated";
 GRANT ALL ON TABLE "public"."invitations" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."knowledge_suggestion_doc_mappings" TO "anon";
 GRANT ALL ON TABLE "public"."knowledge_suggestion_doc_mappings" TO "authenticated";
 GRANT ALL ON TABLE "public"."knowledge_suggestion_doc_mappings" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."knowledge_suggestions" TO "anon";
 GRANT ALL ON TABLE "public"."knowledge_suggestions" TO "authenticated";
 GRANT ALL ON TABLE "public"."knowledge_suggestions" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."migration_pull_request_mappings" TO "anon";
 GRANT ALL ON TABLE "public"."migration_pull_request_mappings" TO "authenticated";
 GRANT ALL ON TABLE "public"."migration_pull_request_mappings" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."migrations" TO "anon";
 GRANT ALL ON TABLE "public"."migrations" TO "authenticated";
 GRANT ALL ON TABLE "public"."migrations" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."organization_members" TO "anon";
 GRANT ALL ON TABLE "public"."organization_members" TO "authenticated";
 GRANT ALL ON TABLE "public"."organization_members" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."organizations" TO "anon";
 GRANT ALL ON TABLE "public"."organizations" TO "authenticated";
 GRANT ALL ON TABLE "public"."organizations" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."overall_review_knowledge_suggestion_mappings" TO "anon";
 GRANT ALL ON TABLE "public"."overall_review_knowledge_suggestion_mappings" TO "authenticated";
 GRANT ALL ON TABLE "public"."overall_review_knowledge_suggestion_mappings" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."overall_reviews" TO "anon";
 GRANT ALL ON TABLE "public"."overall_reviews" TO "authenticated";
 GRANT ALL ON TABLE "public"."overall_reviews" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."project_repository_mappings" TO "anon";
 GRANT ALL ON TABLE "public"."project_repository_mappings" TO "authenticated";
 GRANT ALL ON TABLE "public"."project_repository_mappings" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."projects" TO "anon";
 GRANT ALL ON TABLE "public"."projects" TO "authenticated";
 GRANT ALL ON TABLE "public"."projects" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."review_feedback_comments" TO "anon";
 GRANT ALL ON TABLE "public"."review_feedback_comments" TO "authenticated";
 GRANT ALL ON TABLE "public"."review_feedback_comments" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."review_feedback_knowledge_suggestion_mappings" TO "anon";
 GRANT ALL ON TABLE "public"."review_feedback_knowledge_suggestion_mappings" TO "authenticated";
 GRANT ALL ON TABLE "public"."review_feedback_knowledge_suggestion_mappings" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."review_feedbacks" TO "anon";
 GRANT ALL ON TABLE "public"."review_feedbacks" TO "authenticated";
 GRANT ALL ON TABLE "public"."review_feedbacks" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."review_suggestion_snippets" TO "anon";
 GRANT ALL ON TABLE "public"."review_suggestion_snippets" TO "authenticated";
 GRANT ALL ON TABLE "public"."review_suggestion_snippets" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."schema_file_paths" TO "anon";
 GRANT ALL ON TABLE "public"."schema_file_paths" TO "authenticated";
 GRANT ALL ON TABLE "public"."schema_file_paths" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."timeline_items" TO "anon";
 GRANT ALL ON TABLE "public"."timeline_items" TO "authenticated";
 GRANT ALL ON TABLE "public"."timeline_items" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."users" TO "anon";
 GRANT ALL ON TABLE "public"."users" TO "authenticated";
 GRANT ALL ON TABLE "public"."users" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."validation_queries" TO "anon";
 GRANT ALL ON TABLE "public"."validation_queries" TO "authenticated";
 GRANT ALL ON TABLE "public"."validation_queries" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."validation_results" TO "anon";
 GRANT ALL ON TABLE "public"."validation_results" TO "authenticated";
 GRANT ALL ON TABLE "public"."validation_results" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."workflow_runs" TO "anon";
 GRANT ALL ON TABLE "public"."workflow_runs" TO "authenticated";
 GRANT ALL ON TABLE "public"."workflow_runs" TO "service_role";
 
@@ -5324,7 +5257,6 @@ GRANT ALL ON TABLE "public"."workflow_runs" TO "service_role";
 
 
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES  TO "postgres";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES  TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES  TO "authenticated";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES  TO "service_role";
 
@@ -5334,7 +5266,6 @@ ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQ
 
 
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS  TO "postgres";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS  TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS  TO "authenticated";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS  TO "service_role";
 
@@ -5344,7 +5275,6 @@ ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUN
 
 
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES  TO "postgres";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES  TO "anon";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES  TO "authenticated";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES  TO "service_role";
 

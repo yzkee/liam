@@ -1,5 +1,11 @@
 # @liam-hq/ui
 
+## 0.0.18
+
+### Patch Changes
+
+- [#2942](https://github.com/liam-hq/liam/pull/2942) - 💄 update Toast style, be singleton and appearing from the bottom / Thanks [@tnyo43](https://github.com/tnyo43)!
+
 ## 0.0.17
 
 ### Patch Changes

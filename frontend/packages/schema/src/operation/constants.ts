@@ -13,12 +13,16 @@ export const PATH_PATTERNS = {
   INDEX_NAME: /^\/tables\/([^/]+)\/indexes\/([^/]+)\/name$/,
   INDEX_UNIQUE: /^\/tables\/([^/]+)\/indexes\/([^/]+)\/unique$/,
   INDEX_COLUMNS: /^\/tables\/([^/]+)\/indexes\/([^/]+)\/columns$/,
+  INDEX_COLUMNS_ELEMENT:
+    /^\/tables\/([^/]+)\/indexes\/([^/]+)\/columns\/(\d+)$/,
   INDEX_TYPE: /^\/tables\/([^/]+)\/indexes\/([^/]+)\/type$/,
   CONSTRAINT_BASE: /^\/tables\/([^/]+)\/constraints\/([^/]+)$/,
   CONSTRAINT_NAME: /^\/tables\/([^/]+)\/constraints\/([^/]+)\/name$/,
   CONSTRAINT_TYPE: /^\/tables\/([^/]+)\/constraints\/([^/]+)\/type$/,
   CONSTRAINT_COLUMN_NAME:
     /^\/tables\/([^/]+)\/constraints\/([^/]+)\/columnName$/,
+  CONSTRAINT_COLUMN_NAMES_ARRAY:
+    /^\/tables\/([^/]+)\/constraints\/([^/]+)\/columnNames\/(\d+)$/,
   CONSTRAINT_TARGET_TABLE_NAME:
     /^\/tables\/([^/]+)\/constraints\/([^/]+)\/targetTableName$/,
   CONSTRAINT_TARGET_COLUMN_NAME:

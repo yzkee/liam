@@ -4,6 +4,7 @@ import type { Schema } from '@liam-hq/schema'
 import { config } from 'dotenv'
 import type { Result } from 'neverthrow'
 import { err, errAsync, ok, okAsync, ResultAsync } from 'neverthrow'
+import { DEFAULT_RECURSION_LIMIT } from '../../src/chat/workflow/shared/langGraphUtils'
 import { createSupabaseRepositories } from '../../src/repositories/factory'
 import type { WorkflowSetupResult } from '../../src/shared/workflowSetup'
 import { setupWorkflowState } from '../../src/shared/workflowSetup'
@@ -226,7 +227,7 @@ export const createBuildingSchema = (
   },
 ) => {
   const { supabaseClient, organization, designSession } = sessionData
-  const initialSchema: Schema = { tables: {} }
+  const initialSchema: Schema = { tables: {}, enums: {} }
 
   return ResultAsync.fromPromise(
     supabaseClient
@@ -414,6 +415,7 @@ export const createWorkflowState = (
   // Empty schema for testing - let AI design from scratch
   const sampleSchema: Schema = {
     tables: {},
+    enums: {},
   }
 
   const userInput = getBusinessManagementSystemUserInput()
@@ -422,13 +424,12 @@ export const createWorkflowState = (
   const workflowParams: AgentWorkflowParams = {
     userInput,
     schemaData: sampleSchema,
-    history: [] satisfies [string, string][], // Empty history for initial run
     organizationId: organization.id,
     buildingSchemaId: buildingSchema.id,
     latestVersionNumber: buildingSchema.latest_version_number,
     designSessionId: designSession.id,
     userId: user.id,
-    recursionLimit: 100, // Higher limit for deep modeling
+    recursionLimit: DEFAULT_RECURSION_LIMIT, // Higher limit for deep modeling
   }
 
   // Use shared setupWorkflowState function
@@ -441,7 +442,7 @@ export const createWorkflowState = (
     workflowState: workflowSetupResult.workflowState,
     options: {
       configurable: workflowSetupResult.configurable,
-      recursionLimit: 100,
+      recursionLimit: DEFAULT_RECURSION_LIMIT,
       streamMode: 'values' as const,
       callbacks: [workflowSetupResult.runCollector],
     },

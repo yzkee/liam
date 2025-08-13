@@ -1,14 +1,13 @@
-import { AIMessage, HumanMessage } from '@langchain/core/messages'
+import { HumanMessage } from '@langchain/core/messages'
 import { RunCollectorCallbackHandler } from '@langchain/core/tracers/run_collector'
 import type { CompiledStateGraph } from '@langchain/langgraph'
-import { err, ok, ResultAsync } from 'neverthrow'
+import { err, errAsync, ok, okAsync, ResultAsync } from 'neverthrow'
 import { v4 as uuidv4 } from 'uuid'
 import { DEFAULT_RECURSION_LIMIT } from '../chat/workflow/shared/langGraphUtils'
 import type {
   WorkflowConfigurable,
   WorkflowState,
 } from '../chat/workflow/types'
-import { withTimelineItemSync } from '../chat/workflow/utils/withTimelineItemSync'
 import type { AgentWorkflowParams, AgentWorkflowResult } from '../types'
 import { WorkflowTerminationError } from './errorHandling'
 import { createEnhancedTraceData } from './traceEnhancer'
@@ -48,7 +47,6 @@ export const setupWorkflowState = (
   const {
     userInput,
     schemaData,
-    history,
     organizationId,
     buildingSchemaId,
     latestVersionNumber = 0,
@@ -58,27 +56,10 @@ export const setupWorkflowState = (
 
   const { repositories, thread_id } = config.configurable
 
-  // TODO(MH4GF): Remove this history-to-messages conversion once checkpointer is implemented
-  // When thread_id checkpoint functionality is working, message history will be
-  // automatically restored from the checkpoint storage, making this manual conversion unnecessary
-  // Convert history to BaseMessage objects (synchronous)
-  const messages = history.map(([role, content]) => {
-    return role === 'assistant'
-      ? new AIMessage(content)
-      : new HumanMessage(content)
-  })
-
   const workflowRunId = uuidv4()
 
-  const setupMessage = ResultAsync.fromPromise(
-    withTimelineItemSync(new HumanMessage(userInput), {
-      designSessionId,
-      organizationId,
-      userId,
-      repositories,
-    }),
-    (error) => new Error(String(error)),
-  ).andThen((message) => ok([...messages, message]))
+  const userMessage = new HumanMessage(userInput)
+  const allMessages = [userMessage]
 
   const createWorkflowRun = ResultAsync.fromPromise(
     repositories.schema.createWorkflowRun({
@@ -93,50 +74,48 @@ export const setupWorkflowState = (
     return ok(createWorkflowRun)
   })
 
-  return ResultAsync.combine([setupMessage, createWorkflowRun]).andThen(
-    ([messages]) => {
-      const runCollector = new RunCollectorCallbackHandler()
+  return createWorkflowRun.andThen(() => {
+    const runCollector = new RunCollectorCallbackHandler()
 
-      // Enhanced tracing with environment and developer context
-      const traceEnhancement = createEnhancedTraceData(
-        workflowRunId,
-        'agent-workflow',
-        [`organization:${organizationId}`, `session:${designSessionId}`],
-        {
-          workflow: {
-            building_schema_id: buildingSchemaId,
-            design_session_id: designSessionId,
-            user_id: userId,
-            organization_id: organizationId,
-            version_number: latestVersionNumber,
-          },
+    // Enhanced tracing with environment and developer context
+    const traceEnhancement = createEnhancedTraceData(
+      workflowRunId,
+      'agent-workflow',
+      [`organization:${organizationId}`, `session:${designSessionId}`],
+      {
+        workflow: {
+          building_schema_id: buildingSchemaId,
+          design_session_id: designSessionId,
+          user_id: userId,
+          organization_id: organizationId,
+          version_number: latestVersionNumber,
         },
-      )
+      },
+    )
 
-      return ok({
-        workflowState: {
-          userInput: userInput,
-          messages,
-          schemaData,
-          organizationId,
-          buildingSchemaId,
-          latestVersionNumber,
-          designSessionId,
-          userId,
-          retryCount: {},
-        },
-        workflowRunId,
-        runCollector,
-        configurable: {
-          repositories,
-          thread_id,
-          buildingSchemaId,
-          latestVersionNumber,
-        },
-        traceEnhancement,
-      })
-    },
-  )
+    return ok({
+      workflowState: {
+        userInput: userInput,
+        messages: allMessages,
+        schemaData,
+        organizationId,
+        buildingSchemaId,
+        latestVersionNumber,
+        designSessionId,
+        userId,
+        retryCount: {},
+      },
+      workflowRunId,
+      runCollector,
+      configurable: {
+        repositories,
+        thread_id,
+        buildingSchemaId,
+        latestVersionNumber,
+      },
+      traceEnhancement,
+    })
+  })
 }
 
 /**
@@ -153,7 +132,7 @@ export const executeWorkflowWithTracking = <
   compiled: S,
   setupResult: WorkflowSetupResult,
   recursionLimit: number = DEFAULT_RECURSION_LIMIT,
-): ResultAsync<AgentWorkflowResult, Error> => {
+): AgentWorkflowResult => {
   const {
     workflowState,
     workflowRunId,
@@ -203,8 +182,8 @@ export const executeWorkflowWithTracking = <
 
   const validateAndReturnResult = (result: unknown) =>
     isWorkflowState(result)
-      ? ok(ok(result))
-      : err(new Error('Invalid workflow result'))
+      ? okAsync(result)
+      : errAsync(new Error('Invalid workflow result'))
 
   // 4. Handle WorkflowTerminationError - save timeline item and update status
   const saveTimelineItem = (error: WorkflowTerminationError) =>
@@ -217,11 +196,13 @@ export const executeWorkflowWithTracking = <
       (timelineError) => new Error(String(timelineError)),
     )
 
-  const handleWorkflowTermination = (error: WorkflowTerminationError) =>
+  const handleWorkflowTermination = (
+    error: WorkflowTerminationError,
+  ): AgentWorkflowResult =>
     ResultAsync.combine([
       saveTimelineItem(error),
       updateWorkflowStatus('error'),
-    ]).map(() => ok(workflowState))
+    ]).map(() => workflowState)
 
   // 5. Chain everything together
   return executeWorkflow

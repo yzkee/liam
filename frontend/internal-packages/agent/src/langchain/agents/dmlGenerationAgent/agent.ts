@@ -39,8 +39,7 @@ export class DMLGenerationAgent
     })
 
     const model = new ChatOpenAI({
-      model: 'gpt-4o',
-      temperature: 0.1,
+      model: 'gpt-5',
     })
 
     const messages: BaseMessage[] = [

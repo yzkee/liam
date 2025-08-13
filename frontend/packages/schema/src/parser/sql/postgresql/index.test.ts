@@ -489,7 +489,7 @@ describe(processor, () => {
         CREATEe TABLE posts ();
       `)
 
-      const value = { tables: {} }
+      const value = { tables: {}, enums: {} }
       const errors = [
         new UnexpectedTokenWarningError('syntax error at or near "CREATEe"'),
       ]
@@ -875,6 +875,73 @@ describe(processor, () => {
 
       // Should parse all 8 foreign key constraints
       expect(totalForeignKeys).toBe(8)
+    })
+  })
+
+  describe('CREATE TYPE AS ENUM statement', () => {
+    it('should parse basic enum type', async () => {
+      const { value } = await processor(/* sql */ `
+        CREATE TYPE status AS ENUM ('active', 'inactive', 'pending');
+      `)
+
+      expect(value.enums).toEqual({
+        status: {
+          name: 'status',
+          values: ['active', 'inactive', 'pending'],
+          comment: null,
+        },
+      })
+    })
+
+    it('should parse enum with comment', async () => {
+      const { value } = await processor(/* sql */ `
+        CREATE TYPE user_status AS ENUM ('new', 'verified', 'suspended');
+        COMMENT ON TYPE user_status IS 'Possible user account statuses';
+      `)
+
+      expect(value.enums).toEqual({
+        user_status: {
+          name: 'user_status',
+          values: ['new', 'verified', 'suspended'],
+          comment: 'Possible user account statuses',
+        },
+      })
+    })
+
+    it('should parse multiple enum types', async () => {
+      const { value } = await processor(/* sql */ `
+        CREATE TYPE priority AS ENUM ('low', 'medium', 'high', 'urgent');
+        CREATE TYPE category AS ENUM ('bug', 'feature', 'improvement');
+        COMMENT ON TYPE priority IS 'Task priority levels';
+      `)
+
+      expect(value.enums).toEqual({
+        priority: {
+          name: 'priority',
+          values: ['low', 'medium', 'high', 'urgent'],
+          comment: 'Task priority levels',
+        },
+        category: {
+          name: 'category',
+          values: ['bug', 'feature', 'improvement'],
+          comment: null,
+        },
+      })
+    })
+
+    it('should handle empty enum creation', async () => {
+      const { value } = await processor(/* sql */ `
+        CREATE TYPE empty_enum AS ENUM ();
+      `)
+
+      // Empty enums should still be included (PostgreSQL allows empty enums)
+      expect(value.enums).toEqual({
+        empty_enum: {
+          name: 'empty_enum',
+          values: [],
+          comment: null,
+        },
+      })
     })
   })
 })

@@ -4,6 +4,7 @@ import { HumanMessage } from '@langchain/core/messages'
 import type { Schema } from '@liam-hq/schema'
 import type { Result } from 'neverthrow'
 import { err, errAsync, ok, okAsync, ResultAsync } from 'neverthrow'
+import { DEFAULT_RECURSION_LIMIT } from '../src/chat/workflow/shared/langGraphUtils'
 import type { WorkflowState } from '../src/chat/workflow/types'
 import { createDbAgentGraph } from '../src/db-agent/createDbAgentGraph'
 import { hasHelpFlag, parseDesignProcessArgs } from './shared/argumentParser'
@@ -147,6 +148,7 @@ const createWorkflowState = (
   // Empty schema for testing - let AI design from scratch
   const sampleSchema: Schema = {
     tables: {},
+    enums: {},
   }
 
   // Use custom user input if provided, otherwise use default
@@ -203,7 +205,7 @@ const executeDesignProcess = async (
   const streamResult = await (async () => {
     const stream = await graph.stream(workflowState, {
       configurable: config.configurable,
-      recursionLimit: 100,
+      recursionLimit: DEFAULT_RECURSION_LIMIT,
       streamMode: 'values',
     })
 

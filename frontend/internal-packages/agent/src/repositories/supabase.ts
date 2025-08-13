@@ -174,7 +174,7 @@ export class SupabaseSchemaRepository implements SchemaRepository {
       typeof buildingSchema.initial_schema_snapshot === 'object' &&
       buildingSchema.initial_schema_snapshot !== null
         ? JSON.parse(JSON.stringify(buildingSchema.initial_schema_snapshot))
-        : { tables: {} }
+        : { tables: {}, enums: {} }
 
     for (const version of versions) {
       const patchParsed = v.safeParse(operationsSchema, version.patch)
@@ -189,7 +189,16 @@ export class SupabaseSchemaRepository implements SchemaRepository {
           )
           continue
         }
-        applyPatchOperations(currentSchema, patchParsed.output)
+        const patchResult = applyPatchOperations(
+          currentSchema,
+          patchParsed.output,
+        )
+        if (patchResult.isOk()) {
+          // Update currentSchema with the patched result
+          Object.assign(currentSchema, patchResult.value)
+        } else {
+          // Failed to apply patch for this version, continue with next
+        }
       } else {
         console.warn(
           `Invalid patch operations in version ${version.number}:`,
@@ -201,8 +210,8 @@ export class SupabaseSchemaRepository implements SchemaRepository {
     // Validate and return as Schema type
     const validationResult = v.safeParse(schemaSchema, currentSchema)
     if (!validationResult.success) {
-      console.warn('Schema validation failed, using fallback schema')
-      return { tables: {} }
+      // Schema validation failed, using fallback schema
+      return { tables: {}, enums: {} }
     }
 
     return validationResult.output

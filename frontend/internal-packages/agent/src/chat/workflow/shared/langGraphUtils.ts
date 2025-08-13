@@ -15,13 +15,13 @@ import type { Usecase } from '../../../langchain/agents/qaGenerateUsecaseAgent/a
  * - With error loops: May have additional transitions when errors occur
  *   (e.g., validateSchema → designSchema)
  *
- * Setting this to 100 ensures:
+ * Setting this to 50 ensures:
  * - Complete workflow execution under normal conditions
  * - Ample headroom for complex error handling loops and retries
  * - Protection against infinite loops while allowing for complex workflows
  * - Sufficient capacity for finding optimal workflow patterns
  */
-export const DEFAULT_RECURSION_LIMIT = 100
+export const DEFAULT_RECURSION_LIMIT = 50
 
 /**
  * Create LangGraph-compatible annotations (shared)

@@ -14,10 +14,15 @@ import {
   type ReplaceEnumValuesOperation,
 } from '../enum.js'
 
-// Helper function to safely get schemas from array
-const getSchema = (index: number) => {
-  // biome-ignore lint/style/noNonNullAssertion: Test helper function with known valid indices
-  return enumOperations[index]!
+// Helper to fetch the correct schema by validating a representative operation
+const getSchemaFor = (operation: unknown) => {
+  for (const schema of enumOperations) {
+    if (v.safeParse(schema, operation).success) {
+      return schema
+    }
+  }
+  // biome-ignore lint/style/noNonNullAssertion: Test helper function with validated enum operations
+  return enumOperations[0]!
 }
 
 describe('enumOperations', () => {
@@ -32,7 +37,7 @@ describe('enumOperations', () => {
       },
     }
 
-    const addEnumSchema = getSchema(0)
+    const addEnumSchema = getSchemaFor(validAddOperation)
 
     it('should validate a correct add enum operation', () => {
       const result = v.safeParse(addEnumSchema, validAddOperation)
@@ -65,7 +70,7 @@ describe('enumOperations', () => {
       path: '/enums/status',
     }
 
-    const removeEnumSchema = getSchema(1)
+    const removeEnumSchema = getSchemaFor(validRemoveOperation)
 
     it('should validate a correct remove enum operation', () => {
       const result = v.safeParse(removeEnumSchema, validRemoveOperation)
@@ -97,7 +102,7 @@ describe('enumOperations', () => {
       value: 'user_status',
     }
 
-    const replaceNameSchema = getSchema(2)
+    const replaceNameSchema = getSchemaFor(validReplaceNameOperation)
 
     it('should validate a correct replace enum name operation', () => {
       const result = v.safeParse(replaceNameSchema, validReplaceNameOperation)
@@ -132,7 +137,7 @@ describe('enumOperations', () => {
       value: ['low', 'medium', 'high'],
     }
 
-    const replaceValuesSchema = getSchema(3)
+    const replaceValuesSchema = getSchemaFor(validReplaceValuesOperation)
 
     it('should validate a correct replace enum values operation', () => {
       const result = v.safeParse(
@@ -178,7 +183,7 @@ describe('enumOperations', () => {
       value: null,
     }
 
-    const replaceCommentSchema = getSchema(4)
+    const replaceCommentSchema = getSchemaFor(validReplaceCommentOperation)
 
     it('should validate a correct replace enum comment operation with string', () => {
       const result = v.safeParse(
@@ -229,7 +234,11 @@ describe('enumOperations', () => {
         '/enums/user_role',
         '/enums/priority',
       ]
-      const addEnumSchema = getSchema(0)
+      const addEnumSchema = getSchemaFor({
+        op: 'add' as const,
+        path: '/enums/test',
+        value: { name: 'test', values: ['a'], comment: null },
+      })
 
       for (const path of validPaths) {
         const operation = {
@@ -249,7 +258,11 @@ describe('enumOperations', () => {
         '/tables/users',
         '/enum/status',
       ]
-      const addEnumSchema = getSchema(0)
+      const addEnumSchema = getSchemaFor({
+        op: 'add' as const,
+        path: '/enums/test',
+        value: { name: 'test', values: ['a'], comment: null },
+      })
 
       for (const path of invalidPaths) {
         const operation = {
@@ -278,9 +291,21 @@ describe('enumOperations', () => {
         '/enums/priority/comment',
       ]
 
-      const replaceNameSchema = getSchema(2)
-      const replaceValuesSchema = getSchema(3)
-      const replaceCommentSchema = getSchema(4)
+      const replaceNameSchema = getSchemaFor({
+        op: 'replace' as const,
+        path: '/enums/test/name',
+        value: 'name',
+      })
+      const replaceValuesSchema = getSchemaFor({
+        op: 'replace' as const,
+        path: '/enums/test/values',
+        value: ['a'],
+      })
+      const replaceCommentSchema = getSchemaFor({
+        op: 'replace' as const,
+        path: '/enums/test/comment',
+        value: 'comment',
+      })
 
       for (const path of validNamePaths) {
         const operation = { op: 'replace' as const, path, value: 'new_name' }

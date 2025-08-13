@@ -72,35 +72,28 @@ export type ReplaceEnumCommentOperation = v.InferOutput<
   typeof replaceEnumCommentOperationSchema
 >
 
-export const isAddEnumOperation = (
-  operation: Operation,
-): operation is AddEnumOperation => {
-  return v.safeParse(addEnumOperationSchema, operation).success
-}
+// Helper for type guards to reduce repetition
+const isOperationOf =
+  <T extends Operation>(schema: v.GenericSchema<T>) =>
+  (operation: Operation): operation is T =>
+    v.safeParse(schema, operation).success
 
-export const isRemoveEnumOperation = (
-  operation: Operation,
-): operation is RemoveEnumOperation => {
-  return v.safeParse(removeEnumOperationSchema, operation).success
-}
+export const isAddEnumOperation = isOperationOf<AddEnumOperation>(
+  addEnumOperationSchema,
+)
 
-export const isReplaceEnumNameOperation = (
-  operation: Operation,
-): operation is ReplaceEnumNameOperation => {
-  return v.safeParse(replaceEnumNameOperationSchema, operation).success
-}
+export const isRemoveEnumOperation = isOperationOf<RemoveEnumOperation>(
+  removeEnumOperationSchema,
+)
 
-export const isReplaceEnumValuesOperation = (
-  operation: Operation,
-): operation is ReplaceEnumValuesOperation => {
-  return v.safeParse(replaceEnumValuesOperationSchema, operation).success
-}
+export const isReplaceEnumNameOperation =
+  isOperationOf<ReplaceEnumNameOperation>(replaceEnumNameOperationSchema)
 
-export const isReplaceEnumCommentOperation = (
-  operation: Operation,
-): operation is ReplaceEnumCommentOperation => {
-  return v.safeParse(replaceEnumCommentOperationSchema, operation).success
-}
+export const isReplaceEnumValuesOperation =
+  isOperationOf<ReplaceEnumValuesOperation>(replaceEnumValuesOperationSchema)
+
+export const isReplaceEnumCommentOperation =
+  isOperationOf<ReplaceEnumCommentOperation>(replaceEnumCommentOperationSchema)
 
 export const enumOperations = [
   addEnumOperationSchema,

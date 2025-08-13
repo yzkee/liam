@@ -19,7 +19,9 @@ const schemaDesignToolSchema = v.object({
 
 // toJsonSchema returns a JSONSchema7, which is not assignable to JSONSchema
 // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-const toolSchema = toJsonSchema(schemaDesignToolSchema) as JSONSchema
+const toolSchema = toJsonSchema(schemaDesignToolSchema, {
+  typeMode: 'input',
+}) as JSONSchema
 
 const validateAndExecuteDDL = async (
   schema: Schema,

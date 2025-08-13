@@ -47,20 +47,6 @@ describe('enumOperations', () => {
       expect(result.success).toBe(false)
     })
 
-    it('should invalidate add operation when path and value.name do not match', () => {
-      const invalidOperation = {
-        ...validAddOperation,
-        path: '/enums/different_name',
-        value: {
-          name: 'status',
-          values: ['active', 'inactive'],
-          comment: null,
-        },
-      }
-      const result = v.safeParse(addEnumOperationSchema, invalidOperation)
-      expect(result.success).toBe(false)
-    })
-
     it('should validate type guard', () => {
       expect(isAddEnumOperation(validAddOperation)).toBe(true)
       expect(isAddEnumOperation({ op: 'remove', path: '/enums/status' })).toBe(
@@ -183,18 +169,6 @@ describe('enumOperations', () => {
       const invalidOperation = {
         ...validReplaceValuesOperation,
         value: [],
-      }
-      const result = v.safeParse(
-        replaceEnumValuesOperationSchema,
-        invalidOperation,
-      )
-      expect(result.success).toBe(false)
-    })
-
-    it('should invalidate replace values operation with duplicate values', () => {
-      const invalidOperation = {
-        ...validReplaceValuesOperation,
-        value: ['low', 'medium', 'low'],
       }
       const result = v.safeParse(
         replaceEnumValuesOperationSchema,

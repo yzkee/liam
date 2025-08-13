@@ -105,7 +105,7 @@ export const schemaDesignTool = tool(
       // LangGraph tool nodes require throwing errors to trigger retry mechanism
       // eslint-disable-next-line no-throw-error/no-throw-error
       throw new Error(
-        'Could not retrieve current schema for DDL validation. Please check the schema ID and try again.',
+        `Failed to apply patch operations before DDL validation: ${applyResult.error.message}`,
       )
     }
 

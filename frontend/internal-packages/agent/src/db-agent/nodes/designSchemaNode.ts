@@ -1,13 +1,13 @@
 import { AIMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import type { Database } from '@liam-hq/db'
-import { invokeDesignAgent } from '../../../langchain/agents/databaseSchemaBuildAgent/agent'
-import { WorkflowTerminationError } from '../../../shared/errorHandling'
-import { convertSchemaToText } from '../../../utils/convertSchemaToText'
-import { getConfigurable } from '../shared/getConfigurable'
-import type { WorkflowState } from '../types'
-import { logAssistantMessage } from '../utils/timelineLogger'
-import { withTimelineItemSync } from '../utils/withTimelineItemSync'
+import { getConfigurable } from '../../chat/workflow/shared/getConfigurable'
+import type { WorkflowState } from '../../chat/workflow/types'
+import { logAssistantMessage } from '../../chat/workflow/utils/timelineLogger'
+import { withTimelineItemSync } from '../../chat/workflow/utils/withTimelineItemSync'
+import { WorkflowTerminationError } from '../../shared/errorHandling'
+import { convertSchemaToText } from '../../utils/convertSchemaToText'
+import { invokeDesignAgent } from '../invokeDesignAgent'
 
 /**
  * Design Schema Node - DB Design & DDL Execution

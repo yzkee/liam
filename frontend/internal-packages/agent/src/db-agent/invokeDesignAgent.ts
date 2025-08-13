@@ -6,11 +6,11 @@ import {
 import { ChatOpenAI } from '@langchain/openai'
 import { ok, ResultAsync } from 'neverthrow'
 import * as v from 'valibot'
-import type { ToolConfigurable } from '../../../db-agent/getToolConfigurable'
-import { schemaDesignTool } from '../../../db-agent/tools/schemaDesignTool'
-import { reasoningSchema } from '../../utils/schema'
-import type { Reasoning } from '../../utils/types'
-import { type DesignAgentPromptVariables, designAgentPrompt } from './prompts'
+import { reasoningSchema } from '../langchain/utils/schema'
+import type { Reasoning } from '../langchain/utils/types'
+import type { ToolConfigurable } from './getToolConfigurable'
+import { type DesignAgentPromptVariables, designAgentPrompt } from './prompt'
+import { schemaDesignTool } from './tools/schemaDesignTool'
 
 const model = new ChatOpenAI({
   model: 'gpt-5',

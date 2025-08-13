@@ -69,6 +69,59 @@ export const Chat: FC<Props> = ({
     })
   }
 
+  // Helper function to get effective role
+  const getEffectiveRole = (entry: TimelineItemEntry): string => {
+    if ('role' in entry) {
+      return entry.role
+    }
+    // schema_version, query_result, error all render as 'db' agent
+    return 'db'
+  }
+
+  // Check if two items should be grouped together
+  const shouldGroupItems = (
+    item1: TimelineItemEntry,
+    item2: TimelineItemEntry,
+  ): boolean => {
+    return getEffectiveRole(item1) === getEffectiveRole(item2)
+  }
+
+  // Handle grouping when the last item is an array
+  const tryGroupWithArray = (
+    acc: Array<TimelineItemEntry | TimelineItemEntry[]>,
+    item: TimelineItemEntry,
+  ): boolean => {
+    const lastItem = acc[acc.length - 1]
+    if (!Array.isArray(lastItem) || lastItem.length === 0) return false
+
+    const firstItem = lastItem[0]
+    if (!firstItem || !shouldGroupItems(firstItem, item)) return false
+
+    lastItem.push(item)
+    return true
+  }
+
+  // Handle grouping when the last item is a single item
+  const tryGroupWithSingleItem = (
+    acc: Array<TimelineItemEntry | TimelineItemEntry[]>,
+    item: TimelineItemEntry,
+    agentTypes: string[],
+  ): boolean => {
+    const lastItem = acc[acc.length - 1]
+    if (
+      !lastItem ||
+      Array.isArray(lastItem) ||
+      !agentTypes.includes(lastItem.type)
+    ) {
+      return false
+    }
+
+    if (!shouldGroupItems(lastItem, item)) return false
+
+    acc[acc.length - 1] = [lastItem, item]
+    return true
+  }
+
   // Group consecutive messages from the same agent
   const groupedTimelineItems = timelineItems.reduce<
     Array<TimelineItemEntry | TimelineItemEntry[]>
@@ -87,42 +140,15 @@ export const Chat: FC<Props> = ({
       return acc
     }
 
-    // Check if the previous item in the accumulator is a group of the same type
-    const lastItem = acc[acc.length - 1]
+    // Try to group with existing items
+    const groupedWithArray = tryGroupWithArray(acc, item)
+    if (groupedWithArray) return acc
 
-    // Helper function to get effective role
-    const getEffectiveRole = (entry: TimelineItemEntry): string => {
-      if ('role' in entry) {
-        return entry.role
-      }
-      // schema_version, query_result, error all render as 'db' agent
-      return 'db'
-    }
+    const groupedWithSingleItem = tryGroupWithSingleItem(acc, item, agentTypes)
+    if (groupedWithSingleItem) return acc
 
-    const currentRole = getEffectiveRole(item)
-
-    if (Array.isArray(lastItem) && lastItem.length > 0) {
-      const firstItem = lastItem[0]
-      if (!firstItem) return acc
-      const lastRole = getEffectiveRole(firstItem)
-      if (lastRole === currentRole) {
-        lastItem.push(item)
-        return acc
-      }
-    } else if (
-      lastItem &&
-      !Array.isArray(lastItem) &&
-      agentTypes.includes(lastItem.type)
-    ) {
-      const lastRole = getEffectiveRole(lastItem)
-      if (lastRole === currentRole) {
-        acc[acc.length - 1] = [lastItem, item]
-        return acc
-      }
-    }
-
+    // Add as new item if no grouping occurred
     acc.push(item)
-
     return acc
   }, [])
 

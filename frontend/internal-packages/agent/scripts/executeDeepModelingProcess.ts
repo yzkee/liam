@@ -54,10 +54,9 @@ const logWorkflowMessage = (
  */
 const executeDeepModelingProcess = async (): Promise<Result<void, Error>> => {
   // Validate environment, setup database, create session and schema with andThen chaining
-  const sessionName = `Deep Modeling Session - ${new Date().toISOString()}`
   const setupResult = await validateEnvironment()
     .andThen(setupDatabaseAndUser(logger))
-    .andThen(createDesignSession(sessionName))
+    .andThen(createDesignSession)
     .andThen(createBuildingSchema)
     .andThen(createWorkflowState)
 

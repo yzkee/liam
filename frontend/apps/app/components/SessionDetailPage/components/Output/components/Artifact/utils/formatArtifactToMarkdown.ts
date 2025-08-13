@@ -18,7 +18,7 @@ function formatDmlOperation(operation: DmlOperation): string {
   sections.push('```')
 
   // Execution logs
-  if (operation.dml_execution_logs && operation.dml_execution_logs.length > 0) {
+  if (operation.dml_execution_logs.length > 0) {
     sections.push('')
     sections.push(`**${EXECUTION_SECTION_TITLE}:**`)
     sections.push('')

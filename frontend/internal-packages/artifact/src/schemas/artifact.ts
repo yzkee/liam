@@ -13,7 +13,7 @@ export const dmlOperationSchema = v.object({
   operation_type: v.picklist(['INSERT', 'UPDATE', 'DELETE', 'SELECT']),
   sql: v.string(),
   description: v.optional(v.string()),
-  dml_execution_logs: v.optional(v.array(dmlExecutionLogSchema)),
+  dml_execution_logs: v.array(dmlExecutionLogSchema),
 })
 
 // Use case schema

@@ -109,9 +109,7 @@ export const invokeSchemaDesignToolNode = async (
       // Errors are handled by returning undefined ddlStatements
 
       const ddlStatements =
-        ddlResult.errors && ddlResult.errors.length > 0
-          ? undefined
-          : ddlResult.value
+        ddlResult.errors.length > 0 ? undefined : ddlResult.value
 
       // Update workflow state with fresh schema data and DDL statements
       updatedResult = {

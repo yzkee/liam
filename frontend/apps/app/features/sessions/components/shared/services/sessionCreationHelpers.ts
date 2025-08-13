@@ -93,7 +93,7 @@ const createBuildingSchema = async (
     .single()
 
   if (buildingSchemaError || !buildingSchema) {
-    console.error('Error creating building schema:', buildingSchemaError)
+    console.error('Building schema creation error:', buildingSchemaError)
     return { success: false, error: 'Failed to create building schema' }
   }
 

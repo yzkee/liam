@@ -104,6 +104,10 @@ export const invokeSchemaDesignToolNode = async (
     if (schemaResult.isOk()) {
       // Generate DDL statements from the updated schema
       const ddlResult = postgresqlSchemaDeparser(schemaResult.value.schema)
+
+      // Check for DDL generation errors without logging
+      // Errors are handled by returning undefined ddlStatements
+
       const ddlStatements =
         ddlResult.errors.length > 0 ? undefined : ddlResult.value
 

@@ -37,10 +37,10 @@ const parseArgValue = (
  */
 export const parseDesignProcessArgs = (): {
   prompt?: string
-  threadId?: string
+  sessionId?: string
 } => {
   const args = process.argv.slice(2)
-  const result: { prompt?: string; threadId?: string } = {}
+  const result: { prompt?: string; sessionId?: string } = {}
 
   for (let i = 0; i < args.length; i++) {
     // Parse prompt
@@ -51,16 +51,16 @@ export const parseDesignProcessArgs = (): {
       continue
     }
 
-    // Parse thread-id
-    const threadResult = parseArgValue(args, i, 'thread-id', 't')
-    if (threadResult.value !== undefined) {
-      const trimmed = threadResult.value.trim()
+    // Parse session-id
+    const sessionResult = parseArgValue(args, i, 'session-id', 's')
+    if (sessionResult.value !== undefined) {
+      const trimmed = sessionResult.value.trim()
       if (trimmed) {
-        result.threadId = trimmed
+        result.sessionId = trimmed
       } else {
-        console.warn('Invalid thread ID provided - ignoring empty value')
+        console.warn('Invalid session ID provided - ignoring empty value')
       }
-      if (threadResult.skip) i++
+      if (sessionResult.skip) i++
     }
   }
 

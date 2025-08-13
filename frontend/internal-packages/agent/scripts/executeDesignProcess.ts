@@ -28,21 +28,21 @@ const logger = createLogger(currentLogLevel)
  * Fetch existing design session from database
  */
 const fetchDesignSession =
-  (threadId: string) => (setupData: SetupDatabaseAndUserResult) => {
+  (sessionId: string) => (setupData: SetupDatabaseAndUserResult) => {
     const { supabaseClient } = setupData
 
     return ResultAsync.fromPromise(
       supabaseClient
         .from('design_sessions')
         .select('id, name')
-        .eq('id', threadId)
+        .eq('id', sessionId)
         .single(),
       (error) => new Error(`Failed to fetch design session: ${error}`),
     ).andThen(({ data, error }) => {
       if (error || !data) {
         return errAsync(
           new Error(
-            `Design session not found for thread ID ${threadId}: ${error?.message || 'No data'}`,
+            `Design session not found for session ID ${sessionId}: ${error?.message || 'No data'}`,
           ),
         )
       }
@@ -119,9 +119,9 @@ const fetchBuildingSchema = (setupData: SetupDataWithDesignSession) => {
  * Find or create design session
  */
 const findOrCreateDesignSession =
-  (resumeThreadId?: string) => (setupData: SetupDatabaseAndUserResult) => {
-    if (resumeThreadId) {
-      return fetchDesignSession(resumeThreadId)(setupData).andThen(
+  (resumeSessionId?: string) => (setupData: SetupDatabaseAndUserResult) => {
+    if (resumeSessionId) {
+      return fetchDesignSession(resumeSessionId)(setupData).andThen(
         fetchBuildingSchema,
       )
     }
@@ -175,11 +175,11 @@ const createWorkflowState = (
  */
 const executeDesignProcess = async (
   customPrompt?: string,
-  resumeThreadId?: string,
+  resumeSessionId?: string,
 ): Promise<Result<void, Error>> => {
   const setupResult = await validateEnvironment()
     .andThen(setupDatabaseAndUser(logger))
-    .andThen(findOrCreateDesignSession(resumeThreadId))
+    .andThen(findOrCreateDesignSession(resumeSessionId))
     .andThen((data) => createWorkflowState(data, customPrompt))
 
   if (setupResult.isErr()) return err(setupResult.error)
@@ -223,12 +223,10 @@ const executeDesignProcess = async (
 
   logger.info('Workflow completed')
 
-  // Log the thread_id for future reference when resuming sessions
-  const sessionThreadId = workflowState.designSessionId
-  logger.info(`Session thread ID: ${sessionThreadId}`)
-  logger.info(
-    `To resume this session later, use: --thread-id ${sessionThreadId}`,
-  )
+  // Log the session_id for future reference when resuming sessions
+  const sessionId = workflowState.designSessionId
+  logger.info(`Session ID: ${sessionId}`)
+  logger.info(`To resume this session later, use: --session-id ${sessionId}`)
 
   logSchemaResults(logger, streamResult.schemaData, currentLogLevel, undefined)
 
@@ -238,7 +236,7 @@ const executeDesignProcess = async (
 // Execute if this file is run directly
 if (require.main === module) {
   // Parse command line arguments
-  const { prompt, threadId } = parseDesignProcessArgs()
+  const { prompt, sessionId } = parseDesignProcessArgs()
 
   // Show usage information
   if (hasHelpFlag()) {
@@ -250,11 +248,11 @@ if (require.main === module) {
 
   Additional Options:
     --prompt, -p <text>     Custom prompt for the AI
-    --thread-id, -t <id>    Resume from existing design session (thread ID)`,
+    --session-id, -s <id>   Resume from existing design session (session ID)`,
       [
         'pnpm --filter @liam-hq/agent execute-design-process',
         'pnpm --filter @liam-hq/agent execute-design-process --prompt "Create a user management system"',
-        'pnpm --filter @liam-hq/agent execute-design-process --thread-id abc-123 --prompt "Add more tables"',
+        'pnpm --filter @liam-hq/agent execute-design-process --session-id abc-123 --prompt "Add more tables"',
         'pnpm --filter @liam-hq/agent execute-design-process:debug',
       ],
     )
@@ -265,7 +263,7 @@ if (require.main === module) {
     `Starting design process execution (log level: ${currentLogLevel})`,
   )
 
-  executeDesignProcess(prompt, threadId).then((result) => {
+  executeDesignProcess(prompt, sessionId).then((result) => {
     if (result.isErr()) {
       logger.error(`FAILED: ${result.error.message}`)
       process.exit(1)

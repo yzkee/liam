@@ -133,6 +133,15 @@ export const isReplaceEnumValuesOperation =
 export const isReplaceEnumCommentOperation =
   isOperationOf<ReplaceEnumCommentOperation>(replaceEnumCommentOperationSchema)
 
+// Export individual schemas
+export {
+  addEnumOperationSchema,
+  removeEnumOperationSchema,
+  replaceEnumNameOperationSchema,
+  replaceEnumValuesOperationSchema,
+  replaceEnumCommentOperationSchema,
+}
+
 export const enumOperations = [
   addEnumOperationSchema,
   removeEnumOperationSchema,

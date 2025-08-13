@@ -2,7 +2,7 @@ import * as v from 'valibot'
 import { describe, expect, it } from 'vitest'
 import {
   type AddEnumOperation,
-  enumOperations,
+  addEnumOperationSchema,
   isAddEnumOperation,
   isRemoveEnumOperation,
   isReplaceEnumCommentOperation,
@@ -12,18 +12,11 @@ import {
   type ReplaceEnumCommentOperation,
   type ReplaceEnumNameOperation,
   type ReplaceEnumValuesOperation,
+  removeEnumOperationSchema,
+  replaceEnumCommentOperationSchema,
+  replaceEnumNameOperationSchema,
+  replaceEnumValuesOperationSchema,
 } from '../enum.js'
-
-// Helper to fetch the correct schema by validating a representative operation
-const getSchemaFor = (operation: unknown) => {
-  for (const schema of enumOperations) {
-    if (v.safeParse(schema, operation).success) {
-      return schema
-    }
-  }
-  // biome-ignore lint/style/noNonNullAssertion: Test helper function with validated enum operations
-  return enumOperations[0]!
-}
 
 describe('enumOperations', () => {
   describe('AddEnumOperation', () => {
@@ -37,22 +30,20 @@ describe('enumOperations', () => {
       },
     }
 
-    const addEnumSchema = getSchemaFor(validAddOperation)
-
     it('should validate a correct add enum operation', () => {
-      const result = v.safeParse(addEnumSchema, validAddOperation)
+      const result = v.safeParse(addEnumOperationSchema, validAddOperation)
       expect(result.success).toBe(true)
     })
 
     it('should invalidate add operation with wrong op', () => {
       const invalidOperation = { ...validAddOperation, op: 'replace' }
-      const result = v.safeParse(addEnumSchema, invalidOperation)
+      const result = v.safeParse(addEnumOperationSchema, invalidOperation)
       expect(result.success).toBe(false)
     })
 
     it('should invalidate add operation with wrong path format', () => {
       const invalidOperation = { ...validAddOperation, path: '/enums' }
-      const result = v.safeParse(addEnumSchema, invalidOperation)
+      const result = v.safeParse(addEnumOperationSchema, invalidOperation)
       expect(result.success).toBe(false)
     })
 
@@ -66,7 +57,7 @@ describe('enumOperations', () => {
           comment: null,
         },
       }
-      const result = v.safeParse(addEnumSchema, invalidOperation)
+      const result = v.safeParse(addEnumOperationSchema, invalidOperation)
       expect(result.success).toBe(false)
     })
 
@@ -84,16 +75,17 @@ describe('enumOperations', () => {
       path: '/enums/status',
     }
 
-    const removeEnumSchema = getSchemaFor(validRemoveOperation)
-
     it('should validate a correct remove enum operation', () => {
-      const result = v.safeParse(removeEnumSchema, validRemoveOperation)
+      const result = v.safeParse(
+        removeEnumOperationSchema,
+        validRemoveOperation,
+      )
       expect(result.success).toBe(true)
     })
 
     it('should invalidate remove operation with wrong op', () => {
       const invalidOperation = { ...validRemoveOperation, op: 'add' }
-      const result = v.safeParse(removeEnumSchema, invalidOperation)
+      const result = v.safeParse(removeEnumOperationSchema, invalidOperation)
       expect(result.success).toBe(false)
     })
 
@@ -116,10 +108,11 @@ describe('enumOperations', () => {
       value: 'user_status',
     }
 
-    const replaceNameSchema = getSchemaFor(validReplaceNameOperation)
-
     it('should validate a correct replace enum name operation', () => {
-      const result = v.safeParse(replaceNameSchema, validReplaceNameOperation)
+      const result = v.safeParse(
+        replaceEnumNameOperationSchema,
+        validReplaceNameOperation,
+      )
       expect(result.success).toBe(true)
     })
 
@@ -128,7 +121,10 @@ describe('enumOperations', () => {
         ...validReplaceNameOperation,
         path: '/enums/status',
       }
-      const result = v.safeParse(replaceNameSchema, invalidOperation)
+      const result = v.safeParse(
+        replaceEnumNameOperationSchema,
+        invalidOperation,
+      )
       expect(result.success).toBe(false)
     })
 
@@ -137,7 +133,10 @@ describe('enumOperations', () => {
         ...validReplaceNameOperation,
         value: '',
       }
-      const result = v.safeParse(replaceNameSchema, invalidOperation)
+      const result = v.safeParse(
+        replaceEnumNameOperationSchema,
+        invalidOperation,
+      )
       expect(result.success).toBe(false)
     })
 
@@ -160,11 +159,9 @@ describe('enumOperations', () => {
       value: ['low', 'medium', 'high'],
     }
 
-    const replaceValuesSchema = getSchemaFor(validReplaceValuesOperation)
-
     it('should validate a correct replace enum values operation', () => {
       const result = v.safeParse(
-        replaceValuesSchema,
+        replaceEnumValuesOperationSchema,
         validReplaceValuesOperation,
       )
       expect(result.success).toBe(true)
@@ -175,7 +172,10 @@ describe('enumOperations', () => {
         ...validReplaceValuesOperation,
         value: 'not-an-array',
       }
-      const result = v.safeParse(replaceValuesSchema, invalidOperation)
+      const result = v.safeParse(
+        replaceEnumValuesOperationSchema,
+        invalidOperation,
+      )
       expect(result.success).toBe(false)
     })
 
@@ -184,7 +184,10 @@ describe('enumOperations', () => {
         ...validReplaceValuesOperation,
         value: [],
       }
-      const result = v.safeParse(replaceValuesSchema, invalidOperation)
+      const result = v.safeParse(
+        replaceEnumValuesOperationSchema,
+        invalidOperation,
+      )
       expect(result.success).toBe(false)
     })
 
@@ -193,7 +196,10 @@ describe('enumOperations', () => {
         ...validReplaceValuesOperation,
         value: ['low', 'medium', 'low'],
       }
-      const result = v.safeParse(replaceValuesSchema, invalidOperation)
+      const result = v.safeParse(
+        replaceEnumValuesOperationSchema,
+        invalidOperation,
+      )
       expect(result.success).toBe(false)
     })
 
@@ -224,11 +230,9 @@ describe('enumOperations', () => {
       value: null,
     }
 
-    const replaceCommentSchema = getSchemaFor(validReplaceCommentOperation)
-
     it('should validate a correct replace enum comment operation with string', () => {
       const result = v.safeParse(
-        replaceCommentSchema,
+        replaceEnumCommentOperationSchema,
         validReplaceCommentOperation,
       )
       expect(result.success).toBe(true)
@@ -236,7 +240,7 @@ describe('enumOperations', () => {
 
     it('should validate a correct replace enum comment operation with null', () => {
       const result = v.safeParse(
-        replaceCommentSchema,
+        replaceEnumCommentOperationSchema,
         validReplaceCommentNullOperation,
       )
       expect(result.success).toBe(true)
@@ -247,7 +251,10 @@ describe('enumOperations', () => {
         ...validReplaceCommentOperation,
         value: 42,
       }
-      const result = v.safeParse(replaceCommentSchema, invalidOperation)
+      const result = v.safeParse(
+        replaceEnumCommentOperationSchema,
+        invalidOperation,
+      )
       expect(result.success).toBe(false)
     })
 
@@ -275,11 +282,6 @@ describe('enumOperations', () => {
         '/enums/user_role',
         '/enums/priority',
       ]
-      const addEnumSchema = getSchemaFor({
-        op: 'add' as const,
-        path: '/enums/test',
-        value: { name: 'test', values: ['a'], comment: null },
-      })
 
       for (const path of validPaths) {
         // Extract enum name from path to match path/value.name consistency requirement
@@ -289,7 +291,9 @@ describe('enumOperations', () => {
           path,
           value: { name: enumName, values: ['a'], comment: null },
         }
-        expect(v.safeParse(addEnumSchema, operation).success).toBe(true)
+        expect(v.safeParse(addEnumOperationSchema, operation).success).toBe(
+          true,
+        )
       }
     })
 
@@ -301,11 +305,6 @@ describe('enumOperations', () => {
         '/tables/users',
         '/enum/status',
       ]
-      const addEnumSchema = getSchemaFor({
-        op: 'add' as const,
-        path: '/enums/test',
-        value: { name: 'test', values: ['a'], comment: null },
-      })
 
       for (const path of invalidPaths) {
         const operation = {
@@ -313,7 +312,9 @@ describe('enumOperations', () => {
           path,
           value: { name: 'test', values: ['a'], comment: null },
         }
-        expect(v.safeParse(addEnumSchema, operation).success).toBe(false)
+        expect(v.safeParse(addEnumOperationSchema, operation).success).toBe(
+          false,
+        )
       }
     })
 
@@ -334,25 +335,11 @@ describe('enumOperations', () => {
         '/enums/priority/comment',
       ]
 
-      const replaceNameSchema = getSchemaFor({
-        op: 'replace' as const,
-        path: '/enums/test/name',
-        value: 'name',
-      })
-      const replaceValuesSchema = getSchemaFor({
-        op: 'replace' as const,
-        path: '/enums/test/values',
-        value: ['a'],
-      })
-      const replaceCommentSchema = getSchemaFor({
-        op: 'replace' as const,
-        path: '/enums/test/comment',
-        value: 'comment',
-      })
-
       for (const path of validNamePaths) {
         const operation = { op: 'replace' as const, path, value: 'new_name' }
-        expect(v.safeParse(replaceNameSchema, operation).success).toBe(true)
+        expect(
+          v.safeParse(replaceEnumNameOperationSchema, operation).success,
+        ).toBe(true)
       }
 
       for (const path of validValuesPaths) {
@@ -361,7 +348,9 @@ describe('enumOperations', () => {
           path,
           value: ['value1', 'value2'],
         }
-        expect(v.safeParse(replaceValuesSchema, operation).success).toBe(true)
+        expect(
+          v.safeParse(replaceEnumValuesOperationSchema, operation).success,
+        ).toBe(true)
       }
 
       for (const path of validCommentPaths) {
@@ -370,7 +359,9 @@ describe('enumOperations', () => {
           path,
           value: 'A comment',
         }
-        expect(v.safeParse(replaceCommentSchema, operation).success).toBe(true)
+        expect(
+          v.safeParse(replaceEnumCommentOperationSchema, operation).success,
+        ).toBe(true)
       }
     })
   })

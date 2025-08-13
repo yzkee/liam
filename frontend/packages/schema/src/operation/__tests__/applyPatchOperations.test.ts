@@ -387,6 +387,16 @@ describe('applyPatchOperations', () => {
       }
     })
 
+    it('should fail when replacing values for a non-existent enum', () => {
+      const initialSchema = aSchema({ tables: {}, enums: {} })
+      const operations: Operation[] = [
+        { op: 'replace', path: '/enums/missing/values', value: ['a'] },
+      ]
+
+      const result = applyPatchOperations(initialSchema, operations)
+      expect(result.isErr()).toBe(true)
+    })
+
     it('should handle multiple enum operations', () => {
       const initialSchema = aSchema({ tables: {}, enums: {} })
       const operations: Operation[] = [

@@ -69,60 +69,41 @@ export const Chat: FC<Props> = ({
     })
   }
 
-  // Helper function to get effective role
+  // Determines the role for grouping purposes
+  // Messages with 'role' property use their role, others default to 'db'
   const getEffectiveRole = (entry: TimelineItemEntry): string => {
-    if ('role' in entry) {
-      return entry.role
-    }
-    // schema_version, query_result, error all render as 'db' agent
-    return 'db'
+    return 'role' in entry ? entry.role : 'db'
   }
 
-  // Check if two items should be grouped together
-  const shouldGroupItems = (
-    item1: TimelineItemEntry,
-    item2: TimelineItemEntry,
-  ): boolean => {
-    return getEffectiveRole(item1) === getEffectiveRole(item2)
-  }
-
-  // Handle grouping when the last item is an array
-  const tryGroupWithArray = (
-    acc: Array<TimelineItemEntry | TimelineItemEntry[]>,
-    item: TimelineItemEntry,
-  ): boolean => {
-    const lastItem = acc[acc.length - 1]
-    if (!Array.isArray(lastItem) || lastItem.length === 0) return false
-
-    const firstItem = lastItem[0]
-    if (!firstItem || !shouldGroupItems(firstItem, item)) return false
-
-    lastItem.push(item)
-    return true
-  }
-
-  // Handle grouping when the last item is a single item
-  const tryGroupWithSingleItem = (
-    acc: Array<TimelineItemEntry | TimelineItemEntry[]>,
-    item: TimelineItemEntry,
+  // Helper to check if an item can be grouped with the previous item
+  const canGroupWithPrevious = (
+    lastItem: TimelineItemEntry | TimelineItemEntry[] | undefined,
+    currentItem: TimelineItemEntry,
     agentTypes: string[],
-  ): boolean => {
-    const lastItem = acc[acc.length - 1]
-    if (
-      !lastItem ||
-      Array.isArray(lastItem) ||
-      !agentTypes.includes(lastItem.type)
-    ) {
-      return false
+  ): { canGroup: boolean; isArray: boolean } => {
+    if (!lastItem) return { canGroup: false, isArray: false }
+
+    const currentRole = getEffectiveRole(currentItem)
+
+    if (Array.isArray(lastItem) && lastItem.length > 0) {
+      const firstItem = lastItem[0]
+      return {
+        canGroup: !!firstItem && getEffectiveRole(firstItem) === currentRole,
+        isArray: true,
+      }
     }
 
-    if (!shouldGroupItems(lastItem, item)) return false
+    if (!Array.isArray(lastItem) && agentTypes.includes(lastItem.type)) {
+      return {
+        canGroup: getEffectiveRole(lastItem) === currentRole,
+        isArray: false,
+      }
+    }
 
-    acc[acc.length - 1] = [lastItem, item]
-    return true
+    return { canGroup: false, isArray: false }
   }
 
-  // Group consecutive messages from the same agent
+  // Group consecutive messages from the same agent to reduce visual clutter
   const groupedTimelineItems = timelineItems.reduce<
     Array<TimelineItemEntry | TimelineItemEntry[]>
   >((acc, item) => {
@@ -134,20 +115,31 @@ export const Chat: FC<Props> = ({
       'error',
     ]
 
+    // Non-agent messages (like user messages) are never grouped
     if (!agentTypes.includes(item.type)) {
-      // Non-agent messages are added as-is
       acc.push(item)
       return acc
     }
 
-    // Try to group with existing items
-    const groupedWithArray = tryGroupWithArray(acc, item)
-    if (groupedWithArray) return acc
+    const lastItem = acc[acc.length - 1]
+    const groupingCheck = canGroupWithPrevious(lastItem, item, agentTypes)
 
-    const groupedWithSingleItem = tryGroupWithSingleItem(acc, item, agentTypes)
-    if (groupedWithSingleItem) return acc
+    if (groupingCheck.canGroup) {
+      if (groupingCheck.isArray && Array.isArray(lastItem)) {
+        // Add to existing group
+        lastItem.push(item)
+      } else if (
+        !groupingCheck.isArray &&
+        lastItem &&
+        !Array.isArray(lastItem)
+      ) {
+        // Create new group from two single items
+        acc[acc.length - 1] = [lastItem, item]
+      }
+      return acc
+    }
 
-    // Add as new item if no grouping occurred
+    // No grouping possible - add as standalone item
     acc.push(item)
     return acc
   }, [])

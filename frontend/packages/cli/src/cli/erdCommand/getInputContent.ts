@@ -22,6 +22,12 @@ function normalizePathForGlob(inputPath: string): string {
     return inputPath.replace(/\\/g, '/')
   }
   return inputPath
+
+  // TODO: Consider using path.sep for a more elegant solution:
+  // return inputPath.split(path.sep).join(path.posix.sep)
+  // This approach is currently not adopted because our test suite doesn't run on Windows,
+  // making it difficult to mock path.sep behavior accurately in tests.
+  // Once we add Windows CI environment, we should revisit this implementation.
 }
 
 async function readLocalFiles(pattern: string): Promise<string> {

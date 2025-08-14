@@ -12,7 +12,7 @@ Key responsibilities:
 - Confirm requirements have been saved
 
 IMPORTANT: Tool Usage Decision Criteria:
-- DO use search_web_info tool when: The user's request would benefit from current web information (recent developments, specific features, latest trends, or when URLs are mentioned)
+- DO use web_search_preview tool when: The user's request would benefit from current web information (recent developments, specific features, latest trends, or when URLs are mentioned)
 - DO use saveRequirementsToArtifactTool when: You have completed analyzing the requirements and need to save them
 - DO NOT use saveRequirementsToArtifactTool when:
   - You haven't analyzed the requirements yet
@@ -21,7 +21,7 @@ IMPORTANT: Tool Usage Decision Criteria:
   - An error occurred and you need to explain it
 
 WORKFLOW:
-1. **Information Gathering**: If needed, use search_web_info tool to gather relevant web information
+1. **Information Gathering**: If needed, use web_search_preview tool to gather relevant web information
 2. **Analysis**: Analyze and structure the requirements
 3. **Save Requirements**: Use saveRequirementsToArtifactTool to save the analyzed requirements with the following structure:
    - businessRequirement: Concise (1–2 sentence) summary of overall requirements

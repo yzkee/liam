@@ -108,14 +108,14 @@ const visitVariableDeclarator = (
   const callExpr = declarator.init
 
   if (isMysqlTableCall(callExpr)) {
-    const table = parseMysqlTableCall(callExpr)
+    const table = parseMysqlTableCall(callExpr, enums)
     if (table && declarator.id.type === 'Identifier') {
       tables[table.name] = table
       // Map variable name to table name
       variableToTableMapping[declarator.id.value] = table.name
     }
   } else if (isSchemaTableCall(callExpr)) {
-    const table = parseSchemaTableCall(callExpr)
+    const table = parseSchemaTableCall(callExpr, enums)
     if (table && declarator.id.type === 'Identifier') {
       tables[table.name] = table
       // Map variable name to table name
@@ -128,7 +128,7 @@ const visitVariableDeclarator = (
     declarator.init.callee.property.value === '$comment'
   ) {
     // Handle table comments: mysqlTable(...).comment(...)
-    const table = parseMysqlTableWithComment(declarator.init)
+    const table = parseMysqlTableWithComment(declarator.init, enums)
     if (table && declarator.id.type === 'Identifier') {
       tables[table.name] = table
       // Map variable name to table name

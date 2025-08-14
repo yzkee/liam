@@ -219,7 +219,11 @@ export async function validateSchemaNode(
 
     // Update artifact with the new state
     const artifact = transformWorkflowStateToArtifact(updatedState)
-    await createOrUpdateArtifact(updatedState, artifact, repositories)
+    await createOrUpdateArtifact(
+      updatedState.designSessionId,
+      artifact,
+      repositories,
+    )
   }
 
   const results = allResults

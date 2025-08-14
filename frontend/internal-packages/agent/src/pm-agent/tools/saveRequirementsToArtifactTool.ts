@@ -12,7 +12,6 @@ import { toJsonSchema } from '@valibot/to-json-schema'
 import { err, ok, type Result } from 'neverthrow'
 import * as v from 'valibot'
 import { getConfigurable } from '../../chat/workflow/shared/getConfigurable'
-import type { WorkflowState } from '../../chat/workflow/types'
 import { createOrUpdateArtifact } from '../../chat/workflow/utils/transformWorkflowStateToArtifact'
 import type { Repositories } from '../../repositories'
 import { WorkflowTerminationError } from '../../shared/errorHandling'
@@ -131,24 +130,8 @@ export const saveRequirementsToArtifactTool = tool(
 
     const artifact = createArtifactFromRequirements(analyzedRequirements)
 
-    // TODO: createOrUpdateArtifact should be refactored to accept only designSessionId
-    // instead of WorkflowState. Currently creating a dummy state as a workaround.
-    // Only designSessionId is actually used in createOrUpdateArtifact.
-    // Track this tech debt in a separate issue for future refactoring.
-    const dummyState: WorkflowState = {
-      designSessionId,
-      organizationId: '', // Not used in createOrUpdateArtifact
-      userId: '', // Not used in createOrUpdateArtifact
-      messages: [],
-      retryCount: {},
-      buildingSchemaId: '',
-      latestVersionNumber: 0,
-      userInput: '',
-      schemaData: { tables: {}, enums: {} },
-    }
-
     const result = await createOrUpdateArtifact(
-      dummyState,
+      designSessionId,
       artifact,
       repositories,
     )

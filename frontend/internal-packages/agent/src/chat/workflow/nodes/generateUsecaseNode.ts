@@ -29,7 +29,7 @@ async function saveArtifacts(
 
   const artifact = transformWorkflowStateToArtifact(state)
   const artifactResult = await createOrUpdateArtifact(
-    state,
+    state.designSessionId,
     artifact,
     repositories,
   )

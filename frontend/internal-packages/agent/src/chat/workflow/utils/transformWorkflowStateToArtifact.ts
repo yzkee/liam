@@ -192,19 +192,17 @@ const groupUsecasesByRequirement = (usecases: Usecase[]) => {
  * Tries to update existing artifact first, creates new one if not found
  */
 export const createOrUpdateArtifact = async (
-  state: WorkflowState,
+  designSessionId: string,
   artifact: Artifact,
   repositories: Repositories,
 ): Promise<{ success: boolean; error?: string }> => {
   // Try to get existing artifact first
-  const existingResult = await repositories.schema.getArtifact(
-    state.designSessionId,
-  )
+  const existingResult = await repositories.schema.getArtifact(designSessionId)
 
   if (existingResult.success) {
     // Artifact exists, update it
     const updateResult = await repositories.schema.updateArtifact({
-      designSessionId: state.designSessionId,
+      designSessionId,
       artifact,
     })
 
@@ -221,7 +219,7 @@ export const createOrUpdateArtifact = async (
 
   // Artifact doesn't exist, create new one
   const createResult = await repositories.schema.createArtifact({
-    designSessionId: state.designSessionId,
+    designSessionId,
     artifact,
   })
 

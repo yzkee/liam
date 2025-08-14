@@ -12,7 +12,6 @@ import { toJsonSchema } from '@valibot/to-json-schema'
 import { err, ok, type Result } from 'neverthrow'
 import * as v from 'valibot'
 import { getConfigurable } from '../../chat/workflow/shared/getConfigurable'
-import { createOrUpdateArtifact } from '../../chat/workflow/utils/transformWorkflowStateToArtifact'
 import type { Repositories } from '../../repositories'
 import { WorkflowTerminationError } from '../../shared/errorHandling'
 
@@ -130,18 +129,16 @@ export const saveRequirementsToArtifactTool = tool(
 
     const artifact = createArtifactFromRequirements(analyzedRequirements)
 
-    const result = await createOrUpdateArtifact(
+    const result = await repositories.schema.upsertArtifact({
       designSessionId,
       artifact,
-      repositories,
-    )
+    })
 
-    if (!result.success) {
-      const errorMessage = result.error || 'Unknown error'
+    if (result.isErr()) {
       // LangGraph tool nodes require throwing errors to trigger retry mechanism
       // eslint-disable-next-line no-throw-error/no-throw-error
       throw new Error(
-        `Failed to save artifact: ${errorMessage}. Please try again or contact support if the issue persists.`,
+        `Failed to save artifact: ${result.error.message}. Please try again or contact support if the issue persists.`,
       )
     }
 

@@ -8,10 +8,7 @@ import { WorkflowTerminationError } from '../../../shared/errorHandling'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 import { logAssistantMessage } from '../utils/timelineLogger'
-import {
-  createOrUpdateArtifact,
-  transformWorkflowStateToArtifact,
-} from '../utils/transformWorkflowStateToArtifact'
+import { transformWorkflowStateToArtifact } from '../utils/transformWorkflowStateToArtifact'
 
 type UsecaseDmlExecutionResult = {
   useCaseId: string
@@ -219,11 +216,10 @@ export async function validateSchemaNode(
 
     // Update artifact with the new state
     const artifact = transformWorkflowStateToArtifact(updatedState)
-    await createOrUpdateArtifact(
-      updatedState.designSessionId,
+    await repositories.schema.upsertArtifact({
+      designSessionId: updatedState.designSessionId,
       artifact,
-      repositories,
-    )
+    })
   }
 
   const results = allResults

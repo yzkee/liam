@@ -1,7 +1,7 @@
 import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
 import type { Artifact } from '@liam-hq/artifact'
 import { artifactSchema } from '@liam-hq/artifact'
-import type { SupabaseClientType } from '@liam-hq/db'
+import { type SupabaseClientType, toResultAsync } from '@liam-hq/db'
 import type { Json, Tables } from '@liam-hq/db/supabase/database.types'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import type { Schema } from '@liam-hq/schema'
@@ -574,7 +574,7 @@ export class SupabaseSchemaRepository implements SchemaRepository {
   ): ResultAsync<Tables<'artifacts'>, Error> {
     const { designSessionId, artifact } = params
 
-    return ResultAsync.fromPromise(
+    return toResultAsync(
       this.client
         .from('artifacts')
         .upsert(
@@ -588,21 +588,7 @@ export class SupabaseSchemaRepository implements SchemaRepository {
         )
         .select()
         .single(),
-      (error) =>
-        new Error(error instanceof Error ? error.message : String(error)),
-    ).andThen(({ data, error }) => {
-      if (error) {
-        return errAsync(new Error(error.message))
-      }
-
-      if (!data) {
-        return errAsync(
-          new Error('Failed to upsert artifact: no data returned'),
-        )
-      }
-
-      return okAsync(data)
-    })
+    )
   }
 
   async getArtifact(designSessionId: string): Promise<ArtifactResult> {

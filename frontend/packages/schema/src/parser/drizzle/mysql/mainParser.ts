@@ -10,7 +10,10 @@ import {
   isMysqlTableCall,
   isSchemaTableCall,
 } from './astUtils.js'
-import { convertDrizzleTablesToInternal } from './converter.js'
+import {
+  convertDrizzleEnumsToInternal,
+  convertDrizzleTablesToInternal,
+} from './converter.js'
 import { parseMysqlEnumCall } from './enumParser.js'
 import { parseMysqlSchemaCall } from './schemaParser.js'
 import {
@@ -164,9 +167,10 @@ const parseDrizzleSchemaString = (
       enums,
       variableToTableMapping,
     )
+    const convertedEnums = convertDrizzleEnumsToInternal(enums)
 
     return Promise.resolve({
-      value: { tables, enums: {} },
+      value: { tables, enums: convertedEnums },
       errors,
     })
   } catch (error) {

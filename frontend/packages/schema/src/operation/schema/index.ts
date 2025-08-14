@@ -1,6 +1,7 @@
 import * as v from 'valibot'
 import { columnOperations } from './column.js'
 import { constraintOperations } from './constraint.js'
+import { enumOperations } from './enum.js'
 import { indexOperations } from './indexOperations.js'
 import { tableOperations } from './table.js'
 
@@ -9,6 +10,7 @@ export const operationSchema = v.union([
   ...columnOperations,
   ...indexOperations,
   ...constraintOperations,
+  ...enumOperations,
 ])
 export type Operation = v.InferOutput<typeof operationSchema>
 

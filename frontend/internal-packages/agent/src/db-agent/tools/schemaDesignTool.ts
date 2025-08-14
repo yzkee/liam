@@ -105,7 +105,7 @@ export const schemaDesignTool = tool(
       // LangGraph tool nodes require throwing errors to trigger retry mechanism
       // eslint-disable-next-line no-throw-error/no-throw-error
       throw new Error(
-        'Could not retrieve current schema for DDL validation. Please check the schema ID and try again.',
+        `Failed to apply patch operations before DDL validation: ${applyResult.error.message}`,
       )
     }
 
@@ -177,7 +177,7 @@ export const schemaDesignTool = tool(
   {
     name: 'schemaDesignTool',
     description:
-      'Use to design database schemas, recommend table structures, and help with database modeling. This tool applies JSON Patch operations to modify schema elements including tables, columns, indexes, and constraints. When operations fail, the tool provides detailed error messages with specific guidance for correction. Always include all required schema properties (columns, constraints, indexes) when creating tables.',
+      'Use to design database schemas, recommend table structures, and help with database modeling. This tool applies JSON Patch operations to modify schema elements including tables, columns, indexes, constraints, and enums. When operations fail, the tool provides detailed error messages with specific guidance for correction. Always include all required schema properties (columns, constraints, indexes) when creating tables.',
     schema: toolSchema,
   },
 )

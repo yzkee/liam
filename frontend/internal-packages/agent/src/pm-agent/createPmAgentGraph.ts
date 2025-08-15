@@ -1,16 +1,10 @@
 import { END, START, StateGraph } from '@langchain/langgraph'
 import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
 import { createAnnotations } from '../chat/workflow/shared/langGraphUtils'
+import { RETRY_POLICY } from '../shared/errorHandling'
 import { analyzeRequirementsNode } from './nodes/analyzeRequirementsNode'
 import { invokeSaveArtifactToolNode } from './nodes/invokeSaveArtifactToolNode'
 import { routeAfterAnalyzeRequirements } from './routing/routeAfterAnalyzeRequirements'
-
-/**
- * Retry policy configuration for PM Agent nodes
- */
-const RETRY_POLICY = {
-  maxAttempts: process.env['NODE_ENV'] === 'test' ? 1 : 3,
-}
 
 /**
  * Create and configure the PM Agent subgraph for requirements analysis

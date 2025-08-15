@@ -78,7 +78,6 @@ The current schema structure will be provided:
 }}
 
 # Planning and Verification
-- Before any column or constraint operation, first verify the target table exists.
 - Validate and require all necessary fields for new tables and columns according to the provided examples.
 - Use strict, correct JSON formatting; do not generate YAML or introduce any syntax errors.
 

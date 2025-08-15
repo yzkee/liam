@@ -8,22 +8,19 @@ A **LangGraph implementation** for processing chat messages in the LIAM applicat
 %%{init: {'flowchart': {'curve': 'linear'}}}%%
 graph TD;
 	__start__([<p>__start__</p>]):::first
-	analyzeRequirements(analyzeRequirements)
-	invokeSaveArtifactTool(invokeSaveArtifactTool)
+	pmAgent(pmAgent)
 	dbAgent(dbAgent)
 	generateUsecase(generateUsecase)
 	prepareDML(prepareDML)
 	validateSchema(validateSchema)
 	finalizeArtifacts(finalizeArtifacts)
 	__end__([<p>__end__</p>]):::last
-	__start__ --> analyzeRequirements;
+	__start__ --> pmAgent;
 	dbAgent --> generateUsecase;
 	finalizeArtifacts --> __end__;
 	generateUsecase --> prepareDML;
-	invokeSaveArtifactTool --> analyzeRequirements;
+	pmAgent --> dbAgent;
 	prepareDML --> validateSchema;
-	analyzeRequirements -.-> invokeSaveArtifactTool;
-	analyzeRequirements -.-> dbAgent;
 	validateSchema -.-> dbAgent;
 	validateSchema -.-> finalizeArtifacts;
 	classDef default fill:#f2f0ff,line-height:1.2;
@@ -76,13 +73,53 @@ interface WorkflowState {
 
 ## Nodes
 
-1. **analyzeRequirements**: Organizes and clarifies requirements from user input (performed by pmAnalysisAgent)
-2. **saveRequirementToArtifact**: Processes analyzed requirements, saves artifacts to database, and syncs timeline (performed by pmAgent)
-3. **dbAgent**: DB Agent subgraph that handles database schema design - contains designSchema and invokeSchemaDesignTool nodes (performed by dbAgent)
-4. **generateUsecase**: Creates use cases for testing with automatic timeline sync (performed by qaAgent)
-5. **prepareDML**: Generates DML statements for testing (performed by qaAgent)
-6. **validateSchema**: Executes DML and validates schema (performed by qaAgent)
-7. **finalizeArtifacts**: Generates and saves comprehensive artifacts to database, handles error timeline items (performed by dbAgentArtifactGen)
+1. **pmAgent**: PM Agent subgraph that handles requirements analysis - contains analyzeRequirements and invokeSaveArtifactTool nodes
+2. **dbAgent**: DB Agent subgraph that handles database schema design - contains designSchema and invokeSchemaDesignTool nodes (performed by dbAgent)
+3. **generateUsecase**: Creates use cases for testing with automatic timeline sync (performed by qaAgent)
+4. **prepareDML**: Generates DML statements for testing (performed by qaAgent)
+5. **validateSchema**: Executes DML and validates schema (performed by qaAgent)
+6. **finalizeArtifacts**: Generates and saves comprehensive artifacts to database, handles error timeline items (performed by dbAgentArtifactGen)
+
+## PM Agent Subgraph
+
+The `pmAgent` node is implemented as a **LangGraph subgraph** that encapsulates all requirements analysis and artifact management logic as an independent, reusable component following multi-agent system best practices.
+
+### PM Agent Architecture
+
+```mermaid
+%%{init: {'flowchart': {'curve': 'linear'}}}%%
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	analyzeRequirements(analyzeRequirements)
+	invokeSaveArtifactTool(invokeSaveArtifactTool)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> analyzeRequirements;
+	invokeSaveArtifactTool --> analyzeRequirements;
+	analyzeRequirements -.-> invokeSaveArtifactTool;
+	analyzeRequirements -.-> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2;
+	classDef first fill-opacity:0;
+	classDef last fill:#bfb6fc;
+```
+
+### PM Agent Components
+
+#### 1. analyzeRequirements Node
+- **Purpose**: Analyzes and structures user requirements into BRDs
+- **Performed by**: PM Analysis Agent with GPT-5
+- **Retry Policy**: maxAttempts: 3 (internal to subgraph)
+- **Timeline Sync**: Automatic message synchronization
+
+#### 2. invokeSaveArtifactTool Node
+- **Purpose**: Saves analyzed requirements as artifacts to database
+- **Performed by**: saveRequirementsToArtifactTool
+- **Retry Policy**: maxAttempts: 3 (internal to subgraph)
+- **Tool Integration**: Direct database artifact storage
+
+### PM Agent Flow Patterns
+
+1. **Simple Analysis**: `START → analyzeRequirements → END` (when requirements are fully analyzed)
+2. **Iterative Saving**: `START → analyzeRequirements → invokeSaveArtifactTool → analyzeRequirements → ... → END`
 
 ## DB Agent Subgraph
 

@@ -1,10 +1,10 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
 import type { Database } from '@liam-hq/db'
-import { PMAnalysisAgent } from '../../../langchain/agents'
-import { WorkflowTerminationError } from '../../../shared/errorHandling'
-import { getConfigurable } from '../shared/getConfigurable'
-import type { WorkflowState } from '../types'
-import { logAssistantMessage } from '../utils/timelineLogger'
+import { getConfigurable } from '../../chat/workflow/shared/getConfigurable'
+import type { WorkflowState } from '../../chat/workflow/types'
+import { logAssistantMessage } from '../../chat/workflow/utils/timelineLogger'
+import { WorkflowTerminationError } from '../../shared/errorHandling'
+import { invokePmAnalysisAgent } from '../invokePmAnalysisAgent'
 
 /**
  * Analyze Requirements Node - Requirements Organization
@@ -31,9 +31,7 @@ export async function analyzeRequirementsNode(
     assistantRole,
   )
 
-  const pmAnalysisAgent = new PMAnalysisAgent()
-
-  const analysisResult = await pmAnalysisAgent.generate(
+  const analysisResult = await invokePmAnalysisAgent(
     state.messages,
     configurableResult.value,
   )

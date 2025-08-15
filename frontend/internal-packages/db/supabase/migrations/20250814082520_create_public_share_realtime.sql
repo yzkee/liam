@@ -61,8 +61,25 @@ create policy "public_timeline_items_read" on "public"."timeline_items" for sele
 -- Grant SELECT permissions on base tables to anonymous users
 -- These work in conjunction with RLS policies to allow secure access
 grant select on table "public"."public_share_settings" to "anon";
-grant select on table "public"."design_sessions" to "anon";
-grant select on table "public"."artifacts" to "anon";
-grant select on table "public"."timeline_items" to "anon";
-grant select on table "public"."building_schemas" to "anon";
-grant select on table "public"."building_schema_versions" to "anon";
+
+-- design_sessions
+grant select ("id", "name", "created_at", "parent_design_session_id")
+  on table "public"."design_sessions" to "anon";
+
+-- artifacts
+grant select ("id", "design_session_id", "artifact", "created_at", "updated_at")
+  on table "public"."artifacts" to "anon";
+
+-- timeline_items
+grant select ("id", "design_session_id", "content", "created_at", "updated_at",
+  "building_schema_version_id", "type", "query_result_id", "assistant_role")
+  on table "public"."timeline_items" to "anon";
+
+-- building_schemas
+grant select ("id", "design_session_id", "schema", "created_at", "git_sha",
+  "initial_schema_snapshot", "schema_file_path")
+  on table "public"."building_schemas" to "anon";
+
+-- building_schema_versions
+grant select ("id", "building_schema_id", "number", "created_at", "patch", "reverse_patch")
+  on table "public"."building_schema_versions" to "anon";

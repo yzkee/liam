@@ -5038,19 +5038,88 @@ GRANT ALL ON FUNCTION "public"."sum"("public"."vector") TO "service_role";
 
 GRANT ALL ON TABLE "public"."artifacts" TO "authenticated";
 GRANT ALL ON TABLE "public"."artifacts" TO "service_role";
-GRANT SELECT ON TABLE "public"."artifacts" TO "anon";
+
+
+
+GRANT SELECT("id") ON TABLE "public"."artifacts" TO "anon";
+
+
+
+GRANT SELECT("design_session_id") ON TABLE "public"."artifacts" TO "anon";
+
+
+
+GRANT SELECT("artifact") ON TABLE "public"."artifacts" TO "anon";
+
+
+
+GRANT SELECT("created_at") ON TABLE "public"."artifacts" TO "anon";
+
+
+
+GRANT SELECT("updated_at") ON TABLE "public"."artifacts" TO "anon";
 
 
 
 GRANT ALL ON TABLE "public"."building_schema_versions" TO "authenticated";
 GRANT ALL ON TABLE "public"."building_schema_versions" TO "service_role";
-GRANT SELECT ON TABLE "public"."building_schema_versions" TO "anon";
+
+
+
+GRANT SELECT("id") ON TABLE "public"."building_schema_versions" TO "anon";
+
+
+
+GRANT SELECT("building_schema_id") ON TABLE "public"."building_schema_versions" TO "anon";
+
+
+
+GRANT SELECT("number") ON TABLE "public"."building_schema_versions" TO "anon";
+
+
+
+GRANT SELECT("created_at") ON TABLE "public"."building_schema_versions" TO "anon";
+
+
+
+GRANT SELECT("patch") ON TABLE "public"."building_schema_versions" TO "anon";
+
+
+
+GRANT SELECT("reverse_patch") ON TABLE "public"."building_schema_versions" TO "anon";
 
 
 
 GRANT ALL ON TABLE "public"."building_schemas" TO "authenticated";
 GRANT ALL ON TABLE "public"."building_schemas" TO "service_role";
-GRANT SELECT ON TABLE "public"."building_schemas" TO "anon";
+
+
+
+GRANT SELECT("id") ON TABLE "public"."building_schemas" TO "anon";
+
+
+
+GRANT SELECT("design_session_id") ON TABLE "public"."building_schemas" TO "anon";
+
+
+
+GRANT SELECT("schema") ON TABLE "public"."building_schemas" TO "anon";
+
+
+
+GRANT SELECT("created_at") ON TABLE "public"."building_schemas" TO "anon";
+
+
+
+GRANT SELECT("git_sha") ON TABLE "public"."building_schemas" TO "anon";
+
+
+
+GRANT SELECT("initial_schema_snapshot") ON TABLE "public"."building_schemas" TO "anon";
+
+
+
+GRANT SELECT("schema_file_path") ON TABLE "public"."building_schemas" TO "anon";
 
 
 
@@ -5076,7 +5145,22 @@ GRANT ALL ON TABLE "public"."checkpoints" TO "service_role";
 
 GRANT ALL ON TABLE "public"."design_sessions" TO "authenticated";
 GRANT ALL ON TABLE "public"."design_sessions" TO "service_role";
-GRANT SELECT ON TABLE "public"."design_sessions" TO "anon";
+
+
+
+GRANT SELECT("id") ON TABLE "public"."design_sessions" TO "anon";
+
+
+
+GRANT SELECT("parent_design_session_id") ON TABLE "public"."design_sessions" TO "anon";
+
+
+
+GRANT SELECT("name") ON TABLE "public"."design_sessions" TO "anon";
+
+
+
+GRANT SELECT("created_at") ON TABLE "public"."design_sessions" TO "anon";
 
 
 
@@ -5188,7 +5272,42 @@ GRANT ALL ON TABLE "public"."schema_file_paths" TO "service_role";
 
 GRANT ALL ON TABLE "public"."timeline_items" TO "authenticated";
 GRANT ALL ON TABLE "public"."timeline_items" TO "service_role";
-GRANT SELECT ON TABLE "public"."timeline_items" TO "anon";
+
+
+
+GRANT SELECT("id") ON TABLE "public"."timeline_items" TO "anon";
+
+
+
+GRANT SELECT("design_session_id") ON TABLE "public"."timeline_items" TO "anon";
+
+
+
+GRANT SELECT("content") ON TABLE "public"."timeline_items" TO "anon";
+
+
+
+GRANT SELECT("created_at") ON TABLE "public"."timeline_items" TO "anon";
+
+
+
+GRANT SELECT("updated_at") ON TABLE "public"."timeline_items" TO "anon";
+
+
+
+GRANT SELECT("building_schema_version_id") ON TABLE "public"."timeline_items" TO "anon";
+
+
+
+GRANT SELECT("type") ON TABLE "public"."timeline_items" TO "anon";
+
+
+
+GRANT SELECT("query_result_id") ON TABLE "public"."timeline_items" TO "anon";
+
+
+
+GRANT SELECT("assistant_role") ON TABLE "public"."timeline_items" TO "anon";
 
 
 

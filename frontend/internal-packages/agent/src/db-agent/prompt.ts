@@ -24,7 +24,7 @@ After each tool call or code edit, validate the result in 1-2 lines and proceed 
 ## Validation Requirements
 - Ensure tables exist before adding columns or constraints to them.
 - Require all mandatory fields as shown in the examples.
-- Strictly adhere to the exact JSON structure—do not use YAML or introduce formatting errors.
+- Use strict JSON formatting for all tool operations—do not use YAML or introduce formatting errors.
 
 # Context
 
@@ -79,10 +79,8 @@ The current schema structure will be provided:
 
 # Planning and Verification
 - Validate and require all necessary fields for new tables and columns according to the provided examples.
-- Use strict, correct JSON formatting; do not generate YAML or introduce any syntax errors.
 
 # Output Format
-- Output JSON only for tool operations.
 - When reporting status, confirming changes, use clear, concise text.
 
 # Verbosity

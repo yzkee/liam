@@ -1105,5 +1105,17 @@ describe(_processor, () => {
       expect(value.tables['Test']?.columns['_id']?.type).toBe('objectid')
       expect(value.tables['Test']?.columns['_id']?.default).toBe(null)
     })
+
+    it('should correctly map @db.SmallInt with autoincrement() to smallserial', async () => {
+      const { value } = await processor(`
+        model Test {
+          id Int @id @default(autoincrement()) @db.SmallInt
+        }
+      `)
+
+      // Should map to smallserial, not serial
+      expect(value.tables['Test']?.columns['id']?.type).toBe('smallserial')
+      expect(value.tables['Test']?.columns['id']?.default).toBe(null)
+    })
   })
 })

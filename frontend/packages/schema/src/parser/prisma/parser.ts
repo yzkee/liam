@@ -42,22 +42,6 @@ function hasAutoincrementFunction(field: DMMF.Field): boolean {
 }
 
 /**
- * Get autoincrement type mapping from Prisma type to PostgreSQL
- */
-function getAutoincrementType(typeName: string): string {
-  switch (typeName) {
-    case 'Int':
-      return 'serial'
-    case 'SmallInt':
-      return 'smallserial'
-    case 'BigInt':
-      return 'bigserial'
-    default:
-      return typeName.toLowerCase()
-  }
-}
-
-/**
  * Check if a field has a function that requires TEXT type (either supported or unsupported)
  * @see https://www.prisma.io/docs/orm/reference/prisma-schema-reference#default
  */
@@ -128,7 +112,26 @@ function processModelField(
     columnType = 'text'
   } else if (hasAutoincrement) {
     // Handle autoincrement type mapping
-    columnType = getAutoincrementType(field.type)
+    // First resolve the base PostgreSQL type considering native types
+    const baseType = convertToPostgresColumnType(
+      field.type,
+      field.nativeType,
+      null, // Pass null to get base type without autoincrement
+    )
+    // Then map to the appropriate serial type
+    switch (baseType) {
+      case 'smallint':
+        columnType = 'smallserial'
+        break
+      case 'integer':
+        columnType = 'serial'
+        break
+      case 'bigint':
+        columnType = 'bigserial'
+        break
+      default:
+        columnType = baseType
+    }
   } else {
     columnType = convertToPostgresColumnType(
       field.type,

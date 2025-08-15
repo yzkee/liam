@@ -29,6 +29,34 @@ const getFieldRenamedIndex = (
 }
 
 /**
+ * Check if a field has a client-generated ID function that requires TEXT type
+ * @see https://www.prisma.io/docs/orm/reference/prisma-schema-reference#default
+ */
+function hasClientGeneratedIdFunction(field: DMMF.Field): boolean {
+  const value = field.default?.valueOf()
+  if (typeof value === 'object' && value !== null && 'name' in value) {
+    const functionName = String(value.name)
+
+    // These functions generate TEXT values and are handled by Prisma Client
+    const textGeneratingFunctions = ['cuid', 'ulid', 'nanoid']
+
+    if (textGeneratingFunctions.includes(functionName)) {
+      return true
+    }
+
+    // uuid(7) is client-side and generates TEXT
+    if (functionName === 'uuid' && 'args' in value) {
+      const args = Array.isArray(value.args) ? value.args : []
+      if (args.length > 0 && args[0] === 7) {
+        return true
+      }
+    }
+  }
+
+  return false
+}
+
+/**
  * Build a mapping of field renamings from model fields
  */
 function buildFieldRenamingMap(
@@ -67,16 +95,17 @@ function processModelField(
 
   const defaultValue = extractDefaultValue(field)
 
+  // Check if the field has a client-generated ID function that needs TEXT type
+  const needsTextType = hasClientGeneratedIdFunction(field)
+
   const fieldName =
     tableFieldRenaming[model.dbName || model.name]?.[field.name] ?? field.name
 
   const column = {
     name: fieldName,
-    type: convertToPostgresColumnType(
-      field.type,
-      field.nativeType,
-      defaultValue,
-    ),
+    type: needsTextType
+      ? 'text'
+      : convertToPostgresColumnType(field.type, field.nativeType, defaultValue),
     default: defaultValue,
     notNull: field.isRequired,
     comment: field.documentation ?? null,
@@ -487,9 +516,47 @@ function extractDefaultValue(field: DMMF.Field) {
   // This function handles both primitive types (`string | number | boolean`) and objects,
   // returning a string like `name(args)` for objects.
   // Note: `FieldDefaultScalar[]` is not supported.
+  // @see https://www.prisma.io/docs/orm/reference/prisma-schema-reference#default
   if (typeof defaultValue === 'object' && defaultValue !== null) {
     if ('name' in defaultValue && 'args' in defaultValue) {
-      return `${defaultValue.name}(${defaultValue.args})`
+      const functionName = String(defaultValue.name)
+
+      // Functions that are handled by Prisma Client at runtime (not DB defaults)
+      const clientGeneratedFunctions = [
+        'cuid',
+        'uuid', // uuid(7) is client-side, but uuid(4) and uuid() are DB-side
+        'ulid',
+        'nanoid',
+        'sequence', // CockroachDB only - not supported
+        'auto', // MongoDB only - not supported
+      ]
+
+      // Check if it's a client-side generated function
+      if (clientGeneratedFunctions.includes(functionName)) {
+        // Special handling for uuid - only uuid(7) is client-side
+        if (functionName === 'uuid') {
+          const args = Array.isArray(defaultValue.args) ? defaultValue.args : []
+          // uuid(7) is client-side, uuid() and uuid(4) are DB-side
+          if (args.length > 0 && args[0] === 7) {
+            return null // Client-side generation
+          }
+          // uuid() defaults to uuid(4) which is DB-side
+          // Return the appropriate format for DB-side uuid
+          if (args.length === 0) {
+            return 'uuid(4)' // uuid() defaults to version 4
+          }
+          return `${functionName}(${args[0]})`
+        }
+        // All other client-generated functions return null
+        return null
+      }
+
+      // DB-generated functions (autoincrement, dbgenerated, now, uuid/uuid(4))
+      // Format the args correctly
+      const argsStr = Array.isArray(defaultValue.args)
+        ? defaultValue.args.join(',')
+        : defaultValue.args
+      return `${functionName}(${argsStr})`
     }
   }
   return typeof defaultValue === 'string' ||

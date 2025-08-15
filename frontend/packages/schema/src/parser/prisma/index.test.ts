@@ -762,5 +762,81 @@ describe(_processor, () => {
 
       expect(value).toEqual(expectedSchema)
     })
+
+    it('client-generated ID functions (cuid, ulid, nanoid, uuid(7))', async () => {
+      const { value } = await processor(`
+        model User {
+          id       String @id @default(cuid())
+          ulid_id  String @default(ulid())
+          nano_id  String @default(nanoid())
+          uuid7_id String @default(uuid(7))
+          uuid4_id String @default(uuid(4))
+          uuid_id  String @default(uuid())
+        }
+      `)
+
+      const expectedSchema = aSchema({
+        tables: {
+          User: aTable({
+            name: 'User',
+            columns: {
+              id: aColumn({
+                name: 'id',
+                type: 'text',
+                default: null, // cuid is client-generated
+                notNull: true,
+              }),
+              ulid_id: aColumn({
+                name: 'ulid_id',
+                type: 'text',
+                default: null, // ulid is client-generated
+                notNull: true,
+              }),
+              nano_id: aColumn({
+                name: 'nano_id',
+                type: 'text',
+                default: null, // nanoid is client-generated
+                notNull: true,
+              }),
+              uuid7_id: aColumn({
+                name: 'uuid7_id',
+                type: 'text',
+                default: null, // uuid(7) is client-generated
+                notNull: true,
+              }),
+              uuid4_id: aColumn({
+                name: 'uuid4_id',
+                type: 'uuid',
+                default: 'uuid(4)', // uuid(4) is DB-generated
+                notNull: true,
+              }),
+              uuid_id: aColumn({
+                name: 'uuid_id',
+                type: 'uuid',
+                default: 'uuid(4)', // uuid() defaults to uuid(4), DB-generated
+                notNull: true,
+              }),
+            },
+            indexes: {
+              User_pkey: anIndex({
+                name: 'User_pkey',
+                columns: ['id'],
+                unique: true,
+              }),
+            },
+            constraints: {
+              PRIMARY_id: {
+                type: 'PRIMARY KEY',
+                name: 'PRIMARY_id',
+                columnNames: ['id'],
+              },
+            },
+            comment: null,
+          }),
+        },
+      })
+
+      expect(value).toEqual(expectedSchema)
+    })
   })
 })

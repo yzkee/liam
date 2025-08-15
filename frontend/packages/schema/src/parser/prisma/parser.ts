@@ -542,6 +542,20 @@ function extractIndex(index: DMMF.Index): Index | null {
   }
 }
 
+/**
+ * Check if a value is a primitive type suitable for SQL
+ */
+function isPrimitiveType(
+  value: unknown,
+): value is string | number | boolean | null {
+  return (
+    typeof value === 'string' ||
+    typeof value === 'number' ||
+    typeof value === 'boolean' ||
+    value === null
+  )
+}
+
 function extractDefaultValue(field: DMMF.Field) {
   const value = field.default?.valueOf()
   const defaultValue = value === undefined ? null : value
@@ -579,6 +593,7 @@ function extractDefaultValue(field: DMMF.Field) {
 
         case 'dbgenerated': {
           // dbgenerated() takes SQL expression as argument
+          // Note: Prisma validates non-empty strings since v2.21.0, so this is safe
           const args = Array.isArray(defaultValue.args) ? defaultValue.args : []
           return args.length > 0 ? String(args[0]) : null
         }
@@ -594,19 +609,24 @@ function extractDefaultValue(field: DMMF.Field) {
 
         default: {
           // Fallback for any other functions
-          const defaultArgsStr = Array.isArray(defaultValue.args)
-            ? defaultValue.args.join(',')
-            : defaultValue.args
+          // Validate that all args are primitive types to prevent invalid SQL
+          const args = Array.isArray(defaultValue.args)
+            ? defaultValue.args
+            : [defaultValue.args]
+          const allPrimitives = args.every(isPrimitiveType)
+
+          if (!allPrimitives) {
+            // Return null for safety if arguments contain complex objects
+            return null
+          }
+
+          const defaultArgsStr = args.join(',')
           return `${functionName}(${defaultArgsStr})`
         }
       }
     }
   }
-  return typeof defaultValue === 'string' ||
-    typeof defaultValue === 'number' ||
-    typeof defaultValue === 'boolean'
-    ? defaultValue
-    : null
+  return isPrimitiveType(defaultValue) ? defaultValue : null
 }
 
 function normalizeConstraintName(

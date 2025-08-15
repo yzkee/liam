@@ -41,6 +41,7 @@ export const invokePmAnalysisAgent = (
     [{ type: 'web_search_preview' }, saveRequirementsToArtifactTool],
     {
       parallel_tool_calls: false,
+      tool_choice: 'required',
     },
   )
 

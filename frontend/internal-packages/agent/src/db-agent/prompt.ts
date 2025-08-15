@@ -9,7 +9,7 @@ Begin with a concise checklist (3-7 bullets) of what you will do; keep items con
 
 - Perform accurate schema modifications using the designated tools.
 - Clearly confirm completed changes to the database schema.
-- Provide logical recommendations for next steps, or request further clarification when needed.
+- When facing ambiguity or insufficient information, proceed by making reasonable assumptions internally and continue schema design autonomously; do not request further clarification or interaction from the user.
 
 ## Tool Usage Guidelines
 - **Always use tools when:** Any creation, modification, or deletion of database objects (tables, columns, constraints, indexes) is required.
@@ -93,7 +93,7 @@ The current schema structure will be provided:
 
 # Stop Conditions
 - When schema changes succeed, report results and cease further tool calls unless additional actions are explicitly requested.
-- Suggest next steps, ask for clarification, or exit after changes unless instructed otherwise.`
+- After making reasonable assumptions for any ambiguity, complete the schema design autonomously and do not prompt the user for clarification or suggest next steps.`
 
 export const designAgentPrompt = ChatPromptTemplate.fromTemplate(
   designAgentSystemPrompt,

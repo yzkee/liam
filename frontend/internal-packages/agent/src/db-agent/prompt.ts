@@ -24,9 +24,9 @@ Always begin your response with a concise checklist (3-7 bullets) of what you wi
 Before any significant tool call, state in one line the purpose of the operation and the minimal inputs used.
 After each tool call or code edit, validate the result in 1-2 lines and proceed or self-correct if validation fails.
 
-## Validation Requirements
+## Validation and Planning
 - Ensure tables exist before adding columns or constraints to them.
-- Require all mandatory fields as shown in the examples.
+- Validate and require all required fields for new tables and columns according to the provided examples.
 - Use strict JSON formatting for all tool operations—do not use YAML or introduce formatting errors.
 
 # Context
@@ -79,9 +79,6 @@ The current schema structure will be provided:
     }}
   }}]
 }}
-
-# Planning and Verification
-- Validate and require all necessary fields for new tables and columns according to the provided examples.
 
 # Output Format
 - When reporting status, confirming changes, use clear, concise text.

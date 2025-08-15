@@ -108,7 +108,8 @@ function processModelField(
     tableFieldRenaming[model.dbName || model.name]?.[field.name] ?? field.name
 
   let columnType: string
-  if (needsTextType) {
+  if (needsTextType && !field.nativeType) {
+    // Only force text type if there's no explicit native type
     columnType = 'text'
   } else if (hasAutoincrement) {
     // Handle autoincrement type mapping

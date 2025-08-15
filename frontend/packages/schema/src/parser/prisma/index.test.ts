@@ -1117,5 +1117,25 @@ describe(_processor, () => {
       expect(value.tables['Test']?.columns['id']?.type).toBe('smallserial')
       expect(value.tables['Test']?.columns['id']?.default).toBe(null)
     })
+
+    it('should preserve explicit native types even with text-generating functions', async () => {
+      const { value } = await processor(`
+        model Test {
+          id         Int    @id @default(autoincrement())
+          uuid_field String @default(uuid()) @db.Uuid
+          cuid_field String @default(cuid()) @db.VarChar(30)
+        }
+      `)
+
+      // Should preserve @db.Uuid instead of forcing text
+      expect(value.tables['Test']?.columns['uuid_field']?.type).toBe('uuid')
+      expect(value.tables['Test']?.columns['uuid_field']?.default).toBe(null)
+
+      // Should preserve @db.VarChar(30) instead of forcing text
+      expect(value.tables['Test']?.columns['cuid_field']?.type).toBe(
+        'varchar(30)',
+      )
+      expect(value.tables['Test']?.columns['cuid_field']?.default).toBe(null)
+    })
   })
 })

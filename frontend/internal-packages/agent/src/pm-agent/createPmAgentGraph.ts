@@ -1,0 +1,47 @@
+import { END, START, StateGraph } from '@langchain/langgraph'
+import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
+import { createAnnotations } from '../chat/workflow/shared/langGraphUtils'
+import { analyzeRequirementsNode } from './nodes/analyzeRequirementsNode'
+import { invokeSaveArtifactToolNode } from './nodes/invokeSaveArtifactToolNode'
+import { routeAfterAnalyzeRequirements } from './routing/routeAfterAnalyzeRequirements'
+
+/**
+ * Retry policy configuration for PM Agent nodes
+ */
+const RETRY_POLICY = {
+  maxAttempts: process.env['NODE_ENV'] === 'test' ? 1 : 3,
+}
+
+/**
+ * Create and configure the PM Agent subgraph for requirements analysis
+ *
+ * The PM Agent handles the requirements analysis process:
+ * 1. analyzeRequirements - Analyzes and structures user requirements
+ * 2. invokeSaveArtifactTool - Saves requirements as artifacts using tools
+ * 3. Loop between analysis and tool invocation until requirements are saved
+ *
+ * @param checkpointer - Optional checkpoint saver for persistent state management
+ */
+export const createPmAgentGraph = (checkpointer?: BaseCheckpointSaver) => {
+  const ChatStateAnnotation = createAnnotations()
+  const pmAgentGraph = new StateGraph(ChatStateAnnotation)
+
+  pmAgentGraph
+    .addNode('analyzeRequirements', analyzeRequirementsNode, {
+      retryPolicy: RETRY_POLICY,
+    })
+    .addNode('invokeSaveArtifactTool', invokeSaveArtifactToolNode, {
+      retryPolicy: RETRY_POLICY,
+    })
+
+    .addEdge(START, 'analyzeRequirements')
+    .addEdge('invokeSaveArtifactTool', 'analyzeRequirements')
+    .addConditionalEdges('analyzeRequirements', routeAfterAnalyzeRequirements, {
+      invokeSaveArtifactTool: 'invokeSaveArtifactTool',
+      dbAgent: END,
+    })
+
+  return checkpointer
+    ? pmAgentGraph.compile({ checkpointer })
+    : pmAgentGraph.compile()
+}

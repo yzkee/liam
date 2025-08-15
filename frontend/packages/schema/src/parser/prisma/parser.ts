@@ -29,28 +29,47 @@ const getFieldRenamedIndex = (
 }
 
 /**
- * Check if a field has a client-generated ID function that requires TEXT type
+ * Check if a field has autoincrement() function
  * @see https://www.prisma.io/docs/orm/reference/prisma-schema-reference#default
  */
-function hasClientGeneratedIdFunction(field: DMMF.Field): boolean {
+function hasAutoincrementFunction(field: DMMF.Field): boolean {
+  const value = field.default?.valueOf()
+  if (typeof value === 'object' && value !== null && 'name' in value) {
+    const functionName = String(value.name)
+    return functionName === 'autoincrement'
+  }
+  return false
+}
+
+/**
+ * Get autoincrement type mapping from Prisma type to PostgreSQL
+ */
+function getAutoincrementType(typeName: string): string {
+  switch (typeName) {
+    case 'Int':
+      return 'serial'
+    case 'SmallInt':
+      return 'smallserial'
+    case 'BigInt':
+      return 'bigserial'
+    default:
+      return typeName.toLowerCase()
+  }
+}
+
+/**
+ * Check if a field has a function that requires TEXT type (either supported or unsupported)
+ * @see https://www.prisma.io/docs/orm/reference/prisma-schema-reference#default
+ */
+function requiresTextType(field: DMMF.Field): boolean {
   const value = field.default?.valueOf()
   if (typeof value === 'object' && value !== null && 'name' in value) {
     const functionName = String(value.name)
 
-    // These functions generate TEXT values and are handled by Prisma Client
-    const textGeneratingFunctions = ['cuid', 'ulid', 'nanoid']
+    // All functions that generate TEXT values (all are supported)
+    const textGeneratingFunctions = ['cuid', 'uuid', 'ulid', 'nanoid']
 
-    if (textGeneratingFunctions.includes(functionName)) {
-      return true
-    }
-
-    // uuid(7) is client-side and generates TEXT
-    if (functionName === 'uuid' && 'args' in value) {
-      const args = Array.isArray(value.args) ? value.args : []
-      if (args.length > 0 && args[0] === 7) {
-        return true
-      }
-    }
+    return textGeneratingFunctions.includes(functionName)
   }
 
   return false
@@ -95,17 +114,32 @@ function processModelField(
 
   const defaultValue = extractDefaultValue(field)
 
-  // Check if the field has a client-generated ID function that needs TEXT type
-  const needsTextType = hasClientGeneratedIdFunction(field)
+  // Check if the field requires TEXT type
+  const needsTextType = requiresTextType(field)
+
+  // Check if the field has autoincrement() which affects type
+  const hasAutoincrement = hasAutoincrementFunction(field)
 
   const fieldName =
     tableFieldRenaming[model.dbName || model.name]?.[field.name] ?? field.name
 
+  let columnType: string
+  if (needsTextType) {
+    columnType = 'text'
+  } else if (hasAutoincrement) {
+    // Handle autoincrement type mapping
+    columnType = getAutoincrementType(field.type)
+  } else {
+    columnType = convertToPostgresColumnType(
+      field.type,
+      field.nativeType,
+      defaultValue,
+    )
+  }
+
   const column = {
     name: fieldName,
-    type: needsTextType
-      ? 'text'
-      : convertToPostgresColumnType(field.type, field.nativeType, defaultValue),
+    type: columnType,
     default: defaultValue,
     notNull: field.isRequired,
     comment: field.documentation ?? null,
@@ -521,42 +555,51 @@ function extractDefaultValue(field: DMMF.Field) {
     if ('name' in defaultValue && 'args' in defaultValue) {
       const functionName = String(defaultValue.name)
 
-      // Functions that are handled by Prisma Client at runtime (not DB defaults)
-      const clientGeneratedFunctions = [
-        'cuid',
-        'uuid', // uuid(7) is client-side, but uuid(4) and uuid() are DB-side
-        'ulid',
-        'nanoid',
-        'sequence', // CockroachDB only - not supported
-        'auto', // MongoDB only - not supported
-      ]
+      // Handle supported functions
+      switch (functionName) {
+        case 'cuid':
+          // cuid() and cuid(2) are client-generated, no database default
+          return null
 
-      // Check if it's a client-side generated function
-      if (clientGeneratedFunctions.includes(functionName)) {
-        // Special handling for uuid - only uuid(7) is client-side
-        if (functionName === 'uuid') {
+        case 'uuid':
+          // All uuid() variants are client-generated in Prisma
+          return null
+
+        case 'ulid':
+          // ulid() is client-generated in Prisma
+          return null
+
+        case 'nanoid':
+          // nanoid() and nanoid(size) are client-generated in Prisma
+          return null
+
+        case 'now':
+          // now() creates database-level DEFAULT
+          return 'CURRENT_TIMESTAMP'
+
+        case 'dbgenerated': {
+          // dbgenerated() takes SQL expression as argument
           const args = Array.isArray(defaultValue.args) ? defaultValue.args : []
-          // uuid(7) is client-side, uuid() and uuid(4) are DB-side
-          if (args.length > 0 && args[0] === 7) {
-            return null // Client-side generation
-          }
-          // uuid() defaults to uuid(4) which is DB-side
-          // Return the appropriate format for DB-side uuid
-          if (args.length === 0) {
-            return 'uuid(4)' // uuid() defaults to version 4
-          }
-          return `${functionName}(${args[0]})`
+          return args.length > 0 ? String(args[0]) : null
         }
-        // All other client-generated functions return null
-        return null
-      }
 
-      // DB-generated functions (autoincrement, dbgenerated, now, uuid/uuid(4))
-      // Format the args correctly
-      const argsStr = Array.isArray(defaultValue.args)
-        ? defaultValue.args.join(',')
-        : defaultValue.args
-      return `${functionName}(${argsStr})`
+        case 'autoincrement':
+          // autoincrement() is handled by type system (SERIAL), no DEFAULT needed
+          return null
+
+        // Unsupported functions in PostgreSQL - return null for graceful handling
+        case 'sequence': // CockroachDB only
+        case 'auto': // MongoDB only
+          return null
+
+        default: {
+          // Fallback for any other functions
+          const defaultArgsStr = Array.isArray(defaultValue.args)
+            ? defaultValue.args.join(',')
+            : defaultValue.args
+          return `${functionName}(${defaultArgsStr})`
+        }
+      }
     }
   }
   return typeof defaultValue === 'string' ||

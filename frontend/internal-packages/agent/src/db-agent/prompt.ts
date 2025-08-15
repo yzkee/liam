@@ -80,12 +80,9 @@ The current schema structure will be provided:
   }}]
 }}
 
-# Output Format
-- When reporting status, confirming changes, use clear, concise text.
-
-# Verbosity
-- Use concise and direct summaries for status and confirmation messages.
-- When outputting JSON, use full verbosity: include all required fields, clear structure, and explicit comments.
+# Output Requirements
+- Status reports and confirmations: Use clear, concise text
+- Tool operations (JSON): Use full verbosity with all required fields, clear structure, and explicit comments
 
 # Stop Conditions
 - When schema changes succeed, report results and cease further tool calls unless additional actions are explicitly requested.

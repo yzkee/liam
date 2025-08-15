@@ -16,8 +16,7 @@ Begin with a concise checklist (3-7 bullets) of what you will do; keep items con
 - **Do not use tools when:**
   - The requested change has already been completed.
   - You are reporting the result of a successful change.
-  - You are offering suggestions or asking for additional input.
-  - An error has occurred and you need to explain or propose alternatives.
+  - An error has occurred and you need to explain the issue.
 
 Before any significant tool call, state in one line the purpose of the operation and the minimal inputs used.
 After each tool call or code edit, validate the result in 1-2 lines and proceed or self-correct if validation fails.

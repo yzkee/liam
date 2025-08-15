@@ -618,6 +618,65 @@ describe('postgresqlSchemaDeparser', () => {
 
       await expectGeneratedSQLToBeParseable(result.value)
     })
+
+    it('should generate complex CHECK constraints', async () => {
+      const schema = aSchema({
+        tables: {
+          design_sessions: aTable({
+            name: 'design_sessions',
+            columns: {
+              id: aColumn({
+                name: 'id',
+                type: 'uuid',
+                notNull: true,
+              }),
+              project_id: aColumn({
+                name: 'project_id',
+                type: 'uuid',
+              }),
+              organization_id: aColumn({
+                name: 'organization_id',
+                type: 'uuid',
+                notNull: true,
+              }),
+              age: aColumn({
+                name: 'age',
+                type: 'integer',
+              }),
+            },
+            constraints: {
+              design_sessions_project_or_org_check: aCheckConstraint({
+                name: 'design_sessions_project_or_org_check',
+                detail:
+                  '(("project_id" IS NOT NULL) OR ("organization_id" IS NOT NULL))',
+              }),
+              age_range_check: aCheckConstraint({
+                name: 'age_range_check',
+                detail: 'age >= 0 AND age <= 120',
+              }),
+            },
+          }),
+        },
+      })
+
+      const result = postgresqlSchemaDeparser(schema)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "CREATE TABLE "design_sessions" (
+          "id" uuid NOT NULL,
+          "project_id" uuid,
+          "organization_id" uuid NOT NULL,
+          "age" integer
+        );
+
+        ALTER TABLE "design_sessions" ADD CONSTRAINT "design_sessions_project_or_org_check" CHECK ((("project_id" IS NOT NULL) OR ("organization_id" IS NOT NULL)));
+
+        ALTER TABLE "design_sessions" ADD CONSTRAINT "age_range_check" CHECK (age >= 0 AND age <= 120);"
+      `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
+    })
   })
 
   describe('complex schemas', () => {

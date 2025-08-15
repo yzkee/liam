@@ -320,7 +320,7 @@ describe(processor, () => {
       })
     })
 
-    it('check constraint', async () => {
+    it('check constraint (anonymous)', async () => {
       const { value } = await processor(/* sql */ `
         CREATE TABLE products (
             id SERIAL PRIMARY KEY,
@@ -335,10 +335,58 @@ describe(processor, () => {
           type: 'PRIMARY KEY',
           columnNames: ['id'],
         },
-        CHECK_price: {
-          name: 'CHECK_price',
+        price_check: {
+          name: 'price_check',
           type: 'CHECK',
-          detail: 'CHECK (price > 0)',
+          detail: 'price > 0',
+        },
+      })
+    })
+
+    it('check constraint (table-level)', async () => {
+      const { value } = await processor(/* sql */ `
+        CREATE TABLE "design_sessions" (
+            "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+            "project_id" "uuid",
+            "organization_id" "uuid" NOT NULL,
+            CONSTRAINT "design_sessions_project_or_org_check" CHECK ((("project_id" IS NOT NULL) OR ("organization_id" IS NOT NULL)))
+        );
+      `)
+
+      expect(value.tables['design_sessions']?.constraints).toEqual({
+        design_sessions_project_or_org_check: {
+          name: 'design_sessions_project_or_org_check',
+          type: 'CHECK',
+          detail:
+            '(("project_id" IS NOT NULL) OR ("organization_id" IS NOT NULL))',
+        },
+      })
+    })
+
+    it('check constraint (multiple conditions)', async () => {
+      const { value } = await processor(/* sql */ `
+        CREATE TABLE employees (
+            id SERIAL PRIMARY KEY,
+            age INT CHECK (age >= 18 AND age <= 120),
+            salary NUMERIC CHECK (salary > 0)
+        );
+      `)
+
+      expect(value.tables['employees']?.constraints).toEqual({
+        PRIMARY_id: {
+          name: 'PRIMARY_id',
+          type: 'PRIMARY KEY',
+          columnNames: ['id'],
+        },
+        age_check: {
+          name: 'age_check',
+          type: 'CHECK',
+          detail: 'age >= 18 AND age <= 120',
+        },
+        salary_check: {
+          name: 'salary_check',
+          type: 'CHECK',
+          detail: 'salary > 0',
         },
       })
     })
@@ -477,7 +525,7 @@ describe(processor, () => {
         price_check_is_positive: {
           name: 'price_check_is_positive',
           type: 'CHECK',
-          detail: 'CHECK (price > 0)',
+          detail: 'price > 0',
         },
       })
     })

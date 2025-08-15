@@ -43,10 +43,14 @@ function formatDmlOperation(operation: DmlOperation): string {
   return sections.join('\n')
 }
 
-function formatUseCase(useCase: UseCase, index: number): string {
+function formatUseCase(
+  useCase: UseCase,
+  index: number,
+  reqIndex: number,
+): string {
   const sections: string[] = []
 
-  sections.push(`#### ${index + 1}. ${useCase.title}`)
+  sections.push(`#### ${reqIndex + 1}.${index + 1}. ${useCase.title}`)
   sections.push('')
   sections.push(useCase.description)
 
@@ -112,7 +116,7 @@ export function formatArtifactToMarkdown(artifact: Artifact): string {
         sections.push('')
 
         req.use_cases.forEach((useCase, ucIndex) => {
-          sections.push(formatUseCase(useCase, ucIndex))
+          sections.push(formatUseCase(useCase, ucIndex, reqIndex))
           sections.push('')
         })
       }

@@ -541,8 +541,8 @@ importers:
   frontend/internal-packages/mcp-server:
     dependencies:
       '@modelcontextprotocol/sdk':
-        specifier: 1.17.0
-        version: 1.17.0
+        specifier: 1.17.1
+        version: 1.17.1
       zod:
         specifier: 3.25.76
         version: 3.25.76
@@ -2987,8 +2987,8 @@ packages:
       '@types/react': '>=16'
       react: '>=16'
 
-  '@modelcontextprotocol/sdk@1.17.0':
-    resolution: {integrity: sha512-qFfbWFA7r1Sd8D697L7GkTd36yqDuTkvz0KfOGkgXR8EUhQn3/EDNIR/qUdQNMT8IjmasBvHWuXeisxtXTQT2g==}
+  '@modelcontextprotocol/sdk@1.17.1':
+    resolution: {integrity: sha512-CPle1OQehbWqd25La9Ack5B07StKIxh4+Bf19qnpZKJC1oI22Y0czZHbifjw1UoczIfKBwBDAp/dFxvHG13B5A==}
     engines: {node: '>=18'}
 
   '@mswjs/interceptors@0.39.4':
@@ -13026,7 +13026,7 @@ snapshots:
       '@types/react': 19.1.8
       react: 19.1.0
 
-  '@modelcontextprotocol/sdk@1.17.0':
+  '@modelcontextprotocol/sdk@1.17.1':
     dependencies:
       ajv: 6.12.6
       content-type: 1.0.5
@@ -18349,7 +18349,7 @@ snapshots:
       isstream: 0.1.2
       jsonwebtoken: 9.0.2
       mime-types: 2.1.35
-      retry-axios: 2.6.0(axios@1.11.0)
+      retry-axios: 2.6.0(axios@1.11.0(debug@4.4.1))
       tough-cookie: 4.1.4
     transitivePeerDependencies:
       - supports-color
@@ -20979,7 +20979,7 @@ snapshots:
       onetime: 7.0.0
       signal-exit: 4.1.0
 
-  retry-axios@2.6.0(axios@1.11.0):
+  retry-axios@2.6.0(axios@1.11.0(debug@4.4.1)):
     dependencies:
       axios: 1.11.0(debug@4.4.1)
 

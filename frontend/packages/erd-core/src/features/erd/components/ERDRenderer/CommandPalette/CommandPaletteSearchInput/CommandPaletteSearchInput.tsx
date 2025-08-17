@@ -26,11 +26,14 @@ export const CommandPaletteSearchInput: FC<Props> = ({
   return (
     <div className={styles.container}>
       <Search className={styles.searchIcon} />
-      <Command.Input
-        {...inputProps}
-        className={styles.input}
-        placeholder="Search"
-      />
+      <div className={styles.inputContainer}>
+        {modePrefix && <span className={styles.modePrefix}>{modePrefix}</span>}
+        <Command.Input
+          {...inputProps}
+          className={styles.input}
+          placeholder="Search"
+        />
+      </div>
     </div>
   )
 }

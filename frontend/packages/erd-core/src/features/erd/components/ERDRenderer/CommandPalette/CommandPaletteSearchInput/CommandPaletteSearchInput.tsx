@@ -1,6 +1,12 @@
 import { Search } from '@liam-hq/ui'
 import { Command } from 'cmdk'
-import { type ComponentProps, type FC, useMemo } from 'react'
+import {
+  type ComponentProps,
+  type FC,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import type { CommandPaletteInputMode } from '../types'
 import styles from './CommandPaletteSearchInput.module.css'
 
@@ -14,6 +20,8 @@ export const CommandPaletteSearchInput: FC<Props> = ({
   setMode,
   ...inputProps
 }) => {
+  const [value, setValue] = useState('')
+
   const modePrefix = useMemo(() => {
     switch (mode.type) {
       case 'default':
@@ -23,6 +31,35 @@ export const CommandPaletteSearchInput: FC<Props> = ({
     }
   }, [mode])
 
+  useEffect(() => {
+    const down = (event: KeyboardEvent) => {
+      if (mode.type === 'default') {
+        // switch to "command" mode if value is empty and `>` is pressed
+        if (event.key === '>' && value === '') {
+          event.preventDefault()
+          setMode({ type: 'command' })
+          return
+        }
+
+        return
+      }
+
+      if (mode.type === 'command') {
+        // switch to "default" mode if value is empty and delete key is pressed
+        if (event.key === 'Backspace' && value === '') {
+          event.preventDefault()
+          setMode({ type: 'default' })
+          return
+        }
+
+        return
+      }
+    }
+
+    document.addEventListener('keydown', down)
+    return () => document.removeEventListener('keydown', down)
+  }, [value, mode])
+
   return (
     <div className={styles.container}>
       <Search className={styles.searchIcon} />
@@ -30,6 +67,8 @@ export const CommandPaletteSearchInput: FC<Props> = ({
         {modePrefix && <span className={styles.modePrefix}>{modePrefix}</span>}
         <Command.Input
           {...inputProps}
+          value={value}
+          onValueChange={setValue}
           className={styles.input}
           placeholder="Search"
         />

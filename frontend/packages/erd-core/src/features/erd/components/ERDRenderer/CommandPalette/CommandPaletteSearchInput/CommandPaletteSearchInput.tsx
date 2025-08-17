@@ -1,6 +1,6 @@
 import { Search } from '@liam-hq/ui'
 import { Command } from 'cmdk'
-import type { ComponentProps, FC } from 'react'
+import { type ComponentProps, type FC, useMemo } from 'react'
 import type { CommandPaletteInputMode } from '../types'
 import styles from './CommandPaletteSearchInput.module.css'
 
@@ -14,6 +14,15 @@ export const CommandPaletteSearchInput: FC<Props> = ({
   setMode,
   ...inputProps
 }) => {
+  const modePrefix = useMemo(() => {
+    switch (mode.type) {
+      case 'default':
+        return null
+      case 'command':
+        return '>'
+    }
+  }, [mode])
+
   return (
     <div className={styles.container}>
       <Search className={styles.searchIcon} />

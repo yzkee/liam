@@ -5,7 +5,6 @@ import { type FC, useCallback, useEffect, useState } from 'react'
 import { useTableSelection } from '@/features/erd/hooks'
 import { useSchemaOrThrow } from '@/stores'
 import { TableNode } from '../../../ERDContent/components'
-import { CommandPaletteCommandOptions } from '../CommandPaletteOptions'
 import styles from './CommandPaletteContent.module.css'
 
 const getTableLinkHref = (activeTableName: string) => {
@@ -94,7 +93,6 @@ export const CommandPaletteContent: FC<Props> = ({ closeDialog }) => {
               </Command.Item>
             ))}
           </Command.Group>
-          <CommandPaletteCommandOptions />
         </Command.List>
         <div
           className={styles.previewContainer}

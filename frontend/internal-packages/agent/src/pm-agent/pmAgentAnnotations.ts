@@ -1,4 +1,3 @@
-import type { BaseMessage } from '@langchain/core/messages'
 import { Annotation, MessagesAnnotation } from '@langchain/langgraph'
 
 /**
@@ -20,14 +19,6 @@ export const pmAgentStateAnnotation = Annotation.Root({
 
 /**
  * Type definition for PM Agent state
+ * Derived from the annotation to ensure type consistency
  */
-export type PmAgentState = {
-  messages: BaseMessage[]
-  analyzedRequirements: {
-    businessRequirement: string
-    functionalRequirements: Record<string, string[]>
-    nonFunctionalRequirements: Record<string, string[]>
-  }
-  designSessionId: string
-  analyzedRequirementsRetryCount: number
-}
+export type PmAgentState = typeof pmAgentStateAnnotation.State

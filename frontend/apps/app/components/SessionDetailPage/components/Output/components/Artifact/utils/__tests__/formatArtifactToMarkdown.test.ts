@@ -244,11 +244,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
 
         The operations manager opens the aircraft management screen, selects "New Registration", and enters the aircraft number, model, and seating capacity. Upon clicking the register button, the system verifies required field entry, confirms aircraft number uniqueness, checks that seating capacity is a positive number, then records it in the aircraft registry.
 
-        **Related DML Operations:**
-
-        ##### Operation 1
-
-        **INSERT** - New aircraft registration test including normal cases and edge cases (capacity 1/0, model names with special characters and non-ASCII).
+        ##### **INSERT** - New aircraft registration test including normal cases and edge cases (capacity 1/0, model names with special characters and non-ASCII).
 
         \`\`\`sql
         BEGIN;
@@ -266,9 +262,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
 
         ---
 
-        ##### Operation 2
-
-        **UPDATE** - Aircraft model name and seat count update (normal update scenario for existing data).
+        ##### **UPDATE** - Aircraft model name and seat count update (normal update scenario for existing data).
 
         \`\`\`sql
         UPDATE airplanes SET model = 'ATR42-700', capacity = 50 WHERE airplane_number = 'JA100A';
@@ -284,9 +278,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
 
         The operations manager specifies an aircraft number on the search screen and searches with period and route conditions. The system extracts flights associated with the specified aircraft within the period and displays a list of flight names, departure times, arrival times, segments, assigned captain and first officer.
 
-        **Related DML Operations:**
-
-        **SELECT** - Retrieve flight list within period for specified aircraft (JA100A). Verify date boundaries and flight names.
+        ##### **SELECT** - Retrieve flight list within period for specified aircraft (JA100A). Verify date boundaries and flight names.
 
         \`\`\`sql
         SELECT f.flight_name, f.scheduled_departure, f.scheduled_arrival, f.origin, f.destination
@@ -316,9 +308,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
 
         The schedule coordinator enters flight name, departure time, arrival time, origin, and destination on the flight creation screen, then selects aircraft number and pilot IDs. The system validates the input values before saving.
 
-        **Related DML Operations:**
-
-        **INSERT** - Representative flight creation (Tokyo to Osaka route)
+        ##### **INSERT** - Representative flight creation (Tokyo to Osaka route)
 
         \`\`\`sql
         INSERT INTO flights (id, flight_name, origin, destination, scheduled_departure, scheduled_arrival, airplane_number, captain_id, first_officer_id)
@@ -335,9 +325,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
 
         After operation, the operations coordinator opens the target flight details screen and enters the start time (actual departure) and end time (actual arrival) then saves.
 
-        **Related DML Operations:**
-
-        **UPDATE** - Record actual departure and arrival times simultaneously (normal case including delays).
+        ##### **UPDATE** - Record actual departure and arrival times simultaneously (normal case including delays).
 
         \`\`\`sql
         UPDATE flights SET actual_start = '2024-06-01 08:05:00+09', actual_end = '2024-06-01 09:12:00+09'
@@ -363,9 +351,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
 
         HR or operations manager selects "New Registration" from the pilot roster screen and enters pilot ID, name, and phone number then saves.
 
-        **Related DML Operations:**
-
-        **INSERT** - Multiple pilot registration (diverse name and phone number formats)
+        ##### **INSERT** - Multiple pilot registration (diverse name and phone number formats)
 
         \`\`\`sql
         INSERT INTO pilots (pilot_id, name, phone) VALUES
@@ -395,9 +381,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
 
         Verify that the system properly returns errors when attempting to delete aircraft with existing flights or pilots assigned to flights.
 
-        **Related DML Operations:**
-
-        **DELETE** - Delete aircraft with remaining flights (expecting referential integrity error: ON DELETE RESTRICT).
+        ##### **DELETE** - Delete aircraft with remaining flights (expecting referential integrity error: ON DELETE RESTRICT).
 
         \`\`\`sql
         DELETE FROM airplanes WHERE airplane_number = 'JA330C';
@@ -857,7 +841,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
 
       expect(result).toContain('#### 1.1. Single Operation Use Case')
       expect(result).toContain('This use case has one operation')
-      expect(result).toContain('**Related DML Operations:**')
+      expect(result).toContain('##### **INSERT**')
       expect(result).not.toContain('##### Operation 1')
     })
 
@@ -897,8 +881,8 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
 
       const result = formatArtifactToMarkdown(artifact)
 
-      expect(result).toContain('##### Operation 1')
-      expect(result).toContain('##### Operation 2')
+      expect(result).toContain('##### **INSERT**')
+      expect(result).toContain('##### **UPDATE**')
       expect(result).toContain('---')
       expect(result).toContain('INSERT INTO orders')
       expect(result).toContain('UPDATE inventory')

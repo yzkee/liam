@@ -30,7 +30,9 @@
     "frontend/packages/erd-core/src/features/erd/components/ERDRenderer/CommandPalette/CommandPaletteOptions/CommandOptions.tsx",
     "frontend/packages/erd-core/src/features/erd/components/ERDRenderer/CommandPalette/CommandPaletteOptions/index.ts",
     // - Foundation code for Public Share feature (createPublicServerClient will be used in future phases)
-    "frontend/apps/app/libs/db/server.ts"
+    "frontend/apps/app/libs/db/server.ts",
+    // - Server Actions are not detected by knip due to 'use server' directive
+    "frontend/apps/app/features/public-share/actions.ts"
   ],
 
 

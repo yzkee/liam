@@ -10,6 +10,9 @@ SET artifact = jsonb_set(
     (
       SELECT jsonb_agg(
         CASE 
+          -- If description is null, convert to empty array
+          WHEN jsonb_typeof(req.value -> 'description') = 'null' THEN
+            jsonb_set(req.value, '{description}', '[]'::jsonb)
           -- If description is a string, convert to array
           WHEN jsonb_typeof(req.value -> 'description') = 'string' THEN
             -- Use jsonb_set to preserve all other fields in the requirement object
@@ -37,26 +40,26 @@ SET artifact = jsonb_set(
 )
 WHERE artifact -> 'requirement_analysis' -> 'requirements' IS NOT NULL
   AND jsonb_typeof(artifact -> 'requirement_analysis' -> 'requirements') = 'array'
-  -- Only update rows that have at least one string description
+  -- Only update rows that have at least one string or null description
   AND EXISTS (
     SELECT 1
     FROM jsonb_array_elements(artifact -> 'requirement_analysis' -> 'requirements') AS r(value)
-    WHERE jsonb_typeof(r.value -> 'description') = 'string'
+    WHERE jsonb_typeof(r.value -> 'description') IN ('string', 'null')
   );
 
--- Verify the migration by checking if any string descriptions remain
+-- Verify the migration by checking if any string or null descriptions remain
 DO $$
 DECLARE
-  remaining_strings INTEGER;
+  remaining_non_arrays INTEGER;
 BEGIN
   SELECT COUNT(*)
-  INTO remaining_strings
+  INTO remaining_non_arrays
   FROM public.artifacts,
-       jsonb_array_elements(artifact -> 'requirement_analysis' -> 'requirements') AS req
-  WHERE jsonb_typeof(req -> 'description') = 'string';
+       jsonb_array_elements(artifact -> 'requirement_analysis' -> 'requirements') AS req(value)
+  WHERE jsonb_typeof(req.value -> 'description') IN ('string', 'null');
   
-  IF remaining_strings > 0 THEN
-    RAISE NOTICE 'Found % artifacts with string descriptions still remaining', remaining_strings;
+  IF remaining_non_arrays > 0 THEN
+    RAISE NOTICE 'Found % requirements with non-array descriptions still remaining', remaining_non_arrays;
   ELSE
     RAISE NOTICE 'Migration successful: All descriptions are now arrays';
   END IF;

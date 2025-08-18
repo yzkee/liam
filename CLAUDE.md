@@ -114,6 +114,7 @@ For database migration and type generation workflows, see [`docs/migrationOpsCon
 - Server Components for server-side data fetching
 - Client-side fetching only when necessary
 - Align data fetching responsibilities with component roles
+- Use Server Actions for all data mutations (create, update, delete operations)
 
 ### CSS
 - Use CSS Variables from `@liam-hq/ui` package

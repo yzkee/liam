@@ -60,7 +60,7 @@ const createArtifactFromRequirements = (
     const functionalRequirement: FunctionalRequirement = {
       type: 'functional',
       name: category,
-      description: items.join(', '),
+      description: items,
       use_cases: [], // Empty array as use cases don't exist at this point
     }
     requirements.push(functionalRequirement)
@@ -73,7 +73,7 @@ const createArtifactFromRequirements = (
     const nonFunctionalRequirement: NonFunctionalRequirement = {
       type: 'non_functional',
       name: category,
-      description: items.join(', '),
+      description: items,
     }
     requirements.push(nonFunctionalRequirement)
   }

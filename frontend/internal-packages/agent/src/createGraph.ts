@@ -7,7 +7,7 @@ import {
   prepareDmlNode,
   validateSchemaNode,
 } from './chat/workflow/nodes'
-import { createAnnotations } from './chat/workflow/shared/langGraphUtils'
+import { createAnnotations } from './chat/workflow/shared/createAnnotations'
 import type { WorkflowState } from './chat/workflow/types'
 import { createDbAgentGraph } from './db-agent/createDbAgentGraph'
 import { createPmAgentGraph } from './pm-agent/createPmAgentGraph'

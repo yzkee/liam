@@ -8,6 +8,17 @@ import type { Usecase } from '../../../langchain/agents/qaGenerateUsecaseAgent/a
 import type { WorkflowState } from '../types'
 
 /**
+ * Wraps a description string in an array format with fallback
+ */
+const wrapDescription = (
+  description: string | undefined,
+  prefix: string,
+  category: string,
+): string[] => {
+  return description ? [description] : [`${prefix}${category}`]
+}
+
+/**
  * Map workflow-level DML operations to individual use cases
  */
 const mapDmlOperationsToUsecases = (
@@ -51,7 +62,7 @@ const convertAnalyzedRequirementsToArtifact = (
     const functionalRequirement: FunctionalRequirement = {
       type: 'functional',
       name: category,
-      description: items.join(', '),
+      description: items, // Keep as array
       use_cases: [], // Will be populated later if usecases exist
     }
     requirements.push(functionalRequirement)
@@ -64,7 +75,7 @@ const convertAnalyzedRequirementsToArtifact = (
     const nonFunctionalRequirement: NonFunctionalRequirement = {
       type: 'non_functional',
       name: category,
-      description: items.join(', '),
+      description: items, // Keep as array
     }
     requirements.push(nonFunctionalRequirement)
   }
@@ -109,7 +120,11 @@ const mergeUseCasesIntoRequirements = (
         const functionalRequirement: FunctionalRequirement = {
           type: 'functional',
           name: category,
-          description: description || `Functional requirement: ${category}`,
+          description: wrapDescription(
+            description,
+            'Functional requirement: ',
+            category,
+          ),
           use_cases: groupedUsecases.map(mapUseCasesToRequirements),
         }
         requirements.push(functionalRequirement)
@@ -117,7 +132,11 @@ const mergeUseCasesIntoRequirements = (
         const nonFunctionalRequirement: NonFunctionalRequirement = {
           type: 'non_functional',
           name: category,
-          description: description || `Non-functional requirement: ${category}`,
+          description: wrapDescription(
+            description,
+            'Non-functional requirement: ',
+            category,
+          ),
         }
         requirements.push(nonFunctionalRequirement)
       }

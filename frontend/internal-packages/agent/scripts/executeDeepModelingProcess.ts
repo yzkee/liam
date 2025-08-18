@@ -58,7 +58,6 @@ const createWorkflowStateForDeepModeling = (
       designSessionId: designSession.id,
       userId: user.id,
       organizationId: organization.id,
-      retryCount: {},
     },
     options: {
       configurable: {

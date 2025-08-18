@@ -41,7 +41,6 @@ interface WorkflowState {
   organizationId: string;
   userId: string;
   designSessionId: string;
-  retryCount: Record<string, number>;
 
   // Requirements analysis
   analyzedRequirements?: AnalyzedRequirements;
@@ -50,9 +49,6 @@ interface WorkflowState {
   // DDL/DML execution
   ddlStatements?: string;
   dmlStatements?: string;
-  shouldRetryWithDesignSchema?: boolean;
-  ddlExecutionFailed?: boolean;
-  ddlExecutionFailureReason?: string;
 
   // DML execution results
   dmlExecutionSuccessful?: boolean;

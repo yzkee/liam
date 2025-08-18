@@ -57,7 +57,6 @@ const createWorkflowState = (
     designSessionId: designSession.id,
     userId: user.id,
     organizationId: organization.id,
-    retryCount: {},
   }
 
   return okAsync({

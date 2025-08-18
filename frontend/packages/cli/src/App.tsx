@@ -19,7 +19,9 @@ function loadSchemaContent() {
   return ResultAsync.fromPromise(
     fetch('./schema.json').then(async (response) => {
       if (!response.ok) {
-        throw new Error(`Failed to fetch schema: ${response.statusText}`)
+        return await Promise.reject(
+          new Error(`Failed to fetch schema: ${response.statusText}`),
+        )
       }
       return await response.json()
     }),

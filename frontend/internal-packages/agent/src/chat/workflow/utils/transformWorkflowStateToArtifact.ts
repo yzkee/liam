@@ -51,7 +51,7 @@ const convertAnalyzedRequirementsToArtifact = (
     const functionalRequirement: FunctionalRequirement = {
       type: 'functional',
       name: category,
-      description: items.join(', '),
+      description: items, // Keep as array
       use_cases: [], // Will be populated later if usecases exist
     }
     requirements.push(functionalRequirement)
@@ -64,7 +64,7 @@ const convertAnalyzedRequirementsToArtifact = (
     const nonFunctionalRequirement: NonFunctionalRequirement = {
       type: 'non_functional',
       name: category,
-      description: items.join(', '),
+      description: items, // Keep as array
     }
     requirements.push(nonFunctionalRequirement)
   }
@@ -109,7 +109,9 @@ const mergeUseCasesIntoRequirements = (
         const functionalRequirement: FunctionalRequirement = {
           type: 'functional',
           name: category,
-          description: description || `Functional requirement: ${category}`,
+          description: description
+            ? [description]
+            : [`Functional requirement: ${category}`],
           use_cases: groupedUsecases.map(mapUseCasesToRequirements),
         }
         requirements.push(functionalRequirement)
@@ -117,7 +119,9 @@ const mergeUseCasesIntoRequirements = (
         const nonFunctionalRequirement: NonFunctionalRequirement = {
           type: 'non_functional',
           name: category,
-          description: description || `Non-functional requirement: ${category}`,
+          description: description
+            ? [description]
+            : [`Non-functional requirement: ${category}`],
         }
         requirements.push(nonFunctionalRequirement)
       }

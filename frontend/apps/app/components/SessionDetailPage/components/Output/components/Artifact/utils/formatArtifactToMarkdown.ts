@@ -107,7 +107,10 @@ export function formatArtifactToMarkdown(artifact: Artifact): string {
     functionalReqs.forEach((req, reqIndex) => {
       sections.push(`### ${reqIndex + 1}. ${req.name}`)
       sections.push('')
-      sections.push(req.description)
+
+      req.description.forEach((item) => {
+        sections.push(`- ${item}`)
+      })
       sections.push('')
 
       if (req.type === 'functional' && req.use_cases.length > 0) {
@@ -140,7 +143,10 @@ export function formatArtifactToMarkdown(artifact: Artifact): string {
     nonFunctionalReqs.forEach((req, reqIndex) => {
       sections.push(`### ${reqIndex + 1}. ${req.name}`)
       sections.push('')
-      sections.push(req.description)
+
+      req.description.forEach((item) => {
+        sections.push(`- ${item}`)
+      })
       sections.push('')
 
       if (reqIndex < nonFunctionalReqs.length - 1) {

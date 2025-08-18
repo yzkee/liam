@@ -3,6 +3,7 @@ import os from 'node:os'
 import path from 'node:path'
 import type { SupportedFormat } from '@liam-hq/schema/parser'
 import { describe, expect, it } from 'vitest'
+import { err, ok } from '../../utils/result.js'
 import { ArgumentError, WarningProcessingError } from '../errors.js'
 import { runPreprocess } from './runPreprocess.js'
 
@@ -38,7 +39,9 @@ describe('runPreprocess', () => {
         tmpDir,
         format,
       )
-      if (!outputFilePath) throw new Error('Failed to run preprocess')
+      if (!outputFilePath) {
+        throw new Error(`Failed to run preprocess: ${JSON.stringify(errors)}`)
+      }
 
       expect(errors).toEqual([])
       expect(fs.existsSync(outputFilePath)).toBe(true)

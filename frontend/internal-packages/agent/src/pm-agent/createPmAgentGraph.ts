@@ -1,9 +1,9 @@
 import { END, START, StateGraph } from '@langchain/langgraph'
 import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
-import { createAnnotations } from '../chat/workflow/shared/createAnnotations'
 import { RETRY_POLICY } from '../shared/errorHandling'
 import { analyzeRequirementsNode } from './nodes/analyzeRequirementsNode'
 import { invokeSaveArtifactToolNode } from './nodes/invokeSaveArtifactToolNode'
+import { pmAgentStateAnnotation } from './pmAgentAnnotations'
 import { routeAfterAnalyzeRequirements } from './routing/routeAfterAnalyzeRequirements'
 
 /**
@@ -17,8 +17,7 @@ import { routeAfterAnalyzeRequirements } from './routing/routeAfterAnalyzeRequir
  * @param checkpointer - Optional checkpoint saver for persistent state management
  */
 export const createPmAgentGraph = (checkpointer?: BaseCheckpointSaver) => {
-  const ChatStateAnnotation = createAnnotations()
-  const pmAgentGraph = new StateGraph(ChatStateAnnotation)
+  const pmAgentGraph = new StateGraph(pmAgentStateAnnotation)
 
   pmAgentGraph
     .addNode('analyzeRequirements', analyzeRequirementsNode, {
@@ -32,7 +31,8 @@ export const createPmAgentGraph = (checkpointer?: BaseCheckpointSaver) => {
     .addEdge('invokeSaveArtifactTool', 'analyzeRequirements')
     .addConditionalEdges('analyzeRequirements', routeAfterAnalyzeRequirements, {
       invokeSaveArtifactTool: 'invokeSaveArtifactTool',
-      dbAgent: END,
+      END: END,
+      analyzeRequirements: 'analyzeRequirements',
     })
 
   return checkpointer

@@ -42,20 +42,14 @@ async function readLocalFiles(pattern: string): Promise<Result<string, Error>> {
     )
   }
 
-  try {
-    const contents = await Promise.all(
-      files.map(async (filePath) => {
-        if (!fs.existsSync(filePath)) {
-          throw new Error(`File not found: ${filePath}`)
-        }
-        return fs.readFileSync(filePath, 'utf8')
-      }),
-    )
-
-    return ok(contents.join('\n'))
-  } catch (error) {
-    return err(error instanceof Error ? error : new Error(String(error)))
+  // Pre-validate file existence to avoid throwing inside async map
+  const missing = files.find((filePath) => !fs.existsSync(filePath))
+  if (missing) {
+    return err(new Error(`File not found: ${missing}`))
   }
+
+  const contents = files.map((filePath) => fs.readFileSync(filePath, 'utf8'))
+  return ok(contents.join('\n'))
 }
 
 function downloadGitHubRawContent(
@@ -71,7 +65,9 @@ function downloadFile(url: string): ResultAsync<string, Error> {
   return ResultAsync.fromPromise(
     fetch(url).then(async (response) => {
       if (!response.ok) {
-        throw new Error(`Failed to download file: ${response.statusText}`)
+        return await Promise.reject(
+          new Error(`Failed to download file: ${response.statusText}`),
+        )
       }
       return await response.text()
     }),

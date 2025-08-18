@@ -1,3 +1,4 @@
+import type { RunnableConfig } from '@langchain/core/runnables'
 import { END, START, StateGraph } from '@langchain/langgraph'
 import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
 import {
@@ -7,6 +8,7 @@ import {
   validateSchemaNode,
 } from './chat/workflow/nodes'
 import { createAnnotations } from './chat/workflow/shared/langGraphUtils'
+import type { WorkflowState } from './chat/workflow/types'
 import { createDbAgentGraph } from './db-agent/createDbAgentGraph'
 import { createPmAgentGraph } from './pm-agent/createPmAgentGraph'
 import { RETRY_POLICY } from './shared/errorHandling'
@@ -19,11 +21,25 @@ import { RETRY_POLICY } from './shared/errorHandling'
 export const createGraph = (checkpointer?: BaseCheckpointSaver) => {
   const ChatStateAnnotation = createAnnotations()
   const graph = new StateGraph(ChatStateAnnotation)
-  const pmAgentSubgraph = createPmAgentGraph(checkpointer)
   const dbAgentSubgraph = createDbAgentGraph(checkpointer)
 
+  const callPmAgent = async (state: WorkflowState, config: RunnableConfig) => {
+    const pmAgentSubgraph = createPmAgentGraph(checkpointer)
+    const pmAgentOutput = await pmAgentSubgraph.invoke(
+      {
+        messages: state.messages,
+        analyzedRequirements: state.analyzedRequirements,
+        designSessionId: state.designSessionId,
+        analyzedRequirementsRetryCount: 0,
+      },
+      config,
+    )
+
+    return { ...state, ...pmAgentOutput }
+  }
+
   graph
-    .addNode('pmAgent', pmAgentSubgraph)
+    .addNode('pmAgent', callPmAgent)
     .addNode('dbAgent', dbAgentSubgraph)
     .addNode('generateUsecase', generateUsecaseNode, {
       retryPolicy: RETRY_POLICY,

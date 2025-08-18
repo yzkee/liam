@@ -263,7 +263,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
 
         **Execution History:**
 
-        ✅ **06/01/2024, 05:00:00 PM**
+        ✅ **06/01/2024, 08:00:00 AM**
         > 3 rows inserted
 
         ---
@@ -276,7 +276,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
 
         **Execution History:**
 
-        ✅ **06/01/2024, 05:05:00 PM**
+        ✅ **06/01/2024, 08:05:00 AM**
         > 1 row updated
 
 
@@ -297,7 +297,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
 
         **Execution History:**
 
-        ✅ **06/02/2024, 07:00:00 PM**
+        ✅ **06/02/2024, 10:00:00 AM**
         > 2 rows returned
 
 
@@ -323,7 +323,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
 
         **Execution History:**
 
-        ✅ **05/30/2024, 11:00:00 PM**
+        ✅ **05/30/2024, 02:00:00 PM**
         > 1 row inserted
 
 
@@ -340,7 +340,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
 
         **Execution History:**
 
-        ✅ **06/01/2024, 06:15:00 PM**
+        ✅ **06/01/2024, 09:15:00 AM**
         > 1 row updated
 
 
@@ -367,10 +367,10 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
 
         **Execution History:**
 
-        ❌ **05/25/2024, 07:00:00 PM**
+        ❌ **05/25/2024, 10:00:00 AM**
         > ERROR: duplicate key value violates unique constraint "pk_pilots"
 
-        ✅ **05/25/2024, 07:05:00 PM**
+        ✅ **05/25/2024, 10:05:00 AM**
         > 2 rows inserted
 
 
@@ -395,7 +395,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
 
         **Execution History:**
 
-        ❌ **06/03/2024, 08:00:00 PM**
+        ❌ **06/03/2024, 11:00:00 AM**
         > ERROR: update or delete on table "airplanes" violates foreign key constraint "fk_flights_airplane"
 
 
@@ -655,7 +655,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
       const result = formatArtifactToMarkdown(artifact)
 
       expect(result).toContain('**Execution History:**')
-      expect(result).toContain('✅ **03/20/2024, 11:45:30 PM**')
+      expect(result).toContain('✅ **03/20/2024, 02:45:30 PM**')
       expect(result).toContain('> 25 rows returned')
     })
 
@@ -695,7 +695,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
 
       const result = formatArtifactToMarkdown(artifact)
 
-      expect(result).toContain('❌ **03/20/2024, 11:45:30 PM**')
+      expect(result).toContain('❌ **03/20/2024, 02:45:30 PM**')
       expect(result).toContain('> Unique constraint violation')
     })
 
@@ -740,9 +740,9 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
 
       const result = formatArtifactToMarkdown(artifact)
 
-      expect(result).toContain('❌ **03/20/2024, 07:00:00 PM**')
+      expect(result).toContain('❌ **03/20/2024, 10:00:00 AM**')
       expect(result).toContain('> Connection timeout')
-      expect(result).toContain('✅ **03/20/2024, 07:01:00 PM**')
+      expect(result).toContain('✅ **03/20/2024, 10:01:00 AM**')
       expect(result).toContain('> 1 row inserted')
     })
 

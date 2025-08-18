@@ -62,7 +62,9 @@
         "pnpm",
         "concurrently",
         "node",
-        "knip"
+        "knip",
+        "anthropics/claude-code-action",
+        "anthropics/claude-code-security-review"
       ],
       "matchDepTypes": [
         "devDependencies"

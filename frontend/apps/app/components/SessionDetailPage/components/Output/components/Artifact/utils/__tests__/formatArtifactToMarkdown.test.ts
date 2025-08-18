@@ -12,8 +12,9 @@ describe('formatArtifactToMarkdown', () => {
           requirements: [
             {
               name: 'Aircraft Management',
-              description:
+              description: [
                 'The company owns multiple aircraft, each with an aircraft number, model, and seating capacity. The aircraft number must be unique, and seating capacity must be an integer greater than 0.',
+              ],
               type: 'functional',
               use_cases: [
                 {
@@ -86,8 +87,9 @@ ORDER BY f.scheduled_departure;`,
             },
             {
               name: 'Flight Information Management',
-              description:
+              description: [
                 'Flight information includes flight name, departure time, arrival time, origin, destination, aircraft number, captain ID, first officer ID, start time, and end time. Origin and destination cannot be the same, and scheduled times must satisfy departure time < arrival time.',
+              ],
               type: 'functional',
               use_cases: [
                 {
@@ -138,8 +140,9 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
             },
             {
               name: 'Pilot Management',
-              description:
+              description: [
                 'Each flight is operated by a captain and first officer, each with an ID, name, and phone number. Pilot IDs must be unique, and for flights, the captain ID and first officer ID cannot be the same person.',
+              ],
               type: 'functional',
               use_cases: [
                 {
@@ -175,8 +178,9 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
             },
             {
               name: 'Data Integrity and Validation',
-              description:
+              description: [
                 'Enforce referential integrity through foreign keys and implement various business rules through CHECK constraints. Protect related data with ON DELETE RESTRICT during deletions.',
+              ],
               type: 'functional',
               use_cases: [
                 {
@@ -205,14 +209,16 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
             },
             {
               name: 'Performance',
-              description:
+              description: [
                 'The system must be able to search 1000 flight records within 3 seconds and support concurrent access from 50 users.',
+              ],
               type: 'non_functional',
             },
             {
               name: 'Security',
-              description:
+              description: [
                 'Pilot personal information must be encrypted for storage and access logs must be recorded. Database access must be restricted to authenticated users only.',
+              ],
               type: 'non_functional',
             },
           ],
@@ -235,7 +241,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
 
         ### 1. Aircraft Management
 
-        The company owns multiple aircraft, each with an aircraft number, model, and seating capacity. The aircraft number must be unique, and seating capacity must be an integer greater than 0.
+        - The company owns multiple aircraft, each with an aircraft number, model, and seating capacity. The aircraft number must be unique, and seating capacity must be an integer greater than 0.
 
 
         **Use Cases:**
@@ -299,7 +305,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
 
         ### 2. Flight Information Management
 
-        Flight information includes flight name, departure time, arrival time, origin, destination, aircraft number, captain ID, first officer ID, start time, and end time. Origin and destination cannot be the same, and scheduled times must satisfy departure time < arrival time.
+        - Flight information includes flight name, departure time, arrival time, origin, destination, aircraft number, captain ID, first officer ID, start time, and end time. Origin and destination cannot be the same, and scheduled times must satisfy departure time < arrival time.
 
 
         **Use Cases:**
@@ -342,7 +348,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
 
         ### 3. Pilot Management
 
-        Each flight is operated by a captain and first officer, each with an ID, name, and phone number. Pilot IDs must be unique, and for flights, the captain ID and first officer ID cannot be the same person.
+        - Each flight is operated by a captain and first officer, each with an ID, name, and phone number. Pilot IDs must be unique, and for flights, the captain ID and first officer ID cannot be the same person.
 
 
         **Use Cases:**
@@ -372,7 +378,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
 
         ### 4. Data Integrity and Validation
 
-        Enforce referential integrity through foreign keys and implement various business rules through CHECK constraints. Protect related data with ON DELETE RESTRICT during deletions.
+        - Enforce referential integrity through foreign keys and implement various business rules through CHECK constraints. Protect related data with ON DELETE RESTRICT during deletions.
 
 
         **Use Cases:**
@@ -398,14 +404,14 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
 
         ### 1. Performance
 
-        The system must be able to search 1000 flight records within 3 seconds and support concurrent access from 50 users.
+        - The system must be able to search 1000 flight records within 3 seconds and support concurrent access from 50 users.
 
 
         ---
 
         ### 2. Security
 
-        Pilot personal information must be encrypted for storage and access logs must be recorded. Database access must be restricted to authenticated users only.
+        - Pilot personal information must be encrypted for storage and access logs must be recorded. Database access must be restricted to authenticated users only.
         "
       `)
     })
@@ -417,7 +423,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
           requirements: [
             {
               name: 'Task CRUD',
-              description: 'Create, read, update, delete tasks',
+              description: ['Create, read, update, delete tasks'],
               type: 'functional',
               use_cases: [],
             },
@@ -438,7 +444,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
           requirements: [
             {
               name: 'Security',
-              description: 'All data must be encrypted',
+              description: ['All data must be encrypted'],
               type: 'non_functional',
             },
           ],
@@ -474,24 +480,24 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
           requirements: [
             {
               name: 'Feature A',
-              description: 'Description A',
+              description: ['Description A'],
               type: 'functional',
               use_cases: [],
             },
             {
               name: 'Feature B',
-              description: 'Description B',
+              description: ['Description B'],
               type: 'functional',
               use_cases: [],
             },
             {
               name: 'Requirement X',
-              description: 'Description X',
+              description: ['Description X'],
               type: 'non_functional',
             },
             {
               name: 'Requirement Y',
-              description: 'Description Y',
+              description: ['Description Y'],
               type: 'non_functional',
             },
           ],
@@ -513,13 +519,13 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
           requirements: [
             {
               name: 'First',
-              description: 'First desc',
+              description: ['First desc'],
               type: 'functional',
               use_cases: [],
             },
             {
               name: 'Second',
-              description: 'Second desc',
+              description: ['Second desc'],
               type: 'functional',
               use_cases: [],
             },
@@ -550,7 +556,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
           requirements: [
             {
               name: 'Test Feature',
-              description: 'Test description',
+              description: ['Test description'],
               type: 'functional',
               use_cases: [
                 {
@@ -585,7 +591,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
           requirements: [
             {
               name: 'Test Feature',
-              description: 'Test description',
+              description: ['Test description'],
               type: 'functional',
               use_cases: [
                 {
@@ -619,7 +625,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
           requirements: [
             {
               name: 'Test Feature',
-              description: 'Test description',
+              description: ['Test description'],
               type: 'functional',
               use_cases: [
                 {
@@ -660,7 +666,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
           requirements: [
             {
               name: 'Test Feature',
-              description: 'Test description',
+              description: ['Test description'],
               type: 'functional',
               use_cases: [
                 {
@@ -700,7 +706,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
           requirements: [
             {
               name: 'Test Feature',
-              description: 'Test description',
+              description: ['Test description'],
               type: 'functional',
               use_cases: [
                 {
@@ -747,7 +753,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
           requirements: [
             {
               name: 'Test Feature',
-              description: 'Test description',
+              description: ['Test description'],
               type: 'functional',
               use_cases: [
                 {
@@ -780,7 +786,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
           requirements: [
             {
               name: 'Test Feature',
-              description: 'Test description',
+              description: ['Test description'],
               type: 'functional',
               use_cases: [
                 {
@@ -816,7 +822,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
           requirements: [
             {
               name: 'Test Feature',
-              description: 'Test description',
+              description: ['Test description'],
               type: 'functional',
               use_cases: [
                 {
@@ -852,7 +858,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
           requirements: [
             {
               name: 'Test Feature',
-              description: 'Test description',
+              description: ['Test description'],
               type: 'functional',
               use_cases: [
                 {
@@ -895,7 +901,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
           requirements: [
             {
               name: 'Test Feature',
-              description: 'Test description',
+              description: ['Test description'],
               type: 'functional',
               use_cases: [
                 {
@@ -923,7 +929,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
           requirements: [
             {
               name: 'User Management',
-              description: 'User management features',
+              description: ['User management features'],
               type: 'functional',
               use_cases: [
                 {
@@ -961,7 +967,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
           requirements: [
             {
               name: 'Feature 1',
-              description: 'First feature',
+              description: ['First feature'],
               type: 'functional',
               use_cases: [
                 {
@@ -978,7 +984,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
             },
             {
               name: 'Feature 2',
-              description: 'Second feature',
+              description: ['Second feature'],
               type: 'functional',
               use_cases: [
                 {
@@ -1037,7 +1043,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
           requirements: [
             {
               name: 'Test Feature',
-              description: 'Test all operation types',
+              description: ['Test all operation types'],
               type: 'functional',
               use_cases: [
                 {
@@ -1069,7 +1075,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
           requirements: [
             {
               name: 'Long Feature',
-              description: longDescription,
+              description: [longDescription],
               type: 'functional',
               use_cases: [
                 {
@@ -1110,7 +1116,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
           requirements: [
             {
               name: 'Special & Characters',
-              description: 'Description with **bold** and _italic_ text',
+              description: ['Description with **bold** and _italic_ text'],
               type: 'functional',
               use_cases: [
                 {

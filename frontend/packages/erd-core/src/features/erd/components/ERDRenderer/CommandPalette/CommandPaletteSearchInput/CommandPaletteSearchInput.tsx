@@ -35,11 +35,12 @@ export const CommandPaletteSearchInput: FC<Props> = ({
     const down = (event: KeyboardEvent) => {
       if (mode.type === 'default') {
         // switch to "command" mode if value is empty and `>` is pressed
-        if (event.key === '>' && value === '') {
-          event.preventDefault()
-          setMode({ type: 'command' })
-          return
-        }
+        // TODO(command options): uncomment the following lines to release command options
+        // if (event.key === '>' && value === '') {
+        //   event.preventDefault()
+        //   setMode({ type: 'command' })
+        //   return
+        // }
 
         return
       }

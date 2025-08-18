@@ -28,7 +28,11 @@ export const createGraph = (checkpointer?: BaseCheckpointSaver) => {
     const pmAgentOutput = await pmAgentSubgraph.invoke(
       {
         messages: state.messages,
-        analyzedRequirements: state.analyzedRequirements,
+        analyzedRequirements: state.analyzedRequirements || {
+          businessRequirement: '',
+          functionalRequirements: {},
+          nonFunctionalRequirements: {},
+        },
         designSessionId: state.designSessionId,
         analyzedRequirementsRetryCount: 0,
       },

@@ -10,11 +10,16 @@ const createPmAgentState = (
   messages: [],
   designSessionId: 'test-session',
   analyzedRequirementsRetryCount: 0,
+  analyzedRequirements: {
+    businessRequirement: '',
+    functionalRequirements: {},
+    nonFunctionalRequirements: {},
+  },
   ...overrides,
 })
 
 describe('routeAfterAnalyzeRequirements', () => {
-  describe('when analyzedRequirements is set', () => {
+  describe('when businessRequirement is not empty', () => {
     it('should return END', () => {
       const state = createPmAgentState({
         analyzedRequirements: {
@@ -131,7 +136,7 @@ describe('routeAfterAnalyzeRequirements', () => {
     })
   })
 
-  describe('when no tool calls and requirements not set', () => {
+  describe('when no tool calls and businessRequirement is empty', () => {
     it('should return analyzeRequirements for re-analysis', () => {
       const messageWithoutToolCalls = new AIMessage({
         content: 'Unable to analyze requirements',
@@ -212,7 +217,7 @@ describe('routeAfterAnalyzeRequirements', () => {
       expect(result).toBe('analyzeRequirements')
     })
 
-    it('should prioritize analyzedRequirements over retry count', () => {
+    it('should prioritize non-empty businessRequirement over retry count', () => {
       const state = createPmAgentState({
         analyzedRequirements: {
           businessRequirement: 'Test',

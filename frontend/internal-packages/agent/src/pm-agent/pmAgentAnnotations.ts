@@ -7,14 +7,11 @@ import { Annotation, MessagesAnnotation } from '@langchain/langgraph'
  */
 export const pmAgentStateAnnotation = Annotation.Root({
   ...MessagesAnnotation.spec,
-  analyzedRequirements: Annotation<
-    | {
-        businessRequirement: string
-        functionalRequirements: Record<string, string[]>
-        nonFunctionalRequirements: Record<string, string[]>
-      }
-    | undefined
-  >,
+  analyzedRequirements: Annotation<{
+    businessRequirement: string
+    functionalRequirements: Record<string, string[]>
+    nonFunctionalRequirements: Record<string, string[]>
+  }>,
   designSessionId: Annotation<string>,
 
   // PM Agent private state
@@ -26,13 +23,11 @@ export const pmAgentStateAnnotation = Annotation.Root({
  */
 export type PmAgentState = {
   messages: BaseMessage[]
-  analyzedRequirements?:
-    | {
-        businessRequirement: string
-        functionalRequirements: Record<string, string[]>
-        nonFunctionalRequirements: Record<string, string[]>
-      }
-    | undefined
+  analyzedRequirements: {
+    businessRequirement: string
+    functionalRequirements: Record<string, string[]>
+    nonFunctionalRequirements: Record<string, string[]>
+  }
   designSessionId: string
   analyzedRequirementsRetryCount: number
 }

@@ -463,6 +463,16 @@ function processManyToManyRelationships(
 /**
  * Process enums from DMMF and create enum objects
  */
+/**
+ * Convert camelCase/PascalCase to snake_case
+ */
+function toSnakeCase(str: string): string {
+  return str
+    .replace(/([A-Z])/g, '_$1')
+    .toLowerCase()
+    .replace(/^_/, '') // Remove leading underscore
+}
+
 function processEnums(
   dmmfEnums: readonly DMMF.DatamodelEnum[],
 ): Record<string, Enum> {
@@ -471,8 +481,11 @@ function processEnums(
   for (const dmmfEnum of dmmfEnums) {
     const values = dmmfEnum.values.map((value) => value.name)
 
-    enums[dmmfEnum.name] = {
-      name: dmmfEnum.name,
+    // Convert ENUM name from camelCase/PascalCase to snake_case
+    const snakeCaseName = toSnakeCase(dmmfEnum.name)
+
+    enums[snakeCaseName] = {
+      name: snakeCaseName,
       values,
       comment: dmmfEnum.documentation ?? null,
     }

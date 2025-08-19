@@ -565,7 +565,7 @@ describe(_processor, () => {
               }),
               role: aColumn({
                 name: 'role',
-                type: 'Role',
+                type: 'role',
                 notNull: true,
                 default: 'USER',
               }),
@@ -636,8 +636,8 @@ describe(_processor, () => {
           }),
         },
         enums: {
-          Role: anEnum({
-            name: 'Role',
+          role: anEnum({
+            name: 'role',
             values: ['USER', 'ADMIN'],
             comment: null,
           }),
@@ -1023,8 +1023,8 @@ describe(_processor, () => {
       `)
 
       expect(value.enums).toEqual({
-        Role: {
-          name: 'Role',
+        role: {
+          name: 'role',
           values: ['USER', 'ADMIN', 'MODERATOR'],
           comment: null,
         },
@@ -1047,8 +1047,8 @@ describe(_processor, () => {
       `)
 
       expect(value.enums).toEqual({
-        UserStatus: {
-          name: 'UserStatus',
+        user_status: {
+          name: 'user_status',
           values: ['ACTIVE', 'INACTIVE', 'PENDING'],
           comment: 'User role enumeration',
         },
@@ -1079,13 +1079,13 @@ describe(_processor, () => {
       `)
 
       expect(value.enums).toEqual({
-        Priority: {
-          name: 'Priority',
+        priority: {
+          name: 'priority',
           values: ['LOW', 'MEDIUM', 'HIGH', 'URGENT'],
           comment: 'Task priority levels',
         },
-        Category: {
-          name: 'Category',
+        category: {
+          name: 'category',
           values: ['BUG', 'FEATURE', 'IMPROVEMENT'],
           comment: null,
         },
@@ -1117,8 +1117,8 @@ describe(_processor, () => {
       `)
 
       expect(value.enums).toEqual({
-        Role: {
-          name: 'Role',
+        role: {
+          name: 'role',
           values: ['USER', 'ADMIN'],
           comment: null,
         },
@@ -1128,7 +1128,7 @@ describe(_processor, () => {
       const userTable = value.tables['User']
       expect(userTable?.columns['role']).toMatchObject({
         name: 'role',
-        type: 'Role',
+        type: 'role',
         default: 'USER',
         notNull: true,
       })

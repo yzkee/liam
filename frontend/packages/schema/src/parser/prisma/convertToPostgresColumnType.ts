@@ -42,6 +42,16 @@ function handleNativeType(
 }
 
 // Helper function to map Prisma types to PostgreSQL types
+/**
+ * Convert camelCase/PascalCase to snake_case
+ */
+function toSnakeCase(str: string): string {
+  return str
+    .replace(/([A-Z])/g, '_$1')
+    .toLowerCase()
+    .replace(/^_/, '') // Remove leading underscore
+}
+
 function mapPrismaTypeToPostgres(type: string): string {
   switch (type) {
     case 'String':
@@ -63,7 +73,8 @@ function mapPrismaTypeToPostgres(type: string): string {
     case 'Bytes':
       return 'bytea'
     default:
-      return type
+      // For custom types (like ENUMs), convert to snake_case
+      return toSnakeCase(type)
   }
 }
 

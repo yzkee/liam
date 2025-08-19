@@ -349,7 +349,7 @@ function processEnums(
 
   for (const tblsEnum of tblsEnums) {
     const enumName = tblsEnum.name.includes('.')
-      ? tblsEnum.name.split('.').pop() || tblsEnum.name
+      ? tblsEnum.name.substring(tblsEnum.name.lastIndexOf('.') + 1)
       : tblsEnum.name
 
     enums[enumName] = anEnum({

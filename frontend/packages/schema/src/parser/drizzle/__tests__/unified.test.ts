@@ -543,85 +543,120 @@ describe.each(Object.entries(dbConfigs))(
         expect(value.tables).toEqual(expected.tables)
       })
 
-      it('enum parsing returns enum definitions', async () => {
-        const enumFunction = config.functions.enum
+      if (dbType === 'postgres') {
+        it('postgres enum definitions (declared enum pattern)', async () => {
+          const schema = `
+          import { pgTable, serial, varchar, pgEnum } from 'drizzle-orm/pg-core';
 
-        const schema = `
-        import { ${config.functions.table}, ${config.types.id}, varchar, ${enumFunction} } from '${config.imports.core}';
+          export const roleEnum = pgEnum('role', ['user', 'admin', 'moderator']);
 
-        ${dbType === 'postgres' ? `export const roleEnum = ${enumFunction}('role', ['user', 'admin', 'moderator']);` : ''}
-
-        export const users = ${config.functions.table}('users', {
-          id: ${config.types.idColumn()},
-          name: varchar('name', { length: 255 }),
-          role: ${
-            dbType === 'mysql'
-              ? `${enumFunction}('role', ['user', 'admin', 'moderator']).default('user')`
-              : `roleEnum('role').default('user')`
-          },
-        });
-      `
-
-        const { value } = await config.processor(schema)
-
-        // Verify that enums object contains the parsed enum definition
-        expect(value.enums).toHaveProperty('role')
-        expect(value.enums['role']).toEqual({
-          name: 'role',
-          values: ['user', 'admin', 'moderator'],
-          comment: null,
-        })
-      })
-
-      it('multiple enum definitions', async () => {
-        const enumFunction = config.functions.enum
-
-        const schema = `
-        import { ${config.functions.table}, ${config.types.id}, varchar, ${enumFunction} } from '${config.imports.core}';
-
-        ${
-          dbType === 'postgres'
-            ? `
-        export const roleEnum = ${enumFunction}('role', ['user', 'admin']);
-        export const statusEnum = ${enumFunction}('status', ['active', 'inactive', 'pending']);
+          export const users = pgTable('users', {
+            id: serial('id').primaryKey(),
+            name: varchar('name', { length: 255 }),
+            role: roleEnum('role').default('user'),
+          });
         `
-            : ''
-        }
 
-        export const users = ${config.functions.table}('users', {
-          id: ${config.types.idColumn()},
-          name: varchar('name', { length: 255 }),
-          role: ${
-            dbType === 'mysql'
-              ? `${enumFunction}('role', ['user', 'admin']).default('user')`
-              : `roleEnum('role').default('user')`
-          },
-          status: ${
-            dbType === 'mysql'
-              ? `${enumFunction}('status', ['active', 'inactive', 'pending']).default('active')`
-              : `statusEnum('status').default('active')`
-          },
-        });
-      `
+          const { value } = await config.processor(schema)
 
-        const { value } = await config.processor(schema)
-
-        // Verify that enums object contains both enum definitions
-        expect(value.enums).toHaveProperty('role')
-        expect(value.enums).toHaveProperty('status')
-
-        expect(value.enums['role']).toEqual({
-          name: 'role',
-          values: ['user', 'admin'],
-          comment: null,
+          // Verify that enums object contains the parsed enum definition
+          expect(value.enums).toHaveProperty('role')
+          expect(value.enums['role']).toEqual({
+            name: 'role',
+            values: ['user', 'admin', 'moderator'],
+            comment: null,
+          })
         })
 
-        expect(value.enums['status']).toEqual({
-          name: 'status',
-          values: ['active', 'inactive', 'pending'],
-          comment: null,
+        it('postgres multiple enum definitions', async () => {
+          const schema = `
+          import { pgTable, serial, varchar, pgEnum } from 'drizzle-orm/pg-core';
+
+          export const roleEnum = pgEnum('role', ['user', 'admin']);
+          export const statusEnum = pgEnum('status', ['active', 'inactive', 'pending']);
+
+          export const users = pgTable('users', {
+            id: serial('id').primaryKey(),
+            name: varchar('name', { length: 255 }),
+            role: roleEnum('role').default('user'),
+            status: statusEnum('status').default('active'),
+          });
+        `
+
+          const { value } = await config.processor(schema)
+
+          // Verify that enums object contains both enum definitions
+          expect(value.enums).toHaveProperty('role')
+          expect(value.enums).toHaveProperty('status')
+
+          expect(value.enums['role']).toEqual({
+            name: 'role',
+            values: ['user', 'admin'],
+            comment: null,
+          })
+
+          expect(value.enums['status']).toEqual({
+            name: 'status',
+            values: ['active', 'inactive', 'pending'],
+            comment: null,
+          })
         })
-      })
+      }
+
+      if (dbType === 'mysql') {
+        it('mysql enum definitions (inline enum pattern)', async () => {
+          const schema = `
+          import { mysqlTable, int, varchar, mysqlEnum } from 'drizzle-orm/mysql-core';
+
+          export const users = mysqlTable('users', {
+            id: int('id').primaryKey().autoincrement(),
+            name: varchar('name', { length: 255 }),
+            role: mysqlEnum('role', ['user', 'admin', 'moderator']).default('user'),
+          });
+        `
+
+          const { value } = await config.processor(schema)
+
+          // Verify that enums object contains the parsed enum definition
+          expect(value.enums).toHaveProperty('role')
+          expect(value.enums['role']).toEqual({
+            name: 'role',
+            values: ['user', 'admin', 'moderator'],
+            comment: null,
+          })
+        })
+
+        it('mysql multiple enum definitions', async () => {
+          const schema = `
+          import { mysqlTable, int, varchar, mysqlEnum } from 'drizzle-orm/mysql-core';
+
+          export const users = mysqlTable('users', {
+            id: int('id').primaryKey().autoincrement(),
+            name: varchar('name', { length: 255 }),
+            role: mysqlEnum('role', ['user', 'admin']).default('user'),
+            status: mysqlEnum('status', ['active', 'inactive', 'pending']).default('active'),
+          });
+        `
+
+          const { value } = await config.processor(schema)
+
+          // Verify that enums object contains both enum definitions
+          expect(value.enums).toHaveProperty('role')
+          expect(value.enums).toHaveProperty('status')
+
+          expect(value.enums['role']).toEqual({
+            name: 'role',
+            values: ['user', 'admin'],
+            comment: null,
+          })
+
+          expect(value.enums['status']).toEqual({
+            name: 'status',
+            values: ['active', 'inactive', 'pending'],
+            comment: null,
+          })
+        })
+      }
 
       it('empty enum definition (Postgres only - MySQL requires at least one value)', async () => {
         // Skip for MySQL since empty enums are not valid

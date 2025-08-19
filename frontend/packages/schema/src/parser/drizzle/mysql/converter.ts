@@ -259,6 +259,7 @@ export const convertDrizzleEnumsToInternal = (
   const convertedEnums: Record<string, Enum> = {}
 
   for (const [, enumDef] of Object.entries(enums)) {
+    if (convertedEnums[enumDef.name]) continue // avoid accidental overwrite
     convertedEnums[enumDef.name] = {
       name: enumDef.name,
       values: enumDef.values,

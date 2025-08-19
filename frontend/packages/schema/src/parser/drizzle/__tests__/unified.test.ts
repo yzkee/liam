@@ -623,18 +623,23 @@ describe.each(Object.entries(dbConfigs))(
         })
       })
 
-      it('empty enum definition', async () => {
+      it('empty enum definition (Postgres only - MySQL requires at least one value)', async () => {
+        // Skip for MySQL since empty enums are not valid
+        if (dbType === 'mysql') {
+          return
+        }
+
         const enumFunction = config.functions.enum
 
         const schema = `
         import { ${config.functions.table}, ${config.types.id}, varchar, ${enumFunction} } from '${config.imports.core}';
 
-        ${dbType === 'postgres' ? `export const emptyEnum = ${enumFunction}('empty_enum', []);` : ''}
+        export const emptyEnum = ${enumFunction}('empty_enum', []);
 
         export const users = ${config.functions.table}('users', {
           id: ${config.types.idColumn()},
           name: varchar('name', { length: 255 }),
-          ${dbType === 'mysql' ? `empty_field: ${enumFunction}('empty_enum', []),` : `empty_field: emptyEnum('empty_field'),`}
+          empty_field: emptyEnum('empty_field'),
         });
       `
 

@@ -43,12 +43,10 @@ const extractInlineEnumDefinition = (
 
   const values: string[] = []
   for (const element of valuesExpr.elements) {
-    if (element && typeof element === 'object' && 'expression' in element) {
-      const expr = element.expression
-      if (isStringLiteral(expr)) {
-        values.push(expr.value)
-      }
-    }
+    if (!element) continue
+    const expr = 'expression' in element ? element.expression : element
+    const str = getStringValue(expr)
+    if (typeof str === 'string') values.push(str)
   }
 
   return { name: enumName, values }

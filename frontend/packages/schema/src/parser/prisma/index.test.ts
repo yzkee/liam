@@ -1133,5 +1133,39 @@ describe(_processor, () => {
         notNull: true,
       })
     })
+
+    it('should parse enum values with @map directives', async () => {
+      const { value } = await processor(`
+        enum Status {
+          ACTIVE    @map("active")
+          INACTIVE  @map("inactive") 
+          PENDING   @map("pending")
+          DELETED   @map("deleted")
+        }
+
+        model User {
+          id     Int    @id @default(autoincrement())
+          status Status @default(ACTIVE)
+        }
+      `)
+
+      // Enum should use the mapped database values
+      expect(value.enums).toEqual({
+        Status: {
+          name: 'Status',
+          values: ['active', 'inactive', 'pending', 'deleted'], // mapped values
+          comment: null,
+        },
+      })
+
+      // Column should still reference the original enum type name
+      const userTable = value.tables['User']
+      expect(userTable?.columns['status']).toMatchObject({
+        name: 'status',
+        type: 'Status', // original enum name
+        default: 'ACTIVE', // original value name in default
+        notNull: true,
+      })
+    })
   })
 })

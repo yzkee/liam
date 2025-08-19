@@ -469,7 +469,8 @@ function processEnums(
   const enums: Record<string, Enum> = {}
 
   for (const dmmfEnum of dmmfEnums) {
-    const values = dmmfEnum.values.map((value) => value.name)
+    // Use dbName if mapped with @map, otherwise fall back to name
+    const values = dmmfEnum.values.map((value) => value.dbName ?? value.name)
 
     // Preserve original ENUM name to match Prisma migrate behavior
     // Prisma keeps the original casing and wraps in double quotes during DDL generation

@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import type { Table } from '../../schema/index.js'
-import { aColumn, anIndex, aSchema, aTable } from '../../schema/index.js'
+import {
+  aColumn,
+  anEnum,
+  anIndex,
+  aSchema,
+  aTable,
+} from '../../schema/index.js'
 import { processor } from './index.js'
 
 describe(processor, () => {
@@ -681,6 +687,116 @@ describe(processor, () => {
 
         expect(value.tables['users']?.constraints).toEqual(expected)
       })
+    })
+  })
+
+  describe('enum parsing', () => {
+    it('should parse enums correctly', async () => {
+      const { value } = await processor(
+        JSON.stringify({
+          name: 'testdb',
+          tables: [
+            {
+              name: 'posts',
+              type: 'TABLE',
+              columns: [
+                {
+                  name: 'id',
+                  type: 'int',
+                  nullable: false,
+                },
+                {
+                  name: 'status',
+                  type: 'post_types',
+                  nullable: false,
+                },
+              ],
+            },
+          ],
+          enums: [
+            {
+              name: 'public.post_types',
+              values: ['draft', 'private', 'public'],
+            },
+          ],
+        }),
+      )
+
+      const expected = aSchema({
+        tables: {
+          posts: aTable({
+            name: 'posts',
+            columns: {
+              id: aColumn({
+                name: 'id',
+                type: 'int',
+                notNull: true,
+              }),
+              status: aColumn({
+                name: 'status',
+                type: 'post_types',
+                notNull: true,
+              }),
+            },
+          }),
+        },
+        enums: {
+          post_types: anEnum({
+            name: 'post_types',
+            values: ['draft', 'private', 'public'],
+            comment: null,
+          }),
+        },
+      })
+
+      expect(value).toEqual(expected)
+    })
+
+    it('should handle empty enums array', async () => {
+      const { value } = await processor(
+        JSON.stringify({
+          name: 'testdb',
+          tables: [
+            {
+              name: 'users',
+              type: 'TABLE',
+              columns: [
+                {
+                  name: 'id',
+                  type: 'int',
+                  nullable: false,
+                },
+              ],
+            },
+          ],
+          enums: [],
+        }),
+      )
+
+      expect(value.enums).toEqual({})
+    })
+
+    it('should handle missing enums property', async () => {
+      const { value } = await processor(
+        JSON.stringify({
+          name: 'testdb',
+          tables: [
+            {
+              name: 'users',
+              type: 'TABLE',
+              columns: [
+                {
+                  name: 'id',
+                  type: 'int',
+                  nullable: false,
+                },
+              ],
+            },
+          ],
+        }),
+      )
+
+      expect(value.enums).toEqual({})
     })
   })
 })

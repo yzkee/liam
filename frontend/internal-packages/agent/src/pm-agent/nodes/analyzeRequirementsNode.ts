@@ -4,6 +4,7 @@ import { getConfigurable } from '../../chat/workflow/shared/getConfigurable'
 import type { WorkflowState } from '../../chat/workflow/types'
 import { logAssistantMessage } from '../../chat/workflow/utils/timelineLogger'
 import { WorkflowTerminationError } from '../../shared/errorHandling'
+import { convertSchemaToText } from '../../utils/convertSchemaToText'
 import { invokePmAnalysisAgent } from '../invokePmAnalysisAgent'
 import type { PmAgentState } from '../pmAgentAnnotations'
 
@@ -51,7 +52,10 @@ export async function analyzeRequirementsNode(
     assistantRole,
   )
 
+  const schemaText = convertSchemaToText(state.schemaData)
+
   const analysisResult = await invokePmAnalysisAgent(
+    { schemaText },
     state.messages,
     configurableResult.value,
   )

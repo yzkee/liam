@@ -34,6 +34,7 @@ export const createGraph = (checkpointer?: BaseCheckpointSaver) => {
           nonFunctionalRequirements: {},
         },
         designSessionId: state.designSessionId,
+        schemaData: state.schemaData,
         analyzedRequirementsRetryCount: 0,
       },
       config,

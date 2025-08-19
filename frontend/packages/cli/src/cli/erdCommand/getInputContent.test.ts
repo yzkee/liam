@@ -138,4 +138,147 @@ describe('getInputContent', () => {
       'No files found matching the pattern. Please provide valid file(s).',
     )
   })
+
+  describe('Windows path handling', () => {
+    const originalPlatform = process.platform
+
+    beforeEach(() => {
+      // Mock Windows platform
+      Object.defineProperty(process, 'platform', {
+        value: 'win32',
+        configurable: true,
+      })
+    })
+
+    afterEach(() => {
+      // Restore original platform
+      Object.defineProperty(process, 'platform', {
+        value: originalPlatform,
+        configurable: true,
+      })
+    })
+
+    it('should convert Windows backslashes to forward slashes', async () => {
+      const windowsPath = 'src\\schema\\file.prisma'
+      const normalizedPath = 'src/schema/file.prisma'
+      const mockFileContent = 'Schema content'
+
+      vi.mocked(glob).mockImplementation(async (pattern) => {
+        if (pattern === normalizedPath) {
+          return [normalizedPath]
+        }
+        return []
+      })
+      vi.spyOn(fs, 'existsSync').mockReturnValue(true)
+      vi.spyOn(fs, 'readFileSync').mockReturnValue(mockFileContent)
+
+      const content = await getInputContent(windowsPath)
+
+      expect(content).toBe(mockFileContent)
+      expect(glob).toHaveBeenCalledWith(normalizedPath)
+    })
+
+    it('should handle Windows glob patterns with backslashes', async () => {
+      const windowsGlob = 'src\\**\\*.prisma'
+      const normalizedGlob = 'src/**/*.prisma'
+      const mockFiles = ['src/db/schema.prisma', 'src/auth/schema.prisma']
+      const mockContents = ['DB schema', 'Auth schema']
+
+      vi.mocked(glob).mockImplementation(async (pattern) => {
+        if (pattern === normalizedGlob) {
+          return mockFiles
+        }
+        return []
+      })
+      vi.spyOn(fs, 'existsSync').mockReturnValue(true)
+      vi.spyOn(fs, 'readFileSync')
+        .mockReturnValueOnce(mockContents[0])
+        .mockReturnValueOnce(mockContents[1])
+
+      const content = await getInputContent(windowsGlob)
+
+      expect(content).toBe(mockContents.join('\n'))
+      expect(glob).toHaveBeenCalledWith(normalizedGlob)
+    })
+
+    it('should handle mixed forward and backward slashes', async () => {
+      const mixedPath = 'src/schema\\file.prisma'
+      const normalizedPath = 'src/schema/file.prisma'
+      const mockFileContent = 'Mixed path content'
+
+      vi.mocked(glob).mockImplementation(async (pattern) => {
+        if (pattern === normalizedPath) {
+          return [normalizedPath]
+        }
+        return []
+      })
+      vi.spyOn(fs, 'existsSync').mockReturnValue(true)
+      vi.spyOn(fs, 'readFileSync').mockReturnValue(mockFileContent)
+
+      const content = await getInputContent(mixedPath)
+
+      expect(content).toBe(mockFileContent)
+      expect(glob).toHaveBeenCalledWith(normalizedPath)
+    })
+  })
+
+  describe('Linux/macOS path handling', () => {
+    const originalPlatform = process.platform
+
+    beforeEach(() => {
+      // Mock Linux platform
+      Object.defineProperty(process, 'platform', {
+        value: 'linux',
+        configurable: true,
+      })
+    })
+
+    afterEach(() => {
+      // Restore original platform
+      Object.defineProperty(process, 'platform', {
+        value: originalPlatform,
+        configurable: true,
+      })
+    })
+
+    it('should preserve backslashes in filenames on Linux/macOS', async () => {
+      const linuxPathWithBackslash = 'file\\with\\backslash.txt'
+      const mockFileContent = 'Linux file with backslash in name'
+
+      vi.mocked(glob).mockImplementation(async (pattern) => {
+        // On Linux, backslash should be preserved
+        if (pattern === linuxPathWithBackslash) {
+          return [linuxPathWithBackslash]
+        }
+        return []
+      })
+      vi.spyOn(fs, 'existsSync').mockReturnValue(true)
+      vi.spyOn(fs, 'readFileSync').mockReturnValue(mockFileContent)
+
+      const content = await getInputContent(linuxPathWithBackslash)
+
+      expect(content).toBe(mockFileContent)
+      // Should be called with the original path, not converted
+      expect(glob).toHaveBeenCalledWith(linuxPathWithBackslash)
+    })
+
+    it('should work normally with forward slashes on Linux/macOS', async () => {
+      const linuxPath = 'src/schema/file.prisma'
+      const mockFileContent = 'Linux file content'
+
+      vi.mocked(glob).mockImplementation(async (pattern) => {
+        if (pattern === linuxPath) {
+          return [linuxPath]
+        }
+        return []
+      })
+      vi.spyOn(fs, 'existsSync').mockReturnValue(true)
+      vi.spyOn(fs, 'readFileSync').mockReturnValue(mockFileContent)
+
+      const content = await getInputContent(linuxPath)
+
+      expect(content).toBe(mockFileContent)
+      expect(glob).toHaveBeenCalledWith(linuxPath)
+    })
+  })
 })

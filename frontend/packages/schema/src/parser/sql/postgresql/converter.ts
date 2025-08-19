@@ -169,29 +169,67 @@ const constraintToCheckConstraint = (
     return err(new UnexpectedTokenWarningError('Invalid check constraint'))
   }
 
-  let openParenthesesCount = 0
-  const startLocation = rawSql.indexOf('(', constraint.location)
-  let endLocation: number | undefined = undefined
-  for (let i = startLocation; i < rawSql.length; i++) {
-    if (rawSql[i] === '(') {
-      openParenthesesCount++
-    } else if (rawSql[i] === ')') {
-      openParenthesesCount--
-      if (openParenthesesCount === 0) {
-        endLocation = i
-        break
+  // Find balanced parentheses for the CHECK constraint condition
+  const findBalancedParentheses = (
+    sql: string,
+    startIndex: number,
+  ): { start: number; end: number } | null => {
+    let openParenIndex = -1
+    let depth = 0
+
+    // Find the first opening parenthesis
+    for (let i = startIndex; i < sql.length; i++) {
+      if (sql[i] === '(') {
+        if (openParenIndex === -1) {
+          openParenIndex = i
+        }
+        depth++
+      } else if (sql[i] === ')') {
+        depth--
+        if (depth === 0 && openParenIndex !== -1) {
+          return { start: openParenIndex, end: i }
+        }
       }
+    }
+    return null
+  }
+
+  const parentheses = findBalancedParentheses(rawSql, constraint.location)
+
+  if (!parentheses) {
+    return err(
+      new UnexpectedTokenWarningError(
+        'Invalid check constraint: no balanced parentheses found',
+      ),
+    )
+  }
+
+  // Extract the condition inside the parentheses (without the CHECK prefix)
+  const condition = rawSql.slice(parentheses.start + 1, parentheses.end)
+
+  // Generate a better name for anonymous constraints
+  let constraintName = constraint.conname
+  if (!constraintName) {
+    if (columnName) {
+      constraintName = `${columnName}_check`
+    } else {
+      // For table-level constraints, try to extract a meaningful name from the condition
+      // Handle case where condition might be empty or invalid
+      const simplifiedCondition = condition
+        .trim()
+        .replace(/\s+/g, '_')
+        .replace(/[^a-zA-Z0-9_]/g, '')
+        .substring(0, 20)
+      constraintName = simplifiedCondition
+        ? `check_${simplifiedCondition}`
+        : 'check_constraint'
     }
   }
 
-  if (startLocation === undefined || endLocation === undefined) {
-    return err(new UnexpectedTokenWarningError('Invalid check constraint'))
-  }
-
   const checkConstraint: CheckConstraint = {
-    name: constraint.conname ?? `CHECK_${columnName}`,
+    name: constraintName,
     type: 'CHECK',
-    detail: `CHECK ${rawSql.slice(startLocation, endLocation + 1)}`,
+    detail: condition,
   }
 
   return ok(checkConstraint)

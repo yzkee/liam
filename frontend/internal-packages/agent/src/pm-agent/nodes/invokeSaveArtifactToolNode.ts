@@ -1,6 +1,6 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { ToolNode } from '@langchain/langgraph/prebuilt'
-import type { WorkflowState } from '../../chat/workflow/types'
+import type { PmAgentState } from '../pmAgentAnnotations'
 import { saveRequirementsToArtifactTool } from '../tools/saveRequirementsToArtifactTool'
 
 /**
@@ -8,7 +8,7 @@ import { saveRequirementsToArtifactTool } from '../tools/saveRequirementsToArtif
  * This follows the same pattern as invokeSchemaDesignToolNode
  */
 export const invokeSaveArtifactToolNode = async (
-  state: WorkflowState,
+  state: PmAgentState,
   config: RunnableConfig,
 ) => {
   const toolNode = new ToolNode([saveRequirementsToArtifactTool])

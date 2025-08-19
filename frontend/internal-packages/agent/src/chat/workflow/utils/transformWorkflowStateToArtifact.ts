@@ -5,8 +5,18 @@ import type {
   NonFunctionalRequirement,
 } from '@liam-hq/artifact'
 import type { Usecase } from '../../../langchain/agents/qaGenerateUsecaseAgent/agent'
-import type { Repositories } from '../../../repositories'
 import type { WorkflowState } from '../types'
+
+/**
+ * Wraps a description string in an array format with fallback
+ */
+const wrapDescription = (
+  description: string | undefined,
+  prefix: string,
+  category: string,
+): string[] => {
+  return description ? [description] : [`${prefix}${category}`]
+}
 
 /**
  * Map workflow-level DML operations to individual use cases
@@ -52,7 +62,7 @@ const convertAnalyzedRequirementsToArtifact = (
     const functionalRequirement: FunctionalRequirement = {
       type: 'functional',
       name: category,
-      description: items.join(', '),
+      description: items, // Keep as array
       use_cases: [], // Will be populated later if usecases exist
     }
     requirements.push(functionalRequirement)
@@ -65,7 +75,7 @@ const convertAnalyzedRequirementsToArtifact = (
     const nonFunctionalRequirement: NonFunctionalRequirement = {
       type: 'non_functional',
       name: category,
-      description: items.join(', '),
+      description: items, // Keep as array
     }
     requirements.push(nonFunctionalRequirement)
   }
@@ -110,7 +120,11 @@ const mergeUseCasesIntoRequirements = (
         const functionalRequirement: FunctionalRequirement = {
           type: 'functional',
           name: category,
-          description: description || `Functional requirement: ${category}`,
+          description: wrapDescription(
+            description,
+            'Functional requirement: ',
+            category,
+          ),
           use_cases: groupedUsecases.map(mapUseCasesToRequirements),
         }
         requirements.push(functionalRequirement)
@@ -118,7 +132,11 @@ const mergeUseCasesIntoRequirements = (
         const nonFunctionalRequirement: NonFunctionalRequirement = {
           type: 'non_functional',
           name: category,
-          description: description || `Non-functional requirement: ${category}`,
+          description: wrapDescription(
+            description,
+            'Non-functional requirement: ',
+            category,
+          ),
         }
         requirements.push(nonFunctionalRequirement)
       }
@@ -185,48 +203,4 @@ const groupUsecasesByRequirement = (usecases: Usecase[]) => {
   }
 
   return groups
-}
-
-/**
- * Create an artifact with upsert logic
- * Tries to update existing artifact first, creates new one if not found
- */
-export const createOrUpdateArtifact = async (
-  state: WorkflowState,
-  artifact: Artifact,
-  repositories: Repositories,
-): Promise<{ success: boolean; error?: string }> => {
-  // Try to get existing artifact first
-  const existingResult = await repositories.schema.getArtifact(
-    state.designSessionId,
-  )
-
-  if (existingResult.success) {
-    // Artifact exists, update it
-    const updateResult = await repositories.schema.updateArtifact({
-      designSessionId: state.designSessionId,
-      artifact,
-    })
-
-    if (updateResult.success) {
-      return { success: true }
-    }
-    return { success: false, error: updateResult.error }
-  }
-
-  // Check if the failure is due to "not found" vs actual error
-  if (existingResult.error !== 'Artifact not found') {
-    return { success: false, error: existingResult.error }
-  }
-
-  // Artifact doesn't exist, create new one
-  const createResult = await repositories.schema.createArtifact({
-    designSessionId: state.designSessionId,
-    artifact,
-  })
-
-  if (createResult.success) {
-    return { success: true }
-  }
-  return { success: false, error: createResult.error }
 }

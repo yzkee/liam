@@ -1,5 +1,12 @@
 # @liam-hq/cli
 
+## 0.7.3
+
+### Patch Changes
+
+- [#3004](https://github.com/liam-hq/liam/pull/3004) - - ✨ Add Windows backslash path support to CLI / Thanks [@hoshinotsuyoshi](https://github.com/hoshinotsuyoshi)!
+  - Enable Windows users to use native backslash paths (e.g., `prisma\schema.prisma`) with the CLI tool. The implementation converts backslashes to forward slashes on Windows only, preserving the ability to use backslashes in filenames on Linux/macOS systems.
+
 ## 0.7.2
 
 ### Patch Changes

@@ -4,11 +4,7 @@ import type { Schema } from '@liam-hq/schema'
 import { config } from 'dotenv'
 import type { Result } from 'neverthrow'
 import { err, errAsync, ok, okAsync, ResultAsync } from 'neverthrow'
-import { DEFAULT_RECURSION_LIMIT } from '../../src/chat/workflow/shared/langGraphUtils'
 import { createSupabaseRepositories } from '../../src/repositories/factory'
-import type { WorkflowSetupResult } from '../../src/shared/workflowSetup'
-import { setupWorkflowState } from '../../src/shared/workflowSetup'
-import type { AgentWorkflowParams } from '../../src/types'
 
 // Load environment variables from ../../../../../.env
 config({ path: resolve(__dirname, '../../../../../.env') })
@@ -270,21 +266,6 @@ export type SetupDatabaseAndUserResult = {
   user: { id: string; email: string }
 }
 
-type CreateWorkflowStateInput = SetupDatabaseAndUserResult & {
-  designSession: { id: string; name: string }
-  buildingSchema: { id: string; latest_version_number: number }
-}
-
-type CreateWorkflowStateResult = {
-  workflowState: WorkflowSetupResult['workflowState']
-  options: {
-    configurable: WorkflowSetupResult['configurable']
-    recursionLimit: number
-    streamMode: 'values'
-    callbacks: WorkflowSetupResult['runCollector'][]
-  }
-}
-
 /**
  * Setup database connections and user data
  */
@@ -401,52 +382,6 @@ export const getBusinessManagementSystemUserInput = (): string => {
    - Supplier-brand handling relationships
 
 Please design a normalized database schema with proper primary keys, foreign key relationships, and constraints to support these business operations effectively.`
-}
-
-/**
- * Create workflow state for deep modeling using shared setupWorkflowState
- */
-export const createWorkflowState = (
-  setupData: CreateWorkflowStateInput,
-): ResultAsync<CreateWorkflowStateResult, Error> => {
-  const { organization, buildingSchema, designSession, user, repositories } =
-    setupData
-
-  // Empty schema for testing - let AI design from scratch
-  const sampleSchema: Schema = {
-    tables: {},
-    enums: {},
-  }
-
-  const userInput = getBusinessManagementSystemUserInput()
-
-  // Convert to AgentWorkflowParams for setupWorkflowState
-  const workflowParams: AgentWorkflowParams = {
-    userInput,
-    schemaData: sampleSchema,
-    organizationId: organization.id,
-    buildingSchemaId: buildingSchema.id,
-    latestVersionNumber: buildingSchema.latest_version_number,
-    designSessionId: designSession.id,
-    userId: user.id,
-    recursionLimit: DEFAULT_RECURSION_LIMIT, // Higher limit for deep modeling
-  }
-
-  // Use shared setupWorkflowState function
-  return setupWorkflowState(workflowParams, {
-    configurable: {
-      repositories,
-      thread_id: designSession.id,
-    },
-  }).map((workflowSetupResult) => ({
-    workflowState: workflowSetupResult.workflowState,
-    options: {
-      configurable: workflowSetupResult.configurable,
-      recursionLimit: DEFAULT_RECURSION_LIMIT,
-      streamMode: 'values' as const,
-      callbacks: [workflowSetupResult.runCollector],
-    },
-  }))
 }
 
 /**

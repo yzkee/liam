@@ -9,10 +9,7 @@ import { removeReasoningFromMessages } from '../../../utils/messageCleanup'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 import { logAssistantMessage } from '../utils/timelineLogger'
-import {
-  createOrUpdateArtifact,
-  transformWorkflowStateToArtifact,
-} from '../utils/transformWorkflowStateToArtifact'
+import { transformWorkflowStateToArtifact } from '../utils/transformWorkflowStateToArtifact'
 import { withTimelineItemSync } from '../utils/withTimelineItemSync'
 
 /**
@@ -28,13 +25,12 @@ async function saveArtifacts(
   }
 
   const artifact = transformWorkflowStateToArtifact(state)
-  const artifactResult = await createOrUpdateArtifact(
-    state,
+  const artifactResult = await repositories.schema.upsertArtifact({
+    designSessionId: state.designSessionId,
     artifact,
-    repositories,
-  )
+  })
 
-  if (artifactResult.success) {
+  if (artifactResult.isOk()) {
     await logAssistantMessage(
       state,
       repositories,

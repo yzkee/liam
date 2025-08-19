@@ -174,7 +174,10 @@ export const ChatInput: FC<Props> = ({
                 className={styles.input}
                 rows={1}
                 data-error={error ? 'true' : undefined}
-                role="combobox"
+                {...{
+                  // biome-ignore lint/a11y/useSemanticElements: This textarea with role="combobox" is intentional for the mention autocomplete feature
+                  role: 'combobox',
+                }}
                 aria-controls={mentionSuggestorId}
                 aria-expanded={isMentionSuggestorOpen}
                 aria-autocomplete="list"

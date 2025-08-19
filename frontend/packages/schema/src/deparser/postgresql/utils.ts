@@ -9,11 +9,34 @@ import type {
 /**
  * Generate column definition as DDL string
  */
+/**
+ * Check if a string is camelCase (starts with uppercase or contains uppercase letters)
+ */
+function isCamelCaseOrPascalCase(str: string): boolean {
+  // Check if it contains uppercase letters (camelCase or PascalCase)
+  // Prisma uses camelCase/PascalCase naming, which requires quotes in PostgreSQL
+  return /[A-Z]/.test(str)
+}
+
+/**
+ * Escape PostgreSQL type names, adding double quotes for camelCase/PascalCase types
+ */
+function escapeTypeIdentifier(type: string): string {
+  // If it's a camelCase/PascalCase type (likely a custom type like enum),
+  // it needs to be quoted in PostgreSQL
+  if (isCamelCaseOrPascalCase(type)) {
+    return escapeIdentifier(type)
+  }
+
+  // For standard PostgreSQL types (lowercase), no quotes needed
+  return type
+}
+
 function generateColumnDefinition(
   column: Column,
   isPrimaryKey = false,
 ): string {
-  let definition = `${escapeIdentifier(column.name)} ${column.type}`
+  let definition = `${escapeIdentifier(column.name)} ${escapeTypeIdentifier(column.type)}`
 
   // Add constraints (following PostgreSQL common order)
   // Don't add NOT NULL if this will be a PRIMARY KEY

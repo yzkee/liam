@@ -1050,6 +1050,138 @@ describe('postgresqlSchemaDeparser', () => {
       await expectGeneratedSQLToBeParseable(result.value)
     })
 
+    it('should parse camelCase enum names correctly', async () => {
+      const schema = aSchema({
+        enums: {
+          UserRole: anEnum({
+            name: 'UserRole',
+            values: ['USER', 'ADMIN', 'MODERATOR'],
+          }),
+          OrderStatus: anEnum({
+            name: 'OrderStatus',
+            values: ['PENDING', 'CONFIRMED', 'SHIPPED'],
+          }),
+        },
+        tables: {},
+      })
+
+      const result = postgresqlSchemaDeparser(schema)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "CREATE TYPE \"UserRole\" AS ENUM ('USER', 'ADMIN', 'MODERATOR');
+
+        CREATE TYPE \"OrderStatus\" AS ENUM ('PENDING', 'CONFIRMED', 'SHIPPED');"
+      `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
+    })
+
+    it('should use double quotes for camelCase enum types in column definitions', async () => {
+      const schema = aSchema({
+        enums: {
+          ScoreSource: anEnum({
+            name: 'ScoreSource',
+            values: ['MANUAL', 'AUTOMATIC', 'IMPORTED'],
+          }),
+        },
+        tables: {
+          scores: aTable({
+            name: 'scores',
+            columns: {
+              id: aColumn({
+                name: 'id',
+                type: 'bigint',
+                notNull: true,
+              }),
+              source: aColumn({
+                name: 'source',
+                type: 'ScoreSource',
+                notNull: true,
+              }),
+            },
+            constraints: {
+              scores_pkey: aPrimaryKeyConstraint({
+                name: 'scores_pkey',
+                columnNames: ['id'],
+              }),
+            },
+          }),
+        },
+      })
+
+      const result = postgresqlSchemaDeparser(schema)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "CREATE TYPE \"ScoreSource\" AS ENUM ('MANUAL', 'AUTOMATIC', 'IMPORTED');
+
+        CREATE TABLE \"scores\" (
+          \"id\" bigint NOT NULL,
+          \"source\" \"ScoreSource\" NOT NULL
+        );
+
+        ALTER TABLE \"scores\" ADD CONSTRAINT \"scores_pkey\" PRIMARY KEY (\"id\");"
+      `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
+    })
+
+    it('should not quote standard PostgreSQL types in column definitions', async () => {
+      const schema = aSchema({
+        enums: {},
+        tables: {
+          users: aTable({
+            name: 'users',
+            columns: {
+              id: aColumn({
+                name: 'id',
+                type: 'bigint',
+                notNull: true,
+              }),
+              name: aColumn({
+                name: 'name',
+                type: 'text',
+                notNull: true,
+              }),
+              age: aColumn({
+                name: 'age',
+                type: 'integer',
+                notNull: false,
+              }),
+              created_at: aColumn({
+                name: 'created_at',
+                type: 'timestamp(3)',
+                notNull: true,
+              }),
+            },
+            constraints: {
+              users_pkey: aPrimaryKeyConstraint({
+                name: 'users_pkey',
+                columnNames: ['id'],
+              }),
+            },
+          }),
+        },
+      })
+
+      const result = postgresqlSchemaDeparser(schema)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "CREATE TABLE \"users\" (
+          \"id\" bigint NOT NULL,
+          \"name\" text NOT NULL,
+          \"age\" integer,
+          \"created_at\" timestamp(3) NOT NULL
+        );
+
+        ALTER TABLE \"users\" ADD CONSTRAINT \"users_pkey\" PRIMARY KEY (\"id\");"
+      `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
+    })
+
     it('should generate enums before tables', async () => {
       const schema = aSchema({
         enums: {

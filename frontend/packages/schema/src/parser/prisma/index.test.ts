@@ -565,7 +565,7 @@ describe(_processor, () => {
               }),
               role: aColumn({
                 name: 'role',
-                type: 'role',
+                type: 'Role',
                 notNull: true,
                 default: 'USER',
               }),
@@ -636,8 +636,8 @@ describe(_processor, () => {
           }),
         },
         enums: {
-          role: anEnum({
-            name: 'role',
+          Role: anEnum({
+            name: 'Role',
             values: ['USER', 'ADMIN'],
             comment: null,
           }),
@@ -1023,8 +1023,8 @@ describe(_processor, () => {
       `)
 
       expect(value.enums).toEqual({
-        role: {
-          name: 'role',
+        Role: {
+          name: 'Role',
           values: ['USER', 'ADMIN', 'MODERATOR'],
           comment: null,
         },
@@ -1033,7 +1033,7 @@ describe(_processor, () => {
 
     it('should parse enum with comment', async () => {
       const { value } = await processor(`
-        /// User role enumeration
+        /// User Role enumeration
         enum UserStatus {
           ACTIVE
           INACTIVE
@@ -1047,17 +1047,17 @@ describe(_processor, () => {
       `)
 
       expect(value.enums).toEqual({
-        user_status: {
-          name: 'user_status',
+        UserStatus: {
+          name: 'UserStatus',
           values: ['ACTIVE', 'INACTIVE', 'PENDING'],
-          comment: 'User role enumeration',
+          comment: 'User Role enumeration',
         },
       })
     })
 
     it('should parse multiple enum types', async () => {
       const { value } = await processor(`
-        /// Task priority levels
+        /// Task Priority levels
         enum Priority {
           LOW
           MEDIUM
@@ -1079,13 +1079,13 @@ describe(_processor, () => {
       `)
 
       expect(value.enums).toEqual({
-        priority: {
-          name: 'priority',
+        Priority: {
+          name: 'Priority',
           values: ['LOW', 'MEDIUM', 'HIGH', 'URGENT'],
-          comment: 'Task priority levels',
+          comment: 'Task Priority levels',
         },
-        category: {
-          name: 'category',
+        Category: {
+          name: 'Category',
           values: ['BUG', 'FEATURE', 'IMPROVEMENT'],
           comment: null,
         },
@@ -1117,8 +1117,8 @@ describe(_processor, () => {
       `)
 
       expect(value.enums).toEqual({
-        role: {
-          name: 'role',
+        Role: {
+          name: 'Role',
           values: ['USER', 'ADMIN'],
           comment: null,
         },
@@ -1128,7 +1128,7 @@ describe(_processor, () => {
       const userTable = value.tables['User']
       expect(userTable?.columns['role']).toMatchObject({
         name: 'role',
-        type: 'role',
+        type: 'Role',
         default: 'USER',
         notNull: true,
       })

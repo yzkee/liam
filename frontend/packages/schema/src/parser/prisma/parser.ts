@@ -9,7 +9,6 @@ import type {
   Index,
   Table,
 } from '../../schema/index.js'
-import { toSnakeCase } from '../../utils/stringUtils.js'
 import type { Processor, ProcessResult } from '../types.js'
 import { convertToPostgresColumnType } from './convertToPostgresColumnType.js'
 
@@ -472,13 +471,12 @@ function processEnums(
   for (const dmmfEnum of dmmfEnums) {
     const values = dmmfEnum.values.map((value) => value.name)
 
-    // Convert ENUM name from camelCase/PascalCase to snake_case
-    // PostgreSQL convention is to use snake_case for type names,
-    // while Prisma schemas often use PascalCase
-    const snakeCaseName = toSnakeCase(dmmfEnum.name)
+    // Preserve original ENUM name to match Prisma migrate behavior
+    // Prisma keeps the original casing and wraps in double quotes during DDL generation
+    const originalName = dmmfEnum.name
 
-    enums[snakeCaseName] = {
-      name: snakeCaseName,
+    enums[originalName] = {
+      name: originalName,
       values,
       comment: dmmfEnum.documentation ?? null,
     }

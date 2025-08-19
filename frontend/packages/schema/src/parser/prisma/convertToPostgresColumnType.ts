@@ -1,5 +1,4 @@
 import type { DMMF } from '@prisma/generator-helper'
-import { toSnakeCase } from '../../utils/stringUtils.js'
 
 // Helper function to handle autoincrement types
 function getAutoincrementType(typeName: string): string {
@@ -64,10 +63,7 @@ function mapPrismaTypeToPostgres(type: string): string {
     case 'Bytes':
       return 'bytea'
     default:
-      // For custom types (like ENUMs), convert to snake_case
-      // PostgreSQL convention is to use snake_case for type names,
-      // so we convert Prisma's camelCase/PascalCase enum names
-      return toSnakeCase(type)
+      return type
   }
 }
 

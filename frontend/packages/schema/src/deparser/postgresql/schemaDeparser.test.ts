@@ -1182,6 +1182,67 @@ describe('postgresqlSchemaDeparser', () => {
       await expectGeneratedSQLToBeParseable(result.value)
     })
 
+    it('should handle complex type scenarios correctly', async () => {
+      const schema = aSchema({
+        enums: {
+          UserRole: anEnum({
+            name: 'UserRole',
+            values: ['ADMIN', 'USER'],
+          }),
+        },
+        tables: {
+          test_table: aTable({
+            name: 'test_table',
+            columns: {
+              id: aColumn({
+                name: 'id',
+                type: 'bigint',
+                notNull: true,
+              }),
+              // Test array type (would be problematic with current implementation)
+              roles_array: aColumn({
+                name: 'roles_array',
+                type: 'UserRole[]',
+                notNull: false,
+              }),
+              // Test schema-qualified type (would be problematic)
+              qualified_role: aColumn({
+                name: 'qualified_role',
+                type: 'public.UserRole',
+                notNull: false,
+              }),
+              // Test parameterized standard type (should not be quoted even if uppercase)
+              varchar_field: aColumn({
+                name: 'varchar_field',
+                type: 'VARCHAR(255)',
+                notNull: false,
+              }),
+              // Test spaced type
+              double_precision: aColumn({
+                name: 'double_precision',
+                type: 'double precision',
+                notNull: false,
+              }),
+            },
+            constraints: {
+              test_table_pkey: aPrimaryKeyConstraint({
+                name: 'test_table_pkey',
+                columnNames: ['id'],
+              }),
+            },
+          }),
+        },
+      })
+
+      const result = postgresqlSchemaDeparser(schema)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toContain('"UserRole"[]') // Array type should quote only the base type
+      expect(result.value).toContain('public."UserRole"') // Schema-qualified should quote only the type part
+      expect(result.value).toContain('VARCHAR(255)') // Parameterized standard type should not be quoted
+      expect(result.value).toContain('double precision') // Spaced type should not be quoted
+    })
+
     it('should generate enums before tables', async () => {
       const schema = aSchema({
         enums: {

@@ -9,27 +9,38 @@ import type {
 /**
  * Generate column definition as DDL string
  */
-/**
- * Check if a string is camelCase (starts with uppercase or contains uppercase letters)
- */
-function isCamelCaseOrPascalCase(str: string): boolean {
-  // Check if it contains uppercase letters (camelCase or PascalCase)
-  // Prisma uses camelCase/PascalCase naming, which requires quotes in PostgreSQL
-  return /[A-Z]/.test(str)
-}
 
 /**
- * Escape PostgreSQL type names, adding double quotes for camelCase/PascalCase types
+ * Escape PostgreSQL type names, handling arrays, schema-qualified types, and camelCase/PascalCase types
+ * - Arrays: ScoreSource[] -> "ScoreSource"[]
+ * - Schema-qualified: public.ScoreSource -> public."ScoreSource"
+ * - Parameterized/spaced types: VARCHAR(255), double precision -> unchanged
+ * - CamelCase types: UserRole -> "UserRole"
  */
 function escapeTypeIdentifier(type: string): string {
-  // If it's a camelCase/PascalCase type (likely a custom type like enum),
-  // it needs to be quoted in PostgreSQL
-  if (isCamelCaseOrPascalCase(type)) {
-    return escapeIdentifier(type)
-  }
+  // If already quoted somewhere, assume caller provided the exact type
+  if (type.includes('"')) return type
 
-  // For standard PostgreSQL types (lowercase), no quotes needed
-  return type
+  // Extract array suffixes: e.g., [], [][]
+  const arraySuffixMatch = type.match(/(\[\])+$/)
+  const arraySuffix = arraySuffixMatch ? arraySuffixMatch[0] : ''
+  const base = arraySuffix ? type.slice(0, -arraySuffix.length) : type
+
+  // Parameterized or spaced types (e.g., varchar(255), timestamp(3), double precision)
+  // should not be quoted here.
+  if (base.includes('(') || base.includes(' ')) return type
+
+  // Support schema-qualified types: public.ScoreSource -> public."ScoreSource"
+  const parts = base.split('.')
+  const simpleIdentifier = /^[A-Za-z_][A-Za-z0-9_]*$/
+  const allPartsSimple = parts.every((p) => simpleIdentifier.test(p))
+  if (!allPartsSimple) return type
+
+  const escaped = parts
+    .map((p) => (/[A-Z]/.test(p) ? escapeIdentifier(p) : p))
+    .join('.')
+
+  return `${escaped}${arraySuffix}`
 }
 
 function generateColumnDefinition(

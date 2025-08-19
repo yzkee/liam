@@ -1,16 +1,16 @@
+import type { RunnableConfig } from '@langchain/core/runnables'
 import { END, START, StateGraph } from '@langchain/langgraph'
 import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
 import {
-  analyzeRequirementsNode,
   finalizeArtifactsNode,
   generateUsecaseNode,
-  invokeSaveArtifactToolNode,
   prepareDmlNode,
   validateSchemaNode,
 } from './chat/workflow/nodes'
-import { createAnnotations } from './chat/workflow/shared/langGraphUtils'
+import { createAnnotations } from './chat/workflow/shared/createAnnotations'
+import type { WorkflowState } from './chat/workflow/types'
 import { createDbAgentGraph } from './db-agent/createDbAgentGraph'
-import { routeAfterAnalyzeRequirements } from './pm-agent/routing/routeAfterAnalyzeRequirements'
+import { createPmAgentGraph } from './pm-agent/createPmAgentGraph'
 import { RETRY_POLICY } from './shared/errorHandling'
 
 /**
@@ -21,17 +21,29 @@ import { RETRY_POLICY } from './shared/errorHandling'
 export const createGraph = (checkpointer?: BaseCheckpointSaver) => {
   const ChatStateAnnotation = createAnnotations()
   const graph = new StateGraph(ChatStateAnnotation)
-
-  // Create DB Agent subgraph with checkpoint support
   const dbAgentSubgraph = createDbAgentGraph(checkpointer)
 
+  const callPmAgent = async (state: WorkflowState, config: RunnableConfig) => {
+    const pmAgentSubgraph = createPmAgentGraph(checkpointer)
+    const pmAgentOutput = await pmAgentSubgraph.invoke(
+      {
+        messages: state.messages,
+        analyzedRequirements: state.analyzedRequirements || {
+          businessRequirement: '',
+          functionalRequirements: {},
+          nonFunctionalRequirements: {},
+        },
+        designSessionId: state.designSessionId,
+        analyzedRequirementsRetryCount: 0,
+      },
+      config,
+    )
+
+    return { ...state, ...pmAgentOutput }
+  }
+
   graph
-    .addNode('analyzeRequirements', analyzeRequirementsNode, {
-      retryPolicy: RETRY_POLICY,
-    })
-    .addNode('invokeSaveArtifactTool', invokeSaveArtifactToolNode, {
-      retryPolicy: RETRY_POLICY,
-    })
+    .addNode('pmAgent', callPmAgent)
     .addNode('dbAgent', dbAgentSubgraph)
     .addNode('generateUsecase', generateUsecaseNode, {
       retryPolicy: RETRY_POLICY,
@@ -46,18 +58,12 @@ export const createGraph = (checkpointer?: BaseCheckpointSaver) => {
       retryPolicy: RETRY_POLICY,
     })
 
-    .addEdge(START, 'analyzeRequirements')
-    .addEdge('invokeSaveArtifactTool', 'analyzeRequirements')
+    .addEdge(START, 'pmAgent')
+    .addEdge('pmAgent', 'dbAgent')
     .addEdge('dbAgent', 'generateUsecase')
     .addEdge('generateUsecase', 'prepareDML')
     .addEdge('prepareDML', 'validateSchema')
     .addEdge('finalizeArtifacts', END)
-
-    // Conditional edges for requirements analysis
-    .addConditionalEdges('analyzeRequirements', routeAfterAnalyzeRequirements, {
-      invokeSaveArtifactTool: 'invokeSaveArtifactTool',
-      dbAgent: 'dbAgent',
-    })
 
     // Conditional edges for validation results
     .addConditionalEdges(

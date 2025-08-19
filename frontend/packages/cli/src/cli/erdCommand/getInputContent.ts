@@ -16,8 +16,23 @@ function isGitHubFileUrl(url: string): boolean {
   return parsedUrl.hostname === 'github.com' && url.includes('/blob/')
 }
 
+function normalizePathForGlob(inputPath: string): string {
+  // Only convert backslashes on Windows to preserve Linux/macOS filenames with backslashes
+  if (process.platform === 'win32') {
+    return inputPath.replace(/\\/g, '/')
+  }
+  return inputPath
+
+  // TODO: Consider using path.sep for a more elegant solution:
+  // return inputPath.split(path.sep).join(path.posix.sep)
+  // This approach is currently not adopted because our test suite doesn't run on Windows,
+  // making it difficult to mock path.sep behavior accurately in tests.
+  // Once we add Windows CI environment, we should revisit this implementation.
+}
+
 async function readLocalFiles(pattern: string): Promise<string> {
-  const files = await glob(pattern)
+  const normalizedPattern = normalizePathForGlob(pattern)
+  const files = await glob(normalizedPattern)
   if (files.length === 0) {
     throw new Error(
       'No files found matching the pattern. Please provide valid file(s).',

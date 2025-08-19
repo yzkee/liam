@@ -12,8 +12,6 @@ import { toJsonSchema } from '@valibot/to-json-schema'
 import { err, ok, type Result } from 'neverthrow'
 import * as v from 'valibot'
 import { getConfigurable } from '../../chat/workflow/shared/getConfigurable'
-import type { WorkflowState } from '../../chat/workflow/types'
-import { createOrUpdateArtifact } from '../../chat/workflow/utils/transformWorkflowStateToArtifact'
 import type { Repositories } from '../../repositories'
 import { WorkflowTerminationError } from '../../shared/errorHandling'
 
@@ -62,7 +60,7 @@ const createArtifactFromRequirements = (
     const functionalRequirement: FunctionalRequirement = {
       type: 'functional',
       name: category,
-      description: items.join(', '),
+      description: items,
       use_cases: [], // Empty array as use cases don't exist at this point
     }
     requirements.push(functionalRequirement)
@@ -75,7 +73,7 @@ const createArtifactFromRequirements = (
     const nonFunctionalRequirement: NonFunctionalRequirement = {
       type: 'non_functional',
       name: category,
-      description: items.join(', '),
+      description: items,
     }
     requirements.push(nonFunctionalRequirement)
   }
@@ -131,34 +129,16 @@ export const saveRequirementsToArtifactTool = tool(
 
     const artifact = createArtifactFromRequirements(analyzedRequirements)
 
-    // TODO: createOrUpdateArtifact should be refactored to accept only designSessionId
-    // instead of WorkflowState. Currently creating a dummy state as a workaround.
-    // Only designSessionId is actually used in createOrUpdateArtifact.
-    // Track this tech debt in a separate issue for future refactoring.
-    const dummyState: WorkflowState = {
+    const result = await repositories.schema.upsertArtifact({
       designSessionId,
-      organizationId: '', // Not used in createOrUpdateArtifact
-      userId: '', // Not used in createOrUpdateArtifact
-      messages: [],
-      retryCount: {},
-      buildingSchemaId: '',
-      latestVersionNumber: 0,
-      userInput: '',
-      schemaData: { tables: {}, enums: {} },
-    }
-
-    const result = await createOrUpdateArtifact(
-      dummyState,
       artifact,
-      repositories,
-    )
+    })
 
-    if (!result.success) {
-      const errorMessage = result.error || 'Unknown error'
+    if (result.isErr()) {
       // LangGraph tool nodes require throwing errors to trigger retry mechanism
       // eslint-disable-next-line no-throw-error/no-throw-error
       throw new Error(
-        `Failed to save artifact: ${errorMessage}. Please try again or contact support if the issue persists.`,
+        `Failed to save artifact: ${result.error.message}. Please try again or contact support if the issue persists.`,
       )
     }
 

@@ -10,7 +10,10 @@ import type { WorkflowConfigurable } from '../chat/workflow/types'
 import { reasoningSchema } from '../langchain/utils/schema'
 import type { Reasoning } from '../langchain/utils/types'
 import { removeReasoningFromMessages } from '../utils/messageCleanup'
-import { PM_ANALYSIS_SYSTEM_MESSAGE } from './prompts/pmAnalysisPrompts'
+import {
+  type PmAnalysisPromptVariables,
+  pmAnalysisPrompt,
+} from './prompts/pmAnalysisPrompts'
 import { saveRequirementsToArtifactTool } from './tools/saveRequirementsToArtifactTool'
 
 type AnalysisWithReasoning = {
@@ -23,15 +26,15 @@ type AnalysisWithReasoning = {
  * This function replaces the PMAnalysisAgent class with a simpler functional approach
  */
 export const invokePmAnalysisAgent = (
+  variables: PmAnalysisPromptVariables,
   messages: BaseMessage[],
   configurable: WorkflowConfigurable,
 ): ResultAsync<AnalysisWithReasoning, Error> => {
   const cleanedMessages = removeReasoningFromMessages(messages)
 
-  const allMessages: BaseMessage[] = [
-    new SystemMessage(PM_ANALYSIS_SYSTEM_MESSAGE),
-    ...cleanedMessages,
-  ]
+  const formatPrompt = ResultAsync.fromSafePromise(
+    pmAnalysisPrompt.format(variables),
+  )
 
   const model = new ChatOpenAI({
     model: 'gpt-5',
@@ -45,10 +48,15 @@ export const invokePmAnalysisAgent = (
     },
   )
 
-  return ResultAsync.fromPromise(
-    model.invoke(allMessages, { configurable }),
+  const invoke = ResultAsync.fromThrowable(
+    (systemPrompt: string) =>
+      model.invoke([new SystemMessage(systemPrompt), ...cleanedMessages], {
+        configurable,
+      }),
     (error) => (error instanceof Error ? error : new Error(String(error))),
-  ).andThen((response) => {
+  )
+
+  return formatPrompt.andThen(invoke).andThen((response) => {
     const parsedReasoning = v.safeParse(
       reasoningSchema,
       response.additional_kwargs['reasoning'],

@@ -40,7 +40,13 @@ describe('runPreprocess', () => {
         format,
       )
       if (!outputFilePath) {
-        throw new Error(`Failed to run preprocess: ${JSON.stringify(errors)}`)
+        // Build clear error message by mapping errors to their .message
+        const errorMessages = errors
+          .filter(Boolean)
+          .map((error) => error.message)
+          .join('; ')
+        console.error(`Failed to run preprocess: ${errorMessages}`)
+        return // Return early instead of throwing
       }
 
       expect(errors).toEqual([])

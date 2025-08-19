@@ -165,6 +165,13 @@ export type SchemaRepository = {
   updateArtifact(params: UpdateArtifactParams): Promise<ArtifactResult>
 
   /**
+   * Upsert an artifact for a design session (insert or update)
+   */
+  upsertArtifact(
+    params: CreateArtifactParams,
+  ): ResultAsync<Tables<'artifacts'>, Error>
+
+  /**
    * Get artifact for a design session
    */
   getArtifact(designSessionId: string): Promise<ArtifactResult>

@@ -29,7 +29,11 @@ export const setPrismWasmUrl = (url: string): void => {
 export async function loadPrism(): Promise<(source: string) => ParseResult> {
   const path =
     overrideWasmUrl ?? fileURLToPath(new URL('prism.wasm', import.meta.url))
-  const wasm = await WebAssembly.compile(await readFile(path))
+  const fileBuffer = await readFile(path)
+  const arrayBuffer = new ArrayBuffer(fileBuffer.length)
+  const view = new Uint8Array(arrayBuffer)
+  view.set(fileBuffer)
+  const wasm = await WebAssembly.compile(arrayBuffer)
 
   // Dynamic import for WASI to avoid warnings unless necessary
   // biome-ignore lint/correctness/noNodejsModules: This import is server-side specific because loadPrism() is exclusively invoked in server environments.

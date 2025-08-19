@@ -374,6 +374,39 @@ export class InMemoryRepository implements SchemaRepository {
     return { success: true, artifact: updated }
   }
 
+  upsertArtifact(
+    params: CreateArtifactParams,
+  ): ResultAsync<Tables<'artifacts'>, Error> {
+    const { designSessionId, artifact } = params
+    const now = new Date().toISOString()
+
+    const existingArtifact = this.state.artifacts.get(designSessionId)
+
+    if (existingArtifact) {
+      // Update existing artifact
+      const updatedArtifact: Tables<'artifacts'> = {
+        ...existingArtifact,
+        artifact: artifact,
+        updated_at: now,
+      }
+      this.state.artifacts.set(designSessionId, updatedArtifact)
+      return okAsync(updatedArtifact)
+    }
+
+    // Create new artifact
+    const newArtifact: Tables<'artifacts'> = {
+      id: this.generateId(),
+      design_session_id: designSessionId,
+      organization_id: 'test-org-id',
+      artifact: artifact,
+      created_at: now,
+      updated_at: now,
+    }
+
+    this.state.artifacts.set(designSessionId, newArtifact)
+    return okAsync(newArtifact)
+  }
+
   async getArtifact(designSessionId: string): Promise<ArtifactResult> {
     const artifact = this.state.artifacts.get(designSessionId)
 

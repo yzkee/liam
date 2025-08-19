@@ -12,6 +12,7 @@ import {
 } from '../../schema/factories.js'
 import { postgresqlSchemaDeparser } from './schemaDeparser.js'
 import { expectGeneratedSQLToBeParseable } from './testUtils.js'
+import { generateAlterColumnTypeStatement } from './utils.js'
 
 describe('postgresqlSchemaDeparser', () => {
   it('should generate basic CREATE TABLE statement', async () => {
@@ -1725,6 +1726,62 @@ describe('postgresqlSchemaDeparser', () => {
         expect(result.value).not.toContain("DEFAULT 'gen_random_uuid()'")
         expect(result.value).not.toContain("DEFAULT 'now()'")
       })
+    })
+  })
+})
+
+describe('PostgreSQL utils', () => {
+  describe('generateAlterColumnTypeStatement', () => {
+    it('should properly escape complex types in ALTER COLUMN TYPE statements', () => {
+      // Test camelCase enum type
+      const alterCamelCase = generateAlterColumnTypeStatement(
+        'users',
+        'status',
+        'UserStatus',
+      )
+      expect(alterCamelCase).toBe(
+        'ALTER TABLE "users" ALTER COLUMN "status" TYPE "UserStatus";',
+      )
+
+      // Test array type
+      const alterArray = generateAlterColumnTypeStatement(
+        'users',
+        'roles',
+        'UserRole[]',
+      )
+      expect(alterArray).toBe(
+        'ALTER TABLE "users" ALTER COLUMN "roles" TYPE "UserRole"[];',
+      )
+
+      // Test multi-dimensional array
+      const alterMultiArray = generateAlterColumnTypeStatement(
+        'users',
+        'permissions',
+        'Permission[][]',
+      )
+      expect(alterMultiArray).toBe(
+        'ALTER TABLE "users" ALTER COLUMN "permissions" TYPE "Permission"[][];',
+      )
+
+      // Test schema-qualified type
+      const alterSchemaQualified = generateAlterColumnTypeStatement(
+        'users',
+        'status',
+        'public.UserStatus',
+      )
+      expect(alterSchemaQualified).toBe(
+        'ALTER TABLE "users" ALTER COLUMN "status" TYPE public."UserStatus";',
+      )
+
+      // Test standard PostgreSQL type (should not be quoted)
+      const alterStandard = generateAlterColumnTypeStatement(
+        'users',
+        'name',
+        'varchar(255)',
+      )
+      expect(alterStandard).toBe(
+        'ALTER TABLE "users" ALTER COLUMN "name" TYPE varchar(255);',
+      )
     })
   })
 })

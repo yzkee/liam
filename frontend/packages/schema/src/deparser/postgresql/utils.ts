@@ -346,7 +346,7 @@ export function generateAlterColumnTypeStatement(
 ): string {
   return `ALTER TABLE ${escapeIdentifier(
     tableName,
-  )} ALTER COLUMN ${escapeIdentifier(columnName)} TYPE ${newType};`
+  )} ALTER COLUMN ${escapeIdentifier(columnName)} TYPE ${escapeTypeIdentifier(newType)};`
 }
 
 /**

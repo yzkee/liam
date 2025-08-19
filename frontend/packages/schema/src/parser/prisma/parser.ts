@@ -9,6 +9,7 @@ import type {
   Index,
   Table,
 } from '../../schema/index.js'
+import { toSnakeCase } from '../../utils/stringUtils.js'
 import type { Processor, ProcessResult } from '../types.js'
 import { convertToPostgresColumnType } from './convertToPostgresColumnType.js'
 
@@ -463,16 +464,6 @@ function processManyToManyRelationships(
 /**
  * Process enums from DMMF and create enum objects
  */
-/**
- * Convert camelCase/PascalCase to snake_case
- */
-function toSnakeCase(str: string): string {
-  return str
-    .replace(/([A-Z])/g, '_$1')
-    .toLowerCase()
-    .replace(/^_/, '') // Remove leading underscore
-}
-
 function processEnums(
   dmmfEnums: readonly DMMF.DatamodelEnum[],
 ): Record<string, Enum> {

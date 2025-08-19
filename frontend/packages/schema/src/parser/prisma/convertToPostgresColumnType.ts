@@ -1,4 +1,5 @@
 import type { DMMF } from '@prisma/generator-helper'
+import { toSnakeCase } from '../../utils/stringUtils.js'
 
 // Helper function to handle autoincrement types
 function getAutoincrementType(typeName: string): string {
@@ -42,16 +43,6 @@ function handleNativeType(
 }
 
 // Helper function to map Prisma types to PostgreSQL types
-/**
- * Convert camelCase/PascalCase to snake_case
- */
-function toSnakeCase(str: string): string {
-  return str
-    .replace(/([A-Z])/g, '_$1')
-    .toLowerCase()
-    .replace(/^_/, '') // Remove leading underscore
-}
-
 function mapPrismaTypeToPostgres(type: string): string {
   switch (type) {
     case 'String':

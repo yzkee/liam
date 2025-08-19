@@ -21,10 +21,15 @@ function escapeTypeIdentifier(type: string): string {
   // If already quoted somewhere, assume caller provided the exact type
   if (type.includes('"')) return type
 
-  // Extract array suffixes: e.g., [], [][]
-  const arraySuffixMatch = type.match(/(\[\])+$/)
-  const arraySuffix = arraySuffixMatch ? arraySuffixMatch[0] : ''
-  const base = arraySuffix ? type.slice(0, -arraySuffix.length) : type
+  // Extract array suffixes safely: find the rightmost sequence of [] brackets
+  let arraySuffix = ''
+  let base = type
+
+  // Find array suffixes from the end, avoiding ReDoS vulnerability
+  while (base.endsWith('[]')) {
+    arraySuffix = `[]${arraySuffix}`
+    base = base.slice(0, -2)
+  }
 
   // Parameterized or spaced types (e.g., varchar(255), timestamp(3), double precision)
   // should not be quoted here.

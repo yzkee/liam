@@ -1243,6 +1243,46 @@ describe('postgresqlSchemaDeparser', () => {
       expect(result.value).toContain('double precision') // Spaced type should not be quoted
     })
 
+    it('should handle multi-dimensional arrays safely', async () => {
+      const schema = aSchema({
+        enums: {
+          UserRole: anEnum({
+            name: 'UserRole',
+            values: ['ADMIN', 'USER'],
+          }),
+        },
+        tables: {
+          test_table: aTable({
+            name: 'test_table',
+            columns: {
+              id: aColumn({
+                name: 'id',
+                type: 'bigint',
+                notNull: true,
+              }),
+              // Test multi-dimensional array
+              multi_array: aColumn({
+                name: 'multi_array',
+                type: 'UserRole[][]',
+                notNull: false,
+              }),
+            },
+            constraints: {
+              test_table_pkey: aPrimaryKeyConstraint({
+                name: 'test_table_pkey',
+                columnNames: ['id'],
+              }),
+            },
+          }),
+        },
+      })
+
+      const result = postgresqlSchemaDeparser(schema)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toContain('"UserRole"[][]') // Multi-dimensional array should quote only the base type
+    })
+
     it('should generate enums before tables', async () => {
       const schema = aSchema({
         enums: {

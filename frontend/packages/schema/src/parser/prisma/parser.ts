@@ -473,6 +473,8 @@ function processEnums(
     const values = dmmfEnum.values.map((value) => value.name)
 
     // Convert ENUM name from camelCase/PascalCase to snake_case
+    // PostgreSQL convention is to use snake_case for type names,
+    // while Prisma schemas often use PascalCase
     const snakeCaseName = toSnakeCase(dmmfEnum.name)
 
     enums[snakeCaseName] = {

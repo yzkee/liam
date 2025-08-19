@@ -65,6 +65,8 @@ function mapPrismaTypeToPostgres(type: string): string {
       return 'bytea'
     default:
       // For custom types (like ENUMs), convert to snake_case
+      // PostgreSQL convention is to use snake_case for type names,
+      // so we convert Prisma's camelCase/PascalCase enum names
       return toSnakeCase(type)
   }
 }

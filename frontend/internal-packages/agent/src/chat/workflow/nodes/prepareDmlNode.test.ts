@@ -44,7 +44,6 @@ describe('prepareDmlNode', () => {
       organizationId: 'test-org-id',
       userId: 'user-id',
       designSessionId: 'session-id',
-      retryCount: {},
       repositories,
       ...overrides,
     }

@@ -24,15 +24,9 @@ export const createAnnotations = () => {
     organizationId: Annotation<string>,
     userId: Annotation<string>,
     designSessionId: Annotation<string>,
-    retryCount: Annotation<Record<string, number>>,
 
     ddlStatements: Annotation<string | undefined>,
     dmlStatements: Annotation<string | undefined>,
-
-    // DDL execution retry mechanism
-    shouldRetryWithDesignSchema: Annotation<boolean | undefined>,
-    ddlExecutionFailed: Annotation<boolean | undefined>,
-    ddlExecutionFailureReason: Annotation<string | undefined>,
 
     // DML execution results
     dmlExecutionSuccessful: Annotation<boolean | undefined>,

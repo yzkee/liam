@@ -23,7 +23,6 @@ describe('validateSchemaNode', () => {
       organizationId: 'test-org-id',
       userId: 'user-id',
       designSessionId: 'session-id',
-      retryCount: {},
       ...overrides,
     }
   }

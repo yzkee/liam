@@ -1,47 +1,5 @@
-import type { Artifact, DmlOperation, UseCase } from '@liam-hq/artifact'
+import type { Artifact, UseCase } from '@liam-hq/artifact'
 import { EXECUTION_SECTION_TITLE, FAILURE_ICON, SUCCESS_ICON } from '../utils'
-
-function formatDmlOperation(operation: DmlOperation): string {
-  const sections: string[] = []
-
-  // Operation type and description
-  if (operation.description) {
-    sections.push(`**${operation.operation_type}** - ${operation.description}`)
-  } else {
-    sections.push(`**${operation.operation_type}**`)
-  }
-  sections.push('')
-
-  // SQL code block
-  sections.push('```sql')
-  sections.push(operation.sql.trim())
-  sections.push('```')
-
-  // Execution logs
-  if (operation.dml_execution_logs.length > 0) {
-    sections.push('')
-    sections.push(`**${EXECUTION_SECTION_TITLE}:**`)
-    sections.push('')
-
-    operation.dml_execution_logs.forEach((log) => {
-      const statusIcon = log.success ? SUCCESS_ICON : FAILURE_ICON
-      const executedAt = new Date(log.executed_at).toLocaleString('en-US', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-      })
-
-      sections.push(`${statusIcon} **${executedAt}**`)
-      sections.push(`> ${log.result_summary}`)
-      sections.push('')
-    })
-  }
-
-  return sections.join('\n')
-}
 
 function formatUseCase(
   useCase: UseCase,
@@ -56,15 +14,47 @@ function formatUseCase(
 
   if (useCase.dml_operations.length > 0) {
     sections.push('')
-    sections.push('**Related DML Operations:**')
-    sections.push('')
 
+    // Format all operations directly as headings
     useCase.dml_operations.forEach((operation, opIndex) => {
-      if (useCase.dml_operations.length > 1) {
-        sections.push(`##### Operation ${opIndex + 1}`)
-        sections.push('')
+      // Format as heading with operation type and description
+      if (operation.description) {
+        sections.push(
+          `##### **${operation.operation_type}** - ${operation.description}`,
+        )
+      } else {
+        sections.push(`##### **${operation.operation_type}**`)
       }
-      sections.push(formatDmlOperation(operation))
+      sections.push('')
+
+      // SQL code block
+      sections.push('```sql')
+      sections.push(operation.sql.trim())
+      sections.push('```')
+
+      // Execution logs
+      if (operation.dml_execution_logs.length > 0) {
+        sections.push('')
+        sections.push(`**${EXECUTION_SECTION_TITLE}:**`)
+        sections.push('')
+
+        operation.dml_execution_logs.forEach((log) => {
+          const statusIcon = log.success ? SUCCESS_ICON : FAILURE_ICON
+          const executedAt = new Date(log.executed_at).toLocaleString('en-US', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            timeZone: 'UTC',
+          })
+
+          sections.push(`${statusIcon} **${executedAt}**`)
+          sections.push(`> ${log.result_summary}`)
+          sections.push('')
+        })
+      }
 
       if (opIndex < useCase.dml_operations.length - 1) {
         sections.push('---')

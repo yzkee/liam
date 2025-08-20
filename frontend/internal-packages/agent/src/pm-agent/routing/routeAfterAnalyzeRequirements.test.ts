@@ -15,6 +15,7 @@ const createPmAgentState = (
     functionalRequirements: {},
     nonFunctionalRequirements: {},
   },
+  schemaData: { tables: {}, enums: {} },
   ...overrides,
 })
 

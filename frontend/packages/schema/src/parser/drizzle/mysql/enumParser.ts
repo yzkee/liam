@@ -7,7 +7,6 @@ import {
   getArgumentExpression,
   getStringValue,
   isArrayExpression,
-  isStringLiteral,
 } from './astUtils.js'
 import type { DrizzleEnumDefinition } from './types.js'
 
@@ -33,9 +32,10 @@ export const parseMysqlEnumCall = (
 
   const values: string[] = []
   for (const element of valuesExpr.elements) {
-    if (isStringLiteral(element)) {
-      values.push(element.value)
-    }
+    if (!element) continue
+    const expr = 'expression' in element ? element.expression : element
+    const str = getStringValue(expr)
+    if (typeof str === 'string') values.push(str)
   }
 
   return { name: enumName, values }

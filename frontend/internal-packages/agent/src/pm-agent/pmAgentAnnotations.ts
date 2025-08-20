@@ -1,4 +1,5 @@
 import { Annotation, MessagesAnnotation } from '@langchain/langgraph'
+import type { Schema } from '@liam-hq/schema'
 
 /**
  * PM Agent subgraph specific state annotation
@@ -12,6 +13,7 @@ export const pmAgentStateAnnotation = Annotation.Root({
     nonFunctionalRequirements: Record<string, string[]>
   }>,
   designSessionId: Annotation<string>,
+  schemaData: Annotation<Schema>,
 
   // PM Agent private state
   analyzedRequirementsRetryCount: Annotation<number>,

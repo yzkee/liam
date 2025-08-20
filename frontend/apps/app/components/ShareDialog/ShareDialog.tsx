@@ -1,6 +1,16 @@
 'use client'
 
-import { Check, Copy, Link, Lock } from '@liam-hq/ui'
+import {
+  Check,
+  Copy,
+  Link,
+  Lock,
+  ModalContent,
+  ModalOverlay,
+  ModalPortal,
+  ModalRoot,
+  ModalTitle,
+} from '@liam-hq/ui'
 import { type FC, useState } from 'react'
 import { usePublicShareServerAction } from '@/hooks/usePublicShareServerAction'
 import styles from './ShareDialog.module.css'
@@ -43,108 +53,99 @@ export const ShareDialog: FC<Props> = ({
     setTimeout(() => setCopied(false), 2000)
   }
 
-  if (!isOpen) return null
-
   return (
-    <>
-      <div className={styles.backdrop} onClick={onClose} aria-hidden="true" />
-      <div
-        className={styles.dialog}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="share-dialog-title"
-        onKeyDown={(e) => {
-          if (e.key === 'Escape') {
-            onClose()
-          }
-        }}
-      >
-        <div className={styles.dialogContent}>
-          <div className={styles.dialogHeader}>
-            <h2 id="share-dialog-title" className={styles.dialogTitle}>
-              Share
-            </h2>
-            <button
-              type="button"
-              className={styles.closeButton}
-              onClick={onClose}
-              aria-label="Close"
-            >
-              ×
-            </button>
-          </div>
-
-          <div className={styles.shareContent}>
-            {/* People with access */}
-            <div className={styles.accessSection}>
-              <h4 className={styles.sectionTitle}>People with access</h4>
-              <div className={styles.userInfo}>
-                <div className={styles.avatar}>
-                  <span>You</span>
-                </div>
-                <div className={styles.userDetails}>
-                  <div className={styles.userName}>You (Owner)</div>
-                  <div className={styles.userEmail}>Has full access</div>
-                </div>
-              </div>
+    <ModalRoot open={isOpen} onOpenChange={onClose}>
+      <ModalPortal>
+        <ModalOverlay />
+        <ModalContent className={styles.dialog}>
+          <div className={styles.dialogContent}>
+            <div className={styles.dialogHeader}>
+              <ModalTitle className={styles.dialogTitle}>Share</ModalTitle>
+              <button
+                type="button"
+                className={styles.closeButton}
+                onClick={onClose}
+                aria-label="Close"
+              >
+                ×
+              </button>
             </div>
 
-            {/* Visibility */}
-            <div className={styles.visibilitySection}>
-              <h4 id="visibility-section-title" className={styles.sectionTitle}>
-                Visibility
-              </h4>
-              <div className={styles.visibilityControls}>
-                <div className={styles.selectWrapper}>
-                  <select
-                    value={isPublic ? 'link' : 'private'}
-                    onChange={(e) => handleVisibilityChange(e.target.value)}
-                    disabled={loading}
-                    className={styles.visibilitySelect}
-                    aria-labelledby="visibility-section-title"
-                  >
-                    <option value="private" className={styles.selectOption}>
-                      🔒 Private
-                    </option>
-                    <option value="link" className={styles.selectOption}>
-                      🔗 Anyone with the link
-                    </option>
-                  </select>
-                  <div className={styles.selectIcon}>
-                    {isPublic ? <Link size={16} /> : <Lock size={16} />}
+            <div className={styles.shareContent}>
+              {/* People with access */}
+              <div className={styles.accessSection}>
+                <h4 className={styles.sectionTitle}>People with access</h4>
+                <div className={styles.userInfo}>
+                  <div className={styles.avatar}>
+                    <span>You</span>
+                  </div>
+                  <div className={styles.userDetails}>
+                    <div className={styles.userName}>You (Owner)</div>
+                    <div className={styles.userEmail}>Has full access</div>
                   </div>
                 </div>
+              </div>
 
+              {/* Visibility */}
+              <div className={styles.visibilitySection}>
+                <h4
+                  id="visibility-section-title"
+                  className={styles.sectionTitle}
+                >
+                  Visibility
+                </h4>
+                <div className={styles.visibilityControls}>
+                  <div className={styles.selectWrapper}>
+                    <select
+                      value={isPublic ? 'link' : 'private'}
+                      onChange={(e) => handleVisibilityChange(e.target.value)}
+                      disabled={loading}
+                      className={styles.visibilitySelect}
+                      aria-labelledby="visibility-section-title"
+                    >
+                      <option value="private" className={styles.selectOption}>
+                        🔒 Private
+                      </option>
+                      <option value="link" className={styles.selectOption}>
+                        🔗 Anyone with the link
+                      </option>
+                    </select>
+                    <div className={styles.selectIcon}>
+                      {isPublic ? <Link size={16} /> : <Lock size={16} />}
+                    </div>
+                  </div>
+
+                  {isPublic && (
+                    <button
+                      type="button"
+                      onClick={copyLink}
+                      disabled={loading}
+                      className={styles.copyButton}
+                    >
+                      {copied ? (
+                        <>
+                          <Check size={16} />
+                          Copied!
+                        </>
+                      ) : (
+                        <>
+                          <Copy size={16} />
+                          Copy Link
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
                 {isPublic && (
-                  <button
-                    type="button"
-                    onClick={copyLink}
-                    disabled={loading}
-                    className={styles.copyButton}
-                  >
-                    {copied ? (
-                      <>
-                        <Check size={16} />
-                        Copied!
-                      </>
-                    ) : (
-                      <>
-                        <Copy size={16} />
-                        Copy Link
-                      </>
-                    )}
-                  </button>
+                  <p className={styles.visibilityDescription}>
+                    Anyone with the link can view this session
+                  </p>
                 )}
               </div>
-              {isPublic && (
-                <p className={styles.visibilityDescription}>
-                  Anyone with the link can view this session
-                </p>
-              )}
             </div>
           </div>
-        </div>
-      </div>
-    </>
+        </ModalContent>
+      </ModalPortal>
+    </ModalRoot>
   )
 }

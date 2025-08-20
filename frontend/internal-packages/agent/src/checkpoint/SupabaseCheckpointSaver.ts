@@ -1,7 +1,6 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
 import {
   BaseCheckpointSaver,
-  type ChannelProtocol,
   type ChannelVersions,
   type Checkpoint,
   type CheckpointListOptions,
@@ -373,11 +372,56 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
     }
   }
 
-  override getNextVersion(
-    current: number | undefined,
-    _channel: ChannelProtocol,
-  ): number {
+  override getNextVersion(current: number | undefined): number {
     return (current ?? 0) + 1
+  }
+
+  /**
+   * Delete all checkpoints and writes for a thread
+   * Required for compatibility with LangGraph 0.4.x
+   */
+  async deleteThread(threadId: string): Promise<void> {
+    // Delete all checkpoints for the thread
+    const { error: checkpointsError } = await this.client
+      .from('checkpoints')
+      .delete()
+      .eq('thread_id', threadId)
+      .eq('organization_id', this.organizationId)
+
+    if (checkpointsError) {
+      // eslint-disable-next-line no-throw-error/no-throw-error
+      throw new Error(
+        `Failed to delete checkpoints for thread ${threadId}: ${checkpointsError.message}`,
+      )
+    }
+
+    // Delete all checkpoint writes for the thread
+    const { error: writesError } = await this.client
+      .from('checkpoint_writes')
+      .delete()
+      .eq('thread_id', threadId)
+      .eq('organization_id', this.organizationId)
+
+    if (writesError) {
+      // eslint-disable-next-line no-throw-error/no-throw-error
+      throw new Error(
+        `Failed to delete checkpoint writes for thread ${threadId}: ${writesError.message}`,
+      )
+    }
+
+    // Delete all checkpoint blobs for the thread
+    const { error: blobsError } = await this.client
+      .from('checkpoint_blobs')
+      .delete()
+      .eq('thread_id', threadId)
+      .eq('organization_id', this.organizationId)
+
+    if (blobsError) {
+      // eslint-disable-next-line no-throw-error/no-throw-error
+      throw new Error(
+        `Failed to delete checkpoint blobs for thread ${threadId}: ${blobsError.message}`,
+      )
+    }
   }
 
   /**
@@ -403,7 +447,6 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
       channel_values: channelValues,
       channel_versions: channelVersions,
       versions_seen: versionsSeen,
-      pending_sends: [],
     }
   }
 
@@ -545,9 +588,7 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
     // Don't store channel_values in checkpoint table
     // They go to the blobs table instead
 
-    if (checkpoint.pending_sends && checkpoint.pending_sends.length > 0) {
-      serialized.pending_sends = checkpoint.pending_sends
-    }
+    // pending_sends has been removed from Checkpoint type in langgraph-checkpoint 0.1.0
 
     return serialized
   }
@@ -617,7 +658,7 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
           organization_id: this.organizationId,
         })
       } else {
-        const [type, serialized] = this.serde.dumpsTyped(value)
+        const [type, serialized] = await this.serde.dumpsTyped(value)
 
         blobs.push({
           thread_id: threadId,
@@ -659,7 +700,7 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
       const write = writes[idx]
       if (!write) continue
       const [channel, value] = write
-      const [type, serialized] = this.serde.dumpsTyped(value)
+      const [type, serialized] = await this.serde.dumpsTyped(value)
 
       dumpedWrites.push({
         thread_id: threadId,

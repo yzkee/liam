@@ -55,7 +55,6 @@ describe('SupabaseCheckpointSaver', () => {
       state: 1,
     },
     versions_seen: {},
-    pending_sends: [],
   })
 
   const createMinimalConfig = (): RunnableConfig => ({
@@ -110,7 +109,6 @@ describe('SupabaseCheckpointSaver', () => {
       const metadata: CheckpointMetadata = {
         source: 'input' as const,
         step: -1,
-        writes: null,
         parents: {},
       }
       const config = createMinimalConfig()
@@ -212,12 +210,10 @@ describe('SupabaseCheckpointSaver', () => {
             state: 1,
           },
           versions_seen: {},
-          pending_sends: [],
         },
         metadata: {
           source: 'input' as const,
           step: -1,
-          writes: null,
           parents: {},
         },
         parentConfig: undefined,
@@ -242,7 +238,6 @@ describe('SupabaseCheckpointSaver', () => {
         metadata: {
           source: 'input' as const,
           step: -1,
-          writes: null,
           parents: {},
           latest: true,
         },
@@ -284,12 +279,10 @@ describe('SupabaseCheckpointSaver', () => {
           channel_values: {},
           channel_versions: { messages: 2 },
           versions_seen: {},
-          pending_sends: [],
         },
         metadata: {
           source: 'input' as const,
           step: -1,
-          writes: null,
           parents: {},
           latest: true,
         },
@@ -318,7 +311,6 @@ describe('SupabaseCheckpointSaver', () => {
           metadata: {
             source: 'input' as const,
             step: 0,
-            writes: null,
             parents: {},
           },
           organization_id: TEST_ORG_ID,
@@ -340,7 +332,6 @@ describe('SupabaseCheckpointSaver', () => {
           metadata: {
             source: 'input' as const,
             step: 0,
-            writes: null,
             parents: {},
           },
           organization_id: TEST_ORG_ID,
@@ -386,12 +377,10 @@ describe('SupabaseCheckpointSaver', () => {
           channel_values: {},
           channel_versions: {},
           versions_seen: {},
-          pending_sends: [],
         },
         metadata: {
           source: 'input' as const,
           step: 0,
-          writes: null,
           parents: {},
         },
         parentConfig: {
@@ -422,7 +411,6 @@ describe('SupabaseCheckpointSaver', () => {
         metadata: {
           source: 'input' as const,
           step: -1,
-          writes: null,
           parents: {},
           status: 'active',
         },
@@ -470,12 +458,10 @@ describe('SupabaseCheckpointSaver', () => {
           channel_values: {},
           channel_versions: {},
           versions_seen: {},
-          pending_sends: [],
         },
         metadata: {
           source: 'input' as const,
           step: -1,
-          writes: null,
           parents: {},
           status: 'active',
         },
@@ -533,7 +519,6 @@ describe('SupabaseCheckpointSaver', () => {
       const emptyMetadata: CheckpointMetadata = {
         source: 'input' as const,
         step: -1,
-        writes: null,
         parents: {},
       }
       await expect(
@@ -550,6 +535,66 @@ describe('SupabaseCheckpointSaver', () => {
       await expect(
         saver.putWrites(invalidConfig, [], 'task-1'),
       ).rejects.toThrow('Missing thread_id or checkpoint_id')
+    })
+  })
+
+  describe('deleteThread', () => {
+    it('should delete all checkpoints and related data for a thread', async () => {
+      const saver = createTestSaver()
+      const threadId = 'thread-to-delete'
+
+      // Setup mock handlers for delete operations
+      const deleteHandlers = {
+        checkpoints: false,
+        writes: false,
+        blobs: false,
+      }
+
+      server.use(
+        http.delete(`${SUPABASE_URL}/rest/v1/checkpoints`, () => {
+          deleteHandlers.checkpoints = true
+          return HttpResponse.json({})
+        }),
+        http.delete(`${SUPABASE_URL}/rest/v1/checkpoint_writes`, () => {
+          deleteHandlers.writes = true
+          return HttpResponse.json({})
+        }),
+        http.delete(`${SUPABASE_URL}/rest/v1/checkpoint_blobs`, () => {
+          deleteHandlers.blobs = true
+          return HttpResponse.json({})
+        }),
+      )
+
+      // Call deleteThread
+      await saver.deleteThread(threadId)
+
+      // Verify all delete operations were called
+      expect(deleteHandlers.checkpoints).toBe(true)
+      expect(deleteHandlers.writes).toBe(true)
+      expect(deleteHandlers.blobs).toBe(true)
+    })
+
+    it('should throw error when delete operations fail', async () => {
+      const saver = createTestSaver()
+      const threadId = 'thread-with-error'
+
+      // Setup mock handler to return error for checkpoints deletion
+      server.use(
+        http.delete(`${SUPABASE_URL}/rest/v1/checkpoints`, () => {
+          return HttpResponse.json(
+            {
+              error: 'Database connection lost',
+              message: 'Database connection lost',
+            },
+            { status: 500 },
+          )
+        }),
+      )
+
+      // deleteThread should throw when database operation fails
+      await expect(saver.deleteThread(threadId)).rejects.toThrow(
+        'Failed to delete checkpoints for thread thread-with-error: Database connection lost',
+      )
     })
   })
 
@@ -584,7 +629,6 @@ describe('SupabaseCheckpointSaver', () => {
       const metadata: CheckpointMetadata = {
         source: 'input' as const,
         step: -1,
-        writes: null,
         parents: {},
       }
       await saver.put(config, checkpoint, metadata, checkpoint.channel_versions)

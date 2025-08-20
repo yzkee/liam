@@ -15,7 +15,6 @@ const SerializedCheckpointSchema = v.strictObject({
     v.string(),
     v.record(v.string(), v.union([v.number(), v.string()])),
   ),
-  pending_sends: v.optional(v.array(v.unknown())),
 })
 
 /**
@@ -30,7 +29,6 @@ const CheckpointMetadataSchema = v.looseObject({
     v.literal('fork'),
   ]),
   step: v.number(),
-  writes: v.nullable(v.record(v.string(), v.unknown())),
   parents: v.record(v.string(), v.string()),
 })
 
@@ -51,9 +49,6 @@ export const parseSerializedCheckpoint = (
   }
   if (parsed.channel_values !== undefined) {
     result.channel_values = parsed.channel_values
-  }
-  if (parsed.pending_sends !== undefined) {
-    result.pending_sends = parsed.pending_sends
   }
   return result
 }

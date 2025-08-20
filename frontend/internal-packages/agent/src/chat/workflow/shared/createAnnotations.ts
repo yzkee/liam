@@ -1,5 +1,4 @@
 import { Annotation, MessagesAnnotation } from '@langchain/langgraph'
-import type { DmlOperation } from '@liam-hq/artifact'
 import type { Schema } from '@liam-hq/schema'
 import type { Usecase } from '../../../langchain/agents/qaGenerateUsecaseAgent/agent'
 
@@ -29,7 +28,6 @@ export const createAnnotations = () => {
 
     ddlStatements: Annotation<string | undefined>,
     dmlStatements: Annotation<string | undefined>,
-    dmlOperations: Annotation<DmlOperation[] | undefined>,
 
     // DDL execution retry mechanism
     shouldRetryWithDesignSchema: Annotation<boolean | undefined>,

@@ -1,4 +1,3 @@
-export type CommandPaletteInputMode = { type: 'default' }
+export type CommandPaletteInputMode = { type: 'default' } | { type: 'command' }
 // upcoming input mode
-// | { type: 'command' }
 // | { type: 'column'; tableName: string }

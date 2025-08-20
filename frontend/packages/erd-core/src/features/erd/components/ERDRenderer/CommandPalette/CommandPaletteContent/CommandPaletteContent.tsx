@@ -100,6 +100,12 @@ export const CommandPaletteContent: FC<Props> = ({ closeDialog }) => {
               ))}
             </Command.Group>
           )}
+          {
+            (inputMode.type === 'default' || inputMode.type === 'command') &&
+              null
+            // TODO(command options): uncomment the following line to release command options
+            // <CommandPaletteCommandOptions />
+          }
         </Command.List>
         <div
           className={styles.previewContainer}

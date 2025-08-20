@@ -1,11 +1,12 @@
 import type {
   Columns,
   Constraints,
+  Enums,
   ForeignKeyConstraintReferenceOption,
   Indexes,
   Tables,
 } from '../../schema/index.js'
-import { aColumn, anIndex, aTable } from '../../schema/index.js'
+import { aColumn, anEnum, anIndex, aTable } from '../../schema/index.js'
 import type { Processor, ProcessResult } from '../types.js'
 import schema from './schema.generated.js'
 
@@ -330,6 +331,38 @@ function processTable(tblsTable: {
 }
 
 /**
+ * Process enums from tbls schema
+ */
+function processEnums(
+  tblsEnums:
+    | Array<{
+        name: string
+        values: string[]
+      }>
+    | undefined,
+): Enums {
+  const enums: Enums = {}
+
+  if (!tblsEnums) {
+    return enums
+  }
+
+  for (const tblsEnum of tblsEnums) {
+    const enumName = tblsEnum.name.includes('.')
+      ? tblsEnum.name.substring(tblsEnum.name.lastIndexOf('.') + 1)
+      : tblsEnum.name
+
+    enums[enumName] = anEnum({
+      name: enumName,
+      values: tblsEnum.values,
+      comment: null,
+    })
+  }
+
+  return enums
+}
+
+/**
  * Main function to parse a tbls schema
  */
 async function parseTblsSchema(schemaString: string): Promise<ProcessResult> {
@@ -386,11 +419,12 @@ async function parseTblsSchema(schemaString: string): Promise<ProcessResult> {
     tables[tableName] = tableObj
   }
 
-  // Return the schema
+  const enums = processEnums(result.data.enums)
+
   return {
     value: {
       tables,
-      enums: {},
+      enums,
     },
     errors,
   }
@@ -419,5 +453,4 @@ function extractDefaultValue(
   return value
 }
 
-// TODO: Add enum parsing support for tbls schemas
 export const processor: Processor = (str) => parseTblsSchema(str)

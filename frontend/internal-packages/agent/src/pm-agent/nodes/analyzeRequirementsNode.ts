@@ -4,16 +4,35 @@ import { getConfigurable } from '../../chat/workflow/shared/getConfigurable'
 import type { WorkflowState } from '../../chat/workflow/types'
 import { logAssistantMessage } from '../../chat/workflow/utils/timelineLogger'
 import { WorkflowTerminationError } from '../../shared/errorHandling'
+import { convertSchemaToText } from '../../utils/convertSchemaToText'
 import { invokePmAnalysisAgent } from '../invokePmAnalysisAgent'
+import type { PmAgentState } from '../pmAgentAnnotations'
+
+/**
+ * Create a WorkflowState with dummy values for logAssistantMessage compatibility
+ */
+const createWorkflowStateForLogging = (
+  pmState: PmAgentState,
+): WorkflowState => ({
+  messages: pmState.messages,
+  userInput: '',
+  analyzedRequirements: pmState.analyzedRequirements,
+  designSessionId: pmState.designSessionId,
+  schemaData: { tables: {}, enums: {} },
+  buildingSchemaId: '',
+  latestVersionNumber: 0,
+  organizationId: '',
+  userId: '',
+})
 
 /**
  * Analyze Requirements Node - Requirements Organization
  * Performed by pmAnalysisAgent
  */
 export async function analyzeRequirementsNode(
-  state: WorkflowState,
+  state: PmAgentState,
   config: RunnableConfig,
-): Promise<WorkflowState> {
+): Promise<Partial<PmAgentState>> {
   const assistantRole: Database['public']['Enums']['assistant_role_enum'] = 'pm'
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
@@ -24,14 +43,18 @@ export async function analyzeRequirementsNode(
   }
   const { repositories } = configurableResult.value
 
+  const workflowState = createWorkflowStateForLogging(state)
   await logAssistantMessage(
-    state,
+    workflowState,
     repositories,
     'Breaking down your request into structured requirements...',
     assistantRole,
   )
 
+  const schemaText = convertSchemaToText(state.schemaData)
+
   const analysisResult = await invokePmAnalysisAgent(
+    { schemaText },
     state.messages,
     configurableResult.value,
   )
@@ -48,7 +71,7 @@ export async function analyzeRequirementsNode(
   if (reasoning?.summary && reasoning.summary.length > 0) {
     for (const summaryItem of reasoning.summary) {
       await logAssistantMessage(
-        state,
+        workflowState,
         repositories,
         summaryItem.text,
         assistantRole,
@@ -56,7 +79,7 @@ export async function analyzeRequirementsNode(
     }
   }
   return {
-    ...state,
     messages: [response],
+    analyzedRequirementsRetryCount: state.analyzedRequirementsRetryCount + 1,
   }
 }

@@ -1,11 +1,9 @@
 #!/usr/bin/env tsx
 
-import type { BaseMessage } from '@langchain/core/messages'
 import { HumanMessage } from '@langchain/core/messages'
 import type { Schema } from '@liam-hq/schema'
 import type { Result } from 'neverthrow'
 import { err, ok, okAsync } from 'neverthrow'
-import { isToolMessageError } from '../src/chat/workflow/utils/toolMessageUtils'
 import { createGraph } from '../src/createGraph'
 import { hasHelpFlag, parseDesignProcessArgs } from './shared/argumentParser'
 import {
@@ -20,7 +18,6 @@ import {
 } from './shared/scriptUtils'
 import { findOrCreateDesignSession } from './shared/sessionUtils'
 import { processStreamChunk } from './shared/streamingUtils'
-import type { Logger } from './shared/types'
 
 const currentLogLevel = getLogLevel()
 const logger = createLogger(currentLogLevel)
@@ -69,34 +66,6 @@ const createWorkflowStateForDeepModeling = (
     },
   })
 }
-
-const logWorkflowMessage = (
-  logger: Logger,
-  message: BaseMessage,
-  index: number,
-) => {
-  const messageType = message.constructor.name
-    .toLowerCase()
-    .replace('message', '')
-  const content = message.text
-
-  // Check if this is a ToolMessage with an error
-  if (isToolMessageError(message)) {
-    logger.error(
-      `  ${index + 1}. [${messageType}] ${content.substring(0, 200)}${
-        content.length > 200 ? '...' : ''
-      }`,
-    )
-    return
-  }
-
-  logger.info(
-    `  ${index + 1}. [${messageType}] ${content.substring(0, 200)}${
-      content.length > 200 ? '...' : ''
-    }`,
-  )
-}
-
 /**
  * Main execution function
  */
@@ -115,8 +84,6 @@ const executeDeepModelingProcess = async (
   const graph = createGraph(
     options.configurable.repositories.schema.checkpointer,
   )
-
-  logger.info('Starting Deep Modeling workflow execution...')
 
   // Use streaming with proper async iterator handling
   const streamResult = await (async () => {
@@ -141,13 +108,6 @@ const executeDeepModelingProcess = async (
   const sessionId = workflowState.designSessionId
   logger.info(`Session ID: ${sessionId}`)
   logger.info(`To resume this session later, use: --session-id ${sessionId}`)
-
-  if (streamResult.messages && streamResult.messages.length > 0) {
-    logger.info('Workflow Messages:')
-    streamResult.messages.forEach((message, index) => {
-      logWorkflowMessage(logger, message, index)
-    })
-  }
 
   if (currentLogLevel === 'DEBUG') {
     logger.debug('Final Schema Data:', {

@@ -103,7 +103,6 @@ export const setupWorkflowState = (
         latestVersionNumber,
         designSessionId,
         userId,
-        retryCount: {},
       },
       workflowRunId,
       runCollector,

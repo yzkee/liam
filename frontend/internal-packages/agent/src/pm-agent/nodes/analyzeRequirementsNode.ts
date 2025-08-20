@@ -23,7 +23,6 @@ const createWorkflowStateForLogging = (
   latestVersionNumber: 0,
   organizationId: '',
   userId: '',
-  retryCount: {},
 })
 
 /**

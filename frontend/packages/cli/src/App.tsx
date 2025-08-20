@@ -7,9 +7,9 @@ import {
   versionSchema,
 } from '@liam-hq/erd-core'
 import { type Schema, schemaSchema } from '@liam-hq/schema'
+import { ResultAsync } from 'neverthrow'
 import { useEffect, useState } from 'react'
 import * as v from 'valibot'
-import { ResultAsync } from './utils/result.js'
 
 const emptySchema: Schema = {
   tables: {},

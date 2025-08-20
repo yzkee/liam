@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import { URL } from 'node:url'
 import { glob } from 'glob'
-import { err, ok, type Result, ResultAsync } from '../../utils/result.js'
+import { err, ok, type Result, ResultAsync } from 'neverthrow'
 
 function isValidUrl(url: string): boolean {
   try {
@@ -86,5 +86,5 @@ export async function getInputContent(
     ? downloadGitHubRawContent(inputPath)
     : downloadFile(inputPath)
 
-  return await resultAsync.toResult()
+  return await resultAsync
 }

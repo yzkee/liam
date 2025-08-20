@@ -1,5 +1,4 @@
 import type { BaseMessage } from '@langchain/core/messages'
-import type { DmlOperation } from '@liam-hq/artifact'
 import type { Schema } from '@liam-hq/schema'
 import type { Usecase } from '../../langchain/agents/qaGenerateUsecaseAgent/agent'
 import type { Repositories } from '../../repositories'
@@ -19,7 +18,6 @@ export type WorkflowState = {
 
   ddlStatements?: string | undefined
   dmlStatements?: string | undefined
-  dmlOperations?: DmlOperation[] | undefined
 
   // DML execution results
   dmlExecutionSuccessful?: boolean | undefined

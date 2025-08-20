@@ -18,6 +18,14 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  experimental: {
+    serverActions: {
+      allowedOrigins:
+        process.env.NODE_ENV === 'production'
+          ? ['https://liambx.com', 'https://liam-erd-web.vercel.app']
+          : undefined,
+    },
+  },
   images: {
     remotePatterns: [
       {

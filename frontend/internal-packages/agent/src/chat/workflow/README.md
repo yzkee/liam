@@ -171,6 +171,74 @@ const dbAgentSubgraph = createDbAgentGraph()
 graph.addNode('dbAgent', dbAgentSubgraph) // No retry policy - handled internally
 ```
 
+## QA Agent Subgraph
+
+The `qaAgent` node is implemented as a **LangGraph subgraph** that encapsulates all testing and validation logic as an independent, reusable component following multi-agent system best practices.
+
+### QA Agent Architecture
+
+```mermaid
+%%{init: {'flowchart': {'curve': 'linear'}}}%%
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	generateUsecase(generateUsecase)
+	prepareDML(prepareDML)
+	validateSchema(validateSchema)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> generateUsecase;
+	generateUsecase --> prepareDML;
+	prepareDML --> validateSchema;
+	validateSchema --> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2;
+	classDef first fill-opacity:0;
+	classDef last fill:#bfb6fc;
+```
+
+### QA Agent Components
+
+#### 1. generateUsecase Node
+- **Purpose**: Creates comprehensive use cases for testing database schema functionality
+- **Performed by**: QA Generate Usecase Agent with GPT-4
+- **Retry Policy**: maxAttempts: 3 (internal to subgraph)
+- **Timeline Sync**: Automatic message synchronization
+
+#### 2. prepareDML Node
+- **Purpose**: Generates DML statements based on use cases for schema validation
+- **Performed by**: DML Generation Agent
+- **Retry Policy**: maxAttempts: 3 (internal to subgraph)
+- **Output**: Structured DML operations for testing
+
+#### 3. validateSchema Node
+- **Purpose**: Executes DML statements and validates schema functionality
+- **Performed by**: DML Generation Agent with database execution
+- **Retry Policy**: maxAttempts: 3 (internal to subgraph)
+- **Validation**: Schema integrity and DML execution results
+
+### QA Agent Flow Patterns
+
+1. **Linear Testing Flow**: `START → generateUsecase → prepareDML → validateSchema → END`
+2. **Comprehensive Validation**: Each step builds upon the previous to ensure thorough testing
+
+### QA Agent Benefits
+
+- **🔄 Reusability**: Can be used across multiple workflows requiring schema validation
+- **🧪 Independent Testing**: Dedicated test suite for QA Agent logic (`createQaAgentGraph.test.ts`)
+- **🏗️ Separation of Concerns**: Testing and validation logic isolated from main workflow
+- **⚡ Optimized Retry Strategy**: Internal retry policy prevents double-retry scenarios
+- **📊 Encapsulated State**: Self-contained error handling and state management
+- **🎯 Focused Testing**: Linear flow ensures comprehensive schema validation
+
+### Integration
+
+The QA Agent subgraph is integrated into the main workflow as:
+
+```typescript
+import { createQaAgentGraph } from './qa-agent/createQaAgentGraph'
+
+const qaAgentSubgraph = createQaAgentGraph()
+graph.addNode('qaAgent', qaAgentSubgraph) // No retry policy - handled internally
+```
+
 ### Conditional Edge Logic
 
 - **analyzeRequirements**: Routes to `saveRequirementToArtifact` when requirements are successfully analyzed, retries `analyzeRequirements` with retry count tracking (max 3 attempts), fallback to `finalizeArtifacts` when max retries exceeded

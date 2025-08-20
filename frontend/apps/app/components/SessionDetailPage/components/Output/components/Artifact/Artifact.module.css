@@ -79,18 +79,6 @@
   word-break: normal !important;
 }
 
-/* Add overflow handling for code blocks */
-.body :global(pre) {
-  overflow-x: auto !important;
-  max-width: 100% !important;
-}
-
-/* SyntaxHighlighter specific overflow handling */
-.body :global([class*='language-']) {
-  overflow-x: auto !important;
-  max-width: 100% !important;
-}
-
 /* Global header styles */
 .body :global(h1),
 .body :global(h2),

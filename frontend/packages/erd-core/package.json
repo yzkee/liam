@@ -54,7 +54,7 @@
     "lint:biome": "biome check .",
     "lint:eslint": "eslint . --prune-suppressions",
     "lint:tsc": "tsc --noEmit",
-    "suppressions": "eslint --suppress-all --fix",
+    "suppressions": "eslint --suppress-all --fix --max-warnings 0",
     "test": "vitest --watch=false"
   }
 }

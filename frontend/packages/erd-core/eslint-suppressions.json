@@ -9,12 +9,22 @@
       "count": 1
     }
   },
+  "src/features/erd/components/ERDContent/components/TableNode/TableDetail/Constraints/Constraints.module.css": {
+    "css-modules-kit/no-unused-class-names": {
+      "count": 4
+    }
+  },
   "src/features/erd/components/ERDRenderer/AppBar/AppBar.module.css": {
     "css-modules-kit/no-unused-class-names": {
       "count": 2
     }
   },
   "src/features/erd/components/ERDRenderer/AppBar/ExportButton/ExportButton.module.css": {
+    "css-modules-kit/no-missing-component-file": {
+      "count": 1
+    }
+  },
+  "src/features/erd/components/ERDRenderer/CommandPalette/CommandPaletteOptions/CommandPaletteOptions.module.css": {
     "css-modules-kit/no-missing-component-file": {
       "count": 1
     }

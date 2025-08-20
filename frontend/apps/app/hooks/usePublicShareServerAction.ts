@@ -7,7 +7,7 @@ import {
 
 type UsePublicShareServerActionProps = {
   designSessionId: string
-  initialIsPublic?: boolean
+  initialIsPublic: boolean
 }
 
 export const usePublicShareServerAction = ({

@@ -21,7 +21,7 @@ type BaseProps = ComponentProps<typeof VersionDropdown> & {
   schema: Schema
   prevSchema: Schema
   sqlReviewComments: ReviewComment[]
-  initialIsPublic?: boolean
+  initialIsPublic: boolean
 }
 
 type ControlledProps = BaseProps & {

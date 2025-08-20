@@ -8,7 +8,7 @@ import styles from './ShareButton.module.css'
 
 type Props = {
   designSessionId: string
-  initialIsPublic?: boolean
+  initialIsPublic: boolean
 }
 
 export const ShareButton: FC<Props> = ({

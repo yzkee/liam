@@ -21,7 +21,7 @@ type Props = ComponentProps<typeof VersionDropdown> & {
   artifactDoc?: string
   hasArtifact?: boolean
   designSessionId: string
-  initialIsPublic?: boolean
+  initialIsPublic: boolean
 }
 
 const generateCumulativeOperations = (

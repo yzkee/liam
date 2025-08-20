@@ -29,7 +29,7 @@ type Props = {
   initialVersions: Version[]
   initialWorkflowRunStatus: WorkflowRunStatus | null
   isDeepModelingEnabled: boolean
-  initialIsPublic?: boolean
+  initialIsPublic: boolean
 }
 
 export const SessionDetailPageClient: FC<Props> = ({
@@ -40,7 +40,7 @@ export const SessionDetailPageClient: FC<Props> = ({
   initialVersions,
   initialWorkflowRunStatus,
   isDeepModelingEnabled,
-  initialIsPublic = false,
+  initialIsPublic,
 }) => {
   const designSessionId = designSessionWithTimelineItems.id
 

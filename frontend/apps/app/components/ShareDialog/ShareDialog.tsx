@@ -9,7 +9,7 @@ type Props = {
   isOpen: boolean
   onClose: () => void
   designSessionId: string
-  initialIsPublic?: boolean
+  initialIsPublic: boolean
 }
 
 export const ShareDialog: FC<Props> = ({

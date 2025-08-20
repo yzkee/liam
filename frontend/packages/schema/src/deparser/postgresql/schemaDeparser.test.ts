@@ -948,9 +948,9 @@ describe('postgresqlSchemaDeparser', () => {
       const result = postgresqlSchemaDeparser(schema)
 
       expect(result.errors).toHaveLength(0)
-      expect(result.value).toMatchInlineSnapshot(`
-        "CREATE TYPE "status" AS ENUM ('active', 'inactive', 'pending');"
-      `)
+      expect(result.value).toMatchInlineSnapshot(
+        `"CREATE TYPE status AS ENUM ('active', 'inactive', 'pending');"`,
+      )
 
       await expectGeneratedSQLToBeParseable(result.value)
     })
@@ -971,9 +971,9 @@ describe('postgresqlSchemaDeparser', () => {
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
-        "CREATE TYPE "user_role" AS ENUM ('admin', 'user', 'guest');
+        "CREATE TYPE user_role AS ENUM ('admin', 'user', 'guest');
 
-        COMMENT ON TYPE "user_role" IS 'User role enumeration';"
+        COMMENT ON TYPE user_role IS 'User role enumeration';"
       `)
 
       await expectGeneratedSQLToBeParseable(result.value)
@@ -999,11 +999,11 @@ describe('postgresqlSchemaDeparser', () => {
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
-        "CREATE TYPE "status" AS ENUM ('active', 'inactive');
+        "CREATE TYPE status AS ENUM ('active', 'inactive');
 
-        CREATE TYPE "priority" AS ENUM ('low', 'medium', 'high');
+        CREATE TYPE priority AS ENUM ('low', 'medium', 'high');
 
-        COMMENT ON TYPE "priority" IS 'Task priority levels';"
+        COMMENT ON TYPE priority IS 'Task priority levels';"
       `)
 
       await expectGeneratedSQLToBeParseable(result.value)
@@ -1023,9 +1023,9 @@ describe('postgresqlSchemaDeparser', () => {
       const result = postgresqlSchemaDeparser(schema)
 
       expect(result.errors).toHaveLength(0)
-      expect(result.value).toMatchInlineSnapshot(`
-        "CREATE TYPE "singleton" AS ENUM ('only_value');"
-      `)
+      expect(result.value).toMatchInlineSnapshot(
+        `"CREATE TYPE singleton AS ENUM ('only_value');"`,
+      )
 
       await expectGeneratedSQLToBeParseable(result.value)
     })
@@ -1044,9 +1044,9 @@ describe('postgresqlSchemaDeparser', () => {
       const result = postgresqlSchemaDeparser(schema)
 
       expect(result.errors).toHaveLength(0)
-      expect(result.value).toMatchInlineSnapshot(`
-        "CREATE TYPE "quoted_values" AS ENUM ('value with ''quotes''', 'normal_value');"
-      `)
+      expect(result.value).toMatchInlineSnapshot(
+        `"CREATE TYPE quoted_values AS ENUM ('value with ''quotes''', 'normal_value');"`,
+      )
 
       await expectGeneratedSQLToBeParseable(result.value)
     })
@@ -1321,7 +1321,7 @@ describe('postgresqlSchemaDeparser', () => {
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
-        "CREATE TYPE "user_status" AS ENUM ('active', 'inactive');
+        "CREATE TYPE user_status AS ENUM ('active', 'inactive');
 
         CREATE TABLE "users" (
           "id" bigint NOT NULL,

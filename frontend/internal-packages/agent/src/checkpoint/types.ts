@@ -8,5 +8,4 @@ export type SerializedCheckpoint = {
   channel_values?: Record<string, unknown>
   channel_versions: Record<string, number | string>
   versions_seen: Record<string, Record<string, number | string>>
-  pending_sends?: unknown[]
 }

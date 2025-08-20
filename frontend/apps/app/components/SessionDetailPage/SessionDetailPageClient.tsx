@@ -29,6 +29,7 @@ type Props = {
   initialVersions: Version[]
   initialWorkflowRunStatus: WorkflowRunStatus | null
   isDeepModelingEnabled: boolean
+  initialIsPublic: boolean
 }
 
 export const SessionDetailPageClient: FC<Props> = ({
@@ -39,6 +40,7 @@ export const SessionDetailPageClient: FC<Props> = ({
   initialVersions,
   initialWorkflowRunStatus,
   isDeepModelingEnabled,
+  initialIsPublic,
 }) => {
   const designSessionId = designSessionWithTimelineItems.id
 
@@ -163,6 +165,7 @@ export const SessionDetailPageClient: FC<Props> = ({
                   onSelectedVersionChange={handleChangeSelectedVersion}
                   activeTab={activeTab}
                   onTabChange={setActiveTab}
+                  initialIsPublic={initialIsPublic}
                 />
               ) : (
                 <Output
@@ -173,6 +176,7 @@ export const SessionDetailPageClient: FC<Props> = ({
                   versions={versions}
                   selectedVersion={selectedVersion}
                   onSelectedVersionChange={handleChangeSelectedVersion}
+                  initialIsPublic={initialIsPublic}
                 />
               )
             ) : (

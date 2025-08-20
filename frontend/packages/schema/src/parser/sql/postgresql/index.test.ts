@@ -991,5 +991,57 @@ describe(processor, () => {
         },
       })
     })
+
+    it('should correctly parse schema-qualified enum types in column definitions', async () => {
+      const { value } = await processor(/* sql */ `
+        CREATE TYPE public.user_status AS ENUM ('active', 'inactive', 'pending');
+
+        CREATE TABLE users (
+          id BIGSERIAL PRIMARY KEY,
+          status public.user_status NOT NULL,
+          name TEXT NOT NULL
+        );
+      `)
+
+      // The enum definition should preserve the full schema-qualified name
+      expect(value.enums).toEqual({
+        'public.user_status': {
+          name: 'public.user_status',
+          values: ['active', 'inactive', 'pending'],
+          comment: null,
+        },
+      })
+
+      // Column type should preserve the full schema-qualified name
+      expect(value.tables['users']?.columns['status']?.type).toBe(
+        'public.user_status',
+      )
+    })
+
+    it('should handle quoted schema-qualified enum types', async () => {
+      const { value } = await processor(/* sql */ `
+        CREATE TYPE "public"."user_status" AS ENUM ('active', 'inactive', 'pending');
+
+        CREATE TABLE IF NOT EXISTS "public"."users" (
+          "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+          "status" "public"."user_status" DEFAULT 'active'::"public"."user_status" NOT NULL,
+          "name" TEXT NOT NULL
+        );
+      `)
+
+      // The enum definition should preserve the full schema-qualified name
+      expect(value.enums).toEqual({
+        'public.user_status': {
+          name: 'public.user_status',
+          values: ['active', 'inactive', 'pending'],
+          comment: null,
+        },
+      })
+
+      // Column type should preserve the full schema-qualified name even when quoted
+      expect(value.tables['users']?.columns['status']?.type).toBe(
+        'public.user_status',
+      )
+    })
   })
 })

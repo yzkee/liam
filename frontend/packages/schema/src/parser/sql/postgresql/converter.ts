@@ -271,14 +271,22 @@ export const convertToSchema = (
 
   /**
    * Extract column type from type name
+   * For schema-qualified types like "public.user_status",
+   * returns the full qualified name "public.user_status"
    */
   function extractColumnType(typeName: { names?: Node[] } | undefined): string {
-    return (
-      typeName?.names
-        ?.filter(isStringNode)
-        .map((n) => n.String.sval)
-        .join('') || ''
-    )
+    const names = typeName?.names
+      ?.filter(isStringNode)
+      .map((n) => n.String.sval)
+      .filter((name): name is string => name !== undefined)
+
+    if (!names || names.length === 0) {
+      return ''
+    }
+
+    // Return full qualified name with dots to preserve schema information
+    // e.g., for "public.user_status", return "public.user_status"
+    return names.join('.')
   }
 
   /**
@@ -796,11 +804,15 @@ export const convertToSchema = (
       const typeName = objectNode.TypeName
       if (!typeName?.names || typeName.names.length === 0) return
 
-      const lastNameNode = typeName.names[typeName.names.length - 1]
-      if (!isStringNode(lastNameNode)) return
+      // Extract full qualified name for schema-qualified enum comments
+      const typeNames = typeName.names
+        .filter(isStringNode)
+        .map((n) => n.String.sval)
+        .filter((name): name is string => name !== undefined)
 
-      const enumName = lastNameNode.String.sval
-      if (!enumName) return
+      if (typeNames.length === 0) return
+
+      const enumName = typeNames.join('.')
 
       // Set comment on existing enum
       if (enums[enumName]) {
@@ -988,12 +1000,15 @@ export const convertToSchema = (
     if (!createEnumStmt?.typeName || createEnumStmt.typeName.length === 0)
       return
 
-    const lastNameNode =
-      createEnumStmt.typeName[createEnumStmt.typeName.length - 1]
-    if (!isStringNode(lastNameNode)) return
+    // Extract full qualified name for schema-qualified enums
+    const typeNames = createEnumStmt.typeName
+      .filter(isStringNode)
+      .map((n) => n.String.sval)
+      .filter((name): name is string => name !== undefined)
 
-    const enumName = lastNameNode.String.sval
-    if (!enumName) return
+    if (typeNames.length === 0) return
+
+    const enumName = typeNames.join('.')
 
     // Extract enum values
     const enumValues: string[] = []

@@ -42,7 +42,14 @@ function escapeTypeIdentifier(type: string): string {
   if (!allPartsSimple) return type
 
   const escaped = parts
-    .map((p) => (/[A-Z]/.test(p) ? escapeIdentifier(p) : p))
+    .map((p, index) => {
+      // Quote if it contains uppercase letters, OR
+      // if it's the type name part (last part) of a schema-qualified type
+      if (/[A-Z]/.test(p) || (index === parts.length - 1 && parts.length > 1)) {
+        return escapeIdentifier(p)
+      }
+      return p
+    })
     .join('.')
 
   return `${escaped}${arraySuffix}`
@@ -449,7 +456,7 @@ export function generateDropCheckConstraintStatement(
  * Generate CREATE TYPE AS ENUM statement for an enum
  */
 export function generateCreateEnumStatement(enumObj: Enum): string {
-  const enumName = escapeIdentifier(enumObj.name)
+  const enumName = escapeTypeIdentifier(enumObj.name)
   const enumValues = enumObj.values
     .map((value) => `'${escapeString(value)}'`)
     .join(', ')

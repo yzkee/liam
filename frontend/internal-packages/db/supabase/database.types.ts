@@ -169,6 +169,176 @@ export type Database = {
           },
         ]
       }
+      checkpoint_blobs: {
+        Row: {
+          blob: string | null
+          channel: string
+          checkpoint_ns: string
+          created_at: string | null
+          id: string
+          organization_id: string
+          thread_id: string
+          type: string
+          version: string
+        }
+        Insert: {
+          blob?: string | null
+          channel: string
+          checkpoint_ns?: string
+          created_at?: string | null
+          id?: string
+          organization_id: string
+          thread_id: string
+          type: string
+          version: string
+        }
+        Update: {
+          blob?: string | null
+          channel?: string
+          checkpoint_ns?: string
+          created_at?: string | null
+          id?: string
+          organization_id?: string
+          thread_id?: string
+          type?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'checkpoint_blobs_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      checkpoint_migrations: {
+        Row: {
+          created_at: string | null
+          id: string
+          organization_id: string
+          v: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          organization_id: string
+          v: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          organization_id?: string
+          v?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'checkpoint_migrations_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      checkpoint_writes: {
+        Row: {
+          blob: string
+          channel: string
+          checkpoint_id: string
+          checkpoint_ns: string
+          created_at: string | null
+          id: string
+          idx: number
+          organization_id: string
+          task_id: string
+          thread_id: string
+          type: string | null
+        }
+        Insert: {
+          blob: string
+          channel: string
+          checkpoint_id: string
+          checkpoint_ns?: string
+          created_at?: string | null
+          id?: string
+          idx: number
+          organization_id: string
+          task_id: string
+          thread_id: string
+          type?: string | null
+        }
+        Update: {
+          blob?: string
+          channel?: string
+          checkpoint_id?: string
+          checkpoint_ns?: string
+          created_at?: string | null
+          id?: string
+          idx?: number
+          organization_id?: string
+          task_id?: string
+          thread_id?: string
+          type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'checkpoint_writes_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      checkpoints: {
+        Row: {
+          checkpoint: Json
+          checkpoint_id: string
+          checkpoint_ns: string
+          created_at: string | null
+          id: string
+          metadata: Json
+          organization_id: string
+          parent_checkpoint_id: string | null
+          thread_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          checkpoint: Json
+          checkpoint_id: string
+          checkpoint_ns?: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json
+          organization_id: string
+          parent_checkpoint_id?: string | null
+          thread_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          checkpoint?: Json
+          checkpoint_id?: string
+          checkpoint_ns?: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json
+          organization_id?: string
+          parent_checkpoint_id?: string | null
+          thread_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'checkpoints_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       design_sessions: {
         Row: {
           created_at: string
@@ -269,44 +439,6 @@ export type Database = {
             columns: ['project_id']
             isOneToOne: false
             referencedRelation: 'projects'
-            referencedColumns: ['id']
-          },
-        ]
-      }
-      documents: {
-        Row: {
-          content: string
-          created_at: string
-          embedding: string | null
-          id: string
-          metadata: Json | null
-          organization_id: string
-          updated_at: string
-        }
-        Insert: {
-          content: string
-          created_at?: string
-          embedding?: string | null
-          id?: string
-          metadata?: Json | null
-          organization_id: string
-          updated_at: string
-        }
-        Update: {
-          content?: string
-          created_at?: string
-          embedding?: string | null
-          id?: string
-          metadata?: Json | null
-          organization_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'documents_organization_id_fkey'
-            columns: ['organization_id']
-            isOneToOne: false
-            referencedRelation: 'organizations'
             referencedColumns: ['id']
           },
         ]
@@ -919,6 +1051,29 @@ export type Database = {
           },
         ]
       }
+      public_share_settings: {
+        Row: {
+          created_at: string
+          design_session_id: string
+        }
+        Insert: {
+          created_at?: string
+          design_session_id: string
+        }
+        Update: {
+          created_at?: string
+          design_session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'public_share_settings_design_session_id_fkey'
+            columns: ['design_session_id']
+            isOneToOne: true
+            referencedRelation: 'design_sessions'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       review_feedback_comments: {
         Row: {
           content: string
@@ -1494,20 +1649,6 @@ export type Database = {
       l2_normalize: {
         Args: { '': string } | { '': unknown } | { '': unknown }
         Returns: string
-      }
-      match_documents: {
-        Args: {
-          filter?: Json
-          match_count?: number
-          query_embedding?: string
-          match_threshold?: number
-        }
-        Returns: {
-          id: string
-          content: string
-          metadata: Json
-          similarity: number
-        }[]
       }
       sparsevec_out: {
         Args: { '': unknown }

@@ -22,7 +22,7 @@ export const DeepModelingToggle: FC<Props> = ({
   className,
   children,
   name,
-  defaultChecked = false,
+  defaultChecked = true,
   onClick,
   ref,
   ...props

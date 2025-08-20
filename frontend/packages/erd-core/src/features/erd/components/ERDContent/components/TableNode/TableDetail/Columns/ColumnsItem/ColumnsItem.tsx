@@ -1,65 +1,63 @@
-import {
-  type Column,
-  type Constraints,
-  isPrimaryKey,
-} from '@liam-hq/db-structure'
-import {
-  DiamondFillIcon,
-  DiamondIcon,
-  GridTableDd,
-  GridTableDt,
-  GridTableItem,
-  GridTableRoot,
-  GridTableRow,
-  KeyRound,
-} from '@liam-hq/ui'
-import type { FC } from 'react'
+import type { Column, Constraints } from '@liam-hq/schema'
+import { GridTableRoot } from '@liam-hq/ui'
+import clsx from 'clsx'
+import { type FC, useMemo } from 'react'
+import { useDiffStyle } from '@/features/diff/hooks/useDiffStyle'
+import { useSchemaOrThrow, useUserEditingOrThrow } from '@/stores'
 import styles from './ColumnsItem.module.css'
+import { Comment } from './Comment'
+import { Default } from './Default'
+import { getChangeStatus } from './getChangeStatus'
+import { NotNull } from './NotNull'
+import { PrimaryKey } from './PrimaryKey'
+import { Type } from './Type'
 
 type Props = {
+  tableId: string
   column: Column
   constraints: Constraints
 }
 
-export const ColumnsItem: FC<Props> = ({ column, constraints }) => {
+export const ColumnsItem: FC<Props> = ({ tableId, column, constraints }) => {
+  const { operations } = useSchemaOrThrow()
+  const { showDiff } = useUserEditingOrThrow()
+
+  const changeStatus = useMemo(() => {
+    if (!showDiff) return undefined
+    return getChangeStatus({
+      tableId,
+      operations: operations ?? [],
+      columnId: column.name,
+    })
+  }, [showDiff, tableId, operations])
+
+  const diffStyle = useDiffStyle(showDiff, changeStatus)
+
+  const constraint = useMemo(
+    () =>
+      Object.values(constraints).find(
+        (constraint) =>
+          constraint.type === 'PRIMARY KEY' &&
+          constraint.columnNames.includes(column.name),
+      ),
+    [constraints],
+  )
+
   return (
-    <div className={styles.wrapper}>
+    <div className={clsx(styles.wrapper, diffStyle)}>
       <h3 className={styles.heading}>{column.name}</h3>
-      {column.comment && <p className={styles.comment}>{column.comment}</p>}
+      {column.comment && <Comment tableId={tableId} column={column} />}
       <GridTableRoot>
-        <GridTableItem>
-          <GridTableDt>Type</GridTableDt>
-          <GridTableDd>{column.type}</GridTableDd>
-        </GridTableItem>
-        {column.default !== null && (
-          <GridTableItem>
-            <GridTableDt>Default</GridTableDt>
-            <GridTableDd>{column.default}</GridTableDd>
-          </GridTableItem>
+        <Type tableId={tableId} column={column} />
+        <Default tableId={tableId} column={column} />
+        {constraint && (
+          <PrimaryKey
+            tableId={tableId}
+            columnName={column.name}
+            constraintName={constraint.name}
+          />
         )}
-        {isPrimaryKey(column.name, constraints) && (
-          <GridTableItem>
-            <GridTableRow>
-              <KeyRound className={styles.primaryKeyIcon} />
-              Primary Key
-            </GridTableRow>
-          </GridTableItem>
-        )}
-        {column.notNull ? (
-          <GridTableItem>
-            <GridTableRow>
-              <DiamondFillIcon className={styles.diamondIcon} />
-              Not-null
-            </GridTableRow>
-          </GridTableItem>
-        ) : (
-          <GridTableItem>
-            <GridTableRow>
-              <DiamondIcon className={styles.diamondIcon} />
-              Nullable
-            </GridTableRow>
-          </GridTableItem>
-        )}
+        <NotNull tableId={tableId} column={column} />
       </GridTableRoot>
     </div>
   )

@@ -2,6 +2,7 @@ import { LiamLogoMark } from '@liam-hq/ui'
 import { cookies } from 'next/headers'
 import { EmailForm } from './EmailForm'
 import styles from './LoginPage.module.css'
+import { LogoutToast } from './LogoutToast'
 import { SignInGithubButton } from './SignInGithubButton'
 
 export async function LoginPage() {
@@ -16,11 +17,12 @@ export async function LoginPage() {
 
   return (
     <div className={styles.container}>
+      <LogoutToast />
       <div className={styles.cardContainer}>
         <div className={styles.card}>
           <div className={styles.titleWrapper}>
             <LiamLogoMark className={styles.logoMark} />
-            <h1 className={styles.title}>Sign in to Liam Migration</h1>
+            <h1 className={styles.title}>Sign in to Liam DB</h1>
           </div>
 
           <div className={styles.oauthList}>

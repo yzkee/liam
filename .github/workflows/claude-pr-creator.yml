@@ -42,7 +42,7 @@ jobs:
         run: bash .github/scripts/setup-claude.sh
 
       - name: Run Claude Code Action
-        uses: anthropics/claude-code-action@7c5a98d59d2464ae73f453c3e649f5b813374481 # beta
+        uses: anthropics/claude-code-action@78b07473f50218c6494719ef164ed1ebd31da25c # beta
         id: claude-code
         env:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
@@ -52,6 +52,7 @@ jobs:
           github_token: ${{ steps.app-token.outputs.token }}
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           timeout_minutes: 60
+          allowed_bots: "liam-claude-code-action-bot[bot]"
           additional_permissions: |
             actions: read
           custom_instructions: |

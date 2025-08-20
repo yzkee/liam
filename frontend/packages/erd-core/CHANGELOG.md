@@ -1,5 +1,21 @@
 # @liam-hq/erd-core
 
+## 0.6.1
+
+### Patch Changes
+
+- [#2945](https://github.com/liam-hq/liam/pull/2945) - 🐛fix(regression): Restore broken column highlighting in TableColumn / Thanks [@FunamaYukina](https://github.com/FunamaYukina)!
+- [#2942](https://github.com/liam-hq/liam/pull/2942) - 💄 update Toast style, be singleton and appearing from the bottom / Thanks [@tnyo43](https://github.com/tnyo43)!
+
+## 0.6.0
+
+### Minor Changes
+
+- [#2852](https://github.com/liam-hq/liam/pull/2852) - ✨ add CommandPalette component / Thanks [@tnyo43](https://github.com/tnyo43)!
+- open with ⌘K / Ctrl+K
+- search tables
+- click to view in ERD
+
 ## 0.5.0
 
 ### Minor Changes

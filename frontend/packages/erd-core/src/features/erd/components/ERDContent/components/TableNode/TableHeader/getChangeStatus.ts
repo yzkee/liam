@@ -1,34 +1,58 @@
 import {
   type ChangeStatus,
-  columnRelatedDiffItemSchema,
-  type SchemaDiffItem,
-  tableRelatedDiffItemSchema,
-} from '@liam-hq/db-structure'
-import { safeParse } from 'valibot'
+  getColumnRelatedChangeStatus,
+  getConstraintRelatedChangeStatus,
+  getIndexRelatedChangeStatus,
+  getTableRelatedChangeStatus,
+  type Operation,
+} from '@liam-hq/schema'
 
 type Params = {
   tableId: string
-  diffItems: SchemaDiffItem[]
+  operations: Operation[]
 }
 
-export function getChangeStatus({ tableId, diffItems }: Params): ChangeStatus {
-  const filteredDiffItems = diffItems.filter((d) => d.tableId === tableId)
-
-  const tableRelatedItem = filteredDiffItems.find((item) => {
-    const parsed = safeParse(tableRelatedDiffItemSchema, item)
-    return parsed.success
-  })
-
-  if (tableRelatedItem) {
-    return tableRelatedItem.status
+/**
+ *
+ * Priority order for status determination:
+ *
+ * 1. Table-level changes
+ *    - Table addition/deletion → returns 'added'/'removed'
+ *    - Table name or comment changes → returns 'modified'
+ *
+ * 2. Column-level changes
+ *    - Any column changes → returns 'modified'
+ *
+ * 3. Index-level changes
+ *    - Any index changes → returns 'modified'
+ *
+ * 4. Constraint-level changes
+ *    - Any constraint changes → returns 'modified'
+ *
+ * 5. No changes
+ *    - None of the above → returns 'unchanged'
+ */
+export function getChangeStatus({ tableId, operations }: Params): ChangeStatus {
+  const tableStatus = getTableRelatedChangeStatus({ tableId, operations })
+  if (tableStatus !== 'unchanged') {
+    return tableStatus
   }
 
-  const hasColumnRelatedItem = filteredDiffItems.some((item) => {
-    const parsed = safeParse(columnRelatedDiffItemSchema, item)
-    return parsed.success
-  })
+  const hasColumnChanges =
+    getColumnRelatedChangeStatus({ tableId, operations }) !== 'unchanged'
+  if (hasColumnChanges) {
+    return 'modified'
+  }
 
-  if (hasColumnRelatedItem) {
+  const hasIndexChanges =
+    getIndexRelatedChangeStatus({ tableId, operations }) !== 'unchanged'
+  if (hasIndexChanges) {
+    return 'modified'
+  }
+
+  const hasConstraintChanges =
+    getConstraintRelatedChangeStatus({ tableId, operations }) !== 'unchanged'
+  if (hasConstraintChanges) {
     return 'modified'
   }
 

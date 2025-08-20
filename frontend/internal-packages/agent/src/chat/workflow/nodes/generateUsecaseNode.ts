@@ -4,13 +4,12 @@ import type { Database } from '@liam-hq/db'
 import { ResultAsync } from 'neverthrow'
 import { QAGenerateUsecaseAgent } from '../../../langchain/agents'
 import type { Repositories } from '../../../repositories'
+import { WorkflowTerminationError } from '../../../shared/errorHandling'
+import { removeReasoningFromMessages } from '../../../utils/messageCleanup'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 import { logAssistantMessage } from '../utils/timelineLogger'
-import {
-  createOrUpdateArtifact,
-  transformWorkflowStateToArtifact,
-} from '../utils/transformWorkflowStateToArtifact'
+import { transformWorkflowStateToArtifact } from '../utils/transformWorkflowStateToArtifact'
 import { withTimelineItemSync } from '../utils/withTimelineItemSync'
 
 /**
@@ -26,13 +25,12 @@ async function saveArtifacts(
   }
 
   const artifact = transformWorkflowStateToArtifact(state)
-  const artifactResult = await createOrUpdateArtifact(
-    state,
+  const artifactResult = await repositories.schema.upsertArtifact({
+    designSessionId: state.designSessionId,
     artifact,
-    repositories,
-  )
+  })
 
-  if (artifactResult.success) {
+  if (artifactResult.isOk()) {
     await logAssistantMessage(
       state,
       repositories,
@@ -60,10 +58,10 @@ export async function generateUsecaseNode(
   const assistantRole: Database['public']['Enums']['assistant_role_enum'] = 'qa'
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
-    return {
-      ...state,
-      error: configurableResult.error,
-    }
+    throw new WorkflowTerminationError(
+      configurableResult.error,
+      'generateUsecaseNode',
+    )
   }
   const { repositories } = configurableResult.value
 
@@ -86,19 +84,20 @@ export async function generateUsecaseNode(
       assistantRole,
     )
 
-    return {
-      ...state,
-      error: new Error(errorMessage),
-    }
+    throw new WorkflowTerminationError(
+      new Error(errorMessage),
+      'generateUsecaseNode',
+    )
   }
 
   const qaAgent = new QAGenerateUsecaseAgent()
 
-  const retryCount = state.retryCount['generateUsecaseNode'] ?? 0
+  // Remove reasoning field from AIMessages to avoid API issues
+  // This prevents the "reasoning without required following item" error
+  const cleanedMessages = removeReasoningFromMessages(state.messages)
 
-  // Use state.messages directly - includes error messages and all context
   const usecaseResult = await ResultAsync.fromPromise(
-    qaAgent.generate(state.messages),
+    qaAgent.generate(cleanedMessages),
     (error) => (error instanceof Error ? error : new Error(String(error))),
   )
 
@@ -134,7 +133,6 @@ export async function generateUsecaseNode(
         ...state,
         messages: [usecaseMessage],
         generatedUsecases: response.usecases,
-        error: undefined, // Clear error on success
       }
 
       // Save artifacts if usecases are successfully generated
@@ -150,15 +148,7 @@ export async function generateUsecaseNode(
         assistantRole,
       )
 
-      // Increment retry count and set error
-      return {
-        ...state,
-        error: error,
-        retryCount: {
-          ...state.retryCount,
-          ['generateUsecaseNode']: retryCount + 1,
-        },
-      }
+      throw new WorkflowTerminationError(error, 'generateUsecaseNode')
     },
   )
 }

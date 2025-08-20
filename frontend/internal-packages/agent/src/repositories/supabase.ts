@@ -1,17 +1,19 @@
+import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
 import type { Artifact } from '@liam-hq/artifact'
 import { artifactSchema } from '@liam-hq/artifact'
-import type { SupabaseClientType } from '@liam-hq/db'
-import type { Json } from '@liam-hq/db/supabase/database.types'
-import type { Schema } from '@liam-hq/db-structure'
+import { type SupabaseClientType, toResultAsync } from '@liam-hq/db'
+import type { Json, Tables } from '@liam-hq/db/supabase/database.types'
+import type { SqlResult } from '@liam-hq/pglite-server/src/types'
+import type { Schema } from '@liam-hq/schema'
 import {
   applyPatchOperations,
   operationsSchema,
   schemaSchema,
-} from '@liam-hq/db-structure'
-import type { SqlResult } from '@liam-hq/pglite-server/src/types'
+} from '@liam-hq/schema'
 import { compare } from 'fast-json-patch'
 import { errAsync, okAsync, ResultAsync } from 'neverthrow'
 import * as v from 'valibot'
+import { SupabaseCheckpointSaver } from '../checkpoint/SupabaseCheckpointSaver'
 import { ensurePathStructure } from '../utils/pathPreparation'
 import type {
   ArtifactResult,
@@ -38,13 +40,18 @@ const artifactToJson = (artifact: Artifact): Json => {
 }
 
 /**
- * Supabase implementation of SchemaRepository
+ * Supabase implementation of SchemaRepository with checkpoint functionality
  */
 export class SupabaseSchemaRepository implements SchemaRepository {
   private client: SupabaseClientType
+  public checkpointer: BaseCheckpointSaver
 
-  constructor(client: SupabaseClientType) {
+  constructor(client: SupabaseClientType, organizationId: string) {
     this.client = client
+    this.checkpointer = new SupabaseCheckpointSaver({
+      client: this.client,
+      options: { organizationId },
+    })
   }
 
   async getDesignSession(
@@ -167,7 +174,7 @@ export class SupabaseSchemaRepository implements SchemaRepository {
       typeof buildingSchema.initial_schema_snapshot === 'object' &&
       buildingSchema.initial_schema_snapshot !== null
         ? JSON.parse(JSON.stringify(buildingSchema.initial_schema_snapshot))
-        : { tables: {} }
+        : { tables: {}, enums: {} }
 
     for (const version of versions) {
       const patchParsed = v.safeParse(operationsSchema, version.patch)
@@ -182,7 +189,16 @@ export class SupabaseSchemaRepository implements SchemaRepository {
           )
           continue
         }
-        applyPatchOperations(currentSchema, patchParsed.output)
+        const patchResult = applyPatchOperations(
+          currentSchema,
+          patchParsed.output,
+        )
+        if (patchResult.isOk()) {
+          // Update currentSchema with the patched result
+          Object.assign(currentSchema, patchResult.value)
+        } else {
+          // Failed to apply patch for this version, continue with next
+        }
       } else {
         console.warn(
           `Invalid patch operations in version ${version.number}:`,
@@ -194,8 +210,8 @@ export class SupabaseSchemaRepository implements SchemaRepository {
     // Validate and return as Schema type
     const validationResult = v.safeParse(schemaSchema, currentSchema)
     if (!validationResult.success) {
-      console.warn('Schema validation failed, using fallback schema')
-      return { tables: {} }
+      // Schema validation failed, using fallback schema
+      return { tables: {}, enums: {} }
     }
 
     return validationResult.output
@@ -551,6 +567,28 @@ export class SupabaseSchemaRepository implements SchemaRepository {
       success: true,
       artifact: artifactData,
     }
+  }
+
+  upsertArtifact(
+    params: CreateArtifactParams,
+  ): ResultAsync<Tables<'artifacts'>, Error> {
+    const { designSessionId, artifact } = params
+
+    return toResultAsync(
+      this.client
+        .from('artifacts')
+        .upsert(
+          {
+            design_session_id: designSessionId,
+            artifact: artifactToJson(artifact),
+          },
+          {
+            onConflict: 'design_session_id',
+          },
+        )
+        .select()
+        .single(),
+    )
   }
 
   async getArtifact(designSessionId: string): Promise<ArtifactResult> {

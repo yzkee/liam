@@ -2,7 +2,7 @@ import type { BaseMessage } from '@langchain/core/messages'
 import { ToolMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { ToolNode } from '@langchain/langgraph/prebuilt'
-import { postgresqlSchemaDeparser, type Schema } from '@liam-hq/db-structure'
+import { postgresqlSchemaDeparser, type Schema } from '@liam-hq/schema'
 import type { ResultAsync } from 'neverthrow'
 import { getConfigurable } from '../../chat/workflow/shared/getConfigurable'
 import type { WorkflowState } from '../../chat/workflow/types'
@@ -104,6 +104,10 @@ export const invokeSchemaDesignToolNode = async (
     if (schemaResult.isOk()) {
       // Generate DDL statements from the updated schema
       const ddlResult = postgresqlSchemaDeparser(schemaResult.value.schema)
+
+      // Check for DDL generation errors without logging
+      // Errors are handled by returning undefined ddlStatements
+
       const ddlStatements =
         ddlResult.errors.length > 0 ? undefined : ddlResult.value
 

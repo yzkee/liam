@@ -17,13 +17,12 @@ describe('validateSchemaNode', () => {
     return {
       messages: [],
       userInput: 'test',
-      schemaData: { tables: {} },
+      schemaData: { tables: {}, enums: {} },
       buildingSchemaId: 'test-id',
       latestVersionNumber: 1,
       organizationId: 'test-org-id',
       userId: 'user-id',
       designSessionId: 'session-id',
-      retryCount: {},
       ...overrides,
     }
   }
@@ -46,7 +45,7 @@ describe('validateSchemaNode', () => {
 
     const repositories = createRepositories()
     const result = await validateSchemaNode(state, {
-      configurable: { repositories },
+      configurable: { repositories, thread_id: 'test-thread' },
     })
 
     expect(executeQuery).not.toHaveBeenCalled()
@@ -71,14 +70,6 @@ describe('validateSchemaNode', () => {
 
     const state = createMockState({
       ddlStatements: '',
-      dmlOperations: [
-        {
-          useCaseId: 'usecase-1',
-          operation_type: 'INSERT',
-          sql: 'INSERT INTO users VALUES (1, "test");',
-          dml_execution_logs: [],
-        },
-      ],
       generatedUsecases: [
         {
           id: 'usecase-1',
@@ -101,7 +92,7 @@ describe('validateSchemaNode', () => {
 
     const repositories = createRepositories()
     const result = await validateSchemaNode(state, {
-      configurable: { repositories },
+      configurable: { repositories, thread_id: 'test-thread' },
     })
 
     expect(executeQuery).toHaveBeenCalledWith(
@@ -134,7 +125,7 @@ describe('validateSchemaNode', () => {
 
     const repositories = createRepositories()
     const result = await validateSchemaNode(state, {
-      configurable: { repositories },
+      configurable: { repositories, thread_id: 'test-thread' },
     })
 
     expect(executeQuery).toHaveBeenCalledWith(
@@ -177,14 +168,6 @@ describe('validateSchemaNode', () => {
 
     const state = createMockState({
       ddlStatements: 'CREATE TABLE users (id INT);',
-      dmlOperations: [
-        {
-          useCaseId: 'usecase-1',
-          operation_type: 'INSERT',
-          sql: 'INSERT INTO users VALUES (1);',
-          dml_execution_logs: [],
-        },
-      ],
       generatedUsecases: [
         {
           id: 'usecase-1',
@@ -207,7 +190,7 @@ describe('validateSchemaNode', () => {
 
     const repositories = createRepositories()
     const result = await validateSchemaNode(state, {
-      configurable: { repositories },
+      configurable: { repositories, thread_id: 'test-thread' },
     })
 
     expect(executeQuery).toHaveBeenCalledTimes(2)
@@ -264,14 +247,6 @@ describe('validateSchemaNode', () => {
 
     const state = createMockState({
       ddlStatements: 'CREATE TABLE users (id INT);',
-      dmlOperations: [
-        {
-          useCaseId: 'usecase-1',
-          operation_type: 'INSERT',
-          sql: 'INSERT INTO invalid_table VALUES (1);',
-          dml_execution_logs: [],
-        },
-      ],
       generatedUsecases: [
         {
           id: 'usecase-1',
@@ -294,7 +269,7 @@ describe('validateSchemaNode', () => {
 
     const repositories = createRepositories()
     const result = await validateSchemaNode(state, {
-      configurable: { repositories },
+      configurable: { repositories, thread_id: 'test-thread' },
     })
 
     expect(result.dmlExecutionSuccessful).toBeUndefined()
@@ -310,10 +285,79 @@ describe('validateSchemaNode', () => {
 
     const repositories = createRepositories()
     const result = await validateSchemaNode(state, {
-      configurable: { repositories },
+      configurable: { repositories, thread_id: 'test-thread' },
     })
 
     expect(executeQuery).not.toHaveBeenCalled()
     expect(result).toEqual(state)
+  })
+
+  it('should execute DML operations from each usecase', async () => {
+    // This test verifies that validateSchemaNode executes DML operations
+    // found in each usecase's dmlOperations array
+
+    const sqlResults: SqlResult[] = [
+      {
+        success: true,
+        sql: 'INSERT INTO users VALUES (1, "test");',
+        result: { rows: [], columns: [] },
+        id: 'result-1',
+        metadata: {
+          executionTime: 5,
+          timestamp: new Date().toISOString(),
+        },
+      },
+    ]
+
+    vi.mocked(executeQuery).mockResolvedValue(sqlResults)
+
+    const state = createMockState({
+      ddlStatements: '',
+      dmlStatements: 'INSERT INTO users VALUES (1, "test");',
+      generatedUsecases: [
+        {
+          id: 'usecase-1',
+          requirementType: 'functional',
+          requirementCategory: 'data_management',
+          requirement: 'Insert user data',
+          title: 'Insert User',
+          description: 'Insert a new user record',
+          dmlOperations: [
+            {
+              useCaseId: 'usecase-1',
+              operation_type: 'INSERT',
+              sql: 'INSERT INTO users VALUES (1, "test");',
+              dml_execution_logs: [],
+            },
+          ],
+        },
+      ],
+    })
+
+    const repositories = createRepositories()
+    const result = await validateSchemaNode(state, {
+      configurable: { repositories, thread_id: 'test-thread' },
+    })
+
+    // Verify that DML operations were executed
+    expect(executeQuery).toHaveBeenCalledWith(
+      'session-id',
+      expect.stringContaining('INSERT INTO users VALUES (1, "test");'),
+    )
+
+    // Verify execution was successful
+    expect(result.dmlExecutionSuccessful).toBe(true)
+
+    // Verify execution logs were added to the usecase's DML operations
+    expect(result.generatedUsecases).toBeDefined()
+    const firstUsecase = result.generatedUsecases?.[0]
+    expect(firstUsecase).toBeDefined()
+    expect(firstUsecase?.dmlOperations).toBeDefined()
+    const firstDmlOp = firstUsecase?.dmlOperations?.[0]
+    expect(firstDmlOp).toBeDefined()
+    expect(firstDmlOp?.dml_execution_logs).toBeDefined()
+    const executionLogs = firstDmlOp?.dml_execution_logs!
+    expect(executionLogs).toHaveLength(1)
+    expect(executionLogs[0]?.success).toBe(true)
   })
 })

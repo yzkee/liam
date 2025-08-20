@@ -1,5 +1,43 @@
 # @liam-hq/cli
 
+## 0.7.3
+
+### Patch Changes
+
+- [#3004](https://github.com/liam-hq/liam/pull/3004) - - ✨ Add Windows backslash path support to CLI / Thanks [@hoshinotsuyoshi](https://github.com/hoshinotsuyoshi)!
+  - Enable Windows users to use native backslash paths (e.g., `prisma\schema.prisma`) with the CLI tool. The implementation converts backslashes to forward slashes on Windows only, preserving the ability to use backslashes in filenames on Linux/macOS systems.
+
+## 0.7.2
+
+### Patch Changes
+
+- [#2945](https://github.com/liam-hq/liam/pull/2945) - 🐛fix(regression): Restore broken column highlighting in TableColumn / Thanks [@FunamaYukina](https://github.com/FunamaYukina)!
+
+## 0.7.1
+
+### Patch Changes
+
+- [#2897](https://github.com/liam-hq/liam/pull/2897) - - 💥 Rename package from @liam-hq/db-structure to @liam-hq/schema / Thanks [@devin-ai-integration](https://github.com/apps/devin-ai-integration)!
+  - Package name changed for better clarity and consistency
+  - Directory structure updated from `frontend/packages/db-structure/` to `frontend/packages/schema/`
+  - All import statements updated from `@liam-hq/db-structure` to `@liam-hq/schema`
+
+## 0.7.0
+
+### Minor Changes
+
+- [#2867](https://github.com/liam-hq/liam/pull/2867) - - ✨ Enhanced generated ERD files with CommandPalette / Thanks [@MH4GF](https://github.com/MH4GF)!
+  - CLI-generated ERD files now include search functionality (⌘K / Ctrl+K)
+  - Improved user experience for exploring large database schemas
+  - Better accessibility and navigation in generated static HTML files
+
+### Patch Changes
+
+- [#2852](https://github.com/liam-hq/liam/pull/2852) - ✨ add CommandPalette component / Thanks [@tnyo43](https://github.com/tnyo43)!
+- open with ⌘K / Ctrl+K
+- search tables
+- click to view in ERD
+
 ## 0.6.6
 
 ### Patch Changes

@@ -1,20 +1,19 @@
-import type { Constraints as ConstraintsType } from '@liam-hq/db-structure'
-import { Check, Fingerprint, KeyRound, Link, Lock } from '@liam-hq/ui'
-import { clsx } from 'clsx'
+import type { Table } from '@liam-hq/schema'
+import { Lock } from '@liam-hq/ui'
 import type React from 'react'
 import { CollapsibleHeader } from '../CollapsibleHeader'
-import { CheckConstraintsItem } from './CheckConstraintsItem'
-import styles from './Constraints.module.css'
-import { ForeignKeyConstraintsItem } from './ForeignKeyConstraintsItem'
-import { PrimaryKeyConstraintsItem } from './PrimaryKeyConstraintsItem'
-import { UniqueConstraintsItem } from './Unique'
+import { CheckConstraints } from './CheckConstraints'
+import { ForeignKeyConstraints } from './ForeignKeyConstraints'
+import { PrimaryKeyConstraints } from './PrimaryKeyConstraints'
+import { UniqueConstraints } from './UniqueConstraints'
 
 type Props = {
-  constraints: ConstraintsType
+  table: Table
 }
 
-export const Constraints: React.FC<Props> = ({ constraints: _constraints }) => {
-  const constraints = Object.values(_constraints)
+export const Constraints: React.FC<Props> = ({ table }) => {
+  const tableId = table.name
+  const constraints = Object.values(table.constraints)
 
   const primaryKeyConstraints = constraints.filter(
     (constraint) => constraint.type === 'PRIMARY KEY',
@@ -42,72 +41,24 @@ export const Constraints: React.FC<Props> = ({ constraints: _constraints }) => {
       stickyTopHeight={82}
       contentMaxHeight={contentMaxHeight}
     >
-      {primaryKeyConstraints.length >= 1 ? (
-        <div className={styles.itemWrapper}>
-          <h3 className={styles.sectionTitle}>
-            <KeyRound
-              className={clsx(
-                styles.constraintsIcon,
-                styles.primaryConstraintsIcon,
-              )}
-            />
-            Primary key
-          </h3>
-          {primaryKeyConstraints.map((constraint) => (
-            <PrimaryKeyConstraintsItem
-              key={constraint.name}
-              primaryKeyConstraint={constraint}
-            />
-          ))}
-        </div>
-      ) : null}
-      {foreignKeyConstraints.length >= 1 ? (
-        <div className={styles.itemWrapper}>
-          <h3 className={styles.sectionTitle}>
-            <Link
-              className={clsx(
-                styles.constraintsIcon,
-                styles.primaryConstraintsIcon,
-              )}
-            />
-            Foreign key
-          </h3>
-          {foreignKeyConstraints.map((constraint) => (
-            <ForeignKeyConstraintsItem
-              key={constraint.name}
-              foreignKeyConstraint={constraint}
-            />
-          ))}
-        </div>
-      ) : null}
-      {uniqueConstraints.length >= 1 ? (
-        <div className={styles.itemWrapper}>
-          <h3 className={styles.sectionTitle}>
-            <Fingerprint className={styles.constraintsIcon} />
-            Unique
-          </h3>
-          {uniqueConstraints.map((constraint) => (
-            <UniqueConstraintsItem
-              key={constraint.name}
-              uniqueConstraint={constraint}
-            />
-          ))}
-        </div>
-      ) : null}
-      {checkConstraints.length >= 1 ? (
-        <div className={styles.itemWrapper}>
-          <h3 className={styles.sectionTitle}>
-            <Check className={styles.constraintsIcon} />
-            Check
-          </h3>
-          {checkConstraints.map((constraint) => (
-            <CheckConstraintsItem
-              key={constraint.name}
-              checkConstraint={constraint}
-            />
-          ))}
-        </div>
-      ) : null}
+      {primaryKeyConstraints.length > 0 && (
+        <PrimaryKeyConstraints
+          tableId={tableId}
+          constraints={primaryKeyConstraints}
+        />
+      )}
+      {foreignKeyConstraints.length > 0 && (
+        <ForeignKeyConstraints
+          tableId={tableId}
+          constraints={foreignKeyConstraints}
+        />
+      )}
+      {uniqueConstraints.length > 0 && (
+        <UniqueConstraints tableId={tableId} constraints={uniqueConstraints} />
+      )}
+      {checkConstraints.length > 0 && (
+        <CheckConstraints tableId={tableId} constraints={checkConstraints} />
+      )}
     </CollapsibleHeader>
   )
 }

@@ -1,43 +1,46 @@
 import {
   type ChangeStatus,
-  type ColumnRelatedDiffItem,
-  columnRelatedDiffItemSchema,
-  type SchemaDiffItem,
-  tableRelatedDiffItemSchema,
-} from '@liam-hq/db-structure'
-import { safeParse } from 'valibot'
-
-const isColumnRelatedDiffItem = (
-  item: SchemaDiffItem,
-): item is ColumnRelatedDiffItem => {
-  return safeParse(columnRelatedDiffItemSchema, item).success
-}
+  getColumnRelatedChangeStatus,
+  getTableRelatedChangeStatus,
+  type Operation,
+} from '@liam-hq/schema'
 
 type Params = {
   tableId: string
   columnId: string
-  diffItems: SchemaDiffItem[]
+  operations: Operation[]
 }
 
+/**
+ *
+ * Priority order for status determination:
+ *
+ * 1. Table-level changes
+ *    - Table addition/deletion → returns 'added'/'removed'
+ *    - If the table itself has been added or removed, return that status immediately
+ *
+ * 2. Column-level changes
+ *    - Column addition → returns 'added'
+ *    - Column deletion → returns 'removed'
+ *    - Column property changes (name, type, etc.) → returns 'modified'
+ *
+ * 3. No changes
+ *    - None of the above → returns 'unchanged'
+ */
 export function getChangeStatus({
   tableId,
   columnId,
-  diffItems,
+  operations,
 }: Params): ChangeStatus {
-  const tableRelatedItems = diffItems.filter((d) => d.tableId === tableId)
-  const tableRelatedItem = tableRelatedItems.find((item) => {
-    const parsed = safeParse(tableRelatedDiffItemSchema, item)
-    return parsed.success
-  })
-
-  if (tableRelatedItem) {
-    return tableRelatedItem.status
+  const tableStatus = getTableRelatedChangeStatus({ tableId, operations })
+  if (tableStatus === 'added' || tableStatus === 'removed') {
+    return tableStatus
   }
 
-  const filteredDiffItems = diffItems.filter((d) => isColumnRelatedDiffItem(d))
-  const columnRelatedItem = filteredDiffItems.find(
-    (d) => d.tableId === tableId && d.columnId === columnId,
-  )
-
-  return columnRelatedItem?.status ?? 'unchanged'
+  const columnStatus = getColumnRelatedChangeStatus({
+    tableId,
+    columnId,
+    operations,
+  })
+  return columnStatus
 }

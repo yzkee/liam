@@ -11,22 +11,3 @@
   font-weight: 400;
   line-height: normal;
 }
-
-.comment {
-  color: var(--color-white-alpha-70);
-  font-size: var(--font-size-2);
-  font-style: normal;
-  line-height: 150%;
-}
-
-.primaryKeyIcon {
-  width: 0.75rem;
-  height: 0.75rem;
-  color: var(--primary-accent);
-}
-
-.diamondIcon {
-  width: 0.75rem;
-  height: 0.75rem;
-  color: var(--overlay-70);
-}

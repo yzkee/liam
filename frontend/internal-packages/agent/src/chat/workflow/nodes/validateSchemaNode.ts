@@ -4,13 +4,11 @@ import { executeQuery } from '@liam-hq/pglite-server'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import { ResultAsync } from 'neverthrow'
 import type { Usecase } from '../../../langchain/agents/qaGenerateUsecaseAgent/agent'
+import { WorkflowTerminationError } from '../../../shared/errorHandling'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
 import { logAssistantMessage } from '../utils/timelineLogger'
-import {
-  createOrUpdateArtifact,
-  transformWorkflowStateToArtifact,
-} from '../utils/transformWorkflowStateToArtifact'
+import { transformWorkflowStateToArtifact } from '../utils/transformWorkflowStateToArtifact'
 
 type UsecaseDmlExecutionResult = {
   useCaseId: string
@@ -103,37 +101,44 @@ function updateWorkflowStateWithUsecaseResults(
   state: WorkflowState,
   results: UsecaseDmlExecutionResult[],
 ): WorkflowState {
-  if (!state.generatedUsecases || !state.dmlOperations) {
+  if (!state.generatedUsecases) {
     return state
   }
 
   // Create a map of usecase results for quick lookup
   const resultMap = new Map(results.map((result) => [result.useCaseId, result]))
 
-  const updatedDmlOperations = state.dmlOperations.map((dmlOp) => {
-    const usecaseResult = resultMap.get(dmlOp.useCaseId)
+  const updatedUsecases = state.generatedUsecases.map((usecase) => {
+    const usecaseResult = resultMap.get(usecase.id)
 
-    if (!usecaseResult) {
-      return dmlOp
+    if (!usecaseResult || !usecase.dmlOperations) {
+      return usecase
     }
 
-    const executionLog = {
-      executed_at: usecaseResult.executedAt.toISOString(),
-      success: usecaseResult.success,
-      result_summary: usecaseResult.success
-        ? `UseCase "${usecaseResult.useCaseTitle}" operations completed successfully`
-        : `UseCase "${usecaseResult.useCaseTitle}" failed: ${usecaseResult.errors?.join('; ')}`,
-    }
+    const updatedDmlOperations = usecase.dmlOperations.map((dmlOp) => {
+      const executionLog = {
+        executed_at: usecaseResult.executedAt.toISOString(),
+        success: usecaseResult.success,
+        result_summary: usecaseResult.success
+          ? `UseCase "${usecaseResult.useCaseTitle}" operations completed successfully`
+          : `UseCase "${usecaseResult.useCaseTitle}" failed: ${usecaseResult.errors?.join('; ')}`,
+      }
+
+      return {
+        ...dmlOp,
+        dml_execution_logs: [executionLog],
+      }
+    })
 
     return {
-      ...dmlOp,
-      dml_execution_logs: [executionLog],
+      ...usecase,
+      dmlOperations: updatedDmlOperations,
     }
   })
 
   return {
     ...state,
-    dmlOperations: updatedDmlOperations,
+    generatedUsecases: updatedUsecases,
   }
 }
 
@@ -148,18 +153,22 @@ export async function validateSchemaNode(
   const assistantRole: Database['public']['Enums']['assistant_role_enum'] = 'db'
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
-    return {
-      ...state,
-      error: configurableResult.error,
-    }
+    throw new WorkflowTerminationError(
+      configurableResult.error,
+      'validateSchemaNode',
+    )
   }
   const { repositories } = configurableResult.value
 
   // Check if we have any statements to execute
   const hasDdl = state.ddlStatements?.trim()
-  const hasDml = state.dmlOperations && state.dmlOperations.length > 0
   const hasUsecases =
     state.generatedUsecases && state.generatedUsecases.length > 0
+  const hasDml =
+    hasUsecases &&
+    state.generatedUsecases?.some(
+      (uc) => uc.dmlOperations && uc.dmlOperations.length > 0,
+    )
 
   if (!hasDdl && !hasDml) {
     return state
@@ -186,7 +195,7 @@ export async function validateSchemaNode(
   // Execute DML operations by usecase if present
   let usecaseExecutionResults: UsecaseDmlExecutionResult[] = []
   let updatedState = state
-  if (hasDml && hasUsecases && state.generatedUsecases) {
+  if (hasDml && state.generatedUsecases) {
     usecaseExecutionResults = await executeDmlOperationsByUsecase(
       state.designSessionId,
       state.ddlStatements || '',
@@ -218,7 +227,10 @@ export async function validateSchemaNode(
 
     // Update artifact with the new state
     const artifact = transformWorkflowStateToArtifact(updatedState)
-    await createOrUpdateArtifact(updatedState, artifact, repositories)
+    await repositories.schema.upsertArtifact({
+      designSessionId: updatedState.designSessionId,
+      artifact,
+    })
   }
 
   const results = allResults

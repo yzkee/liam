@@ -18,14 +18,27 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  experimental: {
+    serverActions: {
+      allowedOrigins:
+        process.env.VERCEL_ENV === 'production'
+          ? ['liambx.com', 'liam-erd-web.vercel.app']
+          : undefined,
+    },
+  },
   images: {
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'avatars.githubusercontent.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'liam-erd-web.vercel.app',
+      },
     ],
   },
+  serverExternalPackages: ['@electric-sql/pglite'],
   webpack: (config) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (Array.isArray(config.externals)) {

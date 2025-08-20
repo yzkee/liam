@@ -7,6 +7,7 @@ import {
   TooltipTrigger,
 } from '@liam-hq/ui'
 import type { FC } from 'react'
+import { CommandPaletteTriggerButton } from '../CommandPalette'
 import styles from './AppBar.module.css'
 import { CopyLinkButton } from './CopyLinkButton'
 import { GithubButton } from './GithubButton'
@@ -44,6 +45,7 @@ export const AppBar: FC = () => {
 
       <div className={styles.rightSide}>
         <div className={styles.iconButtonGroup}>
+          <CommandPaletteTriggerButton />
           <GithubButton />
           <ReleaseNoteButton />
           <HelpButton />

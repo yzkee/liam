@@ -8,21 +8,19 @@ A **LangGraph implementation** for processing chat messages in the LIAM applicat
 %%{init: {'flowchart': {'curve': 'linear'}}}%%
 graph TD;
 	__start__([<p>__start__</p>]):::first
-	webSearch(webSearch)
-	analyzeRequirements(analyzeRequirements)
+	pmAgent(pmAgent)
 	dbAgent(dbAgent)
 	generateUsecase(generateUsecase)
 	prepareDML(prepareDML)
 	validateSchema(validateSchema)
 	finalizeArtifacts(finalizeArtifacts)
 	__end__([<p>__end__</p>]):::last
-	__start__ --> webSearch;
-	analyzeRequirements --> dbAgent;
+	__start__ --> pmAgent;
 	dbAgent --> generateUsecase;
 	finalizeArtifacts --> __end__;
 	generateUsecase --> prepareDML;
+	pmAgent --> dbAgent;
 	prepareDML --> validateSchema;
-	webSearch --> analyzeRequirements;
 	validateSchema -.-> dbAgent;
 	validateSchema -.-> finalizeArtifacts;
 	classDef default fill:#f2f0ff,line-height:1.2;
@@ -43,7 +41,6 @@ interface WorkflowState {
   organizationId: string;
   userId: string;
   designSessionId: string;
-  retryCount: Record<string, number>;
 
   // Requirements analysis
   analyzedRequirements?: AnalyzedRequirements;
@@ -52,9 +49,6 @@ interface WorkflowState {
   // DDL/DML execution
   ddlStatements?: string;
   dmlStatements?: string;
-  shouldRetryWithDesignSchema?: boolean;
-  ddlExecutionFailed?: boolean;
-  ddlExecutionFailureReason?: string;
 
   // DML execution results
   dmlExecutionSuccessful?: boolean;
@@ -75,13 +69,53 @@ interface WorkflowState {
 
 ## Nodes
 
-1. **webSearch**: Performs initial research and gathers relevant information (performed by pmAgent)
-2. **analyzeRequirements**: Organizes and clarifies requirements from user input (performed by pmAnalysisAgent)
-3. **dbAgent**: DB Agent subgraph that handles database schema design - contains designSchema and invokeSchemaDesignTool nodes (performed by dbAgent)
-4. **generateUsecase**: Creates use cases for testing with automatic timeline sync (performed by qaAgent)
-5. **prepareDML**: Generates DML statements for testing (performed by qaAgent)
-6. **validateSchema**: Executes DML and validates schema (performed by qaAgent)
-7. **finalizeArtifacts**: Generates and saves comprehensive artifacts to database, handles error timeline items (performed by dbAgentArtifactGen)
+1. **pmAgent**: PM Agent subgraph that handles requirements analysis - contains analyzeRequirements and invokeSaveArtifactTool nodes
+2. **dbAgent**: DB Agent subgraph that handles database schema design - contains designSchema and invokeSchemaDesignTool nodes (performed by dbAgent)
+3. **generateUsecase**: Creates use cases for testing with automatic timeline sync (performed by qaAgent)
+4. **prepareDML**: Generates DML statements for testing (performed by qaAgent)
+5. **validateSchema**: Executes DML and validates schema (performed by qaAgent)
+6. **finalizeArtifacts**: Generates and saves comprehensive artifacts to database, handles error timeline items (performed by dbAgentArtifactGen)
+
+## PM Agent Subgraph
+
+The `pmAgent` node is implemented as a **LangGraph subgraph** that encapsulates all requirements analysis and artifact management logic as an independent, reusable component following multi-agent system best practices.
+
+### PM Agent Architecture
+
+```mermaid
+%%{init: {'flowchart': {'curve': 'linear'}}}%%
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	analyzeRequirements(analyzeRequirements)
+	invokeSaveArtifactTool(invokeSaveArtifactTool)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> analyzeRequirements;
+	invokeSaveArtifactTool --> analyzeRequirements;
+	analyzeRequirements -.-> invokeSaveArtifactTool;
+	analyzeRequirements -.-> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2;
+	classDef first fill-opacity:0;
+	classDef last fill:#bfb6fc;
+```
+
+### PM Agent Components
+
+#### 1. analyzeRequirements Node
+- **Purpose**: Analyzes and structures user requirements into BRDs
+- **Performed by**: PM Analysis Agent with GPT-5
+- **Retry Policy**: maxAttempts: 3 (internal to subgraph)
+- **Timeline Sync**: Automatic message synchronization
+
+#### 2. invokeSaveArtifactTool Node
+- **Purpose**: Saves analyzed requirements as artifacts to database
+- **Performed by**: saveRequirementsToArtifactTool
+- **Retry Policy**: maxAttempts: 3 (internal to subgraph)
+- **Tool Integration**: Direct database artifact storage
+
+### PM Agent Flow Patterns
+
+1. **Simple Analysis**: `START → analyzeRequirements → END` (when requirements are fully analyzed)
+2. **Iterative Saving**: `START → analyzeRequirements → invokeSaveArtifactTool → analyzeRequirements → ... → END`
 
 ## DB Agent Subgraph
 
@@ -145,6 +179,8 @@ graph.addNode('dbAgent', dbAgentSubgraph) // No retry policy - handled internall
 
 ### Conditional Edge Logic
 
+- **analyzeRequirements**: Routes to `saveRequirementToArtifact` when requirements are successfully analyzed, retries `analyzeRequirements` with retry count tracking (max 3 attempts), fallback to `finalizeArtifacts` when max retries exceeded
+- **saveRequirementToArtifact**: Always routes to `dbAgent` after processing artifacts (workflow termination node pattern)
 - **dbAgent**: DB Agent subgraph handles internal routing between designSchema and invokeSchemaDesignTool nodes, routes to `generateUsecase` on completion
 - **validateSchema**: Routes to `finalizeArtifacts` on success, `dbAgent` on validation error
 
@@ -164,7 +200,7 @@ graph.addNode('dbAgent', dbAgentSubgraph) // No retry policy - handled internall
 ### Implementation Details
 
 - **User Message Sync**: User input is synchronized in `deepModeling.ts` before workflow execution
-- **AI Message Sync**: All workflow nodes (webSearch, analyzeRequirements, dbAgent subgraph, generateUsecase) automatically sync their AI responses
+- **AI Message Sync**: All workflow nodes (analyzeRequirements, dbAgent subgraph, generateUsecase) automatically sync their AI responses
 - **Non-blocking**: Timeline synchronization is asynchronous and non-blocking to ensure workflow performance
 - **Utility Function**: `withTimelineItemSync()` provides consistent message synchronization across all nodes
 
@@ -183,7 +219,6 @@ const result = await deepModeling(
   {
     userInput:
       "Create a schema for a fitness tracking app with users, workout plans, exercise logs, and progress charts.",
-    history: [],
     schemaData: mySchemaData,
     organizationId: "my-organization-id",
     buildingSchemaId: "my-building-schema-id",

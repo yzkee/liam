@@ -19,7 +19,7 @@ const main = () => {
 
   process.chdir(nodeModulesPath)
 
-  execSync('npm install @prisma/internals', { stdio: 'inherit' })
+  execSync('npm install @prisma/internals@6.8.2', { stdio: 'inherit' })
 
   const packageJsonPath = path.join(nodeModulesPath, 'package.json')
   const packageLockJsonPath = path.join(nodeModulesPath, '.package-lock.json')

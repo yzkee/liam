@@ -1,6 +1,6 @@
 import { Button, Table2 } from '@liam-hq/ui'
 import { DialogClose } from '@radix-ui/react-dialog'
-import { Command } from 'cmdk'
+import { Command, defaultFilter } from 'cmdk'
 import { type FC, useCallback, useEffect, useMemo, useState } from 'react'
 import { useTableSelection } from '@/features/erd/hooks'
 import { useSchemaOrThrow } from '@/stores'
@@ -66,7 +66,16 @@ export const CommandPaletteContent: FC<Props> = ({ closeDialog }) => {
   }, [suggestedTableName])
 
   return (
-    <Command value={suggestionText} onValueChange={(v) => setSuggestionText(v)}>
+    <Command
+      value={suggestionText}
+      onValueChange={(v) => setSuggestionText(v)}
+      filter={(value, ...rest) => {
+        const suggestion = textToSuggestion(value)
+        if (!suggestion) return 0
+
+        return defaultFilter(suggestion.name, ...rest)
+      }}
+    >
       <div className={styles.searchContainer}>
         <CommandPaletteSearchInput
           mode={inputMode}

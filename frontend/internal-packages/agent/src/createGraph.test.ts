@@ -9,19 +9,15 @@ graph TD;
 	__start__([<p>__start__</p>]):::first
 	pmAgent(pmAgent)
 	dbAgent(dbAgent)
-	generateUsecase(generateUsecase)
-	prepareDML(prepareDML)
-	validateSchema(validateSchema)
+	qaAgent(qaAgent)
 	finalizeArtifacts(finalizeArtifacts)
 	__end__([<p>__end__</p>]):::last
 	__start__ --> pmAgent;
-	dbAgent --> generateUsecase;
+	dbAgent --> qaAgent;
 	finalizeArtifacts --> __end__;
-	generateUsecase --> prepareDML;
 	pmAgent --> dbAgent;
-	prepareDML --> validateSchema;
-	validateSchema -.-> dbAgent;
-	validateSchema -.-> finalizeArtifacts;
+	qaAgent -.-> dbAgent;
+	qaAgent -.-> finalizeArtifacts;
 	classDef default fill:#f2f0ff,line-height:1.2;
 	classDef first fill-opacity:0;
 	classDef last fill:#bfb6fc;

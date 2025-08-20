@@ -10,19 +10,15 @@ graph TD;
 	__start__([<p>__start__</p>]):::first
 	pmAgent(pmAgent)
 	dbAgent(dbAgent)
-	generateUsecase(generateUsecase)
-	prepareDML(prepareDML)
-	validateSchema(validateSchema)
+	qaAgent(qaAgent)
 	finalizeArtifacts(finalizeArtifacts)
 	__end__([<p>__end__</p>]):::last
 	__start__ --> pmAgent;
-	dbAgent --> generateUsecase;
+	dbAgent --> qaAgent;
 	finalizeArtifacts --> __end__;
-	generateUsecase --> prepareDML;
 	pmAgent --> dbAgent;
-	prepareDML --> validateSchema;
-	validateSchema -.-> dbAgent;
-	validateSchema -.-> finalizeArtifacts;
+	qaAgent -.-> dbAgent;
+	qaAgent -.-> finalizeArtifacts;
 	classDef default fill:#f2f0ff,line-height:1.2;
 	classDef first fill-opacity:0;
 	classDef last fill:#bfb6fc;
@@ -71,10 +67,8 @@ interface WorkflowState {
 
 1. **pmAgent**: PM Agent subgraph that handles requirements analysis - contains analyzeRequirements and invokeSaveArtifactTool nodes
 2. **dbAgent**: DB Agent subgraph that handles database schema design - contains designSchema and invokeSchemaDesignTool nodes (performed by dbAgent)
-3. **generateUsecase**: Creates use cases for testing with automatic timeline sync (performed by qaAgent)
-4. **prepareDML**: Generates DML statements for testing (performed by qaAgent)
-5. **validateSchema**: Executes DML and validates schema (performed by qaAgent)
-6. **finalizeArtifacts**: Generates and saves comprehensive artifacts to database, handles error timeline items (performed by dbAgentArtifactGen)
+3. **qaAgent**: QA Agent subgraph that handles testing and validation - contains generateUsecase, prepareDML, and validateSchema nodes (performed by qaAgent)
+4. **finalizeArtifacts**: Generates and saves comprehensive artifacts to database, handles error timeline items (performed by dbAgentArtifactGen)
 
 ## PM Agent Subgraph
 
@@ -181,8 +175,8 @@ graph.addNode('dbAgent', dbAgentSubgraph) // No retry policy - handled internall
 
 - **analyzeRequirements**: Routes to `saveRequirementToArtifact` when requirements are successfully analyzed, retries `analyzeRequirements` with retry count tracking (max 3 attempts), fallback to `finalizeArtifacts` when max retries exceeded
 - **saveRequirementToArtifact**: Always routes to `dbAgent` after processing artifacts (workflow termination node pattern)
-- **dbAgent**: DB Agent subgraph handles internal routing between designSchema and invokeSchemaDesignTool nodes, routes to `generateUsecase` on completion
-- **validateSchema**: Routes to `finalizeArtifacts` on success, `dbAgent` on validation error
+- **dbAgent**: DB Agent subgraph handles internal routing between designSchema and invokeSchemaDesignTool nodes, routes to `qaAgent` on completion
+- **qaAgent**: QA Agent subgraph handles internal routing between generateUsecase, prepareDML, and validateSchema nodes, routes to `finalizeArtifacts` on success, `dbAgent` on validation error
 
 ## Timeline Synchronization
 

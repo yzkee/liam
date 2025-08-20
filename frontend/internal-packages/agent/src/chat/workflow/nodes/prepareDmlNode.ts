@@ -126,9 +126,19 @@ export async function prepareDmlNode(
     })
     .join('\n\n')
 
+  const updatedUsecases = state.generatedUsecases.map((usecase) => {
+    const usecaseDmlOperations = result.dmlOperations.filter(
+      (op) => op.useCaseId === usecase.id,
+    )
+    return {
+      ...usecase,
+      dmlOperations: usecaseDmlOperations,
+    }
+  })
+
   return {
     ...state,
     dmlStatements,
-    dmlOperations: result.dmlOperations,
+    generatedUsecases: updatedUsecases,
   }
 }

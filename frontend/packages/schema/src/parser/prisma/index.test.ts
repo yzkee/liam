@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import type { Table } from '../../schema/index.js'
-import { aColumn, anIndex, aSchema, aTable } from '../../schema/index.js'
+import {
+  aColumn,
+  anEnum,
+  anIndex,
+  aSchema,
+  aTable,
+} from '../../schema/index.js'
 import { createParserTestCases } from '../__tests__/index.js'
 import { processor as _processor } from './index.js'
 
@@ -629,6 +635,13 @@ describe(_processor, () => {
             },
           }),
         },
+        enums: {
+          Role: anEnum({
+            name: 'Role',
+            values: ['USER', 'ADMIN'],
+            comment: null,
+          }),
+        },
       })
 
       expect(value).toEqual(expectedTables)
@@ -991,6 +1004,168 @@ describe(_processor, () => {
         'varchar(30)',
       )
       expect(value.tables['Test']?.columns['cuid_field']?.default).toBe(null)
+    })
+  })
+
+  describe('enum types', () => {
+    it('should parse basic enum type', async () => {
+      const { value } = await processor(`
+        enum Role {
+          USER
+          ADMIN
+          MODERATOR
+        }
+
+        model User {
+          id   Int  @id @default(autoincrement())
+          role Role
+        }
+      `)
+
+      expect(value.enums).toEqual({
+        Role: {
+          name: 'Role',
+          values: ['USER', 'ADMIN', 'MODERATOR'],
+          comment: null,
+        },
+      })
+    })
+
+    it('should parse enum with comment', async () => {
+      const { value } = await processor(`
+        /// User Role enumeration
+        enum UserStatus {
+          ACTIVE
+          INACTIVE
+          PENDING
+        }
+
+        model User {
+          id     Int        @id @default(autoincrement())
+          status UserStatus
+        }
+      `)
+
+      expect(value.enums).toEqual({
+        UserStatus: {
+          name: 'UserStatus',
+          values: ['ACTIVE', 'INACTIVE', 'PENDING'],
+          comment: 'User Role enumeration',
+        },
+      })
+    })
+
+    it('should parse multiple enum types', async () => {
+      const { value } = await processor(`
+        /// Task Priority levels
+        enum Priority {
+          LOW
+          MEDIUM
+          HIGH
+          URGENT
+        }
+
+        enum Category {
+          BUG
+          FEATURE
+          IMPROVEMENT
+        }
+
+        model Task {
+          id       Int      @id @default(autoincrement())
+          priority Priority
+          category Category
+        }
+      `)
+
+      expect(value.enums).toEqual({
+        Priority: {
+          name: 'Priority',
+          values: ['LOW', 'MEDIUM', 'HIGH', 'URGENT'],
+          comment: 'Task Priority levels',
+        },
+        Category: {
+          name: 'Category',
+          values: ['BUG', 'FEATURE', 'IMPROVEMENT'],
+          comment: null,
+        },
+      })
+    })
+
+    it('should handle schema with no enums', async () => {
+      const { value } = await processor(`
+        model User {
+          id   Int    @id @default(autoincrement())
+          name String
+        }
+      `)
+
+      expect(value.enums).toEqual({})
+    })
+
+    it('should parse enum used as default value', async () => {
+      const { value } = await processor(`
+        enum Role {
+          USER
+          ADMIN
+        }
+
+        model User {
+          id   Int  @id @default(autoincrement())
+          role Role @default(USER)
+        }
+      `)
+
+      expect(value.enums).toEqual({
+        Role: {
+          name: 'Role',
+          values: ['USER', 'ADMIN'],
+          comment: null,
+        },
+      })
+
+      // Also verify the column has the correct enum type and default
+      const userTable = value.tables['User']
+      expect(userTable?.columns['role']).toMatchObject({
+        name: 'role',
+        type: 'Role',
+        default: 'USER',
+        notNull: true,
+      })
+    })
+
+    it('should parse enum values with @map directives', async () => {
+      const { value } = await processor(`
+        enum Status {
+          ACTIVE    @map("active")
+          INACTIVE  @map("inactive") 
+          PENDING   @map("pending")
+          DELETED   @map("deleted")
+        }
+
+        model User {
+          id     Int    @id @default(autoincrement())
+          status Status @default(ACTIVE)
+        }
+      `)
+
+      // Enum should use the mapped database values
+      expect(value.enums).toEqual({
+        Status: {
+          name: 'Status',
+          values: ['active', 'inactive', 'pending', 'deleted'], // mapped values
+          comment: null,
+        },
+      })
+
+      // Column should still reference the original enum type name
+      const userTable = value.tables['User']
+      expect(userTable?.columns['status']).toMatchObject({
+        name: 'status',
+        type: 'Status', // original enum name
+        default: 'ACTIVE', // original value name in default
+        notNull: true,
+      })
     })
   })
 })

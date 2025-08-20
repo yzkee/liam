@@ -12,6 +12,7 @@ import {
 } from '../../schema/factories.js'
 import { postgresqlSchemaDeparser } from './schemaDeparser.js'
 import { expectGeneratedSQLToBeParseable } from './testUtils.js'
+import { generateAlterColumnTypeStatement } from './utils.js'
 
 describe('postgresqlSchemaDeparser', () => {
   it('should generate basic CREATE TABLE statement', async () => {
@@ -1050,6 +1051,239 @@ describe('postgresqlSchemaDeparser', () => {
       await expectGeneratedSQLToBeParseable(result.value)
     })
 
+    it('should parse camelCase enum names correctly', async () => {
+      const schema = aSchema({
+        enums: {
+          UserRole: anEnum({
+            name: 'UserRole',
+            values: ['USER', 'ADMIN', 'MODERATOR'],
+          }),
+          OrderStatus: anEnum({
+            name: 'OrderStatus',
+            values: ['PENDING', 'CONFIRMED', 'SHIPPED'],
+          }),
+        },
+        tables: {},
+      })
+
+      const result = postgresqlSchemaDeparser(schema)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "CREATE TYPE \"UserRole\" AS ENUM ('USER', 'ADMIN', 'MODERATOR');
+
+        CREATE TYPE \"OrderStatus\" AS ENUM ('PENDING', 'CONFIRMED', 'SHIPPED');"
+      `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
+    })
+
+    it('should use double quotes for camelCase enum types in column definitions', async () => {
+      const schema = aSchema({
+        enums: {
+          ScoreSource: anEnum({
+            name: 'ScoreSource',
+            values: ['MANUAL', 'AUTOMATIC', 'IMPORTED'],
+          }),
+        },
+        tables: {
+          scores: aTable({
+            name: 'scores',
+            columns: {
+              id: aColumn({
+                name: 'id',
+                type: 'bigint',
+                notNull: true,
+              }),
+              source: aColumn({
+                name: 'source',
+                type: 'ScoreSource',
+                notNull: true,
+              }),
+            },
+            constraints: {
+              scores_pkey: aPrimaryKeyConstraint({
+                name: 'scores_pkey',
+                columnNames: ['id'],
+              }),
+            },
+          }),
+        },
+      })
+
+      const result = postgresqlSchemaDeparser(schema)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "CREATE TYPE \"ScoreSource\" AS ENUM ('MANUAL', 'AUTOMATIC', 'IMPORTED');
+
+        CREATE TABLE \"scores\" (
+          \"id\" bigint NOT NULL,
+          \"source\" \"ScoreSource\" NOT NULL
+        );
+
+        ALTER TABLE \"scores\" ADD CONSTRAINT \"scores_pkey\" PRIMARY KEY (\"id\");"
+      `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
+    })
+
+    it('should not quote standard PostgreSQL types in column definitions', async () => {
+      const schema = aSchema({
+        enums: {},
+        tables: {
+          users: aTable({
+            name: 'users',
+            columns: {
+              id: aColumn({
+                name: 'id',
+                type: 'bigint',
+                notNull: true,
+              }),
+              name: aColumn({
+                name: 'name',
+                type: 'text',
+                notNull: true,
+              }),
+              age: aColumn({
+                name: 'age',
+                type: 'integer',
+                notNull: false,
+              }),
+              created_at: aColumn({
+                name: 'created_at',
+                type: 'timestamp(3)',
+                notNull: true,
+              }),
+            },
+            constraints: {
+              users_pkey: aPrimaryKeyConstraint({
+                name: 'users_pkey',
+                columnNames: ['id'],
+              }),
+            },
+          }),
+        },
+      })
+
+      const result = postgresqlSchemaDeparser(schema)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toMatchInlineSnapshot(`
+        "CREATE TABLE \"users\" (
+          \"id\" bigint NOT NULL,
+          \"name\" text NOT NULL,
+          \"age\" integer,
+          \"created_at\" timestamp(3) NOT NULL
+        );
+
+        ALTER TABLE \"users\" ADD CONSTRAINT \"users_pkey\" PRIMARY KEY (\"id\");"
+      `)
+
+      await expectGeneratedSQLToBeParseable(result.value)
+    })
+
+    it('should handle complex type scenarios correctly', async () => {
+      const schema = aSchema({
+        enums: {
+          UserRole: anEnum({
+            name: 'UserRole',
+            values: ['ADMIN', 'USER'],
+          }),
+        },
+        tables: {
+          test_table: aTable({
+            name: 'test_table',
+            columns: {
+              id: aColumn({
+                name: 'id',
+                type: 'bigint',
+                notNull: true,
+              }),
+              // Test array type (would be problematic with current implementation)
+              roles_array: aColumn({
+                name: 'roles_array',
+                type: 'UserRole[]',
+                notNull: false,
+              }),
+              // Test schema-qualified type (would be problematic)
+              qualified_role: aColumn({
+                name: 'qualified_role',
+                type: 'public.UserRole',
+                notNull: false,
+              }),
+              // Test parameterized standard type (should not be quoted even if uppercase)
+              varchar_field: aColumn({
+                name: 'varchar_field',
+                type: 'VARCHAR(255)',
+                notNull: false,
+              }),
+              // Test spaced type
+              double_precision: aColumn({
+                name: 'double_precision',
+                type: 'double precision',
+                notNull: false,
+              }),
+            },
+            constraints: {
+              test_table_pkey: aPrimaryKeyConstraint({
+                name: 'test_table_pkey',
+                columnNames: ['id'],
+              }),
+            },
+          }),
+        },
+      })
+
+      const result = postgresqlSchemaDeparser(schema)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toContain('"UserRole"[]') // Array type should quote only the base type
+      expect(result.value).toContain('public."UserRole"') // Schema-qualified should quote only the type part
+      expect(result.value).toContain('VARCHAR(255)') // Parameterized standard type should not be quoted
+      expect(result.value).toContain('double precision') // Spaced type should not be quoted
+    })
+
+    it('should handle multi-dimensional arrays safely', async () => {
+      const schema = aSchema({
+        enums: {
+          UserRole: anEnum({
+            name: 'UserRole',
+            values: ['ADMIN', 'USER'],
+          }),
+        },
+        tables: {
+          test_table: aTable({
+            name: 'test_table',
+            columns: {
+              id: aColumn({
+                name: 'id',
+                type: 'bigint',
+                notNull: true,
+              }),
+              // Test multi-dimensional array
+              multi_array: aColumn({
+                name: 'multi_array',
+                type: 'UserRole[][]',
+                notNull: false,
+              }),
+            },
+            constraints: {
+              test_table_pkey: aPrimaryKeyConstraint({
+                name: 'test_table_pkey',
+                columnNames: ['id'],
+              }),
+            },
+          }),
+        },
+      })
+
+      const result = postgresqlSchemaDeparser(schema)
+
+      expect(result.errors).toHaveLength(0)
+      expect(result.value).toContain('"UserRole"[][]') // Multi-dimensional array should quote only the base type
+    })
+
     it('should generate enums before tables', async () => {
       const schema = aSchema({
         enums: {
@@ -1492,6 +1726,62 @@ describe('postgresqlSchemaDeparser', () => {
         expect(result.value).not.toContain("DEFAULT 'gen_random_uuid()'")
         expect(result.value).not.toContain("DEFAULT 'now()'")
       })
+    })
+  })
+})
+
+describe('PostgreSQL utils', () => {
+  describe('generateAlterColumnTypeStatement', () => {
+    it('should properly escape complex types in ALTER COLUMN TYPE statements', () => {
+      // Test camelCase enum type
+      const alterCamelCase = generateAlterColumnTypeStatement(
+        'users',
+        'status',
+        'UserStatus',
+      )
+      expect(alterCamelCase).toBe(
+        'ALTER TABLE "users" ALTER COLUMN "status" TYPE "UserStatus";',
+      )
+
+      // Test array type
+      const alterArray = generateAlterColumnTypeStatement(
+        'users',
+        'roles',
+        'UserRole[]',
+      )
+      expect(alterArray).toBe(
+        'ALTER TABLE "users" ALTER COLUMN "roles" TYPE "UserRole"[];',
+      )
+
+      // Test multi-dimensional array
+      const alterMultiArray = generateAlterColumnTypeStatement(
+        'users',
+        'permissions',
+        'Permission[][]',
+      )
+      expect(alterMultiArray).toBe(
+        'ALTER TABLE "users" ALTER COLUMN "permissions" TYPE "Permission"[][];',
+      )
+
+      // Test schema-qualified type
+      const alterSchemaQualified = generateAlterColumnTypeStatement(
+        'users',
+        'status',
+        'public.UserStatus',
+      )
+      expect(alterSchemaQualified).toBe(
+        'ALTER TABLE "users" ALTER COLUMN "status" TYPE public."UserStatus";',
+      )
+
+      // Test standard PostgreSQL type (should not be quoted)
+      const alterStandard = generateAlterColumnTypeStatement(
+        'users',
+        'name',
+        'varchar(255)',
+      )
+      expect(alterStandard).toBe(
+        'ALTER TABLE "users" ALTER COLUMN "name" TYPE varchar(255);',
+      )
     })
   })
 })

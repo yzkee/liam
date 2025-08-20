@@ -9,11 +9,50 @@ import type {
 /**
  * Generate column definition as DDL string
  */
+
+/**
+ * Escape PostgreSQL type names, handling arrays, schema-qualified types, and camelCase/PascalCase types
+ * - Arrays: ScoreSource[] -> "ScoreSource"[]
+ * - Schema-qualified: public.ScoreSource -> public."ScoreSource"
+ * - Parameterized/spaced types: VARCHAR(255), double precision -> unchanged
+ * - CamelCase types: UserRole -> "UserRole"
+ */
+function escapeTypeIdentifier(type: string): string {
+  // If already quoted somewhere, assume caller provided the exact type
+  if (type.includes('"')) return type
+
+  // Extract array suffixes safely: find the rightmost sequence of [] brackets
+  let arraySuffix = ''
+  let base = type
+
+  // Find array suffixes from the end, avoiding ReDoS vulnerability
+  while (base.endsWith('[]')) {
+    arraySuffix = `[]${arraySuffix}`
+    base = base.slice(0, -2)
+  }
+
+  // Parameterized or spaced types (e.g., varchar(255), timestamp(3), double precision)
+  // should not be quoted here.
+  if (base.includes('(') || base.includes(' ')) return type
+
+  // Support schema-qualified types: public.ScoreSource -> public."ScoreSource"
+  const parts = base.split('.')
+  const simpleIdentifier = /^[A-Za-z_][A-Za-z0-9_]*$/
+  const allPartsSimple = parts.every((p) => simpleIdentifier.test(p))
+  if (!allPartsSimple) return type
+
+  const escaped = parts
+    .map((p) => (/[A-Z]/.test(p) ? escapeIdentifier(p) : p))
+    .join('.')
+
+  return `${escaped}${arraySuffix}`
+}
+
 function generateColumnDefinition(
   column: Column,
   isPrimaryKey = false,
 ): string {
-  let definition = `${escapeIdentifier(column.name)} ${column.type}`
+  let definition = `${escapeIdentifier(column.name)} ${escapeTypeIdentifier(column.type)}`
 
   // Add constraints (following PostgreSQL common order)
   // Don't add NOT NULL if this will be a PRIMARY KEY
@@ -307,7 +346,7 @@ export function generateAlterColumnTypeStatement(
 ): string {
   return `ALTER TABLE ${escapeIdentifier(
     tableName,
-  )} ALTER COLUMN ${escapeIdentifier(columnName)} TYPE ${newType};`
+  )} ALTER COLUMN ${escapeIdentifier(columnName)} TYPE ${escapeTypeIdentifier(newType)};`
 }
 
 /**

@@ -1,12 +1,14 @@
 import { Button, Table2 } from '@liam-hq/ui'
 import { DialogClose } from '@radix-ui/react-dialog'
 import { Command } from 'cmdk'
-import { type FC, useCallback, useEffect, useState } from 'react'
+import { type FC, useCallback, useEffect, useMemo, useState } from 'react'
 import { useTableSelection } from '@/features/erd/hooks'
 import { useSchemaOrThrow } from '@/stores'
 import { TableNode } from '../../../ERDContent/components'
+import { CommandPaletteCommandOptions } from '../CommandPaletteOptions'
 import { CommandPaletteSearchInput } from '../CommandPaletteSearchInput'
 import type { CommandPaletteInputMode } from '../types'
+import { getSuggestionText, textToSuggestion } from '../utils'
 import styles from './CommandPaletteContent.module.css'
 
 const getTableLinkHref = (activeTableName: string) => {
@@ -26,8 +28,15 @@ export const CommandPaletteContent: FC<Props> = ({ closeDialog }) => {
   })
 
   const schema = useSchemaOrThrow()
-  const [tableName, setTableName] = useState<string | null>(null)
-  const table = schema.current.tables[tableName ?? '']
+  const [suggestionText, setSuggestionText] = useState('')
+  const suggestion = useMemo(
+    () => textToSuggestion(suggestionText),
+    [suggestionText],
+  )
+
+  const suggestedTableName =
+    suggestion?.type === 'table' ? suggestion.name : null
+  const table = schema.current.tables[suggestedTableName ?? '']
   const { selectTable } = useTableSelection()
 
   const goToERD = useCallback(
@@ -41,23 +50,23 @@ export const CommandPaletteContent: FC<Props> = ({ closeDialog }) => {
   // Select option by pressing [Enter] key (with/without ⌘ key)
   useEffect(() => {
     const down = (event: KeyboardEvent) => {
-      if (!tableName) return
+      if (!suggestedTableName) return
 
       if (event.key === 'Enter') {
         if (event.metaKey || event.ctrlKey) {
-          window.open(getTableLinkHref(tableName))
+          window.open(getTableLinkHref(suggestedTableName))
         } else {
-          goToERD(tableName)
+          goToERD(suggestedTableName)
         }
       }
     }
 
     document.addEventListener('keydown', down)
     return () => document.removeEventListener('keydown', down)
-  }, [tableName])
+  }, [suggestedTableName])
 
   return (
-    <Command value={tableName ?? ''} onValueChange={(v) => setTableName(v)}>
+    <Command value={suggestionText} onValueChange={(v) => setSuggestionText(v)}>
       <div className={styles.searchContainer}>
         <CommandPaletteSearchInput
           mode={inputMode}
@@ -80,7 +89,11 @@ export const CommandPaletteContent: FC<Props> = ({ closeDialog }) => {
           {inputMode.type === 'default' && (
             <Command.Group heading="Tables">
               {Object.values(schema.current.tables).map((table) => (
-                <Command.Item key={table.name} value={table.name} asChild>
+                <Command.Item
+                  key={table.name}
+                  value={getSuggestionText({ type: 'table', name: table.name })}
+                  asChild
+                >
                   <a
                     href={getTableLinkHref(table.name)}
                     onClick={(event) => {
@@ -100,12 +113,9 @@ export const CommandPaletteContent: FC<Props> = ({ closeDialog }) => {
               ))}
             </Command.Group>
           )}
-          {
-            (inputMode.type === 'default' || inputMode.type === 'command') &&
-              null
-            // TODO(command options): uncomment the following line to release command options
-            // <CommandPaletteCommandOptions />
-          }
+          {(inputMode.type === 'default' || inputMode.type === 'command') && (
+            <CommandPaletteCommandOptions />
+          )}
         </Command.List>
         <div
           className={styles.previewContainer}

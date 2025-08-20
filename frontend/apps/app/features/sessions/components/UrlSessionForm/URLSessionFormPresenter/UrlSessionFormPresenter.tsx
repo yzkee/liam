@@ -317,7 +317,7 @@ export const URLSessionFormPresenter: FC<Props> = ({
 
   const { handleChange } = useAutoResizeTextarea(textareaRef, state.textContent)
   const handleTextareaChange = handleChange(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    (e: ChangeEvent<HTMLTextAreaElement>) => {
       state.setTextContent(e.target.value)
     },
   )

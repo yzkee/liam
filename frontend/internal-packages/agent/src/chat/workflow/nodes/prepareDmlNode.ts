@@ -6,6 +6,7 @@ import { WorkflowTerminationError } from '../../../shared/errorHandling'
 import { convertSchemaToText } from '../../../utils/convertSchemaToText'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
+import { generateDdlFromSchema } from '../utils/generateDdl'
 import { logAssistantMessage } from '../utils/timelineLogger'
 
 /**
@@ -69,7 +70,8 @@ export async function prepareDmlNode(
   )
 
   // Check if we have required inputs
-  if (!state.ddlStatements) {
+  const ddlStatements = generateDdlFromSchema(state.schemaData)
+  if (!ddlStatements) {
     await logAssistantMessage(
       state,
       repositories,
@@ -100,7 +102,7 @@ export async function prepareDmlNode(
 
   // Generate DML statements
   const result = await dmlAgent.generate({
-    schemaSQL: state.ddlStatements,
+    schemaSQL: ddlStatements,
     formattedUseCases,
     schemaContext,
   })

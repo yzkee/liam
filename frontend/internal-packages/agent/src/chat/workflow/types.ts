@@ -16,7 +16,6 @@ export type WorkflowState = {
   generatedUsecases?: Usecase[] | undefined
   schemaData: Schema
 
-  ddlStatements?: string | undefined
   dmlStatements?: string | undefined
 
   // DML execution results

@@ -35,15 +35,15 @@ function escapeTypeIdentifier(type: string): string {
   // should not be quoted here.
   if (base.includes('(') || base.includes(' ')) return type
 
-  // Strip schema prefix if present (e.g., "public.user_status" -> "user_status")
+  // Support schema-qualified types: public.ScoreSource -> public."ScoreSource"
   const parts = base.split('.')
-  const typeName = parts[parts.length - 1] ?? base // Take only the type name part with fallback
-
   const simpleIdentifier = /^[A-Za-z_][A-Za-z0-9_]*$/
-  if (!simpleIdentifier.test(typeName)) return type
+  const allPartsSimple = parts.every((p) => simpleIdentifier.test(p))
+  if (!allPartsSimple) return type
 
-  // Quote if it contains uppercase letters
-  const escaped = /[A-Z]/.test(typeName) ? escapeIdentifier(typeName) : typeName
+  const escaped = parts
+    .map((p) => (/[A-Z]/.test(p) ? escapeIdentifier(p) : p))
+    .join('.')
 
   return `${escaped}${arraySuffix}`
 }
@@ -449,7 +449,7 @@ export function generateDropCheckConstraintStatement(
  * Generate CREATE TYPE AS ENUM statement for an enum
  */
 export function generateCreateEnumStatement(enumObj: Enum): string {
-  const enumName = escapeTypeIdentifier(enumObj.name)
+  const enumName = escapeIdentifier(enumObj.name)
   const enumValues = enumObj.values
     .map((value) => `'${escapeString(value)}'`)
     .join(', ')

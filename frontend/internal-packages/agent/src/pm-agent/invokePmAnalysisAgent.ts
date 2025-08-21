@@ -37,7 +37,7 @@ export const invokePmAnalysisAgent = (
   )
 
   const model = new ChatOpenAI({
-    model: 'gpt-5-nonexistent-model-for-testing',
+    model: 'gpt-5',
     reasoning: { effort: 'high', summary: 'detailed' },
     useResponsesApi: true,
   }).bindTools(

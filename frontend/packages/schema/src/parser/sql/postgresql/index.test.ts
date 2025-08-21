@@ -1003,19 +1003,17 @@ describe(processor, () => {
         );
       `)
 
-      // The enum definition should preserve the full schema-qualified name
+      // The enum definition should strip the schema prefix and use only the type name
       expect(value.enums).toEqual({
-        'public.user_status': {
-          name: 'public.user_status',
+        user_status: {
+          name: 'user_status',
           values: ['active', 'inactive', 'pending'],
           comment: null,
         },
       })
 
-      // Column type should preserve the full schema-qualified name
-      expect(value.tables['users']?.columns['status']?.type).toBe(
-        'public.user_status',
-      )
+      // Column type should strip the schema prefix and use only the type name
+      expect(value.tables['users']?.columns['status']?.type).toBe('user_status')
     })
 
     it('should handle quoted schema-qualified enum types', async () => {
@@ -1029,19 +1027,17 @@ describe(processor, () => {
         );
       `)
 
-      // The enum definition should preserve the full schema-qualified name
+      // The enum definition should strip the schema prefix and use only the type name
       expect(value.enums).toEqual({
-        'public.user_status': {
-          name: 'public.user_status',
+        user_status: {
+          name: 'user_status',
           values: ['active', 'inactive', 'pending'],
           comment: null,
         },
       })
 
-      // Column type should preserve the full schema-qualified name even when quoted
-      expect(value.tables['users']?.columns['status']?.type).toBe(
-        'public.user_status',
-      )
+      // Column type should strip the schema prefix and use only the type name even when quoted
+      expect(value.tables['users']?.columns['status']?.type).toBe('user_status')
     })
   })
 })

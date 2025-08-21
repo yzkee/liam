@@ -35,22 +35,15 @@ function escapeTypeIdentifier(type: string): string {
   // should not be quoted here.
   if (base.includes('(') || base.includes(' ')) return type
 
-  // Support schema-qualified types: public.ScoreSource -> public."ScoreSource"
+  // Strip schema prefix if present (e.g., "public.user_status" -> "user_status")
   const parts = base.split('.')
-  const simpleIdentifier = /^[A-Za-z_][A-Za-z0-9_]*$/
-  const allPartsSimple = parts.every((p) => simpleIdentifier.test(p))
-  if (!allPartsSimple) return type
+  const typeName = parts[parts.length - 1] ?? base // Take only the type name part with fallback
 
-  const escaped = parts
-    .map((p, index) => {
-      // Quote if it contains uppercase letters, OR
-      // if it's the type name part (last part) of a schema-qualified type
-      if (/[A-Z]/.test(p) || (index === parts.length - 1 && parts.length > 1)) {
-        return escapeIdentifier(p)
-      }
-      return p
-    })
-    .join('.')
+  const simpleIdentifier = /^[A-Za-z_][A-Za-z0-9_]*$/
+  if (!simpleIdentifier.test(typeName)) return type
+
+  // Quote if it contains uppercase letters
+  const escaped = /[A-Z]/.test(typeName) ? escapeIdentifier(typeName) : typeName
 
   return `${escaped}${arraySuffix}`
 }

@@ -1206,10 +1206,10 @@ describe('postgresqlSchemaDeparser', () => {
                 type: 'UserRole[]',
                 notNull: false,
               }),
-              // Test schema-qualified type (would be problematic)
+              // Test schema-qualified type (schema prefix should be stripped)
               qualified_role: aColumn({
                 name: 'qualified_role',
-                type: 'public.UserRole',
+                type: 'UserRole', // Schema prefix stripped by parser
                 notNull: false,
               }),
               // Test parameterized standard type (should not be quoted even if uppercase)
@@ -1239,7 +1239,7 @@ describe('postgresqlSchemaDeparser', () => {
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toContain('"UserRole"[]') // Array type should quote only the base type
-      expect(result.value).toContain('public."UserRole"') // Schema-qualified should quote only the type part
+      expect(result.value).toContain('"UserRole"') // Schema prefix stripped, only type name remains
       expect(result.value).toContain('VARCHAR(255)') // Parameterized standard type should not be quoted
       expect(result.value).toContain('double precision') // Spaced type should not be quoted
     })
@@ -1763,14 +1763,14 @@ describe('PostgreSQL utils', () => {
         'ALTER TABLE "users" ALTER COLUMN "permissions" TYPE "Permission"[][];',
       )
 
-      // Test schema-qualified type
+      // Test schema-qualified type (schema prefix gets stripped)
       const alterSchemaQualified = generateAlterColumnTypeStatement(
         'users',
         'status',
         'public.UserStatus',
       )
       expect(alterSchemaQualified).toBe(
-        'ALTER TABLE "users" ALTER COLUMN "status" TYPE public."UserStatus";',
+        'ALTER TABLE "users" ALTER COLUMN "status" TYPE "UserStatus";',
       )
 
       // Test standard PostgreSQL type (should not be quoted)

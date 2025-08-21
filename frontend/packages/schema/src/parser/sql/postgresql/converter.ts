@@ -284,9 +284,23 @@ export const convertToSchema = (
       return ''
     }
 
-    // Return full qualified name with dots to preserve schema information
-    // e.g., for "public.user_status", return "public.user_status"
-    return names.join('.')
+    // Join with dots first, then strip schema prefix
+    const fullTypeName = names.join('.')
+    return stripSchemaPrefix(fullTypeName)
+  }
+
+  /**
+   * Remove schema prefix from type name
+   * e.g., "public.user_status" -> "user_status"
+   */
+  function stripSchemaPrefix(typeName: string): string {
+    const parts = typeName.split('.')
+    // If it has multiple parts and the first part looks like a schema name,
+    // return only the type name (last part)
+    if (parts.length > 1) {
+      return parts[parts.length - 1] ?? typeName // Return the last part (type name) with fallback
+    }
+    return typeName
   }
 
   /**
@@ -1008,7 +1022,9 @@ export const convertToSchema = (
 
     if (typeNames.length === 0) return
 
-    const enumName = typeNames.join('.')
+    // Join with dots first, then strip schema prefix
+    const fullTypeName = typeNames.join('.')
+    const enumName = stripSchemaPrefix(fullTypeName)
 
     // Extract enum values
     const enumValues: string[] = []

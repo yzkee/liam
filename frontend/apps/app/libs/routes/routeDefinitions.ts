@@ -29,6 +29,7 @@ export type RouteDefinitions = {
     schemaFilePath: string
   }) => string
   'design_sessions/[id]': (params: { id: string }) => string
+  'public/design_sessions/[id]': (params: { id: string }) => string
 }
 
 export const routeDefinitions: RouteDefinitions = {
@@ -79,5 +80,8 @@ export const routeDefinitions: RouteDefinitions = {
   },
   'design_sessions/[id]': ({ id }) => {
     return `/app/design_sessions/${id}`
+  },
+  'public/design_sessions/[id]': ({ id }) => {
+    return `/app/public/design_sessions/${id}`
   },
 } as const

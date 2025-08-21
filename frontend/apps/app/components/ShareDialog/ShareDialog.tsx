@@ -13,6 +13,7 @@ import {
 } from '@liam-hq/ui'
 import { type FC, useState } from 'react'
 import { usePublicShareServerAction } from '@/hooks/usePublicShareServerAction'
+import { urlgen } from '@/libs/routes'
 import styles from './ShareDialog.module.css'
 
 type Props = {
@@ -47,7 +48,7 @@ export const ShareDialog: FC<Props> = ({
   const copyLink = async () => {
     if (!isPublic) return
 
-    const publicUrl = `${window.location.origin}/app/public/design_sessions/${designSessionId}`
+    const publicUrl = `${window.location.origin}${urlgen('public/design_sessions/[id]', { id: designSessionId })}`
     await navigator.clipboard.writeText(publicUrl)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)

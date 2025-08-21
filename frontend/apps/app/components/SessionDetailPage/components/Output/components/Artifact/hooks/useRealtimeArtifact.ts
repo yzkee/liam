@@ -33,21 +33,15 @@ export function useRealtimeArtifact(designSessionId: string) {
     const supabase = createClient()
     const { data, error: fetchError } = await supabase
       .from('artifacts')
-      .select('*')
+      // Explicitly specify columns as anon user has grants on individual columns, not all columns
+      .select(
+        'id, design_session_id, artifact, created_at, updated_at, organization_id',
+      )
       .eq('design_session_id', designSessionId)
       .maybeSingle()
 
     if (fetchError) {
-      // For public view, any error is expected (no artifact exists yet)
-      if (isPublic) {
-        setLoading(false)
-        return
-      }
-
-      // TODO: fix this workaound
-      // For private view, handle actual errors
-      if (fetchError.code && fetchError.code !== 'PGRST116') {
-        // Only log real errors, not "no rows" errors
+      if (fetchError.code) {
         console.error(
           'Error fetching artifact:',
           fetchError.message || fetchError,

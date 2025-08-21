@@ -99,13 +99,13 @@ For database migration and type generation workflows, see [`docs/migrationOpsCon
 // ❌ Bad: Optional parameter leads to conditional logic
 function saveUser(data: UserData, userId?: string) {
   const id = userId || generateId(); // Unnecessary fallback logic
-  if (!userId) console.warn('Using generated ID'); // Extra handling
-  return db.save(id, data);
+  if (!userId) console.warn('Using generated ID') // Extra handling
+  return db.save(id, data)
 }
 
 // ✅ Good: Required parameter, update all callers
 function saveUser(data: UserData, userId: string) {
-  return db.save(userId, data); // Simple and clear
+  return db.save(userId, data) // Simple and clear
 }
 ```
 

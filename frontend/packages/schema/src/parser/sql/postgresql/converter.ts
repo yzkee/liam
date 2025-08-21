@@ -271,14 +271,36 @@ export const convertToSchema = (
 
   /**
    * Extract column type from type name
+   * For schema-qualified types like "public.user_status",
+   * returns the full qualified name "public.user_status"
    */
   function extractColumnType(typeName: { names?: Node[] } | undefined): string {
-    return (
-      typeName?.names
-        ?.filter(isStringNode)
-        .map((n) => n.String.sval)
-        .join('') || ''
-    )
+    const names = typeName?.names
+      ?.filter(isStringNode)
+      .map((n) => n.String.sval)
+      .filter((name): name is string => name !== undefined)
+
+    if (!names || names.length === 0) {
+      return ''
+    }
+
+    // Join with dots first, then strip schema prefix
+    const fullTypeName = names.join('.')
+    return stripSchemaPrefix(fullTypeName)
+  }
+
+  /**
+   * Remove schema prefix from type name
+   * e.g., "public.user_status" -> "user_status"
+   */
+  function stripSchemaPrefix(typeName: string): string {
+    const parts = typeName.split('.')
+    // If it has multiple parts and the first part looks like a schema name,
+    // return only the type name (last part)
+    if (parts.length > 1) {
+      return parts[parts.length - 1] ?? typeName // Return the last part (type name) with fallback
+    }
+    return typeName
   }
 
   /**
@@ -796,11 +818,17 @@ export const convertToSchema = (
       const typeName = objectNode.TypeName
       if (!typeName?.names || typeName.names.length === 0) return
 
-      const lastNameNode = typeName.names[typeName.names.length - 1]
-      if (!isStringNode(lastNameNode)) return
+      // Extract type names and strip schema prefix for lookup
+      const typeNames = typeName.names
+        .filter(isStringNode)
+        .map((n) => n.String.sval)
+        .filter((name): name is string => name !== undefined)
 
-      const enumName = lastNameNode.String.sval
-      if (!enumName) return
+      if (typeNames.length === 0) return
+
+      // Use stripSchemaPrefix to get the unqualified enum name for lookup
+      const fullTypeName = typeNames.join('.')
+      const enumName = stripSchemaPrefix(fullTypeName)
 
       // Set comment on existing enum
       if (enums[enumName]) {
@@ -988,12 +1016,17 @@ export const convertToSchema = (
     if (!createEnumStmt?.typeName || createEnumStmt.typeName.length === 0)
       return
 
-    const lastNameNode =
-      createEnumStmt.typeName[createEnumStmt.typeName.length - 1]
-    if (!isStringNode(lastNameNode)) return
+    // Extract full qualified name for schema-qualified enums
+    const typeNames = createEnumStmt.typeName
+      .filter(isStringNode)
+      .map((n) => n.String.sval)
+      .filter((name): name is string => name !== undefined)
 
-    const enumName = lastNameNode.String.sval
-    if (!enumName) return
+    if (typeNames.length === 0) return
+
+    // Join with dots first, then strip schema prefix
+    const fullTypeName = typeNames.join('.')
+    const enumName = stripSchemaPrefix(fullTypeName)
 
     // Extract enum values
     const enumValues: string[] = []

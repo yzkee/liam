@@ -1,3 +1,4 @@
+import { AIMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import type { Database } from '@liam-hq/db'
 import { executeQuery } from '@liam-hq/pglite-server'
@@ -7,8 +8,8 @@ import type { Usecase } from '../../../langchain/agents/qaGenerateUsecaseAgent/a
 import { WorkflowTerminationError } from '../../../shared/errorHandling'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
-import { logAssistantMessage } from '../utils/timelineLogger'
 import { transformWorkflowStateToArtifact } from '../utils/transformWorkflowStateToArtifact'
+import { withTimelineItemSync } from '../utils/withTimelineItemSync'
 
 type UsecaseDmlExecutionResult = {
   useCaseId: string
@@ -253,12 +254,26 @@ export async function validateSchemaNode(
         ? 'Database validation complete: all checks passed successfully'
         : `Database validation found ${errorCount} issues that need attention`
 
-    await logAssistantMessage(
-      state,
+    // Create AIMessage for validation result
+    const validationAIMessage = new AIMessage({
+      content: validationMessage,
+      name: 'SchemaValidator',
+    })
+
+    // Sync with timeline
+    const syncedMessage = await withTimelineItemSync(validationAIMessage, {
+      designSessionId: state.designSessionId,
+      organizationId: state.organizationId || '',
+      userId: state.userId,
       repositories,
-      validationMessage,
       assistantRole,
-    )
+    })
+
+    // Add synced message to state
+    updatedState = {
+      ...updatedState,
+      messages: [...state.messages, syncedMessage],
+    }
   }
 
   // Check for execution errors

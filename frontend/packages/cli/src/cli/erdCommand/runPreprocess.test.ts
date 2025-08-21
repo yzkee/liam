@@ -3,7 +3,7 @@ import os from 'node:os'
 import path from 'node:path'
 import type { SupportedFormat } from '@liam-hq/schema/parser'
 import { err, ok } from 'neverthrow'
-import { describe, expect, it } from 'vitest'
+import { assert, describe, expect, it } from 'vitest'
 import { ArgumentError, WarningProcessingError } from '../errors.js'
 import { runPreprocess } from './runPreprocess.js'
 
@@ -41,12 +41,9 @@ describe('runPreprocess', () => {
       )
       if (!outputFilePath) {
         // Build clear error message by mapping errors to their .message
-        const errorMessages = errors
-          .filter(Boolean)
-          .map((error) => error.message)
-          .join('; ')
+        const errorMessages = errors.map((error) => error.message).join('; ')
         console.error(`Failed to run preprocess: ${errorMessages}`)
-        return // Return early instead of throwing
+        assert.fail(errorMessages)
       }
 
       expect(errors).toEqual([])

@@ -18,6 +18,9 @@ const getTableLinkHref = (activeTableName: string) => {
 
 const commandPaletteFilter: typeof defaultFilter = (value, ...rest) => {
   const suggestion = textToSuggestion(value)
+
+  // if the value is inappropriate for suggestion, it returns 0 and the options is hidden
+  // https://github.com/pacocoursey/cmdk/blob/d6fde235386414196bf80d9b9fa91e2cf89a72ea/cmdk/src/index.tsx#L91-L95
   if (!suggestion) return 0
 
   return defaultFilter(suggestion.name, ...rest)

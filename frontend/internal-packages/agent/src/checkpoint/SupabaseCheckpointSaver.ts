@@ -303,7 +303,9 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
 
     const { error: checkpointError } = await this.client
       .from('checkpoints')
-      .upsert(checkpointInsert)
+      .upsert(checkpointInsert, {
+        onConflict: 'thread_id,checkpoint_ns,checkpoint_id,organization_id',
+      })
 
     if (checkpointError) {
       // BaseCheckpointSaver expects exceptions to be thrown
@@ -322,7 +324,9 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
     if (blobs.length > 0) {
       const { error: blobError } = await this.client
         .from('checkpoint_blobs')
-        .upsert(blobs)
+        .upsert(blobs, {
+          onConflict: 'thread_id,checkpoint_ns,channel,version,organization_id',
+        })
 
       if (blobError) {
         // BaseCheckpointSaver expects exceptions to be thrown
@@ -362,7 +366,10 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
     if (dumpedWrites.length > 0) {
       const { error } = await this.client
         .from('checkpoint_writes')
-        .upsert(dumpedWrites)
+        .upsert(dumpedWrites, {
+          onConflict:
+            'thread_id,checkpoint_ns,checkpoint_id,task_id,idx,organization_id',
+        })
 
       if (error) {
         // BaseCheckpointSaver expects exceptions to be thrown

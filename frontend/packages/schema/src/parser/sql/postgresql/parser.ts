@@ -4,7 +4,12 @@ import type { RawStmt } from '@pgsql/types'
 import Module from 'pg-query-emscripten'
 
 export const parse = async (str: string): Promise<ParseResult> => {
-  const pgQuery = await new Module()
+  const pgQuery = await new Module({
+    wasmMemory: new WebAssembly.Memory({
+      initial: 2048, // 128MB (64KB × 2048 pages)
+      maximum: 4096, // 256MB max
+    }),
+  })
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   const result = pgQuery.parse(str)
   return result

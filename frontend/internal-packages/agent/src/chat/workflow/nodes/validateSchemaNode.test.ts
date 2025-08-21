@@ -292,6 +292,174 @@ describe('validateSchemaNode', () => {
     expect(result).toEqual(state)
   })
 
+  it('should generate detailed error message with usecase information', async () => {
+    const ddlMockResults: SqlResult[] = [
+      {
+        success: true,
+        sql: 'CREATE TABLE users (id INT);',
+        result: { rows: [], columns: [] },
+        id: 'result-1',
+        metadata: {
+          executionTime: 10,
+          timestamp: new Date().toISOString(),
+        },
+      },
+    ]
+
+    const dmlMockResults: SqlResult[] = [
+      {
+        success: false,
+        sql: 'INSERT INTO users VALUES (1);',
+        result: { error: 'column "name" does not exist' },
+        id: 'result-2',
+        metadata: {
+          executionTime: 2,
+          timestamp: new Date().toISOString(),
+        },
+      },
+    ]
+
+    vi.mocked(executeQuery)
+      .mockResolvedValueOnce(ddlMockResults)
+      .mockResolvedValueOnce(dmlMockResults)
+
+    const state = createMockState({
+      ddlStatements: 'CREATE TABLE users (id INT);',
+      generatedUsecases: [
+        {
+          id: 'usecase-1',
+          requirementType: 'functional',
+          requirementCategory: 'data_management',
+          requirement: 'Insert user data',
+          title: 'User Registration',
+          description: 'Register new user in the system',
+          dmlOperations: [
+            {
+              useCaseId: 'usecase-1',
+              operation_type: 'INSERT',
+              sql: 'INSERT INTO users VALUES (1);',
+              dml_execution_logs: [],
+            },
+          ],
+        },
+      ],
+    })
+
+    const repositories = createRepositories()
+    const result = await validateSchemaNode(state, {
+      configurable: { repositories, thread_id: 'test-thread' },
+    })
+
+    // Verify error message contains usecase information
+    expect(result.messages).toHaveLength(1)
+    const message = result.messages[0]
+    const expectedMessage = `Database validation found 1 issues. Please fix the following errors:
+
+- "User Registration":
+  - column "name" does not exist`
+    expect(message?.content).toBe(expectedMessage)
+  })
+
+  it('should handle multiple usecase errors with detailed messages', async () => {
+    const ddlMockResults: SqlResult[] = [
+      {
+        success: true,
+        sql: 'CREATE TABLE users (id INT);',
+        result: { rows: [], columns: [] },
+        id: 'result-1',
+        metadata: {
+          executionTime: 10,
+          timestamp: new Date().toISOString(),
+        },
+      },
+    ]
+
+    const dmlMockResults1: SqlResult[] = [
+      {
+        success: false,
+        sql: 'INSERT INTO users VALUES (1);',
+        result: { error: 'relation "users" does not exist' },
+        id: 'result-2',
+        metadata: {
+          executionTime: 2,
+          timestamp: new Date().toISOString(),
+        },
+      },
+    ]
+
+    const dmlMockResults2: SqlResult[] = [
+      {
+        success: false,
+        sql: 'UPDATE products SET price = 100;',
+        result: { error: 'relation "products" does not exist' },
+        id: 'result-3',
+        metadata: {
+          executionTime: 2,
+          timestamp: new Date().toISOString(),
+        },
+      },
+    ]
+
+    vi.mocked(executeQuery)
+      .mockResolvedValueOnce(ddlMockResults)
+      .mockResolvedValueOnce(dmlMockResults1)
+      .mockResolvedValueOnce(dmlMockResults2)
+
+    const state = createMockState({
+      ddlStatements: 'CREATE TABLE users (id INT);',
+      generatedUsecases: [
+        {
+          id: 'usecase-1',
+          requirementType: 'functional',
+          requirementCategory: 'data_management',
+          requirement: 'Insert user data',
+          title: 'User Registration',
+          description: 'Register new user',
+          dmlOperations: [
+            {
+              useCaseId: 'usecase-1',
+              operation_type: 'INSERT',
+              sql: 'INSERT INTO users VALUES (1);',
+              dml_execution_logs: [],
+            },
+          ],
+        },
+        {
+          id: 'usecase-2',
+          requirementType: 'non_functional',
+          requirementCategory: 'performance',
+          requirement: 'Update product prices',
+          title: 'Bulk Price Update',
+          description: 'Update all product prices',
+          dmlOperations: [
+            {
+              useCaseId: 'usecase-2',
+              operation_type: 'UPDATE',
+              sql: 'UPDATE products SET price = 100;',
+              dml_execution_logs: [],
+            },
+          ],
+        },
+      ],
+    })
+
+    const repositories = createRepositories()
+    const result = await validateSchemaNode(state, {
+      configurable: { repositories, thread_id: 'test-thread' },
+    })
+
+    // Verify error message contains information for both usecases
+    expect(result.messages).toHaveLength(1)
+    const message = result.messages[0]
+    const expectedMessage = `Database validation found 2 issues. Please fix the following errors:
+
+- "User Registration":
+  - relation "users" does not exist
+- "Bulk Price Update":
+  - relation "products" does not exist`
+    expect(message?.content).toBe(expectedMessage)
+  })
+
   it('should execute DML operations from each usecase', async () => {
     // This test verifies that validateSchemaNode executes DML operations
     // found in each usecase's dmlOperations array

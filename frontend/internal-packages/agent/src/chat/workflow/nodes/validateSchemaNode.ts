@@ -70,7 +70,17 @@ async function executeDmlOperationsByUsecase(
       const hasErrors = sqlResults.some((result) => !result.success)
       const errors = sqlResults
         .filter((result) => !result.success)
-        .map((result) => String(result.result))
+        .map((result) => {
+          // Extract error message from result object
+          if (
+            typeof result.result === 'object' &&
+            result.result !== null &&
+            'error' in result.result
+          ) {
+            return String(result.result.error)
+          }
+          return String(result.result)
+        })
 
       results.push({
         useCaseId: usecase.id,
@@ -249,10 +259,23 @@ export async function validateSchemaNode(
 
     const successCount = results.filter((r) => r.success).length
     const errorCount = results.length - successCount
-    const validationMessage =
-      errorCount === 0
-        ? 'Database validation complete: all checks passed successfully'
-        : `Database validation found ${errorCount} issues that need attention`
+
+    let validationMessage: string
+    if (errorCount === 0) {
+      validationMessage =
+        'Database validation complete: all checks passed successfully'
+    } else {
+      // Build detailed error message with usecase information
+      const errorDetails = usecaseExecutionResults
+        .filter((result) => !result.success)
+        .map((result) => {
+          const errorMessages = result.errors?.join('\n  - ') || 'Unknown error'
+          return `- "${result.useCaseTitle}":\n  - ${errorMessages}`
+        })
+        .join('\n')
+
+      validationMessage = `Database validation found ${errorCount} issues. Please fix the following errors:\n\n${errorDetails}`
+    }
 
     // Create AIMessage for validation result
     const validationAIMessage = new AIMessage({

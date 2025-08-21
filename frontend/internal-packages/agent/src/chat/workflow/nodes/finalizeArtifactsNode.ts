@@ -17,7 +17,8 @@ function generateWorkflowSummary(
 ): ResultAsync<AIMessage, Error> {
   // Create LLM for summary generation
   const llm = new ChatOpenAI({
-    model: 'gpt-5',
+    model: 'gpt-5-nano',
+    reasoning: { effort: 'minimal' },
   })
 
   // Create a summary prompt based on the workflow messages

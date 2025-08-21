@@ -9,11 +9,7 @@ export const parse = async (str: string): Promise<ParseResult> => {
   const filteredStr = str
     .split('\n')
     .filter((line) => {
-      const trimmedLine = line.trim()
-      return (
-        !trimmedLine.startsWith('\\restrict') &&
-        !trimmedLine.startsWith('\\unrestrict')
-      )
+      return !line.startsWith('\\restrict') && !line.startsWith('\\unrestrict')
     })
     .join('\n')
 

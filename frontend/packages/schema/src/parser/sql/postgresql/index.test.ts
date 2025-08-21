@@ -544,6 +544,68 @@ describe(processor, () => {
 
       expect(result).toEqual({ value, errors })
     })
+
+    it('should ignore \\restrict and \\unrestrict lines from PostgreSQL 16.10+', async () => {
+      const { value, errors } = await processor(/* sql */ `
+        --
+        -- PostgreSQL database dump
+        --
+
+        \\restrict GNe5kMfiI0ANWitVE3BZ0HVlF41EznPoORQML2l8w8Tg2gLdbf9IxWY2UPYdYuN
+
+        SET statement_timeout = 0;
+        SET lock_timeout = 0;
+
+        CREATE TABLE users (
+          id BIGSERIAL PRIMARY KEY,
+          name VARCHAR(255) NOT NULL
+        );
+
+        CREATE TYPE status AS ENUM ('active', 'inactive');
+
+        \\unrestrict GNe5kMfiI0ANWitVE3BZ0HVlF41EznPoORQML2l8w8Tg2gLdbf9IxWY2UPYdYuN
+      `)
+
+      expect(errors).toEqual([])
+      expect(value.tables['users']).toBeDefined()
+      expect(value.tables['users']?.columns['id']).toBeDefined()
+      expect(value.tables['users']?.columns['name']).toBeDefined()
+      expect(value.enums['status']).toBeDefined()
+      expect(value.enums['status']?.values).toEqual(['active', 'inactive'])
+    })
+
+    it('should handle various \\restrict and \\unrestrict patterns', async () => {
+      const { value, errors } = await processor(/* sql */ `
+        -- Test comment with \\restrict word should not be filtered
+        CREATE TABLE products (
+          id SERIAL PRIMARY KEY
+        );
+
+        \\restrict ABC123DEF456
+        \\unrestrict ABC123DEF456
+
+        CREATE TABLE orders (
+          id SERIAL PRIMARY KEY,
+          product_id INT REFERENCES products(id)
+        );
+
+        -- Another restrict line with different hash
+        \\restrict XYZ789GHI012JKL345MNO678
+
+        CREATE TYPE priority AS ENUM ('low', 'high');
+
+        \\unrestrict XYZ789GHI012JKL345MNO678
+      `)
+
+      expect(errors).toEqual([])
+      expect(value.tables['products']).toBeDefined()
+      expect(value.tables['orders']).toBeDefined()
+      expect(
+        value.tables['orders']?.constraints['products_id_to_orders_product_id'],
+      ).toBeDefined()
+      expect(value.enums['priority']).toBeDefined()
+      expect(value.enums['priority']?.values).toEqual(['low', 'high'])
+    })
   })
 
   describe('Long "create table" statement (surpassing CHUNK_SIZE). regression test for liam-hq/liam#874', () => {

@@ -1,3 +1,4 @@
+import { aColumn, aSchema, aTable } from '@liam-hq/schema'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { DMLGenerationAgent } from '../../../langchain/agents/dmlGenerationAgent/agent'
 import type { Repositories } from '../../../repositories'
@@ -38,7 +39,7 @@ describe('prepareDmlNode', () => {
     return {
       messages: [],
       userInput: 'test',
-      schemaData: { tables: {}, enums: {} },
+      schemaData: aSchema({ tables: {} }),
       buildingSchemaId: 'test-id',
       latestVersionNumber: 1,
       organizationId: 'test-org-id',
@@ -76,27 +77,16 @@ describe('prepareDmlNode', () => {
 
   it('should return state unchanged when use cases are missing', async () => {
     const state = createMockState({
-      schemaData: {
+      schemaData: aSchema({
         tables: {
-          users: {
+          users: aTable({
             name: 'users',
-            comment: null,
             columns: {
-              id: {
-                name: 'id',
-                type: 'INT',
-                notNull: true,
-                default: null,
-                check: null,
-                comment: null,
-              },
+              id: aColumn({ name: 'id', type: 'INT', notNull: true }),
             },
-            constraints: {},
-            indexes: {},
-          },
+          }),
         },
-        enums: {},
-      },
+      }),
     })
 
     const result = await prepareDmlNode(state, {
@@ -111,27 +101,16 @@ describe('prepareDmlNode', () => {
 
   it('should return state unchanged when use cases array is empty', async () => {
     const state = createMockState({
-      schemaData: {
+      schemaData: aSchema({
         tables: {
-          users: {
+          users: aTable({
             name: 'users',
-            comment: null,
             columns: {
-              id: {
-                name: 'id',
-                type: 'INT',
-                notNull: true,
-                default: null,
-                check: null,
-                comment: null,
-              },
+              id: aColumn({ name: 'id', type: 'INT', notNull: true }),
             },
-            constraints: {},
-            indexes: {},
-          },
+          }),
         },
-        enums: {},
-      },
+      }),
       generatedUsecases: [],
     })
 
@@ -157,27 +136,16 @@ describe('prepareDmlNode', () => {
     })
 
     const state = createMockState({
-      schemaData: {
+      schemaData: aSchema({
         tables: {
-          users: {
+          users: aTable({
             name: 'users',
-            comment: null,
             columns: {
-              id: {
-                name: 'id',
-                type: 'INT',
-                notNull: true,
-                default: null,
-                check: null,
-                comment: null,
-              },
+              id: aColumn({ name: 'id', type: 'INT', notNull: true }),
             },
-            constraints: {},
-            indexes: {},
-          },
+          }),
         },
-        enums: {},
-      },
+      }),
       generatedUsecases: [
         {
           id: 'test-id-1',
@@ -203,35 +171,17 @@ describe('prepareDmlNode', () => {
 
   it('should process schema with convertSchemaToText', async () => {
     const state = createMockState({
-      schemaData: {
+      schemaData: aSchema({
         tables: {
-          users: {
+          users: aTable({
             name: 'users',
-            comment: null,
             columns: {
-              id: {
-                name: 'id',
-                type: 'INT',
-                notNull: true,
-                default: null,
-                check: null,
-                comment: null,
-              },
-              email: {
-                name: 'email',
-                type: 'VARCHAR',
-                notNull: true,
-                default: null,
-                check: null,
-                comment: null,
-              },
+              id: aColumn({ name: 'id', type: 'INT', notNull: true }),
+              email: aColumn({ name: 'email', type: 'VARCHAR', notNull: true }),
             },
-            constraints: {},
-            indexes: {},
-          },
+          }),
         },
-        enums: {},
-      },
+      }),
       generatedUsecases: [
         {
           id: 'test-id-1',
@@ -264,35 +214,17 @@ describe('prepareDmlNode', () => {
     // and assigns them to the correct usecase
 
     const state = createMockState({
-      schemaData: {
+      schemaData: aSchema({
         tables: {
-          users: {
+          users: aTable({
             name: 'users',
-            comment: null,
             columns: {
-              id: {
-                name: 'id',
-                type: 'INT',
-                notNull: true,
-                default: null,
-                check: null,
-                comment: null,
-              },
-              name: {
-                name: 'name',
-                type: 'VARCHAR',
-                notNull: false,
-                default: null,
-                check: null,
-                comment: null,
-              },
+              id: aColumn({ name: 'id', type: 'INT', notNull: true }),
+              name: aColumn({ name: 'name', type: 'VARCHAR' }),
             },
-            constraints: {},
-            indexes: {},
-          },
+          }),
         },
-        enums: {},
-      },
+      }),
       generatedUsecases: [
         {
           id: 'test-id-1',

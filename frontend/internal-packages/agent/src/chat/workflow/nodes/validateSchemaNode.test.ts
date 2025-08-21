@@ -1,5 +1,6 @@
 import { executeQuery } from '@liam-hq/pglite-server'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
+import { aColumn, aSchema, aTable } from '@liam-hq/schema'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Repositories } from '../../../repositories'
 import { InMemoryRepository } from '../../../repositories/InMemoryRepository'
@@ -17,7 +18,7 @@ describe('validateSchemaNode', () => {
     return {
       messages: [],
       userInput: 'test',
-      schemaData: { tables: {}, enums: {} },
+      schemaData: aSchema({ tables: {} }),
       buildingSchemaId: 'test-id',
       latestVersionNumber: 1,
       organizationId: 'test-org-id',
@@ -117,27 +118,16 @@ describe('validateSchemaNode', () => {
     vi.mocked(executeQuery).mockResolvedValue(mockResults)
 
     const state = createMockState({
-      schemaData: {
+      schemaData: aSchema({
         tables: {
-          users: {
+          users: aTable({
             name: 'users',
-            comment: null,
             columns: {
-              id: {
-                name: 'id',
-                type: 'INT',
-                notNull: true,
-                default: null,
-                check: null,
-                comment: null,
-              },
+              id: aColumn({ name: 'id', type: 'INT', notNull: true }),
             },
-            constraints: {},
-            indexes: {},
-          },
+          }),
         },
-        enums: {},
-      },
+      }),
       dmlStatements: '',
     })
 
@@ -185,27 +175,16 @@ describe('validateSchemaNode', () => {
       .mockResolvedValueOnce(dmlMockResults)
 
     const state = createMockState({
-      schemaData: {
+      schemaData: aSchema({
         tables: {
-          users: {
+          users: aTable({
             name: 'users',
-            comment: null,
             columns: {
-              id: {
-                name: 'id',
-                type: 'INT',
-                notNull: true,
-                default: null,
-                check: null,
-                comment: null,
-              },
+              id: aColumn({ name: 'id', type: 'INT', notNull: true }),
             },
-            constraints: {},
-            indexes: {},
-          },
+          }),
         },
-        enums: {},
-      },
+      }),
       generatedUsecases: [
         {
           id: 'usecase-1',
@@ -284,27 +263,16 @@ describe('validateSchemaNode', () => {
       .mockResolvedValueOnce(dmlMockResults)
 
     const state = createMockState({
-      schemaData: {
+      schemaData: aSchema({
         tables: {
-          users: {
+          users: aTable({
             name: 'users',
-            comment: null,
             columns: {
-              id: {
-                name: 'id',
-                type: 'INT',
-                notNull: true,
-                default: null,
-                check: null,
-                comment: null,
-              },
+              id: aColumn({ name: 'id', type: 'INT', notNull: true }),
             },
-            constraints: {},
-            indexes: {},
-          },
+          }),
         },
-        enums: {},
-      },
+      }),
       generatedUsecases: [
         {
           id: 'usecase-1',

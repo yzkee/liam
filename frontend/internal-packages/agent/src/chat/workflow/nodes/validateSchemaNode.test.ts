@@ -1,5 +1,6 @@
 import { executeQuery } from '@liam-hq/pglite-server'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
+import { aColumn, aSchema, aTable } from '@liam-hq/schema'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Repositories } from '../../../repositories'
 import { InMemoryRepository } from '../../../repositories/InMemoryRepository'
@@ -17,7 +18,7 @@ describe('validateSchemaNode', () => {
     return {
       messages: [],
       userInput: 'test',
-      schemaData: { tables: {}, enums: {} },
+      schemaData: aSchema({ tables: {} }),
       buildingSchemaId: 'test-id',
       latestVersionNumber: 1,
       organizationId: 'test-org-id',
@@ -40,7 +41,6 @@ describe('validateSchemaNode', () => {
   it('should handle empty statements', async () => {
     const state = createMockState({
       dmlStatements: '',
-      ddlStatements: '',
     })
 
     const repositories = createRepositories()
@@ -69,7 +69,6 @@ describe('validateSchemaNode', () => {
     vi.mocked(executeQuery).mockResolvedValue(mockResults)
 
     const state = createMockState({
-      ddlStatements: '',
       generatedUsecases: [
         {
           id: 'usecase-1',
@@ -119,7 +118,16 @@ describe('validateSchemaNode', () => {
     vi.mocked(executeQuery).mockResolvedValue(mockResults)
 
     const state = createMockState({
-      ddlStatements: 'CREATE TABLE users (id INT);',
+      schemaData: aSchema({
+        tables: {
+          users: aTable({
+            name: 'users',
+            columns: {
+              id: aColumn({ name: 'id', type: 'INT', notNull: true }),
+            },
+          }),
+        },
+      }),
       dmlStatements: '',
     })
 
@@ -130,7 +138,7 @@ describe('validateSchemaNode', () => {
 
     expect(executeQuery).toHaveBeenCalledWith(
       'session-id',
-      'CREATE TABLE users (id INT);',
+      expect.stringContaining('CREATE TABLE "users"'),
     )
     expect(result.dmlExecutionSuccessful).toBe(true)
   })
@@ -167,7 +175,16 @@ describe('validateSchemaNode', () => {
       .mockResolvedValueOnce(dmlMockResults)
 
     const state = createMockState({
-      ddlStatements: 'CREATE TABLE users (id INT);',
+      schemaData: aSchema({
+        tables: {
+          users: aTable({
+            name: 'users',
+            columns: {
+              id: aColumn({ name: 'id', type: 'INT', notNull: true }),
+            },
+          }),
+        },
+      }),
       generatedUsecases: [
         {
           id: 'usecase-1',
@@ -198,13 +215,13 @@ describe('validateSchemaNode', () => {
     expect(executeQuery).toHaveBeenNthCalledWith(
       1,
       'session-id',
-      'CREATE TABLE users (id INT);',
+      expect.stringContaining('CREATE TABLE "users"'),
     )
     // Second call should include both DDL and DML combined
     expect(executeQuery).toHaveBeenNthCalledWith(
       2,
       'session-id',
-      expect.stringContaining('CREATE TABLE users (id INT);'),
+      expect.stringContaining('-- DDL Statements'),
     )
     expect(executeQuery).toHaveBeenNthCalledWith(
       2,
@@ -246,7 +263,16 @@ describe('validateSchemaNode', () => {
       .mockResolvedValueOnce(dmlMockResults)
 
     const state = createMockState({
-      ddlStatements: 'CREATE TABLE users (id INT);',
+      schemaData: aSchema({
+        tables: {
+          users: aTable({
+            name: 'users',
+            columns: {
+              id: aColumn({ name: 'id', type: 'INT', notNull: true }),
+            },
+          }),
+        },
+      }),
       generatedUsecases: [
         {
           id: 'usecase-1',
@@ -279,7 +305,6 @@ describe('validateSchemaNode', () => {
 
   it('should trim whitespace from statements', async () => {
     const state = createMockState({
-      ddlStatements: '   ',
       dmlStatements: '   ',
     })
 
@@ -480,7 +505,6 @@ describe('validateSchemaNode', () => {
     vi.mocked(executeQuery).mockResolvedValue(sqlResults)
 
     const state = createMockState({
-      ddlStatements: '',
       dmlStatements: 'INSERT INTO users VALUES (1, "test");',
       generatedUsecases: [
         {
@@ -524,8 +548,9 @@ describe('validateSchemaNode', () => {
     const firstDmlOp = firstUsecase?.dmlOperations?.[0]
     expect(firstDmlOp).toBeDefined()
     expect(firstDmlOp?.dml_execution_logs).toBeDefined()
-    const executionLogs = firstDmlOp?.dml_execution_logs!
+    const executionLogs = firstDmlOp?.dml_execution_logs
+    expect(executionLogs).toBeDefined()
     expect(executionLogs).toHaveLength(1)
-    expect(executionLogs[0]?.success).toBe(true)
+    expect(executionLogs?.[0]?.success).toBe(true)
   })
 })

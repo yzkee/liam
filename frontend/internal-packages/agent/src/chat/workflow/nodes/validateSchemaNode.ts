@@ -8,6 +8,7 @@ import type { Usecase } from '../../../langchain/agents/qaGenerateUsecaseAgent/a
 import { WorkflowTerminationError } from '../../../shared/errorHandling'
 import { getConfigurable } from '../shared/getConfigurable'
 import type { WorkflowState } from '../types'
+import { generateDdlFromSchema } from '../utils/generateDdl'
 import { transformWorkflowStateToArtifact } from '../utils/transformWorkflowStateToArtifact'
 import { withTimelineItemSync } from '../utils/withTimelineItemSync'
 
@@ -171,8 +172,9 @@ export async function validateSchemaNode(
   }
   const { repositories } = configurableResult.value
 
+  const ddlStatements = generateDdlFromSchema(state.schemaData)
   // Check if we have any statements to execute
-  const hasDdl = state.ddlStatements?.trim()
+  const hasDdl = ddlStatements?.trim()
   const hasUsecases =
     state.generatedUsecases && state.generatedUsecases.length > 0
   const hasDml =
@@ -188,17 +190,17 @@ export async function validateSchemaNode(
   let allResults: SqlResult[] = []
 
   const combinedStatements = [
-    hasDdl ? state.ddlStatements : '',
+    hasDdl ? ddlStatements : '',
     hasDml ? 'DML operations executed individually' : '',
   ]
     .filter(Boolean)
     .join('\n')
 
   // Execute DDL first if present
-  if (hasDdl && state.ddlStatements) {
+  if (hasDdl && ddlStatements) {
     const ddlResults: SqlResult[] = await executeQuery(
       state.designSessionId,
-      state.ddlStatements,
+      ddlStatements,
     )
     allResults = [...ddlResults]
   }
@@ -209,7 +211,7 @@ export async function validateSchemaNode(
   if (hasDml && state.generatedUsecases) {
     usecaseExecutionResults = await executeDmlOperationsByUsecase(
       state.designSessionId,
-      state.ddlStatements || '',
+      ddlStatements || '',
       state.generatedUsecases,
     )
 

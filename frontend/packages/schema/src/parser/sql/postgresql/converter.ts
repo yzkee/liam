@@ -818,7 +818,7 @@ export const convertToSchema = (
       const typeName = objectNode.TypeName
       if (!typeName?.names || typeName.names.length === 0) return
 
-      // Extract full qualified name for schema-qualified enum comments
+      // Extract type names and strip schema prefix for lookup
       const typeNames = typeName.names
         .filter(isStringNode)
         .map((n) => n.String.sval)
@@ -826,7 +826,9 @@ export const convertToSchema = (
 
       if (typeNames.length === 0) return
 
-      const enumName = typeNames.join('.')
+      // Use stripSchemaPrefix to get the unqualified enum name for lookup
+      const fullTypeName = typeNames.join('.')
+      const enumName = stripSchemaPrefix(fullTypeName)
 
       // Set comment on existing enum
       if (enums[enumName]) {

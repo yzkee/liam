@@ -1039,5 +1039,57 @@ describe(processor, () => {
       // Column type should strip the schema prefix and use only the type name even when quoted
       expect(value.tables['users']?.columns['status']?.type).toBe('user_status')
     })
+
+    it('should handle COMMENT ON TYPE with schema-qualified enum (unquoted)', async () => {
+      const { value } = await processor(/* sql */ `
+        CREATE TYPE public.priority_level AS ENUM ('low', 'medium', 'high');
+        COMMENT ON TYPE public.priority_level IS 'Task priority levels';
+
+        CREATE TABLE tasks (
+          id BIGSERIAL PRIMARY KEY,
+          priority public.priority_level NOT NULL
+        );
+      `)
+
+      // The enum should have the comment attached
+      expect(value.enums).toEqual({
+        priority_level: {
+          name: 'priority_level',
+          values: ['low', 'medium', 'high'],
+          comment: 'Task priority levels',
+        },
+      })
+
+      // Column type should strip the schema prefix
+      expect(value.tables['tasks']?.columns['priority']?.type).toBe(
+        'priority_level',
+      )
+    })
+
+    it('should handle COMMENT ON TYPE with schema-qualified enum (quoted)', async () => {
+      const { value } = await processor(/* sql */ `
+        CREATE TYPE "public"."TaskStatus" AS ENUM ('todo', 'in_progress', 'done');
+        COMMENT ON TYPE "public"."TaskStatus" IS 'Available task statuses';
+
+        CREATE TABLE projects (
+          id uuid PRIMARY KEY,
+          status "public"."TaskStatus" DEFAULT 'todo'
+        );
+      `)
+
+      // The enum should have the comment attached despite quoted schema qualification
+      expect(value.enums).toEqual({
+        TaskStatus: {
+          name: 'TaskStatus',
+          values: ['todo', 'in_progress', 'done'],
+          comment: 'Available task statuses',
+        },
+      })
+
+      // Column type should strip the schema prefix
+      expect(value.tables['projects']?.columns['status']?.type).toBe(
+        'TaskStatus',
+      )
+    })
   })
 })

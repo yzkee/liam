@@ -87,7 +87,9 @@ export class PGliteInstanceManager {
    * Creates a new PGlite instance for query execution
    */
   private async createInstance(): Promise<PGlite> {
-    return new PGlite()
+    return new PGlite({
+      initialMemory: 256 * 1024 * 1024, // 256MB initial memory allocation
+    })
   }
 
   /**

@@ -1,4 +1,4 @@
-import { LayoutGrid, Settings } from '@liam-hq/ui'
+import { BaseGlobalNav, LayoutGrid, Settings } from '@liam-hq/ui'
 import type { FC } from 'react'
 import { LiamDbLogo, LiamLogoMark } from '@/logos'
 import type { Organization } from '../services/getOrganization'
@@ -20,20 +20,21 @@ export const GlobalNav: FC<Props> = ({
   organizations,
 }) => {
   return (
-    <div className={styles.globalNavContainer} data-global-nav-container>
-      <nav className={styles.globalNav}>
-        <div className={styles.logoContainer}>
-          <div className={styles.logoSection}>
-            <div className={itemStyles.iconContainer}>
-              <LiamLogoMark />
-            </div>
-            <div className={itemStyles.labelArea}>
-              <LiamDbLogo className={styles.liamMigrationLogo} />
-            </div>
+    <BaseGlobalNav
+      containerClassName={styles.customGlobalNavContainer}
+      className={styles.customGlobalNav}
+      logoSection={
+        <>
+          <div className={itemStyles.iconContainer}>
+            <LiamLogoMark />
           </div>
-        </div>
-
-        <div className={styles.navSection}>
+          <div className={itemStyles.labelArea}>
+            <LiamDbLogo className={styles.liamMigrationLogo} />
+          </div>
+        </>
+      }
+      navContent={
+        <>
           {currentOrganization && (
             <OrganizationItem
               currentOrganization={currentOrganization}
@@ -49,16 +50,15 @@ export const GlobalNav: FC<Props> = ({
 
           <NewSessionButton />
           <RecentsSection />
-        </div>
-
-        <div className={styles.footerSection}>
-          <LinkItem
-            href="/app/settings/general"
-            icon={<Settings />}
-            label="Settings"
-          />
-        </div>
-      </nav>
-    </div>
+        </>
+      }
+      footerContent={
+        <LinkItem
+          href="/app/settings/general"
+          icon={<Settings />}
+          label="Settings"
+        />
+      }
+    />
   )
 }

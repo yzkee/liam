@@ -39,7 +39,8 @@ export class DMLGenerationAgent
     })
 
     const model = new ChatOpenAI({
-      model: 'gpt-4.1',
+      model: 'gpt-5-nano',
+      reasoning: { effort: 'minimal' },
     })
 
     const messages: BaseMessage[] = [

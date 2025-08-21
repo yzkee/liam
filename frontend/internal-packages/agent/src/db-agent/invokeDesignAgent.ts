@@ -14,6 +14,7 @@ import { schemaDesignTool } from './tools/schemaDesignTool'
 
 const model = new ChatOpenAI({
   model: 'gpt-5',
+  reasoning: { effort: 'medium', summary: 'detailed' },
   useResponsesApi: true,
 }).bindTools([schemaDesignTool])
 

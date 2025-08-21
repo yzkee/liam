@@ -98,8 +98,8 @@ export class QAGenerateUsecaseAgent {
 
   constructor() {
     const baseModel = new ChatOpenAI({
-      model: 'gpt-5',
-      reasoning: { effort: 'high', summary: 'detailed' },
+      model: 'gpt-5-mini',
+      reasoning: { effort: 'minimal' },
       useResponsesApi: true,
     })
 

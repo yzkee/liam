@@ -38,7 +38,7 @@ export const invokePmAnalysisAgent = (
 
   const model = new ChatOpenAI({
     model: 'gpt-5',
-    reasoning: { effort: 'high', summary: 'detailed' },
+    reasoning: { effort: 'medium', summary: 'detailed' },
     useResponsesApi: true,
   }).bindTools(
     [{ type: 'web_search_preview' }, saveRequirementsToArtifactTool],

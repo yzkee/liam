@@ -1,6 +1,7 @@
 import { execSync } from 'node:child_process'
 import { withSentryConfig } from '@sentry/nextjs'
 import type { NextConfig } from 'next'
+import { ROUTE_PREFIXES } from './libs/routes/constants'
 
 const gitCommitHash = execSync('git rev-parse --short HEAD').toString().trim()
 const releaseDate = new Date().toISOString().split('T')[0]
@@ -119,6 +120,20 @@ const nextConfig: NextConfig = {
     process.env.NEXT_PUBLIC_ENV_NAME === 'production'
       ? process.env.ASSET_PREFIX
       : undefined,
+  async headers() {
+    return [
+      {
+        source: `${ROUTE_PREFIXES.PUBLIC}/:path*`,
+        headers: [
+          {
+            key: 'Cache-Control',
+            value:
+              'public, max-age=0, s-maxage=60, stale-while-revalidate=86400',
+          },
+        ],
+      },
+    ]
+  },
 }
 
 export default withSentryConfig(nextConfig, {

@@ -21,7 +21,12 @@ const getPgQueryInstance = (): ResultAsync<PgQueryInstance, Error> => {
   }
 
   return ResultAsync.fromPromise(
-    new Module(),
+    new Module({
+      wasmMemory: new WebAssembly.Memory({
+        initial: 2048, // 128MB (64KB × 2048 pages)
+        maximum: 4096, // 256MB max
+      }),
+    }),
     (error) => new Error(`Failed to initialize pg-query module: ${error}`),
   )
     .andThen((instance: unknown) => {
@@ -88,7 +93,7 @@ export class PGliteInstanceManager {
    */
   private async createInstance(): Promise<PGlite> {
     return new PGlite({
-      initialMemory: 256 * 1024 * 1024, // 256MB initial memory allocation
+      initialMemory: 2 * 1024 * 1024 * 1024, // 2GB initial memory allocation
     })
   }
 

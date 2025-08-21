@@ -42,8 +42,7 @@ interface WorkflowState {
   analyzedRequirements?: AnalyzedRequirements;
   generatedUsecases?: Usecase[];
 
-  // DDL/DML execution
-  ddlStatements?: string;
+  // DML execution
   dmlStatements?: string;
 
   // DML execution results

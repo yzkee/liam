@@ -76,7 +76,27 @@ describe('prepareDmlNode', () => {
 
   it('should return state unchanged when use cases are missing', async () => {
     const state = createMockState({
-      ddlStatements: 'CREATE TABLE users (id INT);',
+      schemaData: {
+        tables: {
+          users: {
+            name: 'users',
+            comment: null,
+            columns: {
+              id: {
+                name: 'id',
+                type: 'INT',
+                notNull: true,
+                default: null,
+                check: null,
+                comment: null,
+              },
+            },
+            constraints: {},
+            indexes: {},
+          },
+        },
+        enums: {},
+      },
     })
 
     const result = await prepareDmlNode(state, {
@@ -91,7 +111,27 @@ describe('prepareDmlNode', () => {
 
   it('should return state unchanged when use cases array is empty', async () => {
     const state = createMockState({
-      ddlStatements: 'CREATE TABLE users (id INT);',
+      schemaData: {
+        tables: {
+          users: {
+            name: 'users',
+            comment: null,
+            columns: {
+              id: {
+                name: 'id',
+                type: 'INT',
+                notNull: true,
+                default: null,
+                check: null,
+                comment: null,
+              },
+            },
+            constraints: {},
+            indexes: {},
+          },
+        },
+        enums: {},
+      },
       generatedUsecases: [],
     })
 
@@ -117,7 +157,27 @@ describe('prepareDmlNode', () => {
     })
 
     const state = createMockState({
-      ddlStatements: 'CREATE TABLE users (id INT);',
+      schemaData: {
+        tables: {
+          users: {
+            name: 'users',
+            comment: null,
+            columns: {
+              id: {
+                name: 'id',
+                type: 'INT',
+                notNull: true,
+                default: null,
+                check: null,
+                comment: null,
+              },
+            },
+            constraints: {},
+            indexes: {},
+          },
+        },
+        enums: {},
+      },
       generatedUsecases: [
         {
           id: 'test-id-1',
@@ -143,18 +203,6 @@ describe('prepareDmlNode', () => {
 
   it('should process schema with convertSchemaToText', async () => {
     const state = createMockState({
-      ddlStatements: 'CREATE TABLE users (id INT);',
-      generatedUsecases: [
-        {
-          id: 'test-id-1',
-          requirementType: 'functional',
-          requirementCategory: 'User Management',
-          requirement: 'Users should be able to register',
-          title: 'User Registration',
-          description: 'Allow users to create new accounts',
-          dmlOperations: [],
-        },
-      ],
       schemaData: {
         tables: {
           users: {
@@ -184,6 +232,17 @@ describe('prepareDmlNode', () => {
         },
         enums: {},
       },
+      generatedUsecases: [
+        {
+          id: 'test-id-1',
+          requirementType: 'functional',
+          requirementCategory: 'User Management',
+          requirement: 'Users should be able to register',
+          title: 'User Registration',
+          description: 'Allow users to create new accounts',
+          dmlOperations: [],
+        },
+      ],
     })
 
     await prepareDmlNode(state, {
@@ -205,18 +264,6 @@ describe('prepareDmlNode', () => {
     // and assigns them to the correct usecase
 
     const state = createMockState({
-      ddlStatements: 'CREATE TABLE users (id INT, name VARCHAR(255));',
-      generatedUsecases: [
-        {
-          id: 'test-id-1',
-          requirementType: 'functional',
-          requirementCategory: 'User Management',
-          requirement: 'Users should be able to register',
-          title: 'User Registration',
-          description: 'Allow users to create new accounts',
-          dmlOperations: [], // Initially empty
-        },
-      ],
       schemaData: {
         tables: {
           users: {
@@ -246,6 +293,17 @@ describe('prepareDmlNode', () => {
         },
         enums: {},
       },
+      generatedUsecases: [
+        {
+          id: 'test-id-1',
+          requirementType: 'functional',
+          requirementCategory: 'User Management',
+          requirement: 'Users should be able to register',
+          title: 'User Registration',
+          description: 'Allow users to create new accounts',
+          dmlOperations: [],
+        },
+      ],
     })
 
     const result = await prepareDmlNode(state, {

@@ -25,7 +25,6 @@ export const createAnnotations = () => {
     userId: Annotation<string>,
     designSessionId: Annotation<string>,
 
-    ddlStatements: Annotation<string | undefined>,
     dmlStatements: Annotation<string | undefined>,
 
     // DML execution results

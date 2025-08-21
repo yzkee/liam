@@ -1,3 +1,5 @@
+import { ROUTE_PREFIXES } from './constants'
+
 export type RouteDefinitions = {
   login: string
   projects: string
@@ -82,6 +84,6 @@ export const routeDefinitions: RouteDefinitions = {
     return `/app/design_sessions/${id}`
   },
   'public/design_sessions/[id]': ({ id }) => {
-    return `/app/public/design_sessions/${id}`
+    return `${ROUTE_PREFIXES.PUBLIC}/design_sessions/${id}`
   },
 } as const

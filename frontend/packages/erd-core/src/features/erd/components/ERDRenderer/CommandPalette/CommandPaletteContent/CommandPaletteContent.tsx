@@ -17,6 +17,13 @@ const getTableLinkHref = (activeTableName: string) => {
   return `?${searchParams.toString()}`
 }
 
+const commandPaletteFilter: typeof defaultFilter = (value, ...rest) => {
+  const suggestion = textToSuggestion(value)
+  if (!suggestion) return 0
+
+  return defaultFilter(suggestion.name, ...rest)
+}
+
 type Props = {
   closeDialog: () => void
 }
@@ -69,12 +76,7 @@ export const CommandPaletteContent: FC<Props> = ({ closeDialog }) => {
     <Command
       value={suggestionText}
       onValueChange={(v) => setSuggestionText(v)}
-      filter={(value, ...rest) => {
-        const suggestion = textToSuggestion(value)
-        if (!suggestion) return 0
-
-        return defaultFilter(suggestion.name, ...rest)
-      }}
+      filter={commandPaletteFilter}
     >
       <div className={styles.searchContainer}>
         <CommandPaletteSearchInput

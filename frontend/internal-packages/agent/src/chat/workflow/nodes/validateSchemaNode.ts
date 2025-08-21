@@ -24,7 +24,6 @@ type UsecaseDmlExecutionResult = {
  * Combines DDL and usecase-specific DML into single execution units
  */
 async function executeDmlOperationsByUsecase(
-  sessionId: string,
   ddlStatements: string,
   usecases: Usecase[],
 ): Promise<UsecaseDmlExecutionResult[]> {
@@ -58,7 +57,7 @@ async function executeDmlOperationsByUsecase(
 
     const startTime = new Date()
     const executionResult = await ResultAsync.fromPromise(
-      executeQuery(sessionId, combinedSql),
+      executeQuery(combinedSql),
       (error) => new Error(String(error)),
     )
 
@@ -185,10 +184,7 @@ export async function validateSchemaNode(
 
   // Execute DDL first if present
   if (hasDdl && state.ddlStatements) {
-    const ddlResults: SqlResult[] = await executeQuery(
-      state.designSessionId,
-      state.ddlStatements,
-    )
+    const ddlResults: SqlResult[] = await executeQuery(state.ddlStatements)
     allResults = [...ddlResults]
   }
 
@@ -197,7 +193,6 @@ export async function validateSchemaNode(
   let updatedState = state
   if (hasDml && state.generatedUsecases) {
     usecaseExecutionResults = await executeDmlOperationsByUsecase(
-      state.designSessionId,
       state.ddlStatements || '',
       state.generatedUsecases,
     )

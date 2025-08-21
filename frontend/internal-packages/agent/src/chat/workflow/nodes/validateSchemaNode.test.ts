@@ -96,7 +96,6 @@ describe('validateSchemaNode', () => {
     })
 
     expect(executeQuery).toHaveBeenCalledWith(
-      'session-id',
       expect.stringContaining('INSERT INTO users VALUES (1, "test");'),
     )
     expect(result.dmlExecutionSuccessful).toBe(true)
@@ -128,10 +127,7 @@ describe('validateSchemaNode', () => {
       configurable: { repositories, thread_id: 'test-thread' },
     })
 
-    expect(executeQuery).toHaveBeenCalledWith(
-      'session-id',
-      'CREATE TABLE users (id INT);',
-    )
+    expect(executeQuery).toHaveBeenCalledWith('CREATE TABLE users (id INT);')
     expect(result.dmlExecutionSuccessful).toBe(true)
   })
 
@@ -197,18 +193,15 @@ describe('validateSchemaNode', () => {
     // First call should be DDL only
     expect(executeQuery).toHaveBeenNthCalledWith(
       1,
-      'session-id',
       'CREATE TABLE users (id INT);',
     )
     // Second call should include both DDL and DML combined
     expect(executeQuery).toHaveBeenNthCalledWith(
       2,
-      'session-id',
       expect.stringContaining('CREATE TABLE users (id INT);'),
     )
     expect(executeQuery).toHaveBeenNthCalledWith(
       2,
-      'session-id',
       expect.stringContaining('INSERT INTO users VALUES (1);'),
     )
     expect(result.dmlExecutionSuccessful).toBe(true)
@@ -341,7 +334,6 @@ describe('validateSchemaNode', () => {
 
     // Verify that DML operations were executed
     expect(executeQuery).toHaveBeenCalledWith(
-      'session-id',
       expect.stringContaining('INSERT INTO users VALUES (1, "test");'),
     )
 

@@ -1,5 +1,12 @@
 # @liam-hq/cli
 
+## 0.7.4
+
+### Patch Changes
+
+- [#3064](https://github.com/liam-hq/liam/pull/3064) - ✨ support selecting Toast position with useCopy / Thanks [@tnyo43](https://github.com/tnyo43)!
+- [#3105](https://github.com/liam-hq/liam/pull/3105) - 🐛 Fix ERD display failure with PostgreSQL 16.10+ pg_dump outputs / Thanks [@FunamaYukina](https://github.com/FunamaYukina)!
+
 ## 0.7.3
 
 ### Patch Changes

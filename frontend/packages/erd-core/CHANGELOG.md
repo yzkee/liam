@@ -1,5 +1,13 @@
 # @liam-hq/erd-core
 
+## 0.6.2
+
+### Patch Changes
+
+- [#3064](https://github.com/liam-hq/liam/pull/3064) - ✨ support selecting Toast position with useCopy / Thanks [@tnyo43](https://github.com/tnyo43)!
+- [#3064](https://github.com/liam-hq/liam/pull/3064) - 💄 show Toast feedback with useCopyLink / Thanks [@tnyo43](https://github.com/tnyo43)!
+- [#2943](https://github.com/liam-hq/liam/pull/2943) - ✨ add Toast for CommandPalette pattern / Thanks [@tnyo43](https://github.com/tnyo43)!
+
 ## 0.6.1
 
 ### Patch Changes

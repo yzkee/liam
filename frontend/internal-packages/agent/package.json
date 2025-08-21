@@ -40,6 +40,8 @@
     "execute-design-process": "tsx scripts/executeDesignProcess.ts",
     "execute-design-process:debug": "tsx scripts/executeDesignProcess.ts --log-level=DEBUG",
     "execute-design-process:warn": "tsx scripts/executeDesignProcess.ts --log-level=WARN",
+    "execute-qa-agent": "tsx scripts/executeQaAgent.ts",
+    "execute-qa-agent:debug": "tsx scripts/executeQaAgent.ts --log-level=DEBUG",
     "fmt": "concurrently \"pnpm:fmt:*\"",
     "fmt:biome": "biome check --write --unsafe .",
     "fmt:eslint": "eslint --fix .",

@@ -61,14 +61,17 @@ jobs:
           echo "" >> execution_log.md
           echo '```' >> execution_log.md
           
+          set -o pipefail
           if pnpm --filter @liam-hq/agent execute-deep-modeling 2>&1 | tee -a execution_log.md; then
             echo '```' >> execution_log.md
             echo "" >> execution_log.md
             echo "✅ **Status:** Completed successfully" >> execution_log.md
+            echo "success=true" >> $GITHUB_OUTPUT
           else
             echo '```' >> execution_log.md
             echo "" >> execution_log.md
             echo "❌ **Status:** Failed with exit code $?" >> execution_log.md
+            echo "success=false" >> $GITHUB_OUTPUT
           fi
           
           echo "" >> execution_log.md
@@ -80,3 +83,9 @@ jobs:
         with:
           header: agent-deep-modeling-execution
           path: execution_log.md
+
+      - name: Check execution result
+        if: steps.deep-modeling.outputs.success == 'false'
+        run: |
+          echo "Agent deep modeling execution failed"
+          exit 1

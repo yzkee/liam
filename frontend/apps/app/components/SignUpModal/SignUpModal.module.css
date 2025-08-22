@@ -31,7 +31,7 @@
 .closeButton {
   background: none;
   border: none;
-  font-size: var(--font-size-2xl);
+  font-size: var(--font-size-14);
   cursor: pointer;
   color: var(--text-secondary);
   line-height: 1;
@@ -71,7 +71,7 @@
   margin-bottom: var(--spacing-6);
   color: var(--global-foreground);
   font-size: var(--font-size-8);
-  font-weight: var(--text-weight-en-medium);
+  font-weight: 500;
 }
 
 .oauthList {

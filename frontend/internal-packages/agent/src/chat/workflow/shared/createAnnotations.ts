@@ -23,6 +23,6 @@ export const workflowAnnotation = Annotation.Root({
 
   dmlStatements: Annotation<string | undefined>,
 
-  dmlExecutionSuccessful: Annotation<boolean | undefined>,
+  // DML execution results
   dmlExecutionErrors: Annotation<string | undefined>,
 })

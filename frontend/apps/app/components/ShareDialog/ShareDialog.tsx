@@ -2,7 +2,13 @@
 
 import {
   Check,
+  ChevronDown,
   Copy,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuPortal,
+  DropdownMenuRoot,
+  DropdownMenuTrigger,
   Link,
   Lock,
   ModalContent,
@@ -10,11 +16,6 @@ import {
   ModalPortal,
   ModalRoot,
   ModalTitle,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
 } from '@liam-hq/ui'
 import { type FC, useState } from 'react'
 import { usePublicShareServerAction } from '@/hooks/usePublicShareServerAction'
@@ -40,9 +41,17 @@ export const ShareDialog: FC<Props> = ({
   })
   const [copied, setCopied] = useState(false)
 
-  const handleVisibilityChange = async (value: string) => {
-    const shouldBePublic = value === 'link'
-    if (shouldBePublic !== isPublic) {
+  const handlePrivateClick = async () => {
+    if (isPublic) {
+      const result = await togglePublicShare()
+      if (!result.success) {
+        console.error(result.error)
+      }
+    }
+  }
+
+  const handlePublicClick = async () => {
+    if (!isPublic) {
       const result = await togglePublicShare()
       if (!result.success) {
         console.error(result.error)
@@ -102,32 +111,62 @@ export const ShareDialog: FC<Props> = ({
                 </h4>
                 <div className={styles.visibilityControls}>
                   <div className={styles.selectWrapper}>
-                    <Select
-                      value={isPublic ? 'link' : 'private'}
-                      onValueChange={handleVisibilityChange}
-                      disabled={loading}
-                    >
-                      <SelectTrigger
-                        className={styles.visibilitySelect}
-                        aria-labelledby="visibility-section-title"
-                      >
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="private">
-                          <span className={styles.selectItemContent}>
+                    <DropdownMenuRoot>
+                      <DropdownMenuTrigger asChild>
+                        <button
+                          type="button"
+                          className={styles.visibilityDropdown}
+                          disabled={loading}
+                          aria-labelledby="visibility-section-title"
+                        >
+                          <span className={styles.dropdownValue}>
+                            {isPublic ? (
+                              <>
+                                <Link size={16} />
+                                <span>Anyone with the link</span>
+                              </>
+                            ) : (
+                              <>
+                                <Lock size={16} />
+                                <span>Private</span>
+                              </>
+                            )}
+                          </span>
+                          <ChevronDown
+                            size={16}
+                            className={styles.dropdownIcon}
+                          />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuPortal>
+                        <DropdownMenuContent
+                          className={styles.dropdownContent}
+                          align="start"
+                          sideOffset={4}
+                        >
+                          <DropdownMenuItem
+                            onClick={handlePrivateClick}
+                            className={styles.dropdownItem}
+                          >
                             <Lock size={16} />
-                            Private
-                          </span>
-                        </SelectItem>
-                        <SelectItem value="link">
-                          <span className={styles.selectItemContent}>
+                            <span>Private</span>
+                            {!isPublic && (
+                              <Check size={16} className={styles.checkIcon} />
+                            )}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={handlePublicClick}
+                            className={styles.dropdownItem}
+                          >
                             <Link size={16} />
-                            Anyone with the link
-                          </span>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
+                            <span>Anyone with the link</span>
+                            {isPublic && (
+                              <Check size={16} className={styles.checkIcon} />
+                            )}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenuPortal>
+                    </DropdownMenuRoot>
                   </div>
 
                   {isPublic && (

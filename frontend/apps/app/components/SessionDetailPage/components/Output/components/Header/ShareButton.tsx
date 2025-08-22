@@ -3,9 +3,10 @@
 import { Button, Link } from '@liam-hq/ui'
 import type { FC } from 'react'
 import { useState } from 'react'
-import { AuthPromptModal } from '@/components/AuthPromptModal'
 import { useViewMode } from '@/components/SessionDetailPage/hooks/viewMode/useViewMode'
 import { ShareDialog } from '@/components/ShareDialog'
+import { SignInModal } from '@/components/SignInModal'
+import { SignUpModal } from '@/components/SignUpModal'
 import styles from './ShareButton.module.css'
 
 type Props = {
@@ -18,12 +19,14 @@ export const ShareButton: FC<Props> = ({
   initialIsPublic = false,
 }) => {
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false)
-  const [isAuthPromptOpen, setIsAuthPromptOpen] = useState(false)
+  const [authModalType, setAuthModalType] = useState<
+    'signin' | 'signup' | null
+  >(null)
   const { isPublic } = useViewMode()
 
   const handleShareClick = () => {
     if (isPublic) {
-      setIsAuthPromptOpen(true)
+      setAuthModalType('signin')
     } else {
       setIsShareDialogOpen(true)
     }
@@ -48,9 +51,16 @@ export const ShareButton: FC<Props> = ({
         initialIsPublic={initialIsPublic}
       />
 
-      <AuthPromptModal
-        isOpen={isAuthPromptOpen}
-        onClose={() => setIsAuthPromptOpen(false)}
+      <SignInModal
+        isOpen={authModalType === 'signin'}
+        onClose={() => setAuthModalType(null)}
+        onSwitchToSignUp={() => setAuthModalType('signup')}
+      />
+
+      <SignUpModal
+        isOpen={authModalType === 'signup'}
+        onClose={() => setAuthModalType(null)}
+        onSwitchToSignIn={() => setAuthModalType('signin')}
       />
     </>
   )

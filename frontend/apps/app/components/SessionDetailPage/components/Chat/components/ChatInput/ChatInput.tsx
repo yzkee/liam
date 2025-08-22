@@ -19,7 +19,8 @@ import {
   useRef,
   useState,
 } from 'react'
-import { AuthPromptModal } from '@/components/AuthPromptModal'
+import { SignInModal } from '@/components/SignInModal'
+import { SignUpModal } from '@/components/SignUpModal'
 import { useViewMode } from '../../../../hooks/viewMode'
 import styles from './ChatInput.module.css'
 import {
@@ -57,7 +58,9 @@ export const ChatInput: FC<Props> = ({
   const [cursorPos, setCursorPos] = useState(0)
   const [isMentionSuggestorOpen, setIsMentionSuggestorOpen] = useState(false)
   const [isImeComposing, setIsImeComposing] = useState(false)
-  const [isAuthPromptOpen, setIsAuthPromptOpen] = useState(false)
+  const [authModalType, setAuthModalType] = useState<
+    'signin' | 'signup' | null
+  >(null)
 
   const hasContent = message.trim().length > 0
 
@@ -154,6 +157,18 @@ export const ChatInput: FC<Props> = ({
 
   return (
     <div className={styles.container}>
+      {isPublic && (
+        <div className={styles.ctaBar}>
+          <span className={styles.ctaText}>Sign up to use Liam</span>
+          <button
+            type="button"
+            className={styles.ctaButton}
+            onClick={() => setAuthModalType('signup')}
+          >
+            Sign up
+          </button>
+        </div>
+      )}
       <form
         className={clsx(
           styles.inputContainer,
@@ -175,7 +190,7 @@ export const ChatInput: FC<Props> = ({
                 value={message}
                 placeholder={
                   isPublic
-                    ? 'Read-only mode'
+                    ? 'Ask for changes'
                     : 'Build or ask anything, @ to mention schema tables'
                 }
                 disabled={isWorkflowRunning || isPublic}
@@ -195,7 +210,7 @@ export const ChatInput: FC<Props> = ({
                 onCompositionEnd={handleCompositionEnd}
                 onClick={() => {
                   if (isPublic) {
-                    setIsAuthPromptOpen(true)
+                    setAuthModalType('signup')
                   }
                 }}
               />
@@ -229,9 +244,16 @@ export const ChatInput: FC<Props> = ({
         />
       </form>
 
-      <AuthPromptModal
-        isOpen={isAuthPromptOpen}
-        onClose={() => setIsAuthPromptOpen(false)}
+      <SignInModal
+        isOpen={authModalType === 'signin'}
+        onClose={() => setAuthModalType(null)}
+        onSwitchToSignUp={() => setAuthModalType('signup')}
+      />
+
+      <SignUpModal
+        isOpen={authModalType === 'signup'}
+        onClose={() => setAuthModalType(null)}
+        onSwitchToSignIn={() => setAuthModalType('signin')}
       />
     </div>
   )

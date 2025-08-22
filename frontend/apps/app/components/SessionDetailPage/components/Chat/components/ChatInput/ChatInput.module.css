@@ -5,6 +5,40 @@
   padding: var(--spacing-2);
 }
 
+.ctaBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: #5551ff;
+  border-radius: var(--border-radius-base);
+  color: white;
+}
+
+.ctaText {
+  font-size: var(--font-size-3);
+  font-weight: var(--font-weight-medium);
+}
+
+.ctaButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  background-color: white;
+  color: #5551ff;
+  border: none;
+  border-radius: var(--border-radius-base);
+  font-size: var(--font-size-3);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.ctaButton:hover {
+  opacity: 0.9;
+}
+
 .inputContainer {
   display: flex;
   align-items: flex-end;

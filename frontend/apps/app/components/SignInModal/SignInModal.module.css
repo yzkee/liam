@@ -1,0 +1,188 @@
+.dialog {
+  width: 90vw;
+  max-width: 450px;
+}
+
+.dialogContent {
+  padding: 0;
+}
+
+.dialogHeader {
+  padding: var(--spacing-l) var(--spacing-l) var(--spacing-m);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dialogTitle {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: var(--font-size-2xl);
+  cursor: pointer;
+  color: var(--text-secondary);
+  line-height: 1;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeButton:hover {
+  color: var(--text-primary);
+}
+
+.authContent {
+  padding: 0 var(--spacing-l) var(--spacing-l);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+}
+
+.googleButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  width: 100%;
+  padding: var(--spacing-3);
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: var(--border-radius-base);
+  font-size: var(--font-size-3);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.googleButton:hover {
+  background-color: #f5f5f5;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  margin: var(--spacing-2) 0;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background-color: #e0e0e0;
+}
+
+.divider span {
+  padding: 0 var(--spacing-3);
+  color: var(--text-secondary);
+  font-size: var(--font-size-2);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.label {
+  font-size: var(--font-size-2);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.input {
+  width: 100%;
+  padding: var(--spacing-3);
+  background-color: #f5f5f5;
+  border: 1px solid transparent;
+  border-radius: var(--border-radius-base);
+  font-size: var(--font-size-3);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+}
+
+.input:focus {
+  outline: none;
+  background-color: white;
+  border-color: #5551ff;
+}
+
+.input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.submitButton {
+  width: 100%;
+  background-color: #000 !important;
+  color: white !important;
+  border: none !important;
+  justify-content: center;
+}
+
+.submitButton:hover {
+  background-color: #333 !important;
+}
+
+.links {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-4);
+  margin-top: var(--spacing-2);
+}
+
+.link {
+  background: none;
+  border: none;
+  color: #5551ff;
+  font-size: var(--font-size-2);
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.link:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.switchAuth {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: var(--font-size-2);
+  margin-top: var(--spacing-4);
+  padding-top: var(--spacing-4);
+  border-top: 1px solid #e0e0e0;
+}
+
+.createAccountLink {
+  background: none;
+  border: none;
+  color: #5551ff;
+  cursor: pointer;
+  font-size: inherit;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.createAccountLink:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}

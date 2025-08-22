@@ -1,1 +1,0 @@
-export { AuthPromptModal } from './AuthPromptModal'

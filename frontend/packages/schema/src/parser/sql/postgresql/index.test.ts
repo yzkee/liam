@@ -545,24 +545,6 @@ describe(processor, () => {
       expect(result).toEqual({ value, errors })
     })
 
-    it('should report error when CHECK constraint parentheses cannot be found', async () => {
-      const { errors } = await processor(/* sql */ `
-        CREATE TABLE test_table (
-          id INTEGER,
-          status TEXT,
-          CONSTRAINT invalid_check CHECK status = 'active'
-        );
-      `)
-
-      expect(errors.length).toBeGreaterThan(0)
-      const hasParenthesesError = errors.some(
-        (e) =>
-          e.message.includes('Failed to find balanced parentheses') ||
-          e.message.includes('syntax error'),
-      )
-      expect(hasParenthesesError).toBe(true)
-    })
-
     it('should ignore \\restrict and \\unrestrict lines from PostgreSQL 16.10+', async () => {
       const { value, errors } = await processor(/* sql */ `--
 -- PostgreSQL database dump

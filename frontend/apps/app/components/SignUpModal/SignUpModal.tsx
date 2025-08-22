@@ -9,6 +9,7 @@ import {
   ModalOverlay,
   ModalPortal,
   ModalRoot,
+  ModalTitle,
 } from '@liam-hq/ui'
 import { type ChangeEvent, type FC, useCallback, useState } from 'react'
 import styles from './SignUpModal.module.css'
@@ -49,6 +50,7 @@ export const SignUpModal: FC<Props> = ({
       <ModalPortal>
         <ModalOverlay />
         <ModalContent className={styles.dialog}>
+          <ModalTitle className="sr-only">Welcome to Liam DB</ModalTitle>
           <div className={styles.dialogContent}>
             <div className={styles.dialogHeader}>
               <button

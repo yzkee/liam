@@ -7,6 +7,7 @@ import {
   ModalOverlay,
   ModalPortal,
   ModalRoot,
+  ModalTitle,
 } from '@liam-hq/ui'
 import type { FC } from 'react'
 import { EmailForm } from '../LoginPage/EmailForm'
@@ -35,6 +36,7 @@ export const SignInModal: FC<Props> = ({
       <ModalPortal>
         <ModalOverlay />
         <ModalContent className={styles.dialog}>
+          <ModalTitle className="sr-only">Sign in to Liam DB</ModalTitle>
           <div className={styles.dialogContent}>
             <div className={styles.dialogHeader}>
               <button

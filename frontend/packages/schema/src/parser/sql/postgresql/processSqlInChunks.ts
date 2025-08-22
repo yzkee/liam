@@ -293,27 +293,28 @@ export const processSQLInChunks = async (
 
   const lines = sqlInput.split('\n')
   const processErrors: ProcessError[] = []
+  let runningOffset = 0
 
   for (let i = 0; i < lines.length; ) {
     // Stop processing if we've encountered errors
     if (processErrors.length > 0) break
 
-    let chunkOffset = 0
-    for (let j = 0; j < i; j++) {
-      chunkOffset += (lines[j] || '').length + 1 // +1 for newline character
-    }
-
     const { newIndex, errors } = await processPosition(
       lines,
       i,
       chunkSize,
-      chunkOffset,
+      runningOffset,
       callback,
     )
 
     if (errors.length > 0) {
       processErrors.push(...errors)
       break
+    }
+
+    // Update running offset for the next chunk
+    for (let j = i; j < newIndex; j++) {
+      runningOffset += (lines[j] || '').length + 1 // +1 for newline character
     }
 
     i = newIndex

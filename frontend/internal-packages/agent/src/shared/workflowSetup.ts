@@ -1,6 +1,7 @@
 import { HumanMessage } from '@langchain/core/messages'
 import { RunCollectorCallbackHandler } from '@langchain/core/tracers/run_collector'
 import type { CompiledStateGraph } from '@langchain/langgraph'
+import { END } from '@langchain/langgraph'
 import { err, errAsync, ok, okAsync, ResultAsync } from 'neverthrow'
 import { v4 as uuidv4 } from 'uuid'
 import { DEFAULT_RECURSION_LIMIT } from '../chat/workflow/shared/langGraphUtils'
@@ -103,6 +104,7 @@ export const setupWorkflowState = (
         latestVersionNumber,
         designSessionId,
         userId,
+        next: END,
       },
       workflowRunId,
       runCollector,

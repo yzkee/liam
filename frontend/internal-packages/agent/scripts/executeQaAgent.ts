@@ -1,6 +1,7 @@
 #!/usr/bin/env tsx
 
 import { HumanMessage } from '@langchain/core/messages'
+import { END } from '@langchain/langgraph'
 import type { Schema } from '@liam-hq/schema'
 import type { Result } from 'neverthrow'
 import { err, ok, okAsync } from 'neverthrow'
@@ -194,6 +195,7 @@ const createWorkflowState = (
         ],
       },
     },
+    next: END,
   }
 
   return okAsync({

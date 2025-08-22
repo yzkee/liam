@@ -1,5 +1,12 @@
 # @liam-hq/ui
 
+## 0.0.19
+
+### Patch Changes
+
+- [#3064](https://github.com/liam-hq/liam/pull/3064) - 💄 show Toast feedback with useCopyLink / Thanks [@tnyo43](https://github.com/tnyo43)!
+- [#2943](https://github.com/liam-hq/liam/pull/2943) - ✨ add Toast for CommandPalette pattern / Thanks [@tnyo43](https://github.com/tnyo43)!
+
 ## 0.0.18
 
 ### Patch Changes

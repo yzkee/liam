@@ -1,43 +1,7 @@
 import { PGlite } from '@electric-sql/pglite'
+import { type PgParseResult, pgParse } from '@liam-hq/schema/parser'
 import type { RawStmt } from '@pgsql/types'
-// pg-query-emscripten does not have types, so we need to define them ourselves
-// @ts-expect-error
-import Module from 'pg-query-emscripten'
 import type { SqlResult } from './types'
-
-// Parse SQL using pg-query-emscripten
-// Creates a new instance for each parse to avoid memory state issues
-// NOTE: This fixes the "Ma[F[(F[((c2 + 12) >> 2)] >> 2)]] is not a function" error
-// that occurred when caching the pg-query instance. However, there may still be
-// WASM interference issues with PGlite in some environments.
-const parse = async (str: string): Promise<ParseResult> => {
-  const pgQuery = await new Module({
-    wasmMemory: new WebAssembly.Memory({
-      initial: 2048, // 128MB (64KB × 2048 pages)
-      maximum: 4096, // 256MB max
-    }),
-  })
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  const result = pgQuery.parse(str)
-  return result
-}
-
-// NOTE: pg-query-emscripten does not have types, so we need to define them ourselves
-type ParseResult = {
-  parse_tree: {
-    version: number
-    stmts: RawStmt[]
-  }
-  stderr_buffer: string
-  error: {
-    message: string
-    funcname: string
-    filename: string
-    lineno: number
-    cursorpos: number
-    context: string
-  } | null
-}
 
 /**
  * Manages PGlite database instances with immediate cleanup after query execution
@@ -70,7 +34,7 @@ export class PGliteInstanceManager {
    */
   private async executeSql(sqlText: string, db: PGlite): Promise<SqlResult[]> {
     try {
-      const parseResult = await parse(sqlText)
+      const parseResult: PgParseResult = await pgParse(sqlText)
 
       if (parseResult.error) {
         return [this.createParseErrorResult(sqlText, parseResult.error.message)]

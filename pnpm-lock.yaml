@@ -842,12 +842,12 @@ importers:
       '@electric-sql/pglite':
         specifier: 0.3.7
         version: 0.3.7
+      '@liam-hq/schema':
+        specifier: workspace:*
+        version: link:../schema
       '@pgsql/types':
         specifier: 15.1.1
         version: 15.1.1
-      pg-query-emscripten:
-        specifier: 5.1.0
-        version: 5.1.0
     devDependencies:
       '@biomejs/biome':
         specifier: 2.1.4

@@ -87,7 +87,6 @@ export const invokeSchemaDesignToolNode = async (
     }),
   )
 
-  // Check if schemaDesignTool was executed successfully and update workflow state
   let updatedResult = {
     ...state,
     ...result,
@@ -95,14 +94,12 @@ export const invokeSchemaDesignToolNode = async (
   }
 
   if (wasSchemaDesignToolSuccessful(syncedMessages)) {
-    // Fetch the updated schema from database
     const schemaResult = await fetchUpdatedSchemaWithResult(
       repositories,
       state.designSessionId,
     )
 
     if (schemaResult.isOk()) {
-      // Update workflow state with fresh schema data
       updatedResult = {
         ...updatedResult,
         schemaData: schemaResult.value.schema,

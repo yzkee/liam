@@ -69,7 +69,6 @@ export async function prepareDmlNode(
     assistantRole,
   )
 
-  // Check if we have required inputs
   const ddlStatements = generateDdlFromSchema(state.schemaData)
   if (!ddlStatements) {
     await logAssistantMessage(
@@ -91,23 +90,18 @@ export async function prepareDmlNode(
     return state
   }
 
-  // Create DML generation agent
   const dmlAgent = new DMLGenerationAgent()
 
-  // Format use cases for the agent
   const formattedUseCases = formatUseCases(state.generatedUsecases)
 
-  // Convert schema to text for additional context
   const schemaContext = convertSchemaToText(state.schemaData)
 
-  // Generate DML statements
   const result = await dmlAgent.generate({
     schemaSQL: ddlStatements,
     formattedUseCases,
     schemaContext,
   })
 
-  // Validate result
   if (!result.dmlOperations || result.dmlOperations.length === 0) {
     await logAssistantMessage(
       state,
@@ -118,7 +112,6 @@ export async function prepareDmlNode(
     return state
   }
 
-  // Convert structured operations back to string format for backward compatibility
   const dmlStatements = result.dmlOperations
     .map((op) => {
       const header = op.description

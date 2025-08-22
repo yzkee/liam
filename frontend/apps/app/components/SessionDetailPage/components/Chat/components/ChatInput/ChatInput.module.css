@@ -10,9 +10,9 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--spacing-3) var(--spacing-4);
-  background-color: #5551ff;
+  background-color: var(--primary-accent);
   border-radius: var(--border-radius-base);
-  color: white;
+  color: var(--global-foreground);
 }
 
 .ctaText {
@@ -25,8 +25,8 @@
   align-items: center;
   gap: var(--spacing-2);
   padding: var(--spacing-2) var(--spacing-3);
-  background-color: white;
-  color: #5551ff;
+  background-color: var(--global-foreground);
+  color: var(--primary-accent);
   border: none;
   border-radius: var(--border-radius-base);
   font-size: var(--font-size-3);

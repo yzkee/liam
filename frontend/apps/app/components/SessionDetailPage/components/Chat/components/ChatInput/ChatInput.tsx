@@ -19,6 +19,7 @@ import {
   useRef,
   useState,
 } from 'react'
+import { AuthPromptModal } from '@/components/AuthPromptModal'
 import { useViewMode } from '../../../../hooks/viewMode'
 import styles from './ChatInput.module.css'
 import {
@@ -56,6 +57,7 @@ export const ChatInput: FC<Props> = ({
   const [cursorPos, setCursorPos] = useState(0)
   const [isMentionSuggestorOpen, setIsMentionSuggestorOpen] = useState(false)
   const [isImeComposing, setIsImeComposing] = useState(false)
+  const [isAuthPromptOpen, setIsAuthPromptOpen] = useState(false)
 
   const hasContent = message.trim().length > 0
 
@@ -191,6 +193,11 @@ export const ChatInput: FC<Props> = ({
                 onKeyDown={handleKeyDown}
                 onCompositionStart={handleCompositionStart}
                 onCompositionEnd={handleCompositionEnd}
+                onClick={() => {
+                  if (isPublic) {
+                    setIsAuthPromptOpen(true)
+                  }
+                }}
               />
             </PopoverAnchor>
             <PopoverPortal>
@@ -221,6 +228,11 @@ export const ChatInput: FC<Props> = ({
           onClick={handleSubmit}
         />
       </form>
+
+      <AuthPromptModal
+        isOpen={isAuthPromptOpen}
+        onClose={() => setIsAuthPromptOpen(false)}
+      />
     </div>
   )
 }

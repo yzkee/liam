@@ -158,7 +158,7 @@ const constraintToCheckConstraint = (
   columnName: string | undefined,
   constraint: PgConstraint,
   rawSql: string,
-  chunkOffset = 0,
+  chunkOffset: number,
 ): Result<CheckConstraint, UnexpectedTokenWarningError> => {
   if (constraint.contype !== 'CONSTR_CHECK') {
     return err(
@@ -195,7 +195,7 @@ const constraintToCheckConstraint = (
     return null
   }
 
-  const absoluteLocation = constraint.location + (chunkOffset || 0)
+  const absoluteLocation = constraint.location + chunkOffset
   const parentheses = findBalancedParentheses(rawSql, absoluteLocation)
 
   if (!parentheses) {
@@ -245,7 +245,7 @@ export const convertToSchema = (
   stmts: RawStmt[],
   rawSql: string,
   mainSchema: Schema,
-  chunkOffset = 0,
+  chunkOffset: number,
 ): ProcessResult => {
   const tables: Record<string, Table> = {}
   const enums: Record<string, Enum> = {}

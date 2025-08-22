@@ -9,7 +9,7 @@ type Props = {
   result: SqlResult
 }
 
-export const QueryResultItem: FC<Props> = ({ result }) => {
+export const QueryResultBox: FC<Props> = ({ result }) => {
   return (
     <div className={styles.queryResultBox}>
       <button

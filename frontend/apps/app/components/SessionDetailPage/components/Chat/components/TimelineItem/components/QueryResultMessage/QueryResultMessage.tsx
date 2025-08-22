@@ -4,7 +4,7 @@ import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import { Button, ChevronDown, ChevronRight } from '@liam-hq/ui'
 import clsx from 'clsx'
 import React, { type FC, useState } from 'react'
-import { QueryResultItem } from './components/QueryResultItem'
+import { QueryResultBox } from './components/QueryResultBox'
 import styles from './QueryResultMessage.module.css'
 
 type Props = {
@@ -102,7 +102,7 @@ export const QueryResultMessage: FC<Props> = ({
         <div className={styles.content}>
           {results.map((result) => (
             <div key={result.id} className={styles.resultItem}>
-              <QueryResultItem result={result} />
+              <QueryResultBox result={result} />
             </div>
           ))}
         </div>

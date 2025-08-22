@@ -4,7 +4,7 @@ import type {
   FunctionalRequirement,
   NonFunctionalRequirement,
 } from '@liam-hq/artifact'
-import type { Usecase } from '../../../langchain/agents/qaGenerateUsecaseAgent/agent'
+import type { Usecase } from '../../../qa-agent/generateUsecase/agent'
 import type { WorkflowState } from '../types'
 
 /**

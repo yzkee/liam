@@ -2,15 +2,15 @@ import { AIMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import type { Database } from '@liam-hq/db'
 import { ResultAsync } from 'neverthrow'
-import { QAGenerateUsecaseAgent } from '../../../langchain/agents'
-import type { Repositories } from '../../../repositories'
-import { WorkflowTerminationError } from '../../../shared/errorHandling'
-import { removeReasoningFromMessages } from '../../../utils/messageCleanup'
-import { getConfigurable } from '../shared/getConfigurable'
-import type { WorkflowState } from '../types'
-import { logAssistantMessage } from '../utils/timelineLogger'
-import { transformWorkflowStateToArtifact } from '../utils/transformWorkflowStateToArtifact'
-import { withTimelineItemSync } from '../utils/withTimelineItemSync'
+import { getConfigurable } from '../../chat/workflow/shared/getConfigurable'
+import type { WorkflowState } from '../../chat/workflow/types'
+import { logAssistantMessage } from '../../chat/workflow/utils/timelineLogger'
+import { transformWorkflowStateToArtifact } from '../../chat/workflow/utils/transformWorkflowStateToArtifact'
+import { withTimelineItemSync } from '../../chat/workflow/utils/withTimelineItemSync'
+import type { Repositories } from '../../repositories'
+import { WorkflowTerminationError } from '../../shared/errorHandling'
+import { removeReasoningFromMessages } from '../../utils/messageCleanup'
+import { QAGenerateUsecaseAgent } from './agent'
 
 /**
  * Save artifacts if workflow state contains artifact data
@@ -103,14 +103,25 @@ export async function generateUsecaseNode(
   return await usecaseResult.match(
     async ({ response, reasoning }) => {
       // Log reasoning summary if available
-      if (reasoning?.summary && reasoning.summary.length > 0) {
+      if (
+        reasoning?.summary &&
+        Array.isArray(reasoning.summary) &&
+        reasoning.summary.length > 0
+      ) {
         for (const summaryItem of reasoning.summary) {
-          await logAssistantMessage(
-            state,
-            repositories,
-            summaryItem.text,
-            assistantRole,
-          )
+          if (
+            summaryItem &&
+            typeof summaryItem === 'object' &&
+            'text' in summaryItem &&
+            typeof summaryItem.text === 'string'
+          ) {
+            await logAssistantMessage(
+              state,
+              repositories,
+              summaryItem.text,
+              assistantRole,
+            )
+          }
         }
       }
 

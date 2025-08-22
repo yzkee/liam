@@ -25,10 +25,10 @@ export const SignInModal: FC<Props> = ({
   onClose,
   onSwitchToSignUp,
 }) => {
-  // For modal, we'll use the current page as returnTo
+  // For modal, convert public path to private path for returnTo
   const returnTo =
     typeof window !== 'undefined'
-      ? window.location.pathname
+      ? window.location.pathname.replace('/app/public/', '/app/')
       : '/app/design_sessions/new'
 
   return (

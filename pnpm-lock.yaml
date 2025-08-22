@@ -80,9 +80,6 @@ importers:
       '@codemirror/view':
         specifier: 6.38.1
         version: 6.38.1
-      '@electric-sql/pglite':
-        specifier: 0.3.6
-        version: 0.3.6
       '@lezer/highlight':
         specifier: 1.2.1
         version: 1.2.1
@@ -18464,7 +18461,7 @@ snapshots:
       isstream: 0.1.2
       jsonwebtoken: 9.0.2
       mime-types: 2.1.35
-      retry-axios: 2.6.0(axios@1.11.0)
+      retry-axios: 2.6.0(axios@1.11.0(debug@4.4.1))
       tough-cookie: 4.1.4
     transitivePeerDependencies:
       - supports-color
@@ -21108,7 +21105,7 @@ snapshots:
       onetime: 7.0.0
       signal-exit: 4.1.0
 
-  retry-axios@2.6.0(axios@1.11.0):
+  retry-axios@2.6.0(axios@1.11.0(debug@4.4.1)):
     dependencies:
       axios: 1.11.0(debug@4.4.1)
 

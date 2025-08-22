@@ -248,6 +248,11 @@ export const ChatInput: FC<Props> = ({
         isOpen={authModalType === 'signin'}
         onClose={() => setAuthModalType(null)}
         onSwitchToSignUp={() => setAuthModalType('signup')}
+        returnTo={
+          typeof window !== 'undefined'
+            ? window.location.pathname.replace('/app/public/', '/app/')
+            : '/app/design_sessions/new'
+        }
       />
 
       <SignUpModal

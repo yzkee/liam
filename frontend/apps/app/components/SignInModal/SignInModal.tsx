@@ -18,19 +18,15 @@ type Props = {
   isOpen: boolean
   onClose: () => void
   onSwitchToSignUp: () => void
+  returnTo?: string
 }
 
 export const SignInModal: FC<Props> = ({
   isOpen,
   onClose,
   onSwitchToSignUp,
+  returnTo = '/app/design_sessions/new',
 }) => {
-  // For modal, convert public path to private path for returnTo
-  const returnTo =
-    typeof window !== 'undefined'
-      ? window.location.pathname.replace('/app/public/', '/app/')
-      : '/app/design_sessions/new'
-
   return (
     <ModalRoot open={isOpen} onOpenChange={onClose}>
       <ModalPortal>

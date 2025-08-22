@@ -1,69 +1,24 @@
 import { PGlite } from '@electric-sql/pglite'
 import type { RawStmt } from '@pgsql/types'
-import { errAsync, okAsync, ResultAsync } from 'neverthrow'
 // pg-query-emscripten does not have types, so we need to define them ourselves
 // @ts-expect-error
 import Module from 'pg-query-emscripten'
 import type { SqlResult } from './types'
 
-// Define the type for pg-query instance
-type PgQueryInstance = {
-  parse: (sql: string) => ParseResult
-}
-
-// Cache the pg-query module instance for better performance
-let pgQueryInstance: PgQueryInstance | null = null
-
-// Initialize pg-query module once and reuse
-const getPgQueryInstance = (): ResultAsync<PgQueryInstance, Error> => {
-  if (pgQueryInstance) {
-    return okAsync(pgQueryInstance)
-  }
-
-  return ResultAsync.fromPromise(
-    new Module({
-      wasmMemory: new WebAssembly.Memory({
-        initial: 2048, // 128MB (64KB × 2048 pages)
-        maximum: 4096, // 256MB max
-      }),
-    }),
-    (error) => new Error(`Failed to initialize pg-query module: ${error}`),
-  )
-    .andThen((instance: unknown) => {
-      // Module constructor is untyped from pg-query-emscripten
-      // Type guard function to validate the instance
-      function isPgQueryInstance(obj: unknown): obj is PgQueryInstance {
-        return (
-          obj !== null &&
-          obj !== undefined &&
-          typeof obj === 'object' &&
-          'parse' in obj &&
-          typeof obj.parse === 'function'
-        )
-      }
-
-      if (isPgQueryInstance(instance)) {
-        pgQueryInstance = instance
-        return okAsync(pgQueryInstance)
-      }
-
-      return errAsync(
-        new Error('Invalid pg-query module instance: missing parse method'),
-      )
-    })
-    .mapErr((error) => {
-      pgQueryInstance = null
-      return error
-    })
-}
-
-// Inline the parse function to avoid import issues
+// Parse SQL using pg-query-emscripten
+// Creates a new instance for each parse to avoid memory state issues
+// NOTE: This fixes the "Ma[F[(F[((c2 + 12) >> 2)] >> 2)]] is not a function" error
+// that occurred when caching the pg-query instance. However, there may still be
+// WASM interference issues with PGlite in some environments.
 const parse = async (str: string): Promise<ParseResult> => {
-  const pgQueryResult = await getPgQueryInstance()
-  if (pgQueryResult.isErr()) {
-    throw pgQueryResult.error
-  }
-  const result = pgQueryResult.value.parse(str)
+  const pgQuery = await new Module({
+    wasmMemory: new WebAssembly.Memory({
+      initial: 2048, // 128MB (64KB × 2048 pages)
+      maximum: 4096, // 256MB max
+    }),
+  })
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  const result = pgQuery.parse(str)
   return result
 }
 

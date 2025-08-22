@@ -845,9 +845,6 @@ importers:
       '@pgsql/types':
         specifier: 15.1.1
         version: 15.1.1
-      neverthrow:
-        specifier: 8.2.0
-        version: 8.2.0
       pg-query-emscripten:
         specifier: 5.1.0
         version: 5.1.0

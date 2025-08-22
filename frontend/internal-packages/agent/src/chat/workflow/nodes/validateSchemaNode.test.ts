@@ -339,6 +339,7 @@ describe('validateSchemaNode', () => {
     vi.mocked(executeQuery).mockResolvedValueOnce(ddlMockResults)
 
     const state = createMockState({
+      dmlStatements: '',
       schemaData: aSchema({
         tables: {
           users: aTable({
@@ -349,7 +350,6 @@ describe('validateSchemaNode', () => {
           }),
         },
       }),
-      dmlStatements: '',
     })
 
     const repositories = createRepositories()

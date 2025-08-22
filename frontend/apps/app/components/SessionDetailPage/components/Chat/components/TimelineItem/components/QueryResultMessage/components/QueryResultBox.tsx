@@ -3,7 +3,7 @@
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import clsx from 'clsx'
 import { useState } from 'react'
-import styles from '../QueryResultMessage.module.css'
+import styles from './QueryResultBox.module.css'
 
 export const QueryResultBox = ({ result }: { result: SqlResult }) => {
   const [isExpanded, setIsExpanded] = useState(false)

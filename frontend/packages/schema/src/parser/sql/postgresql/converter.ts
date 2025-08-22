@@ -198,12 +198,19 @@ const constraintToCheckConstraint = (
   const absoluteLocation = constraint.location + (chunkOffset || 0)
   const parentheses = findBalancedParentheses(rawSql, absoluteLocation)
 
-  let condition = ''
+  if (!parentheses) {
+    const snippetStart = Math.max(0, absoluteLocation - 20)
+    const snippetEnd = Math.min(rawSql.length, absoluteLocation + 50)
+    const sqlSnippet = rawSql.slice(snippetStart, snippetEnd)
 
-  if (parentheses) {
-    // Extract the condition inside the parentheses (without the CHECK prefix)
-    condition = rawSql.slice(parentheses.start + 1, parentheses.end)
+    return err(
+      new UnexpectedTokenWarningError(
+        `Failed to find balanced parentheses for CHECK constraint "${constraint.conname || 'unnamed'}" at location ${absoluteLocation}. SQL snippet: "${sqlSnippet}"`,
+      ),
+    )
   }
+
+  const condition = rawSql.slice(parentheses.start + 1, parentheses.end)
 
   // Generate a better name for anonymous constraints
   let constraintName = constraint.conname

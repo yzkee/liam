@@ -298,7 +298,6 @@ export const processSQLInChunks = async (
     // Stop processing if we've encountered errors
     if (processErrors.length > 0) break
 
-    // Calculate chunk offset in characters (sum of all previous lines plus newlines)
     let chunkOffset = 0
     for (let j = 0; j < i; j++) {
       chunkOffset += (lines[j] || '').length + 1 // +1 for newline character

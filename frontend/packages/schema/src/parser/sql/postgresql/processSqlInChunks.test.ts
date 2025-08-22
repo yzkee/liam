@@ -126,9 +126,8 @@ SELECT 3, -- partial statement
     })
 
     it('should correctly calculate chunk offset for CHECK constraint location correction', async () => {
-      // Test case specifically for CHECK constraint parsing across chunks
-      // This test verifies the fix for chunk offset correction where constraint.location
-      // was relative to chunk but needed to be absolute for the full SQL text
+      // Regression test for CHECK constraint parsing bug where constraint.location
+      // was chunk-relative but used as absolute position in full SQL text
       const input = `CREATE TABLE users (id INTEGER);
 CREATE TABLE design_sessions (
   id INTEGER,
@@ -138,28 +137,27 @@ CREATE TABLE design_sessions (
 ALTER TABLE design_sessions ADD CONSTRAINT design_sessions_project_or_org_check 
   CHECK ((project_id IS NOT NULL) OR (organization_id IS NOT NULL));`
 
-      const chunkSize = 4 // Split at strategic points to test chunk offset calculation
+      const chunkSize = 4 // Forces multi-chunk processing to verify offset calculation
       const actualChunkOffsets: number[] = []
 
       const callback = vi
         .fn()
         .mockImplementation(async (_chunk: string, chunkOffset: number) => {
           actualChunkOffsets.push(chunkOffset)
-          return [null, null, []] // Successful processing
+          return [null, null, []]
         })
 
       await processSQLInChunks(input, chunkSize, callback)
 
-      // Verify that chunk offsets are calculated correctly
-      expect(actualChunkOffsets.length).toBeGreaterThan(1) // Should be split into multiple chunks
-      expect(actualChunkOffsets[0]).toBe(0) // First chunk starts at 0
+      // Verify chunk offsets are character-based, not line-based
+      expect(actualChunkOffsets.length).toBeGreaterThan(1)
+      expect(actualChunkOffsets[0]).toBe(0)
 
-      // Second chunk should start after first chunk + newlines
-      // Calculate expected offset manually
+      // Verify second chunk offset accounts for all characters + newlines
       const lines = input.split('\n')
       let expectedSecondOffset = 0
       for (let i = 0; i < chunkSize && i < lines.length; i++) {
-        expectedSecondOffset += (lines[i] || '').length + 1 // +1 for newline
+        expectedSecondOffset += (lines[i] || '').length + 1
       }
 
       if (actualChunkOffsets.length > 1) {

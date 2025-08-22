@@ -25,11 +25,11 @@ exports[`parse > should parse postgresql to JSON correctly 1`] = `
       },
       "comment": null,
       "constraints": {
-        "PRIMARY_id": {
+        "posts_pkey": {
           "columnNames": [
             "id",
           ],
-          "name": "PRIMARY_id",
+          "name": "posts_pkey",
           "type": "PRIMARY KEY",
         },
         "users_id_to_posts_user_id": {
@@ -86,25 +86,25 @@ exports[`parse > should parse postgresql to JSON correctly 1`] = `
       },
       "comment": "store our users.",
       "constraints": {
-        "PRIMARY_id": {
-          "columnNames": [
-            "id",
-          ],
-          "name": "PRIMARY_id",
-          "type": "PRIMARY KEY",
-        },
-        "UNIQUE_email": {
+        "users_email_key": {
           "columnNames": [
             "email",
           ],
-          "name": "UNIQUE_email",
+          "name": "users_email_key",
           "type": "UNIQUE",
         },
-        "UNIQUE_username": {
+        "users_pkey": {
+          "columnNames": [
+            "id",
+          ],
+          "name": "users_pkey",
+          "type": "PRIMARY KEY",
+        },
+        "users_username_key": {
           "columnNames": [
             "username",
           ],
-          "name": "UNIQUE_username",
+          "name": "users_username_key",
           "type": "UNIQUE",
         },
       },

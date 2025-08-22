@@ -19,8 +19,8 @@ import {
   useRef,
   useState,
 } from 'react'
-import { SignInModal } from '@/components/SignInModal'
-import { SignUpModal } from '@/components/SignUpModal'
+import { AuthModals } from '@/components/AuthModals'
+import { useAuthModal } from '@/hooks/useAuthModal'
 import { useViewMode } from '../../../../hooks/viewMode'
 import styles from './ChatInput.module.css'
 import {
@@ -58,9 +58,14 @@ export const ChatInput: FC<Props> = ({
   const [cursorPos, setCursorPos] = useState(0)
   const [isMentionSuggestorOpen, setIsMentionSuggestorOpen] = useState(false)
   const [isImeComposing, setIsImeComposing] = useState(false)
-  const [authModalType, setAuthModalType] = useState<
-    'signin' | 'signup' | null
-  >(null)
+  const {
+    authModalType,
+    openSignUp,
+    closeModal,
+    switchToSignIn,
+    switchToSignUp,
+    returnTo,
+  } = useAuthModal()
 
   const hasContent = message.trim().length > 0
 
@@ -163,7 +168,7 @@ export const ChatInput: FC<Props> = ({
           <button
             type="button"
             className={styles.ctaButton}
-            onClick={() => setAuthModalType('signup')}
+            onClick={openSignUp}
           >
             Sign up
           </button>
@@ -210,7 +215,7 @@ export const ChatInput: FC<Props> = ({
                 onCompositionEnd={handleCompositionEnd}
                 onClick={() => {
                   if (isPublic) {
-                    setAuthModalType('signup')
+                    openSignUp()
                   }
                 }}
               />
@@ -244,21 +249,12 @@ export const ChatInput: FC<Props> = ({
         />
       </form>
 
-      <SignInModal
-        isOpen={authModalType === 'signin'}
-        onClose={() => setAuthModalType(null)}
-        onSwitchToSignUp={() => setAuthModalType('signup')}
-        returnTo={
-          typeof window !== 'undefined'
-            ? window.location.pathname.replace('/app/public/', '/app/')
-            : '/app/design_sessions/new'
-        }
-      />
-
-      <SignUpModal
-        isOpen={authModalType === 'signup'}
-        onClose={() => setAuthModalType(null)}
-        onSwitchToSignIn={() => setAuthModalType('signin')}
+      <AuthModals
+        authModalType={authModalType}
+        onClose={closeModal}
+        onSwitchToSignIn={switchToSignIn}
+        onSwitchToSignUp={switchToSignUp}
+        returnTo={returnTo}
       />
     </div>
   )

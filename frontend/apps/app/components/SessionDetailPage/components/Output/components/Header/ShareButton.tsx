@@ -3,10 +3,10 @@
 import { Button, Link } from '@liam-hq/ui'
 import type { FC } from 'react'
 import { useState } from 'react'
+import { AuthModals } from '@/components/AuthModals'
 import { useViewMode } from '@/components/SessionDetailPage/hooks/viewMode/useViewMode'
 import { ShareDialog } from '@/components/ShareDialog'
-import { SignInModal } from '@/components/SignInModal'
-import { SignUpModal } from '@/components/SignUpModal'
+import { useAuthModal } from '@/hooks/useAuthModal'
 import styles from './ShareButton.module.css'
 
 type Props = {
@@ -19,14 +19,19 @@ export const ShareButton: FC<Props> = ({
   initialIsPublic = false,
 }) => {
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false)
-  const [authModalType, setAuthModalType] = useState<
-    'signin' | 'signup' | null
-  >(null)
   const { isPublic } = useViewMode()
+  const {
+    authModalType,
+    openSignIn,
+    closeModal,
+    switchToSignIn,
+    switchToSignUp,
+    returnTo,
+  } = useAuthModal()
 
   const handleShareClick = () => {
     if (isPublic) {
-      setAuthModalType('signin')
+      openSignIn()
     } else {
       setIsShareDialogOpen(true)
     }
@@ -51,21 +56,12 @@ export const ShareButton: FC<Props> = ({
         initialIsPublic={initialIsPublic}
       />
 
-      <SignInModal
-        isOpen={authModalType === 'signin'}
-        onClose={() => setAuthModalType(null)}
-        onSwitchToSignUp={() => setAuthModalType('signup')}
-        returnTo={
-          typeof window !== 'undefined'
-            ? window.location.pathname.replace('/app/public/', '/app/')
-            : '/app/design_sessions/new'
-        }
-      />
-
-      <SignUpModal
-        isOpen={authModalType === 'signup'}
-        onClose={() => setAuthModalType(null)}
-        onSwitchToSignIn={() => setAuthModalType('signin')}
+      <AuthModals
+        authModalType={authModalType}
+        onClose={closeModal}
+        onSwitchToSignIn={switchToSignIn}
+        onSwitchToSignUp={switchToSignUp}
+        returnTo={returnTo}
       />
     </>
   )

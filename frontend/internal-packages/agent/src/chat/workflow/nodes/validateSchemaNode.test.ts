@@ -326,7 +326,7 @@ describe('validateSchemaNode', () => {
     const ddlMockResults: SqlResult[] = [
       {
         success: false,
-        sql: 'CREATE TABLE users (id INT);',
+        sql: 'CREATE TABLE "users" ("id" INT NOT NULL);',
         result: { error: 'Syntax error in DDL statement' },
         id: 'result-1',
         metadata: {

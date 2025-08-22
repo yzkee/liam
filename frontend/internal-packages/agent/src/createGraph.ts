@@ -2,7 +2,7 @@ import type { RunnableConfig } from '@langchain/core/runnables'
 import { END, START, StateGraph } from '@langchain/langgraph'
 import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
 import { finalizeArtifactsNode } from './chat/workflow/nodes'
-import { createAnnotations } from './chat/workflow/shared/createAnnotations'
+import { workflowAnnotation } from './chat/workflow/shared/createAnnotations'
 import type { WorkflowState } from './chat/workflow/types'
 import { createDbAgentGraph } from './db-agent/createDbAgentGraph'
 import { createPmAgentGraph } from './pm-agent/createPmAgentGraph'
@@ -15,8 +15,7 @@ import { RETRY_POLICY } from './shared/errorHandling'
  * @param checkpointer - Optional checkpoint saver for persistent state management
  */
 export const createGraph = (checkpointer?: BaseCheckpointSaver) => {
-  const ChatStateAnnotation = createAnnotations()
-  const graph = new StateGraph(ChatStateAnnotation)
+  const graph = new StateGraph(workflowAnnotation)
   const dbAgentSubgraph = createDbAgentGraph(checkpointer)
   const qaAgentSubgraph = createQaAgentGraph(checkpointer)
 

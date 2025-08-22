@@ -2,23 +2,24 @@
 
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import clsx from 'clsx'
-import type { FC } from 'react'
+import { useState } from 'react'
 import styles from '../QueryResultMessage.module.css'
 
-type Props = {
-  result: SqlResult
-}
+export const QueryResultBox = ({ result }: { result: SqlResult }) => {
+  const [isExpanded, setIsExpanded] = useState(false)
 
-export const QueryResultBox: FC<Props> = ({ result }) => {
   return (
     <div className={styles.queryResultBox}>
+      {/* Status header - always visible */}
       <button
         type="button"
         className={clsx(
           styles.resultHeader,
           result.success ? styles.successHeader : styles.errorHeader,
         )}
-        aria-label={`${result.success ? 'Successful' : 'Failed'} query details`}
+        onClick={() => setIsExpanded((isExpanded) => !isExpanded)}
+        aria-expanded={isExpanded}
+        aria-label={`${result.success ? 'Successful' : 'Failed'} query details ${isExpanded ? 'close' : 'open'}`}
       >
         <div className={styles.statusIndicator}>
           {result.success ? '✅' : '❌'}
@@ -31,28 +32,37 @@ export const QueryResultBox: FC<Props> = ({ result }) => {
         <div className={styles.statusMessage}>
           {result.success ? 'Success' : 'Failed'}
         </div>
+        <div className={styles.expandIcon}>{isExpanded ? '▼' : '▶'}</div>
       </button>
-      <div className={styles.resultDetails}>
-        <div className={styles.sqlCommand}>{result.sql}</div>
-        <pre
-          className={clsx(styles.resultPre, result.success ? '' : styles.error)}
-        >
-          {JSON.stringify(result.result, null, 2)}
-        </pre>
-        {result.metadata && (
-          <div className={styles.metadataContainer}>
-            {result.metadata.executionTime !== undefined && (
-              <div>Execution time: {result.metadata.executionTime}ms</div>
+
+      {/* Detailed information - displayed only when expanded */}
+      {isExpanded && (
+        <div className={styles.resultDetails}>
+          <div className={styles.sqlCommand}>{result.sql}</div>
+          <pre
+            className={clsx(
+              styles.resultPre,
+              result.success ? '' : styles.error,
             )}
-            {result.metadata.affectedRows !== undefined && (
-              <div>Affected rows: {result.metadata.affectedRows}</div>
-            )}
-            {result.metadata.timestamp && (
-              <div>Execution timestamp: {result.metadata.timestamp}</div>
-            )}
-          </div>
-        )}
-      </div>
+          >
+            {JSON.stringify(result.result, null, 2)}
+          </pre>
+          {/* Metadata display area for future extensions */}
+          {result.metadata && (
+            <div className={styles.metadataContainer}>
+              {result.metadata.executionTime !== undefined && (
+                <div>Execution time: {result.metadata.executionTime}ms</div>
+              )}
+              {result.metadata.affectedRows !== undefined && (
+                <div>Affected rows: {result.metadata.affectedRows}</div>
+              )}
+              {result.metadata.timestamp && (
+                <div>Execution timestamp: {result.metadata.timestamp}</div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

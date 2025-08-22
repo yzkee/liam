@@ -31,7 +31,7 @@
 .closeButton {
   background: none;
   border: none;
-  font-size: var(--font-size-2xl);
+  font-size: var(--font-size-8);
   cursor: pointer;
   color: var(--text-secondary);
   line-height: 1;

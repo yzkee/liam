@@ -42,6 +42,8 @@ export const TableOptions: FC<Props> = ({ suggestion }) => {
       const suggestedTableName = suggestion.name
 
       if (event.key === 'Enter') {
+        event.preventDefault()
+
         if (event.metaKey || event.ctrlKey) {
           window.open(getTableLinkHref(suggestedTableName))
         } else {

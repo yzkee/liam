@@ -109,7 +109,7 @@ describe('keyboard interactions', () => {
     // TODO: check if the dialog is closed
 
     // other functions are not called
-    expect(mockWindowOpen).not.toHaveBeenCalledWith()
+    expect(mockWindowOpen).not.toHaveBeenCalled()
   })
 
   it('opens suggested table in another tab on ⌘Enter', async () => {

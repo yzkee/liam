@@ -1,20 +1,15 @@
-import { Button, Table2 } from '@liam-hq/ui'
+import { Button } from '@liam-hq/ui'
 import { DialogClose } from '@radix-ui/react-dialog'
 import { Command, defaultFilter } from 'cmdk'
 import { type FC, useCallback, useEffect, useMemo, useState } from 'react'
 import { useTableSelection } from '@/features/erd/hooks'
 import { useSchemaOrThrow } from '@/stores'
 import { TableNode } from '../../../ERDContent/components'
+import { getTableLinkHref, TableOptions } from '../CommandPaletteOptions'
 import { CommandPaletteSearchInput } from '../CommandPaletteSearchInput'
 import type { CommandPaletteInputMode } from '../types'
-import { getSuggestionText, textToSuggestion } from '../utils'
+import { textToSuggestion } from '../utils'
 import styles from './CommandPaletteContent.module.css'
-
-const getTableLinkHref = (activeTableName: string) => {
-  const searchParams = new URLSearchParams(window.location.search)
-  searchParams.set('active', activeTableName)
-  return `?${searchParams.toString()}`
-}
 
 const commandPaletteFilter: typeof defaultFilter = (value, ...rest) => {
   const suggestion = textToSuggestion(value)
@@ -99,33 +94,7 @@ export const CommandPaletteContent: FC<Props> = ({ closeDialog }) => {
       <div className={styles.main}>
         <Command.List>
           <Command.Empty>No results found.</Command.Empty>
-          {inputMode.type === 'default' && (
-            <Command.Group heading="Tables">
-              {Object.values(schema.current.tables).map((table) => (
-                <Command.Item
-                  key={table.name}
-                  value={getSuggestionText({ type: 'table', name: table.name })}
-                  asChild
-                >
-                  <a
-                    href={getTableLinkHref(table.name)}
-                    onClick={(event) => {
-                      // Do not call preventDefault to allow the default link behavior when ⌘ key is pressed
-                      if (event.ctrlKey || event.metaKey) {
-                        return
-                      }
-
-                      event.preventDefault()
-                      goToERD(table.name)
-                    }}
-                  >
-                    <Table2 className={styles.itemIcon} />
-                    <span className={styles.itemText}>{table.name}</span>
-                  </a>
-                </Command.Item>
-              ))}
-            </Command.Group>
-          )}
+          {inputMode.type === 'default' && <TableOptions />}
           {
             (inputMode.type === 'default' || inputMode.type === 'command') &&
               null

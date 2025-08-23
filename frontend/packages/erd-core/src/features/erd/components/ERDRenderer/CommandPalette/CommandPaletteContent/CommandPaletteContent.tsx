@@ -19,11 +19,7 @@ const commandPaletteFilter: typeof defaultFilter = (value, ...rest) => {
   return defaultFilter(suggestion.name, ...rest)
 }
 
-type Props = {
-  closeDialog: () => void
-}
-
-export const CommandPaletteContent: FC<Props> = ({ closeDialog }) => {
+export const CommandPaletteContent: FC = () => {
   // TODO: switch inputMode with `setInputMode`
   const [inputMode, setInputMode] = useState<CommandPaletteInputMode>({
     type: 'default',

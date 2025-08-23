@@ -1,23 +1,30 @@
 import { Table2 } from '@liam-hq/ui'
 import { Command } from 'cmdk'
-import { type FC, useCallback } from 'react'
+import { type FC, useCallback, useEffect } from 'react'
 import { useTableSelection } from '@/features/erd/hooks'
 import { useSchemaOrThrow } from '@/stores'
 import { useCommandPalette } from '../CommandPaletteProvider'
+import type { CommandPaletteSuggestion } from '../types'
 import { getSuggestionText } from '../utils'
 import styles from './CommandPaletteOptions.module.css'
 
-export const getTableLinkHref = (activeTableName: string) => {
+const getTableLinkHref = (activeTableName: string) => {
   const searchParams = new URLSearchParams(window.location.search)
   searchParams.set('active', activeTableName)
   return `?${searchParams.toString()}`
 }
 
-export const TableOptions: FC = () => {
+type Props = {
+  suggestion: CommandPaletteSuggestion | null
+}
+
+export const TableOptions: FC<Props> = ({ suggestion }) => {
   const result = useCommandPalette()
   const setOpen = result.isOk() ? result.value.setOpen : () => {}
 
   const schema = useSchemaOrThrow()
+  const suggestedTableName =
+    suggestion?.type === 'table' ? suggestion.name : null
 
   const { selectTable } = useTableSelection()
 
@@ -28,6 +35,24 @@ export const TableOptions: FC = () => {
     },
     [selectTable, setOpen],
   )
+
+  // Select option by pressing [Enter] key (with/without ⌘ key)
+  useEffect(() => {
+    const down = (event: KeyboardEvent) => {
+      if (!suggestedTableName) return
+
+      if (event.key === 'Enter') {
+        if (event.metaKey || event.ctrlKey) {
+          window.open(getTableLinkHref(suggestedTableName))
+        } else {
+          goToERD(suggestedTableName)
+        }
+      }
+    }
+
+    document.addEventListener('keydown', down)
+    return () => document.removeEventListener('keydown', down)
+  }, [suggestedTableName, goToERD])
 
   return (
     <Command.Group heading="Tables">

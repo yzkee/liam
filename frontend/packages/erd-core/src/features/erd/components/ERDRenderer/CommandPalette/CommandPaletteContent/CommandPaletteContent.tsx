@@ -1,11 +1,10 @@
 import { Button } from '@liam-hq/ui'
 import { DialogClose } from '@radix-ui/react-dialog'
 import { Command, defaultFilter } from 'cmdk'
-import { type FC, useCallback, useEffect, useMemo, useState } from 'react'
-import { useTableSelection } from '@/features/erd/hooks'
+import { type FC, useMemo, useState } from 'react'
 import { useSchemaOrThrow } from '@/stores'
 import { TableNode } from '../../../ERDContent/components'
-import { getTableLinkHref, TableOptions } from '../CommandPaletteOptions'
+import { TableOptions } from '../CommandPaletteOptions'
 import { CommandPaletteSearchInput } from '../CommandPaletteSearchInput'
 import type { CommandPaletteInputMode } from '../types'
 import { textToSuggestion } from '../utils'
@@ -41,33 +40,6 @@ export const CommandPaletteContent: FC<Props> = ({ closeDialog }) => {
   const suggestedTableName =
     suggestion?.type === 'table' ? suggestion.name : null
   const table = schema.current.tables[suggestedTableName ?? '']
-  const { selectTable } = useTableSelection()
-
-  const goToERD = useCallback(
-    (tableName: string) => {
-      selectTable({ tableId: tableName, displayArea: 'main' })
-      closeDialog()
-    },
-    [selectTable, closeDialog],
-  )
-
-  // Select option by pressing [Enter] key (with/without ⌘ key)
-  useEffect(() => {
-    const down = (event: KeyboardEvent) => {
-      if (!suggestedTableName) return
-
-      if (event.key === 'Enter') {
-        if (event.metaKey || event.ctrlKey) {
-          window.open(getTableLinkHref(suggestedTableName))
-        } else {
-          goToERD(suggestedTableName)
-        }
-      }
-    }
-
-    document.addEventListener('keydown', down)
-    return () => document.removeEventListener('keydown', down)
-  }, [suggestedTableName])
 
   return (
     <Command
@@ -94,7 +66,9 @@ export const CommandPaletteContent: FC<Props> = ({ closeDialog }) => {
       <div className={styles.main}>
         <Command.List>
           <Command.Empty>No results found.</Command.Empty>
-          {inputMode.type === 'default' && <TableOptions />}
+          {inputMode.type === 'default' && (
+            <TableOptions suggestion={suggestion} />
+          )}
           {
             (inputMode.type === 'default' || inputMode.type === 'command') &&
               null

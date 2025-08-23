@@ -2,9 +2,8 @@ import { Button } from '@liam-hq/ui'
 import { DialogClose } from '@radix-ui/react-dialog'
 import { Command, defaultFilter } from 'cmdk'
 import { type FC, useMemo, useState } from 'react'
-import { useSchemaOrThrow } from '@/stores'
-import { TableNode } from '../../../ERDContent/components'
 import { TableOptions } from '../CommandPaletteOptions'
+import { TablePreview } from '../CommandPalettePreview/TablePreview'
 import { CommandPaletteSearchInput } from '../CommandPaletteSearchInput'
 import type { CommandPaletteInputMode } from '../types'
 import { textToSuggestion } from '../utils'
@@ -30,16 +29,11 @@ export const CommandPaletteContent: FC<Props> = ({ closeDialog }) => {
     type: 'default',
   })
 
-  const schema = useSchemaOrThrow()
   const [suggestionText, setSuggestionText] = useState('')
   const suggestion = useMemo(
     () => textToSuggestion(suggestionText),
     [suggestionText],
   )
-
-  const suggestedTableName =
-    suggestion?.type === 'table' ? suggestion.name : null
-  const table = schema.current.tables[suggestedTableName ?? '']
 
   return (
     <Command
@@ -80,32 +74,9 @@ export const CommandPaletteContent: FC<Props> = ({ closeDialog }) => {
           className={styles.previewContainer}
           data-testid="CommandPalettePreview"
         >
-          <div className={styles.previewBackground}>
-            {table && (
-              <TableNode
-                id=""
-                type="table"
-                data={{
-                  table: table,
-                  isActiveHighlighted: false,
-                  isHighlighted: false,
-                  isTooltipVisible: false,
-                  sourceColumnName: undefined,
-                  targetColumnCardinalities: undefined,
-                  showMode: 'ALL_FIELDS',
-                }}
-                dragging={false}
-                isConnectable={false}
-                positionAbsoluteX={0}
-                positionAbsoluteY={0}
-                selectable={false}
-                deletable={false}
-                selected={false}
-                draggable={false}
-                zIndex={0}
-              />
-            )}
-          </div>
+          {suggestion?.type === 'table' && (
+            <TablePreview tableName={suggestion.name} />
+          )}
         </div>
       </div>
     </Command>

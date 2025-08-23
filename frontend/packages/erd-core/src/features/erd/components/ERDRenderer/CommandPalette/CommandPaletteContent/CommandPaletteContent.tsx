@@ -77,6 +77,11 @@ export const CommandPaletteContent: FC<Props> = ({ closeDialog }) => {
           {suggestion?.type === 'table' && (
             <TablePreview tableName={suggestion.name} />
           )}
+          {
+            suggestion?.type === 'command' && null
+            // TODO(command options): display a preview component for command options, as like:
+            // <CommandPreview commandName={suggestion.name} />
+          }
         </div>
       </div>
     </Command>

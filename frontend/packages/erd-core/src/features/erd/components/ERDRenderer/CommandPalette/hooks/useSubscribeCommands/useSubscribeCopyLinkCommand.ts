@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useCopyLink } from '../useCopyLink'
 
 export const useSubscribeCopyLinkCommand = () => {
-  const { copyLink } = useCopyLink()
+  const { copyLink } = useCopyLink('header')
 
   // Copy page link when ⌘C is pressed
   useEffect(() => {

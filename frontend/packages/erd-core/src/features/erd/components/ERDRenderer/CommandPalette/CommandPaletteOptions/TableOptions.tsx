@@ -23,9 +23,6 @@ export const TableOptions: FC<Props> = ({ suggestion }) => {
   const setOpen = result.isOk() ? result.value.setOpen : () => {}
 
   const schema = useSchemaOrThrow()
-  const suggestedTableName =
-    suggestion?.type === 'table' ? suggestion.name : null
-
   const { selectTable } = useTableSelection()
 
   const goToERD = useCallback(
@@ -38,8 +35,11 @@ export const TableOptions: FC<Props> = ({ suggestion }) => {
 
   // Select option by pressing [Enter] key (with/without ⌘ key)
   useEffect(() => {
+    // It doesn't subscribe a keydown event listener if the suggestion type is not "table"
+    if (suggestion?.type !== 'table') return
+
     const down = (event: KeyboardEvent) => {
-      if (!suggestedTableName) return
+      const suggestedTableName = suggestion.name
 
       if (event.key === 'Enter') {
         if (event.metaKey || event.ctrlKey) {
@@ -52,7 +52,7 @@ export const TableOptions: FC<Props> = ({ suggestion }) => {
 
     document.addEventListener('keydown', down)
     return () => document.removeEventListener('keydown', down)
-  }, [suggestedTableName, goToERD])
+  }, [suggestion, goToERD])
 
   return (
     <Command.Group heading="Tables">

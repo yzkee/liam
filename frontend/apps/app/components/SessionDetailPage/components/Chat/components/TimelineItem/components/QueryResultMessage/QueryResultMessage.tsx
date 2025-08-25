@@ -4,7 +4,7 @@ import type { SqlResult } from '@liam-hq/pglite-server'
 import { Button, ChevronDown, ChevronRight } from '@liam-hq/ui'
 import clsx from 'clsx'
 import React, { type FC, useState } from 'react'
-import { QueryResultBox } from '@/components/PGlitePage/QueryResultBox'
+import { QueryResultBox } from './components/QueryResultBox'
 import styles from './QueryResultMessage.module.css'
 
 type Props = {

@@ -147,10 +147,10 @@
   width: 100%;
   height: 2.5rem;
   padding: var(--spacing-2) var(--spacing-3);
-  background-color: var(--color-gray-800);
-  border: 1px solid var(--color-gray-700);
-  border-radius: var(--radius-2);
-  color: var(--color-white);
+  background-color: var(--global-background);
+  border: 1px solid var(--dropdown-border);
+  border-radius: var(--border-radius-base);
+  color: var(--global-foreground);
   font-size: var(--font-size-4);
   line-height: 1;
   cursor: pointer;
@@ -158,8 +158,8 @@
 }
 
 .visibilityDropdown:hover:not(:disabled) {
-  border-color: var(--color-gray-600);
-  background-color: var(--color-gray-750);
+  border-color: var(--dropdown-border);
+  background-color: var(--dropdown-background-hover);
 }
 
 .visibilityDropdown:focus-visible {
@@ -190,11 +190,11 @@
 
 .dropdownContent {
   width: var(--radix-dropdown-menu-trigger-width);
-  background-color: var(--color-gray-900);
-  border: 1px solid var(--color-gray-800);
-  border-radius: var(--radius-2);
+  background-color: var(--global-background);
+  border: 1px solid var(--dropdown-border);
+  border-radius: var(--border-radius-base);
   padding: var(--spacing-1);
-  box-shadow: var(--shadow-xl);
+  box-shadow: 0 4px 20px 0 rgb(0 0 0 / 40%);
 }
 
 .dropdownItem {
@@ -203,9 +203,9 @@
   justify-content: flex-start;
   gap: var(--spacing-2);
   padding: var(--spacing-2) var(--spacing-3);
-  border-radius: var(--radius-1);
+  border-radius: var(--border-radius-base);
   font-size: var(--font-size-4);
-  color: var(--color-gray-100);
+  color: var(--global-foreground);
   cursor: pointer;
   transition: background-color 0.2s;
   position: relative;
@@ -214,12 +214,11 @@
 }
 
 .dropdownItem:hover {
-  background-color: var(--color-gray-800);
+  background-color: var(--dropdown-background-hover);
 }
 
 .dropdownItem:focus-visible {
-  outline: 1px solid var(--color-gray-600);
-  outline-offset: -1px;
+  outline: none;
 }
 
 .checkIcon {
@@ -234,7 +233,7 @@
   padding: var(--spacing-2) var(--spacing-3);
   height: 2.5rem;
   border: 1px solid var(--color-gray-700);
-  border-radius: var(--radius-2);
+  border-radius: var(--border-radius-base);
   background-color: var(--color-gray-800);
   color: var(--color-white);
   font-size: var(--font-size-4);

@@ -1,5 +1,11 @@
 # @liam-hq/schema
 
+## 0.5.2
+
+### Patch Changes
+
+- [#3118](https://github.com/liam-hq/liam/pull/3118) - 🐛 Fix PostgreSQL CHECK constraint parsing issue that could cause incorrect parsing of constraint conditions / Thanks [@FunamaYukina](https://github.com/FunamaYukina)!
+
 ## 0.5.1
 
 ### Patch Changes

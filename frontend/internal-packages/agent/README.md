@@ -8,16 +8,19 @@ A **LangGraph implementation** for processing chat messages in the LIAM applicat
 %%{init: {'flowchart': {'curve': 'linear'}}}%%
 graph TD;
 	__start__([<p>__start__</p>]):::first
+	leadAgent(leadAgent)
 	pmAgent(pmAgent)
 	dbAgent(dbAgent)
 	qaAgent(qaAgent)
 	finalizeArtifacts(finalizeArtifacts)
 	__end__([<p>__end__</p>]):::last
-	__start__ --> pmAgent;
+	__start__ --> leadAgent;
 	dbAgent --> qaAgent;
 	finalizeArtifacts --> __end__;
 	pmAgent --> dbAgent;
 	qaAgent --> finalizeArtifacts;
+	leadAgent -.-> pmAgent;
+	leadAgent -.-> __end__;
 	classDef default fill:#f2f0ff,line-height:1.2;
 	classDef first fill-opacity:0;
 	classDef last fill:#bfb6fc;
@@ -39,7 +42,7 @@ interface WorkflowState {
 
   // Requirements analysis
   analyzedRequirements?: AnalyzedRequirements;
-  generatedUsecases?: Usecase[];
+  generatedTestcases?: Testcase[];
 
   // DML execution
   dmlStatements?: string;
@@ -62,10 +65,58 @@ interface WorkflowState {
 
 ## Nodes
 
-1. **pmAgent**: PM Agent subgraph that handles requirements analysis - contains analyzeRequirements and invokeSaveArtifactTool nodes
-2. **dbAgent**: DB Agent subgraph that handles database schema design - contains designSchema and invokeSchemaDesignTool nodes (performed by dbAgent)
-3. **qaAgent**: QA Agent subgraph that handles testing and validation - contains generateUsecase, prepareDML, and validateSchema nodes (performed by qaAgent)
-4. **finalizeArtifacts**: Generates and saves comprehensive artifacts to database, handles error timeline items (performed by dbAgentArtifactGen)
+1. **leadAgent**: Lead Agent subgraph that routes requests to appropriate specialized agents
+2. **pmAgent**: PM Agent subgraph that handles requirements analysis - contains analyzeRequirements and invokeSaveArtifactTool nodes
+3. **dbAgent**: DB Agent subgraph that handles database schema design - contains designSchema and invokeSchemaDesignTool nodes (performed by dbAgent)
+4. **qaAgent**: QA Agent subgraph that handles testing and validation - contains generateTestcase, prepareDML, and validateSchema nodes (performed by qaAgent)
+5. **finalizeArtifacts**: Generates and saves comprehensive artifacts to database, handles error timeline items (performed by dbAgentArtifactGen)
+
+## Lead Agent Subgraph
+
+The `leadAgent` node is implemented as a **LangGraph subgraph** that acts as the intelligent router for incoming requests, determining which specialized agent should handle each task.
+
+### Lead Agent Architecture
+
+```mermaid
+%%{init: {'flowchart': {'curve': 'linear'}}}%%
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	classify(classify)
+	tool(tool)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> classify;
+	tool --> __end__;
+	classify -. &nbsp;toolNode&nbsp; .-> tool;
+	classify -. &nbsp;END&nbsp; .-> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2;
+	classDef first fill-opacity:0;
+	classDef last fill:#bfb6fc;
+```
+
+### Lead Agent Components
+
+#### 1. classify Node
+- **Purpose**: Analyzes user requests and determines appropriate routing
+- **Performed by**: GPT-5-nano with specialized routing logic
+- **Retry Policy**: maxAttempts: 3 (internal to subgraph)
+- **Decision Making**: Evaluates request intent for database design tasks
+
+#### 2. tool Node
+- **Purpose**: Executes the routing tool (`routeToAgent`)
+- **Performed by**: ToolNode with routing capabilities
+- **Tool Integration**: Routes to specialized agents (currently pmAgent)
+
+### Lead Agent Flow Patterns
+
+1. **Database Design Request**: `START → classify → tool → END` (routes to pmAgent)
+2. **Non-Database Request**: `START → classify → END` (responds directly without routing)
+
+### Lead Agent Benefits
+
+- **🎯 Intelligent Routing**: Context-aware decision making for request classification
+- **⚡ Fast Classification**: Uses GPT-5-nano for quick routing decisions
+- **🔄 Extensible**: Easy to add new agent targets as system grows
+- **🏗️ Clean Separation**: Routing logic isolated from business logic
 
 ## PM Agent Subgraph
 
@@ -178,12 +229,12 @@ The `qaAgent` node is implemented as a **LangGraph subgraph** that encapsulates 
 %%{init: {'flowchart': {'curve': 'linear'}}}%%
 graph TD;
 	__start__([<p>__start__</p>]):::first
-	generateUsecase(generateUsecase)
+	generateTestcase(generateTestcase)
 	prepareDML(prepareDML)
 	validateSchema(validateSchema)
 	__end__([<p>__end__</p>]):::last
-	__start__ --> generateUsecase;
-	generateUsecase --> prepareDML;
+	__start__ --> generateTestcase;
+	generateTestcase --> prepareDML;
 	prepareDML --> validateSchema;
 	validateSchema --> __end__;
 	classDef default fill:#f2f0ff,line-height:1.2;
@@ -193,14 +244,14 @@ graph TD;
 
 ### QA Agent Components
 
-#### 1. generateUsecase Node
-- **Purpose**: Creates comprehensive use cases for testing database schema functionality
-- **Performed by**: QA Generate Usecase Agent with GPT-4
+#### 1. generateTestcase Node
+- **Purpose**: Creates comprehensive test cases for testing database schema functionality
+- **Performed by**: QA Generate Testcase Agent with GPT-4
 - **Retry Policy**: maxAttempts: 3 (internal to subgraph)
 - **Timeline Sync**: Automatic message synchronization
 
 #### 2. prepareDML Node
-- **Purpose**: Generates DML statements based on use cases for schema validation
+- **Purpose**: Generates DML statements based on test cases for schema validation
 - **Performed by**: DML Generation Agent
 - **Retry Policy**: maxAttempts: 3 (internal to subgraph)
 - **Output**: Structured DML operations for testing
@@ -213,7 +264,7 @@ graph TD;
 
 ### QA Agent Flow Patterns
 
-1. **Linear Testing Flow**: `START → generateUsecase → prepareDML → validateSchema → END`
+1. **Linear Testing Flow**: `START → generateTestcase → prepareDML → validateSchema → END`
 2. **Comprehensive Validation**: Each step builds upon the previous to ensure thorough testing
 
 ### QA Agent Benefits
@@ -241,7 +292,7 @@ graph.addNode('qaAgent', qaAgentSubgraph) // No retry policy - handled internall
 - **analyzeRequirements**: Routes to `saveRequirementToArtifact` when requirements are successfully analyzed, retries `analyzeRequirements` with retry count tracking (max 3 attempts), fallback to `finalizeArtifacts` when max retries exceeded
 - **saveRequirementToArtifact**: Always routes to `dbAgent` after processing artifacts (workflow termination node pattern)
 - **dbAgent**: DB Agent subgraph handles internal routing between designSchema and invokeSchemaDesignTool nodes, routes to `qaAgent` on completion
-- **qaAgent**: QA Agent subgraph handles internal routing between generateUsecase, prepareDML, and validateSchema nodes, always routes to `finalizeArtifacts` (conditional routing temporarily disabled)
+- **qaAgent**: QA Agent subgraph handles internal routing between generateTestcase, prepareDML, and validateSchema nodes, always routes to `finalizeArtifacts` (conditional routing temporarily disabled)
 
 ## Timeline Synchronization
 
@@ -259,7 +310,7 @@ graph.addNode('qaAgent', qaAgentSubgraph) // No retry policy - handled internall
 ### Implementation Details
 
 - **User Message Sync**: User input is synchronized in `deepModeling.ts` before workflow execution
-- **AI Message Sync**: All workflow nodes (analyzeRequirements, dbAgent subgraph, generateUsecase) automatically sync their AI responses
+- **AI Message Sync**: All workflow nodes (analyzeRequirements, dbAgent subgraph, generateTestcase) automatically sync their AI responses
 - **Non-blocking**: Timeline synchronization is asynchronous and non-blocking to ensure workflow performance
 - **Utility Function**: `withTimelineItemSync()` provides consistent message synchronization across all nodes
 

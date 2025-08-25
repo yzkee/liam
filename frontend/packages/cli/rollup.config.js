@@ -10,6 +10,7 @@ export default {
   output: {
     file: 'dist-cli/bin/cli.js',
     format: 'esm',
+    inlineDynamicImports: true,
   },
   plugins: [
     resolve({

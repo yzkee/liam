@@ -4,12 +4,12 @@ import { dmlOperationSchema } from '@liam-hq/artifact'
 import { toJsonSchema } from '@valibot/to-json-schema'
 import { ResultAsync } from 'neverthrow'
 import * as v from 'valibot'
-import type { ChatAgent } from '../../utils/types'
+import type { ChatAgent } from '../../langchain/utils/types'
 import { formatDMLGenerationPrompts } from './prompts'
 
 const DMLGenerationAgentInputSchema = v.object({
   schemaSQL: v.string(),
-  formattedUseCases: v.string(),
+  formattedTestCases: v.string(),
   schemaContext: v.string(),
 })
 
@@ -32,7 +32,7 @@ export class DMLGenerationAgent
   ): Promise<DMLGenerationAgentOutput> {
     const { systemMessage, humanMessage } = formatDMLGenerationPrompts({
       schema: input.schemaSQL,
-      requirements: input.formattedUseCases,
+      requirements: input.formattedTestCases,
       chat_history: '',
       user_message:
         'Generate comprehensive DML statements for testing the provided schema.',

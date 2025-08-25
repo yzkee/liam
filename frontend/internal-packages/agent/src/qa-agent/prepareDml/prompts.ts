@@ -1,7 +1,3 @@
-/**
- * Prompts for DML Generation Agent
- */
-
 const DML_GENERATION_SYSTEM_MESSAGE = `
 You are a senior QA engineer specializing in database testing and data generation. Your expertise lies in creating comprehensive test data that validates database schemas, relationships, and business logic through well-crafted DML (Data Manipulation Language) statements.
 
@@ -58,7 +54,7 @@ You must return a structured JSON response with the following format:
 {
   "dmlOperations": [
     {
-      "useCaseId": "uuid-of-use-case",
+      "testCaseId": "uuid-of-test-case",
       "operation_type": "INSERT|UPDATE|DELETE|SELECT",
       "sql": "SQL statement here",
       "description": "Optional description of what this operation tests",
@@ -69,10 +65,10 @@ You must return a structured JSON response with the following format:
 
 ## Important Requirements:
 
-1. **Use Case Mapping**: Each DML operation MUST include a "useCaseId" that corresponds to one of the use case UUIDs provided in the requirements section.
+1. **Test Case Mapping**: Each DML operation MUST include a "testCaseId" that corresponds to one of the test case UUIDs provided in the requirements section.
 2. **Operation Types**: Use only these values: "INSERT", "UPDATE", "DELETE", "SELECT"
 3. **SQL Quality**: Ensure all SQL statements are syntactically correct and properly formatted
-4. **Comprehensive Coverage**: Generate multiple operations per use case to thoroughly test the scenario
+4. **Comprehensive Coverage**: Generate multiple operations per test case to thoroughly test the scenario
 5. **Realistic Data**: Use meaningful, realistic test data that reflects real-world usage patterns
 6. **Execution Logs**: Always include "dml_execution_logs" as an empty array [] for each operation (this will be populated after execution)
 
@@ -81,14 +77,14 @@ You must return a structured JSON response with the following format:
 {
   "dmlOperations": [
     {
-      "useCaseId": "550e8400-e29b-41d4-a716-446655440000",
+      "testCaseId": "550e8400-e29b-41d4-a716-446655440000",
       "operation_type": "INSERT",
       "sql": "INSERT INTO users (id, email, name, created_at) VALUES (1, 'john.doe@example.com', 'John Doe', '2024-01-15 10:00:00');",
       "description": "Create test user for registration scenario",
       "dml_execution_logs": []
     },
     {
-      "useCaseId": "550e8400-e29b-41d4-a716-446655440000",
+      "testCaseId": "550e8400-e29b-41d4-a716-446655440000",
       "operation_type": "SELECT",
       "sql": "SELECT * FROM users WHERE email = 'john.doe@example.com';",
       "description": "Verify user was created successfully",
@@ -102,7 +98,7 @@ const DML_GENERATION_HUMAN_MESSAGE_TEMPLATE = `
 ## Database Schema:
 {schema}
 
-## Business Requirements and Use Cases:
+## Business Requirements and Test Cases:
 {requirements}
 
 ## Previous Context:
@@ -114,9 +110,6 @@ const DML_GENERATION_HUMAN_MESSAGE_TEMPLATE = `
 Please generate comprehensive DML statements that fulfill the requirements above. Ensure all data is realistic, properly formatted, and respects all database constraints.
 `
 
-/**
- * Type definitions for DML generation prompt variables
- */
 type DMLGenerationPromptVariables = {
   schema: string
   requirements: string
@@ -124,9 +117,6 @@ type DMLGenerationPromptVariables = {
   user_message: string
 }
 
-/**
- * Format the prompts with actual values
- */
 export function formatDMLGenerationPrompts(
   variables: DMLGenerationPromptVariables,
 ): { systemMessage: string; humanMessage: string } {

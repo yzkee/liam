@@ -1,6 +1,6 @@
 import { ToolMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
-import { tool } from '@langchain/core/tools'
+import { type StructuredTool, tool } from '@langchain/core/tools'
 import type { JSONSchema } from '@langchain/core/utils/json_schema'
 import { Command } from '@langchain/langgraph'
 import type {
@@ -60,7 +60,7 @@ const createArtifactFromRequirements = (
       type: 'functional',
       name: category,
       description: items,
-      use_cases: [], // Empty array as use cases don't exist at this point
+      test_cases: [], // Empty array as test cases don't exist at this point
     }
     requirements.push(functionalRequirement)
   }
@@ -109,7 +109,7 @@ const getToolConfigurable = (
 /**
  * Tool for saving analyzed requirements to artifact and updating workflow state
  */
-export const saveRequirementsToArtifactTool = tool(
+export const saveRequirementsToArtifactTool: StructuredTool = tool(
   async (input: unknown, config: RunnableConfig): Promise<Command> => {
     const analyzedRequirements = v.parse(analyzedRequirementsSchema, input)
 

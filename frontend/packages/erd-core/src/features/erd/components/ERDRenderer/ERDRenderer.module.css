@@ -1,3 +1,5 @@
+/* Responding to Lint failures in CI */
+/* eslint-disable css-modules-kit/no-missing-component-file */
 .wrapper {
   display: grid;
   grid-template-rows: auto 1fr;

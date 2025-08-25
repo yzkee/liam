@@ -1,4 +1,4 @@
-import { BaseAppBar } from '@liam-hq/ui'
+import { BaseAppBar, GlobeIcon } from '@liam-hq/ui'
 import type { FC } from 'react'
 import styles from './PublicAppBar.module.css'
 
@@ -8,7 +8,7 @@ export const PublicAppBar: FC = () => {
       className={styles.customPublicAppBar}
       leftContent={
         <div className={styles.publicBadge}>
-          <span className={styles.icon}>🌐</span>
+          <GlobeIcon className={styles.icon} />
           <span className={styles.publicText}>Public</span>
         </div>
       }

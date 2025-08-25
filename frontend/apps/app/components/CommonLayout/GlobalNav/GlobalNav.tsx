@@ -1,6 +1,11 @@
-import { BaseGlobalNav, LayoutGrid, Settings } from '@liam-hq/ui'
+import {
+  BaseGlobalNav,
+  LayoutGrid,
+  LiamDbLogo,
+  LiamLogoMark,
+  Settings,
+} from '@liam-hq/ui'
 import type { FC } from 'react'
-import { LiamDbLogo, LiamLogoMark } from '@/logos'
 import type { Organization } from '../services/getOrganization'
 import type { OrganizationsByUserId } from '../services/getOrganizationsByUserId'
 import styles from './GlobalNav.module.css'

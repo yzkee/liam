@@ -158,6 +158,7 @@ const constraintToCheckConstraint = (
   columnName: string | undefined,
   constraint: PgConstraint,
   rawSql: string,
+  chunkOffset: number,
 ): Result<CheckConstraint, UnexpectedTokenWarningError> => {
   if (constraint.contype !== 'CONSTR_CHECK') {
     return err(
@@ -194,17 +195,17 @@ const constraintToCheckConstraint = (
     return null
   }
 
-  const parentheses = findBalancedParentheses(rawSql, constraint.location)
+  const absoluteLocation = constraint.location + chunkOffset
+  const parentheses = findBalancedParentheses(rawSql, absoluteLocation)
 
   if (!parentheses) {
     return err(
       new UnexpectedTokenWarningError(
-        'Invalid check constraint: no balanced parentheses found',
+        `Failed to find balanced parentheses for CHECK constraint "${constraint.conname || 'unnamed'}"`,
       ),
     )
   }
 
-  // Extract the condition inside the parentheses (without the CHECK prefix)
   const condition = rawSql.slice(parentheses.start + 1, parentheses.end)
 
   // Generate a better name for anonymous constraints
@@ -240,6 +241,7 @@ export const convertToSchema = (
   stmts: RawStmt[],
   rawSql: string,
   mainSchema: Schema,
+  chunkOffset: number,
 ): ProcessResult => {
   const tables: Record<string, Table> = {}
   const enums: Record<string, Enum> = {}
@@ -394,6 +396,7 @@ export const convertToSchema = (
           columnName,
           constraint.Constraint,
           rawSql,
+          chunkOffset,
         )
 
         if (relResult.isErr()) {
@@ -537,6 +540,7 @@ export const convertToSchema = (
         undefined,
         constraint,
         rawSql,
+        chunkOffset,
       )
 
       if (relResult.isErr()) {
@@ -904,7 +908,12 @@ export const convertToSchema = (
     foreignTableName: string,
     constraint: PgConstraint,
   ): void {
-    const relResult = constraintToCheckConstraint(undefined, constraint, rawSql)
+    const relResult = constraintToCheckConstraint(
+      undefined,
+      constraint,
+      rawSql,
+      chunkOffset,
+    )
 
     if (relResult.isErr()) {
       errors.push(relResult.error)

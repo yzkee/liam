@@ -1,4 +1,5 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
+import { END } from '@langchain/langgraph'
 import type { Database } from '@liam-hq/db'
 import { getConfigurable } from '../../chat/workflow/shared/getConfigurable'
 import type { WorkflowState } from '../../chat/workflow/types'
@@ -23,6 +24,7 @@ const createWorkflowStateForLogging = (
   latestVersionNumber: 0,
   organizationId: '',
   userId: '',
+  next: END,
 })
 
 /**

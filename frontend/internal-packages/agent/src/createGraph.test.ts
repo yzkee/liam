@@ -7,16 +7,19 @@ describe('createGraph', () => {
   const expectedMermaidDiagram = `%%{init: {'flowchart': {'curve': 'linear'}}}%%
 graph TD;
 	__start__([<p>__start__</p>]):::first
+	leadAgent(leadAgent)
 	pmAgent(pmAgent)
 	dbAgent(dbAgent)
 	qaAgent(qaAgent)
 	finalizeArtifacts(finalizeArtifacts)
 	__end__([<p>__end__</p>]):::last
-	__start__ --> pmAgent;
+	__start__ --> leadAgent;
 	dbAgent --> qaAgent;
 	finalizeArtifacts --> __end__;
 	pmAgent --> dbAgent;
 	qaAgent --> finalizeArtifacts;
+	leadAgent -.-> pmAgent;
+	leadAgent -.-> __end__;
 	classDef default fill:#f2f0ff,line-height:1.2;
 	classDef first fill-opacity:0;
 	classDef last fill:#bfb6fc;

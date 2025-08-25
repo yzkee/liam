@@ -53,6 +53,16 @@ function handleSuccessfulProcessing(
   Error
 > {
   if (readOffset !== null) {
+    if (readOffset === chunk.length) {
+      return ok({
+        newChunkSize: adjustedChunkSize,
+        newRetryDirection: retryDirection,
+        nextIndex: startIndex + adjustedChunkSize,
+        errors: [],
+        shouldBreak: true,
+      })
+    }
+
     const lineNumber = getLineNumber(chunk, readOffset)
     if (lineNumber === null) {
       return err(new Error('UnexpectedCondition. lineNumber === null'))
@@ -167,8 +177,10 @@ async function handleRetry(
   currentChunkSize: number,
   originalChunkSize: number,
   retryDirection: RetryDirection,
+  chunkOffset: number,
   callback: (
     chunk: string,
+    chunkOffset: number,
   ) => Promise<[number | null, number | null, ProcessError[]]>,
 ): Promise<{
   newChunkSize: number
@@ -190,7 +202,7 @@ async function handleRetry(
   const chunk = lines
     .slice(startIndex, startIndex + adjustedChunkSize)
     .join('\n')
-  const [retryOffset, readOffset, errors] = await callback(chunk)
+  const [retryOffset, readOffset, errors] = await callback(chunk, chunkOffset)
 
   // Handle successful processing (no retry needed)
   if (retryOffset === null) {
@@ -228,8 +240,10 @@ async function processPosition(
   lines: string[],
   startIndex: number,
   chunkSize: number,
+  chunkOffset: number,
   callback: (
     chunk: string,
+    chunkOffset: number,
   ) => Promise<[number | null, number | null, ProcessError[]]>,
 ): Promise<{
   newIndex: number
@@ -246,6 +260,7 @@ async function processPosition(
       currentChunkSize,
       chunkSize,
       retryDirection,
+      chunkOffset,
       callback,
     )
 
@@ -281,12 +296,14 @@ export const processSQLInChunks = async (
   chunkSize: number,
   callback: (
     chunk: string,
+    chunkOffset: number,
   ) => Promise<[number | null, number | null, ProcessError[]]>,
 ): Promise<ProcessError[]> => {
   if (sqlInput === '') return []
 
   const lines = sqlInput.split('\n')
   const processErrors: ProcessError[] = []
+  let runningOffset = 0
 
   for (let i = 0; i < lines.length; ) {
     // Stop processing if we've encountered errors
@@ -296,12 +313,18 @@ export const processSQLInChunks = async (
       lines,
       i,
       chunkSize,
+      runningOffset,
       callback,
     )
 
     if (errors.length > 0) {
       processErrors.push(...errors)
       break
+    }
+
+    // Update running offset for the next chunk
+    for (let j = i; j < newIndex; j++) {
+      runningOffset += (lines[j] || '').length + 1 // +1 for newline character
     }
 
     i = newIndex

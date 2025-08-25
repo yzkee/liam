@@ -1,12 +1,10 @@
 import { END, START, StateGraph } from '@langchain/langgraph'
 import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
-import {
-  generateUsecaseNode,
-  prepareDmlNode,
-  validateSchemaNode,
-} from '../chat/workflow/nodes'
 import { workflowAnnotation } from '../chat/workflow/shared/createAnnotations'
 import { RETRY_POLICY } from '../shared/errorHandling'
+import { generateUsecaseNode } from './generateUsecase'
+import { prepareDmlNode } from './prepareDml'
+import { validateSchemaNode } from './validateSchema'
 
 /**
  * Create and configure the QA Agent subgraph for use case generation and validation

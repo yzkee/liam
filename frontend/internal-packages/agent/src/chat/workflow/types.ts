@@ -1,6 +1,6 @@
 import type { BaseMessage } from '@langchain/core/messages'
 import type { Schema } from '@liam-hq/schema'
-import type { Usecase } from '../../langchain/agents/qaGenerateUsecaseAgent/agent'
+import type { Usecase } from '../../qa-agent/generateUsecase/agent'
 import type { Repositories } from '../../repositories'
 
 export type WorkflowState = {
@@ -29,6 +29,8 @@ export type WorkflowState = {
 
   // Message saving fields
   designSessionId: string
+
+  next: string
 }
 
 /**

@@ -28,8 +28,8 @@ graph TD;
     expect(mermaid).toEqual(expectedMermaidDiagram)
   })
 
-  it('should have the same diagram in chat/workflow/README.md as the generated graph', () => {
-    const readmePath = join(__dirname, '..', 'chat', 'workflow', 'README.md')
+  it('should have the same diagram in agent/README.md as the generated graph', () => {
+    const readmePath = join(__dirname, '..', '..', 'README.md')
     const readmeContent = readFileSync(readmePath, 'utf-8')
 
     // Check that the README contains the expected Mermaid diagram

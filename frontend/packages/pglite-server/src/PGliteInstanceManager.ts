@@ -1,83 +1,7 @@
 import { PGlite } from '@electric-sql/pglite'
+import { type PgParseResult, pgParse } from '@liam-hq/schema/parser'
 import type { RawStmt } from '@pgsql/types'
-import { errAsync, okAsync, ResultAsync } from 'neverthrow'
-// pg-query-emscripten does not have types, so we need to define them ourselves
-// @ts-expect-error
-import Module from 'pg-query-emscripten'
 import type { SqlResult } from './types'
-
-// Define the type for pg-query instance
-type PgQueryInstance = {
-  parse: (sql: string) => ParseResult
-}
-
-// Cache the pg-query module instance for better performance
-let pgQueryInstance: PgQueryInstance | null = null
-
-// Initialize pg-query module once and reuse
-const getPgQueryInstance = (): ResultAsync<PgQueryInstance, Error> => {
-  if (pgQueryInstance) {
-    return okAsync(pgQueryInstance)
-  }
-
-  return ResultAsync.fromPromise(
-    new Module(),
-    (error) => new Error(`Failed to initialize pg-query module: ${error}`),
-  )
-    .andThen((instance: unknown) => {
-      // Module constructor is untyped from pg-query-emscripten
-      // Type guard function to validate the instance
-      function isPgQueryInstance(obj: unknown): obj is PgQueryInstance {
-        return (
-          obj !== null &&
-          obj !== undefined &&
-          typeof obj === 'object' &&
-          'parse' in obj &&
-          typeof obj.parse === 'function'
-        )
-      }
-
-      if (isPgQueryInstance(instance)) {
-        pgQueryInstance = instance
-        return okAsync(pgQueryInstance)
-      }
-
-      return errAsync(
-        new Error('Invalid pg-query module instance: missing parse method'),
-      )
-    })
-    .mapErr((error) => {
-      pgQueryInstance = null
-      return error
-    })
-}
-
-// Inline the parse function to avoid import issues
-const parse = async (str: string): Promise<ParseResult> => {
-  const pgQueryResult = await getPgQueryInstance()
-  if (pgQueryResult.isErr()) {
-    throw pgQueryResult.error
-  }
-  const result = pgQueryResult.value.parse(str)
-  return result
-}
-
-// NOTE: pg-query-emscripten does not have types, so we need to define them ourselves
-type ParseResult = {
-  parse_tree: {
-    version: number
-    stmts: RawStmt[]
-  }
-  stderr_buffer: string
-  error: {
-    message: string
-    funcname: string
-    filename: string
-    lineno: number
-    cursorpos: number
-    context: string
-  } | null
-}
 
 /**
  * Manages PGlite database instances with immediate cleanup after query execution
@@ -87,13 +11,15 @@ export class PGliteInstanceManager {
    * Creates a new PGlite instance for query execution
    */
   private async createInstance(): Promise<PGlite> {
-    return new PGlite()
+    return new PGlite({
+      initialMemory: 2 * 1024 * 1024 * 1024, // 2GB initial memory allocation
+    })
   }
 
   /**
    * Execute SQL query with immediate instance cleanup
    */
-  async executeQuery(_sessionId: string, sql: string): Promise<SqlResult[]> {
+  async executeQuery(sql: string): Promise<SqlResult[]> {
     const db = await this.createInstance()
     try {
       return await this.executeSql(sql, db)
@@ -108,7 +34,7 @@ export class PGliteInstanceManager {
    */
   private async executeSql(sqlText: string, db: PGlite): Promise<SqlResult[]> {
     try {
-      const parseResult = await parse(sqlText)
+      const parseResult: PgParseResult = await pgParse(sqlText)
 
       if (parseResult.error) {
         return [this.createParseErrorResult(sqlText, parseResult.error.message)]

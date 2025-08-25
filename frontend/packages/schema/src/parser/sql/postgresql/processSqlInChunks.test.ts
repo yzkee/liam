@@ -13,8 +13,8 @@ describe(processSQLInChunks, () => {
       await processSQLInChunks(input, chunkSize, callback)
 
       expect(callback).toHaveBeenCalledTimes(2)
-      expect(callback).toHaveBeenCalledWith('SELECT 1;\nSELECT 2;')
-      expect(callback).toHaveBeenCalledWith('SELECT 3;')
+      expect(callback).toHaveBeenCalledWith('SELECT 1;\nSELECT 2;', 0)
+      expect(callback).toHaveBeenCalledWith('SELECT 3;', 20)
     })
 
     it('should handle chunks correctly to avoid invalid SQL syntax', async () => {
@@ -25,8 +25,11 @@ describe(processSQLInChunks, () => {
       await processSQLInChunks(input, chunkSize, callback)
 
       expect(callback).toHaveBeenCalledTimes(2)
-      expect(callback).toHaveBeenCalledWith('SELECT 1;\nSELECT 2;\nSELECT 3;')
-      expect(callback).toHaveBeenCalledWith('SELECT 4;')
+      expect(callback).toHaveBeenCalledWith(
+        'SELECT 1;\nSELECT 2;\nSELECT 3;',
+        0,
+      )
+      expect(callback).toHaveBeenCalledWith('SELECT 4;', 30)
     })
 
     it('should handle input with no newlines correctly', async () => {
@@ -37,7 +40,7 @@ describe(processSQLInChunks, () => {
       await processSQLInChunks(input, chunkSize, callback)
 
       expect(callback).toHaveBeenCalledTimes(1)
-      expect(callback).toHaveBeenCalledWith('SELECT 1; SELECT 2; SELECT 3;')
+      expect(callback).toHaveBeenCalledWith('SELECT 1; SELECT 2; SELECT 3;', 0)
     })
 
     it('should handle empty input correctly', async () => {
@@ -120,6 +123,46 @@ SELECT 3, -- partial statement
 
       expect(errors).toEqual([])
       expect(callback).toHaveBeenCalledTimes(expectedCalls.length)
+    })
+
+    it('should correctly calculate chunk offset for CHECK constraint location correction', async () => {
+      // Regression test for CHECK constraint parsing bug where constraint.location
+      // was chunk-relative but used as absolute position in full SQL text
+      const input = `CREATE TABLE users (id INTEGER);
+CREATE TABLE design_sessions (
+  id INTEGER,
+  project_id INTEGER,
+  organization_id INTEGER
+);
+ALTER TABLE design_sessions ADD CONSTRAINT design_sessions_project_or_org_check 
+  CHECK ((project_id IS NOT NULL) OR (organization_id IS NOT NULL));`
+
+      const chunkSize = 4 // Forces multi-chunk processing to verify offset calculation
+      const actualChunkOffsets: number[] = []
+
+      const callback = vi
+        .fn()
+        .mockImplementation(async (_chunk: string, chunkOffset: number) => {
+          actualChunkOffsets.push(chunkOffset)
+          return [null, null, []]
+        })
+
+      await processSQLInChunks(input, chunkSize, callback)
+
+      // Verify chunk offsets are character-based, not line-based
+      expect(actualChunkOffsets.length).toBeGreaterThan(1)
+      expect(actualChunkOffsets[0]).toBe(0)
+
+      // Verify second chunk offset accounts for all characters + newlines
+      const lines = input.split('\n')
+      let expectedSecondOffset = 0
+      for (let i = 0; i < chunkSize && i < lines.length; i++) {
+        expectedSecondOffset += (lines[i] || '').length + 1
+      }
+
+      if (actualChunkOffsets.length > 1) {
+        expect(actualChunkOffsets[1]).toBe(expectedSecondOffset)
+      }
     })
 
     it('should correctly handle retryOffset by partially consuming chunk lines', async () => {

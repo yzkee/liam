@@ -4,7 +4,7 @@ import type {
   FunctionalRequirement,
   NonFunctionalRequirement,
 } from '@liam-hq/artifact'
-import type { Usecase } from '../../../langchain/agents/qaGenerateUsecaseAgent/agent'
+import type { Testcase } from '../../../qa-agent/generateTestcase/agent'
 import type { WorkflowState } from '../types'
 
 /**
@@ -26,7 +26,6 @@ const convertAnalyzedRequirementsToArtifact = (
 ): (FunctionalRequirement | NonFunctionalRequirement)[] => {
   const requirements: (FunctionalRequirement | NonFunctionalRequirement)[] = []
 
-  // Add functional requirements
   for (const [category, items] of Object.entries(
     analyzedRequirements.functionalRequirements,
   )) {
@@ -34,12 +33,11 @@ const convertAnalyzedRequirementsToArtifact = (
       type: 'functional',
       name: category,
       description: items, // Keep as array
-      use_cases: [], // Will be populated later if usecases exist
+      test_cases: [], // Will be populated later if testcases exist
     }
     requirements.push(functionalRequirement)
   }
 
-  // Add non-functional requirements
   for (const [category, items] of Object.entries(
     analyzedRequirements.nonFunctionalRequirements,
   )) {
@@ -57,25 +55,25 @@ const convertAnalyzedRequirementsToArtifact = (
 /**
  * Map use cases to functional requirements
  */
-const mapUseCasesToRequirements = (
-  usecase: Usecase,
+const mapTestCasesToRequirements = (
+  testcase: Testcase,
 ): { title: string; description: string; dml_operations: DmlOperation[] } => ({
-  title: usecase.title,
-  description: usecase.description,
-  dml_operations: usecase.dmlOperations, // Use the actual dmlOperations from usecase
+  title: testcase.title,
+  description: testcase.description,
+  dml_operations: testcase.dmlOperations, // Use the actual dmlOperations from testcase
 })
 
 /**
  * Merge use cases into existing requirements
  */
-const mergeUseCasesIntoRequirements = (
+const mergeTestCasesIntoRequirements = (
   requirements: (FunctionalRequirement | NonFunctionalRequirement)[],
-  usecases: Usecase[],
+  testcases: Testcase[],
 ): void => {
-  const requirementGroups = groupUsecasesByRequirement(usecases)
+  const requirementGroups = groupTestcasesByRequirement(testcases)
 
   for (const [category, data] of Object.entries(requirementGroups)) {
-    const { type, usecases: groupedUsecases, description } = data
+    const { type, testcases: groupedTestcases, description } = data
     const existingReq = requirements.find((req) => req.name === category)
 
     if (
@@ -83,10 +81,8 @@ const mergeUseCasesIntoRequirements = (
       existingReq.type === 'functional' &&
       type === 'functional'
     ) {
-      // Update existing functional requirement with use cases
-      existingReq.use_cases = groupedUsecases.map(mapUseCasesToRequirements)
+      existingReq.test_cases = groupedTestcases.map(mapTestCasesToRequirements)
     } else if (!existingReq) {
-      // Add new requirement from use cases if it doesn't exist
       if (type === 'functional') {
         const functionalRequirement: FunctionalRequirement = {
           type: 'functional',
@@ -96,7 +92,7 @@ const mergeUseCasesIntoRequirements = (
             'Functional requirement: ',
             category,
           ),
-          use_cases: groupedUsecases.map(mapUseCasesToRequirements),
+          test_cases: groupedTestcases.map(mapTestCasesToRequirements),
         }
         requirements.push(functionalRequirement)
       } else {
@@ -125,13 +121,12 @@ export const transformWorkflowStateToArtifact = (
   const businessRequirement =
     state.analyzedRequirements?.businessRequirement ?? ''
 
-  // Start with requirements from analyzedRequirements
   const requirements = state.analyzedRequirements
     ? convertAnalyzedRequirementsToArtifact(state.analyzedRequirements)
     : []
 
-  if (state.generatedUsecases && state.generatedUsecases.length > 0) {
-    mergeUseCasesIntoRequirements(requirements, state.generatedUsecases)
+  if (state.generatedTestcases && state.generatedTestcases.length > 0) {
+    mergeTestCasesIntoRequirements(requirements, state.generatedTestcases)
   }
 
   return {
@@ -145,28 +140,28 @@ export const transformWorkflowStateToArtifact = (
 /**
  * Group use cases by requirement category and type
  */
-const groupUsecasesByRequirement = (usecases: Usecase[]) => {
+const groupTestcasesByRequirement = (testcases: Testcase[]) => {
   const groups: Record<
     string,
     {
       type: 'functional' | 'non_functional'
-      usecases: Usecase[]
+      testcases: Testcase[]
       description?: string
     }
   > = {}
 
-  for (const usecase of usecases) {
-    const category = usecase.requirementCategory
+  for (const testcase of testcases) {
+    const category = testcase.requirementCategory
 
     if (!groups[category]) {
       groups[category] = {
-        type: usecase.requirementType,
-        usecases: [],
-        description: usecase.requirement, // Use the first requirement description
+        type: testcase.requirementType,
+        testcases: [],
+        description: testcase.requirement, // Use the first requirement description
       }
     }
 
-    groups[category].usecases.push(usecase)
+    groups[category].testcases.push(testcase)
   }
 
   return groups

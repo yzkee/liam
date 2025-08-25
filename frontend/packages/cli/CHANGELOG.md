@@ -1,5 +1,26 @@
 # @liam-hq/cli
 
+## 0.7.6
+
+### Patch Changes
+
+- [#3156](https://github.com/liam-hq/liam/pull/3156) - 🐛 Fixed collapsed toolbar buttons to display text properly in mobile view. / Thanks [@FunamaYukina](https://github.com/FunamaYukina)!
+- [#2936](https://github.com/liam-hq/liam/pull/2936) - - 🎨 Change the header title position to the right edge / Thanks [@kumanoayumi](https://github.com/kumanoayumi)!
+- [#3118](https://github.com/liam-hq/liam/pull/3118) - 🐛 Fix PostgreSQL CHECK constraint parsing issue that could cause incorrect parsing of constraint conditions / Thanks [@FunamaYukina](https://github.com/FunamaYukina)!
+
+## 0.7.5
+
+### Patch Changes
+
+- [#3108](https://github.com/liam-hq/liam/pull/3108) - 🐛 Fixed an issue where the last few tables in the sidebar were not visible when scrolling in schemas with 30-40 tables / Thanks [@FunamaYukina](https://github.com/FunamaYukina)!
+
+## 0.7.4
+
+### Patch Changes
+
+- [#3064](https://github.com/liam-hq/liam/pull/3064) - ✨ support selecting Toast position with useCopy / Thanks [@tnyo43](https://github.com/tnyo43)!
+- [#3105](https://github.com/liam-hq/liam/pull/3105) - 🐛 Fix ERD display failure with PostgreSQL 16.10+ pg_dump outputs / Thanks [@FunamaYukina](https://github.com/FunamaYukina)!
+
 ## 0.7.3
 
 ### Patch Changes

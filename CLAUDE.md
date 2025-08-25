@@ -94,9 +94,20 @@ For database migration and type generation workflows, see [`docs/migrationOpsCon
 - Use early returns for readability
 
 ### Code Editing
-- When modifying existing code, write the ideal state without worrying about backward compatibility
-- Don't maintain redundant code for the sake of compatibility
-- Focus on clean, optimal implementation
+- Write simple, direct code without backward compatibility concerns - update all call sites together
+```typescript
+// ❌ Bad: Optional parameter leads to conditional logic
+function saveUser(data: UserData, userId?: string) {
+  const id = userId || generateId(); // Unnecessary fallback logic
+  if (!userId) console.warn('Using generated ID') // Extra handling
+  return db.save(id, data)
+}
+
+// ✅ Good: Required parameter, update all callers
+function saveUser(data: UserData, userId: string) {
+  return db.save(userId, data) // Simple and clear
+}
+```
 
 ### Component Patterns
 - Use named exports only (no default exports)

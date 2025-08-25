@@ -1,6 +1,6 @@
 import type { BaseMessage } from '@langchain/core/messages'
 import type { Schema } from '@liam-hq/schema'
-import type { Usecase } from '../../langchain/agents/qaGenerateUsecaseAgent/agent'
+import type { Testcase } from '../../qa-agent/generateTestcase/agent'
 import type { Repositories } from '../../repositories'
 
 export type WorkflowState = {
@@ -13,14 +13,12 @@ export type WorkflowState = {
         nonFunctionalRequirements: Record<string, string[]>
       }
     | undefined
-  generatedUsecases?: Usecase[] | undefined
+  generatedTestcases?: Testcase[] | undefined
   schemaData: Schema
 
-  ddlStatements?: string | undefined
   dmlStatements?: string | undefined
 
   // DML execution results
-  dmlExecutionSuccessful?: boolean | undefined
   dmlExecutionErrors?: string | undefined
 
   // Schema update fields
@@ -31,6 +29,8 @@ export type WorkflowState = {
 
   // Message saving fields
   designSessionId: string
+
+  next: string
 }
 
 /**

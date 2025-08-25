@@ -4,7 +4,6 @@
     "outDir": "dist",
     "declaration": true,
     "target": "ES2022",
-    "moduleResolution": "node",
     "allowImportingTsExtensions": true,
     "noEmit": true
   },

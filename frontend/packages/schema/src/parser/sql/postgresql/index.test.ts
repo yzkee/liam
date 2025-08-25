@@ -25,8 +25,8 @@ describe(processor, () => {
           comment: override?.comment ?? null,
           constraints: {
             ...override?.constraints,
-            PRIMARY_id: {
-              name: 'PRIMARY_id',
+            users_pkey: {
+              name: 'users_pkey',
               type: 'PRIMARY KEY',
               columnNames: ['id'],
             },
@@ -132,8 +132,8 @@ describe(processor, () => {
             }),
           },
           constraints: {
-            UNIQUE_mention: {
-              name: 'UNIQUE_mention',
+            users_mention_key: {
+              name: 'users_mention_key',
               type: 'UNIQUE',
               columnNames: ['mention'],
             },
@@ -235,8 +235,8 @@ describe(processor, () => {
       `)
 
       expect(value.tables['posts']?.constraints).toEqual({
-        PRIMARY_id: {
-          name: 'PRIMARY_id',
+        posts_pkey: {
+          name: 'posts_pkey',
           type: 'PRIMARY KEY',
           columnNames: ['id'],
         },
@@ -272,8 +272,8 @@ describe(processor, () => {
       // We should consider migrating to PostgreSQL's standard naming convention
       // in a future major version to better reflect actual database behavior.
       expect(value.tables['posts']?.constraints).toEqual({
-        PRIMARY_id: {
-          name: 'PRIMARY_id',
+        posts_pkey: {
+          name: 'posts_pkey',
           type: 'PRIMARY KEY',
           columnNames: ['id'],
         },
@@ -298,13 +298,13 @@ describe(processor, () => {
       `)
 
       expect(value.tables['posts']?.constraints).toEqual({
-        PRIMARY_id: {
-          name: 'PRIMARY_id',
+        posts_pkey: {
+          name: 'posts_pkey',
           type: 'PRIMARY KEY',
           columnNames: ['id'],
         },
-        UNIQUE_user_id: {
-          name: 'UNIQUE_user_id',
+        posts_user_id_key: {
+          name: 'posts_user_id_key',
           type: 'UNIQUE',
           columnNames: ['user_id'],
         },
@@ -330,8 +330,8 @@ describe(processor, () => {
       `)
 
       expect(value.tables['products']?.constraints).toEqual({
-        PRIMARY_id: {
-          name: 'PRIMARY_id',
+        products_pkey: {
+          name: 'products_pkey',
           type: 'PRIMARY KEY',
           columnNames: ['id'],
         },
@@ -373,8 +373,8 @@ describe(processor, () => {
       `)
 
       expect(value.tables['employees']?.constraints).toEqual({
-        PRIMARY_id: {
-          name: 'PRIMARY_id',
+        employees_pkey: {
+          name: 'employees_pkey',
           type: 'PRIMARY KEY',
           columnNames: ['id'],
         },
@@ -424,8 +424,8 @@ describe(processor, () => {
       `)
 
       expect(value.tables['posts']?.constraints).toEqual({
-        PRIMARY_id: {
-          name: 'PRIMARY_id',
+        posts_pkey: {
+          name: 'posts_pkey',
           type: 'PRIMARY KEY',
           columnNames: ['id'],
         },
@@ -453,13 +453,13 @@ describe(processor, () => {
       `)
 
       expect(value.tables['posts']?.constraints).toEqual({
-        PRIMARY_id: {
-          name: 'PRIMARY_id',
+        posts_pkey: {
+          name: 'posts_pkey',
           type: 'PRIMARY KEY',
           columnNames: ['id'],
         },
-        UNIQUE_user_id: {
-          name: 'UNIQUE_user_id',
+        posts_user_id_key: {
+          name: 'posts_user_id_key',
           type: 'UNIQUE',
           columnNames: ['user_id'],
         },
@@ -487,8 +487,8 @@ describe(processor, () => {
       `)
 
       expect(value.tables['posts']?.constraints).toEqual({
-        PRIMARY_id: {
-          name: 'PRIMARY_id',
+        posts_pkey: {
+          name: 'posts_pkey',
           type: 'PRIMARY KEY',
           columnNames: ['id'],
         },
@@ -517,8 +517,8 @@ describe(processor, () => {
       `)
 
       expect(value.tables['products']?.constraints).toEqual({
-        PRIMARY_id: {
-          name: 'PRIMARY_id',
+        products_pkey: {
+          name: 'products_pkey',
           type: 'PRIMARY KEY',
           columnNames: ['id'],
         },
@@ -543,6 +543,33 @@ describe(processor, () => {
       ]
 
       expect(result).toEqual({ value, errors })
+    })
+
+    it('should ignore \\restrict and \\unrestrict lines from PostgreSQL 16.10+', async () => {
+      const { value, errors } = await processor(/* sql */ `--
+-- PostgreSQL database dump
+--
+
+\\restrict GNe5kMfiI0ANWitVE3BZ0HVlF41EznPoORQML2l8w8Tg2gLdbf9IxWY2UPYdYuN
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+
+CREATE TABLE users (
+  id BIGSERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL
+);
+
+CREATE TYPE status AS ENUM ('active', 'inactive');
+
+\\unrestrict GNe5kMfiI0ANWitVE3BZ0HVlF41EznPoORQML2l8w8Tg2gLdbf9IxWY2UPYdYuN`)
+
+      expect(errors).toEqual([])
+      expect(value.tables['users']).toBeDefined()
+      expect(value.tables['users']?.columns['id']).toBeDefined()
+      expect(value.tables['users']?.columns['name']).toBeDefined()
+      expect(value.enums['status']).toBeDefined()
+      expect(value.enums['status']?.values).toEqual(['active', 'inactive'])
     })
   })
 
@@ -643,8 +670,8 @@ describe(processor, () => {
       // Currently this will fail because foreign keys only support single columns
       // The expected behavior would be:
       expect(value.tables['stores']?.constraints).toEqual({
-        PRIMARY_store_id: {
-          name: 'PRIMARY_store_id',
+        stores_pkey: {
+          name: 'stores_pkey',
           type: 'PRIMARY KEY',
           columnNames: ['store_id'],
         },
@@ -660,8 +687,8 @@ describe(processor, () => {
       })
 
       expect(value.tables['store_employees']?.constraints).toEqual({
-        PRIMARY_employee_id: {
-          name: 'PRIMARY_employee_id',
+        store_employees_pkey: {
+          name: 'store_employees_pkey',
           type: 'PRIMARY KEY',
           columnNames: ['employee_id'],
         },
@@ -700,8 +727,8 @@ describe(processor, () => {
       `)
 
       expect(value.tables['metric_aggregations']?.constraints).toEqual({
-        PRIMARY_agg_id: {
-          name: 'PRIMARY_agg_id',
+        metric_aggregations_pkey: {
+          name: 'metric_aggregations_pkey',
           type: 'PRIMARY KEY',
           columnNames: ['agg_id'],
         },
@@ -761,8 +788,8 @@ describe(processor, () => {
 
       // Expected: Both foreign key constraints should be parsed correctly
       expect(value.tables['page_views']?.constraints).toEqual({
-        PRIMARY_view_id: {
-          name: 'PRIMARY_view_id',
+        page_views_pkey: {
+          name: 'page_views_pkey',
           type: 'PRIMARY KEY',
           columnNames: ['view_id'],
         },
@@ -778,8 +805,8 @@ describe(processor, () => {
       })
 
       expect(value.tables['products']?.constraints).toEqual({
-        PRIMARY_product_id: {
-          name: 'PRIMARY_product_id',
+        products_pkey: {
+          name: 'products_pkey',
           type: 'PRIMARY KEY',
           columnNames: ['product_id'],
         },
@@ -990,6 +1017,106 @@ describe(processor, () => {
           comment: null,
         },
       })
+    })
+
+    it('should correctly parse schema-qualified enum types in column definitions', async () => {
+      const { value } = await processor(/* sql */ `
+        CREATE TYPE public.user_status AS ENUM ('active', 'inactive', 'pending');
+
+        CREATE TABLE users (
+          id BIGSERIAL PRIMARY KEY,
+          status public.user_status NOT NULL,
+          name TEXT NOT NULL
+        );
+      `)
+
+      // The enum definition should strip the schema prefix and use only the type name
+      expect(value.enums).toEqual({
+        user_status: {
+          name: 'user_status',
+          values: ['active', 'inactive', 'pending'],
+          comment: null,
+        },
+      })
+
+      // Column type should strip the schema prefix and use only the type name
+      expect(value.tables['users']?.columns['status']?.type).toBe('user_status')
+    })
+
+    it('should handle quoted schema-qualified enum types', async () => {
+      const { value } = await processor(/* sql */ `
+        CREATE TYPE "public"."user_status" AS ENUM ('active', 'inactive', 'pending');
+
+        CREATE TABLE IF NOT EXISTS "public"."users" (
+          "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+          "status" "public"."user_status" DEFAULT 'active'::"public"."user_status" NOT NULL,
+          "name" TEXT NOT NULL
+        );
+      `)
+
+      // The enum definition should strip the schema prefix and use only the type name
+      expect(value.enums).toEqual({
+        user_status: {
+          name: 'user_status',
+          values: ['active', 'inactive', 'pending'],
+          comment: null,
+        },
+      })
+
+      // Column type should strip the schema prefix and use only the type name even when quoted
+      expect(value.tables['users']?.columns['status']?.type).toBe('user_status')
+    })
+
+    it('should handle COMMENT ON TYPE with schema-qualified enum (unquoted)', async () => {
+      const { value } = await processor(/* sql */ `
+        CREATE TYPE public.priority_level AS ENUM ('low', 'medium', 'high');
+        COMMENT ON TYPE public.priority_level IS 'Task priority levels';
+
+        CREATE TABLE tasks (
+          id BIGSERIAL PRIMARY KEY,
+          priority public.priority_level NOT NULL
+        );
+      `)
+
+      // The enum should have the comment attached
+      expect(value.enums).toEqual({
+        priority_level: {
+          name: 'priority_level',
+          values: ['low', 'medium', 'high'],
+          comment: 'Task priority levels',
+        },
+      })
+
+      // Column type should strip the schema prefix
+      expect(value.tables['tasks']?.columns['priority']?.type).toBe(
+        'priority_level',
+      )
+    })
+
+    it('should handle COMMENT ON TYPE with schema-qualified enum (quoted)', async () => {
+      const { value } = await processor(/* sql */ `
+        CREATE TYPE "public"."TaskStatus" AS ENUM ('todo', 'in_progress', 'done');
+        COMMENT ON TYPE "public"."TaskStatus" IS 'Available task statuses';
+
+        CREATE TABLE projects (
+          id uuid PRIMARY KEY,
+          status "public"."TaskStatus" DEFAULT 'todo'
+        );
+      `)
+
+      // The enum should have the comment attached despite quoted schema qualification
+      expect(value.enums).toEqual({
+        TaskStatus: {
+          name: 'TaskStatus',
+          values: ['todo', 'in_progress', 'done'],
+          comment: 'Available task statuses',
+        },
+      })
+
+      // Column type should strip the schema prefix
+      expect(value.tables['projects']?.columns['status']?.type).toBe(
+        'TaskStatus',
+      )
     })
   })
 })

@@ -13,6 +13,10 @@ export const mergeSchemas = (target: Schema, source: Schema) => {
         ...target.tables[tableName]?.indexes,
         ...table.indexes,
       },
+      constraints: {
+        ...target.tables[tableName]?.constraints,
+        ...table.constraints,
+      },
     }
   }
 

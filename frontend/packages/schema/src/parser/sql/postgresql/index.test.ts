@@ -25,8 +25,8 @@ describe(processor, () => {
           comment: override?.comment ?? null,
           constraints: {
             ...override?.constraints,
-            PRIMARY_id: {
-              name: 'PRIMARY_id',
+            users_pkey: {
+              name: 'users_pkey',
               type: 'PRIMARY KEY',
               columnNames: ['id'],
             },
@@ -132,8 +132,8 @@ describe(processor, () => {
             }),
           },
           constraints: {
-            UNIQUE_mention: {
-              name: 'UNIQUE_mention',
+            users_mention_key: {
+              name: 'users_mention_key',
               type: 'UNIQUE',
               columnNames: ['mention'],
             },
@@ -235,8 +235,8 @@ describe(processor, () => {
       `)
 
       expect(value.tables['posts']?.constraints).toEqual({
-        PRIMARY_id: {
-          name: 'PRIMARY_id',
+        posts_pkey: {
+          name: 'posts_pkey',
           type: 'PRIMARY KEY',
           columnNames: ['id'],
         },
@@ -272,8 +272,8 @@ describe(processor, () => {
       // We should consider migrating to PostgreSQL's standard naming convention
       // in a future major version to better reflect actual database behavior.
       expect(value.tables['posts']?.constraints).toEqual({
-        PRIMARY_id: {
-          name: 'PRIMARY_id',
+        posts_pkey: {
+          name: 'posts_pkey',
           type: 'PRIMARY KEY',
           columnNames: ['id'],
         },
@@ -298,13 +298,13 @@ describe(processor, () => {
       `)
 
       expect(value.tables['posts']?.constraints).toEqual({
-        PRIMARY_id: {
-          name: 'PRIMARY_id',
+        posts_pkey: {
+          name: 'posts_pkey',
           type: 'PRIMARY KEY',
           columnNames: ['id'],
         },
-        UNIQUE_user_id: {
-          name: 'UNIQUE_user_id',
+        posts_user_id_key: {
+          name: 'posts_user_id_key',
           type: 'UNIQUE',
           columnNames: ['user_id'],
         },
@@ -330,8 +330,8 @@ describe(processor, () => {
       `)
 
       expect(value.tables['products']?.constraints).toEqual({
-        PRIMARY_id: {
-          name: 'PRIMARY_id',
+        products_pkey: {
+          name: 'products_pkey',
           type: 'PRIMARY KEY',
           columnNames: ['id'],
         },
@@ -373,8 +373,8 @@ describe(processor, () => {
       `)
 
       expect(value.tables['employees']?.constraints).toEqual({
-        PRIMARY_id: {
-          name: 'PRIMARY_id',
+        employees_pkey: {
+          name: 'employees_pkey',
           type: 'PRIMARY KEY',
           columnNames: ['id'],
         },
@@ -424,8 +424,8 @@ describe(processor, () => {
       `)
 
       expect(value.tables['posts']?.constraints).toEqual({
-        PRIMARY_id: {
-          name: 'PRIMARY_id',
+        posts_pkey: {
+          name: 'posts_pkey',
           type: 'PRIMARY KEY',
           columnNames: ['id'],
         },
@@ -453,13 +453,13 @@ describe(processor, () => {
       `)
 
       expect(value.tables['posts']?.constraints).toEqual({
-        PRIMARY_id: {
-          name: 'PRIMARY_id',
+        posts_pkey: {
+          name: 'posts_pkey',
           type: 'PRIMARY KEY',
           columnNames: ['id'],
         },
-        UNIQUE_user_id: {
-          name: 'UNIQUE_user_id',
+        posts_user_id_key: {
+          name: 'posts_user_id_key',
           type: 'UNIQUE',
           columnNames: ['user_id'],
         },
@@ -487,8 +487,8 @@ describe(processor, () => {
       `)
 
       expect(value.tables['posts']?.constraints).toEqual({
-        PRIMARY_id: {
-          name: 'PRIMARY_id',
+        posts_pkey: {
+          name: 'posts_pkey',
           type: 'PRIMARY KEY',
           columnNames: ['id'],
         },
@@ -517,8 +517,8 @@ describe(processor, () => {
       `)
 
       expect(value.tables['products']?.constraints).toEqual({
-        PRIMARY_id: {
-          name: 'PRIMARY_id',
+        products_pkey: {
+          name: 'products_pkey',
           type: 'PRIMARY KEY',
           columnNames: ['id'],
         },
@@ -670,8 +670,8 @@ CREATE TYPE status AS ENUM ('active', 'inactive');
       // Currently this will fail because foreign keys only support single columns
       // The expected behavior would be:
       expect(value.tables['stores']?.constraints).toEqual({
-        PRIMARY_store_id: {
-          name: 'PRIMARY_store_id',
+        stores_pkey: {
+          name: 'stores_pkey',
           type: 'PRIMARY KEY',
           columnNames: ['store_id'],
         },
@@ -687,8 +687,8 @@ CREATE TYPE status AS ENUM ('active', 'inactive');
       })
 
       expect(value.tables['store_employees']?.constraints).toEqual({
-        PRIMARY_employee_id: {
-          name: 'PRIMARY_employee_id',
+        store_employees_pkey: {
+          name: 'store_employees_pkey',
           type: 'PRIMARY KEY',
           columnNames: ['employee_id'],
         },
@@ -727,8 +727,8 @@ CREATE TYPE status AS ENUM ('active', 'inactive');
       `)
 
       expect(value.tables['metric_aggregations']?.constraints).toEqual({
-        PRIMARY_agg_id: {
-          name: 'PRIMARY_agg_id',
+        metric_aggregations_pkey: {
+          name: 'metric_aggregations_pkey',
           type: 'PRIMARY KEY',
           columnNames: ['agg_id'],
         },
@@ -788,8 +788,8 @@ CREATE TYPE status AS ENUM ('active', 'inactive');
 
       // Expected: Both foreign key constraints should be parsed correctly
       expect(value.tables['page_views']?.constraints).toEqual({
-        PRIMARY_view_id: {
-          name: 'PRIMARY_view_id',
+        page_views_pkey: {
+          name: 'page_views_pkey',
           type: 'PRIMARY KEY',
           columnNames: ['view_id'],
         },
@@ -805,8 +805,8 @@ CREATE TYPE status AS ENUM ('active', 'inactive');
       })
 
       expect(value.tables['products']?.constraints).toEqual({
-        PRIMARY_product_id: {
-          name: 'PRIMARY_product_id',
+        products_pkey: {
+          name: 'products_pkey',
           type: 'PRIMARY KEY',
           columnNames: ['product_id'],
         },

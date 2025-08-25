@@ -459,7 +459,8 @@ export const convertToSchema = (
     }
 
     if (isPrimaryKey(colDef.constraints)) {
-      const constraintName = `PRIMARY_${columnName}`
+      // Use PostgreSQL's default naming convention for primary key constraints
+      const constraintName = `${tableName}_pkey`
       constraints.push({
         name: constraintName,
         type: 'PRIMARY KEY',
@@ -469,7 +470,8 @@ export const convertToSchema = (
 
     // Create UNIQUE constraint if column has unique constraint but is not primary key
     if (isUnique(colDef.constraints) && !isPrimaryKey(colDef.constraints)) {
-      const constraintName = `UNIQUE_${columnName}`
+      // Use PostgreSQL's default naming convention for unique constraints
+      const constraintName = `${tableName}_${columnName}_key`
       constraints.push({
         name: constraintName,
         type: 'UNIQUE',

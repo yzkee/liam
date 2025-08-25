@@ -16,6 +16,7 @@ import {
   ModalPortal,
   ModalRoot,
   ModalTitle,
+  XIcon,
 } from '@liam-hq/ui'
 import { type FC, useState } from 'react'
 import { usePublicShareServerAction } from '@/hooks/usePublicShareServerAction'
@@ -82,7 +83,7 @@ export const ShareDialog: FC<Props> = ({
                 onClick={onClose}
                 aria-label="Close"
               >
-                ×
+                <XIcon size={16} />
               </button>
             </div>
 

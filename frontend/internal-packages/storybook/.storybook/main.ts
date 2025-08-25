@@ -37,12 +37,6 @@ const config: StorybookConfig = {
       config.resolve.alias = {
         ...config.resolve.alias,
         '@': path.resolve(__dirname, '../../../apps/app'),
-        // Mock VersionMessage component to avoid Supabase dependency
-        '../../../apps/app/components/SessionDetailPage/components/Chat/components/TimelineItem/components/VersionMessage/VersionMessage':
-          path.resolve(
-            __dirname,
-            '../../../apps/app/components/SessionDetailPage/components/Chat/components/TimelineItem/components/VersionMessage/VersionMessage.mock.tsx',
-          ),
       }
 
       if (!config.resolve.plugins) {

@@ -1,7 +1,7 @@
 'use client'
 
-import { type ChangeEvent, type FC, useCallback, useState } from 'react'
 import { Button, Input } from '@liam-hq/ui'
+import { type ChangeEvent, type FC, useCallback, useState } from 'react'
 import styles from './LoginPage.module.css'
 import { loginByEmail } from './services/loginByEmail'
 

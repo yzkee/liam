@@ -2,4 +2,4 @@
 "@liam-hq/schema": patch
 ---
 
-🐛 Fix PostgreSQL CHECK constraint parsing with chunk offset correction to prevent malformed constraint details.
+🐛 Fix PostgreSQL CHECK constraint parsing issue that could cause incorrect parsing of constraint conditions

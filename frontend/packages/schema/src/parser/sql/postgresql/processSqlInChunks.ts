@@ -180,7 +180,7 @@ async function handleRetry(
   chunkOffset: number,
   callback: (
     chunk: string,
-    chunkOffset?: number,
+    chunkOffset: number,
   ) => Promise<[number | null, number | null, ProcessError[]]>,
 ): Promise<{
   newChunkSize: number
@@ -243,7 +243,7 @@ async function processPosition(
   chunkOffset: number,
   callback: (
     chunk: string,
-    chunkOffset?: number,
+    chunkOffset: number,
   ) => Promise<[number | null, number | null, ProcessError[]]>,
 ): Promise<{
   newIndex: number
@@ -296,7 +296,7 @@ export const processSQLInChunks = async (
   chunkSize: number,
   callback: (
     chunk: string,
-    chunkOffset?: number,
+    chunkOffset: number,
   ) => Promise<[number | null, number | null, ProcessError[]]>,
 ): Promise<ProcessError[]> => {
   if (sqlInput === '') return []

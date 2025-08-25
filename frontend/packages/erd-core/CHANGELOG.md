@@ -1,5 +1,12 @@
 # @liam-hq/erd-core
 
+## 0.6.4
+
+### Patch Changes
+
+- [#3156](https://github.com/liam-hq/liam/pull/3156) - 🐛 Fixed collapsed toolbar buttons to display text properly in mobile view. / Thanks [@FunamaYukina](https://github.com/FunamaYukina)!
+- [#2936](https://github.com/liam-hq/liam/pull/2936) - - 🎨 Change the header title position to the right edge / Thanks [@kumanoayumi](https://github.com/kumanoayumi)!
+
 ## 0.6.3
 
 ### Patch Changes

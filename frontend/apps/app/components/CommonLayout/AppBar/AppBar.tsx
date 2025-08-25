@@ -21,7 +21,6 @@ export const AppBar: FC<Props> = async ({
   const avatarUrl = authUser.user?.user_metadata?.avatar_url
   return (
     <BaseAppBar
-      className={styles.customAppBar}
       leftContent={
         currentProjectId && (
           <div className={styles.breadcrumbs}>

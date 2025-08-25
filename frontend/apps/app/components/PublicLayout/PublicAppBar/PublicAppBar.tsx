@@ -5,7 +5,6 @@ import styles from './PublicAppBar.module.css'
 export const PublicAppBar: FC = () => {
   return (
     <BaseAppBar
-      className={styles.customPublicAppBar}
       leftContent={
         <div className={styles.publicBadge}>
           <Globe className={styles.icon} aria-hidden="true" />

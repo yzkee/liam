@@ -26,7 +26,6 @@ type UsecaseDmlExecutionResult = {
  * Combines DDL and usecase-specific DML into single execution units
  */
 async function executeDmlOperationsByUsecase(
-  sessionId: string,
   ddlStatements: string,
   usecases: Usecase[],
 ): Promise<UsecaseDmlExecutionResult[]> {
@@ -37,10 +36,8 @@ async function executeDmlOperationsByUsecase(
       continue
     }
 
-    // Build combined SQL for this usecase
     const sqlParts = []
 
-    // Only include DDL if it exists
     if (ddlStatements.trim()) {
       sqlParts.push('-- DDL Statements', ddlStatements, '')
     }
@@ -60,14 +57,13 @@ async function executeDmlOperationsByUsecase(
 
     const startTime = new Date()
     const executionResult = await ResultAsync.fromPromise(
-      executeQuery(sessionId, combinedSql),
+      executeQuery(combinedSql),
       (error) => new Error(String(error)),
     )
 
     if (executionResult.isOk()) {
       const sqlResults = executionResult.value
 
-      // Check if all operations succeeded
       const hasErrors = sqlResults.some((result) => !result.success)
       const errors = sqlResults
         .filter((result) => !result.success)
@@ -117,7 +113,6 @@ function updateWorkflowStateWithUsecaseResults(
     return state
   }
 
-  // Create a map of usecase results for quick lookup
   const resultMap = new Map(results.map((result) => [result.useCaseId, result]))
 
   const updatedUsecases = state.generatedUsecases.map((usecase) => {
@@ -173,7 +168,6 @@ export async function validateSchemaNode(
   const { repositories } = configurableResult.value
 
   const ddlStatements = generateDdlFromSchema(state.schemaData)
-  // Check if we have any statements to execute
   const hasDdl = ddlStatements?.trim()
   const hasUsecases =
     state.generatedUsecases && state.generatedUsecases.length > 0
@@ -198,24 +192,18 @@ export async function validateSchemaNode(
 
   // Execute DDL first if present
   if (hasDdl && ddlStatements) {
-    const ddlResults: SqlResult[] = await executeQuery(
-      state.designSessionId,
-      ddlStatements,
-    )
+    const ddlResults: SqlResult[] = await executeQuery(ddlStatements)
     allResults = [...ddlResults]
   }
 
-  // Execute DML operations by usecase if present
   let usecaseExecutionResults: UsecaseDmlExecutionResult[] = []
   let updatedState = state
   if (hasDml && state.generatedUsecases) {
     usecaseExecutionResults = await executeDmlOperationsByUsecase(
-      state.designSessionId,
       ddlStatements || '',
       state.generatedUsecases,
     )
 
-    // Convert usecase results to SqlResult format for logging
     const dmlSqlResults: SqlResult[] = usecaseExecutionResults.map(
       (result) => ({
         sql: `UseCase: ${result.useCaseTitle}`,
@@ -232,13 +220,11 @@ export async function validateSchemaNode(
     )
     allResults = [...allResults, ...dmlSqlResults]
 
-    // Update workflow state with execution results
     updatedState = updateWorkflowStateWithUsecaseResults(
       state,
       usecaseExecutionResults,
     )
 
-    // Update artifact with the new state
     const artifact = transformWorkflowStateToArtifact(updatedState)
     await repositories.schema.upsertArtifact({
       designSessionId: updatedState.designSessionId,
@@ -267,7 +253,6 @@ export async function validateSchemaNode(
       validationMessage =
         'Database validation complete: all checks passed successfully'
     } else {
-      // Build detailed error message with usecase information
       const errorDetails = usecaseExecutionResults
         .filter((result) => !result.success)
         .map((result) => {
@@ -279,7 +264,6 @@ export async function validateSchemaNode(
       validationMessage = `Database validation found ${errorCount} issues. Please fix the following errors:\n\n${errorDetails}`
     }
 
-    // Create AIMessage for validation result
     const validationAIMessage = new AIMessage({
       content: validationMessage,
       name: 'SchemaValidator',
@@ -294,14 +278,12 @@ export async function validateSchemaNode(
       assistantRole,
     })
 
-    // Add synced message to state
     updatedState = {
       ...updatedState,
       messages: [...state.messages, syncedMessage],
     }
   }
 
-  // Check for execution errors
   const hasErrors = results.some((result: SqlResult) => !result.success)
 
   if (hasErrors) {
@@ -319,8 +301,5 @@ export async function validateSchemaNode(
     }
   }
 
-  return {
-    ...updatedState,
-    dmlExecutionSuccessful: true,
-  }
+  return updatedState
 }

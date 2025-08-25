@@ -50,23 +50,9 @@ export const createGraph = (checkpointer?: BaseCheckpointSaver) => {
     .addEdge(START, 'pmAgent')
     .addEdge('pmAgent', 'dbAgent')
     .addEdge('dbAgent', 'qaAgent')
+    // TODO: Temporarily removed conditional edges to prevent infinite loop when errors route back to dbAgent
+    .addEdge('qaAgent', 'finalizeArtifacts')
     .addEdge('finalizeArtifacts', END)
-
-    // Conditional edges for validation results
-    .addConditionalEdges(
-      'qaAgent',
-      (state) => {
-        // success → finalizeArtifacts
-        // dml error or test fail → dbAgent
-        return state.dmlExecutionSuccessful === false
-          ? 'dbAgent'
-          : 'finalizeArtifacts'
-      },
-      {
-        dbAgent: 'dbAgent',
-        finalizeArtifacts: 'finalizeArtifacts',
-      },
-    )
 
   return checkpointer ? graph.compile({ checkpointer }) : graph.compile()
 }

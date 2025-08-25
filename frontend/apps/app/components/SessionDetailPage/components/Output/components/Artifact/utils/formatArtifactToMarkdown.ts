@@ -105,7 +105,7 @@ export function formatArtifactToMarkdown(artifact: Artifact): string {
 
       if (req.type === 'functional' && req.use_cases.length > 0) {
         sections.push('')
-        sections.push('**Use Cases:**')
+        sections.push('**Test Cases:**')
         sections.push('')
 
         req.use_cases.forEach((useCase, ucIndex) => {

@@ -153,7 +153,7 @@ export OPENAI_API_KEY="your-api-key"
 3. **Generate**: `pnpm --filter @liam-hq/schema-bench executeLiamDB`
 4. **Evaluate**: `pnpm --filter @liam-hq/schema-bench evaluateSchema`
 
-## Use Cases
+## Test Cases
 
 - **Model Comparison**: Compare OpenAI vs LiamDB schema generation
 - **Quality Assurance**: Validate schema generation accuracy

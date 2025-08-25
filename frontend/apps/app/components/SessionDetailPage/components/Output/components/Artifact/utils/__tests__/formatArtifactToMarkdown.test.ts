@@ -244,7 +244,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
         - The company owns multiple aircraft, each with an aircraft number, model, and seating capacity. The aircraft number must be unique, and seating capacity must be an integer greater than 0.
 
 
-        **Use Cases:**
+        **Test Cases:**
 
         #### 1.1. Aircraft Registration and Update
 
@@ -308,7 +308,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
         - Flight information includes flight name, departure time, arrival time, origin, destination, aircraft number, captain ID, first officer ID, start time, and end time. Origin and destination cannot be the same, and scheduled times must satisfy departure time < arrival time.
 
 
-        **Use Cases:**
+        **Test Cases:**
 
         #### 2.1. Flight Schedule Creation
 
@@ -351,7 +351,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
         - Each flight is operated by a captain and first officer, each with an ID, name, and phone number. Pilot IDs must be unique, and for flights, the captain ID and first officer ID cannot be the same person.
 
 
-        **Use Cases:**
+        **Test Cases:**
 
         #### 3.1. Pilot (Captain/First Officer) Registration
 
@@ -381,7 +381,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
         - Enforce referential integrity through foreign keys and implement various business rules through CHECK constraints. Protect related data with ON DELETE RESTRICT during deletions.
 
 
-        **Use Cases:**
+        **Test Cases:**
 
         #### 4.1. Referential Integrity Verification
 

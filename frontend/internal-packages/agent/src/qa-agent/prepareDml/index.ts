@@ -84,7 +84,7 @@ export async function prepareDmlNode(
     await logAssistantMessage(
       state,
       repositories,
-      'Test scenarios not available. Cannot create sample data without use cases...',
+      'Test scenarios not available. Cannot create sample data without test cases...',
       assistantRole,
     )
     return state

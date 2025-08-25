@@ -31,13 +31,13 @@ export const WithCustomText: Story = {
 
 export const ToUseCasesSection: Story = {
   args: {
-    text: 'View Use Cases',
-    ariaLabel: 'Navigate to use cases tab',
+    text: 'View Test Cases',
+    ariaLabel: 'Navigate to test cases tab',
   },
   parameters: {
     docs: {
       description: {
-        story: 'Link to navigate to Use Cases section in Artifact tab',
+        story: 'Link to navigate to Test Cases section in Artifact tab',
       },
     },
   },

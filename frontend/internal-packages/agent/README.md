@@ -194,13 +194,13 @@ graph TD;
 ### QA Agent Components
 
 #### 1. generateUsecase Node
-- **Purpose**: Creates comprehensive use cases for testing database schema functionality
+- **Purpose**: Creates comprehensive test cases for testing database schema functionality
 - **Performed by**: QA Generate Usecase Agent with GPT-4
 - **Retry Policy**: maxAttempts: 3 (internal to subgraph)
 - **Timeline Sync**: Automatic message synchronization
 
 #### 2. prepareDML Node
-- **Purpose**: Generates DML statements based on use cases for schema validation
+- **Purpose**: Generates DML statements based on test cases for schema validation
 - **Performed by**: DML Generation Agent
 - **Retry Policy**: maxAttempts: 3 (internal to subgraph)
 - **Output**: Structured DML operations for testing

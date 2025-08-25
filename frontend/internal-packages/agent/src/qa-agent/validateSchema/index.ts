@@ -43,7 +43,7 @@ async function executeDmlOperationsByUsecase(
     }
 
     sqlParts.push(
-      `-- UseCase: ${usecase.id}`,
+      `-- Test Case: ${usecase.id}`,
       `-- ${usecase.title}`,
       ...usecase.dmlOperations.map((op) => {
         const header = op.description
@@ -127,8 +127,8 @@ function updateWorkflowStateWithUsecaseResults(
         executed_at: usecaseResult.executedAt.toISOString(),
         success: usecaseResult.success,
         result_summary: usecaseResult.success
-          ? `UseCase "${usecaseResult.useCaseTitle}" operations completed successfully`
-          : `UseCase "${usecaseResult.useCaseTitle}" failed: ${usecaseResult.errors?.join('; ')}`,
+          ? `Test Case "${usecaseResult.useCaseTitle}" operations completed successfully`
+          : `Test Case "${usecaseResult.useCaseTitle}" failed: ${usecaseResult.errors?.join('; ')}`,
       }
 
       return {
@@ -206,7 +206,7 @@ export async function validateSchemaNode(
 
     const dmlSqlResults: SqlResult[] = usecaseExecutionResults.map(
       (result) => ({
-        sql: `UseCase: ${result.useCaseTitle}`,
+        sql: `Test Case: ${result.useCaseTitle}`,
         result: result.success
           ? { executedOperations: result.executedOperations }
           : { errors: result.errors },

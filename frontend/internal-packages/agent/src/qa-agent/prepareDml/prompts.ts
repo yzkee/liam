@@ -98,7 +98,7 @@ const DML_GENERATION_HUMAN_MESSAGE_TEMPLATE = `
 ## Database Schema:
 {schema}
 
-## Business Requirements and Use Cases:
+## Business Requirements and Test Cases:
 {requirements}
 
 ## Previous Context:

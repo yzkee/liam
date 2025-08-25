@@ -34,21 +34,21 @@ async function saveArtifacts(
     await logAssistantMessage(
       state,
       repositories,
-      'Your use cases have been saved and are ready for implementation',
+      'Your test cases have been saved and are ready for implementation',
       assistantRole,
     )
   } else {
     await logAssistantMessage(
       state,
       repositories,
-      'Unable to save your use cases. Please try again or contact support...',
+      'Unable to save your test cases. Please try again or contact support...',
       assistantRole,
     )
   }
 }
 
 /**
- * Generate Usecase Node - QA Agent creates use cases
+ * Generate Usecase Node - QA Agent creates test cases
  * Performed by qaGenerateUsecaseAgent
  */
 export async function generateUsecaseNode(
@@ -74,7 +74,7 @@ export async function generateUsecaseNode(
 
   if (!state.analyzedRequirements) {
     const errorMessage =
-      'No analyzed requirements found. Cannot generate use cases.'
+      'No analyzed requirements found. Cannot generate test cases.'
 
     await logAssistantMessage(
       state,
@@ -116,7 +116,7 @@ export async function generateUsecaseNode(
 
       const usecaseMessage = await withTimelineItemSync(
         new AIMessage({
-          content: `Generated ${response.usecases.length} use cases for testing and validation`,
+          content: `Generated ${response.usecases.length} test cases for testing and validation`,
           name: 'QAGenerateUsecaseAgent',
         }),
         {

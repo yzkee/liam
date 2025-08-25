@@ -7,10 +7,10 @@ import { prepareDmlNode } from './prepareDml'
 import { validateSchemaNode } from './validateSchema'
 
 /**
- * Create and configure the QA Agent subgraph for use case generation and validation
+ * Create and configure the QA Agent subgraph for test case generation and validation
  *
  * The QA Agent handles the testing and validation process:
- * 1. generateUsecase - Creates use cases for testing with automatic timeline sync
+ * 1. generateUsecase - Creates test cases for testing with automatic timeline sync
  * 2. prepareDML - Generates DML statements for testing
  * 3. validateSchema - Executes DML and validates schema
  *

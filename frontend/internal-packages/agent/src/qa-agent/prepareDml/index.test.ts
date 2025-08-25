@@ -18,7 +18,7 @@ describe('prepareDmlNode', () => {
         generate: vi.fn().mockResolvedValue({
           dmlOperations: [
             {
-              useCaseId: 'test-id-1',
+              testCaseId: 'test-id-1',
               operation_type: 'INSERT',
               sql: "INSERT INTO users (id, name) VALUES (1, 'Test User')",
               description: 'Create test user',
@@ -52,7 +52,7 @@ describe('prepareDmlNode', () => {
 
   it('should return state unchanged when DDL statements are missing', async () => {
     const state = createMockState({
-      generatedUsecases: [
+      generatedTestcases: [
         {
           id: 'test-id-1',
           requirementType: 'functional',
@@ -75,7 +75,7 @@ describe('prepareDmlNode', () => {
     expect(result.dmlStatements).toBeUndefined()
   })
 
-  it('should return state unchanged when use cases are missing', async () => {
+  it('should return state unchanged when test cases are missing', async () => {
     const state = createMockState({
       schemaData: aSchema({
         tables: {
@@ -99,7 +99,7 @@ describe('prepareDmlNode', () => {
     expect(result.dmlStatements).toBeUndefined()
   })
 
-  it('should return state unchanged when use cases array is empty', async () => {
+  it('should return state unchanged when test cases array is empty', async () => {
     const state = createMockState({
       schemaData: aSchema({
         tables: {
@@ -111,7 +111,7 @@ describe('prepareDmlNode', () => {
           }),
         },
       }),
-      generatedUsecases: [],
+      generatedTestcases: [],
     })
 
     const result = await prepareDmlNode(state, {
@@ -146,7 +146,7 @@ describe('prepareDmlNode', () => {
           }),
         },
       }),
-      generatedUsecases: [
+      generatedTestcases: [
         {
           id: 'test-id-1',
           requirementType: 'functional',
@@ -182,7 +182,7 @@ describe('prepareDmlNode', () => {
           }),
         },
       }),
-      generatedUsecases: [
+      generatedTestcases: [
         {
           id: 'test-id-1',
           requirementType: 'functional',
@@ -209,9 +209,9 @@ describe('prepareDmlNode', () => {
     expect(schemaText).toContain('email: VARCHAR (not nullable)')
   })
 
-  it('should assign generated DML operations to their corresponding usecases', async () => {
+  it('should assign generated DML operations to their corresponding testcases', async () => {
     // This test verifies that prepareDmlNode generates DML operations
-    // and assigns them to the correct usecase
+    // and assigns them to the correct testcase
 
     const state = createMockState({
       schemaData: aSchema({
@@ -225,7 +225,7 @@ describe('prepareDmlNode', () => {
           }),
         },
       }),
-      generatedUsecases: [
+      generatedTestcases: [
         {
           id: 'test-id-1',
           requirementType: 'functional',
@@ -245,17 +245,17 @@ describe('prepareDmlNode', () => {
       },
     })
 
-    // Verify that DML operations were generated and assigned to the usecase
-    expect(result.generatedUsecases).toBeDefined()
-    const firstUsecase = result.generatedUsecases?.[0]
-    expect(firstUsecase).toBeDefined()
-    expect(firstUsecase?.dmlOperations).toBeDefined()
-    expect(firstUsecase?.dmlOperations?.length).toBeGreaterThan(0)
+    // Verify that DML operations were generated and assigned to the testcase
+    expect(result.generatedTestcases).toBeDefined()
+    const firstTestcase = result.generatedTestcases?.[0]
+    expect(firstTestcase).toBeDefined()
+    expect(firstTestcase?.dmlOperations).toBeDefined()
+    expect(firstTestcase?.dmlOperations?.length).toBeGreaterThan(0)
 
-    // Verify the DML operation has the correct structure and references the correct usecase
-    const dmlOp = firstUsecase?.dmlOperations?.[0]
+    // Verify the DML operation has the correct structure and references the correct testcase
+    const dmlOp = firstTestcase?.dmlOperations?.[0]
     expect(dmlOp).toMatchObject({
-      useCaseId: 'test-id-1', // References the corresponding usecase
+      testCaseId: 'test-id-1', // References the corresponding testcase
       operation_type: 'INSERT',
       sql: expect.stringContaining('INSERT INTO users'),
       description: expect.any(String),

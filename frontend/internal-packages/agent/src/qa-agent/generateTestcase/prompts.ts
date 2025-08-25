@@ -30,7 +30,7 @@ Guidelines for Test Case Generation:
 
 Example output:
 {{
-  "usecases": [
+  "testcases": [
     {{
       "requirementType": "functional",
       "requirementCategory": "Account Management",

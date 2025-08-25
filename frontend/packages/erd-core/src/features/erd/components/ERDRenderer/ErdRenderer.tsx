@@ -19,7 +19,7 @@ import {
   useState,
 } from 'react'
 import { AppBar } from './AppBar'
-import styles from './ErdRenderer.module.css'
+import styles from './ERDRenderer.module.css'
 import '@/styles/globals.css'
 import { toggleLogEvent } from '@/features/gtm/utils'
 import { useIsTouchDevice } from '@/hooks'

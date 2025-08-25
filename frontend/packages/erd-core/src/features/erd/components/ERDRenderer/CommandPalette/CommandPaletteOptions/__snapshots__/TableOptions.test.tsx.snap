@@ -1,0 +1,176 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`snapshot test 1`] = `
+<DocumentFragment>
+  <div
+    cmdk-root=""
+    tabindex="-1"
+  >
+    <label
+      cmdk-label=""
+      for="radix-«r1o»"
+      id="radix-«r1n»"
+      style="position: absolute; width: 1px; height: 1px; padding: 0px; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0px;"
+    />
+    <div
+      cmdk-group=""
+      data-value="Tables"
+      role="presentation"
+    >
+      <div
+        aria-hidden="true"
+        cmdk-group-heading=""
+        id="radix-«r1q»"
+      >
+        Tables
+      </div>
+      <div
+        aria-labelledby="radix-«r1q»"
+        cmdk-group-items=""
+        role="group"
+      >
+        <a
+          aria-disabled="false"
+          aria-selected="false"
+          class="_item_9c4a73"
+          cmdk-item=""
+          data-disabled="false"
+          data-selected="false"
+          data-value="table|users"
+          href="?active=users"
+          id="radix-«r1r»"
+          role="option"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-table2 lucide-table-2 _itemIcon_9c4a73"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"
+            />
+          </svg>
+          <span
+            class="_itemText_9c4a73"
+          >
+            users
+          </span>
+        </a>
+        <a
+          aria-disabled="false"
+          aria-selected="false"
+          class="_item_9c4a73"
+          cmdk-item=""
+          data-disabled="false"
+          data-selected="false"
+          data-value="table|posts"
+          href="?active=posts"
+          id="radix-«r1s»"
+          role="option"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-table2 lucide-table-2 _itemIcon_9c4a73"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"
+            />
+          </svg>
+          <span
+            class="_itemText_9c4a73"
+          >
+            posts
+          </span>
+        </a>
+        <a
+          aria-disabled="false"
+          aria-selected="false"
+          class="_item_9c4a73"
+          cmdk-item=""
+          data-disabled="false"
+          data-selected="false"
+          data-value="table|follows"
+          href="?active=follows"
+          id="radix-«r1t»"
+          role="option"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-table2 lucide-table-2 _itemIcon_9c4a73"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"
+            />
+          </svg>
+          <span
+            class="_itemText_9c4a73"
+          >
+            follows
+          </span>
+        </a>
+        <a
+          aria-disabled="false"
+          aria-selected="false"
+          class="_item_9c4a73"
+          cmdk-item=""
+          data-disabled="false"
+          data-selected="false"
+          data-value="table|user_settings"
+          href="?active=user_settings"
+          id="radix-«r1u»"
+          role="option"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-table2 lucide-table-2 _itemIcon_9c4a73"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"
+            />
+          </svg>
+          <span
+            class="_itemText_9c4a73"
+          >
+            user_settings
+          </span>
+        </a>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;

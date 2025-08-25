@@ -140,3 +140,10 @@ describe('keyboard interactions', () => {
     // TODO: check if the dialog is NOT closed
   })
 })
+
+
+it('snapshot test', async () => {
+  const { asFragment } = render(<TableOptions suggestion={null} />, { wrapper })
+  
+  expect(asFragment()).toMatchSnapshot()
+})

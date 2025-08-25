@@ -1,3 +1,4 @@
+import { END } from '@langchain/langgraph'
 import { aColumn, aSchema, aTable } from '@liam-hq/schema'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { WorkflowState } from '../../chat/workflow/types'
@@ -45,6 +46,7 @@ describe('prepareDmlNode', () => {
       organizationId: 'test-org-id',
       userId: 'user-id',
       designSessionId: 'session-id',
+      next: END,
       repositories,
       ...overrides,
     }

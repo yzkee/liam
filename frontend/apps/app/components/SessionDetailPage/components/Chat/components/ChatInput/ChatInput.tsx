@@ -168,6 +168,8 @@ export const ChatInput: FC<Props> = ({
           <span className={styles.ctaText}>Sign up to use Liam</span>
           <Button
             type="button"
+            variant="solid-primary"
+            size="sm"
             className={styles.ctaButton}
             onClick={openSignUp}
           >

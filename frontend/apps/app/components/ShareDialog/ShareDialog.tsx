@@ -151,7 +151,7 @@ export const ShareDialog: FC<Props> = ({
                           sideOffset={4}
                         >
                           <DropdownMenuItem
-                            onClick={handlePrivateClick}
+                            onSelect={handlePrivateClick}
                             disabled={loading}
                             className={styles.dropdownItem}
                             data-selected={!isPublic}
@@ -163,7 +163,7 @@ export const ShareDialog: FC<Props> = ({
                             )}
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={handlePublicClick}
+                            onSelect={handlePublicClick}
                             disabled={loading}
                             className={styles.dropdownItem}
                             data-selected={isPublic}

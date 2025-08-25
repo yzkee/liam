@@ -30,7 +30,7 @@ describe('convertToSchema', () => {
 
         expect(errors).toEqual([
           new UnexpectedTokenWarningError(
-            'Failed to find balanced parentheses for CHECK constraint "test_check" at location 1090. SQL snippet: ""',
+            'Failed to find balanced parentheses for CHECK constraint "test_check"',
           ),
         ])
       }

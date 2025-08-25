@@ -199,13 +199,9 @@ const constraintToCheckConstraint = (
   const parentheses = findBalancedParentheses(rawSql, absoluteLocation)
 
   if (!parentheses) {
-    const snippetStart = Math.max(0, absoluteLocation - 20)
-    const snippetEnd = Math.min(rawSql.length, absoluteLocation + 50)
-    const sqlSnippet = rawSql.slice(snippetStart, snippetEnd)
-
     return err(
       new UnexpectedTokenWarningError(
-        `Failed to find balanced parentheses for CHECK constraint "${constraint.conname || 'unnamed'}" at location ${absoluteLocation}. SQL snippet: "${sqlSnippet}"`,
+        `Failed to find balanced parentheses for CHECK constraint "${constraint.conname || 'unnamed'}"`,
       ),
     )
   }

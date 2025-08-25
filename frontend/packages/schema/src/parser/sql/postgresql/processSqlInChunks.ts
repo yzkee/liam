@@ -53,6 +53,16 @@ function handleSuccessfulProcessing(
   Error
 > {
   if (readOffset !== null) {
+    if (readOffset === chunk.length) {
+      return ok({
+        newChunkSize: adjustedChunkSize,
+        newRetryDirection: retryDirection,
+        nextIndex: startIndex + adjustedChunkSize,
+        errors: [],
+        shouldBreak: true,
+      })
+    }
+
     const lineNumber = getLineNumber(chunk, readOffset)
     if (lineNumber === null) {
       return err(new Error('UnexpectedCondition. lineNumber === null'))

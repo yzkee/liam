@@ -24,7 +24,7 @@ import {
   Spinner,
   TableNode,
 } from './components'
-import styles from './ERDContent.module.css'
+import styles from './ErdContent.module.css'
 import { ErdContentProvider, useErdContentContext } from './ErdContentContext'
 import { useInitialAutoLayout, useQueryParamsChanged } from './hooks'
 

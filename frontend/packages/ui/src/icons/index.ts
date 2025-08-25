@@ -28,6 +28,7 @@ export {
   Fingerprint,
   GitBranch,
   GitPullRequestArrow,
+  Globe,
   Group,
   Hash,
   Info,
@@ -71,7 +72,6 @@ export * from './DiamondFillIcon'
 export * from './DiamondIcon'
 export * from './ErdIcon'
 export * from './FacebookIcon'
-export * from './GlobeIcon'
 export * from './GotoIcon'
 export * from './InfoIcon'
 export * from './TidyUpIcon'

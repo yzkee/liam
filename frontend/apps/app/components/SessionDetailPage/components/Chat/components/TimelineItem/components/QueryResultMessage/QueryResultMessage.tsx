@@ -1,6 +1,6 @@
 'use client'
 
-import type { SqlResult } from '@liam-hq/pglite-server/src/types'
+import type { SqlResult } from '@liam-hq/pglite-server'
 import { Button, ChevronDown, ChevronRight } from '@liam-hq/ui'
 import clsx from 'clsx'
 import React, { type FC, useState } from 'react'

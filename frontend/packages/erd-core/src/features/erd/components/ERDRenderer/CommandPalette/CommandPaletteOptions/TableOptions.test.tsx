@@ -141,9 +141,8 @@ describe('keyboard interactions', () => {
   })
 })
 
-
 it('snapshot test', async () => {
   const { asFragment } = render(<TableOptions suggestion={null} />, { wrapper })
-  
+
   expect(asFragment()).toMatchSnapshot()
 })

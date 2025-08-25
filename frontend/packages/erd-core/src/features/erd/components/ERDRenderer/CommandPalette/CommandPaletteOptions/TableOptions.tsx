@@ -61,11 +61,10 @@ export const TableOptions: FC<Props> = ({ suggestion }) => {
       {Object.values(schema.current.tables).map((table) => (
         <Command.Item
           key={table.name}
-          className={styles.item}
           value={getSuggestionText({ type: 'table', name: table.name })}
-          asChild
         >
           <a
+            className={styles.item}
             href={getTableLinkHref(table.name)}
             onClick={(event) => {
               // Do not call preventDefault to allow the default link behavior when ⌘ key is pressed

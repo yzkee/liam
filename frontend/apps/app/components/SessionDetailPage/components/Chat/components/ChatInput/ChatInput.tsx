@@ -2,7 +2,6 @@
 
 import type { Schema } from '@liam-hq/schema'
 import {
-  Button,
   PopoverAnchor,
   PopoverContent,
   PopoverPortal,
@@ -24,6 +23,7 @@ import { AuthModals } from '@/components/AuthModals'
 import { useAuthModal } from '@/hooks/useAuthModal'
 import { useViewMode } from '../../../../hooks/viewMode'
 import styles from './ChatInput.module.css'
+import { CtaBar } from './CtaBar'
 import {
   type MentionItem,
   MentionSuggestor,
@@ -163,20 +163,7 @@ export const ChatInput: FC<Props> = ({
 
   return (
     <div className={styles.container}>
-      {isPublic && (
-        <div className={styles.ctaBar}>
-          <span className={styles.ctaText}>Sign up to use Liam</span>
-          <Button
-            type="button"
-            variant="solid-primary"
-            size="sm"
-            className={styles.ctaButton}
-            onClick={openSignUp}
-          >
-            Sign up
-          </Button>
-        </div>
-      )}
+      {isPublic && <CtaBar onSignUpClick={openSignUp} />}
       <form
         className={clsx(
           styles.inputContainer,

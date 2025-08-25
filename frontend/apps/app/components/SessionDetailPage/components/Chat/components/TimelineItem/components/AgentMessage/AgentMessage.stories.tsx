@@ -535,7 +535,7 @@ export const PMWithRequirementsAnalyzed: Story = {
   },
 }
 
-export const QAWithUseCasesSaved: Story = {
+export const QAWithTestCasesSaved: Story = {
   args: {
     state: 'default',
     message: 'Your test cases have been saved and are ready for implementation',

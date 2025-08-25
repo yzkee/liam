@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid'
 import * as v from 'valibot'
 import { reasoningSchema } from '../../langchain/utils/schema'
 import type { Reasoning } from '../../langchain/utils/types'
-import { QA_GENERATE_USECASE_SYSTEM_MESSAGE } from './prompts'
+import { QA_GENERATE_TESTCASE_SYSTEM_MESSAGE } from './prompts'
 
 // Direct JsonSchema definition instead of using toJsonSchema
 // because the generated schema has subtle incompatibilities with withStructuredOutput
@@ -45,7 +45,7 @@ const TESTCASE_GENERATION_SCHEMA = {
   additionalProperties: false,
 }
 
-// Schema for usecase from OpenAI response (without id and dmlOperations)
+// Schema for testcase from OpenAI response (without id and dmlOperations)
 const testcaseFromApiSchema = v.object({
   requirementType: v.picklist(['functional', 'non_functional']), // Type of requirement
   requirementCategory: v.string(), // Category of the requirement
@@ -54,7 +54,7 @@ const testcaseFromApiSchema = v.object({
   description: v.string(),
 })
 
-// Complete usecase schema with id and dmlOperations (for final output)
+// Complete testcase schema with id and dmlOperations (for final output)
 const testcaseSchema = v.object({
   id: v.pipe(v.string(), v.uuid()), // UUID
   requirementType: v.picklist(['functional', 'non_functional']), // Type of requirement
@@ -113,7 +113,7 @@ export class QAGenerateTestcaseAgent {
 
   async generate(messages: BaseMessage[]): Promise<TestcaseWithReasoning> {
     const allMessages = [
-      new SystemMessage(QA_GENERATE_USECASE_SYSTEM_MESSAGE),
+      new SystemMessage(QA_GENERATE_TESTCASE_SYSTEM_MESSAGE),
       ...messages,
     ]
 

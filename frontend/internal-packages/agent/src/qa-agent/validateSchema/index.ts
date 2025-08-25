@@ -22,8 +22,8 @@ type TestcaseDmlExecutionResult = {
 }
 
 /**
- * Execute DML operations by usecase with DDL statements
- * Combines DDL and usecase-specific DML into single execution units
+ * Execute DML operations by testcase with DDL statements
+ * Combines DDL and testcase-specific DML into single execution units
  */
 async function executeDmlOperationsByTestcase(
   ddlStatements: string,
@@ -103,7 +103,7 @@ async function executeDmlOperationsByTestcase(
 }
 
 /**
- * Update workflow state with usecase-based execution results
+ * Update workflow state with testcase-based execution results
  */
 function updateWorkflowStateWithTestcaseResults(
   state: WorkflowState,

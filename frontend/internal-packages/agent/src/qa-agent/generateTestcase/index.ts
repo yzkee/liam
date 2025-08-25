@@ -95,12 +95,12 @@ export async function generateTestcaseNode(
   // This prevents the "reasoning without required following item" error
   const cleanedMessages = removeReasoningFromMessages(state.messages)
 
-  const usecaseResult = await ResultAsync.fromPromise(
+  const testcaseResult = await ResultAsync.fromPromise(
     qaAgent.generate(cleanedMessages),
     (error) => (error instanceof Error ? error : new Error(String(error))),
   )
 
-  return await usecaseResult.match(
+  return await testcaseResult.match(
     async ({ response, reasoning }) => {
       // Log reasoning summary if available
       if (reasoning?.summary && reasoning.summary.length > 0) {

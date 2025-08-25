@@ -29,7 +29,7 @@ export const WithCustomText: Story = {
   },
 }
 
-export const ToUseCasesSection: Story = {
+export const ToTestCasesSection: Story = {
   args: {
     text: 'View Test Cases',
     ariaLabel: 'Navigate to test cases tab',

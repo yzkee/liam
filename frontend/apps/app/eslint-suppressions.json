@@ -89,11 +89,6 @@
       "count": 1
     }
   },
-  "components/CommonLayout/GlobalNav/Item.module.css": {
-    "css-modules-kit/no-missing-component-file": {
-      "count": 1
-    }
-  },
   "components/CommonLayout/GlobalNav/OrganizationItem/OrganizationItem.module.css": {
     "css-modules-kit/no-unused-class-names": {
       "count": 1
@@ -305,11 +300,6 @@
   "features/projects/services/getProjectRepository.test.ts": {
     "no-throw-error/no-throw-error": {
       "count": 2
-    }
-  },
-  "features/sessions/components/GitHubSessionForm/BranchesDropdown/BranchRadioItem.module.css": {
-    "css-modules-kit/no-missing-component-file": {
-      "count": 1
     }
   },
   "features/sessions/components/GitHubSessionForm/BranchesDropdown/BranchesDropdown.module.css": {

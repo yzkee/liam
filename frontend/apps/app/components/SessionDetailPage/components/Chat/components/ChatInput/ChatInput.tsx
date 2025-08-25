@@ -2,6 +2,7 @@
 
 import type { Schema } from '@liam-hq/schema'
 import {
+  Button,
   PopoverAnchor,
   PopoverContent,
   PopoverPortal,
@@ -165,13 +166,13 @@ export const ChatInput: FC<Props> = ({
       {isPublic && (
         <div className={styles.ctaBar}>
           <span className={styles.ctaText}>Sign up to use Liam</span>
-          <button
+          <Button
             type="button"
             className={styles.ctaButton}
             onClick={openSignUp}
           >
             Sign up
-          </button>
+          </Button>
         </div>
       )}
       <form

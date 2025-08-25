@@ -71,6 +71,7 @@ export const parseDesignProcessArgs = (): {
  * Parse command line arguments for QA agent (without session-id)
  */
 export const parseQaAgentArgs = (): { prompt?: string } => {
+  // skip Node exec path and script path, only keep user-provided args
   const args = process.argv.slice(2)
   const result: { prompt?: string } = {}
 

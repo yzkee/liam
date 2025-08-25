@@ -3,7 +3,7 @@ import { Command } from 'cmdk'
 import { type FC, useCallback, useEffect } from 'react'
 import { useTableSelection } from '@/features/erd/hooks'
 import { useSchemaOrThrow } from '@/stores'
-import { useCommandPalette } from '../CommandPaletteProvider'
+import { useCommandPaletteOrThrow } from '../CommandPaletteProvider'
 import type { CommandPaletteSuggestion } from '../types'
 import { getSuggestionText } from '../utils'
 import styles from './CommandPaletteOptions.module.css'
@@ -19,8 +19,7 @@ type Props = {
 }
 
 export const TableOptions: FC<Props> = ({ suggestion }) => {
-  const result = useCommandPalette()
-  const setOpen = result.isOk() ? result.value.setOpen : () => {}
+  const { setOpen } = useCommandPaletteOrThrow()
 
   const schema = useSchemaOrThrow()
   const { selectTable } = useTableSelection()

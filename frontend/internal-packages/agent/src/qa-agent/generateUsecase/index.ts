@@ -103,25 +103,14 @@ export async function generateUsecaseNode(
   return await usecaseResult.match(
     async ({ response, reasoning }) => {
       // Log reasoning summary if available
-      if (
-        reasoning?.summary &&
-        Array.isArray(reasoning.summary) &&
-        reasoning.summary.length > 0
-      ) {
+      if (reasoning?.summary && reasoning.summary.length > 0) {
         for (const summaryItem of reasoning.summary) {
-          if (
-            summaryItem &&
-            typeof summaryItem === 'object' &&
-            'text' in summaryItem &&
-            typeof summaryItem.text === 'string'
-          ) {
-            await logAssistantMessage(
-              state,
-              repositories,
-              summaryItem.text,
-              assistantRole,
-            )
-          }
+          await logAssistantMessage(
+            state,
+            repositories,
+            summaryItem.text,
+            assistantRole,
+          )
         }
       }
 

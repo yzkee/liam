@@ -24,7 +24,10 @@ export const BaseGlobalNav: FC<BaseGlobalNavProps> = ({
   onLeave,
 }) => {
   return (
-    <div className={clsx(styles.globalNavContainer, containerClassName)}>
+    <div
+      className={clsx(styles.globalNavContainer, containerClassName)}
+      data-global-nav-container
+    >
       <nav
         className={clsx(
           styles.globalNav,

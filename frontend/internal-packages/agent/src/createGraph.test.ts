@@ -31,7 +31,7 @@ graph TD;
   })
 
   it('should have the same diagram in README.md as the generated graph', () => {
-    const readmePath = join(__dirname, 'chat', 'workflow', 'README.md')
+    const readmePath = join(__dirname, '..', 'README.md')
     const readmeContent = readFileSync(readmePath, 'utf-8')
 
     // Check that the README contains the expected Mermaid diagram

@@ -1,4 +1,4 @@
-import type { SqlResult } from '@liam-hq/pglite-server/src/types'
+import type { SqlResult } from '@liam-hq/pglite-server'
 import type { Meta, StoryObj } from '@storybook/nextjs'
 import { QueryResultMessage } from './QueryResultMessage'
 

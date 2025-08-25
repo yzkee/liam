@@ -80,9 +80,6 @@ importers:
       '@codemirror/view':
         specifier: 6.38.1
         version: 6.38.1
-      '@electric-sql/pglite':
-        specifier: 0.3.7
-        version: 0.3.7
       '@lezer/highlight':
         specifier: 1.2.1
         version: 1.2.1

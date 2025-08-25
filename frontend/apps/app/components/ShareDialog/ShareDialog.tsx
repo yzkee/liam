@@ -18,7 +18,7 @@ import {
   ModalTitle,
   XIcon,
 } from '@liam-hq/ui'
-import { type FC, useState } from 'react'
+import { type FC, useRef, useState } from 'react'
 import { usePublicShareServerAction } from '@/hooks/usePublicShareServerAction'
 import { urlgen } from '@/libs/routes'
 import styles from './ShareDialog.module.css'
@@ -41,22 +41,27 @@ export const ShareDialog: FC<Props> = ({
     initialIsPublic,
   })
   const [copied, setCopied] = useState(false)
+  const isTogglingRef = useRef(false)
 
   const handlePrivateClick = async () => {
-    if (isPublic) {
+    if (isTogglingRef.current || !isPublic) return
+    isTogglingRef.current = true
+    try {
       const result = await togglePublicShare()
-      if (!result.success) {
-        console.error(result.error)
-      }
+      if (!result.success) console.error(result.error)
+    } finally {
+      isTogglingRef.current = false
     }
   }
 
   const handlePublicClick = async () => {
-    if (!isPublic) {
+    if (isTogglingRef.current || isPublic) return
+    isTogglingRef.current = true
+    try {
       const result = await togglePublicShare()
-      if (!result.success) {
-        console.error(result.error)
-      }
+      if (!result.success) console.error(result.error)
+    } finally {
+      isTogglingRef.current = false
     }
   }
 
@@ -147,6 +152,7 @@ export const ShareDialog: FC<Props> = ({
                         >
                           <DropdownMenuItem
                             onClick={handlePrivateClick}
+                            disabled={loading}
                             className={styles.dropdownItem}
                             data-selected={!isPublic}
                           >
@@ -158,6 +164,7 @@ export const ShareDialog: FC<Props> = ({
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={handlePublicClick}
+                            disabled={loading}
                             className={styles.dropdownItem}
                             data-selected={isPublic}
                           >

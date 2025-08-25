@@ -29,6 +29,11 @@
       "count": 1
     }
   },
+  "src/features/erd/components/ERDRenderer/CommandPalette/CommandPalettePreview/CommandPalettePreview.module.css": {
+    "css-modules-kit/no-missing-component-file": {
+      "count": 1
+    }
+  },
   "src/features/erd/components/ERDRenderer/LeftPane/LeftPane.module.css": {
     "css-modules-kit/no-unused-class-names": {
       "count": 5

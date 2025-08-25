@@ -154,11 +154,6 @@
       "count": 2
     }
   },
-  "components/PGlitePage/PGlitePlayground.module.css": {
-    "css-modules-kit/no-unused-class-names": {
-      "count": 1
-    }
-  },
   "components/ProjectLayout/ProjectHeader/ProjectHeader.module.css": {
     "css-modules-kit/no-unused-class-names": {
       "count": 3
@@ -197,6 +192,11 @@
       "count": 1
     }
   },
+  "components/PublicSessionDetailPage/PublicSessionDetailPage.module.css": {
+    "css-modules-kit/no-unused-class-names": {
+      "count": 1
+    }
+  },
   "components/SchemaPage/SchemaPage.tsx": {
     "no-throw-error/no-throw-error": {
       "count": 1
@@ -214,7 +214,7 @@
   },
   "components/SessionDetailPage/components/Chat/components/ChatInput/ChatInput.module.css": {
     "css-modules-kit/no-unused-class-names": {
-      "count": 1
+      "count": 5
     }
   },
   "components/SessionDetailPage/components/Chat/components/ChatInput/ChatInput.tsx": {

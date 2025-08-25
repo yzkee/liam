@@ -1,13 +1,13 @@
 import { aColumn, aSchema, aTable } from '@liam-hq/schema'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { DMLGenerationAgent } from '../../../langchain/agents/dmlGenerationAgent/agent'
-import type { Repositories } from '../../../repositories'
-import { InMemoryRepository } from '../../../repositories/InMemoryRepository'
-import { convertSchemaToText } from '../../../utils/convertSchemaToText'
-import type { WorkflowState } from '../types'
-import { prepareDmlNode } from './prepareDmlNode'
+import type { WorkflowState } from '../../chat/workflow/types'
+import type { Repositories } from '../../repositories'
+import { InMemoryRepository } from '../../repositories/InMemoryRepository'
+import { convertSchemaToText } from '../../utils/convertSchemaToText'
+import { DMLGenerationAgent } from './agent'
+import { prepareDmlNode } from './index'
 
-vi.mock('../../../langchain/agents/dmlGenerationAgent/agent')
+vi.mock('./agent')
 
 describe('prepareDmlNode', () => {
   beforeEach(() => {

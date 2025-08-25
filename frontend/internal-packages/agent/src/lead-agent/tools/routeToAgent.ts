@@ -1,6 +1,6 @@
 import { ToolMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
-import { tool } from '@langchain/core/tools'
+import { type StructuredTool, tool } from '@langchain/core/tools'
 import type { JSONSchema } from '@langchain/core/utils/json_schema'
 import { Command } from '@langchain/langgraph'
 import { toJsonSchema } from '@valibot/to-json-schema'
@@ -45,7 +45,7 @@ const getToolConfigurable = (
   })
 }
 
-export const routeToAgent = tool(
+export const routeToAgent: StructuredTool = tool(
   async (input: unknown, config: RunnableConfig): Promise<Command> => {
     const inputParseResult = v.safeParse(inputSchema, input)
     if (!inputParseResult.success) {

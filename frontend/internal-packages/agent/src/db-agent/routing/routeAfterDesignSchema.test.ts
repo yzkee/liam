@@ -1,4 +1,5 @@
 import { AIMessage, HumanMessage } from '@langchain/core/messages'
+import { END } from '@langchain/langgraph'
 import { describe, expect, it } from 'vitest'
 import type { WorkflowState } from '../../chat/workflow/types'
 import { routeAfterDesignSchema } from './routeAfterDesignSchema'
@@ -12,6 +13,7 @@ const workflowState = (messages: WorkflowState['messages']): WorkflowState => ({
   organizationId: 'test-org',
   userId: 'test-user',
   designSessionId: 'test-session',
+  next: END,
 })
 
 describe('routeAfterDesignSchema', () => {

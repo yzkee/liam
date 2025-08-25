@@ -29,6 +29,8 @@ export type WorkflowState = {
 
   // Message saving fields
   designSessionId: string
+
+  next: string
 }
 
 /**

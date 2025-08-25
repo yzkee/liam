@@ -1,3 +1,4 @@
+import { END } from '@langchain/langgraph'
 import { executeQuery } from '@liam-hq/pglite-server'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import { aColumn, aSchema, aTable } from '@liam-hq/schema'
@@ -24,6 +25,7 @@ describe('validateSchemaNode', () => {
       organizationId: 'test-org-id',
       userId: 'user-id',
       designSessionId: 'session-id',
+      next: END,
       ...overrides,
     }
   }

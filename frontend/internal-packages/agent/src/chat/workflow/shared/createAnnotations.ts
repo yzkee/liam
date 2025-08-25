@@ -1,4 +1,4 @@
-import { Annotation, MessagesAnnotation } from '@langchain/langgraph'
+import { Annotation, END, MessagesAnnotation } from '@langchain/langgraph'
 import type { Schema } from '@liam-hq/schema'
 import type { Testcase } from '../../../qa-agent/generateTestcase/agent'
 
@@ -25,4 +25,9 @@ export const workflowAnnotation = Annotation.Root({
 
   // DML execution results
   dmlExecutionErrors: Annotation<string | undefined>,
+
+  next: Annotation<string>({
+    reducer: (x, y) => y ?? x ?? END,
+    default: () => END,
+  }),
 })

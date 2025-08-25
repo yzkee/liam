@@ -5,6 +5,7 @@ import { finalizeArtifactsNode } from './chat/workflow/nodes'
 import { workflowAnnotation } from './chat/workflow/shared/createAnnotations'
 import type { WorkflowState } from './chat/workflow/types'
 import { createDbAgentGraph } from './db-agent/createDbAgentGraph'
+import { createLeadAgentGraph } from './lead-agent/createLeadAgentGraph'
 import { createPmAgentGraph } from './pm-agent/createPmAgentGraph'
 import { createQaAgentGraph } from './qa-agent/createQaAgentGraph'
 import { RETRY_POLICY } from './shared/errorHandling'
@@ -16,6 +17,7 @@ import { RETRY_POLICY } from './shared/errorHandling'
  */
 export const createGraph = (checkpointer?: BaseCheckpointSaver) => {
   const graph = new StateGraph(workflowAnnotation)
+  const leadAgentSubgraph = createLeadAgentGraph(checkpointer)
   const dbAgentSubgraph = createDbAgentGraph(checkpointer)
   const qaAgentSubgraph = createQaAgentGraph(checkpointer)
 
@@ -40,6 +42,7 @@ export const createGraph = (checkpointer?: BaseCheckpointSaver) => {
   }
 
   graph
+    .addNode('leadAgent', leadAgentSubgraph)
     .addNode('pmAgent', callPmAgent)
     .addNode('dbAgent', dbAgentSubgraph)
     .addNode('qaAgent', qaAgentSubgraph)
@@ -47,7 +50,11 @@ export const createGraph = (checkpointer?: BaseCheckpointSaver) => {
       retryPolicy: RETRY_POLICY,
     })
 
-    .addEdge(START, 'pmAgent')
+    .addEdge(START, 'leadAgent')
+    .addConditionalEdges('leadAgent', (state) => state.next, {
+      pmAgent: 'pmAgent',
+      [END]: END,
+    })
     .addEdge('pmAgent', 'dbAgent')
     .addEdge('dbAgent', 'qaAgent')
     // TODO: Temporarily removed conditional edges to prevent infinite loop when errors route back to dbAgent

@@ -148,6 +148,7 @@ export const ShareDialog: FC<Props> = ({
                           <DropdownMenuItem
                             onClick={handlePrivateClick}
                             className={styles.dropdownItem}
+                            data-selected={!isPublic}
                           >
                             <Lock size={16} />
                             <span>Private</span>
@@ -158,6 +159,7 @@ export const ShareDialog: FC<Props> = ({
                           <DropdownMenuItem
                             onClick={handlePublicClick}
                             className={styles.dropdownItem}
+                            data-selected={isPublic}
                           >
                             <Link size={16} />
                             <span>Anyone with the link</span>

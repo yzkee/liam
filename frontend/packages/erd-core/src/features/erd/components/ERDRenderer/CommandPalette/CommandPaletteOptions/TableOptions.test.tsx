@@ -62,11 +62,11 @@ it('displays table options', () => {
   render(<TableOptions suggestion={null} />, { wrapper })
 
   // FIXME: their roles should be "link" rather than "option". Also we would like to check its href attribute
-  expect(screen.getByRole('option', { name: 'users' })).toBeInTheDocument()
-  expect(screen.getByRole('option', { name: 'posts' })).toBeInTheDocument()
-  expect(screen.getByRole('option', { name: 'follows' })).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'users' })).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'posts' })).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'follows' })).toBeInTheDocument()
   expect(
-    screen.getByRole('option', { name: 'user_settings' }),
+    screen.getByRole('link', { name: 'user_settings' }),
   ).toBeInTheDocument()
 })
 
@@ -75,7 +75,7 @@ describe('mouse interactions', () => {
     render(<TableOptions suggestion={null} />, { wrapper })
     const user = userEvent.setup()
 
-    await user.click(screen.getByRole('option', { name: 'follows' }))
+    await user.click(screen.getByRole('link', { name: 'follows' }))
 
     expect(mockSelectTable).toHaveBeenCalled()
     // TODO: check if the dialog is closed
@@ -86,7 +86,7 @@ describe('mouse interactions', () => {
     const user = userEvent.setup()
 
     await user.keyboard('{Meta>}')
-    await user.click(screen.getByRole('option', { name: 'follows' }))
+    await user.click(screen.getByRole('link', { name: 'follows' }))
     await user.keyboard('{/Meta}')
 
     expect(mockSelectTable).not.toHaveBeenCalled()

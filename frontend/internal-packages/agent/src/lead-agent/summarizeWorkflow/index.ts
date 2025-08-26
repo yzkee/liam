@@ -4,17 +4,17 @@ import { END } from '@langchain/langgraph'
 import { ChatOpenAI } from '@langchain/openai'
 import { ResultAsync } from 'neverthrow'
 import { getConfigurable } from '../../chat/workflow/shared/getConfigurable'
+import type { WorkflowState } from '../../chat/workflow/types'
 import { WorkflowTerminationError } from '../../shared/errorHandling'
-import type { LeadAgentState } from '../annotation'
 
 /**
  * Summarizes the workflow by generating a summary of what was accomplished
  * This node is responsible for creating a concise summary of the database design session
  */
 export async function summarizeWorkflow(
-  state: LeadAgentState,
+  state: WorkflowState,
   config: RunnableConfig,
-): Promise<Partial<LeadAgentState>> {
+): Promise<Partial<WorkflowState>> {
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
     throw new WorkflowTerminationError(
@@ -41,7 +41,7 @@ export async function summarizeWorkflow(
  * Focuses on database design decisions and outcomes
  */
 function generateWorkflowSummary(
-  state: LeadAgentState,
+  state: WorkflowState,
 ): ResultAsync<AIMessage, Error> {
   const llm = new ChatOpenAI({
     model: 'gpt-5-nano',

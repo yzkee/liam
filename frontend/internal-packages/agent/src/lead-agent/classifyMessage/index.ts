@@ -1,18 +1,20 @@
-import { SystemMessage } from '@langchain/core/messages'
+import { SystemMessage, ToolMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { Command, END } from '@langchain/langgraph'
 import { ChatOpenAI } from '@langchain/openai'
 import { ResultAsync } from 'neverthrow'
 import { getConfigurable } from '../../chat/workflow/shared/getConfigurable'
-import type { WorkflowConfigurable } from '../../chat/workflow/types'
+import type {
+  WorkflowConfigurable,
+  WorkflowState,
+} from '../../chat/workflow/types'
 import { WorkflowTerminationError } from '../../shared/errorHandling'
-import type { LeadAgentState } from '../annotation'
 import { routeToAgent } from '../tools/routeToAgent'
 import { isQACompleted } from '../utils/workflowStatus'
 import { prompt } from './prompt'
 
 export async function classifyMessage(
-  state: LeadAgentState,
+  state: WorkflowState,
   config: RunnableConfig,
 ): Promise<Command> {
   // 1. Check if QA is completed first (highest priority)
@@ -47,10 +49,16 @@ export async function classifyMessage(
 
   // 3. Check if database design request (tool call to routeToAgent)
   if (response.tool_calls?.[0]?.name === 'routeToAgent') {
-    // Route to PM Agent
+    // Create ToolMessage to properly complete the tool call
+    const toolMessage = new ToolMessage({
+      content: response.tool_calls[0].args?.['targetAgent'] || 'pmAgent',
+      tool_call_id: response.tool_calls[0].id ?? '',
+    })
+
+    // Route to PM Agent with both the AI response and tool completion
     return new Command({
       update: {
-        messages: [response],
+        messages: [response, toolMessage],
         next: 'pmAgent',
       },
       goto: END,

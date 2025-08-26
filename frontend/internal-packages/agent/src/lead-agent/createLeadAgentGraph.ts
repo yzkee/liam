@@ -1,12 +1,12 @@
 import { END, START, StateGraph } from '@langchain/langgraph'
 import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
+import { workflowAnnotation } from '../chat/workflow/shared/createAnnotations'
 import { RETRY_POLICY } from '../shared/errorHandling'
-import { leadAgentStateAnnotation } from './annotation'
 import { classifyMessage } from './classifyMessage'
 import { summarizeWorkflow } from './summarizeWorkflow'
 
 export const createLeadAgentGraph = (checkpointer?: BaseCheckpointSaver) => {
-  const leadAgentGraph = new StateGraph(leadAgentStateAnnotation)
+  const leadAgentGraph = new StateGraph(workflowAnnotation)
 
   leadAgentGraph
     .addNode('classify', classifyMessage, {

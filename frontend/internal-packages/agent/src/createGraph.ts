@@ -52,8 +52,6 @@ export const createGraph = (checkpointer?: BaseCheckpointSaver) => {
     })
     .addEdge('pmAgent', 'dbAgent')
     .addEdge('dbAgent', 'qaAgent')
-    // Route back to Lead Agent after QA Agent completes
-    // Lead Agent will finalize the workflow
     .addEdge('qaAgent', 'leadAgent')
 
   return checkpointer ? graph.compile({ checkpointer }) : graph.compile()

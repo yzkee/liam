@@ -16,8 +16,6 @@ export type WorkflowState = {
   generatedTestcases?: Testcase[] | undefined
   schemaData: Schema
 
-  dmlStatements?: string | undefined
-
   // DML execution results
   dmlExecutionErrors?: string | undefined
 

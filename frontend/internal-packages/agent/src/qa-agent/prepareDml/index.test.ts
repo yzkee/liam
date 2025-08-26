@@ -67,14 +67,12 @@ describe('prepareDmlNode', () => {
       ],
     })
 
-    const result = await prepareDmlNode(state, {
+    await prepareDmlNode(state, {
       configurable: {
         repositories: state.repositories,
         thread_id: 'test-thread',
       },
     })
-
-    expect(result.dmlStatements).toBeUndefined()
   })
 
   it('should return state unchanged when test cases are missing', async () => {
@@ -91,14 +89,12 @@ describe('prepareDmlNode', () => {
       }),
     })
 
-    const result = await prepareDmlNode(state, {
+    await prepareDmlNode(state, {
       configurable: {
         repositories: state.repositories,
         thread_id: 'test-thread',
       },
     })
-
-    expect(result.dmlStatements).toBeUndefined()
   })
 
   it('should return state unchanged when test cases array is empty', async () => {
@@ -116,14 +112,12 @@ describe('prepareDmlNode', () => {
       generatedTestcases: [],
     })
 
-    const result = await prepareDmlNode(state, {
+    await prepareDmlNode(state, {
       configurable: {
         repositories: state.repositories,
         thread_id: 'test-thread',
       },
     })
-
-    expect(result.dmlStatements).toBeUndefined()
   })
 
   it('should handle empty DML generation result', async () => {
@@ -161,14 +155,12 @@ describe('prepareDmlNode', () => {
       ],
     })
 
-    const result = await prepareDmlNode(state, {
+    await prepareDmlNode(state, {
       configurable: {
         repositories: state.repositories,
         thread_id: 'test-thread',
       },
     })
-
-    expect(result.dmlStatements).toBeUndefined()
   })
 
   it('should process schema with convertSchemaToText', async () => {
@@ -262,9 +254,5 @@ describe('prepareDmlNode', () => {
       sql: expect.stringContaining('INSERT INTO users'),
       description: expect.any(String),
     })
-
-    // Verify dmlStatements is also generated for other nodes to consume
-    expect(result.dmlStatements).toBeDefined()
-    expect(result.dmlStatements).toContain('INSERT INTO users')
   })
 })

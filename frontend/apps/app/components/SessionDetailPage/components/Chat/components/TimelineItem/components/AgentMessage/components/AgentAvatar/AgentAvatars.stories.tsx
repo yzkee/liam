@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs'
 import styles from './AgentAvatars.stories.module.css'
 import { DBAgent } from './DbAgent'
+import { LeadAgent } from './LeadAgent'
 import { PMAgent } from './PmAgent'
 import { QAAgent } from './QaAgent'
 
@@ -18,6 +19,10 @@ type Story = StoryObj
 export const AllAgents: Story = {
   render: () => (
     <div className={styles.agentsContainer}>
+      <div className={styles.agentWrapper}>
+        <LeadAgent width={48} height={48} />
+        <p className={styles.agentLabel}>Lead Agent</p>
+      </div>
       <div className={styles.agentWrapper}>
         <PMAgent width={48} height={48} />
         <p className={styles.agentLabel}>PM Agent</p>
@@ -63,6 +68,17 @@ export const QAAgentSizes: Story = {
       <QAAgent width={32} height={32} />
       <QAAgent width={48} height={48} />
       <QAAgent width={64} height={64} />
+    </div>
+  ),
+}
+
+export const LeadAgentSizes: Story = {
+  render: () => (
+    <div className={styles.sizesContainer}>
+      <LeadAgent width={24} height={24} />
+      <LeadAgent width={32} height={32} />
+      <LeadAgent width={48} height={48} />
+      <LeadAgent width={64} height={64} />
     </div>
   ),
 }

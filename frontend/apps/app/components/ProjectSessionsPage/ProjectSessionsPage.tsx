@@ -13,7 +13,12 @@ type Props = {
 
 export const ProjectSessionsPage: FC<Props> = async ({ projectId }) => {
   const sessions = await fetchProjectSessions(projectId)
-  const organizationId = await getOrganizationId()
+  const organizationIdResult = await getOrganizationId()
+  if (organizationIdResult.isErr() || organizationIdResult.value == null) {
+    return <div>Unable to load sessions</div>
+  }
+
+  const organizationId = organizationIdResult.value
   const projectsResponse = await getProjects(organizationId)
   const projects = projectsResponse.data || []
 

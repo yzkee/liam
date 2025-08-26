@@ -1,10 +1,15 @@
+import { notFound, redirect } from 'next/navigation'
 import { OrganizationMembersPage } from '@/components/OrganizationMembersPage'
 import { getOrganizationId } from '@/features/organizations/services/getOrganizationId'
 import { createClient } from '@/libs/db/server'
 
 export default async function MembersPage() {
-  const organizationId = await getOrganizationId()
+  const organizationIdResult = await getOrganizationId()
+  if (organizationIdResult.isErr()) {
+    redirect('/login')
+  }
 
+  const organizationId = organizationIdResult.value
   // TODO: Reconsider what screen should be displayed to the user when organizationId is not available
   if (organizationId == null) {
     return null
@@ -20,7 +25,7 @@ export default async function MembersPage() {
 
   if (error || !organization) {
     console.error('Error fetching organization:', error)
-    throw new Error('Organization not found')
+    notFound()
   }
 
   return <OrganizationMembersPage organization={organization} />

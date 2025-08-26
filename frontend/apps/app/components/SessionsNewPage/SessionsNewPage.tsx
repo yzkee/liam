@@ -7,7 +7,13 @@ import { SessionFormContainer } from '@/features/sessions/components/SessionForm
 import styles from './SessionsNewPage.module.css'
 
 export const SessionsNewPage: FC = async () => {
-  const organizationId = await getOrganizationId()
+  const organizationIdResult = await getOrganizationId()
+  if (organizationIdResult.isErr()) {
+    console.error('Failed to get organization ID:', organizationIdResult.error)
+    return null
+  }
+
+  const organizationId = organizationIdResult.value
   const projectsResponse = await getProjects(organizationId)
   const projects = projectsResponse.data || []
 

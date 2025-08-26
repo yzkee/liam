@@ -1,5 +1,6 @@
 'use client'
 
+import { err, ok, type Result } from 'neverthrow'
 import { boolean, object, optional, parse, string } from 'valibot'
 import { ERROR_MESSAGES } from '../constants/chatConstants'
 
@@ -25,7 +26,7 @@ const callChatAPI = async ({
   userInput,
   designSessionId,
   isDeepModelingEnabled,
-}: ChatAPIRequestParams): Promise<Response> => {
+}: ChatAPIRequestParams): Promise<Result<Response, string>> => {
   const response = await fetch('/api/chat', {
     method: 'POST',
     headers: {
@@ -39,10 +40,10 @@ const callChatAPI = async ({
   })
 
   if (!response.ok) {
-    throw new Error(ERROR_MESSAGES.FETCH_FAILED)
+    return err(ERROR_MESSAGES.FETCH_FAILED)
   }
 
-  return response
+  return ok(response)
 }
 
 type SendChatMessageParams = {
@@ -66,18 +67,28 @@ export const sendChatMessage = async ({
   isDeepModelingEnabled,
 }: SendChatMessageParams): Promise<SendChatMessageResult> => {
   try {
-    const response = await callChatAPI({
+    const responseResult = await callChatAPI({
       userInput,
       designSessionId,
       isDeepModelingEnabled,
     })
 
+    if (responseResult.isErr()) {
+      return {
+        success: false,
+        error: responseResult.error,
+      }
+    }
+
     // Parse JSON response with type safety
-    const rawData = await response.json()
+    const rawData = await responseResult.value.json()
     const data = parse(ChatAPIResponseSchema, rawData)
 
     if (!data.success) {
-      throw new Error(data.error || ERROR_MESSAGES.GENERAL)
+      return {
+        success: false,
+        error: data.error || ERROR_MESSAGES.GENERAL,
+      }
     }
 
     return { success: true }

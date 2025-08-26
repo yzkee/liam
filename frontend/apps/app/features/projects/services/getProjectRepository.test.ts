@@ -18,7 +18,7 @@ describe('getProjectRepository', () => {
     // Fail the test if organization doesn't exist
     expect(organization).not.toBeNull()
     if (!organization) {
-      throw new Error('Organization is null')
+      return // Early return instead of throwing
     }
 
     // Create test project
@@ -51,7 +51,7 @@ describe('getProjectRepository', () => {
     expect(repository).not.toBeNull()
 
     if (!project || !repository) {
-      throw new Error('Project or repository is null')
+      return // Early return instead of throwing
     }
 
     // Create mapping between project and repository

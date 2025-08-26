@@ -1,18 +1,21 @@
+import { err, ok, type Result } from 'neverthrow'
 import { createClient } from '@/libs/db/server'
 import { getOrganizationIdFromCookie } from './getOrganizationIdFromCookie'
 
-export async function getOrganizationId(): Promise<string | null> {
+export async function getOrganizationId(): Promise<
+  Result<string | null, string>
+> {
   const storedOrganizationId = await getOrganizationIdFromCookie()
 
   if (storedOrganizationId !== null && storedOrganizationId !== '') {
-    return storedOrganizationId
+    return ok(storedOrganizationId)
   }
 
   const supabase = await createClient()
   const authUser = await supabase.auth.getUser()
 
   if (authUser.error) {
-    throw new Error('Authentication failed: ', authUser.error)
+    return err(`Authentication failed: ${authUser.error.message}`)
   }
 
   const { data: organizationMember, error: organizationMemberError } =
@@ -24,11 +27,10 @@ export async function getOrganizationId(): Promise<string | null> {
       .maybeSingle()
 
   if (organizationMemberError) {
-    throw new Error(
-      'Failed to fetch organization member data',
-      organizationMemberError,
+    return err(
+      `Failed to fetch organization member data: ${organizationMemberError.message}`,
     )
   }
 
-  return organizationMember?.organization_id ?? null
+  return ok(organizationMember?.organization_id ?? null)
 }

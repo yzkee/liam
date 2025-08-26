@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { getOrganizationId } from '@/features/organizations/services/getOrganizationId'
 import { AppBar } from './AppBar'
@@ -19,12 +20,17 @@ export async function CommonLayout({
   branchOrCommit,
   children,
 }: CommonLayoutProps) {
-  const organizationId = await getOrganizationId()
+  const organizationIdResult = await getOrganizationId()
+  if (organizationIdResult.isErr()) {
+    redirect('/login')
+  }
+
+  const organizationId = organizationIdResult.value
   const { data: organization } = await getOrganization(organizationId)
 
   const { data: authUser, error } = await getAuthUser()
   if (error) {
-    throw new Error('Authentication failed')
+    redirect('/login')
   }
 
   const { data: organizations } = await getOrganizationsByUserId(

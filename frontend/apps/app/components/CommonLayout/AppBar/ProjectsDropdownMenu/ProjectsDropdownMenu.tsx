@@ -13,7 +13,12 @@ type Props = {
 }
 
 export const ProjectsDropdownMenu: FC<Props> = async ({ currentProjectId }) => {
-  const organizationId = await getOrganizationId()
+  const organizationIdResult = await getOrganizationId()
+  if (organizationIdResult.isErr() || organizationIdResult.value == null) {
+    return null
+  }
+
+  const organizationId = organizationIdResult.value
   const { data: projects } = await getProjects(organizationId)
   if (projects == null) {
     return null

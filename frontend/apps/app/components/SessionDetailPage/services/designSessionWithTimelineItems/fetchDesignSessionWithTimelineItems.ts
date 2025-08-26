@@ -1,10 +1,11 @@
 import type { SupabaseClientType } from '@liam-hq/db'
+import { err, ok, type Result } from 'neverthrow'
 import type { DesignSessionWithTimelineItems } from '../../types'
 
 export const fetchDesignSessionWithTimelineItems = async (
   supabase: SupabaseClientType,
   designSessionId: string,
-): Promise<DesignSessionWithTimelineItems | null> => {
+): Promise<Result<DesignSessionWithTimelineItems | null, string>> => {
   const { data, error } = await supabase
     .from('design_sessions')
     .select(`
@@ -52,8 +53,8 @@ export const fetchDesignSessionWithTimelineItems = async (
     .single()
 
   if (error) {
-    throw new Error(`Failed to fetch design session: ${error.message}`)
+    return err(`Failed to fetch design session: ${error.message}`)
   }
 
-  return data
+  return ok(data)
 }

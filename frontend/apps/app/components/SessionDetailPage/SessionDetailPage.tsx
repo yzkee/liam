@@ -28,9 +28,12 @@ async function loadSessionData(designSessionId: string): Promise<
     Error
   >
 > {
-  const designSessionWithTimelineItems =
-    await getDesignSessionWithTimelineItems(designSessionId)
+  const sessionResult = await getDesignSessionWithTimelineItems(designSessionId)
+  if (sessionResult.isErr()) {
+    return err(new Error(sessionResult.error))
+  }
 
+  const designSessionWithTimelineItems = sessionResult.value
   if (!designSessionWithTimelineItems) {
     return err(new Error('Design session not found'))
   }

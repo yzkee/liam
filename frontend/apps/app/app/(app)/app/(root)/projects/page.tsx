@@ -1,10 +1,15 @@
+import { redirect } from 'next/navigation'
 import { ProjectsPage } from '@/components/ProjectsPage'
 import { getOrganizationId } from '@/features/organizations/services/getOrganizationId'
 import { createClient } from '@/libs/db/server'
 
 export default async function Page() {
-  const organizationId = await getOrganizationId()
+  const organizationIdResult = await getOrganizationId()
+  if (organizationIdResult.isErr()) {
+    redirect('/login')
+  }
 
+  const organizationId = organizationIdResult.value
   // TODO: Reconsider what screen should be displayed to the user when organizationId is not available
   if (organizationId == null) {
     return null
@@ -19,10 +24,10 @@ export default async function Page() {
 
   if (error || !user) {
     console.error('Error fetching user:', error)
-    throw new Error('User not authenticated')
+    redirect('/login')
   }
   if (data.session === null) {
-    throw new Error('User not authenticated')
+    redirect('/login')
   }
 
   return <ProjectsPage organizationId={organizationId} />

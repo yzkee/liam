@@ -1,11 +1,8 @@
 import { type AIMessage, SystemMessage } from '@langchain/core/messages'
-import type { RunnableConfig } from '@langchain/core/runnables'
 import { END } from '@langchain/langgraph'
 import { ChatOpenAI } from '@langchain/openai'
 import { ResultAsync } from 'neverthrow'
-import { getConfigurable } from '../../chat/workflow/shared/getConfigurable'
 import type { WorkflowState } from '../../chat/workflow/types'
-import { WorkflowTerminationError } from '../../shared/errorHandling'
 
 /**
  * Summarizes the workflow by generating a summary of what was accomplished
@@ -13,16 +10,7 @@ import { WorkflowTerminationError } from '../../shared/errorHandling'
  */
 export async function summarizeWorkflow(
   state: WorkflowState,
-  config: RunnableConfig,
 ): Promise<Partial<WorkflowState>> {
-  const configurableResult = getConfigurable(config)
-  if (configurableResult.isErr()) {
-    throw new WorkflowTerminationError(
-      configurableResult.error,
-      'summarizeWorkflow',
-    )
-  }
-
   const summaryResult = await generateWorkflowSummary(state)
 
   return summaryResult.match(
@@ -31,7 +19,7 @@ export async function summarizeWorkflow(
       next: END,
     }),
     (error) => {
-      throw new WorkflowTerminationError(error, 'summarizeWorkflow')
+      throw error
     },
   )
 }

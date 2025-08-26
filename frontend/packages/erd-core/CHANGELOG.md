@@ -1,5 +1,14 @@
 # @liam-hq/erd-core
 
+## 0.6.5
+
+### Patch Changes
+
+- [#3170](https://github.com/liam-hq/liam/pull/3170) - - 🐛 fix link element unexpected role of the CommandPaletteTableOptions component / Thanks [@tnyo43](https://github.com/tnyo43)!
+- [#3133](https://github.com/liam-hq/liam/pull/3133) - - ✨ make Toast position more flexible / Thanks [@tnyo43](https://github.com/tnyo43)!
+  - allow `useCopyLink` to specify the Toast position via its arguments
+  - export the `ToastPosition` type
+
 ## 0.6.4
 
 ### Patch Changes

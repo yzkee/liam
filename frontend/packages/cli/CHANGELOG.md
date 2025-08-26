@@ -1,5 +1,11 @@
 # @liam-hq/cli
 
+## 0.7.7
+
+### Patch Changes
+
+- [#3170](https://github.com/liam-hq/liam/pull/3170) - - 🐛 fix link element unexpected role of the CommandPaletteTableOptions component / Thanks [@tnyo43](https://github.com/tnyo43)!
+
 ## 0.7.6
 
 ### Patch Changes

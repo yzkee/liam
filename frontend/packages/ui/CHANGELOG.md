@@ -1,5 +1,13 @@
 # @liam-hq/ui
 
+## 0.0.21
+
+### Patch Changes
+
+- [#3133](https://github.com/liam-hq/liam/pull/3133) - - ✨ make Toast position more flexible / Thanks [@tnyo43](https://github.com/tnyo43)!
+  - allow `useCopyLink` to specify the Toast position via its arguments
+  - export the `ToastPosition` type
+
 ## 0.0.20
 
 ### Patch Changes

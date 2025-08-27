@@ -1,4 +1,5 @@
 import * as v from 'valibot'
+import { extensionSchema } from '../../schema/schema.js'
 
 // Add extension operation
 const addExtensionOperation = v.object({
@@ -8,13 +9,7 @@ const addExtensionOperation = v.object({
     v.regex(/^\/extensions\/[^/]+$/),
     v.description('Path to add extension (e.g., /extensions/vector)'),
   ),
-  value: v.object({
-    name: v.string(),
-    version: v.optional(v.string()),
-    fromVersion: v.optional(v.string()),
-    ifNotExists: v.optional(v.boolean()),
-    cascade: v.optional(v.boolean()),
-  }),
+  value: extensionSchema,
 })
 
 // Remove extension operation
@@ -35,13 +30,7 @@ const replaceExtensionOperation = v.object({
     v.regex(/^\/extensions\/[^/]+$/),
     v.description('Path to replace extension (e.g., /extensions/vector)'),
   ),
-  value: v.object({
-    name: v.string(),
-    version: v.optional(v.string()),
-    fromVersion: v.optional(v.string()),
-    ifNotExists: v.optional(v.boolean()),
-    cascade: v.optional(v.boolean()),
-  }),
+  value: extensionSchema,
 })
 
 // Replace extension property operation

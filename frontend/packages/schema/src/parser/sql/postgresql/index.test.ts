@@ -1119,4 +1119,70 @@ CREATE TYPE status AS ENUM ('active', 'inactive');
       )
     })
   })
+
+  describe('CREATE EXTENSION statement', () => {
+    it('should parse basic extension creation', async () => {
+      const { value } = await processor(/* sql */ `
+        CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+      `)
+
+      expect(value.extensions).toEqual({
+        'uuid-ossp': {
+          name: 'uuid-ossp',
+        },
+      })
+    })
+
+    it('should parse multiple extensions', async () => {
+      const { value } = await processor(/* sql */ `
+        CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+        CREATE EXTENSION pgvector;
+        CREATE EXTENSION postgis;
+      `)
+
+      expect(value.extensions).toEqual({
+        'uuid-ossp': {
+          name: 'uuid-ossp',
+        },
+        pgvector: {
+          name: 'pgvector',
+        },
+        postgis: {
+          name: 'postgis',
+        },
+      })
+    })
+
+    it('should handle extensions with tables and other objects', async () => {
+      const { value } = await processor(/* sql */ `
+        CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+        
+        CREATE TABLE users (
+          id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+          name VARCHAR(255) NOT NULL
+        );
+        
+        CREATE EXTENSION pgvector;
+      `)
+
+      expect(value.extensions).toEqual({
+        'uuid-ossp': {
+          name: 'uuid-ossp',
+        },
+        pgvector: {
+          name: 'pgvector',
+        },
+      })
+
+      expect(value.tables).toEqual({
+        users: expect.objectContaining({
+          name: 'users',
+          columns: expect.objectContaining({
+            id: expect.objectContaining({ type: 'uuid' }),
+            name: expect.objectContaining({ type: 'varchar' }),
+          }),
+        }),
+      })
+    })
+  })
 })

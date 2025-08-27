@@ -14,7 +14,7 @@ type Props = {
 
 export const ProjectsDropdownMenu: FC<Props> = async ({ currentProjectId }) => {
   const organizationIdResult = await getOrganizationId()
-  if (organizationIdResult.isErr() || organizationIdResult.value == null) {
+  if (organizationIdResult.isErr()) {
     return null
   }
 

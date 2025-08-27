@@ -1,36 +1,40 @@
-import { err, ok, type Result } from 'neverthrow'
+import { toResultAsync } from '@liam-hq/db'
+import { errAsync, okAsync, ResultAsync } from 'neverthrow'
 import { createClient } from '@/libs/db/server'
 import { getOrganizationIdFromCookie } from './getOrganizationIdFromCookie'
 
-export async function getOrganizationId(): Promise<
-  Result<string | null, string>
-> {
-  const storedOrganizationId = await getOrganizationIdFromCookie()
-
-  if (storedOrganizationId !== null && storedOrganizationId !== '') {
-    return ok(storedOrganizationId)
-  }
-
-  const supabase = await createClient()
-  const authUser = await supabase.auth.getUser()
-
-  if (authUser.error) {
-    return err(`Authentication failed: ${authUser.error.message}`)
-  }
-
-  const { data: organizationMember, error: organizationMemberError } =
-    await supabase
-      .from('organization_members')
-      .select('organization_id')
-      .eq('user_id', authUser.data.user.id)
-      .limit(1)
-      .maybeSingle()
-
-  if (organizationMemberError) {
-    return err(
-      `Failed to fetch organization member data: ${organizationMemberError.message}`,
+const getOrganizationIdFromDatabase = (): ResultAsync<string, Error> => {
+  return ResultAsync.fromSafePromise(createClient()).andThen((supabase) =>
+    ResultAsync.fromPromise(
+      supabase.auth.getUser(),
+      (e) => new Error(`Failed to get user: ${e}`),
     )
-  }
+      .andThen(({ data, error }) => {
+        if (error || !data?.user) {
+          return errAsync(new Error('Authentication failed'))
+        }
+        return okAsync(data.user)
+      })
+      .andThen((user) => {
+        return toResultAsync<{ organization_id: string } | null>(
+          supabase
+            .from('organization_members')
+            .select('organization_id')
+            .eq('user_id', user.id)
+            .limit(1)
+            .single(),
+        )
+      })
+      .andThen((member) =>
+        member?.organization_id
+          ? okAsync(member.organization_id)
+          : errAsync(new Error('No organization member found')),
+      ),
+  )
+}
 
-  return ok(organizationMember?.organization_id ?? null)
+export function getOrganizationId(): ResultAsync<string, Error> {
+  return getOrganizationIdFromCookie().orElse(() =>
+    getOrganizationIdFromDatabase(),
+  )
 }

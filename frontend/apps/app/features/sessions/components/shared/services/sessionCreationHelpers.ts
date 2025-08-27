@@ -155,13 +155,10 @@ export const createSessionWithSchema = async (
 
   const organizationIdResult = await getOrganizationId()
   if (organizationIdResult.isErr()) {
-    return { success: false, error: organizationIdResult.error }
+    return { success: false, error: organizationIdResult.error.message }
   }
 
   const organizationId = organizationIdResult.value
-  if (!organizationId) {
-    return { success: false, error: 'Organization not found' }
-  }
 
   const designSessionResult = await createDesignSession(
     params,

@@ -1,14 +1,14 @@
 'use server'
 
-import { ResultAsync } from 'neverthrow'
+import { type Result, ResultAsync } from 'neverthrow'
 import { createClient } from '@/libs/db/server'
 import type { DesignSessionWithTimelineItems } from '../../../types'
 import { fetchDesignSessionWithTimelineItems } from '../fetchDesignSessionWithTimelineItems'
 
-export function getDesignSessionWithTimelineItems(
+export async function getDesignSessionWithTimelineItems(
   designSessionId: string,
-): ResultAsync<DesignSessionWithTimelineItems, Error> {
-  return ResultAsync.fromSafePromise(createClient()).andThen((supabase) =>
+): Promise<Result<DesignSessionWithTimelineItems, Error>> {
+  return await ResultAsync.fromSafePromise(createClient()).andThen((supabase) =>
     fetchDesignSessionWithTimelineItems(supabase, designSessionId),
   )
 }

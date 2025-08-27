@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { getOrganizationId } from '@/features/organizations/services/getOrganizationId'
+import { urlgen } from '@/libs/routes'
 import { AppBar } from './AppBar'
 import styles from './CommonLayout.module.css'
 import { GlobalNav } from './GlobalNav'
@@ -22,7 +23,7 @@ export async function CommonLayout({
 }: CommonLayoutProps) {
   const organizationIdResult = await getOrganizationId()
   if (organizationIdResult.isErr()) {
-    redirect('/login')
+    redirect(urlgen('login'))
   }
 
   const organizationId = organizationIdResult.value
@@ -30,7 +31,7 @@ export async function CommonLayout({
 
   const { data: authUser, error } = await getAuthUser()
   if (error) {
-    redirect('/login')
+    redirect(urlgen('login'))
   }
 
   const { data: organizations } = await getOrganizationsByUserId(

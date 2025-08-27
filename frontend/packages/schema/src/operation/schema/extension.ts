@@ -10,9 +10,10 @@ const addExtensionOperation = v.object({
   ),
   value: v.object({
     name: v.string(),
-    schema: v.optional(v.string()),
     version: v.optional(v.string()),
-    comment: v.nullable(v.string()),
+    fromVersion: v.optional(v.string()),
+    ifNotExists: v.optional(v.boolean()),
+    cascade: v.optional(v.boolean()),
   }),
 })
 
@@ -36,9 +37,10 @@ const replaceExtensionOperation = v.object({
   ),
   value: v.object({
     name: v.string(),
-    schema: v.optional(v.string()),
     version: v.optional(v.string()),
-    comment: v.nullable(v.string()),
+    fromVersion: v.optional(v.string()),
+    ifNotExists: v.optional(v.boolean()),
+    cascade: v.optional(v.boolean()),
   }),
 })
 
@@ -47,12 +49,12 @@ const replaceExtensionPropertyOperation = v.object({
   op: v.literal('replace'),
   path: v.pipe(
     v.string(),
-    v.regex(/^\/extensions\/[^/]+\/(schema|version|comment)$/),
+    v.regex(/^\/extensions\/[^/]+\/(version|fromVersion|ifNotExists|cascade)$/),
     v.description(
       'Path to replace extension property (e.g., /extensions/vector/version)',
     ),
   ),
-  value: v.union([v.string(), v.null()]),
+  value: v.union([v.string(), v.boolean(), v.null()]),
 })
 
 export const extensionOperations = [

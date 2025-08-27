@@ -12,8 +12,7 @@ function formatSqlForDisplay(sql: string, maxLength = 300): string {
 function formatFailedOperations(failedOperations: FailedOperation[]): string {
   return failedOperations
     .map((op, index) => {
-      let details = `### ${index + 1}. Error: \`${op.error}\`\n`
-      details += 'Statement:\n'
+      let details = `#### ${index + 1}. Error: \`${op.error}\`\n`
       details += '```sql\n'
       details += formatSqlForDisplay(op.sql)
       details += '\n```'
@@ -36,7 +35,7 @@ export function formatValidationErrors(
   const errorCount = failedResults.length
   const errorDetails = failedResults
     .map((result) => {
-      let details = `## ❌ **Test Case:** ${result.testCaseTitle}`
+      let details = `### ❌ **Test Case:** ${result.testCaseTitle}`
 
       if (result.failedOperations && result.failedOperations.length > 0) {
         details += `\n${formatFailedOperations(result.failedOperations)}`

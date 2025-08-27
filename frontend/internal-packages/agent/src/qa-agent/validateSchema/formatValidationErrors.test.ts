@@ -25,9 +25,8 @@ describe('formatValidationErrors', () => {
     expect(formatted).toMatchInlineSnapshot(`
       "Database validation found 1 issues. Please fix the following errors:
 
-      ## ❌ **Test Case:** Test Insert Operation
-      ### 1. Error: \`duplicate key value violates unique constraint\`
-      Statement:
+      ### ❌ **Test Case:** Test Insert Operation
+      #### 1. Error: \`duplicate key value violates unique constraint\`
       \`\`\`sql
       INSERT INTO users (id, name) VALUES (1, 'John')
       \`\`\`"
@@ -66,21 +65,18 @@ describe('formatValidationErrors', () => {
     expect(formatted).toMatchInlineSnapshot(`
       "Database validation found 1 issues. Please fix the following errors:
 
-      ## ❌ **Test Case:** Complex Transaction Test
-      ### 1. Error: \`invalid input syntax for type uuid\`
-      Statement:
+      ### ❌ **Test Case:** Complex Transaction Test
+      #### 1. Error: \`invalid input syntax for type uuid\`
       \`\`\`sql
       INSERT INTO accounts (id) VALUES ('invalid-uuid')
       \`\`\`
 
-      ### 2. Error: \`current transaction is aborted, commands ignored until end of transaction block\`
-      Statement:
+      #### 2. Error: \`current transaction is aborted, commands ignored until end of transaction block\`
       \`\`\`sql
       UPDATE accounts SET balance = 100 WHERE id = 'invalid-uuid'
       \`\`\`
 
-      ### 3. Error: \`current transaction is aborted, commands ignored until end of transaction block\`
-      Statement:
+      #### 3. Error: \`current transaction is aborted, commands ignored until end of transaction block\`
       \`\`\`sql
       DELETE FROM accounts WHERE id = 'invalid-uuid'
       \`\`\`"
@@ -129,16 +125,14 @@ describe('formatValidationErrors', () => {
     expect(formatted).toMatchInlineSnapshot(`
       "Database validation found 2 issues. Please fix the following errors:
 
-      ## ❌ **Test Case:** First Test Case
-      ### 1. Error: \`table1 does not exist\`
-      Statement:
+      ### ❌ **Test Case:** First Test Case
+      #### 1. Error: \`table1 does not exist\`
       \`\`\`sql
       INSERT INTO table1 VALUES (1)
       \`\`\`
 
-      ## ❌ **Test Case:** Third Test Case
-      ### 1. Error: \`permission denied\`
-      Statement:
+      ### ❌ **Test Case:** Third Test Case
+      #### 1. Error: \`permission denied\`
       \`\`\`sql
       UPDATE table2 SET col = 1
       \`\`\`"
@@ -178,9 +172,8 @@ describe('formatValidationErrors', () => {
     expect(formatted).toMatchInlineSnapshot(`
       "Database validation found 1 issues. Please fix the following errors:
 
-      ## ❌ **Test Case:** Long SQL Test
-      ### 1. Error: \`syntax error\`
-      Statement:
+      ### ❌ **Test Case:** Long SQL Test
+      #### 1. Error: \`syntax error\`
       \`\`\`sql
       INSERT INTO very_long_table_name_with_many_columns (
             column1, column2, column3, column4, column5, column6, column7, column8,
@@ -218,9 +211,8 @@ describe('formatValidationErrors', () => {
     expect(formatted).toMatchInlineSnapshot(`
       "Database validation found 1 issues. Please fix the following errors:
 
-      ## ❌ **Test Case:** SQL with Comments
-      ### 1. Error: \`some error\`
-      Statement:
+      ### ❌ **Test Case:** SQL with Comments
+      #### 1. Error: \`some error\`
       \`\`\`sql
       -- This is a comment
           INSERT INTO users (id, name) VALUES (1, 'John');
@@ -247,7 +239,7 @@ describe('formatValidationErrors', () => {
     expect(formatted).toMatchInlineSnapshot(`
       "Database validation found 1 issues. Please fix the following errors:
 
-      ## ❌ **Test Case:** Test with empty failures"
+      ### ❌ **Test Case:** Test with empty failures"
     `)
   })
 
@@ -298,9 +290,8 @@ describe('formatValidationErrors', () => {
     expect(formatted).toMatchInlineSnapshot(`
       "Database validation found 1 issues. Please fix the following errors:
 
-      ## ❌ **Test Case:** Test with Special Characters
-      ### 1. Error: \`Error with \`backticks\` and "quotes" and 'single quotes'\`
-      Statement:
+      ### ❌ **Test Case:** Test with Special Characters
+      #### 1. Error: \`Error with \`backticks\` and "quotes" and 'single quotes'\`
       \`\`\`sql
       INSERT INTO test VALUES ('data')
       \`\`\`"

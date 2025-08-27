@@ -209,7 +209,7 @@
   },
   "components/SessionDetailPage/components/Chat/components/ChatInput/ChatInput.module.css": {
     "css-modules-kit/no-unused-class-names": {
-      "count": 5
+      "count": 1
     }
   },
   "components/SessionDetailPage/components/Chat/components/ChatInput/ChatInput.tsx": {

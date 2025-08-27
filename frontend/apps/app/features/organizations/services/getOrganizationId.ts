@@ -22,7 +22,7 @@ const getOrganizationIdFromDatabase = (): ResultAsync<string, Error> => {
             .select('organization_id')
             .eq('user_id', user.id)
             .limit(1)
-            .single(),
+            .maybeSingle(),
         )
       })
       .andThen((member) =>

@@ -2,7 +2,6 @@
 
 import * as fs from 'node:fs'
 import * as path from 'node:path'
-import { HumanMessage } from '@langchain/core/messages'
 import { END } from '@langchain/langgraph'
 import type { Result } from 'neverthrow'
 import { err, ok, okAsync } from 'neverthrow'
@@ -56,7 +55,7 @@ const createWorkflowState = (
 
   const workflowState: WorkflowState = {
     userInput,
-    messages: [new HumanMessage(userInput)],
+    messages: [],
     schemaData,
     buildingSchemaId: buildingSchema.id,
     latestVersionNumber: buildingSchema.latest_version_number,

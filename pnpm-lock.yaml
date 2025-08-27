@@ -103,7 +103,7 @@ importers:
         version: link:../../internal-packages/github
       '@liam-hq/pglite-server':
         specifier: workspace:*
-        version: link:../../packages/pglite-server
+        version: link:../../internal-packages/pglite-server
       '@liam-hq/schema':
         specifier: workspace:*
         version: link:../../packages/schema
@@ -333,7 +333,7 @@ importers:
         version: link:../db
       '@liam-hq/pglite-server':
         specifier: workspace:*
-        version: link:../../packages/pglite-server
+        version: link:../pglite-server
       '@liam-hq/schema':
         specifier: workspace:*
         version: link:../../packages/schema
@@ -568,6 +568,34 @@ importers:
       typescript:
         specifier: 5.9.2
         version: 5.9.2
+
+  frontend/internal-packages/pglite-server:
+    dependencies:
+      '@electric-sql/pglite':
+        specifier: 0.3.7
+        version: 0.3.7
+      '@liam-hq/schema':
+        specifier: workspace:*
+        version: link:../../packages/schema
+      '@pgsql/types':
+        specifier: 15.1.1
+        version: 15.1.1
+    devDependencies:
+      '@biomejs/biome':
+        specifier: 2.1.4
+        version: 2.1.4
+      '@liam-hq/configs':
+        specifier: workspace:*
+        version: link:../configs
+      eslint:
+        specifier: 9.33.0
+        version: 9.33.0(jiti@2.5.1)
+      typescript:
+        specifier: 5.9.2
+        version: 5.9.2
+      vitest:
+        specifier: 3.2.4
+        version: 3.2.4(@edge-runtime/vm@3.2.0)(@types/debug@4.1.12)(@types/node@22.17.1)(happy-dom@17.6.3)(jiti@2.5.1)(lightningcss@1.30.1)(msw@2.10.4(@types/node@22.17.1)(typescript@5.9.2))(terser@5.43.1)(tsx@4.20.3)(yaml@2.8.1)
 
   frontend/internal-packages/schema-bench:
     dependencies:
@@ -830,34 +858,6 @@ importers:
       typed-css-modules:
         specifier: 0.9.1
         version: 0.9.1
-      typescript:
-        specifier: 5.9.2
-        version: 5.9.2
-      vitest:
-        specifier: 3.2.4
-        version: 3.2.4(@edge-runtime/vm@3.2.0)(@types/debug@4.1.12)(@types/node@22.17.1)(happy-dom@17.6.3)(jiti@2.5.1)(lightningcss@1.30.1)(msw@2.10.4(@types/node@22.17.1)(typescript@5.9.2))(terser@5.43.1)(tsx@4.20.3)(yaml@2.8.1)
-
-  frontend/packages/pglite-server:
-    dependencies:
-      '@electric-sql/pglite':
-        specifier: 0.3.7
-        version: 0.3.7
-      '@liam-hq/schema':
-        specifier: workspace:*
-        version: link:../schema
-      '@pgsql/types':
-        specifier: 15.1.1
-        version: 15.1.1
-    devDependencies:
-      '@biomejs/biome':
-        specifier: 2.1.4
-        version: 2.1.4
-      '@liam-hq/configs':
-        specifier: workspace:*
-        version: link:../../internal-packages/configs
-      eslint:
-        specifier: 9.33.0
-        version: 9.33.0(jiti@2.5.1)
       typescript:
         specifier: 5.9.2
         version: 5.9.2
@@ -18143,7 +18143,7 @@ snapshots:
       isstream: 0.1.2
       jsonwebtoken: 9.0.2
       mime-types: 2.1.35
-      retry-axios: 2.6.0(axios@1.11.0(debug@4.4.1))
+      retry-axios: 2.6.0(axios@1.11.0)
       tough-cookie: 4.1.4
     transitivePeerDependencies:
       - supports-color
@@ -20809,7 +20809,7 @@ snapshots:
       onetime: 7.0.0
       signal-exit: 4.1.0
 
-  retry-axios@2.6.0(axios@1.11.0(debug@4.4.1)):
+  retry-axios@2.6.0(axios@1.11.0):
     dependencies:
       axios: 1.11.0(debug@4.4.1)
 

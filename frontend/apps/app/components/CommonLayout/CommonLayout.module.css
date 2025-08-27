@@ -2,9 +2,3 @@
 .customLayout {
   /* Any additional styles specific to CommonLayout can go here */
 }
-
-/* Target ERD viewer specifically when it's inside the content area */
-/* This style needs to be preserved for ERD viewer height fix */
-.customLayout :global(.erdContainer) {
-  height: calc(100vh - 52px) !important; /* Override the 100dvh height */
-}

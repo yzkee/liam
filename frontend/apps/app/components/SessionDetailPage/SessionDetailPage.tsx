@@ -30,13 +30,10 @@ async function loadSessionData(designSessionId: string): Promise<
 > {
   const sessionResult = await getDesignSessionWithTimelineItems(designSessionId)
   if (sessionResult.isErr()) {
-    return err(new Error(sessionResult.error))
+    return err(sessionResult.error)
   }
 
   const designSessionWithTimelineItems = sessionResult.value
-  if (!designSessionWithTimelineItems) {
-    return err(new Error('Design session not found'))
-  }
 
   const buildingSchema = await getBuildingSchema(designSessionId)
   if (!buildingSchema) {

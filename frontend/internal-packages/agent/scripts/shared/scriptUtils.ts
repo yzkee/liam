@@ -223,7 +223,7 @@ export const createBuildingSchema = (
   },
 ) => {
   const { supabaseClient, organization, designSession } = sessionData
-  const initialSchema: Schema = { tables: {}, enums: {} }
+  const initialSchema: Schema = { tables: {}, enums: {}, extensions: {} }
 
   return ResultAsync.fromPromise(
     supabaseClient

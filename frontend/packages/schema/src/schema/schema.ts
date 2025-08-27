@@ -142,10 +142,6 @@ export const extensionNameSchema = v.string()
 
 export const extensionSchema = v.object({
   name: extensionNameSchema,
-  version: v.optional(v.string()),
-  fromVersion: v.optional(v.string()),
-  ifNotExists: v.optional(v.boolean()),
-  cascade: v.optional(v.boolean()),
 })
 export type Extension = v.InferOutput<typeof extensionSchema>
 

@@ -6,9 +6,11 @@ import {
   SystemMessage,
 } from '@langchain/core/messages'
 import { ChatOpenAI } from '@langchain/openai'
+import { fromAsyncThrowable } from '@liam-hq/neverthrow'
 import { ResultAsync } from 'neverthrow'
 import * as v from 'valibot'
 import type { WorkflowConfigurable } from '../chat/workflow/types'
+import { SSE_EVENTS } from '../client'
 import { reasoningSchema } from '../langchain/utils/schema'
 import type { Reasoning } from '../langchain/utils/types'
 import { removeReasoningFromMessages } from '../utils/messageCleanup'
@@ -17,6 +19,8 @@ import {
   pmAnalysisPrompt,
 } from './prompts/pmAnalysisPrompts'
 import { saveRequirementsToArtifactTool } from './tools/saveRequirementsToArtifactTool'
+
+const AGENT_NAME = 'pm' as const
 
 type AnalysisWithReasoning = {
   response: AIMessage
@@ -51,12 +55,10 @@ export const invokePmAnalysisAgent = (
     },
   )
 
-  const invoke = ResultAsync.fromThrowable(
-    (systemPrompt: string) =>
-      model.stream([new SystemMessage(systemPrompt), ...cleanedMessages], {
-        configurable,
-      }),
-    (error) => (error instanceof Error ? error : new Error(String(error))),
+  const invoke = fromAsyncThrowable((systemPrompt: string) =>
+    model.stream([new SystemMessage(systemPrompt), ...cleanedMessages], {
+      configurable,
+    }),
   )
 
   return formatPrompt.andThen(invoke).andThen((stream) => {
@@ -68,8 +70,8 @@ export const invokePmAnalysisAgent = (
         let accumulatedChunk: AIMessageChunk | null = null
 
         for await (const _chunk of stream) {
-          const chunk = new AIMessageChunk({ ..._chunk, id, name: 'pm' })
-          await dispatchCustomEvent('messages', chunk)
+          const chunk = new AIMessageChunk({ ..._chunk, id, name: AGENT_NAME })
+          await dispatchCustomEvent(SSE_EVENTS.MESSAGES, chunk)
 
           // Accumulate chunks using concat method
           accumulatedChunk = accumulatedChunk
@@ -78,16 +80,19 @@ export const invokePmAnalysisAgent = (
         }
 
         // Convert the final accumulated chunk to AIMessage
+        // Note: AIMessageChunk.concat() doesn't preserve the name field,
+        // so we need to explicitly set it
         const response = accumulatedChunk
           ? new AIMessage({
+              id,
               content: accumulatedChunk.content,
               additional_kwargs: accumulatedChunk.additional_kwargs,
+              name: AGENT_NAME, // Always set name as concat() doesn't preserve it
               ...(accumulatedChunk.tool_calls && {
                 tool_calls: accumulatedChunk.tool_calls,
               }),
-              ...(accumulatedChunk.name && { name: accumulatedChunk.name }),
             })
-          : new AIMessage({ content: '', name: 'pm' })
+          : new AIMessage({ id, content: '', name: AGENT_NAME })
 
         const parsed = v.safeParse(
           reasoningSchema,

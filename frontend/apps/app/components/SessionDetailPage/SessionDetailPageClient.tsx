@@ -1,8 +1,18 @@
 'use client'
 
+import {
+  AIMessage,
+  type BaseMessage,
+  FunctionMessage,
+  HumanMessage,
+  type StoredMessage,
+  SystemMessage,
+  ToolMessage,
+} from '@langchain/core/messages'
 import type { Schema } from '@liam-hq/schema'
 import clsx from 'clsx'
 import { type FC, useCallback, useEffect, useRef, useState } from 'react'
+import { match } from 'ts-pattern'
 import { Chat } from './components/Chat'
 import { Output } from './components/Output'
 import { useRealtimeArtifact } from './components/Output/components/Artifact/hooks/useRealtimeArtifact'
@@ -20,9 +30,43 @@ import type {
   WorkflowRunStatus,
 } from './types'
 
+const reviveMessage = (stored: StoredMessage): BaseMessage => {
+  return match(stored.type)
+    .with('ai', () => new AIMessage(stored.data))
+    .with('human', () => new HumanMessage(stored.data))
+    .with('system', () => new SystemMessage(stored.data))
+    .with(
+      'tool',
+      () =>
+        new ToolMessage({
+          ...stored.data,
+          tool_call_id: stored.data.tool_call_id || '',
+        }),
+    )
+    .with(
+      'function',
+      () =>
+        new FunctionMessage({
+          ...stored.data,
+          name: stored.data.name || 'unknown',
+        }),
+    )
+    .otherwise(() => {
+      console.warn(
+        `Unsupported message type: ${stored.type}, falling back to HumanMessage`,
+      )
+      return new HumanMessage(stored.data)
+    })
+}
+
+const reviveMessages = (list: StoredMessage[]): BaseMessage[] => {
+  return list.map(reviveMessage)
+}
+
 type Props = {
   buildingSchemaId: string
   designSessionWithTimelineItems: DesignSessionWithTimelineItems
+  initialMessages: StoredMessage[]
   initialDisplayedSchema: Schema
   initialPrevSchema: Schema
   initialVersions: Version[]
@@ -34,6 +78,7 @@ type Props = {
 export const SessionDetailPageClient: FC<Props> = ({
   buildingSchemaId,
   designSessionWithTimelineItems,
+  initialMessages,
   initialDisplayedSchema,
   initialPrevSchema,
   initialVersions,
@@ -97,7 +142,11 @@ export const SessionDetailPageClient: FC<Props> = ({
     initialWorkflowRunStatus,
   )
 
-  const { isStreaming, messages, start } = useStream()
+  // Revive stored messages to BaseMessage instances
+  const revivedMessages = reviveMessages(initialMessages)
+  const { isStreaming, messages, start } = useStream({
+    initialMessages: revivedMessages,
+  })
   // Track if initial workflow has been triggered to prevent multiple executions
   const hasTriggeredInitialWorkflow = useRef(false)
 

@@ -1,5 +1,4 @@
-import type { FC } from 'react'
-import { ChevronRight } from '@/icons'
+import { BaseAppBar, ChevronRight } from '@liam-hq/ui'
 import styles from './AppBar.module.css'
 import { BranchDropdownMenu } from './BranchDropdownMenu'
 import { ProjectsDropdownMenu } from './ProjectsDropdownMenu'
@@ -11,10 +10,10 @@ type Props = {
   currentBranchOrCommit?: string
 }
 
-export const AppBar: FC<Props> = async ({
+export const AppBar = async ({
   currentProjectId,
   currentBranchOrCommit,
-}) => {
+}: Props) => {
   const { data: authUser } = await getAuthUser()
 
   const avatarUrl = authUser.user?.user_metadata?.avatar_url
@@ -23,9 +22,9 @@ export const AppBar: FC<Props> = async ({
     authUser.user?.user_metadata?.name
   const userEmail = authUser.user?.email
   return (
-    <div className={styles.wrapper}>
-      <div className={styles.leftSection}>
-        {currentProjectId && (
+    <BaseAppBar
+      leftContent={
+        currentProjectId && (
           <div className={styles.breadcrumbs}>
             <ProjectsDropdownMenu currentProjectId={currentProjectId} />
             {currentBranchOrCommit && (
@@ -38,15 +37,15 @@ export const AppBar: FC<Props> = async ({
               </>
             )}
           </div>
-        )}
-      </div>
-      <div className={styles.rightSection}>
+        )
+      }
+      rightContent={
         <UserDropdown
           avatarUrl={avatarUrl}
           userName={userName}
           userEmail={userEmail}
         />
-      </div>
-    </div>
+      }
+    />
   )
 }

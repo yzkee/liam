@@ -2,6 +2,7 @@ import {
   type BaseMessage,
   coerceMessageLikeToMessage,
 } from '@langchain/core/messages'
+import { SSE_EVENTS } from '@liam-hq/agent/client'
 import { err, ok } from 'neverthrow'
 import { useCallback, useRef, useState } from 'react'
 import { ERROR_MESSAGES } from '../../components/Chat/constants/chatConstants'
@@ -18,8 +19,11 @@ type ChatRequest = {
  * NOTE: Custom hook based on useStream from @langchain/langgraph-sdk
  * @see https://github.com/langchain-ai/langgraphjs/blob/3320793bffffa02682227644aefbee95dee330a2/libs/sdk/src/react/stream.tsx
  */
-export const useStream = () => {
-  const [messages, setMessages] = useState<BaseMessage[]>([])
+type Props = {
+  initialMessages: BaseMessage[]
+}
+export const useStream = ({ initialMessages }: Props) => {
+  const [messages, setMessages] = useState<BaseMessage[]>(initialMessages)
   const messageManagerRef = useRef(new MessageTupleManager())
 
   const [isStreaming, setIsStreaming] = useState(false)
@@ -52,7 +56,12 @@ export const useStream = () => {
       }
 
       for await (const ev of parseSse(res.body)) {
-        if (ev.event !== 'messages') continue
+        if (ev.event === SSE_EVENTS.END) {
+          setIsStreaming(false)
+          break
+        }
+
+        if (ev.event !== SSE_EVENTS.MESSAGES) continue
 
         const parsedData = JSON.parse(ev.data)
         const [serialized, metadata] = parsedData

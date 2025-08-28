@@ -8,6 +8,9 @@ import { END } from '@langchain/langgraph'
 import { ChatOpenAI } from '@langchain/openai'
 import { ResultAsync } from 'neverthrow'
 import type { WorkflowState } from '../../chat/workflow/types'
+import { SSE_EVENTS } from '../../client'
+
+const AGENT_NAME = 'lead' as const
 
 /**
  * Summarizes the workflow by generating a summary of what was accomplished
@@ -67,8 +70,8 @@ Keep the summary informative but concise, focusing on the key achievements and d
         let accumulatedChunk: AIMessageChunk | null = null
 
         for await (const _chunk of stream) {
-          const chunk = new AIMessageChunk({ ..._chunk, id, name: 'lead' })
-          await dispatchCustomEvent('messages', chunk)
+          const chunk = new AIMessageChunk({ ..._chunk, id, name: AGENT_NAME })
+          await dispatchCustomEvent(SSE_EVENTS.MESSAGES, chunk)
 
           // Accumulate chunks using concat method
           accumulatedChunk = accumulatedChunk
@@ -77,15 +80,19 @@ Keep the summary informative but concise, focusing on the key achievements and d
         }
 
         // Convert the final accumulated chunk to AIMessage
+        // Note: AIMessageChunk.concat() doesn't preserve the name field,
+        // so we need to explicitly set it
         const response = accumulatedChunk
           ? new AIMessage({
+              id,
               content: accumulatedChunk.content,
               additional_kwargs: accumulatedChunk.additional_kwargs,
+              name: AGENT_NAME, // Always set name as concat() doesn't preserve it
               ...(accumulatedChunk.tool_calls && {
                 tool_calls: accumulatedChunk.tool_calls,
               }),
             })
-          : new AIMessage('')
+          : new AIMessage({ id, content: '', name: AGENT_NAME })
 
         return response
       })(),

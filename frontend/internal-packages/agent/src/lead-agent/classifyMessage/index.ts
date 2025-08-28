@@ -8,16 +8,20 @@ import {
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { Command, END } from '@langchain/langgraph'
 import { ChatOpenAI } from '@langchain/openai'
+import { fromAsyncThrowable } from '@liam-hq/neverthrow'
 import { ResultAsync } from 'neverthrow'
 import { getConfigurable } from '../../chat/workflow/shared/getConfigurable'
 import type {
   WorkflowConfigurable,
   WorkflowState,
 } from '../../chat/workflow/types'
+import { SSE_EVENTS } from '../../client'
 import { WorkflowTerminationError } from '../../shared/errorHandling'
 import { routeToAgent } from '../tools/routeToAgent'
 import { isQACompleted } from '../utils/workflowStatus'
 import { prompt } from './prompt'
+
+const AGENT_NAME = 'lead' as const
 
 export async function classifyMessage(
   state: WorkflowState,
@@ -36,14 +40,11 @@ export async function classifyMessage(
     tool_choice: 'auto',
   })
 
-  const invoke = ResultAsync.fromThrowable(
-    (configurable: WorkflowConfigurable) => {
-      return model.stream([new SystemMessage(prompt), ...state.messages], {
-        configurable,
-      })
-    },
-    (error) => (error instanceof Error ? error : new Error(String(error))),
-  )
+  const invoke = fromAsyncThrowable((configurable: WorkflowConfigurable) => {
+    return model.stream([new SystemMessage(prompt), ...state.messages], {
+      configurable,
+    })
+  })
 
   const result = await getConfigurable(config)
     .asyncAndThen(invoke)
@@ -56,8 +57,12 @@ export async function classifyMessage(
           let accumulatedChunk: AIMessageChunk | null = null
 
           for await (const _chunk of stream) {
-            const chunk = new AIMessageChunk({ ..._chunk, id, name: 'lead' })
-            await dispatchCustomEvent('messages', chunk)
+            const chunk = new AIMessageChunk({
+              ..._chunk,
+              id,
+              name: AGENT_NAME,
+            })
+            await dispatchCustomEvent(SSE_EVENTS.MESSAGES, chunk)
 
             // Accumulate chunks using concat method
             accumulatedChunk = accumulatedChunk
@@ -66,16 +71,19 @@ export async function classifyMessage(
           }
 
           // Convert the final accumulated chunk to AIMessage
+          // Note: AIMessageChunk.concat() doesn't preserve the name field,
+          // so we need to explicitly set it
           const response = accumulatedChunk
             ? new AIMessage({
+                id,
                 content: accumulatedChunk.content,
                 additional_kwargs: accumulatedChunk.additional_kwargs,
+                name: AGENT_NAME, // Always set name as concat() doesn't preserve it
                 ...(accumulatedChunk.tool_calls && {
                   tool_calls: accumulatedChunk.tool_calls,
                 }),
-                ...(accumulatedChunk.name && { name: accumulatedChunk.name }),
               })
-            : new AIMessage('')
+            : new AIMessage({ id, name: AGENT_NAME, content: '' })
 
           return response
         })(),

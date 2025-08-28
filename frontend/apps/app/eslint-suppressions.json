@@ -91,10 +91,7 @@
   },
   "components/ProjectNewPage/components/InstallationSelector/actions/addProject.ts": {
     "@typescript-eslint/consistent-type-assertions": {
-      "count": 6
-    },
-    "no-throw-error/no-throw-error": {
-      "count": 3
+      "count": 5
     }
   },
   "components/ProjectsPage/ProjectsPage.module.css": {
@@ -175,11 +172,6 @@
   "components/SessionDetailPage/components/Output/components/SQL/MigrationsViewer/useMigrationsViewer/Comment/Comment.module.css": {
     "css-modules-kit/no-unused-class-names": {
       "count": 1
-    }
-  },
-  "components/SessionDetailPage/components/Output/components/SQL/SQL.module.css": {
-    "css-modules-kit/no-unused-class-names": {
-      "count": 2
     }
   },
   "components/SessionDetailPage/hooks/useRealtimeWorkflowRuns.ts": {

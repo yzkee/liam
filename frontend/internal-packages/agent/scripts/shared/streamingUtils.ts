@@ -1,3 +1,4 @@
+import { gray } from 'yoctocolors'
 import { isMessageContentError } from '../../src/chat/workflow/utils/toolMessageUtils'
 import { hasProperty, isObject } from './scriptUtils'
 import type { Logger } from './types'
@@ -119,7 +120,7 @@ const getToolName = (lastMessage: unknown): string => {
 // Helper function to log human message
 const logHumanMessage = (logger: Logger, content: string | undefined) => {
   if (content && typeof content === 'string') {
-    logger.info(`Request: ${content}`)
+    logger.info(gray(`> ${content}`))
   }
 }
 

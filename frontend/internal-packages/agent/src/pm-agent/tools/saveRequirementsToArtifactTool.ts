@@ -8,6 +8,7 @@ import type {
   FunctionalRequirement,
   NonFunctionalRequirement,
 } from '@liam-hq/artifact'
+import { fromSafeParse } from '@liam-hq/neverthrow'
 import { toJsonSchema } from '@valibot/to-json-schema'
 import { err, ok, type Result } from 'neverthrow'
 import * as v from 'valibot'
@@ -91,18 +92,17 @@ const getToolConfigurable = (
   if (baseConfigResult.isErr()) {
     return err(baseConfigResult.error)
   }
-  const configParseResult = v.safeParse(configSchema, config)
-  if (!configParseResult.success) {
-    const errorMessage = configParseResult.issues
-      .map((issue) => issue.message)
-      .join(', ')
-    return err(new Error(`Invalid config structure: ${errorMessage}`))
+  const configResult = fromSafeParse(v.safeParse(configSchema, config))
+  if (configResult.isErr()) {
+    return err(
+      new Error(`Invalid config structure: ${configResult.error.message}`),
+    )
   }
 
   return ok({
     repositories: baseConfigResult.value.repositories,
-    designSessionId: configParseResult.output.configurable.designSessionId,
-    toolCallId: configParseResult.output.toolCall.id,
+    designSessionId: configResult.value.configurable.designSessionId,
+    toolCallId: configResult.value.toolCall.id,
   })
 }
 

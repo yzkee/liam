@@ -5,7 +5,7 @@ import type { JSONSchema } from '@langchain/core/utils/json_schema'
 import { Command } from '@langchain/langgraph'
 import { fromValibotSafeParse } from '@liam-hq/neverthrow'
 import { toJsonSchema } from '@valibot/to-json-schema'
-import { err, ok, type Result } from 'neverthrow'
+import { ok, type Result } from 'neverthrow'
 import * as v from 'valibot'
 import { WorkflowTerminationError } from '../../shared/errorHandling'
 
@@ -33,16 +33,11 @@ type ToolConfigurable = {
 const getToolConfigurable = (
   config: RunnableConfig,
 ): Result<ToolConfigurable, Error> => {
-  const configResult = fromValibotSafeParse(configSchema, config)
-  if (configResult.isErr()) {
-    return err(
-      new Error(`Invalid config structure: ${configResult.error.message}`),
-    )
-  }
-
-  return ok({
-    toolCallId: configResult.value.toolCall.id,
-  })
+  return fromValibotSafeParse(configSchema, config).andThen((value) =>
+    ok({
+      toolCallId: value.toolCall.id,
+    }),
+  )
 }
 
 export const routeToAgent: StructuredTool = tool(

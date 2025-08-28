@@ -92,18 +92,13 @@ const getToolConfigurable = (
   if (baseConfigResult.isErr()) {
     return err(baseConfigResult.error)
   }
-  const configResult = fromValibotSafeParse(configSchema, config)
-  if (configResult.isErr()) {
-    return err(
-      new Error(`Invalid config structure: ${configResult.error.message}`),
-    )
-  }
-
-  return ok({
-    repositories: baseConfigResult.value.repositories,
-    designSessionId: configResult.value.configurable.designSessionId,
-    toolCallId: configResult.value.toolCall.id,
-  })
+  return fromValibotSafeParse(configSchema, config).andThen((value) =>
+    ok({
+      repositories: baseConfigResult.value.repositories,
+      designSessionId: value.configurable.designSessionId,
+      toolCallId: value.toolCall.id,
+    }),
+  )
 }
 
 /**

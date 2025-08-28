@@ -120,7 +120,14 @@ const getToolName = (lastMessage: unknown): string => {
 // Helper function to log human message
 const logHumanMessage = (logger: Logger, content: string | undefined) => {
   if (content && typeof content === 'string') {
-    logger.info(gray(`> ${content}`))
+    // Split content into lines and apply gray to each line
+    const lines = content.split('\n')
+    const grayLines = lines.map((line, index) => {
+      // Add ">" prefix only to the first line
+      const prefix = index === 0 ? '> ' : '  '
+      return gray(`${prefix}${line}`)
+    })
+    logger.info(grayLines.join('\n'))
   }
 }
 

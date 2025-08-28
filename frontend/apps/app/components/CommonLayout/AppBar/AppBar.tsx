@@ -38,7 +38,6 @@ export const AppBar: FC<Props> = async ({
         )
       }
       rightContent={avatarUrl && <UserDropdown avatarUrl={avatarUrl} />}
-      rightSectionClassName={styles.rightSection}
     />
   )
 }

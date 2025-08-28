@@ -7,10 +7,6 @@ export type BaseGlobalNavProps = {
   navContent?: ReactNode
   footerContent?: ReactNode
   className?: string
-  containerClassName?: string
-  isExpanded?: boolean
-  onHover?: () => void
-  onLeave?: () => void
 }
 
 export const BaseGlobalNav: FC<BaseGlobalNavProps> = ({
@@ -18,25 +14,10 @@ export const BaseGlobalNav: FC<BaseGlobalNavProps> = ({
   navContent,
   footerContent,
   className,
-  containerClassName,
-  isExpanded = false,
-  onHover,
-  onLeave,
 }) => {
   return (
-    <div
-      className={clsx(styles.globalNavContainer, containerClassName)}
-      data-global-nav-container
-    >
-      <nav
-        className={clsx(
-          styles.globalNav,
-          isExpanded && styles.expanded,
-          className,
-        )}
-        onMouseEnter={onHover}
-        onMouseLeave={onLeave}
-      >
+    <div className={styles.globalNavContainer} data-global-nav-container>
+      <nav className={clsx(styles.globalNav, className)}>
         <div className={styles.logoContainer}>
           <div className={styles.logoSection}>{logoSection}</div>
         </div>

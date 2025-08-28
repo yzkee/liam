@@ -7,8 +7,6 @@ export type BaseLayoutProps = {
   appBar: ReactNode
   children: ReactNode
   className?: string
-  mainContentClassName?: string
-  contentClassName?: string
 }
 
 export const BaseLayout: FC<BaseLayoutProps> = ({
@@ -16,17 +14,13 @@ export const BaseLayout: FC<BaseLayoutProps> = ({
   appBar,
   children,
   className,
-  mainContentClassName,
-  contentClassName,
 }) => {
   return (
     <div className={clsx(styles.layout, className)}>
       {globalNav}
-      <div className={clsx(styles.mainContent, mainContentClassName)}>
+      <div className={styles.mainContent}>
         {appBar}
-        <main className={clsx(styles.content, contentClassName)}>
-          {children}
-        </main>
+        <main className={styles.content}>{children}</main>
       </div>
     </div>
   )

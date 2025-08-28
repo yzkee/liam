@@ -7,7 +7,6 @@ export type BaseAppBarProps = {
   rightContent?: ReactNode
   className?: string
   leftSectionClassName?: string
-  rightSectionClassName?: string
 }
 
 export const BaseAppBar: FC<BaseAppBarProps> = ({
@@ -15,7 +14,6 @@ export const BaseAppBar: FC<BaseAppBarProps> = ({
   rightContent,
   className,
   leftSectionClassName,
-  rightSectionClassName,
 }) => {
   return (
     <div className={clsx(styles.wrapper, className)}>
@@ -25,9 +23,7 @@ export const BaseAppBar: FC<BaseAppBarProps> = ({
         </div>
       )}
       {rightContent && (
-        <div className={clsx(styles.rightSection, rightSectionClassName)}>
-          {rightContent}
-        </div>
+        <div className={styles.rightSection}>{rightContent}</div>
       )}
     </div>
   )

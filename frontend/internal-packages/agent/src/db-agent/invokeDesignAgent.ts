@@ -16,6 +16,8 @@ import type { ToolConfigurable } from './getToolConfigurable'
 import { type DesignAgentPromptVariables, designAgentPrompt } from './prompt'
 import { schemaDesignTool } from './tools/schemaDesignTool'
 
+const AGENT_NAME = 'db' as const
+
 const model = new ChatOpenAI({
   model: 'gpt-5',
   reasoning: { effort: 'medium', summary: 'detailed' },
@@ -50,7 +52,7 @@ export const invokeDesignAgent = (
         let accumulatedChunk: AIMessageChunk | null = null
 
         for await (const _chunk of stream) {
-          const chunk = new AIMessageChunk({ ..._chunk, id, name: 'db' })
+          const chunk = new AIMessageChunk({ ..._chunk, id, name: AGENT_NAME })
           await dispatchCustomEvent(SSE_EVENTS.MESSAGES, chunk)
 
           // Accumulate chunks using concat method
@@ -60,16 +62,19 @@ export const invokeDesignAgent = (
         }
 
         // Convert the final accumulated chunk to AIMessage
+        // Note: AIMessageChunk.concat() doesn't preserve the name field,
+        // so we need to explicitly set it
         const response = accumulatedChunk
           ? new AIMessage({
+              id,
               content: accumulatedChunk.content,
               additional_kwargs: accumulatedChunk.additional_kwargs,
+              name: AGENT_NAME, // Always set name as concat() doesn't preserve it
               ...(accumulatedChunk.tool_calls && {
                 tool_calls: accumulatedChunk.tool_calls,
               }),
-              ...(accumulatedChunk.name && { name: accumulatedChunk.name }),
             })
-          : new AIMessage('')
+          : new AIMessage({ id, content: '', name: AGENT_NAME })
 
         const reasoningPayload =
           accumulatedChunk?.additional_kwargs?.['reasoning']

@@ -19,8 +19,11 @@ type ChatRequest = {
  * NOTE: Custom hook based on useStream from @langchain/langgraph-sdk
  * @see https://github.com/langchain-ai/langgraphjs/blob/3320793bffffa02682227644aefbee95dee330a2/libs/sdk/src/react/stream.tsx
  */
-export const useStream = () => {
-  const [messages, setMessages] = useState<BaseMessage[]>([])
+type Props = {
+  initialMessages: BaseMessage[]
+}
+export const useStream = ({ initialMessages }: Props) => {
+  const [messages, setMessages] = useState<BaseMessage[]>(initialMessages)
   const messageManagerRef = useRef(new MessageTupleManager())
 
   const [isStreaming, setIsStreaming] = useState(false)

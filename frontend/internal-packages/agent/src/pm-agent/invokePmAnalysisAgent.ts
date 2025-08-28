@@ -20,6 +20,8 @@ import {
 } from './prompts/pmAnalysisPrompts'
 import { saveRequirementsToArtifactTool } from './tools/saveRequirementsToArtifactTool'
 
+const AGENT_NAME = 'pm' as const
+
 type AnalysisWithReasoning = {
   response: AIMessage
   reasoning: Reasoning | null
@@ -68,7 +70,7 @@ export const invokePmAnalysisAgent = (
         let accumulatedChunk: AIMessageChunk | null = null
 
         for await (const _chunk of stream) {
-          const chunk = new AIMessageChunk({ ..._chunk, id, name: 'pm' })
+          const chunk = new AIMessageChunk({ ..._chunk, id, name: AGENT_NAME })
           await dispatchCustomEvent(SSE_EVENTS.MESSAGES, chunk)
 
           // Accumulate chunks using concat method
@@ -78,16 +80,19 @@ export const invokePmAnalysisAgent = (
         }
 
         // Convert the final accumulated chunk to AIMessage
+        // Note: AIMessageChunk.concat() doesn't preserve the name field,
+        // so we need to explicitly set it
         const response = accumulatedChunk
           ? new AIMessage({
+              id,
               content: accumulatedChunk.content,
               additional_kwargs: accumulatedChunk.additional_kwargs,
+              name: AGENT_NAME, // Always set name as concat() doesn't preserve it
               ...(accumulatedChunk.tool_calls && {
                 tool_calls: accumulatedChunk.tool_calls,
               }),
-              ...(accumulatedChunk.name && { name: accumulatedChunk.name }),
             })
-          : new AIMessage({ content: '', name: 'pm' })
+          : new AIMessage({ id, content: '', name: AGENT_NAME })
 
         const parsed = v.safeParse(
           reasoningSchema,

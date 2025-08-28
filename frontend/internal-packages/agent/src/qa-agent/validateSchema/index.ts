@@ -1,5 +1,6 @@
 import { AIMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
+import type { DmlOperation } from '@liam-hq/artifact'
 import type { Database } from '@liam-hq/db'
 import { executeQuery } from '@liam-hq/pglite-server'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
@@ -10,7 +11,7 @@ import { generateDdlFromSchema } from '../../chat/workflow/utils/generateDdl'
 import { transformWorkflowStateToArtifact } from '../../chat/workflow/utils/transformWorkflowStateToArtifact'
 import { withTimelineItemSync } from '../../chat/workflow/utils/withTimelineItemSync'
 import { WorkflowTerminationError } from '../../shared/errorHandling'
-import type { Testcase } from '../generateTestcase/agent'
+import type { Testcase } from '../types'
 import { formatValidationErrors } from './formatValidationErrors'
 import type { TestcaseDmlExecutionResult } from './types'
 
@@ -38,7 +39,7 @@ async function executeDmlOperationsByTestcase(
     sqlParts.push(
       `-- Test Case: ${testcase.id}`,
       `-- ${testcase.title}`,
-      ...testcase.dmlOperations.map((op) => {
+      ...testcase.dmlOperations.map((op: DmlOperation) => {
         const header = op.description
           ? `-- ${op.description}`
           : `-- ${op.operation_type} operation`
@@ -128,20 +129,22 @@ function updateWorkflowStateWithTestcaseResults(
       return testcase
     }
 
-    const updatedDmlOperations = testcase.dmlOperations.map((dmlOp) => {
-      const executionLog = {
-        executed_at: testcaseResult.executedAt.toISOString(),
-        success: testcaseResult.success,
-        result_summary: testcaseResult.success
-          ? `Test Case "${testcaseResult.testCaseTitle}" operations completed successfully`
-          : `Test Case "${testcaseResult.testCaseTitle}" failed: ${testcaseResult.failedOperations?.map((op) => op.error).join('; ')}`,
-      }
+    const updatedDmlOperations = testcase.dmlOperations.map(
+      (dmlOp: DmlOperation) => {
+        const executionLog = {
+          executed_at: testcaseResult.executedAt.toISOString(),
+          success: testcaseResult.success,
+          result_summary: testcaseResult.success
+            ? `Test Case "${testcaseResult.testCaseTitle}" operations completed successfully`
+            : `Test Case "${testcaseResult.testCaseTitle}" failed: ${testcaseResult.failedOperations?.map((op) => op.error).join('; ')}`,
+        }
 
-      return {
-        ...dmlOp,
-        dml_execution_logs: [executionLog],
-      }
-    })
+        return {
+          ...dmlOp,
+          dml_execution_logs: [executionLog],
+        }
+      },
+    )
 
     return {
       ...testcase,

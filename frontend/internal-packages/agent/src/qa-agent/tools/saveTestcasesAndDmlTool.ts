@@ -8,24 +8,17 @@ import { toJsonSchema } from '@valibot/to-json-schema'
 import { v4 as uuidv4 } from 'uuid'
 import * as v from 'valibot'
 import { WorkflowTerminationError } from '../../shared/errorHandling'
-import type { Testcase } from '../types'
+import { type Testcase, testcaseSchema } from '../types'
 
-// Schema for DML operation without logs (same as before)
 const dmlOperationWithoutLogsSchema = v.omit(dmlOperationSchema, [
   'dml_execution_logs',
 ])
 
-// Schema for testcase with DML operations from the tool input
 const testcaseWithDmlSchema = v.object({
-  requirementType: v.picklist(['functional', 'non_functional']),
-  requirementCategory: v.string(),
-  requirement: v.string(),
-  title: v.string(),
-  description: v.string(),
+  ...v.omit(testcaseSchema, ['id', 'dmlOperations']).entries,
   dmlOperations: v.array(dmlOperationWithoutLogsSchema),
 })
 
-// Tool input schema
 const saveTestcasesAndDmlToolSchema = v.object({
   testcasesWithDml: v.array(testcaseWithDmlSchema),
 })
@@ -77,18 +70,15 @@ export const saveTestcasesAndDmlTool: StructuredTool = tool(
       )
     }
 
-    // Get tool call ID from config
     const toolCallId = getToolCallId(config)
 
-    // Generate testcases with UUIDs and associated DML operations
     const generatedTestcases: Testcase[] = testcasesWithDml.map((testcase) => {
       const testcaseId = uuidv4()
 
-      // Map DML operations to include the testcase ID and empty execution logs
       const dmlOperationsWithId = testcase.dmlOperations.map((op) => ({
         ...op,
         testCaseId: testcaseId,
-        dml_execution_logs: [], // Initialize with empty execution logs
+        dml_execution_logs: [],
       }))
 
       return {
@@ -102,7 +92,6 @@ export const saveTestcasesAndDmlTool: StructuredTool = tool(
       }
     })
 
-    // Count total DML operations
     const totalDmlOperations = generatedTestcases.reduce(
       (sum, tc) => sum + tc.dmlOperations.length,
       0,

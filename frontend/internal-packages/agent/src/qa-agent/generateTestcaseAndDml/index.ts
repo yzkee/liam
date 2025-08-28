@@ -24,7 +24,6 @@ function formatAnalyzedRequirements(
 
   const sections = []
 
-  // Business Requirement
   if (analyzedRequirements.businessRequirement) {
     sections.push(
       '## Business Requirement',
@@ -33,7 +32,6 @@ function formatAnalyzedRequirements(
     )
   }
 
-  // Functional Requirements
   if (
     analyzedRequirements.functionalRequirements &&
     Object.keys(analyzedRequirements.functionalRequirements).length > 0
@@ -52,7 +50,6 @@ function formatAnalyzedRequirements(
     }
   }
 
-  // Non-Functional Requirements
   if (
     analyzedRequirements.nonFunctionalRequirements &&
     Object.keys(analyzedRequirements.nonFunctionalRequirements).length > 0
@@ -74,7 +71,6 @@ function formatAnalyzedRequirements(
   return sections.join('\n').trim()
 }
 
-// Create the model with the tool bound
 const model = new ChatOpenAI({
   model: 'gpt-5-mini',
   useResponsesApi: true,
@@ -99,7 +95,6 @@ export async function generateTestcaseAndDmlNode(
     )
   }
 
-  // Prepare the context message
   const contextMessage = await humanPromptTemplate.format({
     schemaContext: convertSchemaToText(state.schemaData),
     analyzedRequirements: formatAnalyzedRequirements(
@@ -107,10 +102,8 @@ export async function generateTestcaseAndDmlNode(
     ),
   })
 
-  // Remove reasoning field from AIMessages to avoid API issues
   const cleanedMessages = removeReasoningFromMessages(state.messages)
 
-  // Invoke the model with tool binding
   const invokeModel = ResultAsync.fromThrowable(
     () =>
       model.invoke([
@@ -130,8 +123,6 @@ export async function generateTestcaseAndDmlNode(
     )
   }
 
-  // The response contains tool calls
-  // We'll return the messages and let the routing handle the tool invocation
   return {
     messages: [result.value],
   }

@@ -18,6 +18,10 @@ export const AppBar: FC<Props> = async ({
   const { data: authUser } = await getAuthUser()
 
   const avatarUrl = authUser.user?.user_metadata?.avatar_url
+  const userName =
+    authUser.user?.user_metadata?.full_name ||
+    authUser.user?.user_metadata?.name
+  const userEmail = authUser.user?.email
   return (
     <div className={styles.wrapper}>
       <div className={styles.leftSection}>
@@ -37,7 +41,11 @@ export const AppBar: FC<Props> = async ({
         )}
       </div>
       <div className={styles.rightSection}>
-        {avatarUrl && <UserDropdown avatarUrl={avatarUrl} />}
+        <UserDropdown
+          avatarUrl={avatarUrl}
+          userName={userName}
+          userEmail={userEmail}
+        />
       </div>
     </div>
   )

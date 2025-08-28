@@ -1,4 +1,4 @@
-import { defaultErrorFn, fromThrowable } from '@liam-hq/neverthrow'
+import { fromThrowable } from '@liam-hq/neverthrow'
 import pkg, { type Operation } from 'fast-json-patch'
 import type { Result } from 'neverthrow'
 
@@ -11,5 +11,5 @@ export function applyPatchOperations<T extends Record<string, unknown>>(
   return fromThrowable(() => {
     const result = applyPatch(target, operations, true, false)
     return result.newDocument
-  }, defaultErrorFn)()
+  })()
 }

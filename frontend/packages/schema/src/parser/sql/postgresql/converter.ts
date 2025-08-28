@@ -1097,6 +1097,7 @@ export const convertToSchema = (
     value: {
       tables,
       enums,
+      extensions: {},
     },
     errors,
   }

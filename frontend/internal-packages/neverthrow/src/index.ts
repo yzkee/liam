@@ -1,6 +1,6 @@
 import { Result, ResultAsync } from 'neverthrow'
 
-export const standardErrorTransformer = (error: unknown): Error =>
+export const defaultErrorFn = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error))
 
 export function fromThrowable<A extends readonly unknown[], T>(
@@ -8,13 +8,13 @@ export function fromThrowable<A extends readonly unknown[], T>(
 ): (...args: A) => Result<T, Error>
 export function fromThrowable<A extends readonly unknown[], T, E extends Error>(
   fn: (...args: A) => T,
-  errorTransformer: (error: unknown) => E,
+  errorFn: (error: unknown) => E,
 ): (...args: A) => Result<T, E>
 export function fromThrowable<A extends readonly unknown[], T, E extends Error>(
   fn: (...args: A) => T,
-  errorTransformer?: (error: unknown) => E,
+  errorFn?: (error: unknown) => E,
 ) {
-  return Result.fromThrowable(fn, errorTransformer ?? standardErrorTransformer)
+  return Result.fromThrowable(fn, errorFn ?? defaultErrorFn)
 }
 
 export function fromAsyncThrowable<A extends readonly unknown[], T>(
@@ -26,15 +26,12 @@ export function fromAsyncThrowable<
   E extends Error,
 >(
   fn: (...args: A) => Promise<T>,
-  errorTransformer: (error: unknown) => E,
+  errorFn: (error: unknown) => E,
 ): (...args: A) => ResultAsync<T, E>
 export function fromAsyncThrowable<
   A extends readonly unknown[],
   T,
   E extends Error,
->(fn: (...args: A) => Promise<T>, errorTransformer?: (error: unknown) => E) {
-  return ResultAsync.fromThrowable(
-    fn,
-    errorTransformer ?? standardErrorTransformer,
-  )
+>(fn: (...args: A) => Promise<T>, errorFn?: (error: unknown) => E) {
+  return ResultAsync.fromThrowable(fn, errorFn ?? defaultErrorFn)
 }

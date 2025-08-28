@@ -8,7 +8,7 @@ import type {
   FunctionalRequirement,
   NonFunctionalRequirement,
 } from '@liam-hq/artifact'
-import { fromSafeParse } from '@liam-hq/neverthrow'
+import { fromValibotSafeParse } from '@liam-hq/neverthrow'
 import { toJsonSchema } from '@valibot/to-json-schema'
 import { err, ok, type Result } from 'neverthrow'
 import * as v from 'valibot'
@@ -92,7 +92,7 @@ const getToolConfigurable = (
   if (baseConfigResult.isErr()) {
     return err(baseConfigResult.error)
   }
-  const configResult = fromSafeParse(v.safeParse(configSchema, config))
+  const configResult = fromValibotSafeParse(configSchema, config)
   if (configResult.isErr()) {
     return err(
       new Error(`Invalid config structure: ${configResult.error.message}`),

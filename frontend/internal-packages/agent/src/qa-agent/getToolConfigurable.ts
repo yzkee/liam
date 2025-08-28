@@ -1,5 +1,5 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
-import { fromSafeParse } from '@liam-hq/neverthrow'
+import { fromValibotSafeParse } from '@liam-hq/neverthrow'
 import { err, ok, type Result } from 'neverthrow'
 import * as v from 'valibot'
 import { type Testcase, testcaseSchema } from './generateTestcase/agent'
@@ -16,7 +16,7 @@ const configSchema = v.object({
 export const getToolConfigurable = (
   config: RunnableConfig,
 ): Result<{ testcases: Testcase[]; toolCallId: string }, Error> => {
-  const configResult = fromSafeParse(v.safeParse(configSchema, config))
+  const configResult = fromValibotSafeParse(configSchema, config)
   if (configResult.isErr()) {
     return err(
       new Error(`Invalid config structure: ${configResult.error.message}`),

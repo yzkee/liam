@@ -3,7 +3,7 @@ import type { RunnableConfig } from '@langchain/core/runnables'
 import { type StructuredTool, tool } from '@langchain/core/tools'
 import type { JSONSchema } from '@langchain/core/utils/json_schema'
 import { Command } from '@langchain/langgraph'
-import { fromSafeParse } from '@liam-hq/neverthrow'
+import { fromValibotSafeParse } from '@liam-hq/neverthrow'
 import { toJsonSchema } from '@valibot/to-json-schema'
 import { err, ok, type Result } from 'neverthrow'
 import * as v from 'valibot'
@@ -33,7 +33,7 @@ type ToolConfigurable = {
 const getToolConfigurable = (
   config: RunnableConfig,
 ): Result<ToolConfigurable, Error> => {
-  const configResult = fromSafeParse(v.safeParse(configSchema, config))
+  const configResult = fromValibotSafeParse(configSchema, config)
   if (configResult.isErr()) {
     return err(
       new Error(`Invalid config structure: ${configResult.error.message}`),

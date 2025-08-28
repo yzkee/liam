@@ -8,16 +8,10 @@
   border-radius: var(--border-radius-base);
   font-size: 0.875rem;
   font-weight: 500;
+  color: var(--global-foreground);
 }
 
 .icon {
   width: 1rem;
   height: 1rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.publicText {
-  color: var(--global-foreground);
 }

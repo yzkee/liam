@@ -8,7 +8,7 @@ export const PublicAppBar: FC = () => {
       leftContent={
         <div className={styles.publicBadge}>
           <Globe className={styles.icon} aria-hidden="true" />
-          <span className={styles.publicText}>Public</span>
+          <span>Public</span>
         </div>
       }
     />

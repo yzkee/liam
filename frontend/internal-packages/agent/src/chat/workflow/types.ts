@@ -1,6 +1,6 @@
 import type { BaseMessage } from '@langchain/core/messages'
 import type { Schema } from '@liam-hq/schema'
-import type { Testcase } from '../../qa-agent/generateTestcase/agent'
+import type { Testcase } from '../../qa-agent/types'
 import type { Repositories } from '../../repositories'
 
 export type WorkflowState = {

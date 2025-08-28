@@ -3,17 +3,17 @@ import { AIMessage } from '@langchain/core/messages'
 import type { WorkflowState } from '../../chat/workflow/types'
 
 /**
- * Route after generateDml node based on whether tool calls are present
+ * Route after generateTestcaseAndDml node based on whether tool calls are present
  */
-export const routeAfterGenerateDml = (
+export const routeAfterGenerateTestcaseAndDml = (
   state: WorkflowState,
-): 'invokeSaveDmlTool' | 'validateSchema' => {
+): 'invokeSaveTestcasesAndDmlTool' | 'validateSchema' => {
   const { messages } = state
   const lastMessage = messages[messages.length - 1]
 
   // Check if the last message has tool calls
   if (lastMessage && hasToolCalls(lastMessage)) {
-    return 'invokeSaveDmlTool'
+    return 'invokeSaveTestcasesAndDmlTool'
   }
 
   // Default to validation if no tool calls

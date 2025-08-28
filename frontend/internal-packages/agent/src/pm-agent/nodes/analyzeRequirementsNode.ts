@@ -19,7 +19,7 @@ const createWorkflowStateForLogging = (
   userInput: '',
   analyzedRequirements: pmState.analyzedRequirements,
   designSessionId: pmState.designSessionId,
-  schemaData: { tables: {}, enums: {} },
+  schemaData: { tables: {}, enums: {}, extensions: {} },
   buildingSchemaId: '',
   latestVersionNumber: 0,
   organizationId: '',

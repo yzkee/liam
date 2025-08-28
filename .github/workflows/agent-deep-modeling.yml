@@ -52,6 +52,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           LANGSMITH_API_KEY: ${{ secrets.LANGSMITH_API_KEY }}
           LANGSMITH_PROJECT: "liam-app"
+          NO_COLOR: 1
         shell: bash
         run: |
           echo "## 🤖 Agent Deep Modeling Execution" > execution_log.md

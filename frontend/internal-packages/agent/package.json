@@ -35,7 +35,8 @@
     "msw": "2.10.4",
     "tsx": "4.20.3",
     "typescript": "5.9.2",
-    "vitest": "3.2.4"
+    "vitest": "3.2.4",
+    "yoctocolors": "2.1.1"
   },
   "scripts": {
     "dev": "tsc --watch",

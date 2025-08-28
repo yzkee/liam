@@ -4,7 +4,7 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
-import { fromThrowable, withContext } from '@liam-hq/neverthrow'
+import { fromThrowable } from '@liam-hq/neverthrow'
 import type { Result } from 'neverthrow'
 
 /**
@@ -58,7 +58,7 @@ const getCurrentBranch = (): Result<string, Error> => {
       timeout: 5000,
       stdio: ['ignore', 'pipe', 'ignore'],
     }).trim()
-  }, withContext('Failed to get git branch'))()
+  })()
 }
 
 /**
@@ -73,7 +73,7 @@ const getCurrentCommit = (): Result<string, Error> => {
     })
       .trim()
       .slice(0, 8)
-  }, withContext('Failed to get git commit'))()
+  })()
 }
 
 /**
@@ -86,7 +86,7 @@ const getLangGraphVersion = (): Result<string, Error> => {
     const packageJson: { dependencies?: Record<string, string> } =
       JSON.parse(packageJsonContent)
     return packageJson.dependencies?.['@langchain/langgraph'] ?? 'unknown'
-  }, withContext('Failed to get LangGraph version'))()
+  })()
 }
 
 /**

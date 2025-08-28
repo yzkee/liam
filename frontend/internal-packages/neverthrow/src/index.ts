@@ -28,10 +28,3 @@ export const fromAsyncThrowable = <
     fn,
     errorTransformer ?? (standardErrorTransformer as (error: unknown) => E),
   )
-
-export const withContext =
-  (context: string) =>
-  (error: unknown): Error => {
-    const baseError = standardErrorTransformer(error)
-    return new Error(`${context}: ${baseError.message}`)
-  }

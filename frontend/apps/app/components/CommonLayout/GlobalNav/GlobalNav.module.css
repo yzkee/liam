@@ -1,17 +1,5 @@
-/* Custom styles specific to CommonLayout GlobalNav */
-.customGlobalNavContainer {
-  /* Add data attribute for specific targeting if needed */
-  &[data-global-nav-container] {
-    /* Custom container styles */
-  }
-}
-
-.customGlobalNav {
-  /* Custom nav styles */
-}
-
 /* Menu open state specific to CommonLayout */
-.customGlobalNav:has([data-radix-menu-content][data-state='open']) {
+.globalNav:has([data-radix-menu-content][data-state='open']) {
   width: 11rem;
   box-shadow: 4px 0 16px rgba(0, 0, 0, 0.2);
 }

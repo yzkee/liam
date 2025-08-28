@@ -6,8 +6,6 @@ import styles from './PublicGlobalNav.module.css'
 export const PublicGlobalNav: FC = () => {
   return (
     <BaseGlobalNav
-      containerClassName={styles.customPublicGlobalNavContainer}
-      className={styles.customPublicGlobalNav}
       logoSection={
         <>
           <div className={styles.iconContainer}>

@@ -1,12 +1,3 @@
-/* Custom styles specific to PublicGlobalNav */
-.customPublicGlobalNavContainer {
-  /* Any custom container styles for public view */
-}
-
-.customPublicGlobalNav {
-  /* Any custom nav styles for public view */
-}
-
 .iconContainer {
   display: flex;
   align-items: center;

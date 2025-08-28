@@ -26,8 +26,7 @@ export const GlobalNav: FC<Props> = ({
 }) => {
   return (
     <BaseGlobalNav
-      containerClassName={styles.customGlobalNavContainer}
-      className={styles.customGlobalNav}
+      className={styles.globalNav}
       logoSection={
         <>
           <div className={itemStyles.iconContainer}>

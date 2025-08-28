@@ -2,7 +2,6 @@ import { BaseLayout } from '@liam-hq/ui'
 import type { ReactNode } from 'react'
 import { getOrganizationId } from '@/features/organizations/services/getOrganizationId'
 import { AppBar } from './AppBar'
-import styles from './CommonLayout.module.css'
 import { GlobalNav } from './GlobalNav'
 import { OrgCookie } from './OrgCookie'
 import { getAuthUser } from './services/getAuthUser'
@@ -36,7 +35,6 @@ export async function CommonLayout({
     <>
       {organization && <OrgCookie orgId={organization.id} />}
       <BaseLayout
-        className={styles.customLayout}
         globalNav={
           <GlobalNav
             currentOrganization={organization}

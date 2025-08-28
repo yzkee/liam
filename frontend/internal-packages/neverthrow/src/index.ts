@@ -35,3 +35,5 @@ export function fromAsyncThrowable<
 >(fn: (...args: A) => Promise<T>, errorFn?: (error: unknown) => E) {
   return ResultAsync.fromThrowable(fn, errorFn ?? defaultErrorFn)
 }
+
+export { fromValibotSafeParse } from './fromValibotSafeParse'

@@ -1,6 +1,6 @@
 import { Button } from '@liam-hq/ui'
 import type { FC } from 'react'
-import styles from './ChatInput.module.css'
+import styles from './CtaBar.module.css'
 
 type Props = {
   onSignUpClick: () => void

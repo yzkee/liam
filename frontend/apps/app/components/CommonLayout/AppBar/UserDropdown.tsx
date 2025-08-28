@@ -75,7 +75,18 @@ export const UserDropdown: FC<Props> = ({ avatarUrl, userName, userEmail }) => {
   return (
     <DropdownMenuRoot>
       <DropdownMenuTrigger asChild>
-        <button type="button" aria-label="Open user menu">
+        <button
+          type="button"
+          aria-label="Open user menu"
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: 0,
+            margin: 0,
+            cursor: 'pointer',
+            display: 'inline-block',
+          }}
+        >
           {avatarUrl ? (
             <AvatarWithImage src={avatarUrl} alt="" size="sm" />
           ) : (

@@ -50,7 +50,8 @@
     "@biomejs/biome", // Referenced in settings.json to enable Biome's "format on save" in VSCode
     "@swc/core", // Required for Vercel deployment to prevent native binding errors
     "@swc/wasm", // Required for Vercel deployment to prevent native binding errors
-    "langsmith" // Automatically used by LangChain when environment variables are set
+    "langsmith", // Automatically used by LangChain when environment variables are set
+    "@electric-sql/pglite" // Used by pglite-server package and app package
   ],
 
   // TODO: Review ignoreBinaries configuration later

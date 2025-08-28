@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { createDbAgentGraph } from './createDbAgentGraph'
 
@@ -26,34 +28,11 @@ graph TD;
     expect(mermaid).toEqual(expectedMermaidDiagram)
   })
 
-  it('should have correct node structure for iterative design process', async () => {
-    const compiledDbAgentGraph = createDbAgentGraph()
-    const graph = await compiledDbAgentGraph.getGraphAsync()
+  it('should have the same diagram in README.md as the generated graph', () => {
+    const readmePath = join(__dirname, '..', '..', 'README.md')
+    const readmeContent = readFileSync(readmePath, 'utf-8')
 
-    // Check that required nodes exist
-    const nodeNames = Object.keys(graph.nodes)
-    expect(nodeNames).toContain('designSchema')
-    expect(nodeNames).toContain('invokeSchemaDesignTool')
-  })
-
-  it('should start with designSchema node', async () => {
-    const compiledDbAgentGraph = createDbAgentGraph()
-    const graph = await compiledDbAgentGraph.getGraphAsync()
-
-    // Check that the graph starts with designSchema by examining edges from START
-    const startEdges = graph.edges.filter((edge) => edge.source === '__start__')
-    const targetNodes = startEdges.map((edge) => edge.target)
-    expect(targetNodes).toContain('designSchema')
-  })
-
-  it('should have conditional routing from designSchema', async () => {
-    const compiledDbAgentGraph = createDbAgentGraph()
-    const graph = await compiledDbAgentGraph.getGraphAsync()
-
-    // Check that designSchema has conditional edges
-    const designSchemaEdges = graph.edges.filter(
-      (edge) => edge.source === 'designSchema',
-    )
-    expect(designSchemaEdges.length).toBeGreaterThan(1) // Should have multiple conditional edges
+    // Check that the README contains the expected Mermaid diagram
+    expect(readmeContent).toContain(expectedMermaidDiagram)
   })
 })

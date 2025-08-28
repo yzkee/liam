@@ -112,15 +112,6 @@ export async function prepareDmlNode(
     return state
   }
 
-  const dmlStatements = result.dmlOperations
-    .map((op) => {
-      const header = op.description
-        ? `-- ${op.description}`
-        : `-- ${op.operation_type} operation for test case ${op.testCaseId}`
-      return `${header}\n${op.sql};`
-    })
-    .join('\n\n')
-
   const updatedTestcases = state.generatedTestcases.map((testcase) => {
     const testcaseDmlOperations = result.dmlOperations.filter(
       (op) => op.testCaseId === testcase.id,
@@ -133,7 +124,6 @@ export async function prepareDmlNode(
 
   return {
     ...state,
-    dmlStatements,
     generatedTestcases: updatedTestcases,
   }
 }

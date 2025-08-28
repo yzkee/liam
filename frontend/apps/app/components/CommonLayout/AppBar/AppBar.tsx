@@ -17,6 +17,10 @@ export const AppBar = async ({
   const { data: authUser } = await getAuthUser()
 
   const avatarUrl = authUser.user?.user_metadata?.avatar_url
+  const userName =
+    authUser.user?.user_metadata?.full_name ||
+    authUser.user?.user_metadata?.name
+  const userEmail = authUser.user?.email
   return (
     <BaseAppBar
       leftContent={
@@ -35,7 +39,13 @@ export const AppBar = async ({
           </div>
         )
       }
-      rightContent={avatarUrl && <UserDropdown avatarUrl={avatarUrl} />}
+      rightContent={
+        <UserDropdown
+          avatarUrl={avatarUrl}
+          userName={userName}
+          userEmail={userEmail}
+        />
+      }
     />
   )
 }

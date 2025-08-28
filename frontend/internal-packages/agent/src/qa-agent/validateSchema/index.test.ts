@@ -41,9 +41,7 @@ describe('validateSchemaNode', () => {
   })
 
   it('should handle empty statements', async () => {
-    const state = createMockState({
-      dmlStatements: '',
-    })
+    const state = createMockState({})
 
     const repositories = createRepositories()
     const result = await validateSchemaNode(state, {
@@ -130,7 +128,6 @@ describe('validateSchemaNode', () => {
           }),
         },
       }),
-      dmlStatements: '',
     })
 
     const repositories = createRepositories()
@@ -306,9 +303,7 @@ describe('validateSchemaNode', () => {
   })
 
   it('should trim whitespace from statements', async () => {
-    const state = createMockState({
-      dmlStatements: '   ',
-    })
+    const state = createMockState({})
 
     const repositories = createRepositories()
     const result = await validateSchemaNode(state, {
@@ -336,7 +331,6 @@ describe('validateSchemaNode', () => {
     vi.mocked(executeQuery).mockResolvedValueOnce(ddlMockResults)
 
     const state = createMockState({
-      dmlStatements: '',
       schemaData: aSchema({
         tables: {
           users: aTable({
@@ -483,7 +477,6 @@ describe('validateSchemaNode', () => {
     vi.mocked(executeQuery).mockResolvedValue(mockResults)
 
     const state = createMockState({
-      dmlStatements: '',
       dmlExecutionErrors: 'Previous error message', // Pre-existing error
       generatedTestcases: [
         {
@@ -535,7 +528,6 @@ describe('validateSchemaNode', () => {
     vi.mocked(executeQuery).mockResolvedValue(sqlResults)
 
     const state = createMockState({
-      dmlStatements: 'INSERT INTO users VALUES (1, "test");',
       generatedTestcases: [
         {
           id: 'testcase-1',

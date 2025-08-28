@@ -207,11 +207,6 @@
       "count": 6
     }
   },
-  "components/SessionDetailPage/components/Chat/components/ChatInput/ChatInput.module.css": {
-    "css-modules-kit/no-unused-class-names": {
-      "count": 1
-    }
-  },
   "components/SessionDetailPage/components/Chat/components/ChatInput/ChatInput.tsx": {
     "@typescript-eslint/consistent-type-assertions": {
       "count": 2

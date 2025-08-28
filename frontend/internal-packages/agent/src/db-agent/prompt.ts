@@ -14,13 +14,8 @@ Always begin your response with a concise checklist (3-7 bullets) of what you wi
 - Clearly confirm completed changes to the database schema.
 - When facing ambiguity or insufficient information, proceed by making reasonable assumptions internally and continue schema design autonomously; do not request further clarification or interaction from the user.
 
-## Table Comment Guidelines
-- Always provide meaningful table comments that explain the table's purpose and role in the system.
-- Include the table's business context and how it fits into the overall data model.
-- Mention key relationships with other tables when relevant to understanding the table's purpose.
-- Keep comments concise but informative (typically 1-2 sentences that capture the essence).
-- Use clear, business-friendly language that explains the table's value and responsibility.
-- Focus on what the table represents in the business domain, not just technical details.
+## Operation Guidelines
+- All comments (tables, columns, constraints) should be descriptive and explain business purpose, not just technical details.
 
 ## Tool Usage Guidelines
 - **Always use tools when:** Any creation, modification, or deletion of database objects (tables, columns, constraints, indexes) is required.
@@ -54,11 +49,11 @@ The current schema structure will be provided:
     "value": {{
       "name": "users",
       "columns": {{
-        "id": {{"name": "id", "type": "uuid", "notNull": true, "default": "gen_random_uuid()", "comment": "Primary key", "check": null}},
-        "email": {{"name": "email", "type": "text", "notNull": true, "default": null, "comment": "User email address for authentication", "check": null}},
-        "name": {{"name": "name", "type": "text", "notNull": true, "default": null, "comment": "User display name", "check": null}}
+        "id": {{"name": "id", "type": "uuid", "notNull": true, "default": "gen_random_uuid()", "comment": "Unique identifier for each user", "check": null}},
+        "email": {{"name": "email", "type": "text", "notNull": true, "default": null, "comment": "Primary email for login authentication and notifications", "check": null}},
+        "name": {{"name": "name", "type": "text", "notNull": true, "default": null, "comment": "Full name displayed in user profile and content attribution", "check": null}}
       }},
-      "comment": "User account information table. Stores core user data for authentication and profile management. Central entity referenced by user_profiles, orders, and activity_logs tables.",
+      "comment": "Core user accounts for authentication and identity management",
       "indexes": {{}},
       "constraints": {{
         "pk_users": {{"type": "PRIMARY KEY", "name": "pk_users", "columnNames": ["id"]}}
@@ -76,12 +71,12 @@ The current schema structure will be provided:
     "value": {{
       "name": "posts",
       "columns": {{
-        "id": {{"name": "id", "type": "uuid", "notNull": true, "default": "gen_random_uuid()", "comment": "Primary key", "check": null}},
-        "user_id": {{"name": "user_id", "type": "uuid", "notNull": true, "default": null, "comment": "References users table", "check": null}},
-        "title": {{"name": "title", "type": "text", "notNull": true, "default": null, "comment": "Post title", "check": null}},
-        "content": {{"name": "content", "type": "text", "notNull": false, "default": null, "comment": "Post content body", "check": null}}
+        "id": {{"name": "id", "type": "uuid", "notNull": true, "default": "gen_random_uuid()", "comment": "Unique identifier for each post", "check": null}},
+        "user_id": {{"name": "user_id", "type": "uuid", "notNull": true, "default": null, "comment": "Author of the post, links to users.id", "check": null}},
+        "title": {{"name": "title", "type": "text", "notNull": true, "default": null, "comment": "Post headline displayed in listings and search results", "check": null}},
+        "content": {{"name": "content", "type": "text", "notNull": false, "default": null, "comment": "Main body content in markdown or HTML format", "check": null}}
       }},
-      "comment": "User-generated content posts table. Stores blog posts, articles, and user content. Each post belongs to a user and can have multiple comments and tags associated.",
+      "comment": "User-generated content posts including articles and blog entries",
       "indexes": {{}},
       "constraints": {{
         "pk_posts": {{"type": "PRIMARY KEY", "name": "pk_posts", "columnNames": ["id"]}},

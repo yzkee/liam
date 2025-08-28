@@ -1,3 +1,5 @@
+'use client'
+
 import { Plus } from '@liam-hq/ui'
 import { useRouter } from 'next/navigation'
 import { type FC, useCallback } from 'react'

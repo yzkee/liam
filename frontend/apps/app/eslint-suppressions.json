@@ -1,11 +1,56 @@
 {
+  "app/(app)/app/(root)/invitations/tokens/[token]/page.tsx": {
+    "no-throw-error/no-throw-error": {
+      "count": 1
+    }
+  },
+  "app/(app)/app/(root)/projects/new/page.tsx": {
+    "no-throw-error/no-throw-error": {
+      "count": 2
+    }
+  },
+  "app/(app)/app/(root)/projects/page.tsx": {
+    "no-throw-error/no-throw-error": {
+      "count": 2
+    }
+  },
+  "app/(app)/app/(root)/settings/members/page.tsx": {
+    "no-throw-error/no-throw-error": {
+      "count": 1
+    }
+  },
+  "app/(app)/app/(with-project)/projects/[projectId]/page.tsx": {
+    "no-throw-error/no-throw-error": {
+      "count": 1
+    }
+  },
   "app/(app)/app/(with-project-and-branch)/projects/[projectId]/ref/[branchOrCommit]/layout.module.css": {
     "css-modules-kit/no-unused-class-names": {
       "count": 2
     }
   },
+  "app/(app)/app/(with-project-and-branch)/projects/[projectId]/ref/[branchOrCommit]/page.tsx": {
+    "no-throw-error/no-throw-error": {
+      "count": 1
+    }
+  },
+  "app/(app)/app/(with-project-and-branch)/projects/[projectId]/ref/[branchOrCommit]/schema/[...schemaFilePath]/page.tsx": {
+    "no-throw-error/no-throw-error": {
+      "count": 1
+    }
+  },
+  "app/(app)/app/(with-project-and-branch)/projects/[projectId]/ref/[branchOrCommit]/sessions/page.tsx": {
+    "no-throw-error/no-throw-error": {
+      "count": 1
+    }
+  },
   "app/(app)/app/confirm/route.ts": {
     "@typescript-eslint/consistent-type-assertions": {
+      "count": 1
+    }
+  },
+  "app/(app)/app/design_sessions/[id]/page.tsx": {
+    "no-throw-error/no-throw-error": {
       "count": 1
     }
   },
@@ -14,9 +59,19 @@
       "count": 3
     }
   },
+  "app/erd/p/[...slug]/page.tsx": {
+    "no-throw-error/no-throw-error": {
+      "count": 2
+    }
+  },
   "components/BranchDetailPage/BranchDetailPage.module.css": {
     "css-modules-kit/no-unused-class-names": {
       "count": 7
+    }
+  },
+  "components/BranchDetailPage/BranchDetailPage.tsx": {
+    "no-throw-error/no-throw-error": {
+      "count": 1
     }
   },
   "components/CommonLayout/AppBar/BranchDropdownMenu/BranchDropdownMenu.module.css": {
@@ -26,6 +81,11 @@
   },
   "components/CommonLayout/AppBar/ProjectsDropdownMenu/ProjectsDropdownMenu.module.css": {
     "css-modules-kit/no-unused-class-names": {
+      "count": 1
+    }
+  },
+  "components/CommonLayout/CommonLayout.tsx": {
+    "no-throw-error/no-throw-error": {
       "count": 1
     }
   },
@@ -49,6 +109,11 @@
       "count": 17
     }
   },
+  "components/GeneralPage/GeneralPage.tsx": {
+    "no-throw-error/no-throw-error": {
+      "count": 1
+    }
+  },
   "components/GeneralPage/components/GeneralPageClient/components/DeleteOrganizationButtonClient/DeleteOrganizationButtonClient.module.css": {
     "css-modules-kit/no-unused-class-names": {
       "count": 9
@@ -57,6 +122,11 @@
   "components/LoginPage/LoginPage.module.css": {
     "css-modules-kit/no-unused-class-names": {
       "count": 7
+    }
+  },
+  "components/OrganizationMembersPage/OrganizationMembersPage.tsx": {
+    "no-throw-error/no-throw-error": {
+      "count": 1
     }
   },
   "components/OrganizationMembersPage/components/InvitationItem/InvitationItem.module.css": {
@@ -84,6 +154,11 @@
       "count": 3
     }
   },
+  "components/ProjectLayout/ProjectHeader/ProjectHeader.tsx": {
+    "no-throw-error/no-throw-error": {
+      "count": 1
+    }
+  },
   "components/ProjectNewPage/components/InstallationSelector/InstallationSelector.module.css": {
     "css-modules-kit/no-unused-class-names": {
       "count": 1
@@ -91,12 +166,20 @@
   },
   "components/ProjectNewPage/components/InstallationSelector/actions/addProject.ts": {
     "@typescript-eslint/consistent-type-assertions": {
-      "count": 5
+      "count": 6
+    },
+    "no-throw-error/no-throw-error": {
+      "count": 3
     }
   },
   "components/ProjectsPage/ProjectsPage.module.css": {
     "css-modules-kit/no-unused-class-names": {
       "count": 9
+    }
+  },
+  "components/ProjectsPage/ProjectsPage.tsx": {
+    "no-throw-error/no-throw-error": {
+      "count": 1
     }
   },
   "components/ProjectsPage/components/ProjectsListView/hooks/useProjectSearch.ts": {
@@ -109,6 +192,11 @@
       "count": 1
     }
   },
+  "components/SchemaPage/SchemaPage.tsx": {
+    "no-throw-error/no-throw-error": {
+      "count": 1
+    }
+  },
   "components/SchemaPage/components/SchemaHeader/SchemaHeader.module.css": {
     "css-modules-kit/no-unused-class-names": {
       "count": 1
@@ -117,11 +205,6 @@
   "components/SessionDetailPage/SessionDetailPage.module.css": {
     "css-modules-kit/no-unused-class-names": {
       "count": 6
-    }
-  },
-  "components/SessionDetailPage/components/Chat/components/ChatInput/ChatInput.module.css": {
-    "css-modules-kit/no-unused-class-names": {
-      "count": 5
     }
   },
   "components/SessionDetailPage/components/Chat/components/ChatInput/ChatInput.tsx": {
@@ -164,6 +247,11 @@
       "count": 13
     }
   },
+  "components/SessionDetailPage/components/Chat/services/aiMessageService.ts": {
+    "no-throw-error/no-throw-error": {
+      "count": 2
+    }
+  },
   "components/SessionDetailPage/components/Output/components/Artifact/Artifact.module.css": {
     "css-modules-kit/no-unused-class-names": {
       "count": 2
@@ -179,14 +267,24 @@
       "count": 1
     }
   },
+  "components/SessionDetailPage/services/designSessionWithTimelineItems/fetchDesignSessionWithTimelineItems.ts": {
+    "no-throw-error/no-throw-error": {
+      "count": 1
+    }
+  },
   "components/SessionsNewPage/SessionsNewPage.module.css": {
     "css-modules-kit/no-unused-class-names": {
       "count": 19
     }
   },
-  "components/ShareDialog/ShareDialog.module.css": {
-    "css-modules-kit/no-unused-class-names": {
-      "count": 1
+  "features/organizations/services/getOrganizationId.ts": {
+    "no-throw-error/no-throw-error": {
+      "count": 2
+    }
+  },
+  "features/projects/services/getProjectRepository.test.ts": {
+    "no-throw-error/no-throw-error": {
+      "count": 2
     }
   },
   "features/sessions/components/GitHubSessionForm/BranchesDropdown/BranchesDropdown.module.css": {

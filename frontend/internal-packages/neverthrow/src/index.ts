@@ -1,5 +1,4 @@
-import { err, ok, Result, ResultAsync } from 'neverthrow'
-import type * as v from 'valibot'
+import { Result, ResultAsync } from 'neverthrow'
 
 const defaultErrorFn = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error))
@@ -37,13 +36,4 @@ export function fromAsyncThrowable<
   return ResultAsync.fromThrowable(fn, errorFn ?? defaultErrorFn)
 }
 
-export function fromSafeParse<
-  TSchema extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>,
->(result: v.SafeParseResult<TSchema>): Result<v.InferOutput<TSchema>, Error> {
-  if (result.success) {
-    return ok(result.output)
-  }
-
-  const errorMessage = result.issues.map((issue) => issue.message).join(', ')
-  return err(new Error(errorMessage))
-}
+export { fromValibotSafeParse } from './fromValibotSafeParse'

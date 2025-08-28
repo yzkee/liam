@@ -63,7 +63,7 @@ interface WorkflowState {
 1. **leadAgent**: Lead Agent subgraph that routes requests to appropriate specialized agents
 2. **pmAgent**: PM Agent subgraph that handles requirements analysis - contains analyzeRequirements and invokeSaveArtifactTool nodes
 3. **dbAgent**: DB Agent subgraph that handles database schema design - contains designSchema and invokeSchemaDesignTool nodes (performed by dbAgent)
-4. **qaAgent**: QA Agent subgraph that handles testing and validation - contains generateTestcase, generateDml, invokeSaveDmlTool, and validateSchema nodes (performed by qaAgent)
+4. **qaAgent**: QA Agent subgraph that handles testing and validation - contains generateTestcaseAndDml, invokeSaveTestcasesAndDmlTool, and validateSchema nodes (performed by qaAgent)
 5. **leadAgent (summarize)**: When QA completes, Lead Agent summarizes the workflow by generating a comprehensive summary
 
 ## Lead Agent Subgraph
@@ -227,17 +227,15 @@ The `qaAgent` node is implemented as a **LangGraph subgraph** that encapsulates 
 %%{init: {'flowchart': {'curve': 'linear'}}}%%
 graph TD;
 	__start__([<p>__start__</p>]):::first
-	generateTestcase(generateTestcase)
-	generateDml(generateDml)
-	invokeSaveDmlTool(invokeSaveDmlTool)
+	generateTestcaseAndDml(generateTestcaseAndDml)
+	invokeSaveTestcasesAndDmlTool(invokeSaveTestcasesAndDmlTool)
 	validateSchema(validateSchema)
 	__end__([<p>__end__</p>]):::last
-	__start__ --> generateTestcase;
-	generateTestcase --> generateDml;
-	invokeSaveDmlTool --> generateDml;
+	__start__ --> generateTestcaseAndDml;
+	invokeSaveTestcasesAndDmlTool --> generateTestcaseAndDml;
 	validateSchema --> __end__;
-	generateDml -.-> invokeSaveDmlTool;
-	generateDml -.-> validateSchema;
+	generateTestcaseAndDml -.-> invokeSaveTestcasesAndDmlTool;
+	generateTestcaseAndDml -.-> validateSchema;
 	classDef default fill:#f2f0ff,line-height:1.2;
 	classDef first fill-opacity:0;
 	classDef last fill:#bfb6fc;
@@ -245,25 +243,20 @@ graph TD;
 
 ### QA Agent Components
 
-#### 1. generateTestcase Node
-- **Purpose**: Creates comprehensive test cases for testing database schema functionality
-- **Performed by**: QA Generate Testcase Agent with GPT-4
+#### 1. generateTestcaseAndDml Node
+- **Purpose**: Creates comprehensive test cases and generates corresponding DML operations in a single unified process
+- **Performed by**: Unified QA Agent with GPT-5-mini using tool-based architecture
 - **Retry Policy**: maxAttempts: 3 (internal to subgraph)
 - **Timeline Sync**: Automatic message synchronization
+- **Output**: AI-generated test cases with DML operations using tool calls
 
-#### 2. generateDml Node
-- **Purpose**: Generates DML statements based on test cases for schema validation
-- **Performed by**: DML Generation Agent with GPT-5
+#### 2. invokeSaveTestcasesAndDmlTool Node
+- **Purpose**: Executes the saveTestcasesAndDmlTool to save both test cases and DML operations
+- **Performed by**: ToolNode with saveTestcasesAndDmlTool
 - **Retry Policy**: maxAttempts: 3 (internal to subgraph)
-- **Output**: AI-generated DML operations using tool calls
+- **Tool Integration**: Saves test cases and DML operations atomically for validation
 
-#### 3. invokeSaveDmlTool Node
-- **Purpose**: Executes the saveDmlOperationsTool to save generated DML operations
-- **Performed by**: ToolNode with saveDmlOperationsTool
-- **Retry Policy**: maxAttempts: 3 (internal to subgraph)
-- **Tool Integration**: Saves DML operations to database for validation
-
-#### 4. validateSchema Node
+#### 3. validateSchema Node
 - **Purpose**: Executes DML statements and validates schema functionality
 - **Performed by**: DML Generation Agent with database execution
 - **Retry Policy**: maxAttempts: 3 (internal to subgraph)
@@ -271,8 +264,8 @@ graph TD;
 
 ### QA Agent Flow Patterns
 
-1. **Direct Validation Flow**: `START → generateTestcase → generateDml → validateSchema → END` (when DML operations are generated directly)
-2. **Tool-based Flow**: `START → generateTestcase → generateDml → invokeSaveDmlTool → generateDml → validateSchema → END` (when tool calls are required)
+1. **Direct Validation Flow**: `START → generateTestcaseAndDml → validateSchema → END` (when test cases and DML operations are generated and saved directly)
+2. **Tool-based Flow**: `START → generateTestcaseAndDml → invokeSaveTestcasesAndDmlTool → generateTestcaseAndDml → validateSchema → END` (when tool calls are required for saving)
 3. **Comprehensive Validation**: Each step builds upon the previous to ensure thorough testing with conditional routing
 
 ### QA Agent Benefits

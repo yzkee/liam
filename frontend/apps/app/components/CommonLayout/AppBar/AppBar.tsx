@@ -1,6 +1,4 @@
-import { BaseAppBar } from '@liam-hq/ui'
-import type { FC } from 'react'
-import { ChevronRight } from '@/icons'
+import { BaseAppBar, ChevronRight } from '@liam-hq/ui'
 import styles from './AppBar.module.css'
 import { BranchDropdownMenu } from './BranchDropdownMenu'
 import { ProjectsDropdownMenu } from './ProjectsDropdownMenu'
@@ -12,10 +10,10 @@ type Props = {
   currentBranchOrCommit?: string
 }
 
-export const AppBar: FC<Props> = async ({
+export const AppBar = async ({
   currentProjectId,
   currentBranchOrCommit,
-}) => {
+}: Props) => {
   const { data: authUser } = await getAuthUser()
 
   const avatarUrl = authUser.user?.user_metadata?.avatar_url

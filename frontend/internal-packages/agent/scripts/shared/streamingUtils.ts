@@ -135,7 +135,7 @@ const logAIMessage = (
 
   if (hasToolCalls) {
     const { names, args } = processToolCalls(toolCalls)
-    logger.info(`AI calling: ${names}`)
+    logger.info(`⏺ AI calling: ${names}`)
     // Log arguments for each tool call
     args.forEach((arg) => {
       if (arg !== undefined) {
@@ -146,7 +146,7 @@ const logAIMessage = (
       }
     })
   } else if (content && typeof content === 'string' && content.trim()) {
-    logger.info(`AI response: ${content.trim()}`)
+    logger.info(`⏺ ${content.trim()}`)
   }
 }
 

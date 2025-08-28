@@ -59,8 +59,11 @@ export const setupWorkflowState = (
 
   const workflowRunId = uuidv4()
 
-  const userMessage = new HumanMessage(userInput)
-  const allMessages = [userMessage]
+  // Fetch user info to get userName
+  const getUserInfo = ResultAsync.fromPromise(
+    repositories.schema.getUserInfo(userId),
+    (error) => new Error(String(error)),
+  )
 
   const createWorkflowRun = ResultAsync.fromPromise(
     repositories.schema.createWorkflowRun({
@@ -75,48 +78,60 @@ export const setupWorkflowState = (
     return ok(createWorkflowRun)
   })
 
-  return createWorkflowRun.andThen(() => {
-    const runCollector = new RunCollectorCallbackHandler()
+  return ResultAsync.combine([getUserInfo, createWorkflowRun]).andThen(
+    ([userInfo]) => {
+      const userName = userInfo?.userName
 
-    // Enhanced tracing with environment and developer context
-    const traceEnhancement = createEnhancedTraceData(
-      workflowRunId,
-      'agent-workflow',
-      [`organization:${organizationId}`, `session:${designSessionId}`],
-      {
-        workflow: {
-          building_schema_id: buildingSchemaId,
-          design_session_id: designSessionId,
-          user_id: userId,
-          organization_id: organizationId,
-          version_number: latestVersionNumber,
+      const userMessage = new HumanMessage({
+        content: userInput,
+        additional_kwargs: {
+          userName,
         },
-      },
-    )
+      })
+      const allMessages = [userMessage]
 
-    return ok({
-      workflowState: {
-        userInput: userInput,
-        messages: allMessages,
-        schemaData,
-        organizationId,
-        buildingSchemaId,
-        latestVersionNumber,
-        designSessionId,
-        userId,
-        next: END,
-      },
-      workflowRunId,
-      runCollector,
-      configurable: {
-        repositories,
-        thread_id,
-        buildingSchemaId,
-        latestVersionNumber,
-      },
-      traceEnhancement,
-    })
-  })
+      const runCollector = new RunCollectorCallbackHandler()
+
+      // Enhanced tracing with environment and developer context
+      const traceEnhancement = createEnhancedTraceData(
+        workflowRunId,
+        'agent-workflow',
+        [`organization:${organizationId}`, `session:${designSessionId}`],
+        {
+          workflow: {
+            building_schema_id: buildingSchemaId,
+            design_session_id: designSessionId,
+            user_id: userId,
+            organization_id: organizationId,
+            version_number: latestVersionNumber,
+          },
+        },
+      )
+
+      return ok({
+        workflowState: {
+          userInput: userInput,
+          messages: allMessages,
+          schemaData,
+          organizationId,
+          buildingSchemaId,
+          latestVersionNumber,
+          designSessionId,
+          userId,
+          next: END,
+        },
+        workflowRunId,
+        runCollector,
+        configurable: {
+          repositories,
+          thread_id,
+          buildingSchemaId,
+          latestVersionNumber,
+        },
+        traceEnhancement,
+      })
+    },
+  )
 }
 
 /**

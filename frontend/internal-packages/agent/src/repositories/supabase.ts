@@ -28,6 +28,7 @@ import type {
   UpdateArtifactParams,
   UpdateTimelineItemParams,
   UpdateWorkflowRunStatusParams,
+  UserInfo,
   VersionResult,
   WorkflowRunResult,
 } from './types'
@@ -720,6 +721,25 @@ export class SupabaseSchemaRepository implements SchemaRepository {
     return {
       success: true,
       workflowRun,
+    }
+  }
+
+  async getUserInfo(userId: string): Promise<UserInfo | null> {
+    const { data, error } = await this.client
+      .from('users')
+      .select('id, email, name')
+      .eq('id', userId)
+      .single()
+
+    if (error || !data) {
+      console.error(`Could not fetch user info for ${userId}:`, error)
+      return null
+    }
+
+    return {
+      id: data.id,
+      email: data.email,
+      userName: data.name,
     }
   }
 }

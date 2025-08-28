@@ -120,6 +120,12 @@ export type UpdateWorkflowRunStatusParams = {
   status: Database['public']['Enums']['workflow_run_status']
 }
 
+export type UserInfo = {
+  id: string
+  email?: string | null
+  userName?: string | null
+}
+
 /**
  * Schema repository interface for data access abstraction
  */
@@ -205,6 +211,11 @@ export type SchemaRepository = {
   updateWorkflowRunStatus(
     params: UpdateWorkflowRunStatusParams,
   ): Promise<WorkflowRunResult>
+
+  /**
+   * Get user information by user ID
+   */
+  getUserInfo(userId: string): Promise<UserInfo | null>
 
   /**
    * The checkpoint saver instance

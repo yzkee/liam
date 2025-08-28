@@ -1136,7 +1136,7 @@ CREATE TYPE status AS ENUM ('active', 'inactive');
     it('should parse multiple extensions', async () => {
       const { value } = await processor(/* sql */ `
         CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-        CREATE EXTENSION pgvector;
+        CREATE EXTENSION vector;
         CREATE EXTENSION postgis;
       `)
 
@@ -1144,8 +1144,8 @@ CREATE TYPE status AS ENUM ('active', 'inactive');
         'uuid-ossp': {
           name: 'uuid-ossp',
         },
-        pgvector: {
-          name: 'pgvector',
+        vector: {
+          name: 'vector',
         },
         postgis: {
           name: 'postgis',
@@ -1156,21 +1156,21 @@ CREATE TYPE status AS ENUM ('active', 'inactive');
     it('should handle extensions with tables and other objects', async () => {
       const { value } = await processor(/* sql */ `
         CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-        
+
         CREATE TABLE users (
           id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
           name VARCHAR(255) NOT NULL
         );
-        
-        CREATE EXTENSION pgvector;
+
+        CREATE EXTENSION vector;
       `)
 
       expect(value.extensions).toEqual({
         'uuid-ossp': {
           name: 'uuid-ossp',
         },
-        pgvector: {
-          name: 'pgvector',
+        vector: {
+          name: 'vector',
         },
       })
 

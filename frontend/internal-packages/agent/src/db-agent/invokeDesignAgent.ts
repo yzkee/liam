@@ -4,6 +4,7 @@ import {
   SystemMessage,
 } from '@langchain/core/messages'
 import { ChatOpenAI } from '@langchain/openai'
+import { fromAsyncThrowable, withContext } from '@liam-hq/neverthrow'
 import { ok, ResultAsync } from 'neverthrow'
 import * as v from 'valibot'
 import { reasoningSchema } from '../langchain/utils/schema'
@@ -31,13 +32,14 @@ export const invokeDesignAgent = (
   const formatPrompt = ResultAsync.fromSafePromise(
     designAgentPrompt.format(variables),
   )
-  const invoke = ResultAsync.fromThrowable(
-    (systemPrompt: string) =>
-      model.invoke([new SystemMessage(systemPrompt), ...messages], {
-        configurable,
-      }),
-    (error) => new Error(`Failed to invoke design agent: ${error}`),
-  )
+  const invoke = (systemPrompt: string) =>
+    fromAsyncThrowable(
+      () =>
+        model.invoke([new SystemMessage(systemPrompt), ...messages], {
+          configurable,
+        }),
+      withContext('Failed to invoke design agent'),
+    )()
 
   return formatPrompt.andThen(invoke).andThen((response) => {
     const parsedReasoning = v.safeParse(

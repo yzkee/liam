@@ -2,7 +2,10 @@ import { SystemMessage, ToolMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { Command, END } from '@langchain/langgraph'
 import { ChatOpenAI } from '@langchain/openai'
-import { ResultAsync } from 'neverthrow'
+import {
+  fromAsyncThrowable,
+  standardErrorTransformer,
+} from '@liam-hq/neverthrow'
 import { getConfigurable } from '../../chat/workflow/shared/getConfigurable'
 import type {
   WorkflowConfigurable,
@@ -30,14 +33,12 @@ export async function classifyMessage(
     tool_choice: 'auto',
   })
 
-  const invoke = ResultAsync.fromThrowable(
-    (configurable: WorkflowConfigurable) => {
+  const invoke = (configurable: WorkflowConfigurable) =>
+    fromAsyncThrowable(() => {
       return model.invoke([new SystemMessage(prompt), ...state.messages], {
         configurable,
       })
-    },
-    (error) => (error instanceof Error ? error : new Error(String(error))),
-  )
+    }, standardErrorTransformer)()
 
   const result = await getConfigurable(config).asyncAndThen(invoke)
 

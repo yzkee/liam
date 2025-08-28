@@ -331,6 +331,9 @@ importers:
       '@liam-hq/db':
         specifier: workspace:*
         version: link:../db
+      '@liam-hq/neverthrow':
+        specifier: workspace:*
+        version: link:../neverthrow
       '@liam-hq/pglite-server':
         specifier: workspace:*
         version: link:../pglite-server
@@ -569,6 +572,25 @@ importers:
         specifier: 5.9.2
         version: 5.9.2
 
+  frontend/internal-packages/neverthrow:
+    dependencies:
+      neverthrow:
+        specifier: 8.2.0
+        version: 8.2.0
+    devDependencies:
+      '@biomejs/biome':
+        specifier: 2.1.4
+        version: 2.1.4
+      '@liam-hq/configs':
+        specifier: workspace:*
+        version: link:../configs
+      '@types/node':
+        specifier: 22.17.1
+        version: 22.17.1
+      typescript:
+        specifier: 5.9.2
+        version: 5.9.2
+
   frontend/internal-packages/pglite-server:
     dependencies:
       '@electric-sql/pglite':
@@ -605,6 +627,9 @@ importers:
       '@liam-hq/agent':
         specifier: workspace:*
         version: link:../agent
+      '@liam-hq/neverthrow':
+        specifier: workspace:*
+        version: link:../neverthrow
       '@liam-hq/schema':
         specifier: workspace:*
         version: link:../../packages/schema
@@ -867,6 +892,9 @@ importers:
 
   frontend/packages/schema:
     dependencies:
+      '@liam-hq/neverthrow':
+        specifier: workspace:*
+        version: link:../../internal-packages/neverthrow
       '@prisma/internals':
         specifier: 6.8.2
         version: 6.8.2(typescript@5.9.2)
@@ -18143,7 +18171,7 @@ snapshots:
       isstream: 0.1.2
       jsonwebtoken: 9.0.2
       mime-types: 2.1.35
-      retry-axios: 2.6.0(axios@1.11.0)
+      retry-axios: 2.6.0(axios@1.11.0(debug@4.4.1))
       tough-cookie: 4.1.4
     transitivePeerDependencies:
       - supports-color
@@ -20809,7 +20837,7 @@ snapshots:
       onetime: 7.0.0
       signal-exit: 4.1.0
 
-  retry-axios@2.6.0(axios@1.11.0):
+  retry-axios@2.6.0(axios@1.11.0(debug@4.4.1)):
     dependencies:
       axios: 1.11.0(debug@4.4.1)
 

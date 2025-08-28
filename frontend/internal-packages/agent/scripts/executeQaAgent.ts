@@ -55,6 +55,10 @@ const createWorkflowState = (
 
   const workflowState: WorkflowState = {
     userInput,
+    // Why: QA agent doesn't need the original user input in messages.
+    // It operates solely based on analyzedRequirements which provides
+    // the structured context needed for test generation.
+    // TODO: Create QA-specific annotation to remove userInput field entirely
     messages: [],
     schemaData,
     buildingSchemaId: buildingSchema.id,

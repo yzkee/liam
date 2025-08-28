@@ -3,8 +3,12 @@ import { Result, ResultAsync } from 'neverthrow'
 export const standardErrorTransformer = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error))
 
-export const fromThrowable = <T, E extends Error = Error>(
-  fn: () => T,
+export const fromThrowable = <
+  A extends readonly unknown[],
+  T,
+  E extends Error = Error,
+>(
+  fn: (...args: A) => T,
   errorTransformer?: (error: unknown) => E,
 ) =>
   Result.fromThrowable(
@@ -12,8 +16,12 @@ export const fromThrowable = <T, E extends Error = Error>(
     errorTransformer ?? (standardErrorTransformer as (error: unknown) => E),
   )
 
-export const fromAsyncThrowable = <T, E extends Error = Error>(
-  fn: () => Promise<T>,
+export const fromAsyncThrowable = <
+  A extends readonly unknown[],
+  T,
+  E extends Error = Error,
+>(
+  fn: (...args: A) => Promise<T>,
   errorTransformer?: (error: unknown) => E,
 ) =>
   ResultAsync.fromThrowable(

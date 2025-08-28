@@ -98,10 +98,7 @@ const formatUnknownContent = (content: unknown): string => {
   }
 
   if (typeof content === 'object') {
-    return fromThrowable(
-      () => JSON.stringify(content, null, 2),
-      () => new Error('Failed to stringify content'),
-    )().match(
+    return fromThrowable(() => JSON.stringify(content, null, 2))().match(
       (jsonString) => `\`\`\`json\n${jsonString}\n\`\`\``,
       () => String(content),
     )

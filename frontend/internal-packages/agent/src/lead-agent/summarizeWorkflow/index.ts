@@ -8,6 +8,7 @@ import { END } from '@langchain/langgraph'
 import { ChatOpenAI } from '@langchain/openai'
 import { ResultAsync } from 'neverthrow'
 import type { WorkflowState } from '../../chat/workflow/types'
+import { SSE_EVENTS } from '../../client'
 
 /**
  * Summarizes the workflow by generating a summary of what was accomplished
@@ -68,7 +69,7 @@ Keep the summary informative but concise, focusing on the key achievements and d
 
         for await (const _chunk of stream) {
           const chunk = new AIMessageChunk({ ..._chunk, id, name: 'lead' })
-          await dispatchCustomEvent('messages', chunk)
+          await dispatchCustomEvent(SSE_EVENTS.MESSAGES, chunk)
 
           // Accumulate chunks using concat method
           accumulatedChunk = accumulatedChunk

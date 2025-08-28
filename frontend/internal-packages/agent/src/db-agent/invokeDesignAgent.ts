@@ -8,6 +8,7 @@ import {
 import { ChatOpenAI } from '@langchain/openai'
 import { ResultAsync } from 'neverthrow'
 import * as v from 'valibot'
+import { SSE_EVENTS } from '../client'
 import { reasoningSchema } from '../langchain/utils/schema'
 import type { Reasoning } from '../langchain/utils/types'
 import type { ToolConfigurable } from './getToolConfigurable'
@@ -51,7 +52,7 @@ export const invokeDesignAgent = (
 
         for await (const _chunk of stream) {
           const chunk = new AIMessageChunk({ ..._chunk, id, name: 'db' })
-          await dispatchCustomEvent('messages', chunk)
+          await dispatchCustomEvent(SSE_EVENTS.MESSAGES, chunk)
 
           // Accumulate chunks using concat method
           accumulatedChunk = accumulatedChunk

@@ -4,6 +4,7 @@ import {
   deepModelingStream,
   invokeDbAgentStream,
 } from '@liam-hq/agent'
+import { SSE_EVENTS } from '@liam-hq/agent/client'
 import { NextResponse } from 'next/server'
 import * as v from 'valibot'
 import { createClient } from '@/libs/db/server'
@@ -126,7 +127,7 @@ export async function POST(request: Request) {
         for await (const ev of events) {
           controller.enqueue(enc.encode(line(ev.event, ev.data)))
         }
-        controller.enqueue(enc.encode(line('end', null)))
+        controller.enqueue(enc.encode(line(SSE_EVENTS.END, null)))
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err)
         controller.enqueue(enc.encode(line('error', { message })))

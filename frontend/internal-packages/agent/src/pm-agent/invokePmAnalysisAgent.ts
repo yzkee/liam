@@ -9,6 +9,7 @@ import { ChatOpenAI } from '@langchain/openai'
 import { ResultAsync } from 'neverthrow'
 import * as v from 'valibot'
 import type { WorkflowConfigurable } from '../chat/workflow/types'
+import { SSE_EVENTS } from '../client'
 import { reasoningSchema } from '../langchain/utils/schema'
 import type { Reasoning } from '../langchain/utils/types'
 import { removeReasoningFromMessages } from '../utils/messageCleanup'
@@ -69,7 +70,7 @@ export const invokePmAnalysisAgent = (
 
         for await (const _chunk of stream) {
           const chunk = new AIMessageChunk({ ..._chunk, id, name: 'pm' })
-          await dispatchCustomEvent('messages', chunk)
+          await dispatchCustomEvent(SSE_EVENTS.MESSAGES, chunk)
 
           // Accumulate chunks using concat method
           accumulatedChunk = accumulatedChunk

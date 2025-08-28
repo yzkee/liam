@@ -130,7 +130,7 @@ export async function POST(request: Request) {
         controller.enqueue(enc.encode(line(SSE_EVENTS.END, null)))
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err)
-        controller.enqueue(enc.encode(line('error', { message })))
+        controller.enqueue(enc.encode(line(SSE_EVENTS.ERROR, { message })))
       } finally {
         controller.close()
       }

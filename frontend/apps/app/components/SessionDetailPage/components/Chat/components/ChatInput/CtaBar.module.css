@@ -8,19 +8,6 @@
   color: rgba(0, 0, 0, 0.9);
 }
 
-.ctaContent {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-}
-
-.ctaLogo {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-  filter: invert(1);
-}
-
 .ctaText {
   font-size: var(--font-size-3);
   font-weight: 500;

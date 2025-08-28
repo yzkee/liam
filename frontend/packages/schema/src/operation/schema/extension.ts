@@ -23,19 +23,7 @@ const removeExtensionOperation = v.object({
   ),
 })
 
-// Replace extension operation
-const replaceExtensionOperation = v.object({
-  op: v.literal('replace'),
-  path: v.pipe(
-    v.string(),
-    v.regex(PATH_PATTERNS.EXTENSION_BASE),
-    v.description('Path to replace extension (e.g., /extensions/vector)'),
-  ),
-  value: extensionSchema,
-})
-
 export const extensionOperations = [
   addExtensionOperation,
   removeExtensionOperation,
-  replaceExtensionOperation,
 ]

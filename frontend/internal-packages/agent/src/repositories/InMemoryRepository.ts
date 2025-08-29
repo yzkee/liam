@@ -21,6 +21,7 @@ import type {
   UpdateArtifactParams,
   UpdateTimelineItemParams,
   UpdateWorkflowRunStatusParams,
+  UserInfo,
   VersionResult,
   WorkflowRunResult,
 } from './types'
@@ -504,5 +505,13 @@ export class InMemoryRepository implements SchemaRepository {
    */
   getBuildingSchema(buildingSchemaId: string) {
     return this.state.buildingSchemas.get(buildingSchemaId) || null
+  }
+
+  async getUserInfo(userId: string): Promise<UserInfo | null> {
+    return {
+      id: userId,
+      email: `user-${userId}@example.com`,
+      userName: `Test User ${userId}`,
+    }
   }
 }

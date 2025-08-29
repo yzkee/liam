@@ -1,7 +1,7 @@
 import type { HumanMessage as HumanMessageType } from '@langchain/core/messages'
+import { Avatar } from '@liam-hq/ui'
 import type { FC } from 'react'
 import * as v from 'valibot'
-import { Avatar } from '@/components'
 import { MarkdownContent } from '@/components/MarkdownContent'
 import { extractResponseFromMessage } from '../utils/extractResponseFromMessage'
 import styles from './HumanMessage.module.css'

@@ -86,7 +86,6 @@ The current schema structure will be provided:
   }}]
 }}
 
-
 # Output Requirements
 - Status reports and confirmations: Use clear, concise text
 - Tool operations (JSON): Use full verbosity with all required fields, clear structure, and explicit comments

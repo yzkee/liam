@@ -26,5 +26,5 @@ Expected arguments:
 - Format (optional - will auto-detect if not provided)
 
 Example usage:
-`/parse-schema schema.sql case-002`
-`/parse-schema prisma/schema.prisma case-003 --format prisma`
+`/parse-schema-for-dataset schema.sql case-002`
+`/parse-schema-for-dataset prisma/schema.prisma case-003 --format prisma`

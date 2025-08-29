@@ -3,6 +3,7 @@ import { Avatar } from '@liam-hq/ui'
 import type { FC } from 'react'
 import * as v from 'valibot'
 import { MarkdownContent } from '@/components/MarkdownContent'
+import { CopyButton } from '@/components/SessionDetailPage/components/CopyButton'
 import { extractResponseFromMessage } from '../utils/extractResponseFromMessage'
 import styles from './HumanMessage.module.css'
 
@@ -50,6 +51,13 @@ export const HumanMessage: FC<Props> = ({ message }) => {
             <div className={styles.messageText}>
               <MarkdownContent content={content} />
             </div>
+          </div>
+          <div className={styles.copyButtonWrapper}>
+            <CopyButton
+              textToCopy={content}
+              tooltipLabel="Copy message"
+              size="sm"
+            />
           </div>
         </div>
       </div>

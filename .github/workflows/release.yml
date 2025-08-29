@@ -58,7 +58,7 @@ jobs:
         env:
           INCOMING_WEBHOOK_URL: ${{ secrets.SLACK_CLI_CI_WEBHOOK_URL }}
         with:
-          text: "Release Failure"
+          text: "main branch failure(.github/workflows/release.yml)"
           attachments: |
             [
               {

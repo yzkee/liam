@@ -35,7 +35,7 @@
     "prebuild": "pnpm create-env-files",
     "prelint": "pnpm create-env-files",
     "prepare": "lefthook install",
-    "release": "pnpm build && pnpm changeset publish",
+    "release": "pnpm build --filter @liam-hq/cli && pnpm changeset publish",
     "test": "turbo test",
     "test:coverage": "vitest --coverage",
     "test:e2e": "turbo test:e2e",

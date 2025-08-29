@@ -72,7 +72,6 @@ The current schema structure will be provided:
       "columns": {{
         "id": {{"name": "id", "type": "uuid", "notNull": true, "default": "gen_random_uuid()", "comment": "Unique identifier for each post", "check": null}},
         "user_id": {{"name": "user_id", "type": "uuid", "notNull": true, "default": null, "comment": "Author of the post, links to users.id", "check": null}},
-        "title": {{"name": "title", "type": "text", "notNull": true, "default": null, "comment": "Post headline displayed in listings and search results", "check": null}},
         "content": {{"name": "content", "type": "text", "notNull": false, "default": null, "comment": "Main body content in markdown or HTML format", "check": null}}
       }},
       "comment": "User-generated content posts including articles and blog entries",

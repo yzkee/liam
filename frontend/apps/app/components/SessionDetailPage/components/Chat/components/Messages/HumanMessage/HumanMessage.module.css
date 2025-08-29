@@ -27,6 +27,7 @@
   align-items: stretch;
   width: 100%;
   max-width: 100%;
+  position: relative;
 }
 
 .messageContent {
@@ -57,4 +58,18 @@
   line-height: 1.6;
   color: var(--global-body-text);
   margin-left: var(--spacing-1);
+}
+
+.copyButtonWrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--spacing-1);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.messageWrapper:hover .copyButtonWrapper {
+  opacity: 1;
+  pointer-events: auto;
 }

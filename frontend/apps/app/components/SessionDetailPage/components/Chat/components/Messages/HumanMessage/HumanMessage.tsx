@@ -1,5 +1,3 @@
-'use client'
-
 import type { HumanMessage as HumanMessageType } from '@langchain/core/messages'
 import { Avatar } from '@liam-hq/ui'
 import type { FC } from 'react'

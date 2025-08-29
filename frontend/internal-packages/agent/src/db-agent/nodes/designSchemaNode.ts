@@ -2,7 +2,6 @@ import type { RunnableConfig } from '@langchain/core/runnables'
 import type { Database } from '@liam-hq/db'
 import { getConfigurable } from '../../chat/workflow/shared/getConfigurable'
 import type { WorkflowState } from '../../chat/workflow/types'
-import { logAssistantMessage } from '../../chat/workflow/utils/timelineLogger'
 import { withTimelineItemSync } from '../../chat/workflow/utils/withTimelineItemSync'
 import { WorkflowTerminationError } from '../../shared/errorHandling'
 import { convertSchemaToText } from '../../utils/convertSchemaToText'
@@ -44,19 +43,7 @@ export async function designSchemaNode(
     throw new WorkflowTerminationError(invokeResult.error, 'designSchemaNode')
   }
 
-  const { response, reasoning } = invokeResult.value
-
-  // Log reasoning summary if available
-  if (reasoning?.summary && reasoning.summary.length > 0) {
-    for (const summaryItem of reasoning.summary) {
-      await logAssistantMessage(
-        state,
-        repositories,
-        summaryItem.text,
-        assistantRole,
-      )
-    }
-  }
+  const { response } = invokeResult.value
 
   // Apply timeline sync to the message and clear retry flags
   const syncedMessage = await withTimelineItemSync(response, {

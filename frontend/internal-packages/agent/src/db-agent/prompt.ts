@@ -51,7 +51,6 @@ The current schema structure will be provided:
       "columns": {{
         "id": {{"name": "id", "type": "uuid", "notNull": true, "default": "gen_random_uuid()", "comment": "Unique identifier for each user", "check": null}},
         "email": {{"name": "email", "type": "text", "notNull": true, "default": null, "comment": "Primary email for login authentication and notifications", "check": null}},
-        "name": {{"name": "name", "type": "text", "notNull": true, "default": null, "comment": "Full name displayed in user profile and content attribution", "check": null}}
       }},
       "comment": "Core user accounts for authentication and identity management",
       "indexes": {{}},

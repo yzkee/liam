@@ -1,18 +1,22 @@
 import { AIMessage, HumanMessage } from '@langchain/core/messages'
-import { END } from '@langchain/langgraph'
+import { END, START, StateGraph } from '@langchain/langgraph'
 import { describe, it } from 'vitest'
 import {
   getTestConfig,
   outputStream,
-  setupGraph,
 } from '../../../test-utils/workflowTestHelpers'
+import { workflowAnnotation } from '../../chat/workflow/shared/createAnnotations'
 import type { WorkflowState } from '../../chat/workflow/types'
 import { summarizeWorkflow } from './index'
 
 describe('summarizeWorkflow Integration', () => {
   it('should execute summarizeWorkflow with real APIs', async () => {
     // Arrange
-    const graph = setupGraph(summarizeWorkflow)
+    const graph = new StateGraph(workflowAnnotation)
+      .addNode('summarizeWorkflow', summarizeWorkflow)
+      .addEdge(START, 'summarizeWorkflow')
+      .addEdge('summarizeWorkflow', END)
+      .compile()
     const { config, context } = await getTestConfig()
 
     // Explicitly define the state needed for summarization

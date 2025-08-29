@@ -1,5 +1,4 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
-import { END, START, StateGraph } from '@langchain/langgraph'
 import {
   createLogger,
   setupDatabaseAndUser,
@@ -7,38 +6,13 @@ import {
 } from '../scripts/shared/scriptUtils'
 import { findOrCreateDesignSession } from '../scripts/shared/sessionUtils'
 import { processStreamChunk } from '../scripts/shared/streamingUtils'
-import { workflowAnnotation } from '../src/chat/workflow/shared/createAnnotations'
-import type { WorkflowState } from '../src/chat/workflow/types'
-
-type NodeFn =
-  | ((state: WorkflowState) => Promise<Partial<WorkflowState> | WorkflowState>)
-  | ((
-      state: WorkflowState,
-      config: RunnableConfig,
-    ) => Promise<Partial<WorkflowState> | WorkflowState>)
-
-/**
- * Sets up a compiled graph for a single node workflow
- * Encapsulates the repetitive graph construction pattern
- */
-export const setupGraph = (nodeFn: NodeFn, annotation = workflowAnnotation) => {
-  const nodeName = nodeFn.name
-
-  return new StateGraph(annotation)
-    .addNode(nodeName, nodeFn)
-    .addEdge(START, nodeName)
-    .addEdge(nodeName, END)
-    .compile()
-}
-
-type StreamChunk = Record<string, unknown>
 
 /**
  * Processes and outputs the stream from a workflow execution
  * Encapsulates the streaming and logging logic
  */
-export const outputStream = async (
-  stream: AsyncGenerator<StreamChunk, void, unknown>,
+export const outputStream = async <T extends Record<string, unknown>>(
+  stream: AsyncGenerator<T, void, unknown>,
   logLevel: 'ERROR' | 'INFO' | 'DEBUG' = 'INFO',
 ): Promise<void> => {
   const logger = createLogger(logLevel)

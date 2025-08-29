@@ -1,18 +1,22 @@
 import { HumanMessage } from '@langchain/core/messages'
-import { END } from '@langchain/langgraph'
+import { END, START, StateGraph } from '@langchain/langgraph'
 import { describe, it } from 'vitest'
 import {
   getTestConfig,
   outputStream,
-  setupGraph,
 } from '../../../test-utils/workflowTestHelpers'
+import { workflowAnnotation } from '../../chat/workflow/shared/createAnnotations'
 import type { WorkflowState } from '../../chat/workflow/types'
 import { designSchemaNode } from './designSchemaNode'
 
 describe('designSchemaNode Integration', () => {
   it('should execute designSchemaNode with real APIs', async () => {
     // Arrange
-    const graph = setupGraph(designSchemaNode)
+    const graph = new StateGraph(workflowAnnotation)
+      .addNode('designSchemaNode', designSchemaNode)
+      .addEdge(START, 'designSchemaNode')
+      .addEdge('designSchemaNode', END)
+      .compile()
     const { config, context } = await getTestConfig()
 
     const userInput =

@@ -1,13 +1,12 @@
 import { ToolMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { type StructuredTool, tool } from '@langchain/core/tools'
-import type { JSONSchema } from '@langchain/core/utils/json_schema'
 import { Command } from '@langchain/langgraph'
 import { dmlOperationSchema } from '@liam-hq/artifact'
-import { toJsonSchema } from '@valibot/to-json-schema'
 import { v4 as uuidv4 } from 'uuid'
 import * as v from 'valibot'
 import { WorkflowTerminationError } from '../../shared/errorHandling'
+import { toJsonSchema } from '../../shared/jsonSchema'
 import { type Testcase, testcaseSchema } from '../types'
 
 const dmlOperationWithoutLogsSchema = v.omit(dmlOperationSchema, [
@@ -23,9 +22,7 @@ const saveTestcasesAndDmlToolSchema = v.object({
   testcasesWithDml: v.array(testcaseWithDmlSchema),
 })
 
-// toJsonSchema returns a JSONSchema7, which is not assignable to JSONSchema
-// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-const toolSchema = toJsonSchema(saveTestcasesAndDmlToolSchema) as JSONSchema
+const toolSchema = toJsonSchema(saveTestcasesAndDmlToolSchema)
 
 const configSchema = v.object({
   toolCall: v.object({

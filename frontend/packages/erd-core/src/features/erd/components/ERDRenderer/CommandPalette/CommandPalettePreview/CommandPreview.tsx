@@ -1,3 +1,4 @@
+import type { StaticImageData } from 'next/image'
 import type { FC } from 'react'
 import copyLink from './assets/copy-link.mp4'
 import showAllFields from './assets/show-all-fields.png'
@@ -17,11 +18,14 @@ const COMMAND_VIDEO_SOURCE: Record<string, string> = {
   'Tidy Up': tidyUp,
 }
 
-const COMMAND_IMAGE_SOURCE: Record<string, string> = {
+const COMMAND_IMAGE_SOURCE: Record<string, string | StaticImageData> = {
   'Show All Fields': showAllFields,
   'Show Key Only': showKeyOnly,
   'Show Table Name': showTableName,
 }
+
+const getImageSrc = (imageSrc: string | StaticImageData) =>
+  typeof imageSrc === 'string' ? imageSrc : imageSrc.src
 
 export const CommandPreview: FC<Props> = ({ commandName }) => {
   return (
@@ -33,7 +37,7 @@ export const CommandPreview: FC<Props> = ({ commandName }) => {
       )}
       {COMMAND_IMAGE_SOURCE[commandName] && (
         <img
-          src={COMMAND_IMAGE_SOURCE[commandName]}
+          src={getImageSrc(COMMAND_IMAGE_SOURCE[commandName])}
           className={styles.image}
           alt=""
         />

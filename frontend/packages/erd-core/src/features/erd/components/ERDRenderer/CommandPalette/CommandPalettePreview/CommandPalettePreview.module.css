@@ -14,7 +14,8 @@
   scrollbar-gutter: stable both-edges;
 }
 
-.image {
+.image,
+.video {
   height: 100%;
   width: 100%;
 }

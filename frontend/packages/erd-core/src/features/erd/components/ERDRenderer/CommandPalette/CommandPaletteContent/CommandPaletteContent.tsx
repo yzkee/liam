@@ -6,6 +6,7 @@ import {
   CommandPaletteCommandOptions,
   TableOptions,
 } from '../CommandPaletteOptions'
+import { CommandPreview } from '../CommandPalettePreview/CommandPreview'
 import { TablePreview } from '../CommandPalettePreview/TablePreview'
 import { CommandPaletteSearchInput } from '../CommandPaletteSearchInput'
 import type { CommandPaletteInputMode } from '../types'
@@ -73,11 +74,9 @@ export const CommandPaletteContent: FC = () => {
           {suggestion?.type === 'table' && (
             <TablePreview tableName={suggestion.name} />
           )}
-          {
-            suggestion?.type === 'command' && null
-            // TODO(command options): display a preview component for command options, as like:
-            // <CommandPreview commandName={suggestion.name} />
-          }
+          {suggestion?.type === 'command' && (
+            <CommandPreview commandName={suggestion.name} />
+          )}
         </div>
       </div>
     </Command>

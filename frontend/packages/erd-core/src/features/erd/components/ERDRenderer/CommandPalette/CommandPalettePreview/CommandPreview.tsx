@@ -31,7 +31,13 @@ export const CommandPreview: FC<Props> = ({ commandName }) => {
   return (
     <div className={styles.container}>
       {COMMAND_VIDEO_SOURCE[commandName] && (
-        <video muted autoPlay className={styles.video} key={commandName}>
+        <video
+          muted
+          autoPlay
+          className={styles.video}
+          key={commandName}
+          aria-label={`Demonstration of the ${commandName} command execution result`}
+        >
           <source src={COMMAND_VIDEO_SOURCE[commandName]} type="video/mp4" />
         </video>
       )}
@@ -39,7 +45,7 @@ export const CommandPreview: FC<Props> = ({ commandName }) => {
         <img
           src={getImageSrc(COMMAND_IMAGE_SOURCE[commandName])}
           className={styles.image}
-          alt=""
+          alt={`Demonstration of the ${commandName} command execution result`}
         />
       )}
     </div>

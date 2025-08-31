@@ -6,8 +6,7 @@ import {
   CommandPaletteCommandOptions,
   TableOptions,
 } from '../CommandPaletteOptions'
-import { CommandPreview } from '../CommandPalettePreview/CommandPreview'
-import { TablePreview } from '../CommandPalettePreview/TablePreview'
+import { CommandPreview, TablePreview } from '../CommandPalettePreview'
 import { CommandPaletteSearchInput } from '../CommandPaletteSearchInput'
 import type { CommandPaletteInputMode } from '../types'
 import { textToSuggestion } from '../utils'

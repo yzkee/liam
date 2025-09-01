@@ -132,6 +132,7 @@ export const saveRequirementsToArtifactTool: StructuredTool = tool(
     }
 
     const toolMessage = new ToolMessage({
+      status: 'success',
       content: 'Requirements saved successfully to artifact',
       tool_call_id: toolCallId,
     })

@@ -69,6 +69,35 @@ describe('generateCreateExtensionStatement', () => {
         name: 'MyExtension',
         expected: 'CREATE EXTENSION IF NOT EXISTS "MyExtension";',
       },
+      // Edge cases: names starting with digits
+      {
+        name: '3d_extension',
+        expected: 'CREATE EXTENSION IF NOT EXISTS "3d_extension";',
+      },
+      // Edge cases: names with internal double quotes
+      {
+        name: 'my"special"extension',
+        expected: 'CREATE EXTENSION IF NOT EXISTS "my""special""extension";',
+      },
+      // Edge cases: names with spaces
+      {
+        name: 'my extension',
+        expected: 'CREATE EXTENSION IF NOT EXISTS "my extension";',
+      },
+      // Edge cases: names with special characters
+      {
+        name: 'ext$name',
+        expected: 'CREATE EXTENSION IF NOT EXISTS "ext$name";',
+      },
+      // Simple lowercase-only names should not be quoted
+      {
+        name: 'simple_name',
+        expected: 'CREATE EXTENSION IF NOT EXISTS simple_name;',
+      },
+      {
+        name: '_underscore_start',
+        expected: 'CREATE EXTENSION IF NOT EXISTS _underscore_start;',
+      },
     ]
 
     it.each(extensionTestCases)(

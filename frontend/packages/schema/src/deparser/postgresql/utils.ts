@@ -469,11 +469,21 @@ export function generateCreateEnumStatement(enumObj: Enum): string {
  * Generate CREATE EXTENSION statement from Extension type
  */
 export function generateCreateExtensionStatement(extension: Extension): string {
-  // Quote extension names containing hyphens or uppercase letters
-  const quotedName =
-    extension.name.includes('-') || /[A-Z]/.test(extension.name)
-      ? `"${extension.name}"`
-      : extension.name
+  // PostgreSQL simple unquoted identifier pattern: starts with lowercase letter or underscore,
+  // followed by lowercase letters, digits, or underscores
+  const simpleIdentifierPattern = /^[a-z_][a-z0-9_]*$/
 
-  return `CREATE EXTENSION IF NOT EXISTS ${quotedName};`
+  // Check if the extension name needs quoting
+  let extensionName: string
+  if (simpleIdentifierPattern.test(extension.name)) {
+    // Simple identifier - no quoting needed
+    extensionName = extension.name
+  } else {
+    // Non-simple identifier - needs quoting and escaping
+    // Escape internal double quotes by doubling them
+    const escaped = extension.name.replace(/"/g, '""')
+    extensionName = `"${escaped}"`
+  }
+
+  return `CREATE EXTENSION IF NOT EXISTS ${extensionName};`
 }

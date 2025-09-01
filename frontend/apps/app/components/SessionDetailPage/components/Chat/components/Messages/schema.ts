@@ -14,18 +14,15 @@ const reasoningSchema = v.object({
 
 const toolCallSchema = v.object({
   id: v.string(),
-  type: v.literal('function'),
-  index: v.number(),
-  function: v.object({
-    arguments: v.string(),
-    name: v.string(),
-  }),
+  name: v.string(),
+  type: v.literal('tool_call'),
+  args: v.record(v.string(), v.unknown()),
 })
+export type ToolCall = v.InferOutput<typeof toolCallSchema>
 
-const toolCallsSchema = v.array(toolCallSchema)
+export const toolCallsSchema = v.array(toolCallSchema)
 export type ToolCalls = v.InferOutput<typeof toolCallsSchema>
 
 export const additionalKwargsSchema = v.object({
   reasoning: v.optional(reasoningSchema),
-  tool_calls: v.optional(toolCallsSchema),
 })

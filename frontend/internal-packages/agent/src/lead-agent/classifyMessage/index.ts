@@ -101,6 +101,7 @@ export async function classifyMessage(
   if (response.tool_calls?.[0]?.name === 'routeToAgent') {
     // Create ToolMessage to properly complete the tool call
     const toolMessage = new ToolMessage({
+      status: 'success',
       content: response.tool_calls[0].args?.['targetAgent'] || 'pmAgent',
       tool_call_id: response.tool_calls[0].id ?? '',
     })

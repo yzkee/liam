@@ -95,6 +95,7 @@ export const saveTestcasesAndDmlTool: StructuredTool = tool(
     )
 
     const toolMessage = new ToolMessage({
+      status: 'success',
       content: `Successfully saved ${generatedTestcases.length} test cases with ${totalDmlOperations} DML operations`,
       tool_call_id: toolCallId,
     })

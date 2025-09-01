@@ -58,7 +58,11 @@ jobs:
           git checkout -b "$BRANCH_NAME"
           git add "$LICENSE_REPORT"
           git commit -m "Update $LICENSE_REPORT"
+          
+          # Configure git to use the token for authentication
+          git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git"
           git push origin "$BRANCH_NAME"
+          
           gh pr create \
             --title "[$(date +'%Y/%m/%d')] License Report Update" \
             --body "This pull request automatically updates the license report."

@@ -39,17 +39,6 @@
   width: 100%;
 }
 
-.messageText {
-  color: var(--overlay-70);
-  font-family: var(--main-font), sans-serif;
-  font-weight: 400;
-  font-size: var(--font-size-4);
-  line-height: 1.6;
-  word-wrap: break-word;
-  white-space: normal;
-  width: 100%;
-}
-
 .userName {
   font-family: var(--main-font), sans-serif;
   font-weight: 500;

@@ -54,7 +54,7 @@ export async function classifyMessage(
         (async () => {
           // OpenAI ("chatcmpl-...") and LangGraph ("run-...") use different id formats,
           // so we overwrite with a UUID to unify chunk ids for consistent handling.
-          const id = crypto.randomUUID()
+          const id = uuidv4()
           let accumulatedChunk: AIMessageChunk | null = null
 
           for await (const _chunk of stream) {

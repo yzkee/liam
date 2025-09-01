@@ -7,6 +7,7 @@ import {
 import { END } from '@langchain/langgraph'
 import { ChatOpenAI } from '@langchain/openai'
 import { ResultAsync } from 'neverthrow'
+import { v4 as uuidv4 } from 'uuid'
 import type { WorkflowState } from '../../chat/workflow/types'
 import { SSE_EVENTS } from '../../client'
 
@@ -66,7 +67,7 @@ Keep the summary informative but concise, focusing on the key achievements and d
       (async () => {
         // OpenAI ("chatcmpl-...") and LangGraph ("run-...") use different id formats,
         // so we overwrite with a UUID to unify chunk ids for consistent handling.
-        const id = crypto.randomUUID()
+        const id = uuidv4()
         let accumulatedChunk: AIMessageChunk | null = null
 
         for await (const _chunk of stream) {

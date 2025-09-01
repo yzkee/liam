@@ -1,10 +1,12 @@
-import { Wrench } from '@liam-hq/ui'
+import type { ToolMessage as ToolMessageType } from '@langchain/core/messages'
 import type { FC } from 'react'
 import type { ToolCalls as ToolCallsType } from '../../schema'
+import { ToolCall } from './ToolCall'
 import styles from './ToolCalls.module.css'
 
 type Props = {
   toolCalls: ToolCallsType
+  toolMessages: ToolMessageType[]
 }
 
 /**
@@ -18,25 +20,17 @@ type Props = {
  * 2. Icon System - Add specific icons for different tool types
  * 3. Argument Display - Better formatting for JSON arguments
  */
-export const ToolCalls: FC<Props> = ({ toolCalls }) => {
+export const ToolCalls: FC<Props> = ({ toolCalls, toolMessages }) => {
   if (toolCalls.length === 0) return null
 
   return (
     <div className={styles.container}>
       <div className={styles.title}>Tool Calls ({toolCalls.length})</div>
       {toolCalls.map((tc, _idx) => {
-        return (
-          <div key={tc.id} className={styles.toolCall}>
-            <div className={styles.toolCallTitle}>
-              <Wrench className={styles.icon} />
-              <p className={styles.functionName}>{tc.function.name}</p>
-            </div>
-            <div className={styles.args}>
-              <span className={styles.argTitle}>ARGUMENTS</span>
-              <code className={styles.argCode}>{tc.function.arguments}</code>
-            </div>
-          </div>
+        const toolMessage = toolMessages.find(
+          (msg) => msg.tool_call_id === tc.id,
         )
+        return <ToolCall key={tc.id} toolCall={tc} toolMessage={toolMessage} />
       })}
     </div>
   )

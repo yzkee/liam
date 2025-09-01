@@ -1,10 +1,10 @@
-import type { BaseMessage } from '@langchain/core/messages'
+import type { AIMessage } from '@langchain/core/messages'
 import * as v from 'valibot'
-import { additionalKwargsSchema, type ToolCalls } from '../schema'
+import { type ToolCalls, toolCallsSchema } from '../schema'
 
-export function extractToolCallsFromMessage(message: BaseMessage): ToolCalls {
-  const parsed = v.safeParse(additionalKwargsSchema, message.additional_kwargs)
-  if (!parsed.success || parsed.output.tool_calls === undefined) return []
+export function extractToolCallsFromMessage(message: AIMessage): ToolCalls {
+  const parsed = v.safeParse(toolCallsSchema, message.tool_calls)
+  if (!parsed.success || parsed.output === undefined) return []
 
-  return parsed.output.tool_calls
+  return parsed.output
 }

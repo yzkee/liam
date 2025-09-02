@@ -150,12 +150,14 @@ async function processDataset(datasetName: string, datasetPath: string) {
   // Load input files
   const inputsResult = await loadInputFiles(datasetPath)
   if (inputsResult.isErr()) {
+    console.error('   ❌ Failed to load inputs')
     return { datasetName, success: 0, failure: 0 }
   }
 
   const inputs = inputsResult.value
 
   if (inputs.length === 0) {
+    console.warn('   ⚠️  No input files found')
     return { datasetName, success: 0, failure: 0 }
   }
 
@@ -186,6 +188,8 @@ async function processDataset(datasetName: string, datasetPath: string) {
 
   for (let i = 0; i < inputs.length; i += MAX_CONCURRENT) {
     const batch = inputs.slice(i, i + MAX_CONCURRENT)
+    const batchNum = Math.floor(i / MAX_CONCURRENT) + 1
+    const totalBatches = Math.ceil(inputs.length / MAX_CONCURRENT)
     await processBatch(batch)
   }
   return { datasetName, success: successCount, failure: failureCount }

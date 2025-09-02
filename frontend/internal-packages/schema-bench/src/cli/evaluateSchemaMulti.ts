@@ -19,7 +19,70 @@ async function evaluateDataset(datasetName: string, datasetPath: string) {
   const result = await evaluateSchema(config)
 
   if (result.isErr()) {
+    console.error('   ❌ Failed to evaluate dataset')
     return { datasetName, success: false, results: null, error: result.error }
+  }
+
+  const results = result.value
+  if (results && results.length > 0) {
+    // Calculate and display comprehensive metrics
+    const totalCases = results.length
+    const metrics = {
+      tableF1Score:
+        results.reduce((sum, r) => sum + (r.metrics.tableF1Score || 0), 0) /
+        totalCases,
+      tableRecall:
+        results.reduce((sum, r) => sum + (r.metrics.tableRecall || 0), 0) /
+        totalCases,
+      tableAllCorrectRate:
+        results.reduce(
+          (sum, r) => sum + (r.metrics.tableAllCorrectRate || 0),
+          0,
+        ) / totalCases,
+      columnF1ScoreAverage:
+        results.reduce(
+          (sum, r) => sum + (r.metrics.columnF1ScoreAverage || 0),
+          0,
+        ) / totalCases,
+      columnRecallAverage:
+        results.reduce(
+          (sum, r) => sum + (r.metrics.columnRecallAverage || 0),
+          0,
+        ) / totalCases,
+      columnAllCorrectRateAverage:
+        results.reduce(
+          (sum, r) => sum + (r.metrics.columnAllCorrectRateAverage || 0),
+          0,
+        ) / totalCases,
+      primaryKeyAccuracyAverage:
+        results.reduce(
+          (sum, r) => sum + (r.metrics.primaryKeyAccuracyAverage || 0),
+          0,
+        ) / totalCases,
+      constraintAccuracy:
+        results.reduce(
+          (sum, r) => sum + (r.metrics.constraintAccuracy || 0),
+          0,
+        ) / totalCases,
+      foreignKeyF1Score:
+        results.reduce(
+          (sum, r) => sum + (r.metrics.foreignKeyF1Score || 0),
+          0,
+        ) / totalCases,
+      foreignKeyRecall:
+        results.reduce((sum, r) => sum + (r.metrics.foreignKeyRecall || 0), 0) /
+        totalCases,
+      foreignKeyAllCorrectRate:
+        results.reduce(
+          (sum, r) => sum + (r.metrics.foreignKeyAllCorrectRate || 0),
+          0,
+        ) / totalCases,
+      overallSchemaAccuracy:
+        results.reduce(
+          (sum, r) => sum + (r.metrics.overallSchemaAccuracy || 0),
+          0,
+        ) / totalCases,
+    }
   }
 
   return { datasetName, success: true, results: result.value, error: null }

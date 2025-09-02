@@ -57,19 +57,21 @@ If execution succeeds, I'll run the evaluation on all datasets:
 pnpm --filter @liam-hq/schema-bench evaluateSchemaMulti
 ```
 
-The evaluation will display results for each dataset with focused metrics:
+The evaluation will display comprehensive metrics for each dataset:
 
-**Default Dataset Metrics:**
-- Table F1 Score & Recall
-- Column F1 Score & Recall  
-- Primary Key Accuracy
-- Foreign Key F1 Score & Recall
-- Overall Schema Accuracy
-
-**Entity-extraction Dataset Metrics (Recall-focused):**
-- **Table Recall**: % of required tables that were generated
-- **Column Recall**: % of required columns that were generated
-- **Perfect Extraction Rate**: Whether all mentioned entities were found
+**For each dataset:**
+- **Table F1 Score**: Harmonic mean of table precision and recall
+- **Table Recall**: How many reference tables were found
+- **Table All Correct Rate**: Percentage of perfectly matched tables
+- **Column F1 Score Average**: Average F1 score across all tables' columns
+- **Column Recall Average**: How many reference columns were found
+- **Column All Correct Rate Average**: Percentage of perfectly matched columns
+- **Primary Key Accuracy Average**: Accuracy of primary key identification
+- **Constraint Accuracy**: Accuracy of constraint detection
+- **Foreign Key F1 Score**: F1 score for foreign key relationships
+- **Foreign Key Recall**: How many reference foreign keys were found
+- **Foreign Key All Correct Rate**: Percentage of perfectly matched foreign keys
+- **Overall Schema Accuracy**: Combined accuracy across all metrics
 
 ### Expected Performance:
 - **Default dataset**: ~60-80% overall accuracy for complex schemas

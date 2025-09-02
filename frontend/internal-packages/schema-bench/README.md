@@ -33,6 +33,18 @@ pnpm --filter @liam-hq/schema-bench executeOpenai
 pnpm --filter @liam-hq/schema-bench executeLiamDB
 ```
 
+Dataset-specific variants (when using multiple datasets):
+
+- Default dataset
+```bash
+pnpm --filter @liam-hq/schema-bench executeLiamDB:default
+```
+
+- Entity-extraction dataset
+```bash
+pnpm --filter @liam-hq/schema-bench executeLiamDB:entityExtraction
+```
+
 ### 4. Evaluate Results
 ```bash
 pnpm --filter @liam-hq/schema-bench evaluateSchema
@@ -45,6 +57,8 @@ pnpm --filter @liam-hq/schema-bench evaluateSchema
 | `setupWorkspace` | Initialize benchmark directory structure |
 | `executeOpenai` | Generate schemas using OpenAI API |
 | `executeLiamDB` | Generate schemas using Liam's AI agent |
+| `executeLiamDB:default` | Run LiamDB executor for the default dataset |
+| `executeLiamDB:entityExtraction` | Run LiamDB executor for the entity-extraction dataset |
 | `evaluateSchema` | Evaluate generated schemas against references |
 
 ## Executors

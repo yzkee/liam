@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { existsSync, readdirSync } from 'node:fs'
-import { join } from 'node:path'
+import { isAbsolute, join, relative, resolve } from 'node:path'
 import { processDataset } from './executeLiamDbShared'
 import {
   getWorkspacePath,
@@ -13,6 +13,9 @@ type CliOptions = {
   datasets?: string[]
   useAll?: boolean
 }
+
+// Allow alphanumerics, '-', '_', 1..64 chars
+const VALID_DATASET = /^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/
 
 const parseArgs = (argv: string[]): CliOptions => {
   // Supported patterns:
@@ -28,6 +31,11 @@ const parseArgs = (argv: string[]): CliOptions => {
       continue
     }
     if (name) {
+      if (!VALID_DATASET.test(name)) {
+        handleCliError(
+          `Invalid dataset token "${name}". Allowed: letters, numbers, "-", "_" (1–64 chars).`,
+        )
+      }
       options.datasets = [...(options.datasets ?? []), name]
     }
   }
@@ -35,25 +43,9 @@ const parseArgs = (argv: string[]): CliOptions => {
 }
 
 const discoverDefaultDatasets = (workspacePath: string): string[] => {
-  // Prefer known names, then fill up to 3 from existing dirs
-  const preferred = ['default', 'entity-extraction', 'docs']
-  const existing = preferred.filter((name) =>
-    existsSync(join(workspacePath, name)),
-  )
-
-  if (existing.length >= 3) return existing.slice(0, 3)
-
-  try {
-    const entries = readdirSync(workspacePath, { withFileTypes: true })
-    const dirs = entries
-      .filter((e) => e.isDirectory())
-      .map((e) => e.name)
-      .filter((name) => !existing.includes(name))
-
-    return [...existing, ...dirs].slice(0, 3)
-  } catch {
-    return existing
-  }
+  // Default behavior: run only the 'default' dataset if it exists
+  const name = 'default'
+  return existsSync(join(workspacePath, name)) ? [name] : []
 }
 
 const listAllDatasets = (workspacePath: string): string[] => {
@@ -91,14 +83,29 @@ async function main() {
     failure: number
   }> = []
 
+  // Resolve workspace path once for containment checks
+  const resolvedWorkspace = resolve(workspacePath)
+
   for (const name of targetDatasets) {
-    const datasetPath = join(workspacePath, name)
+    // Resolve and verify the path stays within the workspace
+    const datasetPath = resolve(workspacePath, name)
+    const rel = relative(resolvedWorkspace, datasetPath)
+    if (rel.startsWith('..') || isAbsolute(rel)) {
+      console.warn(`   ⚠️  Skipping invalid dataset path: ${name}`)
+      continue
+    }
     if (!existsSync(datasetPath)) {
       // Silently skip missing datasets to mirror existing behavior
       continue
     }
     const result = await processDataset(name, datasetPath)
     results.push(result)
+  }
+
+  // Fail fast if nothing was processed (all targets missing/invalid)
+  if (results.length === 0) {
+    handleCliError('No datasets were processed (all were missing or invalid).')
+    return
   }
 
   const totalSuccess = results.reduce((sum, r) => sum + r.success, 0)

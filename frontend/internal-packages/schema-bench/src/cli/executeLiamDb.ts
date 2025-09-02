@@ -148,8 +148,8 @@ async function main() {
     return
   }
 
-  // Process each case with max 4 concurrent request
-  const MAX_CONCURRENT = 4
+  // Process each case with max 5 concurrent requests
+  const MAX_CONCURRENT = 5
   let successCount = 0
   let failureCount = 0
 

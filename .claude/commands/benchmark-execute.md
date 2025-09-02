@@ -34,7 +34,7 @@ This will set up two benchmark datasets:
 
 The system features:
 - **Parallel Processing**: Datasets are processed simultaneously for faster execution
-- **Smart Concurrency**: Each dataset uses MAX_CONCURRENT=2 for stability
+- **Smart Concurrency**: Each dataset uses MAX_CONCURRENT=5 for stability
 - **Input Standardization**: Entity-extraction inputs are automatically wrapped in `{"input": "..."}` format
 
 Next, I'll execute the specified model on all datasets:

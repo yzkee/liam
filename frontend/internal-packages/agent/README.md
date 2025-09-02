@@ -8,15 +8,17 @@ A **LangGraph implementation** for processing chat messages in the LIAM applicat
 %%{init: {'flowchart': {'curve': 'linear'}}}%%
 graph TD;
 	__start__([<p>__start__</p>]):::first
+	validateInitialSchema(validateInitialSchema)
 	leadAgent(leadAgent)
 	pmAgent(pmAgent)
 	dbAgent(dbAgent)
 	qaAgent(qaAgent)
 	__end__([<p>__end__</p>]):::last
-	__start__ --> leadAgent;
+	__start__ --> validateInitialSchema;
 	dbAgent --> qaAgent;
 	pmAgent --> dbAgent;
 	qaAgent --> leadAgent;
+	validateInitialSchema --> leadAgent;
 	leadAgent -.-> pmAgent;
 	leadAgent -.-> __end__;
 	classDef default fill:#f2f0ff,line-height:1.2;
@@ -60,6 +62,7 @@ interface WorkflowState {
 
 ## Nodes
 
+0. **validateInitialSchema**: Initial schema validation node that validates user-provided schema from initial_schema_snapshot using PostgreSQL deparser and PGLite execution - provides Instant Database initialization experience and terminates workflow on validation errors
 1. **leadAgent**: Lead Agent subgraph that routes requests to appropriate specialized agents
 2. **pmAgent**: PM Agent subgraph that handles requirements analysis - contains analyzeRequirements and invokeSaveArtifactTool nodes
 3. **dbAgent**: DB Agent subgraph that handles database schema design - contains designSchema and invokeSchemaDesignTool nodes (performed by dbAgent)

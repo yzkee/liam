@@ -26,7 +26,6 @@
     "executeLiamDB": "tsx src/cli/executeLiamDbUnified.ts",
     "executeLiamDB:default": "tsx src/cli/executeLiamDbDefault.ts",
     "executeLiamDB:entityExtraction": "tsx src/cli/executeLiamDbEntityExtraction.ts",
-    "executeLiamDBMulti": "tsx src/cli/executeLiamDbMulti.ts",
     "executeOpenai": "tsx src/cli/executeOpenai.ts",
     "fmt": "concurrently \"pnpm:fmt:*\"",
     "fmt:biome": "biome check --write --unsafe .",

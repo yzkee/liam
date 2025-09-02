@@ -153,8 +153,8 @@ export async function processDataset(
   // Load input files
   const inputsResult = await loadInputFiles(datasetPath)
   if (inputsResult.isErr()) {
-    console.error('   ❌ Failed to load inputs')
-    return { datasetName, success: 0, failure: 0 }
+    console.warn(`⚠️  ${datasetName}: ${inputsResult.error.message}`)
+    return { datasetName, success: 0, failure: 1 }
   }
 
   const inputs = inputsResult.value

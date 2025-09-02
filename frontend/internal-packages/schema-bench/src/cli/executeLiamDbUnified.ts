@@ -2,12 +2,12 @@
 
 import { existsSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
-import { processDataset } from './executeLiamDbShared.ts'
+import { processDataset } from './executeLiamDbShared'
 import {
   getWorkspacePath,
   handleCliError,
   handleUnexpectedError,
-} from './utils/index.ts'
+} from './utils'
 
 type CliOptions = {
   datasets?: string[]

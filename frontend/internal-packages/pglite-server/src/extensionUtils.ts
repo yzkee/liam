@@ -154,12 +154,8 @@ export async function loadExtensions(requiredExtensions: string[]): Promise<{
     const extensionModule = await loadExtensionModule(normalizedExt)
 
     if (extensionModule) {
-      try {
-        extensionModules[normalizedExt] = extensionModule
-        supportedExtensionNames.push(ext) // Add original extension name to supported list
-      } catch (error) {
-        console.error(`Failed to configure extension ${normalizedExt}:`, error)
-      }
+      extensionModules[normalizedExt] = extensionModule
+      supportedExtensionNames.push(ext) // Add original extension name to supported list
     }
     // Silently exclude unsupported extensions - they will be reported in the summary
   }

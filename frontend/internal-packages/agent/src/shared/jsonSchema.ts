@@ -9,6 +9,7 @@ import type { BaseSchema } from 'valibot'
  * conversion from JSONSchema7 to the more general JSONSchema type expected
  * by LangChain tools.
  */
+// biome-ignore lint/suspicious/noExplicitAny: Required for LangChain BaseSchema type compatibility
 export function toJsonSchema<TSchema extends BaseSchema<any, any, any>>(
   schema: TSchema,
 ): JSONSchema {

@@ -102,6 +102,7 @@ const visitVariableDeclarator = (
   enums: Record<string, DrizzleEnumDefinition>,
   schemas: Record<string, DrizzleSchemaDefinition>,
   variableToTableMapping: Record<string, string>,
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Complex logic for processing various MySQL declarator types (important-comment)
 ) => {
   if (!declarator.init || declarator.init.type !== 'CallExpression') return
 

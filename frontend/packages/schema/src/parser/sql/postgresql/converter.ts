@@ -498,6 +498,7 @@ export const convertToSchema = (
   /**
    * Process table-level constraint
    */
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Complex logic for processing different constraint types (important-comment)
   function processTableLevelConstraint(
     constraint: PgConstraint,
     tableName: string,
@@ -811,6 +812,7 @@ export const convertToSchema = (
   /**
    * Handle COMMENT statement
    */
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Complex logic for handling different comment statement types (important-comment)
   function handleCommentStmt(commentStmt: CommentStmt): void {
     // Skip if not a supported comment type (only table, column, and type comments are supported)
     if (

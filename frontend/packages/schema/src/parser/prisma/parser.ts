@@ -591,6 +591,7 @@ function isPrimitiveType(
   )
 }
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Complex logic for handling various Prisma default value types
 function extractDefaultValue(field: DMMF.Field) {
   const value = field.default?.valueOf()
   const defaultValue = value === undefined ? null : value

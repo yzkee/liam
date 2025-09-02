@@ -137,6 +137,7 @@ function extractIdColumnAndConstraint(
 /**
  * Process a call node and extract column, index, or constraint details
  */
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Complex parsing logic for processing various call node types (important-comment)
 function processCallNode(
   node: CallNode,
   columns: Column[],
@@ -350,6 +351,7 @@ function extractColumnOptions(
 /**
  * Extract inline index options from column definition
  */
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Complex logic for extracting various index option types (important-comment)
 function extractInlineIndexOptions(
   value: Node,
   columnName: string,

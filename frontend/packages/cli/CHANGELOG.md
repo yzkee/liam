@@ -1,5 +1,11 @@
 # @liam-hq/cli
 
+## 0.7.9
+
+### Patch Changes
+
+- [#3199](https://github.com/liam-hq/liam/pull/3199) - - 💄 style(command palette): fix table preview size / Thanks [@tnyo43](https://github.com/tnyo43)!
+
 ## 0.7.8
 
 ## 0.7.7

@@ -29,6 +29,47 @@ const createWorkspaceDirectories = (workspacePath: string): SetupResult => {
   }
 }
 
+const copyInputFilesWithNormalization = (
+  inputSourceDir: string,
+  inputTargetDir: string,
+): void => {
+  if (!fs.existsSync(inputSourceDir)) return
+  const inputFiles = fs.readdirSync(inputSourceDir)
+  for (const file of inputFiles) {
+    const sourcePath = path.join(inputSourceDir, file)
+    const targetPath = path.join(inputTargetDir, file)
+    if (fs.existsSync(targetPath)) continue
+
+    const content = fs.readFileSync(sourcePath, 'utf-8')
+    try {
+      const parsed = JSON.parse(content)
+      if (typeof parsed === 'string') {
+        const wrappedContent = JSON.stringify({ input: parsed }, null, 2)
+        fs.writeFileSync(targetPath, wrappedContent)
+      } else {
+        fs.copyFileSync(sourcePath, targetPath)
+      }
+    } catch {
+      fs.copyFileSync(sourcePath, targetPath)
+    }
+  }
+}
+
+const copyReferenceFiles = (
+  referenceSourceDir: string,
+  referenceTargetDir: string,
+): void => {
+  if (!fs.existsSync(referenceSourceDir)) return
+  const referenceFiles = fs.readdirSync(referenceSourceDir)
+  for (const file of referenceFiles) {
+    const sourcePath = path.join(referenceSourceDir, file)
+    const targetPath = path.join(referenceTargetDir, file)
+    if (!fs.existsSync(targetPath)) {
+      fs.copyFileSync(sourcePath, targetPath)
+    }
+  }
+}
+
 const copyDefaultData = (
   defaultDataPath: string,
   workspacePath: string,
@@ -43,43 +84,8 @@ const copyDefaultData = (
   const referenceTargetDir = path.join(workspacePath, 'execution', 'reference')
 
   try {
-    if (fs.existsSync(inputSourceDir)) {
-      const inputFiles = fs.readdirSync(inputSourceDir)
-      for (const file of inputFiles) {
-        const sourcePath = path.join(inputSourceDir, file)
-        const targetPath = path.join(inputTargetDir, file)
-        if (!fs.existsSync(targetPath)) {
-          // Read the content and check format
-          const content = fs.readFileSync(sourcePath, 'utf-8')
-          try {
-            const parsed = JSON.parse(content)
-            // If it's a string (entity-extraction format), wrap it
-            if (typeof parsed === 'string') {
-              const wrappedContent = JSON.stringify({ input: parsed }, null, 2)
-              fs.writeFileSync(targetPath, wrappedContent)
-            } else {
-              // Already in correct format, just copy
-              fs.copyFileSync(sourcePath, targetPath)
-            }
-          } catch {
-            // If parsing fails, just copy as-is
-            fs.copyFileSync(sourcePath, targetPath)
-          }
-        }
-      }
-    }
-
-    if (fs.existsSync(referenceSourceDir)) {
-      const referenceFiles = fs.readdirSync(referenceSourceDir)
-      for (const file of referenceFiles) {
-        const sourcePath = path.join(referenceSourceDir, file)
-        const targetPath = path.join(referenceTargetDir, file)
-        if (!fs.existsSync(targetPath)) {
-          fs.copyFileSync(sourcePath, targetPath)
-        }
-      }
-    }
-
+    copyInputFilesWithNormalization(inputSourceDir, inputTargetDir)
+    copyReferenceFiles(referenceSourceDir, referenceTargetDir)
     return ok(undefined)
   } catch (error) {
     return err({

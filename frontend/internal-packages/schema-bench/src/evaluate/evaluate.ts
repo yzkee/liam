@@ -280,55 +280,17 @@ export const evaluate = async (
     tableMapping,
   )
 
-  // 3. Column-level evaluation for each matched table
-  let totalColumnF1Score = 0
-  let totalColumnRecall = 0
-  let totalColumnAllCorrectCount = 0
-  let totalPrimaryKeyCorrectCount = 0
-  let totalConstraintCorrectCount = 0
-  const allColumnMappings: Record<string, Mapping> = {}
-
-  for (const tableName of Object.keys(tableMapping)) {
-    const referenceTable = reference.tables[tableName]
-    const predictTableName = tableMapping[tableName]
-    if (!predictTableName || !referenceTable) continue
-    const predictTable = predict.tables[predictTableName]
-    if (!predictTable) continue
-
-    const referenceColumnNames = Object.keys(referenceTable.columns)
-    const predictColumnNames = Object.keys(predictTable.columns)
-
-    const columnMapping = await createColumnMapping(
-      referenceColumnNames,
-      predictColumnNames,
-    )
-    allColumnMappings[tableName] = columnMapping
-
-    const { columnF1, columnRecall, columnAllcorrect } = calculateColumnMetrics(
-      referenceColumnNames,
-      predictColumnNames,
-      columnMapping,
-    )
-
-    totalColumnF1Score += columnF1
-    totalColumnRecall += columnRecall
-    totalColumnAllCorrectCount += columnAllcorrect
-
-    // Primary key validation
-    const isPrimaryKeyCorrect = validatePrimaryKeys(
-      referenceTable,
-      predictTable,
-      columnMapping,
-    )
-    totalPrimaryKeyCorrectCount += isPrimaryKeyCorrect ? 1 : 0
-
-    // Constraint validation
-    const isConstraintCorrect = validateConstraints(
-      referenceTable,
-      predictTable,
-    )
-    totalConstraintCorrectCount += isConstraintCorrect ? 1 : 0
-  }
+  // 3. Column-level evaluation for each matched table (aggregated)
+  const {
+    totals: {
+      totalColumnF1Score,
+      totalColumnRecall,
+      totalColumnAllCorrectCount,
+      totalPrimaryKeyCorrectCount,
+      totalConstraintCorrectCount,
+    },
+    allColumnMappings,
+  } = await aggregateTableEvaluations(reference, predict, tableMapping)
 
   const foreignKeyMapping = createForeignKeyMapping(
     reference.tables,
@@ -382,4 +344,71 @@ export const evaluate = async (
     foreignKeyAllCorrectRate: foreignKeyAllCorrect,
     overallSchemaAccuracy,
   }
+}
+
+type AggregationTotals = {
+  totalColumnF1Score: number
+  totalColumnRecall: number
+  totalColumnAllCorrectCount: number
+  totalPrimaryKeyCorrectCount: number
+  totalConstraintCorrectCount: number
+}
+
+const aggregateTableEvaluations = async (
+  reference: Schema,
+  predict: Schema,
+  tableMapping: Mapping,
+) => {
+  const totals: AggregationTotals = {
+    totalColumnF1Score: 0,
+    totalColumnRecall: 0,
+    totalColumnAllCorrectCount: 0,
+    totalPrimaryKeyCorrectCount: 0,
+    totalConstraintCorrectCount: 0,
+  }
+  const allColumnMappings: Record<string, Mapping> = {}
+
+  for (const tableName of Object.keys(tableMapping)) {
+    const referenceTable = reference.tables[tableName]
+    const predictTableName = tableMapping[tableName]
+    if (!predictTableName || !referenceTable) continue
+    const predictTable = predict.tables[predictTableName]
+    if (!predictTable) continue
+
+    const referenceColumnNames = Object.keys(referenceTable.columns)
+    const predictColumnNames = Object.keys(predictTable.columns)
+
+    const columnMapping = await createColumnMapping(
+      referenceColumnNames,
+      predictColumnNames,
+    )
+    allColumnMappings[tableName] = columnMapping
+
+    const { columnF1, columnRecall, columnAllcorrect } = calculateColumnMetrics(
+      referenceColumnNames,
+      predictColumnNames,
+      columnMapping,
+    )
+
+    totals.totalColumnF1Score += columnF1
+    totals.totalColumnRecall += columnRecall
+    totals.totalColumnAllCorrectCount += columnAllcorrect
+
+    // Primary key validation
+    const isPrimaryKeyCorrect = validatePrimaryKeys(
+      referenceTable,
+      predictTable,
+      columnMapping,
+    )
+    totals.totalPrimaryKeyCorrectCount += isPrimaryKeyCorrect ? 1 : 0
+
+    // Constraint validation
+    const isConstraintCorrect = validateConstraints(
+      referenceTable,
+      predictTable,
+    )
+    totals.totalConstraintCorrectCount += isConstraintCorrect ? 1 : 0
+  }
+
+  return { totals, allColumnMappings }
 }

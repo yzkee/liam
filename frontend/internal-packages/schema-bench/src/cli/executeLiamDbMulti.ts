@@ -2,12 +2,12 @@
 
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
+import { processDataset } from './executeLiamDbShared.ts'
 import {
   getWorkspacePath,
   handleCliError,
   handleUnexpectedError,
 } from './utils/index.ts'
-import { processDataset } from './executeLiamDbShared.ts'
 
 async function main() {
   const workspacePath = getWorkspacePath()
@@ -36,7 +36,11 @@ async function main() {
   }
 
   // Process datasets sequentially for clearer output
-  const results = [] as Array<{ datasetName: string; success: number; failure: number }>
+  const results: Array<{
+    datasetName: string
+    success: number
+    failure: number
+  }> = []
   for (const dataset of availableDatasets) {
     const result = await processDataset(dataset.name, dataset.path)
     results.push(result)

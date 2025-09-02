@@ -2,12 +2,12 @@
 
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
+import { processDataset } from './executeLiamDbShared.ts'
 import {
   getWorkspacePath,
   handleCliError,
   handleUnexpectedError,
 } from './utils/index.ts'
-import { processDataset } from './executeLiamDbShared.ts'
 
 async function main() {
   const datasetName = 'default'
@@ -20,10 +20,11 @@ async function main() {
 
   const result = await processDataset(datasetName, datasetPath)
   if (result.failure > 0) {
-    handleCliError(`${result.failure} case(s) failed in dataset "${datasetName}"`)
+    handleCliError(
+      `${result.failure} case(s) failed in dataset "${datasetName}"`,
+    )
     return
   }
 }
 
 main().catch(handleUnexpectedError)
-

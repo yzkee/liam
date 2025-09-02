@@ -13,7 +13,6 @@ import {
 } from 'neverthrow'
 import * as v from 'valibot'
 import { execute, type LiamDbExecutorInput } from '../executors/liamDb/index.ts'
-import { getWorkspacePath } from './utils/index.ts'
 
 config({ path: resolve(__dirname, '../../../../../.env') })
 
@@ -24,10 +23,10 @@ const InputSchema = v.union([
   v.string(), // Support legacy format
 ])
 
-export type DatasetResult = { datasetName: string; success: number; failure: number }
-
-export const resolveDatasetPath = (datasetName: string): string => {
-  return join(getWorkspacePath(), datasetName)
+type DatasetResult = {
+  datasetName: string
+  success: number
+  failure: number
 }
 
 async function loadInputFiles(
@@ -165,8 +164,8 @@ export async function processDataset(
     return { datasetName, success: 0, failure: 0 }
   }
 
-  // Process each case with max 2 concurrent request for stability
-  const MAX_CONCURRENT = 2
+  // Process each case with max 5 concurrent requests for stability
+  const MAX_CONCURRENT = 5
   let successCount = 0
   let failureCount = 0
 
@@ -193,4 +192,3 @@ export async function processDataset(
   }
   return { datasetName, success: successCount, failure: failureCount }
 }
-

@@ -2,12 +2,12 @@
 
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { processDataset } from './executeLiamDbShared.ts'
+import { processDataset } from './executeLiamDbShared'
 import {
   getWorkspacePath,
   handleCliError,
   handleUnexpectedError,
-} from './utils/index.ts'
+} from './utils'
 
 async function main() {
   const datasetName = 'entity-extraction'
@@ -19,6 +19,11 @@ async function main() {
   }
 
   const result = await processDataset(datasetName, datasetPath)
+  // Treat zero processed cases as failure to surface issues (e.g., empty inputs)
+  if (result.success === 0 && result.failure === 0) {
+    handleCliError(`No cases were processed for dataset "${datasetName}"`)
+    return
+  }
   if (result.failure > 0) {
     handleCliError(
       `${result.failure} case(s) failed in dataset "${datasetName}"`,

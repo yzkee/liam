@@ -101,7 +101,14 @@ async function main() {
     results.push(result)
   }
 
+  const totalSuccess = results.reduce((sum, r) => sum + r.success, 0)
   const totalFailure = results.reduce((sum, r) => sum + r.failure, 0)
+
+  // Treat all-zero aggregate as failure to surface empty/invalid datasets
+  if (totalSuccess === 0 && totalFailure === 0) {
+    handleCliError('No cases were processed across selected datasets')
+    return
+  }
   if (totalFailure > 0) {
     handleCliError(`${totalFailure} case(s) failed across selected datasets`)
     return

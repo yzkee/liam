@@ -1,4 +1,5 @@
-import { join, resolve } from 'node:path'
+import { existsSync } from 'node:fs'
+import { dirname, join, resolve } from 'node:path'
 
 /**
  * Get the workspace base path
@@ -10,8 +11,21 @@ const getWorkspaceBasePath = (): string => {
 
 /**
  * Get the benchmark workspace path
+ * Searches for project root by looking for pnpm-workspace.yaml
  */
 export const getWorkspacePath = (): string => {
+  // Try to find project root by looking for pnpm-workspace.yaml
+  let currentPath = process.cwd()
+
+  while (currentPath !== '/') {
+    if (existsSync(join(currentPath, 'pnpm-workspace.yaml'))) {
+      // Found project root, return benchmark-workspace at project root
+      return resolve(currentPath, 'benchmark-workspace')
+    }
+    currentPath = dirname(currentPath)
+  }
+
+  // Fallback to original behavior if project root not found
   return resolve(getWorkspaceBasePath(), 'benchmark-workspace')
 }
 

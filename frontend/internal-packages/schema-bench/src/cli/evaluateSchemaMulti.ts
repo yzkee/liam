@@ -19,7 +19,9 @@ async function evaluateDataset(datasetName: string, datasetPath: string) {
   const result = await evaluateSchema(config)
 
   if (result.isErr()) {
-    console.error('   ❌ Failed to evaluate dataset')
+    console.error(
+      `   ❌ Failed to evaluate dataset: ${JSON.stringify(result.error, null, 2)}`,
+    )
     return { datasetName, success: false, results: null, error: result.error }
   }
 
@@ -31,14 +33,29 @@ async function evaluateDataset(datasetName: string, datasetPath: string) {
 async function main() {
   const workspacePath = getWorkspacePath()
 
-  // Define datasets to evaluate
-  const datasets = [
+  // Parse command-line arguments
+  const args = process.argv.slice(2)
+  const requestedDatasets =
+    args.length > 0 ? args : ['default', 'entity-extraction']
+
+  // Define all available datasets
+  const allDatasets = [
     { name: 'default', path: join(workspacePath, 'default') },
     {
       name: 'entity-extraction',
       path: join(workspacePath, 'entity-extraction'),
     },
   ]
+
+  // Filter to requested datasets
+  const datasets = allDatasets.filter((d) => requestedDatasets.includes(d.name))
+
+  if (datasets.length === 0) {
+    handleCliError(
+      'No valid datasets specified. Available: default, entity-extraction',
+    )
+    return
+  }
 
   // Check which datasets exist
   const availableDatasets = datasets.filter((dataset) => {

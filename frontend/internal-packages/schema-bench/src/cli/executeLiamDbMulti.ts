@@ -2,12 +2,12 @@
 
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { processDataset } from './executeLiamDbShared.ts'
+import { processDataset } from './executeLiamDbShared'
 import {
   getWorkspacePath,
   handleCliError,
   handleUnexpectedError,
-} from './utils/index.ts'
+} from './utils'
 
 async function main() {
   const workspacePath = getWorkspacePath()
@@ -53,6 +53,12 @@ async function main() {
   for (const result of results) {
     totalSuccess += result.success
     totalFailure += result.failure
+  }
+
+  // Treat all-zero aggregate as failure to surface empty/invalid datasets
+  if (totalSuccess === 0 && totalFailure === 0) {
+    handleCliError('No cases were processed across selected datasets')
+    return
   }
 
   if (totalFailure > 0) {

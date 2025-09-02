@@ -1,7 +1,7 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { END, START, StateGraph } from '@langchain/langgraph'
 import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
-import { workflowAnnotation } from './chat/workflow/shared/createAnnotations'
+import { workflowAnnotation } from './chat/workflow/shared/workflowAnnotation'
 import type { WorkflowState } from './chat/workflow/types'
 import { createDbAgentGraph } from './db-agent/createDbAgentGraph'
 import { createLeadAgentGraph } from './lead-agent/createLeadAgentGraph'

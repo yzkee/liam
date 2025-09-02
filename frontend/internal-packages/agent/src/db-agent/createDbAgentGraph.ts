@@ -1,6 +1,6 @@
 import { END, START, StateGraph } from '@langchain/langgraph'
 import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
-import { workflowAnnotation } from '../chat/workflow/shared/createAnnotations'
+import { workflowAnnotation } from '../chat/workflow/shared/workflowAnnotation'
 import { designSchemaNode } from './nodes/designSchemaNode'
 import { invokeSchemaDesignToolNode } from './nodes/invokeSchemaDesignToolNode'
 import { routeAfterDesignSchema } from './routing/routeAfterDesignSchema'

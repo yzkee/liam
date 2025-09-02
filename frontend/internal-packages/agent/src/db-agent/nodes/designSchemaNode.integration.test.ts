@@ -5,7 +5,7 @@ import {
   getTestConfig,
   outputStream,
 } from '../../../test-utils/workflowTestHelpers'
-import { workflowAnnotation } from '../../chat/workflow/shared/createAnnotations'
+import { workflowAnnotation } from '../../chat/workflow/shared/workflowAnnotation'
 import type { WorkflowState } from '../../chat/workflow/types'
 import { designSchemaNode } from './designSchemaNode'
 

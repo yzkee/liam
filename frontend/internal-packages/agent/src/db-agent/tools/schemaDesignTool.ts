@@ -36,7 +36,7 @@ const validateAndExecuteDDL = async (
   }
 
   const ddlStatements = ddlResult.value
-  const requiredExtensions = Object.keys(schema.extensions)
+  const requiredExtensions = Object.keys(schema.extensions).sort()
 
   // Execute DDL to validate it
   const results: SqlResult[] = await executeQuery(

@@ -178,7 +178,7 @@ export async function validateSchemaNode(
   const { repositories } = configurableResult.value
 
   const ddlStatements = generateDdlFromSchema(state.schemaData)
-  const requiredExtensions = Object.keys(state.schemaData.extensions)
+  const requiredExtensions = Object.keys(state.schemaData.extensions).sort()
   const hasDdl = ddlStatements?.trim()
   const hasTestcases =
     state.generatedTestcases && state.generatedTestcases.length > 0

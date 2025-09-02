@@ -4,6 +4,8 @@ import {
   coerceMessageLikeToMessage,
   convertToChunk,
   isBaseMessageChunk,
+  isToolMessage,
+  ToolMessageChunk,
 } from '@langchain/core/messages'
 
 function tryConvertToChunk(message: BaseMessage) {
@@ -33,7 +35,15 @@ export class MessageTupleManager {
 
   add(serialized: BaseMessage, metadata: Record<string, unknown> | undefined) {
     const message = coerceMessageLikeToMessage(serialized)
-    const chunk = tryConvertToChunk(message)
+
+    // Handle ToolMessage separately since convertToChunk doesn't support it
+    let chunk: BaseMessageChunk | null
+    if (isToolMessage(message)) {
+      chunk = new ToolMessageChunk(message)
+    } else {
+      chunk = tryConvertToChunk(message)
+    }
+
     const { id } = chunk ?? message
     if (!id) return null
 

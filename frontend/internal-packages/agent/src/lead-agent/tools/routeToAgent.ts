@@ -4,6 +4,7 @@ import { type StructuredTool, tool } from '@langchain/core/tools'
 import { Command } from '@langchain/langgraph'
 import { fromValibotSafeParse } from '@liam-hq/neverthrow'
 import { ok, type Result } from 'neverthrow'
+import { v4 as uuidv4 } from 'uuid'
 import * as v from 'valibot'
 import { WorkflowTerminationError } from '../../shared/errorHandling'
 import { toJsonSchema } from '../../shared/jsonSchema'
@@ -65,6 +66,7 @@ export const routeToAgent: StructuredTool = tool(
         next: inputParseResult.output.targetAgent,
         messages: [
           new ToolMessage({
+            id: uuidv4(),
             content: `Routing request to ${inputParseResult.output.targetAgent}`,
             tool_call_id: toolCallId,
           }),

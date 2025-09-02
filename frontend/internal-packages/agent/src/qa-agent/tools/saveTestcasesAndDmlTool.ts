@@ -1,3 +1,4 @@
+import { dispatchCustomEvent } from '@langchain/core/callbacks/dispatch'
 import { ToolMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { type StructuredTool, tool } from '@langchain/core/tools'
@@ -5,6 +6,7 @@ import { Command } from '@langchain/langgraph'
 import { dmlOperationSchema } from '@liam-hq/artifact'
 import { v4 as uuidv4 } from 'uuid'
 import * as v from 'valibot'
+import { SSE_EVENTS } from '../../client'
 import { WorkflowTerminationError } from '../../shared/errorHandling'
 import { toJsonSchema } from '../../shared/jsonSchema'
 import { type Testcase, testcaseSchema } from '../types'
@@ -95,10 +97,12 @@ export const saveTestcasesAndDmlTool: StructuredTool = tool(
     )
 
     const toolMessage = new ToolMessage({
+      id: uuidv4(),
       status: 'success',
       content: `Successfully saved ${generatedTestcases.length} test cases with ${totalDmlOperations} DML operations`,
       tool_call_id: toolCallId,
     })
+    await dispatchCustomEvent(SSE_EVENTS.MESSAGES, toolMessage)
 
     return new Command({
       update: {

@@ -21,9 +21,12 @@ import {
 
 config({ path: resolve(__dirname, '../../../../../.env') })
 
-const InputSchema = v.object({
-  input: v.string(),
-})
+const InputSchema = v.union([
+  v.object({
+    input: v.string(),
+  }),
+  v.string(), // Support legacy format
+])
 
 async function loadInputFiles(
   datasetPath: string,
@@ -86,9 +89,15 @@ async function loadInputFiles(
       )
     }
 
+    // Normalize input format: handle both string and object formats
+    const normalizedInput: LiamDbExecutorInput =
+      typeof validationResult.output === 'string'
+        ? { input: validationResult.output }
+        : validationResult.output
+
     inputs.push({
       caseId,
-      input: validationResult.output satisfies LiamDbExecutorInput,
+      input: normalizedInput,
     })
   }
 
@@ -150,8 +159,8 @@ async function processDataset(datasetName: string, datasetPath: string) {
     return { datasetName, success: 0, failure: 0 }
   }
 
-  // Process each case with max 4 concurrent request
-  const MAX_CONCURRENT = 4
+  // Process each case with max 2 concurrent request for stability
+  const MAX_CONCURRENT = 2
   let successCount = 0
   let failureCount = 0
 
@@ -194,13 +203,28 @@ async function main() {
     },
   ]
 
-  const results = []
-  for (const dataset of datasets) {
-    if (existsSync(dataset.path)) {
-      const result = await processDataset(dataset.name, dataset.path)
-      results.push(result)
+  // Check which datasets exist
+  const availableDatasets = datasets.filter((dataset) => {
+    const exists = existsSync(dataset.path)
+    if (!exists) {
+      console.warn(`⚠️  Dataset "${dataset.name}" not found at ${dataset.path}`)
     }
+    return exists
+  })
+
+  if (availableDatasets.length === 0) {
+    handleCliError('No datasets found to process')
+    return
   }
+
+  // Process datasets sequentially for clearer output
+  const results = []
+  for (const dataset of availableDatasets) {
+    const result = await processDataset(dataset.name, dataset.path)
+    results.push(result)
+  }
+
+  // Calculate totals
   let totalSuccess = 0
   let totalFailure = 0
 

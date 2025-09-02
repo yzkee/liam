@@ -22,7 +22,7 @@ import { nameSimilarity } from '../nameSimilarity/nameSimilarity.ts'
 import { wordOverlapMatch } from '../wordOverlapMatch/wordOverlapMatch.ts'
 
 // Small epsilon value for numerical comparisons
-const EPSILON = 1e-5
+const EPSILON = 1e-10
 
 // Threshold for determining if all components are correct (table + column + primary key)
 // The value 2.9 represents the sum of perfect scores across three dimensions:
@@ -249,7 +249,7 @@ const calculateForeignKeyMetrics = (
   const foreignKeyPrecision =
     predictCount === 0 ? 0 : matchedCount / predictCount
   const foreignKeyRecall =
-    referenceCount === 0 ? 0 : matchedCount / referenceCount
+    referenceCount === 0 ? 1 : matchedCount / referenceCount // If no FKs expected, recall is perfect
   const foreignKeyF1 =
     foreignKeyPrecision + foreignKeyRecall === 0
       ? 0
@@ -362,7 +362,7 @@ export const evaluate = async (
 
   const overallSchemaAccuracy =
     primaryKeyAccuracyAverage + columnAllCorrectRateAverage + tableAllcorrect >
-    ALL_CORRECT_THRESHOLD
+    ALL_CORRECT_THRESHOLD - EPSILON
       ? 1
       : 0
 

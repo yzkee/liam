@@ -19,10 +19,10 @@ async function evaluateDataset(datasetName: string, datasetPath: string) {
   const result = await evaluateSchema(config)
 
   if (result.isErr()) {
-    return { datasetName, success: false, results: null }
+    return { datasetName, success: false, results: null, error: result.error }
   }
 
-  return { datasetName, success: true, results: result.value }
+  return { datasetName, success: true, results: result.value, error: null }
 }
 
 async function main() {
@@ -37,23 +37,47 @@ async function main() {
     },
   ]
 
+  // Check which datasets exist
+  const availableDatasets = datasets.filter((dataset) => {
+    const exists = existsSync(dataset.path)
+    if (!exists) {
+      console.warn(`⚠️  Dataset "${dataset.name}" not found at ${dataset.path}`)
+    }
+    return exists
+  })
+
+  if (availableDatasets.length === 0) {
+    handleCliError('No datasets found to evaluate')
+    return
+  }
+
+  // Evaluate datasets
   const evaluationResults = []
-  for (const dataset of datasets) {
-    if (existsSync(dataset.path)) {
-      const result = await evaluateDataset(dataset.name, dataset.path)
-      evaluationResults.push(result)
+  for (const dataset of availableDatasets) {
+    const result = await evaluateDataset(dataset.name, dataset.path)
+    evaluationResults.push(result)
+  }
+
+  // Collect statistics
+  let allSuccess = true
+  let totalEvaluated = 0
+  const failedDatasets = []
+
+  for (const result of evaluationResults) {
+    if (result.success && result.results) {
+      totalEvaluated += result.results.length
+    } else if (!result.success) {
+      allSuccess = false
+      failedDatasets.push(result.datasetName)
     }
   }
 
-  let allSuccess = true
-  for (const result of evaluationResults) {
-    if (!result.success) {
-      allSuccess = false
-    }
+  if (failedDatasets.length > 0) {
   }
 
   if (!allSuccess) {
-    handleCliError('Some evaluations failed')
+    handleCliError(`Evaluation failed for ${failedDatasets.length} dataset(s)`)
+    return
   }
 }
 

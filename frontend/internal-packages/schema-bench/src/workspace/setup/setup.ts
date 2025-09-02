@@ -49,7 +49,22 @@ const copyDefaultData = (
         const sourcePath = path.join(inputSourceDir, file)
         const targetPath = path.join(inputTargetDir, file)
         if (!fs.existsSync(targetPath)) {
-          fs.copyFileSync(sourcePath, targetPath)
+          // Read the content and check format
+          const content = fs.readFileSync(sourcePath, 'utf-8')
+          try {
+            const parsed = JSON.parse(content)
+            // If it's a string (entity-extraction format), wrap it
+            if (typeof parsed === 'string') {
+              const wrappedContent = JSON.stringify({ input: parsed }, null, 2)
+              fs.writeFileSync(targetPath, wrappedContent)
+            } else {
+              // Already in correct format, just copy
+              fs.copyFileSync(sourcePath, targetPath)
+            }
+          } catch {
+            // If parsing fails, just copy as-is
+            fs.copyFileSync(sourcePath, targetPath)
+          }
         }
       }
     }

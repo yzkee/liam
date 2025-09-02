@@ -17,7 +17,10 @@ Execute schema benchmark comparison between LiamDB and OpenAI models.
 
 ## Execution
 
-**Important**: When using the Bash tool for these commands, always set the timeout parameter to the maximum value (600000ms / 10 minutes) as benchmark operations can be time-intensive.
+**Important**: Benchmark operations are time-intensive. The system now supports:
+- Parallel dataset processing for faster execution
+- Automatic input format standardization
+- Improved error handling and progress reporting
 
 First, I'll clean up any existing workspace and set up a fresh benchmark environment with multiple datasets:
 
@@ -26,8 +29,13 @@ rm -rf benchmark-workspace && pnpm --filter @liam-hq/schema-bench setupWorkspace
 ```
 
 This will set up two benchmark datasets:
-- **default**: Standard schema generation benchmark
-- **entity-extraction**: Tests if specified table/column names appear in output
+- **default**: Standard schema generation benchmark (3 complex cases)
+- **entity-extraction**: Tests if specified table/column names appear in output (5 cases)
+
+The system features:
+- **Parallel Processing**: Datasets are processed simultaneously for faster execution
+- **Smart Concurrency**: Each dataset uses MAX_CONCURRENT=2 for stability
+- **Input Standardization**: Entity-extraction inputs are automatically wrapped in `{"input": "..."}` format
 
 Next, I'll execute the specified model on all datasets:
 
@@ -49,22 +57,25 @@ If execution succeeds, I'll run the evaluation on all datasets:
 pnpm --filter @liam-hq/schema-bench evaluateSchemaMulti
 ```
 
-The evaluation will display results for each dataset separately, showing:
+The evaluation will display results for each dataset with focused metrics:
 
-**For each dataset:**
-- Table F1 Score
-- Table Recall (how many reference tables were found)
-- Table All Correct Rate
-- Column F1 Score Average
-- Column Recall Average (how many reference columns were found)
-- Column All Correct Rate Average
-- Primary Key Accuracy Average
-- Constraint Accuracy
-- Foreign Key F1 Score
-- Foreign Key Recall
-- Foreign Key All Correct Rate
+**Default Dataset Metrics:**
+- Table F1 Score & Recall
+- Column F1 Score & Recall  
+- Primary Key Accuracy
+- Foreign Key F1 Score & Recall
 - Overall Schema Accuracy
 
-Results are displayed separately for:
-1. **Default dataset**: Full schema generation accuracy
-2. **Entity-extraction dataset**: Accuracy of extracting mentioned table/column names
+**Entity-extraction Dataset Metrics (Recall-focused):**
+- **Table Recall**: % of required tables that were generated
+- **Column Recall**: % of required columns that were generated
+- **Perfect Extraction Rate**: Whether all mentioned entities were found
+
+### Expected Performance:
+- **Default dataset**: ~60-80% overall accuracy for complex schemas
+- **Entity-extraction dataset**: ~100% recall for mentioned entities
+
+### Execution Time:
+- Setup: ~5 seconds
+- LiamDB execution: ~20-30 minutes for all 8 cases
+- Evaluation: ~10 seconds

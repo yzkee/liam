@@ -37,14 +37,22 @@ The system features:
 - **Smart Concurrency**: Each dataset uses MAX_CONCURRENT=5 for stability
 - **Input Standardization**: Entity-extraction inputs are automatically wrapped in `{"input": "..."}` format
 
-Next, I'll execute the specified model on all datasets:
+Next, I'll execute the specified model with dataset selection:
 
 {{#if (eq (lower model) "liamdb")}}
 ```bash
-pnpm --filter @liam-hq/schema-bench executeLiamDBMulti
+# Run LiamDB on all datasets in the workspace
+pnpm --filter @liam-hq/schema-bench executeLiamDB -all
+
+# Run LiamDB on a specific dataset
+pnpm --filter @liam-hq/schema-bench executeLiamDB -entity-extraction
+
+# Run LiamDB on multiple datasets
+pnpm --filter @liam-hq/schema-bench executeLiamDB -default -entity-extraction
 ```
 {{else if (eq (lower model) "openai")}}
 ```bash
+# OpenAI currently targets the default dataset
 pnpm --filter @liam-hq/schema-bench executeOpenai
 ```
 {{else}}

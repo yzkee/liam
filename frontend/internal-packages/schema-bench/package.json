@@ -23,7 +23,7 @@
   "scripts": {
     "evaluateSchema": "tsx src/cli/evaluateSchema.ts",
     "evaluateSchemaMulti": "tsx src/cli/evaluateSchemaMulti.ts",
-    "executeLiamDB": "tsx src/cli/executeLiamDb.ts",
+    "executeLiamDB": "tsx src/cli/executeLiamDbUnified.ts",
     "executeLiamDB:default": "tsx src/cli/executeLiamDbDefault.ts",
     "executeLiamDB:entityExtraction": "tsx src/cli/executeLiamDbEntityExtraction.ts",
     "executeLiamDBMulti": "tsx src/cli/executeLiamDbMulti.ts",

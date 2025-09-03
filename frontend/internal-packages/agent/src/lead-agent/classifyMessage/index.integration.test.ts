@@ -1,6 +1,10 @@
-import { AIMessage, HumanMessage } from '@langchain/core/messages'
+import {
+  AIMessage,
+  type BaseMessage,
+  HumanMessage,
+} from '@langchain/core/messages'
 import { END, START, StateGraph } from '@langchain/langgraph'
-import { aColumn, aSchema, aTable } from '@liam-hq/schema'
+import { aColumn, aSchema, aTable, type Schema } from '@liam-hq/schema'
 import { describe, it } from 'vitest'
 import {
   getTestConfig,
@@ -12,8 +16,8 @@ import { classifyMessage } from './index'
 
 const createTestStateAndConfig = async (
   userInput: string,
-  messages?: any[],
-  schemaData?: any,
+  messages?: BaseMessage[],
+  schemaData?: Schema,
 ) => {
   const { config, context } = await getTestConfig()
 

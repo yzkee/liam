@@ -7,7 +7,7 @@ import {
 import { SSE_EVENTS } from '@liam-hq/agent/client'
 import { NextResponse } from 'next/server'
 import * as v from 'valibot'
-import { createClient } from '@/libs/db/server'
+import { createClient } from '../../../../libs/db/server'
 
 function line(event: string, data: unknown) {
   const payload = typeof data === 'string' ? data : JSON.stringify(data)

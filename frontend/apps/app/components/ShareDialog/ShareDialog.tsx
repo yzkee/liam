@@ -22,8 +22,8 @@ import {
   XIcon,
 } from '@liam-hq/ui'
 import { type FC, useRef, useState } from 'react'
-import { usePublicShareServerAction } from '@/hooks/usePublicShareServerAction'
-import { urlgen } from '@/libs/routes'
+import { usePublicShareServerAction } from '../../hooks/usePublicShareServerAction'
+import { urlgen } from '../../libs/routes'
 import styles from './ShareDialog.module.css'
 
 type Props = {

@@ -3,8 +3,8 @@
 import { Button, Input } from '@liam-hq/ui'
 import { useRouter } from 'next/navigation'
 import { type FC, type FormEvent, useState, useTransition } from 'react'
-import { setOrganizationIdCookie } from '@/features/organizations/services/setOrganizationIdCookie'
-import { urlgen } from '@/libs/routes'
+import { setOrganizationIdCookie } from '../../features/organizations/services/setOrganizationIdCookie'
+import { urlgen } from '../../libs/routes'
 import { createOrganization } from './actions/createOrganizations'
 import styles from './OrganizationNewPage.module.css'
 

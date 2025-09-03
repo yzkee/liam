@@ -16,8 +16,8 @@ const dmlOperationWithoutLogsSchema = v.omit(dmlOperationSchema, [
 ])
 
 const testcaseWithDmlSchema = v.object({
-  ...v.omit(testcaseSchema, ['id', 'dmlOperations']).entries,
-  dmlOperations: v.array(dmlOperationWithoutLogsSchema),
+  ...v.omit(testcaseSchema, ['id', 'dmlOperation']).entries,
+  dmlOperation: dmlOperationWithoutLogsSchema,
 })
 
 const saveTestcasesAndDmlToolSchema = v.object({
@@ -74,11 +74,11 @@ export const saveTestcasesAndDmlTool: StructuredTool = tool(
     const testcases: Testcase[] = testcasesWithDml.map((testcase) => {
       const testcaseId = uuidv4()
 
-      const dmlOperationsWithId = testcase.dmlOperations.map((op) => ({
-        ...op,
+      const dmlOperationWithId = {
+        ...testcase.dmlOperation,
         testCaseId: testcaseId,
         dml_execution_logs: [],
-      }))
+      }
 
       return {
         id: testcaseId,
@@ -87,14 +87,11 @@ export const saveTestcasesAndDmlTool: StructuredTool = tool(
         requirement: testcase.requirement,
         title: testcase.title,
         description: testcase.description,
-        dmlOperations: dmlOperationsWithId,
+        dmlOperation: dmlOperationWithId,
       }
     })
 
-    const totalDmlOperations = testcases.reduce(
-      (sum, tc) => sum + tc.dmlOperations.length,
-      0,
-    )
+    const totalDmlOperations = testcases.length
 
     const toolMessage = new ToolMessage({
       id: uuidv4(),

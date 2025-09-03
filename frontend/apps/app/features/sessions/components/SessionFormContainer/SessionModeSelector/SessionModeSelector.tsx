@@ -8,6 +8,12 @@ export type SessionMode = 'github' | 'upload' | 'url'
 type Props = {
   selectedMode: SessionMode
   onModeChange: (mode: SessionMode) => void
+  githubTabId: string
+  githubPanelId: string
+  uploadTabId: string
+  uploadPanelId: string
+  urlTabId: string
+  urlPanelId: string
 }
 
 const modes: { mode: SessionMode; label: string; icon: React.ReactElement }[] =
@@ -32,11 +38,39 @@ const modes: { mode: SessionMode; label: string; icon: React.ReactElement }[] =
 export const SessionModeSelector: FC<Props> = ({
   selectedMode,
   onModeChange,
+  githubTabId,
+  githubPanelId,
+  uploadTabId,
+  uploadPanelId,
+  urlTabId,
+  urlPanelId,
 }) => {
   const buttonsRef = useRef<(HTMLButtonElement | null)[]>([])
   const backgroundRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const shouldFocusOnModeChange = useRef(false)
+
+  const getTabId = (mode: SessionMode) => {
+    switch (mode) {
+      case 'github':
+        return githubTabId
+      case 'upload':
+        return uploadTabId
+      case 'url':
+        return urlTabId
+    }
+  }
+
+  const getPanelId = (mode: SessionMode) => {
+    switch (mode) {
+      case 'github':
+        return githubPanelId
+      case 'upload':
+        return uploadPanelId
+      case 'url':
+        return urlPanelId
+    }
+  }
 
   useEffect(() => {
     // Only focus when mode changes via arrow keys, not on initial render
@@ -120,9 +154,9 @@ export const SessionModeSelector: FC<Props> = ({
             ref={setButtonRef(currentIndex)}
             type="button"
             role="tab"
-            id={`${modeItem.mode}-tab`}
+            id={getTabId(modeItem.mode)}
             aria-selected={selectedMode === modeItem.mode}
-            aria-controls={`${modeItem.mode}-panel`}
+            aria-controls={getPanelId(modeItem.mode)}
             tabIndex={selectedMode === modeItem.mode ? 0 : -1}
             className={clsx(
               styles.modeButton,

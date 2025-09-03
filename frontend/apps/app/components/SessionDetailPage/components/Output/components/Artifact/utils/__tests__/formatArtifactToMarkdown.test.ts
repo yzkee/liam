@@ -240,19 +240,6 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
         ✅ **06/01/2024, 08:00:00 AM**
         > 3 rows inserted
 
-        ---
-
-        ##### **UPDATE** - Aircraft model name and seat count update (normal update scenario for existing data).
-
-        \`\`\`sql
-        UPDATE airplanes SET model = 'ATR42-700', capacity = 50 WHERE airplane_number = 'JA100A';
-        \`\`\`
-
-        **Execution History:**
-
-        ✅ **06/01/2024, 08:05:00 AM**
-        > 1 row updated
-
 
         #### 1.2. View Flights by Aircraft
 
@@ -997,9 +984,24 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
               type: 'functional',
               test_cases: [
                 {
-                  title: 'All Operations',
-                  description: 'Test all DML operation types',
+                  title: 'INSERT Operation',
+                  description: 'Test INSERT operation',
                   dmlOperation: operations[0]!,
+                },
+                {
+                  title: 'UPDATE Operation',
+                  description: 'Test UPDATE operation',
+                  dmlOperation: operations[1]!,
+                },
+                {
+                  title: 'DELETE Operation',
+                  description: 'Test DELETE operation',
+                  dmlOperation: operations[2]!,
+                },
+                {
+                  title: 'SELECT Operation',
+                  description: 'Test SELECT operation',
+                  dmlOperation: operations[3]!,
                 },
               ],
             },

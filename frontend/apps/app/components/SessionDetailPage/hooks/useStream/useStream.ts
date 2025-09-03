@@ -34,7 +34,7 @@ export const useStream = ({ initialMessages }: Props) => {
     abortRef.current = null
   }, [])
 
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Complex logic for handling stream lifecycle with multiple states and error conditions (important-comment)
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
   const start = useCallback(async (params: ChatRequest) => {
     abortRef.current?.abort()
     abortRef.current = new AbortController()

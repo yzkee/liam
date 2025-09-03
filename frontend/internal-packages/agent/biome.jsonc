@@ -1,16 +1,4 @@
 {
   "extends": "//",
-  "root": false,
-  "linter": {
-    "rules": {
-      "complexity": {
-        "noExcessiveCognitiveComplexity": {
-          "level": "error",
-          "options": {
-            "maxAllowedComplexity": 20
-          }
-        }
-      }
-    }
-  }
+  "root": false
 }

@@ -176,6 +176,7 @@ const constraintToCheckConstraint = (
   const findBalancedParentheses = (
     sql: string,
     startIndex: number,
+    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
   ): { start: number; end: number } | null => {
     let openParenIndex = -1
     let depth = 0
@@ -374,6 +375,7 @@ export const convertToSchema = (
     comment: string | null
   }
 
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
   function processConstraints(
     tableName: string,
     columnName: string,
@@ -498,7 +500,7 @@ export const convertToSchema = (
   /**
    * Process table-level constraint
    */
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Complex logic for processing different constraint types (important-comment)
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
   function processTableLevelConstraint(
     constraint: PgConstraint,
     tableName: string,
@@ -585,6 +587,7 @@ export const convertToSchema = (
   /**
    * Process table elements
    */
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
   function processTableElements(
     tableElts: Node[],
     tableName: string,
@@ -812,7 +815,7 @@ export const convertToSchema = (
   /**
    * Handle COMMENT statement
    */
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Complex logic for handling different comment statement types (important-comment)
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
   function handleCommentStmt(commentStmt: CommentStmt): void {
     // Skip if not a supported comment type (only table, column, and type comments are supported)
     if (

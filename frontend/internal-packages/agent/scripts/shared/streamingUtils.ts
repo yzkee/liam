@@ -29,7 +29,7 @@ const getMessageType = (lastMessage: unknown): string => {
 // Helper function to summarize tool arguments
 const getArgumentSummary = (
   args: unknown,
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Complex logic for handling various argument types and formatting (important-comment)
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
 ): string => {
   // Pure type-based handling - no special cases for any tools
 

@@ -102,6 +102,7 @@ const parseUnknownValue = (value: unknown): unknown => {
 /**
  * Parse property value (including arrays)
  */
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
 const parsePropertyValue = (expr: unknown): unknown => {
   if (isArrayExpression(expr)) {
     const result: unknown[] = []

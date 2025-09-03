@@ -23,7 +23,6 @@ export type Relationships = Record<string, Relationship>
  * @param tables - The tables object containing constraints
  * @returns Relationships derived from foreign key constraints
  */
-// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
 export const constraintsToRelationships = (tables: Tables): Relationships => {
   const relationships: Relationships = {}
 

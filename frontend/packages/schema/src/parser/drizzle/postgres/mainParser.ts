@@ -87,7 +87,6 @@ const visitVariableDeclarator = (
   tables: Record<string, DrizzleTableDefinition>,
   enums: Record<string, DrizzleEnumDefinition>,
   variableToTableMapping: Record<string, string>,
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
 ) => {
   if (!declarator.init || declarator.init.type !== 'CallExpression') return
 

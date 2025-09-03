@@ -5,7 +5,6 @@
 export const convertDrizzleTypeToPgType = (
   drizzleType: string,
   options?: Record<string, unknown>,
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
 ): string => {
   switch (drizzleType) {
     // String types with length options

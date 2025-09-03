@@ -220,7 +220,6 @@ export const parseMysqlTableCall = (
 export const parseSchemaTableCall = (
   callExpr: CallExpression,
   extractedEnums?: Record<string, DrizzleEnumDefinition>,
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
 ): DrizzleTableDefinition | null => {
   if (!isSchemaTableCall(callExpr) || callExpr.arguments.length < 2) return null
 

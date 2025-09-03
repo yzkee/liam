@@ -25,7 +25,7 @@ const convertToTable = (
   tableDef: DrizzleTableDefinition,
   enums: Record<string, DrizzleEnumDefinition> = {},
   variableToTableMapping: Record<string, string> = {},
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Complex logic for converting PostgreSQL Drizzle table definitions to internal format (important-comment)
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
 ): Table => {
   const columns: Columns = {}
   const constraints: Constraints = {}

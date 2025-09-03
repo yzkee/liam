@@ -82,7 +82,7 @@ const parseRuntimeFunction = (args: Argument[]): string => {
 export const parseColumnFromProperty = (
   prop: Property,
   extractedEnums?: Record<string, DrizzleEnumDefinition>,
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Complex parsing logic for handling various MySQL column types and options (important-comment)
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
 ): DrizzleColumnDefinition | null => {
   if (prop.type !== 'KeyValueProperty') return null
 

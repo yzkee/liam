@@ -57,7 +57,7 @@ export const parsePgTableWithComment = (
  */
 export const parsePgTableCall = (
   callExpr: CallExpression,
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Complex parsing logic for handling PostgreSQL table definitions (important-comment)
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
 ): DrizzleTableDefinition | null => {
   if (callExpr.arguments.length < 2) return null
 
@@ -139,7 +139,7 @@ export const parsePgTableCall = (
  */
 export const parseSchemaTableCall = (
   callExpr: CallExpression,
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Complex parsing logic for handling PostgreSQL schema table definitions (important-comment)
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
 ): DrizzleTableDefinition | null => {
   if (!isSchemaTableCall(callExpr) || callExpr.arguments.length < 2) return null
 
@@ -223,7 +223,7 @@ export const parseSchemaTableCall = (
 const parseIndexDefinition = (
   callExpr: CallExpression,
   name: string,
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Complex parsing logic for handling PostgreSQL index definitions (important-comment)
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
 ): DrizzleIndexDefinition | CompositePrimaryKeyDefinition | null => {
   // Handle primaryKey({ columns: [...] })
   if (

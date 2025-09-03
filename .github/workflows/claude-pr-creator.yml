@@ -77,7 +77,7 @@ jobs:
             - NEVER abandon the task when blocked by pre-commit hook - always fix the issues
             - Your task is NOT complete until the commit succeeds after passing all checks
             - This is a REQUIREMENT, not a suggestion - commits MUST pass all lint/format checks"
-            --allowedTools "Bash(pnpm fmt:*),Bash(pnpm install),Bash(pnpm lint:*),Bash(pnpm test:*)"
+            --allowedTools Bash(pnpm fmt:*),Bash(pnpm install),Bash(pnpm lint:*),Bash(pnpm test:*)
 
       - name: Create Pull Request
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1

@@ -59,4 +59,4 @@ jobs:
             - NEVER abandon the task when blocked by pre-commit hook - always fix the issues
             - Your task is NOT complete until the commit succeeds after passing all checks
             - This is a REQUIREMENT, not a suggestion - commits MUST pass all lint/format checks"
-            --allowedTools "Bash(pnpm fmt:*),Bash(pnpm install),Bash(pnpm lint:*),Bash(pnpm test:*),mcp__github__create_issue,mcp__github__add_issue_comment,mcp__github__create_pull_request"
+            --allowedTools Bash(pnpm fmt:*),Bash(pnpm install),Bash(pnpm lint:*),Bash(pnpm test:*),mcp__github__create_issue,mcp__github__add_issue_comment,mcp__github__create_pull_request

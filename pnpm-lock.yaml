@@ -26,9 +26,6 @@ importers:
       '@changesets/types':
         specifier: 6.1.0
         version: 6.1.0
-      '@mkizka/eslint-plugin-relative-import':
-        specifier: ^0.0.9
-        version: 0.0.9
       '@turbo/gen':
         specifier: 2.5.6
         version: 2.5.6(@swc/core@1.12.11)(@swc/wasm@1.12.11)(@types/node@22.17.1)(typescript@5.9.2)
@@ -429,9 +426,6 @@ importers:
       '@eslint/css':
         specifier: 0.10.0
         version: 0.10.0
-      '@mkizka/eslint-plugin-relative-import':
-        specifier: 0.0.9
-        version: 0.0.9
       '@tsconfig/strictest':
         specifier: 2.0.5
         version: 2.0.5
@@ -3084,9 +3078,6 @@ packages:
     peerDependencies:
       '@types/react': '>=16'
       react: '>=16'
-
-  '@mkizka/eslint-plugin-relative-import@0.0.9':
-    resolution: {integrity: sha512-iUUt3lOW2ez4MrwS2Urw/ddwD9ifde+TlcXXBeAPlRR/7uGH/rREj07TFWW7G70NsyFtV1NpBvi8bjDZOM+RsQ==}
 
   '@modelcontextprotocol/sdk@1.17.3':
     resolution: {integrity: sha512-JPwUKWSsbzx+DLFznf/QZ32Qa+ptfbUlHhRLrBQBAFu9iI1iYvizM4p+zhhRDceSsPutXp4z+R/HPVphlIiclg==}
@@ -12997,8 +12988,6 @@ snapshots:
       '@types/react': 19.1.9
       react: 19.1.1
 
-  '@mkizka/eslint-plugin-relative-import@0.0.9': {}
-
   '@modelcontextprotocol/sdk@1.17.3':
     dependencies:
       ajv: 6.12.6
@@ -18284,7 +18273,7 @@ snapshots:
       isstream: 0.1.2
       jsonwebtoken: 9.0.2
       mime-types: 2.1.35
-      retry-axios: 2.6.0(axios@1.11.0(debug@4.4.1))
+      retry-axios: 2.6.0(axios@1.11.0)
       tough-cookie: 4.1.4
     transitivePeerDependencies:
       - supports-color
@@ -20948,7 +20937,7 @@ snapshots:
       onetime: 7.0.0
       signal-exit: 4.1.0
 
-  retry-axios@2.6.0(axios@1.11.0(debug@4.4.1)):
+  retry-axios@2.6.0(axios@1.11.0):
     dependencies:
       axios: 1.11.0(debug@4.4.1)
 

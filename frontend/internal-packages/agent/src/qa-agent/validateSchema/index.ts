@@ -1,7 +1,6 @@
 import { AIMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import type { DmlOperation } from '@liam-hq/artifact'
-import type { Database } from '@liam-hq/db'
 import { executeQuery } from '@liam-hq/pglite-server'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import { ResultAsync } from 'neverthrow'
@@ -9,7 +8,6 @@ import { getConfigurable } from '../../chat/workflow/shared/getConfigurable'
 import type { WorkflowState } from '../../chat/workflow/types'
 import { generateDdlFromSchema } from '../../chat/workflow/utils/generateDdl'
 import { transformWorkflowStateToArtifact } from '../../chat/workflow/utils/transformWorkflowStateToArtifact'
-import { withTimelineItemSync } from '../../chat/workflow/utils/withTimelineItemSync'
 import { WorkflowTerminationError } from '../../shared/errorHandling'
 import type { Testcase } from '../types'
 import { formatValidationErrors } from './formatValidationErrors'
@@ -167,7 +165,6 @@ export async function validateSchemaNode(
   state: WorkflowState,
   config: RunnableConfig,
 ): Promise<WorkflowState> {
-  const assistantRole: Database['public']['Enums']['assistant_role_enum'] = 'db'
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
     throw new WorkflowTerminationError(
@@ -267,18 +264,9 @@ export async function validateSchemaNode(
       name: 'SchemaValidator',
     })
 
-    // Sync with timeline
-    const syncedMessage = await withTimelineItemSync(validationAIMessage, {
-      designSessionId: state.designSessionId,
-      organizationId: state.organizationId || '',
-      userId: state.userId,
-      repositories,
-      assistantRole,
-    })
-
     updatedState = {
       ...updatedState,
-      messages: [...state.messages, syncedMessage],
+      messages: [...state.messages, validationAIMessage],
     }
   }
 

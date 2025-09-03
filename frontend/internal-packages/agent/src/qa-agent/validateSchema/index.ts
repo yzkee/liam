@@ -18,6 +18,47 @@ function isErrorResult(value: unknown): value is { error: unknown } {
 }
 
 /**
+ * Build combined SQL for DDL and testcase DML
+ */
+function buildCombinedSql(ddlStatements: string, testcase: Testcase): string {
+  const sqlParts = []
+
+  if (ddlStatements.trim()) {
+    sqlParts.push('-- DDL Statements', ddlStatements, '')
+  }
+
+  const op: DmlOperation = testcase.dmlOperation
+  const header = op.description
+    ? `-- ${op.description}`
+    : `-- ${op.operation_type} operation`
+  sqlParts.push(
+    `-- Test Case: ${testcase.id}`,
+    `-- ${testcase.title}`,
+    `${header}\n${op.sql};`,
+  )
+
+  return sqlParts.filter(Boolean).join('\n')
+}
+
+/**
+ * Extract failed operation from SQL results
+ */
+function extractFailedOperation(
+  sqlResults: SqlResult[],
+): { sql: string; error: string } | undefined {
+  const firstFailed = sqlResults.find((r) => !r.success)
+  if (!firstFailed) {
+    return undefined
+  }
+
+  const error = isErrorResult(firstFailed.result)
+    ? String(firstFailed.result.error)
+    : String(firstFailed.result)
+
+  return { sql: firstFailed.sql, error }
+}
+
+/**
  * Execute DML operations by testcase with DDL statements
  * Combines DDL and testcase-specific DML into single execution units
  */
@@ -29,25 +70,9 @@ async function executeDmlOperationsByTestcase(
   const results: TestcaseDmlExecutionResult[] = []
 
   for (const testcase of testcases) {
-    const sqlParts = []
-
-    if (ddlStatements.trim()) {
-      sqlParts.push('-- DDL Statements', ddlStatements, '')
-    }
-
-    const op: DmlOperation = testcase.dmlOperation
-    const header = op.description
-      ? `-- ${op.description}`
-      : `-- ${op.operation_type} operation`
-    sqlParts.push(
-      `-- Test Case: ${testcase.id}`,
-      `-- ${testcase.title}`,
-      `${header}\n${op.sql};`,
-    )
-
-    const combinedSql = sqlParts.filter(Boolean).join('\n')
-
+    const combinedSql = buildCombinedSql(ddlStatements, testcase)
     const startTime = new Date()
+
     const executionResult = await ResultAsync.fromPromise(
       executeQuery(combinedSql, requiredExtensions),
       (error) => new Error(String(error)),
@@ -55,18 +80,10 @@ async function executeDmlOperationsByTestcase(
 
     if (executionResult.isOk()) {
       const sqlResults = executionResult.value
-
       const hasErrors = sqlResults.some((result) => !result.success)
-
-      // Extract first failed operation with SQL and error pair
-      const firstFailed = sqlResults.find((r) => !r.success)
-      let failedOperation: { sql: string; error: string } | undefined
-      if (firstFailed) {
-        const error = isErrorResult(firstFailed.result)
-          ? String(firstFailed.result.error)
-          : String(firstFailed.result)
-        failedOperation = { sql: firstFailed.sql, error }
-      }
+      const failedOperation = hasErrors
+        ? extractFailedOperation(sqlResults)
+        : undefined
 
       results.push({
         testCaseId: testcase.id,

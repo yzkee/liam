@@ -1,17 +1,20 @@
 'use client'
 
+import {
+  mapStoredMessagesToChatMessages,
+  type StoredMessage,
+} from '@langchain/core/messages'
 import type { Schema } from '@liam-hq/schema'
 import clsx from 'clsx'
 import { type FC, useCallback, useEffect, useRef, useState } from 'react'
 import { Chat } from './components/Chat'
-import { sendChatMessage } from './components/Chat/services/aiMessageService'
 import { Output } from './components/Output'
 import { useRealtimeArtifact } from './components/Output/components/Artifact/hooks/useRealtimeArtifact'
-import { OUTPUT_TABS } from './components/Output/constants'
 import { OutputPlaceholder } from './components/OutputPlaceholder'
 import { useRealtimeTimelineItems } from './hooks/useRealtimeTimelineItems'
 import { useRealtimeVersionsWithSchema } from './hooks/useRealtimeVersionsWithSchema'
 import { useRealtimeWorkflowRuns } from './hooks/useRealtimeWorkflowRuns'
+import { useStream } from './hooks/useStream'
 import { SQL_REVIEW_COMMENTS } from './mock'
 import styles from './SessionDetailPage.module.css'
 import { convertTimelineItemToTimelineItemEntry } from './services/convertTimelineItemToTimelineItemEntry'
@@ -24,6 +27,7 @@ import type {
 type Props = {
   buildingSchemaId: string
   designSessionWithTimelineItems: DesignSessionWithTimelineItems
+  initialMessages: StoredMessage[]
   initialDisplayedSchema: Schema
   initialPrevSchema: Schema
   initialVersions: Version[]
@@ -35,6 +39,7 @@ type Props = {
 export const SessionDetailPageClient: FC<Props> = ({
   buildingSchemaId,
   designSessionWithTimelineItems,
+  initialMessages,
   initialDisplayedSchema,
   initialPrevSchema,
   initialVersions,
@@ -64,12 +69,13 @@ export const SessionDetailPageClient: FC<Props> = ({
     [setSelectedVersion],
   )
 
-  const handleViewVersion = useCallback((versionId: string) => {
-    const version = versions.find((version) => version.id === versionId)
-    if (!version) return
+  // TODO: Connect to Messages component once migration path from TimelineItems to Messages is established
+  // const handleViewVersion = useCallback((versionId: string) => {
+  //   const version = versions.find((version) => version.id === versionId)
+  //   if (!version) return
 
-    setSelectedVersion(version)
-  }, [])
+  //   setSelectedVersion(version)
+  // }, [])
 
   const { timelineItems, addOrUpdateTimelineItem } = useRealtimeTimelineItems(
     designSessionId,
@@ -80,9 +86,10 @@ export const SessionDetailPageClient: FC<Props> = ({
 
   const [activeTab, setActiveTab] = useState<string | undefined>(undefined)
 
-  const handleArtifactLinkClick = useCallback(() => {
-    setActiveTab(OUTPUT_TABS.ARTIFACT)
-  }, [])
+  // TODO: Connect to Messages component once migration path from TimelineItems to Messages is established
+  // const handleArtifactLinkClick = useCallback(() => {
+  //   setActiveTab(OUTPUT_TABS.ARTIFACT)
+  // }, [])
 
   const hasSelectedVersion = selectedVersion !== null
 
@@ -96,6 +103,10 @@ export const SessionDetailPageClient: FC<Props> = ({
     initialWorkflowRunStatus,
   )
 
+  const chatMessages = mapStoredMessagesToChatMessages(initialMessages)
+  const { isStreaming, messages, start } = useStream({
+    initialMessages: chatMessages,
+  })
   // Track if initial workflow has been triggered to prevent multiple executions
   const hasTriggeredInitialWorkflow = useRef(false)
 
@@ -118,7 +129,7 @@ export const SessionDetailPageClient: FC<Props> = ({
       hasTriggeredInitialWorkflow.current = true
 
       // Trigger the workflow for the initial user message
-      await sendChatMessage({
+      await start({
         designSessionId,
         userInput: firstItem.content,
         isDeepModelingEnabled,
@@ -142,13 +153,10 @@ export const SessionDetailPageClient: FC<Props> = ({
         <div className={styles.chatSection}>
           <Chat
             schemaData={displayedSchema}
-            designSessionId={designSessionId}
+            messages={messages}
             timelineItems={timelineItems}
-            isWorkflowRunning={status === 'pending'}
+            isWorkflowRunning={status === 'pending' || isStreaming}
             onMessageSend={addOrUpdateTimelineItem}
-            onVersionView={handleViewVersion}
-            onArtifactLinkClick={handleArtifactLinkClick}
-            isDeepModelingEnabled={isDeepModelingEnabled}
           />
         </div>
         {hasSelectedVersion && (

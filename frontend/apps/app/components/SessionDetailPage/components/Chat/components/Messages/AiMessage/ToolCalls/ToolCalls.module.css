@@ -1,0 +1,11 @@
+.container {
+  display: grid;
+  width: 100%;
+  grid-template-rows: 1fr auto;
+  gap: 0.5rem;
+}
+
+.title {
+  font-size: var(--font-size-4);
+  color: var(--global-body-text);
+}

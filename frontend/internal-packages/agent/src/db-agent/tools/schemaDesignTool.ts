@@ -1,6 +1,5 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { type StructuredTool, tool } from '@langchain/core/tools'
-import type { JSONSchema } from '@langchain/core/utils/json_schema'
 import { executeQuery } from '@liam-hq/pglite-server'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import {
@@ -9,17 +8,15 @@ import {
   postgresqlSchemaDeparser,
   type Schema,
 } from '@liam-hq/schema'
-import { toJsonSchema } from '@valibot/to-json-schema'
 import * as v from 'valibot'
+import { toJsonSchema } from '../../shared/jsonSchema'
 import { getToolConfigurable } from '../getToolConfigurable'
 
 const schemaDesignToolSchema = v.object({
   operations: operationsSchema,
 })
 
-// toJsonSchema returns a JSONSchema7, which is not assignable to JSONSchema
-// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-const toolSchema = toJsonSchema(schemaDesignToolSchema) as JSONSchema
+const toolSchema = toJsonSchema(schemaDesignToolSchema)
 
 const validateAndExecuteDDL = async (
   schema: Schema,
@@ -39,9 +36,13 @@ const validateAndExecuteDDL = async (
   }
 
   const ddlStatements = ddlResult.value
+  const requiredExtensions = Object.keys(schema.extensions).sort()
 
   // Execute DDL to validate it
-  const results: SqlResult[] = await executeQuery(ddlStatements)
+  const results: SqlResult[] = await executeQuery(
+    ddlStatements,
+    requiredExtensions,
+  )
 
   const hasExecutionErrors = results.some(
     (result: SqlResult) => !result.success,

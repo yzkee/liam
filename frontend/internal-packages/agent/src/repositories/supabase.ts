@@ -28,6 +28,7 @@ import type {
   UpdateArtifactParams,
   UpdateTimelineItemParams,
   UpdateWorkflowRunStatusParams,
+  UserInfo,
   VersionResult,
   WorkflowRunResult,
 } from './types'
@@ -174,7 +175,7 @@ export class SupabaseSchemaRepository implements SchemaRepository {
       typeof buildingSchema.initial_schema_snapshot === 'object' &&
       buildingSchema.initial_schema_snapshot !== null
         ? JSON.parse(JSON.stringify(buildingSchema.initial_schema_snapshot))
-        : { tables: {}, enums: {} }
+        : { tables: {}, enums: {}, extensions: {} }
 
     for (const version of versions) {
       const patchParsed = v.safeParse(operationsSchema, version.patch)
@@ -209,7 +210,7 @@ export class SupabaseSchemaRepository implements SchemaRepository {
     const validationResult = v.safeParse(schemaSchema, currentSchema)
     if (!validationResult.success) {
       // Schema validation failed, using fallback schema
-      return { tables: {}, enums: {} }
+      return { tables: {}, enums: {}, extensions: {} }
     }
 
     return validationResult.output
@@ -219,6 +220,7 @@ export class SupabaseSchemaRepository implements SchemaRepository {
     return versions.length > 0 ? Math.max(...versions.map((v) => v.number)) : 0
   }
 
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
   async createVersion(params: CreateVersionParams): Promise<VersionResult> {
     const { buildingSchemaId, latestVersionNumber, patch } = params
 
@@ -720,6 +722,25 @@ export class SupabaseSchemaRepository implements SchemaRepository {
     return {
       success: true,
       workflowRun,
+    }
+  }
+
+  async getUserInfo(userId: string): Promise<UserInfo | null> {
+    const { data, error } = await this.client
+      .from('users')
+      .select('id, email, name')
+      .eq('id', userId)
+      .single()
+
+    if (error || !data) {
+      console.error(`Could not fetch user info for ${userId}:`, error)
+      return null
+    }
+
+    return {
+      id: data.id,
+      email: data.email,
+      userName: data.name,
     }
   }
 }

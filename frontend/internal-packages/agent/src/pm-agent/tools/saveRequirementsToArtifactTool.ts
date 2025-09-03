@@ -1,19 +1,22 @@
+import { dispatchCustomEvent } from '@langchain/core/callbacks/dispatch'
 import { ToolMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { type StructuredTool, tool } from '@langchain/core/tools'
-import type { JSONSchema } from '@langchain/core/utils/json_schema'
 import { Command } from '@langchain/langgraph'
 import type {
   Artifact,
   FunctionalRequirement,
   NonFunctionalRequirement,
 } from '@liam-hq/artifact'
-import { toJsonSchema } from '@valibot/to-json-schema'
+import { fromValibotSafeParse } from '@liam-hq/neverthrow'
 import { err, ok, type Result } from 'neverthrow'
+import { v4 as uuidv4 } from 'uuid'
 import * as v from 'valibot'
 import { getConfigurable } from '../../chat/workflow/shared/getConfigurable'
+import { SSE_EVENTS } from '../../client'
 import type { Repositories } from '../../repositories'
 import { WorkflowTerminationError } from '../../shared/errorHandling'
+import { toJsonSchema } from '../../shared/jsonSchema'
 
 // Valibot schema for validating analyzedRequirements structure
 const analyzedRequirementsSchema = v.object({
@@ -24,9 +27,7 @@ const analyzedRequirementsSchema = v.object({
 
 type AnalyzedRequirements = v.InferOutput<typeof analyzedRequirementsSchema>
 
-// toJsonSchema returns a JSONSchema7, which is not assignable to JSONSchema
-// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-const toolSchema = toJsonSchema(analyzedRequirementsSchema) as JSONSchema
+const toolSchema = toJsonSchema(analyzedRequirementsSchema)
 
 const configSchema = v.object({
   toolCall: v.object({
@@ -91,19 +92,13 @@ const getToolConfigurable = (
   if (baseConfigResult.isErr()) {
     return err(baseConfigResult.error)
   }
-  const configParseResult = v.safeParse(configSchema, config)
-  if (!configParseResult.success) {
-    const errorMessage = configParseResult.issues
-      .map((issue) => issue.message)
-      .join(', ')
-    return err(new Error(`Invalid config structure: ${errorMessage}`))
-  }
-
-  return ok({
-    repositories: baseConfigResult.value.repositories,
-    designSessionId: configParseResult.output.configurable.designSessionId,
-    toolCallId: configParseResult.output.toolCall.id,
-  })
+  return fromValibotSafeParse(configSchema, config).andThen((value) =>
+    ok({
+      repositories: baseConfigResult.value.repositories,
+      designSessionId: value.configurable.designSessionId,
+      toolCallId: value.toolCall.id,
+    }),
+  )
 }
 
 /**
@@ -140,9 +135,12 @@ export const saveRequirementsToArtifactTool: StructuredTool = tool(
     }
 
     const toolMessage = new ToolMessage({
+      id: uuidv4(),
+      status: 'success',
       content: 'Requirements saved successfully to artifact',
       tool_call_id: toolCallId,
     })
+    await dispatchCustomEvent(SSE_EVENTS.MESSAGES, toolMessage)
 
     return new Command({
       update: {

@@ -137,6 +137,7 @@ function extractIdColumnAndConstraint(
 /**
  * Process a call node and extract column, index, or constraint details
  */
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
 function processCallNode(
   node: CallNode,
   columns: Column[],
@@ -350,6 +351,7 @@ function extractColumnOptions(
 /**
  * Extract inline index options from column definition
  */
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
 function extractInlineIndexOptions(
   value: Node,
   columnName: string,
@@ -707,6 +709,7 @@ class SchemaFinder extends Visitor {
         return acc
       }, {}),
       enums: {},
+      extensions: {},
     }
     return schema
   }

@@ -2,6 +2,7 @@ import type {
   AlterTableStmt,
   CommentStmt,
   CreateEnumStmt,
+  CreateExtensionStmt,
   CreateStmt,
   IndexStmt,
   List,
@@ -17,6 +18,7 @@ import type {
   Constraint,
   Constraints,
   Enum,
+  Extension,
   ForeignKeyConstraint,
   ForeignKeyConstraintReferenceOption,
   Schema,
@@ -245,6 +247,7 @@ export const convertToSchema = (
 ): ProcessResult => {
   const tables: Record<string, Table> = {}
   const enums: Record<string, Enum> = {}
+  const extensions: Record<string, Extension> = {}
   const errors: ProcessError[] = []
 
   function isCreateStmt(stmt: Node): stmt is { CreateStmt: CreateStmt } {
@@ -269,6 +272,12 @@ export const convertToSchema = (
     stmt: Node,
   ): stmt is { CreateEnumStmt: CreateEnumStmt } {
     return 'CreateEnumStmt' in stmt
+  }
+
+  function isCreateExtensionStmt(
+    stmt: Node,
+  ): stmt is { CreateExtensionStmt: CreateExtensionStmt } {
+    return 'CreateExtensionStmt' in stmt
   }
 
   /**
@@ -489,6 +498,7 @@ export const convertToSchema = (
   /**
    * Process table-level constraint
    */
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
   function processTableLevelConstraint(
     constraint: PgConstraint,
     tableName: string,
@@ -802,6 +812,7 @@ export const convertToSchema = (
   /**
    * Handle COMMENT statement
    */
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
   function handleCommentStmt(commentStmt: CommentStmt): void {
     // Skip if not a supported comment type (only table, column, and type comments are supported)
     if (
@@ -1058,6 +1069,23 @@ export const convertToSchema = (
   }
 
   /**
+   * Handle CREATE EXTENSION statement
+   */
+  function handleCreateExtensionStmt(
+    createExtensionStmt: CreateExtensionStmt,
+  ): void {
+    if (!createExtensionStmt?.extname) return
+
+    const extensionName = createExtensionStmt.extname
+
+    const extension: Extension = {
+      name: extensionName,
+    }
+
+    extensions[extensionName] = extension
+  }
+
+  /**
    * Handle ALTER TABLE statement
    */
   function handleAlterTableStmt(alterTableStmt: AlterTableStmt): void {
@@ -1090,6 +1118,8 @@ export const convertToSchema = (
       handleAlterTableStmt(stmt.AlterTableStmt)
     } else if (isCreateEnumStmt(stmt)) {
       handleCreateEnumStmt(stmt.CreateEnumStmt)
+    } else if (isCreateExtensionStmt(stmt)) {
+      handleCreateExtensionStmt(stmt.CreateExtensionStmt)
     }
   }
 
@@ -1097,6 +1127,7 @@ export const convertToSchema = (
     value: {
       tables,
       enums,
+      extensions,
     },
     errors,
   }

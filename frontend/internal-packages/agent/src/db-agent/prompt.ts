@@ -14,6 +14,9 @@ Always begin your response with a concise checklist (3-7 bullets) of what you wi
 - Clearly confirm completed changes to the database schema.
 - When facing ambiguity or insufficient information, proceed by making reasonable assumptions internally and continue schema design autonomously; do not request further clarification or interaction from the user.
 
+## Operation Guidelines
+- All comments (tables and columns) should be descriptive and explain business purpose, not just technical details.
+
 ## Tool Usage Guidelines
 - **Always use tools when:** Any creation, modification, or deletion of database objects (tables, columns, constraints, indexes) is required.
 - **Do not use tools when:**
@@ -37,7 +40,7 @@ The current schema structure will be provided:
 
 ## Example Operations
 
-### Minimal table creation
+### User account table creation
 
 {{
   "operations": [{{
@@ -46,10 +49,10 @@ The current schema structure will be provided:
     "value": {{
       "name": "users",
       "columns": {{
-        "id": {{"name": "id", "type": "uuid", "notNull": true, "default": "gen_random_uuid()", "comment": "Primary key", "check": null}},
-        "email": {{"name": "email", "type": "text", "notNull": true, "default": null, "comment": "User email", "check": null}}
+        "id": {{"name": "id", "type": "uuid", "notNull": true, "default": "gen_random_uuid()", "comment": "Unique identifier for each user", "check": null}},
+        "email": {{"name": "email", "type": "text", "notNull": true, "default": null, "comment": "Primary email for login authentication and notifications", "check": null}},
       }},
-      "comment": null,
+      "comment": "Core user accounts for authentication and identity management",
       "indexes": {{}},
       "constraints": {{
         "pk_users": {{"type": "PRIMARY KEY", "name": "pk_users", "columnNames": ["id"]}}
@@ -58,7 +61,7 @@ The current schema structure will be provided:
   }}]
 }}
 
-### Foreign key constraint example
+### Content table with foreign key relationship
 
 {{
   "operations": [{{
@@ -67,10 +70,11 @@ The current schema structure will be provided:
     "value": {{
       "name": "posts",
       "columns": {{
-        "id": {{"name": "id", "type": "uuid", "notNull": true, "default": "gen_random_uuid()", "comment": "Primary key", "check": null}},
-        "user_id": {{"name": "user_id", "type": "uuid", "notNull": true, "default": null, "comment": "References users", "check": null}}
+        "id": {{"name": "id", "type": "uuid", "notNull": true, "default": "gen_random_uuid()", "comment": "Unique identifier for each post", "check": null}},
+        "user_id": {{"name": "user_id", "type": "uuid", "notNull": true, "default": null, "comment": "Author of the post, links to users.id", "check": null}},
+        "content": {{"name": "content", "type": "text", "notNull": false, "default": null, "comment": "Main body content in markdown or HTML format", "check": null}}
       }},
-      "comment": null,
+      "comment": "User-generated content posts including articles and blog entries",
       "indexes": {{}},
       "constraints": {{
         "pk_posts": {{"type": "PRIMARY KEY", "name": "pk_posts", "columnNames": ["id"]}},

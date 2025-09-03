@@ -21,6 +21,7 @@ import type {
   UpdateArtifactParams,
   UpdateTimelineItemParams,
   UpdateWorkflowRunStatusParams,
+  UserInfo,
   VersionResult,
   WorkflowRunResult,
 } from './types'
@@ -60,8 +61,6 @@ type InMemoryRepositoryOptions = {
 export class InMemoryRepository implements SchemaRepository {
   private state: InMemoryRepositoryState
   public checkpointer: BaseCheckpointSaver
-  // Used by generateId method
-  // biome-ignore lint/correctness/noUnusedPrivateClassMembers: used by generateId method
   private idCounter = 1
 
   constructor(options: InMemoryRepositoryOptions = {}) {
@@ -506,5 +505,13 @@ export class InMemoryRepository implements SchemaRepository {
    */
   getBuildingSchema(buildingSchemaId: string) {
     return this.state.buildingSchemas.get(buildingSchemaId) || null
+  }
+
+  async getUserInfo(userId: string): Promise<UserInfo | null> {
+    return {
+      id: userId,
+      email: `user-${userId}@example.com`,
+      userName: `Test User ${userId}`,
+    }
   }
 }

@@ -2,7 +2,7 @@ import { schemaSchema } from '@liam-hq/schema'
 import { notFound } from 'next/navigation'
 import type { ReactElement } from 'react'
 import { safeParse } from 'valibot'
-import { createPublicServerClient } from '@/libs/db/server'
+import { createPublicServerClient } from '../../libs/db/server'
 import { PublicLayout } from '../PublicLayout'
 import { ViewModeProvider } from '../SessionDetailPage/contexts/ViewModeContext'
 import { SessionDetailPageClient } from '../SessionDetailPage/SessionDetailPageClient'
@@ -120,6 +120,9 @@ export const PublicSessionDetailPage = async ({
         <SessionDetailPageClient
           buildingSchemaId={buildingSchemaId}
           designSessionWithTimelineItems={designSessionWithTimelineItems}
+          // TODO: Fetch actual messages using getMessages() once organizationId becomes optional in createSupabaseRepositories
+          // Currently blocked: Public sessions don't have organizationId, but createSupabaseRepositories requires it
+          initialMessages={[]}
           initialDisplayedSchema={initialSchema}
           initialPrevSchema={initialPrevSchema}
           initialVersions={versions

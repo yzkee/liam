@@ -1,7 +1,7 @@
 'use client'
 
 import { add, getTime, isAfter } from 'date-fns'
-import { Banner } from '@/components'
+import { Banner } from '../components'
 import './global.css'
 import { CookieConsent } from '@liam-hq/ui'
 import { GoogleTagManager } from '@next/third-parties/google'
@@ -14,7 +14,7 @@ import {
   GTMConsent,
   GtagScript,
   updateConsent,
-} from '@/lib/gtm'
+} from '../lib/gtm'
 
 const COOKIE_CONSENT_EXPIRE_KEY = 'cookieConsentExpire'
 

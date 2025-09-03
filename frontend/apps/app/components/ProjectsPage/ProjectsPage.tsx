@@ -1,4 +1,5 @@
-import { urlgen } from '@/libs/routes'
+import { notFound } from 'next/navigation'
+import { urlgen } from '../../libs/routes'
 import { EmptyProjectsState } from './components/EmptyProjectsState'
 import styles from './ProjectsPage.module.css'
 import { ServerProjectsDataProvider } from './ServerProjectsDataProvider'
@@ -17,7 +18,7 @@ export async function ProjectsPage({
 
   if (!currentOrganization) {
     console.error('Organization not found')
-    throw new Error('Organization not found')
+    notFound()
   }
 
   await getUserOrganizations() // Fetch for future use

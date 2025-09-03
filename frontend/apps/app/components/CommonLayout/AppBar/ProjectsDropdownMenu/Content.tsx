@@ -1,7 +1,5 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-import { type FC, useCallback } from 'react'
 import {
   DropdownMenuContent,
   DropdownMenuItem,
@@ -9,9 +7,11 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
-} from '@/components'
-import { Plus } from '@/icons'
-import { urlgen } from '@/libs/routes'
+  Plus,
+} from '@liam-hq/ui'
+import { useRouter } from 'next/navigation'
+import { type FC, useCallback } from 'react'
+import { urlgen } from '../../../../libs/routes'
 import styles from './ProjectsDropdownMenu.module.css'
 import type { Project } from './services/getProject'
 import type { Projects } from './services/getProjects'

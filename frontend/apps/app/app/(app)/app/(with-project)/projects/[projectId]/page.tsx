@@ -1,6 +1,6 @@
-import { redirect } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import * as v from 'valibot'
-import type { PageProps } from '@/app/types'
+import type { PageProps } from '../../../../../types'
 
 const paramsSchema = v.object({
   projectId: v.string(),
@@ -8,7 +8,7 @@ const paramsSchema = v.object({
 
 export default async function Page({ params }: PageProps) {
   const parsedParams = v.safeParse(paramsSchema, await params)
-  if (!parsedParams.success) throw new Error('Invalid project parameters')
+  if (!parsedParams.success) notFound()
 
   const { projectId } = parsedParams.output
 

@@ -2,6 +2,7 @@ import type {
   Column,
   Constraint,
   Enum,
+  Extension,
   Index,
   Table,
 } from '../../schema/index.js'
@@ -462,4 +463,27 @@ export function generateCreateEnumStatement(enumObj: Enum): string {
   }
 
   return ddl
+}
+
+/**
+ * Generate CREATE EXTENSION statement from Extension type
+ */
+export function generateCreateExtensionStatement(extension: Extension): string {
+  // PostgreSQL simple unquoted identifier pattern: starts with lowercase letter or underscore,
+  // followed by lowercase letters, digits, or underscores
+  const simpleIdentifierPattern = /^[a-z_][a-z0-9_]*$/
+
+  // Check if the extension name needs quoting
+  let extensionName: string
+  if (simpleIdentifierPattern.test(extension.name)) {
+    // Simple identifier - no quoting needed
+    extensionName = extension.name
+  } else {
+    // Non-simple identifier - needs quoting and escaping
+    // Escape internal double quotes by doubling them
+    const escaped = extension.name.replace(/"/g, '""')
+    extensionName = `"${escaped}"`
+  }
+
+  return `CREATE EXTENSION IF NOT EXISTS ${extensionName};`
 }

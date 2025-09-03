@@ -6,12 +6,12 @@ import { Command } from 'cmdk'
 import { NuqsTestingAdapter } from 'nuqs/adapters/testing'
 import type { ReactNode } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import * as UseTableSelection from '@/features/erd/hooks'
 import {
   SchemaProvider,
   type SchemaProviderValue,
   UserEditingProvider,
-} from '@/stores'
+} from '../../../../../../stores'
+import * as UseTableSelection from '../../../../hooks'
 import { CommandPaletteProvider } from '../CommandPaletteProvider'
 import * as UseCommandPalette from '../CommandPaletteProvider/hooks'
 import { TableOptions } from './TableOptions'
@@ -54,6 +54,7 @@ const schema: SchemaProviderValue = {
       user_settings: aTable({ name: 'user_settings' }),
     },
     enums: {},
+    extensions: {},
   },
 }
 

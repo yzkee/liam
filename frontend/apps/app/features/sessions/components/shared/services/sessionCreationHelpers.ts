@@ -6,8 +6,8 @@ import type { SupabaseClientType } from '@liam-hq/db'
 import type { Schema } from '@liam-hq/schema'
 import { parse, setPrismWasmUrl } from '@liam-hq/schema/parser'
 import { redirect } from 'next/navigation'
-import { getOrganizationId } from '@/features/organizations/services/getOrganizationId'
-import { createClient } from '@/libs/db/server'
+import { createClient } from '../../../../../libs/db/server'
+import { getOrganizationId } from '../../../../organizations/services/getOrganizationId'
 import type {
   CreateSessionState,
   SchemaFormat,
@@ -153,10 +153,12 @@ export const createSessionWithSchema = async (
     return { success: false, error: 'Authentication required' }
   }
 
-  const organizationId = await getOrganizationId()
-  if (!organizationId) {
-    return { success: false, error: 'Organization not found' }
+  const organizationIdResult = await getOrganizationId()
+  if (organizationIdResult.isErr()) {
+    return { success: false, error: organizationIdResult.error.message }
   }
+
+  const organizationId = organizationIdResult.value
 
   const designSessionResult = await createDesignSession(
     params,

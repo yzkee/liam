@@ -1,5 +1,17 @@
 # @liam-hq/erd-core
 
+## 0.6.7
+
+### Patch Changes
+
+- [#3199](https://github.com/liam-hq/liam/pull/3199) - - 💄 style(command palette): fix table preview size / Thanks [@tnyo43](https://github.com/tnyo43)!
+
+## 0.6.6
+
+### Patch Changes
+
+- [#3195](https://github.com/liam-hq/liam/pull/3195) - 🐛 Fixed an issue where the sidebar couldn't be scrolled properly on Android Chrome browsers. / Thanks [@FunamaYukina](https://github.com/FunamaYukina)!
+
 ## 0.6.5
 
 ### Patch Changes

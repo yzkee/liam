@@ -1,7 +1,7 @@
 {
   "name": "@liam-hq/erd-core",
   "license": "Apache-2.0",
-  "version": "0.6.5",
+  "version": "0.6.7",
   "type": "module",
   "publishConfig": {
     "access": "public"
@@ -12,9 +12,9 @@
   },
   "dependencies": {
     "@liam-hq/ui": "workspace:*",
-    "@radix-ui/react-dialog": "1.1.14",
-    "@radix-ui/react-toolbar": "1.1.10",
-    "@xyflow/react": "12.8.2",
+    "@radix-ui/react-dialog": "1.1.15",
+    "@radix-ui/react-toolbar": "1.1.11",
+    "@xyflow/react": "12.8.3",
     "clsx": "2.1.1",
     "cmdk": "1.1.1",
     "elkjs": "0.10.0",
@@ -48,12 +48,12 @@
     "dev:css": "tcm src --watch",
     "fmt": "concurrently \"pnpm:fmt:*\"",
     "fmt:biome": "biome check --write --unsafe .",
-    "fmt:eslint": "eslint --fix .",
+    "fmt:eslint": "eslint --fix --prune-suppressions .",
     "gen": "concurrently \"pnpm:gen:*\"",
     "gen:css": "tcm src",
     "lint": "concurrently \"pnpm:lint:*\"",
     "lint:biome": "biome check .",
-    "lint:eslint": "eslint . --prune-suppressions",
+    "lint:eslint": "eslint .",
     "lint:tsc": "tsc --noEmit",
     "suppressions": "eslint --suppress-all --fix --max-warnings 0",
     "test": "vitest --watch=false"

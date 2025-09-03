@@ -1,11 +1,16 @@
 import { notFound } from 'next/navigation'
 import * as v from 'valibot'
-import type { PageProps } from '@/app/types'
-import { PublicSessionDetailPage } from '@/components/PublicSessionDetailPage'
+import { PublicSessionDetailPage } from '../../../../../components/PublicSessionDetailPage'
+import type { PageProps } from '../../../../types'
 
 const paramsSchema = v.object({
   id: v.string(),
 })
+
+// Prevent search engines from indexing public share pages
+export const metadata = {
+  robots: 'noindex, nofollow, noarchive',
+}
 
 // Cache configuration for public pages
 export const revalidate = 60 // Revalidate every 60 seconds

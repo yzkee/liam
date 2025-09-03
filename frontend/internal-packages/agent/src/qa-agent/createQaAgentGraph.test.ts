@@ -7,14 +7,15 @@ describe('createQaAgentGraph', () => {
   const expectedMermaidDiagram = `%%{init: {'flowchart': {'curve': 'linear'}}}%%
 graph TD;
 	__start__([<p>__start__</p>]):::first
-	generateTestcase(generateTestcase)
-	prepareDML(prepareDML)
+	generateTestcaseAndDml(generateTestcaseAndDml)
+	invokeSaveTestcasesAndDmlTool(invokeSaveTestcasesAndDmlTool)
 	validateSchema(validateSchema)
 	__end__([<p>__end__</p>]):::last
-	__start__ --> generateTestcase;
-	generateTestcase --> prepareDML;
-	prepareDML --> validateSchema;
+	__start__ --> generateTestcaseAndDml;
+	invokeSaveTestcasesAndDmlTool --> generateTestcaseAndDml;
 	validateSchema --> __end__;
+	generateTestcaseAndDml -.-> invokeSaveTestcasesAndDmlTool;
+	generateTestcaseAndDml -.-> validateSchema;
 	classDef default fill:#f2f0ff,line-height:1.2;
 	classDef first fill-opacity:0;
 	classDef last fill:#bfb6fc;

@@ -6,7 +6,7 @@ import {
   aTable,
   aUniqueConstraint,
 } from '@liam-hq/schema'
-import type { SchemaProviderValue } from '@/stores'
+import type { SchemaProviderValue } from '../../stores'
 
 const usersTable = aTable({
   name: 'users',
@@ -91,6 +91,7 @@ export const mockPreviousSchema = aSchema({
     // posts table will be "added" in diff
   },
   enums: {},
+  extensions: {},
 })
 
 export const mockAddedTableSchema: SchemaProviderValue = {
@@ -157,6 +158,7 @@ export const mockRemovedTableSchema: SchemaProviderValue = {
   previous: mockPreviousSchema,
   current: aSchema({
     tables: {},
+    extensions: {},
   }),
 }
 

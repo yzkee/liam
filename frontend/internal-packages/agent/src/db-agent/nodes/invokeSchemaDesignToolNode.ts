@@ -5,9 +5,8 @@ import { ToolNode } from '@langchain/langgraph/prebuilt'
 import type { Schema } from '@liam-hq/schema'
 import type { ResultAsync } from 'neverthrow'
 import { getConfigurable } from '../../chat/workflow/shared/getConfigurable'
-import type { WorkflowState } from '../../chat/workflow/types'
-import { withTimelineItemSync } from '../../chat/workflow/utils/withTimelineItemSync'
 import type { Repositories } from '../../repositories'
+import type { DbAgentState } from '../shared/dbAgentAnnotation'
 import { schemaDesignTool } from '../tools/schemaDesignTool'
 
 /**
@@ -46,7 +45,7 @@ const fetchUpdatedSchemaWithResult = (
 }
 
 export const invokeSchemaDesignToolNode = async (
-  state: WorkflowState,
+  state: DbAgentState,
   config: RunnableConfig,
 ) => {
   const configurableResult = getConfigurable(config)
@@ -60,7 +59,7 @@ export const invokeSchemaDesignToolNode = async (
 
   const toolNode = new ToolNode<{ messages: BaseMessage[] }>([schemaDesignTool])
 
-  const result = await toolNode.invoke(state, {
+  const stream = await toolNode.stream(state, {
     configurable: {
       ...config.configurable,
       buildingSchemaId: state.buildingSchemaId,
@@ -69,31 +68,24 @@ export const invokeSchemaDesignToolNode = async (
     },
   })
 
-  // Sync all ToolMessages to timeline
+  let result: { messages: BaseMessage[] } = { messages: [] }
+
+  for await (const chunk of stream) {
+    result = chunk
+  }
+
   const messages = result.messages
   if (!Array.isArray(messages)) {
     return result
   }
 
-  const syncedMessages = await Promise.all(
-    messages.map(async (message: BaseMessage) => {
-      return await withTimelineItemSync(message, {
-        designSessionId: state.designSessionId,
-        organizationId: state.organizationId || '',
-        userId: state.userId,
-        repositories,
-        assistantRole: 'db',
-      })
-    }),
-  )
-
   let updatedResult = {
     ...state,
     ...result,
-    messages: syncedMessages,
+    messages: messages,
   }
 
-  if (wasSchemaDesignToolSuccessful(syncedMessages)) {
+  if (wasSchemaDesignToolSuccessful(messages)) {
     const schemaResult = await fetchUpdatedSchemaWithResult(
       repositories,
       state.designSessionId,

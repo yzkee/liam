@@ -42,7 +42,7 @@ interface WorkflowState {
 
   // Requirements analysis
   analyzedRequirements?: AnalyzedRequirements;
-  generatedTestcases?: Testcase[];
+  testcases: Testcase[];
 
   // DML execution results
   dmlExecutionErrors?: string;

@@ -6,6 +6,7 @@
     "@changesets/cli": "2.29.6",
     "@changesets/get-github-info": "0.6.0",
     "@changesets/types": "6.1.0",
+    "@mkizka/eslint-plugin-relative-import": "0.0.9",
     "@turbo/gen": "2.5.6",
     "@types/node": "22.17.1",
     "@vitest/coverage-v8": "3.2.4",

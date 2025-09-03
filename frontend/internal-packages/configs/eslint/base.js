@@ -4,6 +4,7 @@ import css from "@eslint/css";
 import tseslint from "@typescript-eslint/eslint-plugin";
 import tsParser from "@typescript-eslint/parser";
 import unicorn from "eslint-plugin-unicorn";
+import * as relativeImportPlugin from "@mkizka/eslint-plugin-relative-import";
 import { noNonEnglishPlugin } from "./no-non-english-plugin.js";
 import { noThrowErrorPlugin } from "./no-throw-error-plugin.js";
 import { preferClsxPlugin } from "./prefer-clsx-plugin.js";
@@ -36,6 +37,7 @@ export function createBaseConfig(options = {}) {
 				"no-non-english": noNonEnglishPlugin,
 				"no-throw-error": noThrowErrorPlugin,
 				"prefer-clsx": preferClsxPlugin,
+				"@mkizka/relative-import": relativeImportPlugin,
 			},
 			languageOptions: {
 				parser: tsParser,
@@ -97,6 +99,18 @@ export function createBaseConfig(options = {}) {
 						selector: "ExportNamedDeclaration[source]",
 						message: "Re-exports are not allowed except in index.ts files",
 					},
+				],
+			},
+		},
+		{
+			files: ["src/**/*.ts", "src/**/*.tsx"],
+			plugins: {
+				"@mkizka/relative-import": relativeImportPlugin,
+			},
+			rules: {
+				"@mkizka/relative-import/no-path-alias": [
+					"error",
+					{ alias: { "@/": "src" } },
 				],
 			},
 		},

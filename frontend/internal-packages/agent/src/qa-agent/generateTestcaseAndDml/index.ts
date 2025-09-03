@@ -5,10 +5,10 @@ import {
 } from '@langchain/core/messages'
 import { ChatOpenAI } from '@langchain/openai'
 import { ResultAsync } from 'neverthrow'
-import type { WorkflowState } from '../../chat/workflow/types'
 import { WorkflowTerminationError } from '../../shared/errorHandling'
 import { convertSchemaToText } from '../../utils/convertSchemaToText'
 import { removeReasoningFromMessages } from '../../utils/messageCleanup'
+import type { QaAgentState } from '../shared/qaAgentAnnotation'
 import { saveTestcasesAndDmlTool } from '../tools/saveTestcasesAndDmlTool'
 import { humanPromptTemplate, SYSTEM_PROMPT } from './prompt'
 
@@ -17,7 +17,7 @@ import { humanPromptTemplate, SYSTEM_PROMPT } from './prompt'
  */
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
 function formatAnalyzedRequirements(
-  analyzedRequirements: WorkflowState['analyzedRequirements'],
+  analyzedRequirements: QaAgentState['analyzedRequirements'],
 ): string {
   if (!analyzedRequirements) {
     return 'No requirements available.'
@@ -85,7 +85,7 @@ const model = new ChatOpenAI({
  * Generates both test cases and their corresponding DML operations in a single LLM call
  */
 export async function generateTestcaseAndDmlNode(
-  state: WorkflowState,
+  state: QaAgentState,
 ): Promise<{ messages: BaseMessage[] }> {
   if (!state.analyzedRequirements) {
     throw new WorkflowTerminationError(

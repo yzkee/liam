@@ -13,6 +13,51 @@ import type { Testcase } from '../types'
 import { formatValidationErrors } from './formatValidationErrors'
 import type { TestcaseDmlExecutionResult } from './types'
 
+function isErrorResult(value: unknown): value is { error: unknown } {
+  return typeof value === 'object' && value !== null && 'error' in value
+}
+
+/**
+ * Build combined SQL for DDL and testcase DML
+ */
+function buildCombinedSql(ddlStatements: string, testcase: Testcase): string {
+  const sqlParts = []
+
+  if (ddlStatements.trim()) {
+    sqlParts.push('-- DDL Statements', ddlStatements, '')
+  }
+
+  const op: DmlOperation = testcase.dmlOperation
+  const header = op.description
+    ? `-- ${op.description}`
+    : `-- ${op.operation_type} operation`
+  sqlParts.push(
+    `-- Test Case: ${testcase.id}`,
+    `-- ${testcase.title}`,
+    `${header}\n${op.sql};`,
+  )
+
+  return sqlParts.filter(Boolean).join('\n')
+}
+
+/**
+ * Extract failed operation from SQL results
+ */
+function extractFailedOperation(
+  sqlResults: SqlResult[],
+): { sql: string; error: string } | undefined {
+  const firstFailed = sqlResults.find((r) => !r.success)
+  if (!firstFailed) {
+    return undefined
+  }
+
+  const error = isErrorResult(firstFailed.result)
+    ? String(firstFailed.result.error)
+    : String(firstFailed.result)
+
+  return { sql: firstFailed.sql, error }
+}
+
 /**
  * Execute DML operations by testcase with DDL statements
  * Combines DDL and testcase-specific DML into single execution units
@@ -25,30 +70,9 @@ async function executeDmlOperationsByTestcase(
   const results: TestcaseDmlExecutionResult[] = []
 
   for (const testcase of testcases) {
-    if (!testcase.dmlOperations || testcase.dmlOperations.length === 0) {
-      continue
-    }
-
-    const sqlParts = []
-
-    if (ddlStatements.trim()) {
-      sqlParts.push('-- DDL Statements', ddlStatements, '')
-    }
-
-    sqlParts.push(
-      `-- Test Case: ${testcase.id}`,
-      `-- ${testcase.title}`,
-      ...testcase.dmlOperations.map((op: DmlOperation) => {
-        const header = op.description
-          ? `-- ${op.description}`
-          : `-- ${op.operation_type} operation`
-        return `${header}\n${op.sql};`
-      }),
-    )
-
-    const combinedSql = sqlParts.filter(Boolean).join('\n')
-
+    const combinedSql = buildCombinedSql(ddlStatements, testcase)
     const startTime = new Date()
+
     const executionResult = await ResultAsync.fromPromise(
       executeQuery(combinedSql, requiredExtensions),
       (error) => new Error(String(error)),
@@ -56,36 +80,16 @@ async function executeDmlOperationsByTestcase(
 
     if (executionResult.isOk()) {
       const sqlResults = executionResult.value
-
       const hasErrors = sqlResults.some((result) => !result.success)
-
-      // Extract failed operations with SQL and error pairs
-      const failedOperations = sqlResults
-        .filter((result) => !result.success)
-        .map((result) => {
-          let error = 'Unknown error'
-          if (
-            typeof result.result === 'object' &&
-            result.result !== null &&
-            'error' in result.result
-          ) {
-            error = String(result.result.error)
-          } else {
-            error = String(result.result)
-          }
-
-          return {
-            sql: result.sql,
-            error: error,
-          }
-        })
+      const failedOperation = hasErrors
+        ? extractFailedOperation(sqlResults)
+        : undefined
 
       results.push({
         testCaseId: testcase.id,
         testCaseTitle: testcase.title,
         success: !hasErrors,
-        executedOperations: testcase.dmlOperations.length,
-        ...(hasErrors && { failedOperations }),
+        ...(hasErrors && failedOperation && { failedOperation }),
         executedAt: startTime,
       })
     } else {
@@ -93,11 +97,10 @@ async function executeDmlOperationsByTestcase(
         testCaseId: testcase.id,
         testCaseTitle: testcase.title,
         success: false,
-        executedOperations: 0,
-        failedOperations: testcase.dmlOperations.map((op) => ({
-          sql: op.sql,
+        failedOperation: {
+          sql: testcase.dmlOperation.sql,
           error: executionResult.error.message,
-        })),
+        },
         executedAt: startTime,
       })
     }
@@ -124,30 +127,27 @@ function updateWorkflowStateWithTestcaseResults(
   const updatedTestcases = state.testcases.map((testcase) => {
     const testcaseResult = resultMap.get(testcase.id)
 
-    if (!testcaseResult || !testcase.dmlOperations) {
+    if (!testcaseResult) {
       return testcase
     }
 
-    const updatedDmlOperations = testcase.dmlOperations.map(
-      (dmlOp: DmlOperation) => {
-        const executionLog = {
-          executed_at: testcaseResult.executedAt.toISOString(),
-          success: testcaseResult.success,
-          result_summary: testcaseResult.success
-            ? `Test Case "${testcaseResult.testCaseTitle}" operations completed successfully`
-            : `Test Case "${testcaseResult.testCaseTitle}" failed: ${testcaseResult.failedOperations?.map((op) => op.error).join('; ')}`,
-        }
+    const dmlOp: DmlOperation = testcase.dmlOperation
+    const executionLog = {
+      executed_at: testcaseResult.executedAt.toISOString(),
+      success: testcaseResult.success,
+      result_summary: testcaseResult.success
+        ? `Test Case "${testcaseResult.testCaseTitle}" operations completed successfully`
+        : `Test Case "${testcaseResult.testCaseTitle}" failed: ${testcaseResult.failedOperation?.error ?? 'Unknown error'}`,
+    }
 
-        return {
-          ...dmlOp,
-          dml_execution_logs: [executionLog],
-        }
-      },
-    )
+    const updatedDmlOperation = {
+      ...dmlOp,
+      dml_execution_logs: [executionLog],
+    }
 
     return {
       ...testcase,
-      dmlOperations: updatedDmlOperations,
+      dmlOperation: updatedDmlOperation,
     }
   })
 
@@ -178,11 +178,7 @@ export async function validateSchemaNode(
   const requiredExtensions = Object.keys(state.schemaData.extensions).sort()
   const hasDdl = ddlStatements?.trim()
   const hasTestcases = state.testcases.length > 0
-  const hasDml =
-    hasTestcases &&
-    state.testcases.some(
-      (tc) => tc.dmlOperations && tc.dmlOperations.length > 0,
-    )
+  const hasDml = hasTestcases
 
   if (!hasDdl && !hasDml) {
     return state
@@ -219,8 +215,8 @@ export async function validateSchemaNode(
       (result) => ({
         sql: `Test Case: ${result.testCaseTitle}`,
         result: result.success
-          ? { executedOperations: result.executedOperations }
-          : { errors: result.failedOperations?.map((op) => op.error) },
+          ? { executed: true }
+          : { error: result.failedOperation?.error },
         success: result.success,
         id: `testcase-${result.testCaseId}`,
         metadata: {

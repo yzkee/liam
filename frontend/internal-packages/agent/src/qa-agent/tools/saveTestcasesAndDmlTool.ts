@@ -106,7 +106,7 @@ export const saveTestcasesAndDmlTool: StructuredTool = tool(
 
     return new Command({
       update: {
-        generatedTestcases,
+        testcases: generatedTestcases,
         messages: [toolMessage],
       },
     })

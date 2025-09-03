@@ -15,6 +15,7 @@ import { humanPromptTemplate, SYSTEM_PROMPT } from './prompt'
 /**
  * Format analyzed requirements for the prompt
  */
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
 function formatAnalyzedRequirements(
   analyzedRequirements: WorkflowState['analyzedRequirements'],
 ): string {

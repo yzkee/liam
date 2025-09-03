@@ -125,7 +125,7 @@ export const transformWorkflowStateToArtifact = (
     ? convertAnalyzedRequirementsToArtifact(state.analyzedRequirements)
     : []
 
-  if (state.testcases && state.testcases.length > 0) {
+  if (state.testcases.length > 0) {
     mergeTestCasesIntoRequirements(requirements, state.testcases)
   }
 

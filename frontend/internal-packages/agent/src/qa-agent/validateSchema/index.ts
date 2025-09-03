@@ -115,7 +115,7 @@ function updateWorkflowStateWithTestcaseResults(
   state: WorkflowState,
   results: TestcaseDmlExecutionResult[],
 ): WorkflowState {
-  if (!state.testcases) {
+  if (state.testcases.length === 0) {
     return state
   }
 
@@ -180,10 +180,10 @@ export async function validateSchemaNode(
   const ddlStatements = generateDdlFromSchema(state.schemaData)
   const requiredExtensions = Object.keys(state.schemaData.extensions).sort()
   const hasDdl = ddlStatements?.trim()
-  const hasTestcases = state.testcases && state.testcases.length > 0
+  const hasTestcases = state.testcases.length > 0
   const hasDml =
     hasTestcases &&
-    state.testcases?.some(
+    state.testcases.some(
       (tc) => tc.dmlOperations && tc.dmlOperations.length > 0,
     )
 
@@ -211,7 +211,7 @@ export async function validateSchemaNode(
 
   let testcaseExecutionResults: TestcaseDmlExecutionResult[] = []
   let updatedState = state
-  if (hasDml && state.testcases) {
+  if (hasDml) {
     testcaseExecutionResults = await executeDmlOperationsByTestcase(
       ddlStatements || '',
       state.testcases,

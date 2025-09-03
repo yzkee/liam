@@ -13,7 +13,7 @@ export const workflowAnnotation = Annotation.Root({
       }
     | undefined
   >,
-  testcases: Annotation<Testcase[] | undefined>,
+  testcases: Annotation<Testcase[]>,
   schemaData: Annotation<Schema>,
   buildingSchemaId: Annotation<string>,
   latestVersionNumber: Annotation<number>,

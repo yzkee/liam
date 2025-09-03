@@ -176,7 +176,6 @@ const constraintToCheckConstraint = (
   const findBalancedParentheses = (
     sql: string,
     startIndex: number,
-    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
   ): { start: number; end: number } | null => {
     let openParenIndex = -1
     let depth = 0
@@ -375,7 +374,6 @@ export const convertToSchema = (
     comment: string | null
   }
 
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
   function processConstraints(
     tableName: string,
     columnName: string,
@@ -587,7 +585,6 @@ export const convertToSchema = (
   /**
    * Process table elements
    */
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
   function processTableElements(
     tableElts: Node[],
     tableName: string,

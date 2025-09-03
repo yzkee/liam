@@ -60,11 +60,11 @@ const mapTestCasesToRequirements = (
 ): {
   title: string
   description: string
-  dml_operation: DmlOperation
+  dmlOperation: DmlOperation
 } => ({
   title: testcase.title,
   description: testcase.description,
-  dml_operation: testcase.dmlOperation,
+  dmlOperation: testcase.dmlOperation,
 })
 
 /**

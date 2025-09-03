@@ -12,7 +12,7 @@ function formatTestCase(
   sections.push('')
   sections.push(testCase.description)
 
-  const operation = testCase.dml_operation
+  const operation = testCase.dmlOperation
   sections.push('')
 
   // Format as heading with operation type and description

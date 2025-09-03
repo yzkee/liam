@@ -450,7 +450,7 @@ describe('validateSchemaNode', () => {
 
     // Verify that all error messages are accumulated
     expect(result.dmlExecutionErrors).toBe(
-      'SQL: Test Case: Insert User, Error: {"errors":["Column count mismatch"]}; SQL: Test Case: Update User, Error: {"errors":["Column \\"name\\" does not exist"]}',
+      'SQL: Test Case: Insert User, Error: {"error":"Column count mismatch"}; SQL: Test Case: Update User, Error: {"error":"Column \\"name\\" does not exist"}',
     )
   })
 

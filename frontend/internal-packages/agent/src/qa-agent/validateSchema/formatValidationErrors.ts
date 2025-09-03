@@ -10,7 +10,7 @@ function formatSqlForDisplay(sql: string, maxLength = 300): string {
 }
 
 function formatFailedOperation(failedOperation: FailedOperation): string {
-  let details = `#### Error: \`${failedOperation.error}\`\n`
+  let details = `#### 1. Error: \`${failedOperation.error}\`\n`
   details += '```sql\n'
   details += formatSqlForDisplay(failedOperation.sql)
   details += '\n```'

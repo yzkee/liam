@@ -23,7 +23,6 @@ const chatRequestSchema = v.object({
   isDeepModelingEnabled: v.optional(v.boolean(), true),
 })
 
-// Streaming migration completed - this is now the primary chat API endpoint
 export async function POST(request: Request) {
   const requestBody = await request.json()
   const validationResult = v.safeParse(chatRequestSchema, requestBody)

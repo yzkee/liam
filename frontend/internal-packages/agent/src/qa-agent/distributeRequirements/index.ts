@@ -1,6 +1,6 @@
 import { Send } from '@langchain/langgraph'
-import type { WorkflowState } from '../../chat/workflow/types'
 import { WorkflowTerminationError } from '../../shared/errorHandling'
+import type { QaAgentState } from '../shared/qaAgentAnnotation'
 
 /**
  * Requirement data structure for parallel processing
@@ -56,7 +56,7 @@ function processRequirementsByType(
 /**
  * Prepare requirements for distribution
  */
-function prepareRequirements(state: WorkflowState): RequirementData[] {
+function prepareRequirements(state: QaAgentState): RequirementData[] {
   const { analyzedRequirements } = state
 
   if (!analyzedRequirements) {
@@ -111,7 +111,7 @@ function prepareRequirements(state: WorkflowState): RequirementData[] {
  * Conditional edge function to create Send objects for parallel processing
  * This is called directly from START node
  */
-export function continueToRequirements(state: WorkflowState) {
+export function continueToRequirements(state: QaAgentState) {
   const allRequirements = prepareRequirements(state)
 
   // Use Send API to distribute each requirement for parallel processing

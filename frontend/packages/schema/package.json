@@ -49,7 +49,7 @@
     "test": "vitest --watch=false"
   },
   "files": [
-    "src/**/*",
+    "dist/**/*",
     "README.md",
     "package.json",
     "LICENSE"

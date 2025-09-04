@@ -1,13 +1,11 @@
 import Script from 'next/script'
 import type { FC } from 'react'
-import { useId } from 'react'
 
 export const GtagScript: FC = () => {
-  const scriptId = useId()
-
   return (
+    // biome-ignore lint/nursery/useUniqueElementIds: GTM script injection requires stable ID
     <Script
-      id={scriptId}
+      id="gtag"
       strategy="afterInteractive"
       // biome-ignore lint/security/noDangerouslySetInnerHtml: GTM script injection
       dangerouslySetInnerHTML={{

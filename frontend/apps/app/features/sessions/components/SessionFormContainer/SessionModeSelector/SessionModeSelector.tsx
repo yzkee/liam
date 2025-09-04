@@ -50,27 +50,21 @@ export const SessionModeSelector: FC<Props> = ({
   const containerRef = useRef<HTMLDivElement>(null)
   const shouldFocusOnModeChange = useRef(false)
 
-  const getTabId = (mode: SessionMode) => {
-    switch (mode) {
-      case 'github':
-        return githubTabId
-      case 'upload':
-        return uploadTabId
-      case 'url':
-        return urlTabId
-    }
+  const tabIds: Record<SessionMode, string> = {
+    github: githubTabId,
+    upload: uploadTabId,
+    url: urlTabId,
   }
 
-  const getPanelId = (mode: SessionMode) => {
-    switch (mode) {
-      case 'github':
-        return githubPanelId
-      case 'upload':
-        return uploadPanelId
-      case 'url':
-        return urlPanelId
-    }
+  const panelIds: Record<SessionMode, string> = {
+    github: githubPanelId,
+    upload: uploadPanelId,
+    url: urlPanelId,
   }
+
+  const getTabId = (mode: SessionMode) => tabIds[mode]
+
+  const getPanelId = (mode: SessionMode) => panelIds[mode]
 
   useEffect(() => {
     // Only focus when mode changes via arrow keys, not on initial render

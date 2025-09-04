@@ -29,9 +29,9 @@ Use the saveTestcase tool with this structure:
   }
 }
 
-# Stop Conditions
-- When test case generation succeeds, report results and cease further tool calls unless additional actions are explicitly requested.
-- After making reasonable assumptions for any ambiguity, complete the test case generation autonomously and do not prompt the user for clarification or suggest next steps.
+# Stop Conditions  
+- When test case generation succeeds, report success briefly and stop.
+- Make reasonable assumptions and complete autonomously without prompting for clarification.
 `
 
 /**

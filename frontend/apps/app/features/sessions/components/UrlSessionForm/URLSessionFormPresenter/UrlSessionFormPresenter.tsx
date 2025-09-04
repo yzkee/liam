@@ -203,8 +203,8 @@ const renderUrlInputSection = (
   handlers: ReturnType<typeof useUrlFormHandlers>,
   schemaFetch: ReturnType<typeof useSchemaFetch>,
   isPending: boolean,
-  schemaUrlId: string,
 ) => {
+  const schemaUrlId = useId()
   const {
     urlPath,
     schemaStatus,
@@ -296,7 +296,6 @@ export const URLSessionFormPresenter: FC<Props> = ({
   formAction,
   isTransitioning = false,
 }) => {
-  const schemaUrlId = useId()
   const initialMessageId = useId()
   const state = useUrlFormState()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -359,13 +358,7 @@ export const URLSessionFormPresenter: FC<Props> = ({
           />
         )}
         <input type="hidden" name="schemaFormat" value={state.selectedFormat} />
-        {renderUrlInputSection(
-          state,
-          handlers,
-          schemaFetch,
-          isPending,
-          schemaUrlId,
-        )}
+        {renderUrlInputSection(state, handlers, schemaFetch, isPending)}
         <div
           className={clsx(
             styles.inputSection ?? '',

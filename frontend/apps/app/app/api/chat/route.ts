@@ -7,7 +7,7 @@ import {
 import { okAsync } from 'neverthrow'
 import { NextResponse } from 'next/server'
 import * as v from 'valibot'
-import { createClient } from '@/libs/db/server'
+import { createClient } from '../../../libs/db/server'
 
 const chatRequestSchema = v.object({
   userInput: v.pipe(v.string(), v.minLength(1, 'Message is required')),

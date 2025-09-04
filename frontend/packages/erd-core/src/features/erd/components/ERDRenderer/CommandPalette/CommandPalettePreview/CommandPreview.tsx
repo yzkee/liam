@@ -1,11 +1,4 @@
-import type { StaticImageData } from 'next/image'
 import type { FC } from 'react'
-import copyLink from './assets/copy-link.mp4'
-import showAllFields from './assets/show-all-fields.png'
-import showKeyOnly from './assets/show-key-only.png'
-import showTableName from './assets/show-table-name.png'
-import tidyUp from './assets/tidy-up.mp4'
-import zoomToFit from './assets/zoom-to-fit.mp4'
 import styles from './CommandPalettePreview.module.css'
 
 type Props = {
@@ -13,19 +6,21 @@ type Props = {
 }
 
 const COMMAND_VIDEO_SOURCE: Record<string, string> = {
-  'copy link': copyLink,
-  'Zoom to Fit': zoomToFit,
-  'Tidy Up': tidyUp,
+  'copy link':
+    'https://assets.liambx.com/erd-core/2025-09-01/videos/copy-link.mp4',
+  'Zoom to Fit':
+    'https://assets.liambx.com/erd-core/2025-09-01/videos/zoom-to-fit.mp4',
+  'Tidy Up': 'https://assets.liambx.com/erd-core/2025-09-01/videos/tidy-up.mp4',
 }
 
-const COMMAND_IMAGE_SOURCE: Record<string, string | StaticImageData> = {
-  'Show All Fields': showAllFields,
-  'Show Key Only': showKeyOnly,
-  'Show Table Name': showTableName,
+const COMMAND_IMAGE_SOURCE: Record<string, string> = {
+  'Show All Fields':
+    'https://assets.liambx.com/erd-core/2025-09-01/images/show-all-fields.png',
+  'Show Key Only':
+    'https://assets.liambx.com/erd-core/2025-09-01/images/show-key-only.png',
+  'Show Table Name':
+    'https://assets.liambx.com/erd-core/2025-09-01/images/show-table-name.png',
 }
-
-const getImageSrc = (imageSrc: string | StaticImageData) =>
-  typeof imageSrc === 'string' ? imageSrc : imageSrc.src
 
 export const CommandPreview: FC<Props> = ({ commandName }) => {
   return (
@@ -43,7 +38,7 @@ export const CommandPreview: FC<Props> = ({ commandName }) => {
       )}
       {COMMAND_IMAGE_SOURCE[commandName] && (
         <img
-          src={getImageSrc(COMMAND_IMAGE_SOURCE[commandName])}
+          src={COMMAND_IMAGE_SOURCE[commandName]}
           className={styles.image}
           alt={`Demonstration of the ${commandName} command execution result`}
         />

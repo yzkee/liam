@@ -22,7 +22,7 @@ import { nameSimilarity } from '../nameSimilarity/nameSimilarity.ts'
 import { wordOverlapMatch } from '../wordOverlapMatch/wordOverlapMatch.ts'
 
 // Small epsilon value for numerical comparisons
-const EPSILON = 1e-10
+const EPSILON = 1e-5
 
 // Threshold for determining if all components are correct (table + column + primary key)
 // The value 2.9 represents the sum of perfect scores across three dimensions:

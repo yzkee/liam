@@ -64,6 +64,7 @@ const copyDefaultData = (
         }
       }
     }
+
     return ok(undefined)
   } catch (error) {
     return err({

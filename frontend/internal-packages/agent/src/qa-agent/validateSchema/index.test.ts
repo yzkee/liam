@@ -3,9 +3,9 @@ import { executeQuery } from '@liam-hq/pglite-server'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import { aColumn, aSchema, aTable } from '@liam-hq/schema'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import type { WorkflowState } from '../../chat/workflow/types'
 import type { Repositories } from '../../repositories'
 import { InMemoryRepository } from '../../repositories/InMemoryRepository'
+import type { QaAgentState } from '../shared/qaAgentAnnotation'
 import { validateSchemaNode } from './index'
 
 vi.mock('@liam-hq/pglite-server', () => ({
@@ -13,19 +13,16 @@ vi.mock('@liam-hq/pglite-server', () => ({
 }))
 
 describe('validateSchemaNode', () => {
-  const createMockState = (
-    overrides?: Partial<WorkflowState>,
-  ): WorkflowState => {
+  const createMockState = (overrides?: Partial<QaAgentState>): QaAgentState => {
     return {
       messages: [],
-      userInput: 'test',
       schemaData: aSchema({ tables: {} }),
       testcases: [],
       buildingSchemaId: 'test-id',
       latestVersionNumber: 1,
-      organizationId: 'test-org-id',
-      userId: 'user-id',
       designSessionId: 'session-id',
+      analyzedRequirements: undefined,
+      dmlExecutionErrors: undefined,
       next: END,
       ...overrides,
     }

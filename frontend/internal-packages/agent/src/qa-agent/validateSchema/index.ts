@@ -5,10 +5,10 @@ import { executeQuery } from '@liam-hq/pglite-server'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import { ResultAsync } from 'neverthrow'
 import { getConfigurable } from '../../chat/workflow/shared/getConfigurable'
-import type { WorkflowState } from '../../chat/workflow/types'
 import { generateDdlFromSchema } from '../../chat/workflow/utils/generateDdl'
 import { transformWorkflowStateToArtifact } from '../../chat/workflow/utils/transformWorkflowStateToArtifact'
 import { WorkflowTerminationError } from '../../shared/errorHandling'
+import type { QaAgentState } from '../shared/qaAgentAnnotation'
 import type { Testcase } from '../types'
 import { formatValidationErrors } from './formatValidationErrors'
 import type { TestcaseDmlExecutionResult } from './types'
@@ -113,9 +113,9 @@ async function executeDmlOperationsByTestcase(
  * Update workflow state with testcase-based execution results
  */
 function updateWorkflowStateWithTestcaseResults(
-  state: WorkflowState,
+  state: QaAgentState,
   results: TestcaseDmlExecutionResult[],
-): WorkflowState {
+): QaAgentState {
   if (state.testcases.length === 0) {
     return state
   }
@@ -162,9 +162,9 @@ function updateWorkflowStateWithTestcaseResults(
  * Executes DDL first, then DML operations individually to associate results with use cases
  */
 export async function validateSchemaNode(
-  state: WorkflowState,
+  state: QaAgentState,
   config: RunnableConfig,
-): Promise<WorkflowState> {
+): Promise<QaAgentState> {
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
     throw new WorkflowTerminationError(
@@ -232,7 +232,13 @@ export async function validateSchemaNode(
       testcaseExecutionResults,
     )
 
-    const artifact = transformWorkflowStateToArtifact(updatedState)
+    const workflowStateForArtifact = {
+      ...updatedState,
+      userInput: '', // Required by WorkflowState but not used by transformWorkflowStateToArtifact
+      organizationId: '', // Required by WorkflowState but not used by transformWorkflowStateToArtifact
+      userId: '', // Required by WorkflowState but not used by transformWorkflowStateToArtifact
+    }
+    const artifact = transformWorkflowStateToArtifact(workflowStateForArtifact)
     await repositories.schema.upsertArtifact({
       designSessionId: updatedState.designSessionId,
       artifact,

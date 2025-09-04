@@ -3,8 +3,8 @@
   "root": false,
   "linter": {
     "rules": {
-      "nursery": {
-        "useUniqueElementIds": "error"
+      "style": {
+        "noCommonJs": "off"
       }
     }
   }

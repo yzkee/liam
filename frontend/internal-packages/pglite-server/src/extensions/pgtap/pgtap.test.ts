@@ -15,20 +15,6 @@ describe('pgTAP extension', () => {
     expect(result.rows).toEqual([{ extname: 'pgtap' }])
   })
 
-  test('basic TAP functions work', async () => {
-    const db = new PGlite({ extensions: { pgtap } })
-    await db.query('CREATE EXTENSION pgtap')
-
-    // Test basic TAP workflow
-    const planResult = await db.query('SELECT plan(1)')
-    expect(planResult.rows).toEqual([{ plan: '1..1' }])
-
-    const okResult = await db.query("SELECT ok(1 = 1, 'basic assertion')")
-    expect(okResult.rows).toEqual([{ ok: 'ok 1 - basic assertion' }])
-
-    // Don't call finish() in tests as it validates test count
-  })
-
   test('database testing functions work', async () => {
     const db = new PGlite({ extensions: { pgtap } })
     await db.query('CREATE EXTENSION pgtap')

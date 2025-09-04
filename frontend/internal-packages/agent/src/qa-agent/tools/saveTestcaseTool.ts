@@ -68,7 +68,6 @@ export const saveTestcaseTool: StructuredTool = tool(
 
     const dmlOperationWithId = {
       ...testcaseWithDml.dmlOperation,
-      testCaseId: testcaseId,
       dml_execution_logs: [],
     }
 

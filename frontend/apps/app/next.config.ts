@@ -103,12 +103,6 @@ const nextConfig: NextConfig = {
     })
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    config.module.rules.push({
-      test: /\.mp4$/,
-      type: 'asset/resource',
-    })
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     config.plugins = [...config.plugins]
 
     return config

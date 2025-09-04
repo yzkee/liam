@@ -5,7 +5,6 @@ import {
 } from '@langchain/core/messages'
 import { ChatOpenAI } from '@langchain/openai'
 import { fromAsyncThrowable } from '@liam-hq/neverthrow'
-import { convertSchemaToText } from '../../utils/convertSchemaToText'
 import { removeReasoningFromMessages } from '../../utils/messageCleanup'
 import { saveTestcaseTool } from '../tools/saveTestcaseTool'
 import {
@@ -32,10 +31,10 @@ const model = new ChatOpenAI({
 export async function generateTestcaseNode(
   state: typeof testcaseAnnotation.State,
 ): Promise<{ messages: BaseMessage[] }> {
-  const { currentRequirement, schemaData, messages } = state
+  const { currentRequirement, schemaContext, messages } = state
 
   const contextMessage = await humanPromptTemplateForTestcaseGeneration.format({
-    schemaContext: convertSchemaToText(schemaData),
+    schemaContext,
     businessContext: currentRequirement.businessContext,
     requirementType: currentRequirement.type,
     requirementCategory: currentRequirement.category,

@@ -10,8 +10,7 @@
     "@types/node": "22.17.1",
     "concurrently": "9.2.0",
     "eslint": "9.33.0",
-    "fs-extra": "11.2.0",
-    "typescript": "5.9.2"
+    "fs-extra": "11.2.0"
   },
   "scripts": {
     "build": "node scripts/build.js",
@@ -21,7 +20,6 @@
     "fmt:eslint": "eslint --fix .",
     "lint": "concurrently \"pnpm:lint:*\"",
     "lint:biome": "biome check .",
-    "lint:eslint": "eslint .",
-    "lint:tsc": "tsc --noEmit"
+    "lint:eslint": "eslint ."
   }
 }

@@ -56,7 +56,7 @@ const listAllDatasets = (workspacePath: string): string[] => {
     return []
   }
 }
-
+// biome-ignore lint: temporary suppression for complexity; will refactor in a separate issue
 async function main() {
   const options = parseArgs(process.argv)
 

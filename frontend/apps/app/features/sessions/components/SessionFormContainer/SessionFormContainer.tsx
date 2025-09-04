@@ -1,13 +1,17 @@
 'use client'
 
-import { type FC, useEffect, useId, useRef, useState } from 'react'
+import { type FC, useEffect, useRef, useState } from 'react'
 import type { Projects } from '../../../../components/CommonLayout/AppBar/ProjectsDropdownMenu/services/getProjects'
 import { createAccessibleOpacityTransition } from '../../../../utils/accessibleTransitions'
 import { GitHubSessionForm } from '../GitHubSessionForm'
 import { UploadSessionForm } from '../UploadSessionForm'
 import { UrlSessionForm } from '../UrlSessionForm'
 import styles from './SessionFormContainer.module.css'
-import { type SessionMode, SessionModeSelector } from './SessionModeSelector'
+import {
+  type ModeIds,
+  type SessionMode,
+  SessionModeSelector,
+} from './SessionModeSelector'
 
 type Props = {
   projects: Projects
@@ -19,18 +23,13 @@ export const SessionFormContainer: FC<Props> = ({
   defaultProjectId,
 }) => {
   const [mode, setMode] = useState<SessionMode>('github')
+  const [modeIds, setModeIds] = useState<ModeIds>({ tabId: '', panelId: '' })
   const [isTransitioning, setIsTransitioning] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const fadeOutTimerRef = useRef<NodeJS.Timeout | null>(null)
   const fadeInTimerRef = useRef<NodeJS.Timeout | null>(null)
-  const githubPanelId = useId()
-  const githubTabId = useId()
-  const uploadPanelId = useId()
-  const uploadTabId = useId()
-  const urlPanelId = useId()
-  const urlTabId = useId()
 
-  const handleModeChange = (newMode: SessionMode) => {
+  const handleModeChange = (newMode: SessionMode, newModeIds: ModeIds) => {
     if (newMode === mode || isTransitioning) return
 
     const container = containerRef.current
@@ -45,8 +44,9 @@ export const SessionFormContainer: FC<Props> = ({
 
     // Wait for fade out to complete
     fadeOutTimerRef.current = setTimeout(() => {
-      // Change mode (this will trigger height calculation in useEffect)
+      // Change mode and update IDs (this will trigger height calculation in useEffect)
       setMode(newMode)
+      setModeIds(newModeIds)
     }, 150) // Fade out duration
 
     // Start fade in after mode change and height animation
@@ -117,19 +117,13 @@ export const SessionFormContainer: FC<Props> = ({
       <SessionModeSelector
         selectedMode={mode}
         onModeChange={handleModeChange}
-        githubTabId={githubTabId}
-        githubPanelId={githubPanelId}
-        uploadTabId={uploadTabId}
-        uploadPanelId={uploadPanelId}
-        urlTabId={urlTabId}
-        urlPanelId={urlPanelId}
       />
       <div ref={containerRef} className={styles.formContainer}>
         {mode === 'github' && (
           <div
             role="tabpanel"
-            id={githubPanelId}
-            aria-labelledby={githubTabId}
+            id={modeIds.panelId}
+            aria-labelledby={modeIds.tabId}
             style={createAccessibleOpacityTransition(!isTransitioning)}
           >
             <GitHubSessionForm
@@ -141,8 +135,8 @@ export const SessionFormContainer: FC<Props> = ({
         {mode === 'upload' && (
           <div
             role="tabpanel"
-            id={uploadPanelId}
-            aria-labelledby={uploadTabId}
+            id={modeIds.panelId}
+            aria-labelledby={modeIds.tabId}
             style={createAccessibleOpacityTransition(!isTransitioning)}
           >
             <UploadSessionForm />
@@ -151,8 +145,8 @@ export const SessionFormContainer: FC<Props> = ({
         {mode === 'url' && (
           <div
             role="tabpanel"
-            id={urlPanelId}
-            aria-labelledby={urlTabId}
+            id={modeIds.panelId}
+            aria-labelledby={modeIds.tabId}
             style={createAccessibleOpacityTransition(!isTransitioning)}
           >
             <UrlSessionForm />

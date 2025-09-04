@@ -1,19 +1,18 @@
 import { GithubLogo, Link, Upload } from '@liam-hq/ui'
 import clsx from 'clsx'
-import { type FC, useEffect, useRef } from 'react'
+import { type FC, useEffect, useId, useRef } from 'react'
 import styles from './SessionModeSelector.module.css'
 
 export type SessionMode = 'github' | 'upload' | 'url'
 
+export type ModeIds = {
+  tabId: string
+  panelId: string
+}
+
 type Props = {
   selectedMode: SessionMode
-  onModeChange: (mode: SessionMode) => void
-  githubTabId: string
-  githubPanelId: string
-  uploadTabId: string
-  uploadPanelId: string
-  urlTabId: string
-  urlPanelId: string
+  onModeChange: (mode: SessionMode, ids: ModeIds) => void
 }
 
 const modes: { mode: SessionMode; label: string; icon: React.ReactElement }[] =
@@ -38,33 +37,31 @@ const modes: { mode: SessionMode; label: string; icon: React.ReactElement }[] =
 export const SessionModeSelector: FC<Props> = ({
   selectedMode,
   onModeChange,
-  githubTabId,
-  githubPanelId,
-  uploadTabId,
-  uploadPanelId,
-  urlTabId,
-  urlPanelId,
 }) => {
   const buttonsRef = useRef<(HTMLButtonElement | null)[]>([])
   const backgroundRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const shouldFocusOnModeChange = useRef(false)
 
-  const tabIds: Record<SessionMode, string> = {
-    github: githubTabId,
-    upload: uploadTabId,
-    url: urlTabId,
+  // Generate unique IDs for all modes
+  const baseId = useId()
+  const modeIds: Record<SessionMode, ModeIds> = {
+    github: {
+      tabId: `${baseId}-github-tab`,
+      panelId: `${baseId}-github-panel`,
+    },
+    upload: {
+      tabId: `${baseId}-upload-tab`,
+      panelId: `${baseId}-upload-panel`,
+    },
+    url: {
+      tabId: `${baseId}-url-tab`,
+      panelId: `${baseId}-url-panel`,
+    },
   }
 
-  const panelIds: Record<SessionMode, string> = {
-    github: githubPanelId,
-    upload: uploadPanelId,
-    url: urlPanelId,
-  }
-
-  const getTabId = (mode: SessionMode) => tabIds[mode]
-
-  const getPanelId = (mode: SessionMode) => panelIds[mode]
+  const getTabId = (mode: SessionMode) => modeIds[mode].tabId
+  const getPanelId = (mode: SessionMode) => modeIds[mode].panelId
 
   useEffect(() => {
     // Only focus when mode changes via arrow keys, not on initial render
@@ -94,35 +91,26 @@ export const SessionModeSelector: FC<Props> = ({
     }
   }, [selectedMode])
 
+  const keyHandlers: Record<string, (currentIndex: number) => number | null> = {
+    ArrowLeft: (currentIndex) =>
+      currentIndex > 0 ? currentIndex - 1 : modes.length - 1,
+    ArrowRight: (currentIndex) =>
+      currentIndex < modes.length - 1 ? currentIndex + 1 : 0,
+    Home: () => 0,
+    End: () => modes.length - 1,
+  }
+
   const handleKeyDown = (e: React.KeyboardEvent, currentIndex: number) => {
-    let newIndex = currentIndex
+    const handler = keyHandlers[e.key]
+    if (!handler) return
 
-    switch (e.key) {
-      case 'ArrowLeft':
-        e.preventDefault()
-        newIndex = currentIndex > 0 ? currentIndex - 1 : modes.length - 1
-        shouldFocusOnModeChange.current = true
-        break
-      case 'ArrowRight':
-        e.preventDefault()
-        newIndex = currentIndex < modes.length - 1 ? currentIndex + 1 : 0
-        shouldFocusOnModeChange.current = true
-        break
-      case 'Home':
-        e.preventDefault()
-        newIndex = 0
-        shouldFocusOnModeChange.current = true
-        break
-      case 'End':
-        e.preventDefault()
-        newIndex = modes.length - 1
-        shouldFocusOnModeChange.current = true
-        break
-      default:
-        return
-    }
+    e.preventDefault()
+    const newIndex = handler(currentIndex)
+    if (newIndex === null) return
 
-    onModeChange(modes[newIndex]?.mode ?? 'github')
+    shouldFocusOnModeChange.current = true
+    const newMode = modes[newIndex]?.mode ?? 'github'
+    onModeChange(newMode, modeIds[newMode])
   }
 
   const setButtonRef =
@@ -156,7 +144,7 @@ export const SessionModeSelector: FC<Props> = ({
               styles.modeButton,
               selectedMode === modeItem.mode ? styles.modeButtonActive : '',
             )}
-            onClick={() => onModeChange(modeItem.mode)}
+            onClick={() => onModeChange(modeItem.mode, modeIds[modeItem.mode])}
             onKeyDown={(e) => handleKeyDown(e, index)}
           >
             {modeItem.icon}

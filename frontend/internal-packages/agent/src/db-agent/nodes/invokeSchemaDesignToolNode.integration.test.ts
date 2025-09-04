@@ -1,5 +1,6 @@
 import { AIMessage } from '@langchain/core/messages'
 import { END, START, StateGraph } from '@langchain/langgraph'
+import { aColumn, aTable } from '@liam-hq/schema'
 import { describe, it } from 'vitest'
 import {
   getTestConfig,
@@ -30,32 +31,35 @@ describe('invokeSchemaDesignToolNode Integration', () => {
               {
                 op: 'add',
                 path: '/tables/users',
-                value: {
+                value: aTable({
                   name: 'users',
                   columns: {
-                    id: {
+                    id: aColumn({
                       name: 'id',
                       type: 'uuid',
-                      primaryKey: true,
                       notNull: true,
                       default: 'gen_random_uuid()',
-                    },
-                    email: {
+                    }),
+                    email: aColumn({
                       name: 'email',
-                      type: 'varchar',
+                      type: 'varchar(255)',
                       notNull: true,
-                      unique: true,
-                    },
-                    created_at: {
+                    }),
+                    created_at: aColumn({
                       name: 'created_at',
                       type: 'timestamp',
                       notNull: true,
                       default: 'now()',
+                    }),
+                  },
+                  constraints: {
+                    users_pkey: {
+                      type: 'PRIMARY KEY' as const,
+                      name: 'users_pkey',
+                      columnNames: ['id'],
                     },
                   },
-                  indexes: {},
-                  constraints: {},
-                },
+                }),
               },
             ],
           },
@@ -105,9 +109,16 @@ describe('invokeSchemaDesignToolNode Integration', () => {
               {
                 op: 'add',
                 path: '/tables/invalid_table',
-                value: {
+                value: aTable({
                   name: 'invalid_table',
-                },
+                  columns: {
+                    bad_column: aColumn({
+                      name: 'bad_column',
+                      type: 'invalid_type_that_does_not_exist',
+                      notNull: true,
+                    }),
+                  },
+                }),
               },
             ],
           },

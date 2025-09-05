@@ -1,12 +1,13 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { END, START, StateGraph } from '@langchain/langgraph'
 import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
-import { workflowAnnotation } from './chat/workflow/shared/createAnnotations'
+import { workflowAnnotation } from './chat/workflow/shared/workflowAnnotation'
 import type { WorkflowState } from './chat/workflow/types'
 import { createDbAgentGraph } from './db-agent/createDbAgentGraph'
 import { createLeadAgentGraph } from './lead-agent/createLeadAgentGraph'
 import { createPmAgentGraph } from './pm-agent/createPmAgentGraph'
 import { createQaAgentGraph } from './qa-agent/createQaAgentGraph'
+import { validateInitialSchemaNode } from './workflow/nodes/validateInitialSchemaNode'
 
 /**
  * Create and configure the LangGraph workflow
@@ -47,12 +48,14 @@ export const createGraph = (checkpointer?: BaseCheckpointSaver) => {
   }
 
   graph
+    .addNode('validateInitialSchema', validateInitialSchemaNode)
     .addNode('leadAgent', leadAgentSubgraph)
     .addNode('pmAgent', callPmAgent)
     .addNode('dbAgent', dbAgentSubgraph)
     .addNode('qaAgent', callQaAgent)
 
-    .addEdge(START, 'leadAgent')
+    .addEdge(START, 'validateInitialSchema')
+    .addEdge('validateInitialSchema', 'leadAgent')
     .addConditionalEdges('leadAgent', (state) => state.next, {
       pmAgent: 'pmAgent',
       [END]: END,

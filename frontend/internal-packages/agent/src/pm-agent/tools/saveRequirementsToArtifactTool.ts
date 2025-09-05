@@ -1,3 +1,4 @@
+import { dispatchCustomEvent } from '@langchain/core/callbacks/dispatch'
 import { ToolMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { type StructuredTool, tool } from '@langchain/core/tools'
@@ -9,8 +10,10 @@ import type {
 } from '@liam-hq/artifact'
 import { fromValibotSafeParse } from '@liam-hq/neverthrow'
 import { err, ok, type Result } from 'neverthrow'
+import { v4 as uuidv4 } from 'uuid'
 import * as v from 'valibot'
 import { getConfigurable } from '../../chat/workflow/shared/getConfigurable'
+import { SSE_EVENTS } from '../../client'
 import type { Repositories } from '../../repositories'
 import { WorkflowTerminationError } from '../../shared/errorHandling'
 import { toJsonSchema } from '../../shared/jsonSchema'
@@ -132,9 +135,12 @@ export const saveRequirementsToArtifactTool: StructuredTool = tool(
     }
 
     const toolMessage = new ToolMessage({
+      id: uuidv4(),
+      status: 'success',
       content: 'Requirements saved successfully to artifact',
       tool_call_id: toolCallId,
     })
+    await dispatchCustomEvent(SSE_EVENTS.MESSAGES, toolMessage)
 
     return new Command({
       update: {

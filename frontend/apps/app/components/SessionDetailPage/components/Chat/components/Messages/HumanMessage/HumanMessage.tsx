@@ -2,8 +2,9 @@ import type { HumanMessage as HumanMessageType } from '@langchain/core/messages'
 import { Avatar } from '@liam-hq/ui'
 import type { FC } from 'react'
 import * as v from 'valibot'
-import { MarkdownContent } from '@/components/MarkdownContent'
-import { CopyButton } from '@/components/SessionDetailPage/components/CopyButton'
+import { MarkdownContent } from '../../../../../../MarkdownContent'
+import { CopyButton } from '../../../../CopyButton'
+import markdownStyles from '../Markdown.module.css'
 import { extractResponseFromMessage } from '../utils/extractResponseFromMessage'
 import styles from './HumanMessage.module.css'
 
@@ -48,7 +49,7 @@ export const HumanMessage: FC<Props> = ({ message }) => {
       <div className={styles.contentContainer}>
         <div className={styles.messageWrapper}>
           <div className={styles.messageContent}>
-            <div className={styles.messageText}>
+            <div className={markdownStyles.markdownWrapper}>
               <MarkdownContent content={content} />
             </div>
           </div>

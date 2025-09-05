@@ -6,8 +6,13 @@ export type FailedOperation = {
 export type TestcaseDmlExecutionResult = {
   testCaseId: string
   testCaseTitle: string
-  success: boolean
-  executedOperations: number
-  failedOperations?: FailedOperation[]
   executedAt: Date
-}
+} & (
+  | {
+      success: true
+    }
+  | {
+      success: false
+      failedOperation: FailedOperation
+    }
+)

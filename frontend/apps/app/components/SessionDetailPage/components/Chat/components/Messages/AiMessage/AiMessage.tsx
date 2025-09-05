@@ -1,9 +1,10 @@
-import type { AIMessage } from '@langchain/core/messages'
+import type { AIMessage, ToolMessage } from '@langchain/core/messages'
 import type { FC } from 'react'
 import { match } from 'ts-pattern'
 import * as v from 'valibot'
-import { MarkdownContent } from '@/components/MarkdownContent'
-import { CopyButton } from '@/components/SessionDetailPage/components/CopyButton'
+import { MarkdownContent } from '../../../../../../MarkdownContent'
+import { CopyButton } from '../../../../CopyButton'
+import markdownStyles from '../Markdown.module.css'
 import { extractReasoningFromMessage } from '../utils/extractReasoningFromMessage'
 import { extractResponseFromMessage } from '../utils/extractResponseFromMessage'
 import { extractToolCallsFromMessage } from '../utils/extractToolCallsFromMessage'
@@ -33,9 +34,10 @@ const getAgentInfo = (name: string | undefined) => {
 
 type Props = {
   message: AIMessage
+  toolMessages: ToolMessage[]
 }
 
-export const AiMessage: FC<Props> = ({ message }) => {
+export const AiMessage: FC<Props> = ({ message, toolMessages }) => {
   const { avatar, name } = getAgentInfo(message.name)
   const messageContentString = extractResponseFromMessage(message)
   const reasoningText = extractReasoningFromMessage(message)
@@ -52,7 +54,7 @@ export const AiMessage: FC<Props> = ({ message }) => {
           {reasoningText && <ReasoningMessage content={reasoningText} />}
           {messageContentString !== '' && (
             <div className={styles.responseMessageWrapper}>
-              <div className={styles.markdownWrapper}>
+              <div className={markdownStyles.markdownWrapper}>
                 <MarkdownContent content={messageContentString} />
               </div>
               <div className={styles.copyButtonWrapper}>
@@ -64,7 +66,7 @@ export const AiMessage: FC<Props> = ({ message }) => {
               </div>
             </div>
           )}
-          <ToolCalls toolCalls={toolCalls} />
+          <ToolCalls toolCalls={toolCalls} toolMessages={toolMessages} />
         </div>
       </div>
     </div>

@@ -1,23 +1,19 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
-import type { Database } from '@liam-hq/db'
 import { getConfigurable } from '../../chat/workflow/shared/getConfigurable'
-import type { WorkflowState } from '../../chat/workflow/types'
-import { logAssistantMessage } from '../../chat/workflow/utils/timelineLogger'
-import { withTimelineItemSync } from '../../chat/workflow/utils/withTimelineItemSync'
 import { WorkflowTerminationError } from '../../shared/errorHandling'
 import { convertSchemaToText } from '../../utils/convertSchemaToText'
 import { removeReasoningFromMessages } from '../../utils/messageCleanup'
 import { invokeDesignAgent } from '../invokeDesignAgent'
+import type { DbAgentState } from '../shared/dbAgentAnnotation'
 
 /**
  * Design Schema Node - DB Design & DDL Execution
  * Performed by dbAgent
  */
 export async function designSchemaNode(
-  state: WorkflowState,
+  state: DbAgentState,
   config: RunnableConfig,
-): Promise<WorkflowState> {
-  const assistantRole: Database['public']['Enums']['assistant_role_enum'] = 'db'
+): Promise<DbAgentState> {
   const configurableResult = getConfigurable(config)
   if (configurableResult.isErr()) {
     throw new WorkflowTerminationError(
@@ -44,32 +40,11 @@ export async function designSchemaNode(
     throw new WorkflowTerminationError(invokeResult.error, 'designSchemaNode')
   }
 
-  const { response, reasoning } = invokeResult.value
-
-  // Log reasoning summary if available
-  if (reasoning?.summary && reasoning.summary.length > 0) {
-    for (const summaryItem of reasoning.summary) {
-      await logAssistantMessage(
-        state,
-        repositories,
-        summaryItem.text,
-        assistantRole,
-      )
-    }
-  }
-
-  // Apply timeline sync to the message and clear retry flags
-  const syncedMessage = await withTimelineItemSync(response, {
-    designSessionId: state.designSessionId,
-    organizationId: state.organizationId || '',
-    userId: state.userId,
-    repositories,
-    assistantRole,
-  })
+  const { response } = invokeResult.value
 
   return {
     ...state,
-    messages: [syncedMessage],
+    messages: [response],
     latestVersionNumber: state.latestVersionNumber + 1,
   }
 }

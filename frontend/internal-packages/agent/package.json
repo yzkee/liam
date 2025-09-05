@@ -32,8 +32,8 @@
     "@types/node": "22.17.1",
     "@types/uuid": "10.0.0",
     "eslint": "9.33.0",
-    "msw": "2.10.4",
-    "tsx": "4.20.3",
+    "msw": "2.10.5",
+    "tsx": "4.20.4",
     "typescript": "5.9.2",
     "vitest": "3.2.4",
     "yoctocolors": "2.1.1"
@@ -55,6 +55,7 @@
     "lint:biome": "biome check .",
     "lint:eslint": "eslint .",
     "lint:tsc": "tsc --noEmit",
-    "test": "vitest --watch=false --passWithNoTests"
+    "test": "vitest --watch=false --passWithNoTests",
+    "test:integration": "vitest --watch=false --passWithNoTests --config vitest.config.integration.ts"
   }
 }

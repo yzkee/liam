@@ -9,13 +9,10 @@ describe('formatValidationErrors', () => {
         testCaseId: 'test-1',
         testCaseTitle: 'Test Insert Operation',
         success: false,
-        executedOperations: 1,
-        failedOperations: [
-          {
-            sql: "INSERT INTO users (id, name) VALUES (1, 'John')",
-            error: 'duplicate key value violates unique constraint',
-          },
-        ],
+        failedOperation: {
+          sql: "INSERT INTO users (id, name) VALUES (1, 'John')",
+          error: 'duplicate key value violates unique constraint',
+        },
         executedAt: new Date('2024-01-01T00:00:00Z'),
       },
     ]
@@ -39,23 +36,10 @@ describe('formatValidationErrors', () => {
         testCaseId: 'test-1',
         testCaseTitle: 'Complex Transaction Test',
         success: false,
-        executedOperations: 3,
-        failedOperations: [
-          {
-            sql: "INSERT INTO accounts (id) VALUES ('invalid-uuid')",
-            error: 'invalid input syntax for type uuid',
-          },
-          {
-            sql: "UPDATE accounts SET balance = 100 WHERE id = 'invalid-uuid'",
-            error:
-              'current transaction is aborted, commands ignored until end of transaction block',
-          },
-          {
-            sql: "DELETE FROM accounts WHERE id = 'invalid-uuid'",
-            error:
-              'current transaction is aborted, commands ignored until end of transaction block',
-          },
-        ],
+        failedOperation: {
+          error: 'invalid input syntax for type uuid',
+          sql: "INSERT INTO accounts (id) VALUES ('invalid-uuid')",
+        },
         executedAt: new Date('2024-01-01T00:00:00Z'),
       },
     ]
@@ -69,16 +53,6 @@ describe('formatValidationErrors', () => {
       #### 1. Error: \`invalid input syntax for type uuid\`
       \`\`\`sql
       INSERT INTO accounts (id) VALUES ('invalid-uuid')
-      \`\`\`
-
-      #### 2. Error: \`current transaction is aborted, commands ignored until end of transaction block\`
-      \`\`\`sql
-      UPDATE accounts SET balance = 100 WHERE id = 'invalid-uuid'
-      \`\`\`
-
-      #### 3. Error: \`current transaction is aborted, commands ignored until end of transaction block\`
-      \`\`\`sql
-      DELETE FROM accounts WHERE id = 'invalid-uuid'
       \`\`\`"
     `)
   })
@@ -89,33 +63,26 @@ describe('formatValidationErrors', () => {
         testCaseId: 'test-1',
         testCaseTitle: 'First Test Case',
         success: false,
-        executedOperations: 1,
-        failedOperations: [
-          {
-            sql: 'INSERT INTO table1 VALUES (1)',
-            error: 'table1 does not exist',
-          },
-        ],
+        failedOperation: {
+          sql: 'INSERT INTO table1 VALUES (1)',
+          error: 'table1 does not exist',
+        },
         executedAt: new Date('2024-01-01T00:00:00Z'),
       },
       {
         testCaseId: 'test-2',
         testCaseTitle: 'Second Test Case',
         success: true,
-        executedOperations: 2,
         executedAt: new Date('2024-01-01T00:00:00Z'),
       },
       {
         testCaseId: 'test-3',
         testCaseTitle: 'Third Test Case',
         success: false,
-        executedOperations: 1,
-        failedOperations: [
-          {
-            sql: 'UPDATE table2 SET col = 1',
-            error: 'permission denied',
-          },
-        ],
+        failedOperation: {
+          sql: 'UPDATE table2 SET col = 1',
+          error: 'permission denied',
+        },
         executedAt: new Date('2024-01-01T00:00:00Z'),
       },
     ]
@@ -156,13 +123,10 @@ describe('formatValidationErrors', () => {
         testCaseId: 'test-1',
         testCaseTitle: 'Long SQL Test',
         success: false,
-        executedOperations: 1,
-        failedOperations: [
-          {
-            sql: longSql,
-            error: 'syntax error',
-          },
-        ],
+        failedOperation: {
+          sql: longSql,
+          error: 'syntax error',
+        },
         executedAt: new Date('2024-01-01T00:00:00Z'),
       },
     ]
@@ -195,13 +159,10 @@ describe('formatValidationErrors', () => {
         testCaseId: 'test-1',
         testCaseTitle: 'SQL with Comments',
         success: false,
-        executedOperations: 1,
-        failedOperations: [
-          {
-            sql: sqlWithComments,
-            error: 'some error',
-          },
-        ],
+        failedOperation: {
+          sql: sqlWithComments,
+          error: 'some error',
+        },
         executedAt: new Date('2024-01-01T00:00:00Z'),
       },
     ]
@@ -222,14 +183,16 @@ describe('formatValidationErrors', () => {
     `)
   })
 
-  it('should handle empty failed operations array', () => {
+  it('should handle failed case without SQL details', () => {
     const results: TestcaseDmlExecutionResult[] = [
       {
         testCaseId: 'test-1',
-        testCaseTitle: 'Test with empty failures',
+        testCaseTitle: 'Test with minimal error info',
         success: false,
-        executedOperations: 0,
-        failedOperations: [],
+        failedOperation: {
+          error: 'Unknown error occurred',
+          sql: '',
+        },
         executedAt: new Date('2024-01-01T00:00:00Z'),
       },
     ]
@@ -239,24 +202,47 @@ describe('formatValidationErrors', () => {
     expect(formatted).toMatchInlineSnapshot(`
       "Database validation found 1 issues. Please fix the following errors:
 
-      ### ❌ **Test Case:** Test with empty failures"
+      ### ❌ **Test Case:** Test with minimal error info
+      #### 1. Error: \`Unknown error occurred\`
+      \`\`\`sql
+
+      \`\`\`"
     `)
   })
 
-  it('should return success message when all tests pass', () => {
+  it('should handle special characters in error messages', () => {
     const results: TestcaseDmlExecutionResult[] = [
       {
         testCaseId: 'test-1',
-        testCaseTitle: 'Successful Test 1',
-        success: true,
-        executedOperations: 5,
+        testCaseTitle: 'Test with Special Characters',
+        success: false,
+        failedOperation: {
+          sql: "INSERT INTO test VALUES ('data')",
+          error: 'Error with `backticks` and "quotes" and \'single quotes\'',
+        },
         executedAt: new Date('2024-01-01T00:00:00Z'),
       },
+    ]
+
+    const formatted = formatValidationErrors(results)
+
+    expect(formatted).toMatchInlineSnapshot(`
+      "Database validation found 1 issues. Please fix the following errors:
+
+      ### ❌ **Test Case:** Test with Special Characters
+      #### 1. Error: \`Error with \`backticks\` and \"quotes\" and 'single quotes'\`
+      \`\`\`sql
+      INSERT INTO test VALUES ('data')
+      \`\`\`"
+    `)
+  })
+
+  it('should return success message when no errors', () => {
+    const results: TestcaseDmlExecutionResult[] = [
       {
-        testCaseId: 'test-2',
-        testCaseTitle: 'Successful Test 2',
+        testCaseId: 'test-1',
+        testCaseTitle: 'Successful Test',
         success: true,
-        executedOperations: 3,
         executedAt: new Date('2024-01-01T00:00:00Z'),
       },
     ]
@@ -268,33 +254,13 @@ describe('formatValidationErrors', () => {
     )
   })
 
-  it('should handle special characters in error messages', () => {
-    const results: TestcaseDmlExecutionResult[] = [
-      {
-        testCaseId: 'test-1',
-        testCaseTitle: 'Test with Special Characters',
-        success: false,
-        executedOperations: 1,
-        failedOperations: [
-          {
-            sql: "INSERT INTO test VALUES ('data')",
-            error: 'Error with `backticks` and "quotes" and \'single quotes\'',
-          },
-        ],
-        executedAt: new Date('2024-01-01T00:00:00Z'),
-      },
-    ]
+  it('should return success message when empty results', () => {
+    const results: TestcaseDmlExecutionResult[] = []
 
     const formatted = formatValidationErrors(results)
 
-    expect(formatted).toMatchInlineSnapshot(`
-      "Database validation found 1 issues. Please fix the following errors:
-
-      ### ❌ **Test Case:** Test with Special Characters
-      #### 1. Error: \`Error with \`backticks\` and "quotes" and 'single quotes'\`
-      \`\`\`sql
-      INSERT INTO test VALUES ('data')
-      \`\`\`"
-    `)
+    expect(formatted).toMatchInlineSnapshot(
+      `"Database validation complete: all checks passed successfully"`,
+    )
   })
 })

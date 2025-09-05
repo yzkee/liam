@@ -1,3 +1,8 @@
+# NOTE: This workflow is configured as a Trusted Publisher on npmjs.com
+# The workflow filename "release.yml" is registered in the Trusted Publisher settings.
+# If you rename this file, you must also update the Trusted Publisher configuration on npmjs.com
+# ex. https://www.npmjs.com/package/@liam-hq/cli/access
+
 name: release
 on:
   push:
@@ -22,7 +27,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Create GitHub App Token
-        uses: actions/create-github-app-token@0f859bf9e69e887678d5bbfbee594437cb440ffe # v2.1.0
+        uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2.1.1
         id: app-token
         with:
           app-id: ${{ vars.CHANGESET_CI_TRIGGER_APP_ID }}
@@ -35,6 +40,13 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
           persist-credentials: false
       - uses: ./.github/actions/pnpm-setup
+
+      # NOTE: Temporary workaround
+      # - "Trusted publishing" requires npm 11.5.1+.
+      #   See: https://docs.npmjs.com/trusted-publishers
+      - name: Update npm
+        run: npm update -g npm
+
       - name: Create Release Pull Request or Publish to npm
         id: changesets-action
         uses: changesets/action@e0145edc7d9d8679003495b11f87bd8ef63c0cba # v1.5.3
@@ -42,7 +54,6 @@ jobs:
           publish: pnpm run release
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Trigger released_package_test.yml via API
         if: ${{ steps.changesets-action.outputs.published == 'true' }}
         run: |

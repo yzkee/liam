@@ -10,6 +10,7 @@ import { Command, END } from '@langchain/langgraph'
 import { ChatOpenAI } from '@langchain/openai'
 import { fromAsyncThrowable } from '@liam-hq/neverthrow'
 import { ResultAsync } from 'neverthrow'
+import { v4 as uuidv4 } from 'uuid'
 import { getConfigurable } from '../../chat/workflow/shared/getConfigurable'
 import type {
   WorkflowConfigurable,
@@ -53,7 +54,7 @@ export async function classifyMessage(
         (async () => {
           // OpenAI ("chatcmpl-...") and LangGraph ("run-...") use different id formats,
           // so we overwrite with a UUID to unify chunk ids for consistent handling.
-          const id = crypto.randomUUID()
+          const id = uuidv4()
           let accumulatedChunk: AIMessageChunk | null = null
 
           for await (const _chunk of stream) {
@@ -100,10 +101,14 @@ export async function classifyMessage(
   // 3. Check if database design request (tool call to routeToAgent)
   if (response.tool_calls?.[0]?.name === 'routeToAgent') {
     // Create ToolMessage to properly complete the tool call
+    const id = uuidv4()
     const toolMessage = new ToolMessage({
+      id,
+      status: 'success',
       content: response.tool_calls[0].args?.['targetAgent'] || 'pmAgent',
       tool_call_id: response.tool_calls[0].id ?? '',
     })
+    await dispatchCustomEvent(SSE_EVENTS.MESSAGES, toolMessage)
 
     // Route to PM Agent with both the AI response and tool completion
     return new Command({

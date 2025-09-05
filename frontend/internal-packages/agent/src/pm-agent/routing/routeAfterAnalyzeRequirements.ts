@@ -16,7 +16,7 @@ export const routeAfterAnalyzeRequirements = (
     state
 
   // 1. If requirements are saved successfully (not empty), END the subgraph
-  if (analyzedRequirements && analyzedRequirements.businessRequirement !== '') {
+  if (analyzedRequirements.businessRequirement !== '') {
     return 'END'
   }
 

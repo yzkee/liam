@@ -3,9 +3,6 @@
   "root": false,
   "linter": {
     "rules": {
-      "correctness": {
-        "noUnusedVariables": "error"
-      },
       "nursery": {
         "useUniqueElementIds": "error"
       }

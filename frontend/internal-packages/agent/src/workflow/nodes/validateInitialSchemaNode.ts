@@ -4,9 +4,12 @@ import { ResultAsync } from 'neverthrow'
 import type { WorkflowState } from '../../chat/workflow/types'
 import { WorkflowTerminationError } from '../../shared/errorHandling'
 
-const createValidationError = (message: string): WorkflowTerminationError => {
+const createValidationError = (
+  error: Error | string,
+): WorkflowTerminationError => {
+  const errorInstance = error instanceof Error ? error : new Error(error)
   return new WorkflowTerminationError(
-    new Error(message),
+    errorInstance,
     'validateInitialSchemaNode',
   )
 }
@@ -52,9 +55,7 @@ export async function validateInitialSchemaNode(
       return state
     },
     (error) => {
-      throw createValidationError(
-        `Schema validation execution failed: ${error.message}`,
-      )
+      throw createValidationError(error)
     },
   )
 }

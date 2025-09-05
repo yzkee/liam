@@ -26,12 +26,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      # NOTE: Temporary workaround
-      # - "Trusted publishing" requires npm 11.5.1+.
-      #   See: https://docs.npmjs.com/trusted-publishers
-      - name: Update npm
-        run: npm update -g npm
-
       - name: Create GitHub App Token
         uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2.1.1
         id: app-token
@@ -46,6 +40,13 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
           persist-credentials: false
       - uses: ./.github/actions/pnpm-setup
+
+      # NOTE: Temporary workaround
+      # - "Trusted publishing" requires npm 11.5.1+.
+      #   See: https://docs.npmjs.com/trusted-publishers
+      - name: Update npm
+        run: npm update -g npm
+
       - name: Create Release Pull Request or Publish to npm
         id: changesets-action
         uses: changesets/action@e0145edc7d9d8679003495b11f87bd8ef63c0cba # v1.5.3

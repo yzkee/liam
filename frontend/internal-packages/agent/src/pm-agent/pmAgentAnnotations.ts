@@ -7,11 +7,14 @@ import type { Schema } from '@liam-hq/schema'
  */
 export const pmAgentStateAnnotation = Annotation.Root({
   ...MessagesAnnotation.spec,
-  analyzedRequirements: Annotation<{
-    businessRequirement: string
-    functionalRequirements: Record<string, string[]>
-    nonFunctionalRequirements: Record<string, string[]>
-  }>,
+  analyzedRequirements: Annotation<
+    | {
+        businessRequirement: string
+        functionalRequirements: Record<string, string[]>
+        nonFunctionalRequirements: Record<string, string[]>
+      }
+    | undefined
+  >,
   designSessionId: Annotation<string>,
   schemaData: Annotation<Schema>,
 

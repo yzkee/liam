@@ -62,6 +62,7 @@ describe('invokeSaveArtifactToolNode Integration', () => {
 
     const state: PmAgentState = {
       messages: [toolCallMessage],
+      analyzedRequirements: undefined,
       designSessionId: context.designSessionId,
       schemaData: aSchema({
         tables: {

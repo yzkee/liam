@@ -62,35 +62,6 @@ describe('invokeSaveArtifactToolNode Integration', () => {
 
     const state: PmAgentState = {
       messages: [toolCallMessage],
-      analyzedRequirements: {
-        businessRequirement:
-          'Create a task management system for teams to collaborate effectively',
-        functionalRequirements: {
-          'User Management': [
-            'Users can register and login to the system',
-            'Users can create and manage their profiles',
-          ],
-          'Project Management': [
-            'Users can create projects',
-            'Users can assign team members to projects',
-          ],
-          'Task Management': [
-            'Users can create tasks within projects',
-            'Users can assign tasks to team members',
-            'Users can track task progress and status',
-          ],
-        },
-        nonFunctionalRequirements: {
-          Performance: [
-            'System should handle up to 1000 concurrent users',
-            'Page load times should be under 2 seconds',
-          ],
-          Security: [
-            'User data should be encrypted',
-            'Authentication should use secure tokens',
-          ],
-        },
-      },
       designSessionId: context.designSessionId,
       schemaData: aSchema({
         tables: {

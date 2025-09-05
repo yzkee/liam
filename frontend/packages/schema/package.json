@@ -48,5 +48,11 @@
     "lint:tsc": "tsc --noEmit",
     "test": "vitest --watch=false"
   },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "package.json",
+    "LICENSE"
+  ],
   "types": "dist/index.d.ts"
 }

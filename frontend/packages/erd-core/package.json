@@ -56,5 +56,11 @@
     "lint:tsc": "tsc --noEmit",
     "suppressions": "eslint --suppress-all --fix --max-warnings 0",
     "test": "vitest --watch=false"
-  }
+  },
+  "files": [
+    "src/**/*",
+    "README.md",
+    "package.json",
+    "LICENSE"
+  ]
 }

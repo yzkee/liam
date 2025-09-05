@@ -153,7 +153,7 @@ describe('validateInitialSchemaNode Integration', () => {
   })
 
   describe('Error handling scenarios', () => {
-    it('should handle getSchema repository errors gracefully', async () => {
+    it('should handle validation errors gracefully', async () => {
       // Arrange
       const graph = new StateGraph(workflowAnnotation)
         .addNode('validateInitialSchema', validateInitialSchemaNode)
@@ -164,11 +164,11 @@ describe('validateInitialSchemaNode Integration', () => {
       const { config, context } = await getTestConfig()
 
       const state: WorkflowState = {
-        messages: [new HumanMessage('Test repository error')],
-        designSessionId: 'invalid-session-id', // This should cause getSchema to fail
+        messages: [new HumanMessage('Test validation error handling')],
+        designSessionId: 'test-session-id-for-error-handling',
         organizationId: context.organizationId,
         userId: context.userId,
-        userInput: 'Test repository error',
+        userInput: 'Test validation error handling',
         schemaData: aSchema({
           tables: {},
           enums: {},

@@ -3,6 +3,9 @@
   "root": false,
   "linter": {
     "rules": {
+      "correctness": {
+        "useExhaustiveDependencies": "error"
+      },
       "nursery": {
         "useUniqueElementIds": "error"
       }

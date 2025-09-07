@@ -2,7 +2,7 @@ import { useCallback, useEffect } from 'react'
 
 export const useAutoResizeTextarea = (
   textareaRef: React.RefObject<HTMLTextAreaElement | null>,
-  value: string,
+  _value: string,
 ) => {
   const adjustHeight = useCallback(() => {
     const textarea = textareaRef.current
@@ -14,7 +14,7 @@ export const useAutoResizeTextarea = (
 
   useEffect(() => {
     adjustHeight()
-  }, [value, adjustHeight])
+  }, [adjustHeight])
 
   const handleChange = useCallback(
     (onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void) =>

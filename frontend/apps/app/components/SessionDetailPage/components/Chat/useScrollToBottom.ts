@@ -6,7 +6,7 @@ type Options = {
 }
 
 export const useScrollToBottom = <T extends HTMLElement>(
-  itemsLength: number,
+  _itemsLength: number,
   { threshold = 0, behavior = 'smooth' }: Options = {},
 ) => {
   const containerRef = useRef<T | null>(null)
@@ -20,7 +20,7 @@ export const useScrollToBottom = <T extends HTMLElement>(
 
   useEffect(() => {
     if (!locked) scrollToBottom()
-  }, [itemsLength])
+  }, [locked, scrollToBottom])
 
   useEffect(() => {
     const el = containerRef.current

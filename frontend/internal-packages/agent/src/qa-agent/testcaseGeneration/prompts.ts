@@ -6,12 +6,16 @@ const ROLE_CONTEXT =
 const CRITICAL_INSTRUCTIONS =
   'CRITICAL: You MUST use the saveTestcase tool to save your generated test case. Do not provide test cases as text.'
 
-const TEST_REQUIREMENTS = `Create both positive and negative test scenarios that include:
+const TEST_REQUIREMENTS = `
+Create both positive and negative test scenarios that include:
 - Valid data insertion tests
 - Constraint violation tests (NOT NULL, FOREIGN KEY, UNIQUE)
-- Edge cases and boundary conditions`
+- Edge cases and boundary conditions
+- Use gen_random_uuid() for UUID columns, not hardcoded strings
+`
 
-const EXAMPLES = `Use the saveTestcase tool with this structure:
+const EXAMPLES = `
+Use the saveTestcase tool with this structure:
 {
   "testcaseWithDml": {
     "requirementType": "functional",
@@ -25,11 +29,14 @@ const EXAMPLES = `Use the saveTestcase tool with this structure:
       "description": "What this DML operation tests"
     }
   }
-}`
+}
+`
 
-const STOP_CONDITIONS = `# Stop Conditions  
+const STOP_CONDITIONS = `
+# Stop Conditions
 - When test case generation succeeds, report success briefly and stop.
-- Make reasonable assumptions and complete autonomously without prompting for clarification.`
+- Make reasonable assumptions and complete autonomously without prompting for clarification.
+`
 
 /**
  * System prompt for generating test cases

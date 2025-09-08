@@ -34,9 +34,6 @@ const preview: Preview = {
     layout: 'centered',
     nextjs: {
       appDirectory: true,
-      navigation: {
-        pathname: '/',
-      }
     },
   },
   initialGlobals: {

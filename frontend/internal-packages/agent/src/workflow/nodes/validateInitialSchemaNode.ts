@@ -1,8 +1,8 @@
 import { executeQuery } from '@liam-hq/pglite-server'
 import { isEmptySchema, postgresqlSchemaDeparser } from '@liam-hq/schema'
 import { ResultAsync } from 'neverthrow'
-import type { WorkflowState } from '../../chat/workflow/types'
-import { WorkflowTerminationError } from '../../shared/errorHandling'
+import type { WorkflowState } from '../../types'
+import { WorkflowTerminationError } from '../../utils/errorHandling'
 
 const createValidationError = (
   error: Error | string,

@@ -28,7 +28,9 @@ export async function validateInitialSchemaNode(
   const ddlResult = postgresqlSchemaDeparser(state.schemaData)
 
   if (ddlResult.errors.length > 0) {
-    const errorMessage = ddlResult.errors.join('; ')
+    const errorMessage = ddlResult.errors
+      .map((error) => error.message)
+      .join('; ')
     throw createValidationError(`Schema deparser failed: ${errorMessage}`)
   }
 

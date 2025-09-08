@@ -1,11 +1,25 @@
 import { AIMessage, HumanMessage } from '@langchain/core/messages'
 import { END, START, StateGraph } from '@langchain/langgraph'
 import { aColumn, aSchema, aTable } from '@liam-hq/schema'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { getTestConfig } from '../../../test-utils/workflowTestHelpers'
 import type { WorkflowState } from '../../types'
 import { WorkflowTerminationError } from '../../utils/errorHandling'
 import { workflowAnnotation } from '../../workflowAnnotation'
+
+// Mock @liam-hq/schema to include isEmptySchema
+vi.mock('@liam-hq/schema', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@liam-hq/schema')>()
+  return {
+    ...actual,
+    isEmptySchema: (schema: Parameters<typeof actual.isEmptySchema>[0]) => {
+      return (
+        Object.keys(schema.tables || {}).length === 0 &&
+        Object.keys(schema.enums || {}).length === 0
+      )
+    },
+  }
+})
 
 import { validateInitialSchemaNode } from './validateInitialSchemaNode'
 
@@ -40,27 +54,11 @@ describe('validateInitialSchemaNode Integration', () => {
       }
 
       // Act
-      const stream = await graph.stream(state, config)
-      const results = []
-      for await (const result of stream) {
-        results.push(result)
-      }
+      const result = await graph.invoke(state, config)
 
       // Assert
-      expect(results).toHaveLength(1)
-      const finalResult = results[0]
-      expect(finalResult).toBeDefined()
-      expect(finalResult).toHaveProperty('validateInitialSchema')
-
-      if (!finalResult?.validateInitialSchema) {
-        expect.fail('Expected finalResult.validateInitialSchema to be defined')
-      }
-
-      const resultState = finalResult.validateInitialSchema
-
       // Empty schema should return unchanged state
-      expect(resultState.schemaData).toEqual(state.schemaData)
-      expect(resultState.messages).toEqual(state.messages)
+      expect(result).toEqual(state)
     })
 
     it('should validate existing schema successfully', async () => {
@@ -108,31 +106,15 @@ describe('validateInitialSchemaNode Integration', () => {
       }
 
       // Act
-      const stream = await graph.stream(state, config)
-      const results = []
-      for await (const result of stream) {
-        results.push(result)
-      }
+      const result = await graph.invoke(state, config)
 
       // Assert
-      expect(results).toHaveLength(1)
-      const finalResult = results[0]
-      expect(finalResult).toBeDefined()
-      expect(finalResult).toHaveProperty('validateInitialSchema')
-
-      if (!finalResult?.validateInitialSchema) {
-        expect.fail('Expected finalResult.validateInitialSchema to be defined')
-      }
-
-      const resultState = finalResult.validateInitialSchema
-
       // Schema validation should succeed with valid schema
-      expect(resultState.schemaData).toEqual(state.schemaData)
-      expect(resultState.messages).toEqual(state.messages)
+      expect(result).toEqual(state)
 
       // Should have users table with correct structure
-      expect(resultState.schemaData.tables['users']).toBeDefined()
-      const usersTable = resultState.schemaData.tables['users']
+      expect(result.schemaData.tables['users']).toBeDefined()
+      const usersTable = result.schemaData.tables['users']
       expect(usersTable?.name).toBe('users')
       expect(usersTable?.columns['id']?.type).toBe('uuid')
       expect(usersTable?.columns['email']?.type).toBe('varchar')
@@ -184,32 +166,16 @@ describe('validateInitialSchemaNode Integration', () => {
       }
 
       // Act
-      const stream = await graph.stream(state, config)
-      const results = []
-      for await (const result of stream) {
-        results.push(result)
-      }
+      const result = await graph.invoke(state, config)
 
       // Assert
-      expect(results).toHaveLength(1)
-      const finalResult = results[0]
-      expect(finalResult).toBeDefined()
-      expect(finalResult).toHaveProperty('validateInitialSchema')
-
-      if (!finalResult?.validateInitialSchema) {
-        expect.fail('Expected finalResult.validateInitialSchema to be defined')
-      }
-
-      const resultState = finalResult.validateInitialSchema
-
       // Non-first execution should return state unchanged (validation is skipped)
-      expect(resultState.schemaData).toEqual(state.schemaData)
-      expect(resultState.messages).toEqual(state.messages)
-      expect(resultState.userInput).toBe('Follow-up message')
+      expect(result).toEqual(state)
+      expect(result.userInput).toBe('Follow-up message')
 
       // Should preserve the existing messages including AI message
-      expect(resultState.messages).toHaveLength(3)
-      expect(resultState.messages[1]).toBeInstanceOf(AIMessage)
+      expect(result.messages).toHaveLength(3)
+      expect(result.messages[1]).toBeInstanceOf(AIMessage)
     })
   })
 

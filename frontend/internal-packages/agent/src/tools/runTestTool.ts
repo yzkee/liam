@@ -83,13 +83,24 @@ async function executeDmlOperationsByTestcase(
       ? extractFailedOperation(sqlResults)
       : undefined
 
-    results.push({
+    const baseResult = {
       testCaseId: testcase.id,
       testCaseTitle: testcase.title,
-      success: !hasErrors,
-      ...(hasErrors && failedOperation && { failedOperation }),
       executedAt: startTime,
-    })
+    }
+
+    if (hasErrors && failedOperation) {
+      results.push({
+        ...baseResult,
+        success: false,
+        failedOperation,
+      })
+    } else {
+      results.push({
+        ...baseResult,
+        success: true,
+      })
+    }
   }
 
   return results

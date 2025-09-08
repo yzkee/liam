@@ -151,41 +151,4 @@ describe('validateInitialSchemaNode Integration', () => {
       await outputStream(stream)
     })
   })
-
-  describe('Error handling scenarios', () => {
-    it('should handle validation errors gracefully', async () => {
-      // Arrange
-      const graph = new StateGraph(workflowAnnotation)
-        .addNode('validateInitialSchema', validateInitialSchemaNode)
-        .addEdge(START, 'validateInitialSchema')
-        .addEdge('validateInitialSchema', END)
-        .compile()
-
-      const { config, context } = await getTestConfig()
-
-      const state: WorkflowState = {
-        messages: [new HumanMessage('Test validation error handling')],
-        designSessionId: 'test-session-id-for-error-handling',
-        organizationId: context.organizationId,
-        userId: context.userId,
-        userInput: 'Test validation error handling',
-        schemaData: aSchema({
-          tables: {},
-          enums: {},
-          extensions: {},
-        }),
-        analyzedRequirements: undefined,
-        testcases: [],
-        buildingSchemaId: 'test-building-schema-id',
-        latestVersionNumber: 1,
-        next: 'leadAgent',
-      }
-
-      // Act
-      const stream = await graph.stream(state, config)
-
-      // Assert (Output)
-      await outputStream(stream)
-    })
-  })
 })

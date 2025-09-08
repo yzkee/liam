@@ -25,7 +25,9 @@ jobs:
       - name: Auto review Renovate PR
         uses: anthropics/claude-code-action@fd2c17f101639b10696381c1fd85fa735239090a # v1.0.5
         with:
-          direct_prompt: |
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          allowed_bots: "renovate[bot]"
+          prompt: |
             Review this Renovate PR for dependency updates. Analyze regression risks by examining:
 
             ## 1. Impact Analysis
@@ -65,5 +67,5 @@ jobs:
 
             State specific reasons for your verdict and list any pre-merge verification steps.
             Note: This codebase uses TypeScript, React, Next.js, and pnpm workspaces.
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          allowed_tools: "mcp__github__create_pending_pull_request_review,mcp__github__add_pull_request_review_comment_to_pending_review,mcp__github__submit_pending_pull_request_review,mcp__github__get_pull_request_diff,mcp__github__get_pull_request"
+          claude_args: |
+            --allowedTools mcp__github__create_pending_pull_request_review,mcp__github__add_pull_request_review_comment_to_pending_review,mcp__github__submit_pending_pull_request_review,mcp__github__get_pull_request_diff,mcp__github__get_pull_request

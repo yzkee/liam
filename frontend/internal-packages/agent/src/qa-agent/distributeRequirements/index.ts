@@ -1,6 +1,6 @@
 import { Send } from '@langchain/langgraph'
-import { WorkflowTerminationError } from '../../shared/errorHandling'
 import { convertSchemaToText } from '../../utils/convertSchemaToText'
+import { WorkflowTerminationError } from '../../utils/errorHandling'
 import type { QaAgentState } from '../shared/qaAgentAnnotation'
 
 /**

@@ -114,6 +114,11 @@ export const setupWorkflowState = (
           userInput: userInput,
           messages: allMessages,
           schemaData,
+          analyzedRequirements: {
+            businessRequirement: '',
+            functionalRequirements: {},
+            nonFunctionalRequirements: {},
+          },
           testcases: [],
           organizationId,
           buildingSchemaId,

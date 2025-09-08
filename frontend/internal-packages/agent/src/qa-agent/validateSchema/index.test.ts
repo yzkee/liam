@@ -21,7 +21,11 @@ describe('validateSchemaNode', () => {
       buildingSchemaId: 'test-id',
       latestVersionNumber: 1,
       designSessionId: 'session-id',
-      analyzedRequirements: undefined,
+      analyzedRequirements: {
+        businessRequirement: '',
+        functionalRequirements: {},
+        nonFunctionalRequirements: {},
+      },
       dmlExecutionErrors: undefined,
       next: END,
       ...overrides,

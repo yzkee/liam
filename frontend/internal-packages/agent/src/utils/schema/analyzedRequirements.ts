@@ -16,8 +16,3 @@ export const analyzedRequirementsSchema = v.object({
 export type AnalyzedRequirements = v.InferOutput<
   typeof analyzedRequirementsSchema
 >
-
-/**
- * Type for LangGraph annotations with default values
- */
-export type AnalyzedRequirementsAnnotationType = AnalyzedRequirements

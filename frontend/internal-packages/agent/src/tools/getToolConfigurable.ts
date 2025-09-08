@@ -1,10 +1,10 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { fromValibotSafeParse } from '@liam-hq/neverthrow'
-import { err, ok, type Result } from 'neverthrow'
+import { ok, type Result } from 'neverthrow'
 import * as v from 'valibot'
-import { getConfigurable } from '../chat/workflow/shared/getConfigurable'
 import { type Testcase, testcaseSchema } from '../qa-agent/types'
 import type { Repositories } from '../repositories'
+import { getConfigurable } from '../utils/getConfigurable'
 
 const toolConfigurableSchema = v.object({
   toolCall: v.object({
@@ -40,18 +40,16 @@ type ToolConfigurable = {
 export const getToolConfigurable = (
   config: RunnableConfig,
 ): Result<ToolConfigurable, Error> => {
-  const baseConfigurableResult = getConfigurable(config)
-  if (baseConfigurableResult.isErr()) {
-    return err(baseConfigurableResult.error)
-  }
-  const { repositories } = baseConfigurableResult.value
+  return getConfigurable(config).andThen((baseConfigurable) => {
+    const { repositories } = baseConfigurable
 
-  return fromValibotSafeParse(toolConfigurableSchema, config).andThen(
-    (parsed) =>
-      ok({
-        repositories,
-        toolCallId: parsed.toolCall.id,
-        ...parsed.configurable,
-      }),
-  )
+    return fromValibotSafeParse(toolConfigurableSchema, config).andThen(
+      (parsed) =>
+        ok({
+          repositories,
+          toolCallId: parsed.toolCall.id,
+          ...parsed.configurable,
+        }),
+    )
+  })
 }

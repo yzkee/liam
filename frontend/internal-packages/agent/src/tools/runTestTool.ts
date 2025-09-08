@@ -13,7 +13,7 @@ import { SSE_EVENTS } from '../client'
 import type { Testcase } from '../qa-agent/types'
 import { formatValidationErrors } from '../qa-agent/validateSchema/formatValidationErrors'
 import type { TestcaseDmlExecutionResult } from '../qa-agent/validateSchema/types'
-import { WorkflowTerminationError } from '../shared/errorHandling'
+import { WorkflowTerminationError } from '../utils/errorHandling'
 import { getToolConfigurable } from './getToolConfigurable'
 import { transformStateToArtifact } from './transformStateToArtifact'
 

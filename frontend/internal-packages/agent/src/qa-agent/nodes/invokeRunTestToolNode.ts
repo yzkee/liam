@@ -1,7 +1,7 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { ToolNode } from '@langchain/langgraph/prebuilt'
-import { generateDdlFromSchema } from '../../chat/workflow/utils/generateDdl'
 import { runTestTool } from '../../tools/runTestTool'
+import { generateDdlFromSchema } from '../../utils/generateDdl'
 import type { QaAgentState } from '../shared/qaAgentAnnotation'
 
 const toolNode = new ToolNode([runTestTool])

@@ -5,8 +5,8 @@ import type {
   NonFunctionalRequirement,
 } from '@liam-hq/artifact'
 import * as v from 'valibot'
-import type { WorkflowState } from '../chat/workflow/types'
 import type { Testcase } from '../qa-agent/types'
+import type { WorkflowState } from '../types'
 
 /**
  * Wraps a description string in an array format with fallback

@@ -40,7 +40,7 @@ export async function validateInitialSchemaNode(
 
   return await ResultAsync.fromPromise(
     executeQuery(ddlStatements, requiredExtensions),
-    (error) => new Error(String(error)),
+    (error) => (error instanceof Error ? error : new Error(String(error))),
   ).match(
     (validationResults) => {
       const hasErrors = validationResults.some((result) => !result.success)

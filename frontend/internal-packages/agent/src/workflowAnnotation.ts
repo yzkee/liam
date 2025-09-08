@@ -1,13 +1,16 @@
 import { Annotation, END, MessagesAnnotation } from '@langchain/langgraph'
 import type { Schema } from '@liam-hq/schema'
-import type { Testcase } from '../../../qa-agent/types'
-import type { AnalyzedRequirementsAnnotationType } from '../../../utils/schema/analyzedRequirements'
+import type { Testcase } from './qa-agent/types'
+import type { AnalyzedRequirementsAnnotationType } from './utils/schema/analyzedRequirements'
 
 export const workflowAnnotation = Annotation.Root({
   ...MessagesAnnotation.spec,
   userInput: Annotation<string>,
   analyzedRequirements: Annotation<AnalyzedRequirementsAnnotationType>,
-  testcases: Annotation<Testcase[]>,
+  testcases: Annotation<Testcase[]>({
+    reducer: (prev, next) => prev.concat(next),
+    default: () => [],
+  }),
   schemaData: Annotation<Schema>,
   buildingSchemaId: Annotation<string>,
   latestVersionNumber: Annotation<number>,

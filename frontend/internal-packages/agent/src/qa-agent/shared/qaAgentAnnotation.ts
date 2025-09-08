@@ -11,7 +11,9 @@ export const qaAgentAnnotation = Annotation.Root({
   ...MessagesAnnotation.spec,
   schemaData: Annotation<Schema>,
   analyzedRequirements: Annotation<AnalyzedRequirementsAnnotationType>,
-  testcases: Annotation<Testcase[]>,
+  testcases: Annotation<Testcase[]>({
+    reducer: (prev, next) => prev.concat(next),
+  }),
   designSessionId: Annotation<string>,
   buildingSchemaId: Annotation<string>,
   latestVersionNumber: Annotation<number>,

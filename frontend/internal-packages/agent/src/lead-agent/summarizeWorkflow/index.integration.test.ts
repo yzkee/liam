@@ -41,6 +41,11 @@ describe('summarizeWorkflow Integration', () => {
         }),
       ],
       schemaData: { tables: {}, enums: {}, extensions: {} }, // Not used by summarizeWorkflow
+      analyzedRequirements: {
+        businessRequirement: '',
+        functionalRequirements: {},
+        nonFunctionalRequirements: {},
+      },
       testcases: [],
       buildingSchemaId: context.buildingSchemaId,
       latestVersionNumber: context.latestVersionNumber,

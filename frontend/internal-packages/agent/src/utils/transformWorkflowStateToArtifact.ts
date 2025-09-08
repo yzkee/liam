@@ -122,12 +122,11 @@ const mergeTestCasesIntoRequirements = (
 export const transformWorkflowStateToArtifact = (
   state: WorkflowState,
 ): Artifact => {
-  const businessRequirement =
-    state.analyzedRequirements?.businessRequirement ?? ''
+  const businessRequirement = state.analyzedRequirements.businessRequirement
 
-  const requirements = state.analyzedRequirements
-    ? convertAnalyzedRequirementsToArtifact(state.analyzedRequirements)
-    : []
+  const requirements = convertAnalyzedRequirementsToArtifact(
+    state.analyzedRequirements,
+  )
 
   if (state.testcases.length > 0) {
     mergeTestCasesIntoRequirements(requirements, state.testcases)

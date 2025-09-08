@@ -6,7 +6,14 @@ import type { AnalyzedRequirementsAnnotationType } from './utils/schema/analyzed
 export const workflowAnnotation = Annotation.Root({
   ...MessagesAnnotation.spec,
   userInput: Annotation<string>,
-  analyzedRequirements: Annotation<AnalyzedRequirementsAnnotationType>,
+  analyzedRequirements: Annotation<AnalyzedRequirementsAnnotationType>({
+    reducer: (x, y) => y ?? x,
+    default: () => ({
+      businessRequirement: '',
+      functionalRequirements: {},
+      nonFunctionalRequirements: {},
+    }),
+  }),
   testcases: Annotation<Testcase[]>({
     reducer: (prev, next) => prev.concat(next),
     default: () => [],

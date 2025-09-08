@@ -18,8 +18,6 @@ export type AnalyzedRequirements = v.InferOutput<
 >
 
 /**
- * Optional version for LangGraph annotations that can be undefined
+ * Type for LangGraph annotations with default values
  */
-export type AnalyzedRequirementsAnnotationType =
-  | AnalyzedRequirements
-  | undefined
+export type AnalyzedRequirementsAnnotationType = AnalyzedRequirements

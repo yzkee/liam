@@ -8,6 +8,11 @@ const workflowState = (messages: WorkflowState['messages']): WorkflowState => ({
   messages,
   userInput: 'test input',
   schemaData: { tables: {}, enums: {}, extensions: {} },
+  analyzedRequirements: {
+    businessRequirement: '',
+    functionalRequirements: {},
+    nonFunctionalRequirements: {},
+  },
   buildingSchemaId: 'test-id',
   latestVersionNumber: 1,
   organizationId: 'test-org',

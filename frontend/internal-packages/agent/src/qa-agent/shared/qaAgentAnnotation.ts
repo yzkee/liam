@@ -10,7 +10,14 @@ import type { Testcase } from '../types'
 export const qaAgentAnnotation = Annotation.Root({
   ...MessagesAnnotation.spec,
   schemaData: Annotation<Schema>,
-  analyzedRequirements: Annotation<AnalyzedRequirementsAnnotationType>,
+  analyzedRequirements: Annotation<AnalyzedRequirementsAnnotationType>({
+    reducer: (x, y) => y ?? x,
+    default: () => ({
+      businessRequirement: '',
+      functionalRequirements: {},
+      nonFunctionalRequirements: {},
+    }),
+  }),
   testcases: Annotation<Testcase[]>({
     reducer: (prev, next) => prev.concat(next),
   }),

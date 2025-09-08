@@ -23,7 +23,9 @@ const model = new ChatOpenAI({
   model: 'gpt-5',
   reasoning: { effort: 'medium', summary: 'detailed' },
   useResponsesApi: true,
-}).bindTools([schemaDesignTool])
+}).bindTools([schemaDesignTool], {
+  strict: true,
+})
 
 type DesignAgentResult = {
   response: AIMessage

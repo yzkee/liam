@@ -13,6 +13,8 @@ describe('pgTAP extension', () => {
       "SELECT extname FROM pg_extension WHERE extname = 'pgtap'",
     )
     expect(result.rows).toEqual([{ extname: 'pgtap' }])
+
+    await db.close()
   })
 
   test('database testing functions work', async () => {
@@ -46,5 +48,7 @@ describe('pgTAP extension', () => {
     expect(finishResult.rows).toEqual([])
 
     await db.query('ROLLBACK')
+
+    await db.close()
   })
 })

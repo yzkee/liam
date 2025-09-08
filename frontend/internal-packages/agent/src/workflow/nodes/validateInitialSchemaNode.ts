@@ -1,6 +1,5 @@
 import { executeQuery } from '@liam-hq/pglite-server'
 import { isEmptySchema, postgresqlSchemaDeparser } from '@liam-hq/schema'
-import { ResultAsync } from 'neverthrow'
 import type { WorkflowState } from '../../types'
 import { WorkflowTerminationError } from '../../utils/errorHandling'
 
@@ -38,24 +37,18 @@ export async function validateInitialSchemaNode(
     state.schemaData.extensions || {},
   ).sort()
 
-  return await ResultAsync.fromPromise(
-    executeQuery(ddlStatements, requiredExtensions),
-    (error) => (error instanceof Error ? error : new Error(String(error))),
-  ).match(
-    (validationResults) => {
-      const hasErrors = validationResults.some((result) => !result.success)
-
-      if (hasErrors) {
-        const errorResult = validationResults.find((result) => !result.success)
-        const errorMessage = JSON.stringify(errorResult?.result)
-        throw createValidationError(`Schema validation failed: ${errorMessage}`)
-      }
-
-      // TODO: Add message creation in next PR
-      return state
-    },
-    (error) => {
-      throw createValidationError(error)
-    },
+  const validationResults = await executeQuery(
+    ddlStatements,
+    requiredExtensions,
   )
+  const hasErrors = validationResults.some((result) => !result.success)
+
+  if (hasErrors) {
+    const errorResult = validationResults.find((result) => !result.success)
+    const errorMessage = JSON.stringify(errorResult?.result)
+    throw createValidationError(`Schema validation failed: ${errorMessage}`)
+  }
+
+  // TODO: Add message creation in next PR
+  return state
 }

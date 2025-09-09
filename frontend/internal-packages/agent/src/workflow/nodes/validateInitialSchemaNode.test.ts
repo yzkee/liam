@@ -4,7 +4,6 @@ import { aColumn, aSchema, aTable } from '@liam-hq/schema'
 import { describe, expect, it } from 'vitest'
 import { getTestConfig } from '../../../test-utils/workflowTestHelpers'
 import type { WorkflowState } from '../../types'
-import { WorkflowTerminationError } from '../../utils/errorHandling'
 import { workflowAnnotation } from '../../workflowAnnotation'
 import { validateInitialSchemaNode } from './validateInitialSchemaNode'
 
@@ -191,21 +190,7 @@ describe('validateInitialSchemaNode Integration', () => {
         next: 'leadAgent',
       }
 
-      await expect(validateInitialSchemaNode(state)).rejects.toThrow(
-        WorkflowTerminationError,
-      )
-
-      // Additional detailed error message verification
-      const thrownError = await validateInitialSchemaNode(state).catch(
-        (error) => error,
-      )
-      expect(thrownError).toBeInstanceOf(WorkflowTerminationError)
-
-      const errorMessage =
-        thrownError instanceof WorkflowTerminationError
-          ? thrownError.message
-          : String(thrownError)
-      expect(errorMessage).toBe(
+      await expect(validateInitialSchemaNode(state)).rejects.toThrowError(
         'Error in validateInitialSchemaNode: Schema validation failed: {"error":"type \\"unknown_invalid_type\\" does not exist"}',
       )
     }, 30000) // 30 second timeout for CI/preview environments

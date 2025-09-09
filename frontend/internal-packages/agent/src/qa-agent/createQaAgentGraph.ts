@@ -1,6 +1,6 @@
 import { END, START, StateGraph } from '@langchain/langgraph'
 import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
-import { RETRY_POLICY } from '../shared/errorHandling'
+import { RETRY_POLICY } from '../utils/errorHandling'
 import { continueToRequirements } from './distributeRequirements'
 import { qaAgentAnnotation } from './shared/qaAgentAnnotation'
 import { testcaseGeneration } from './testcaseGeneration'

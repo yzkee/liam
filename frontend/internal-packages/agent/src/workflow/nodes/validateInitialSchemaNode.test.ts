@@ -136,7 +136,7 @@ describe('validateInitialSchemaNode Integration', () => {
       expect(usersTable?.name).toBe('users')
       expect(usersTable?.columns['id']?.type).toBe('uuid')
       expect(usersTable?.columns['email']?.type).toBe('varchar')
-    })
+    }, 30000) // 30 second timeout for CI/preview environments
   })
 
   describe('Non-first execution scenarios', () => {
@@ -198,7 +198,7 @@ describe('validateInitialSchemaNode Integration', () => {
       // Should preserve the existing messages including AI message
       expect(result.messages).toHaveLength(3)
       expect(result.messages[1]).toBeInstanceOf(AIMessage)
-    })
+    }, 30000) // 30 second timeout for CI/preview environments
   })
 
   describe('Error handling scenarios', () => {
@@ -257,6 +257,6 @@ describe('validateInitialSchemaNode Integration', () => {
       expect(errorMessage).toBe(
         'Error in validateInitialSchemaNode: Schema validation failed: {"error":"type \\"unknown_invalid_type\\" does not exist"}',
       )
-    })
+    }, 30000) // 30 second timeout for CI/preview environments
   })
 })

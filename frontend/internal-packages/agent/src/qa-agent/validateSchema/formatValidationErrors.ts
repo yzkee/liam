@@ -1,13 +1,9 @@
 import type { FailedOperation, TestcaseDmlExecutionResult } from './types'
 
-function formatSqlForDisplay(sql: string): string {
-  return sql.trim()
-}
-
 function formatFailedOperation(failedOperation: FailedOperation): string {
   let details = `#### 1. Error: \`${failedOperation.error}\`\n`
   details += '```sql\n'
-  details += formatSqlForDisplay(failedOperation.sql)
+  details += failedOperation.sql
   details += '\n```'
   return details
 }

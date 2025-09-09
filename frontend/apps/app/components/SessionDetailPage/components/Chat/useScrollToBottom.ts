@@ -5,10 +5,10 @@ type Options = {
   behavior?: ScrollBehavior
 }
 
-export const useScrollToBottom = <T extends HTMLElement>(
-  _itemsLength: number,
-  { threshold = 0, behavior = 'smooth' }: Options = {},
-) => {
+export const useScrollToBottom = <T extends HTMLElement>({
+  threshold = 0,
+  behavior = 'smooth',
+}: Options = {}) => {
   const containerRef = useRef<T | null>(null)
   const [locked, setLocked] = useState(false)
 

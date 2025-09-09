@@ -18,7 +18,8 @@
         "/^fumadocs-core$/",
         "/^fumadocs-mdx$/",
         "/^fumadocs-ui$/"
-      ]
+      ],
+      "enabled": false  // Temporarily disabled due to Zod v4 dependency conflicts. See route06/liam-internal#5606
     },
     {
       "matchUpdateTypes": [

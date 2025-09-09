@@ -11,7 +11,6 @@ import { validateInitialSchemaNode } from './validateInitialSchemaNode'
 describe('validateInitialSchemaNode Integration', () => {
   describe('First execution scenarios', () => {
     it('should display fresh database message when schema is empty', async () => {
-      // Arrange
       const graph = new StateGraph(workflowAnnotation)
         .addNode('validateInitialSchema', validateInitialSchemaNode)
         .addEdge(START, 'validateInitialSchema')
@@ -42,7 +41,6 @@ describe('validateInitialSchemaNode Integration', () => {
         next: 'leadAgent',
       }
 
-      // Act
       const result = await graph.invoke(state, config)
 
       // Assert
@@ -51,7 +49,6 @@ describe('validateInitialSchemaNode Integration', () => {
     })
 
     it('should validate existing schema successfully', async () => {
-      // Arrange
       const graph = new StateGraph(workflowAnnotation)
         .addNode('validateInitialSchema', validateInitialSchemaNode)
         .addEdge(START, 'validateInitialSchema')
@@ -98,25 +95,14 @@ describe('validateInitialSchemaNode Integration', () => {
         next: 'leadAgent',
       }
 
-      // Act
       const result = await graph.invoke(state, config)
 
-      // Assert
-      // Schema validation should succeed with valid schema
       expect(result).toEqual(state)
-
-      // Should have users table with correct structure
-      expect(result.schemaData.tables['users']).toBeDefined()
-      const usersTable = result.schemaData.tables['users']
-      expect(usersTable?.name).toBe('users')
-      expect(usersTable?.columns['id']?.type).toBe('uuid')
-      expect(usersTable?.columns['email']?.type).toBe('varchar')
     }, 30000) // 30 second timeout for CI/preview environments
   })
 
   describe('Non-first execution scenarios', () => {
     it('should skip validation when AI messages already exist', async () => {
-      // Arrange
       const graph = new StateGraph(workflowAnnotation)
         .addNode('validateInitialSchema', validateInitialSchemaNode)
         .addEdge(START, 'validateInitialSchema')
@@ -162,23 +148,14 @@ describe('validateInitialSchemaNode Integration', () => {
         next: 'leadAgent',
       }
 
-      // Act
       const result = await graph.invoke(state, config)
 
-      // Assert
-      // Non-first execution should return state unchanged (validation is skipped)
       expect(result).toEqual(state)
-      expect(result.userInput).toBe('Follow-up message')
-
-      // Should preserve the existing messages including AI message
-      expect(result.messages).toHaveLength(3)
-      expect(result.messages[1]).toBeInstanceOf(AIMessage)
     }, 30000) // 30 second timeout for CI/preview environments
   })
 
   describe('Error handling scenarios', () => {
     it('should fail when schema contains invalid column type', async () => {
-      // Arrange
       const { context } = await getTestConfig({ useOpenAI: false })
 
       const state: WorkflowState = {
@@ -214,7 +191,6 @@ describe('validateInitialSchemaNode Integration', () => {
         next: 'leadAgent',
       }
 
-      // Act & Assert
       await expect(validateInitialSchemaNode(state)).rejects.toThrow(
         WorkflowTerminationError,
       )

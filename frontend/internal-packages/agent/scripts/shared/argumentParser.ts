@@ -33,41 +33,6 @@ const parseArgValue = (
 }
 
 /**
- * Parse command line arguments for design process
- */
-export const parseDesignProcessArgs = (): {
-  prompt?: string
-  sessionId?: string
-} => {
-  const args = process.argv.slice(2)
-  const result: { prompt?: string; sessionId?: string } = {}
-
-  for (let i = 0; i < args.length; i++) {
-    // Parse prompt
-    const promptResult = parseArgValue(args, i, 'prompt', 'p')
-    if (promptResult.value !== undefined) {
-      result.prompt = promptResult.value
-      if (promptResult.skip) i++
-      continue
-    }
-
-    // Parse session-id
-    const sessionResult = parseArgValue(args, i, 'session-id', 's')
-    if (sessionResult.value !== undefined) {
-      const trimmed = sessionResult.value.trim()
-      if (trimmed) {
-        result.sessionId = trimmed
-      } else {
-        console.warn('Invalid session ID provided - ignoring empty value')
-      }
-      if (sessionResult.skip) i++
-    }
-  }
-
-  return result
-}
-
-/**
  * Parse command line arguments for QA agent (without session-id)
  */
 export const parseQaAgentArgs = (): { prompt?: string } => {

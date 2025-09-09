@@ -1,6 +1,6 @@
 import { type BaseMessage, isAIMessage } from '@langchain/core/messages'
 import * as v from 'valibot'
-import { additionalKwargsSchema, type ToolCalls } from '../schema'
+import { additionalKwargsSchema, type ToolCalls } from '@/components/SessionDetailPage/schema'
 
 export function extractToolCallsFromMessage(message: BaseMessage): ToolCalls {
   // First check if the message has tool_calls directly (for AIMessage)

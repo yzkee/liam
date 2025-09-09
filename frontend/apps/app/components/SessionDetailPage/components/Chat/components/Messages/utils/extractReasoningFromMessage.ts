@@ -1,6 +1,6 @@
 import type { BaseMessage } from '@langchain/core/messages'
 import * as v from 'valibot'
-import { additionalKwargsSchema } from '../schema'
+import { additionalKwargsSchema } from '@/components/SessionDetailPage/schema'
 
 export function extractReasoningFromMessage(
   message: BaseMessage,

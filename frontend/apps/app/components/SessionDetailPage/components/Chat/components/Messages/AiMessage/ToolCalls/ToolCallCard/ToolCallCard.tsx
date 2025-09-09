@@ -16,7 +16,7 @@ import {
   X,
 } from '@liam-hq/ui'
 import { type FC, useEffect, useMemo, useRef, useState } from 'react'
-import type { ToolCalls } from '../../../schema'
+import type { ToolCalls } from '@/components/SessionDetailPage/schema'
 import { extractResponseFromMessage } from '../../../utils/extractResponseFromMessage'
 import { ArgumentsDisplay } from './ArgumentsDisplay'
 import styles from './ToolCallCard.module.css'
@@ -38,20 +38,23 @@ export const ToolCallCard: FC<Props> = ({
   error,
   toolMessage,
 }) => {
+  // Determine if this is a pre-completed tool (no animation needed)
+  const isPreCompleted = status === 'completed'
+  
   // Track if arguments are ready to display
-  // Start as true for completed tools (no animation needed)
-  const [argumentsReady, setArgumentsReady] = useState(status === 'completed')
+  // Always start as true so arguments are visible
+  const [argumentsReady, setArgumentsReady] = useState(true)
   
   // Track if animation was started (to prevent interruption)
   const [animationStarted, setAnimationStarted] = useState(false)
   
   // Track if arguments animation is complete
-  const [argumentsAnimationComplete, setArgumentsAnimationComplete] = useState(status === 'completed')
+  const [argumentsAnimationComplete, setArgumentsAnimationComplete] = useState(isPreCompleted)
   
   // Dynamic state management based on status
   const [isCollapsed, setIsCollapsed] = useState(() => {
     // Always start collapsed for completed tools
-    return status === 'completed'
+    return isPreCompleted
   })
   // const [hasBeenRunning, setHasBeenRunning] = useState(false) // Unused after disabling RESULT scroll
   const [isHovering, setIsHovering] = useState(false)
@@ -69,16 +72,27 @@ export const ToolCallCard: FC<Props> = ({
   // Scroll management for content area
   const contentRef = useRef<HTMLDivElement>(null)
 
-  // Ensure it's expanded when running
+  // Ensure it's expanded when running or pending
   useEffect(() => {
-    if (status === 'running') {
+    // If pending or running, expand the card and start animation
+    if (status === 'pending' || status === 'running') {
       // setHasBeenRunning(true) // Unused after disabling RESULT scroll
-      // Ensure it's expanded when running
+      // Ensure it's expanded when pending/running
       setIsCollapsed(false)
       // Mark that animation has started
       setAnimationStarted(true)
+      // For pending/running, arguments should be visible but animating
+      // Don't set argumentsReady to false as it controls visibility
+      setArgumentsAnimationComplete(false)
+    } else if (status === 'completed' && !animationStarted && !isPreCompleted) {
+      // If completed without running state (but wasn't pre-completed), 
+      // treat as if it ran instantly
+      setArgumentsReady(true)
+      setArgumentsAnimationComplete(true)
+      setIsCollapsed(false) // Show expanded for instant completion
     }
-  }, [status])
+    // If isPreCompleted, keep initial collapsed state
+  }, [status, animationStarted, isPreCompleted])
 
   const parsedArguments = useMemo(
     () => parseToolArguments(toolCall.function.arguments),
@@ -264,7 +278,7 @@ export const ToolCallCard: FC<Props> = ({
             </div>
             <ArgumentsDisplay
               args={parsedArguments}
-              isAnimated={animationStarted ? true : (status === 'pending' || status === 'running')}
+              isAnimated={!isPreCompleted && (animationStarted || status === 'pending' || status === 'running')}
               onLineAdded={handleLineAdded}
               onReady={handleArgumentsReady}
               isExpanded={isArgumentsExpanded}
@@ -274,8 +288,8 @@ export const ToolCallCard: FC<Props> = ({
             />
           </div>
 
-          {/* Result display - shown after arguments animation completes */}
-          {result && status === 'completed' && argumentsAnimationComplete && (
+          {/* Result display - shown after arguments animation completes or for pre-completed tools */}
+          {result && status === 'completed' && (isPreCompleted || argumentsAnimationComplete) && (
             <div className={styles.result}>
               <div className={styles.resultHeader}>
                 <div className={styles.resultTitleWrapper}>

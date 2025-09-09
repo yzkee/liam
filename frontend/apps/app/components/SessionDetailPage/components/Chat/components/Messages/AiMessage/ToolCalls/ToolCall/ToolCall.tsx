@@ -24,7 +24,7 @@ export const ToolCall: FC<Props> = ({ toolCall, toolMessage }) => {
   const [open, setOpen] = useState(false)
 
   const toolCallArgs = `\`\`\`json
-${JSON.stringify(toolCall.args, null, 2)}
+${toolCall.function.arguments}
 \`\`\``
 
   const toolCallResult = useMemo(
@@ -44,7 +44,7 @@ ${JSON.stringify(toolCall.args, null, 2)}
       <div className={styles.head}>
         <div className={styles.title}>
           <Wrench className={styles.icon} />
-          <p className={styles.toolName}>{toolCall.name}</p>
+          <p className={styles.toolName}>{toolCall.function.name}</p>
         </div>
         <CollapsibleTrigger asChild>
           <IconButton

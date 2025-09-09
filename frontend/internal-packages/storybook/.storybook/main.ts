@@ -33,6 +33,13 @@ const config: StorybookConfig = {
   staticDirs: ['../public', './public', '../../../apps/app/public'],
 
   webpackFinal: async (config) => {
+    // Add alias for @/ to resolve to apps/app directory
+    if (config.resolve) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        '@': path.resolve(__dirname, '../../../apps/app'),
+      }
+    }
     return config
   }
 }

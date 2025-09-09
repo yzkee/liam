@@ -1,8 +1,8 @@
 'use client'
 
 import type { ToolMessage as ToolMessageType } from '@langchain/core/messages'
-import { type FC, useEffect, useState } from 'react'
-import type { ToolCalls as ToolCallsType } from '../../schema'
+import { type FC, useEffect, useMemo, useState } from 'react'
+import type { ToolCalls as ToolCallsType } from '@/components/SessionDetailPage/schema'
 import { ToolCallCard } from './ToolCallCard'
 import styles from './ToolCalls.module.css'
 
@@ -28,10 +28,18 @@ export const ToolCalls: FC<Props> = ({ toolCallsWithMessages, isStreaming = fals
     Record<string, ToolCallState>
   >({})
 
+  // Filter out routeToAgent tool calls
+  const filteredToolCalls = useMemo(
+    () => toolCallsWithMessages.filter(
+      ({ toolCall }) => toolCall.function.name !== 'routeToAgent'
+    ),
+    [toolCallsWithMessages]
+  )
+
   // Initialize tool call states
   useEffect(() => {
     const newStates: Record<string, ToolCallState> = {}
-    toolCallsWithMessages.forEach(({ toolCall: tc }) => {
+    filteredToolCalls.forEach(({ toolCall: tc }) => {
       if (!toolCallStates[tc.id]) {
         // If not streaming (loading existing session), show as completed immediately
         // If streaming (new execution), start with pending for animation
@@ -44,7 +52,7 @@ export const ToolCalls: FC<Props> = ({ toolCallsWithMessages, isStreaming = fals
     if (Object.keys(newStates).length > 0) {
       setToolCallStates((prev) => ({ ...prev, ...newStates }))
     }
-  }, [toolCallsWithMessages, isStreaming])
+  }, [filteredToolCalls, isStreaming])
 
   // Execute tools sequentially - Only for streaming
   useEffect(() => {
@@ -52,7 +60,7 @@ export const ToolCalls: FC<Props> = ({ toolCallsWithMessages, isStreaming = fals
     if (!isStreaming) return
     
     const runTools = async () => {
-      for (const { toolCall: tc } of toolCallsWithMessages) {
+      for (const { toolCall: tc } of filteredToolCalls) {
         // Wait before starting (for better visibility)
         await new Promise((resolve) => setTimeout(resolve, 1000))
 
@@ -90,16 +98,16 @@ export const ToolCalls: FC<Props> = ({ toolCallsWithMessages, isStreaming = fals
     }
 
     // Run for all tools to show animation
-    if (toolCallsWithMessages.length > 0) {
+    if (filteredToolCalls.length > 0) {
       runTools()
     }
-  }, [toolCallsWithMessages, isStreaming])
+  }, [filteredToolCalls, isStreaming])
 
-  if (toolCallsWithMessages.length === 0) return null
+  if (filteredToolCalls.length === 0) return null
 
   return (
     <div className={styles.container}>
-      {toolCallsWithMessages.map(({ toolCall: tc, toolMessage }) => {
+      {filteredToolCalls.map(({ toolCall: tc, toolMessage }) => {
         const state = toolCallStates[tc.id] || { status: 'pending' }
         return (
           <ToolCallCard

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import type { ToolCalls as ToolCallsType } from '../../schema'
+import type { ToolCalls as ToolCallsType } from '@/components/SessionDetailPage/schema'
 import { ToolCalls } from './ToolCalls'
 
 const meta: Meta<typeof ToolCalls> = {
@@ -19,22 +19,10 @@ const meta: Meta<typeof ToolCalls> = {
 export default meta
 type Story = StoryObj<typeof ToolCalls>
 
-const routeToAgentCall: ToolCallsType[number] = {
+const schemaDesignCall: ToolCallsType[number] = {
   id: 'call_1',
   type: 'function',
   index: 0,
-  function: {
-    name: 'routeToAgent',
-    arguments: JSON.stringify({
-      targetAgent: 'pmAgent',
-    }),
-  },
-}
-
-const schemaDesignCall: ToolCallsType[number] = {
-  id: 'call_2',
-  type: 'function',
-  index: 1,
   function: {
     name: 'schemaDesignTool',
     arguments: JSON.stringify({
@@ -104,9 +92,9 @@ const schemaDesignCall: ToolCallsType[number] = {
 }
 
 const saveRequirementsCall: ToolCallsType[number] = {
-  id: 'call_3',
+  id: 'call_2',
   type: 'function',
-  index: 2,
+  index: 1,
   function: {
     name: 'saveRequirementsToArtifactTool',
     arguments: JSON.stringify({
@@ -201,9 +189,9 @@ const saveRequirementsCall: ToolCallsType[number] = {
 }
 
 const saveTestcasesCall: ToolCallsType[number] = {
-  id: 'call_4',
+  id: 'call_3',
   type: 'function',
-  index: 3,
+  index: 2,
   function: {
     name: 'saveTestcasesAndDmlTool',
     arguments: JSON.stringify({
@@ -234,16 +222,6 @@ const saveTestcasesCall: ToolCallsType[number] = {
 }
 
 // Individual tool stories
-export const RouteToAgent: Story = {
-  name: 'Route to Agent',
-  args: {
-    toolCallsWithMessages: [
-      { toolCall: routeToAgentCall, toolMessage: undefined }
-    ],
-    isStreaming: false,
-  },
-}
-
 export const SchemaDesign: Story = {
   name: 'Schema Design Tool',
   args: {
@@ -279,7 +257,6 @@ export const AllToolsCompleted: Story = {
   name: 'All Tools (Completed - Reload Behavior)',
   args: {
     toolCallsWithMessages: [
-      { toolCall: routeToAgentCall, toolMessage: undefined },
       { toolCall: schemaDesignCall, toolMessage: undefined },
       { toolCall: saveRequirementsCall, toolMessage: undefined },
       { toolCall: saveTestcasesCall, toolMessage: undefined },

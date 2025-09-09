@@ -15,6 +15,21 @@
       "indexes": {},
       "constraints": {}
     },
+    "works": {
+      "name": "works",
+      "columns": {
+        "work_id": {
+          "name": "work_id",
+          "type": "integer",
+          "notNull": true,
+          "default": "",
+          "check": "",
+          "comment": ""
+        }
+      },
+      "indexes": {},
+      "constraints": {}
+    },
     "items": {
       "name": "items",
       "columns": {
@@ -35,6 +50,21 @@
       "columns": {
         "loan_id": {
           "name": "loan_id",
+          "type": "integer",
+          "notNull": true,
+          "default": "",
+          "check": "",
+          "comment": ""
+        }
+      },
+      "indexes": {},
+      "constraints": {}
+    },
+    "locations": {
+      "name": "locations",
+      "columns": {
+        "location_id": {
+          "name": "location_id",
           "type": "integer",
           "notNull": true,
           "default": "",

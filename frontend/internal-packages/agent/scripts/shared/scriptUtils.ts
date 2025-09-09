@@ -322,33 +322,3 @@ export const setupDatabaseAndUser =
       })
     })
   }
-
-/**
- * Show help information for scripts
- */
-export const showHelp = (
-  scriptName: string,
-  description: string,
-  examples: string[],
-) => {
-  console.info(`
-Usage: ${scriptName} [options]
-
-Description:
-  ${description}
-
-Options:
-  --help, -h           Show this help message and exit
-  --log-level=LEVEL    Set the logging level (DEBUG, INFO, WARN, ERROR)
-                       Default: INFO (can also be set via LOG_LEVEL env var)
-
-Environment Variables:
-  SUPABASE_SERVICE_ROLE_KEY  Required. Supabase service role key for database access
-  NEXT_PUBLIC_SUPABASE_URL   Required. Supabase project URL
-  OPENAI_API_KEY             Required. OpenAI API key for AI functionality
-  LOG_LEVEL                  Optional. Set logging level (overridden by --log-level)
-
-Examples:
-${examples.map((example) => `  ${example}`).join('\n')}
-`)
-}

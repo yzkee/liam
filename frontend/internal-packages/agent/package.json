@@ -33,7 +33,6 @@
     "@types/uuid": "10.0.0",
     "eslint": "9.33.0",
     "msw": "2.10.5",
-    "tsx": "4.20.4",
     "typescript": "5.9.2",
     "vitest": "3.2.4",
     "yoctocolors": "2.1.2"
@@ -46,8 +45,8 @@
     "execute-design-process": "pnpm test:integration src/db-agent/createDbAgentGraph.integration.test.ts",
     "execute-design-process:debug": "LOG_LEVEL=DEBUG pnpm test:integration src/db-agent/createDbAgentGraph.integration.test.ts",
     "execute-design-process:warn": "LOG_LEVEL=WARN pnpm test:integration src/db-agent/createDbAgentGraph.integration.test.ts",
-    "execute-qa-agent": "tsx scripts/executeQaAgent.ts",
-    "execute-qa-agent:debug": "tsx scripts/executeQaAgent.ts --log-level=DEBUG",
+    "execute-qa-agent": "pnpm test:integration src/qa-agent/createQaAgentGraph.integration.test.ts",
+    "execute-qa-agent:debug": "LOG_LEVEL=DEBUG pnpm test:integration src/qa-agent/createQaAgentGraph.integration.test.ts",
     "fmt": "concurrently \"pnpm:fmt:*\"",
     "fmt:biome": "biome check --write --unsafe .",
     "fmt:eslint": "eslint --fix .",

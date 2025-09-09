@@ -305,7 +305,7 @@ export const ToolCallCard: FC<Props> = ({
               args={parsedArguments}
               isAnimated={
                 !isPreCompleted &&
-                (animationStarted ||
+                (animationState.animationStarted ||
                   status === 'pending' ||
                   status === 'running')
               }

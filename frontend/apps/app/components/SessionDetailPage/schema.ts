@@ -21,7 +21,6 @@ const toolCallSchema = v.object({
     arguments: v.string(),
   }),
 })
-type ToolCall = v.InferOutput<typeof toolCallSchema>
 
 export const toolCallsSchema = v.array(toolCallSchema)
 export type ToolCalls = v.InferOutput<typeof toolCallsSchema>

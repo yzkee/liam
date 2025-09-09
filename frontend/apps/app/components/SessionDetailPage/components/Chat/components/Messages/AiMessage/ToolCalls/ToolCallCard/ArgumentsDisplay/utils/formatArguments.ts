@@ -26,20 +26,39 @@ const hasOperations = (obj: unknown): obj is { operations: unknown } => {
   return typeof obj === 'object' && obj !== null && 'operations' in obj
 }
 
+type RequirementsArgs = {
+  businessRequirement?: unknown
+  functionalRequirements?: unknown
+  nonFunctionalRequirements?: unknown
+}
+
+const isRequirementsArgs = (args: unknown): args is RequirementsArgs => {
+  return typeof args === 'object' && args !== null
+}
+
 const formatSaveRequirements = (args: unknown): string[] => {
   const lines: string[] = []
 
+  if (!isRequirementsArgs(args)) {
+    return ['No requirements found']
+  }
+
+  const argsObj = args
+
   // Business Requirement
-  if (args.businessRequirement) {
+  if (argsObj.businessRequirement) {
     lines.push('📋 Business Requirement:')
-    lines.push(`  ${args.businessRequirement}`)
+    lines.push(`  ${argsObj.businessRequirement}`)
     lines.push(' ') // Minimal space for visual separation
   }
 
   // Functional Requirements
-  if (args.functionalRequirements) {
+  if (
+    argsObj.functionalRequirements &&
+    typeof argsObj.functionalRequirements === 'object'
+  ) {
     lines.push('⚙️ Functional Requirements:')
-    Object.entries(args.functionalRequirements).forEach(
+    Object.entries(argsObj.functionalRequirements).forEach(
       ([category, requirements]) => {
         if (Array.isArray(requirements)) {
           lines.push(`  ${category}:`)
@@ -53,9 +72,12 @@ const formatSaveRequirements = (args: unknown): string[] => {
   }
 
   // Non-Functional Requirements
-  if (args.nonFunctionalRequirements) {
+  if (
+    argsObj.nonFunctionalRequirements &&
+    typeof argsObj.nonFunctionalRequirements === 'object'
+  ) {
     lines.push('🔧 Non-Functional Requirements:')
-    Object.entries(args.nonFunctionalRequirements).forEach(
+    Object.entries(argsObj.nonFunctionalRequirements).forEach(
       ([category, requirements]) => {
         if (Array.isArray(requirements)) {
           lines.push(`  ${category}:`)

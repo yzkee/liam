@@ -9,13 +9,11 @@ import type { reasoningSchema } from './utils/validationSchema'
 export type WorkflowState = {
   messages: BaseMessage[]
   userInput: string
-  analyzedRequirements?:
-    | {
-        businessRequirement: string
-        functionalRequirements: Record<string, string[]>
-        nonFunctionalRequirements: Record<string, string[]>
-      }
-    | undefined
+  analyzedRequirements: {
+    businessRequirement: string
+    functionalRequirements: Record<string, string[]>
+    nonFunctionalRequirements: Record<string, string[]>
+  }
   testcases: Testcase[]
   schemaData: Schema
 

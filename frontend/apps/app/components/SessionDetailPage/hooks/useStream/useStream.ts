@@ -7,7 +7,7 @@ import {
 } from '@langchain/core/messages'
 import { SSE_EVENTS } from '@liam-hq/agent/client'
 import { err, ok } from 'neverthrow'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { LG_INITIAL_MESSAGE_PREFIX } from '../../../../constants/storageKeys'
 import { ERROR_MESSAGES } from '../../components/Chat/constants/chatConstants'
 import { MessageTupleManager } from './MessageTupleManager'
@@ -28,18 +28,7 @@ type Props = {
   initialMessages: BaseMessage[]
 }
 export const useStream = ({ designSessionId, initialMessages }: Props) => {
-  const [messages, setMessages] = useState<BaseMessage[]>(() => {
-    const key = `${LG_INITIAL_MESSAGE_PREFIX}:${designSessionId}`
-    const stored = sessionStorage.getItem(key)
-    if (stored) {
-      const message = coerceMessageLikeToMessage(JSON.parse(stored))
-      sessionStorage.removeItem(key)
-      if (isHumanMessage(message)) {
-        return [message, ...initialMessages]
-      }
-    }
-    return initialMessages
-  })
+  const [messages, setMessages] = useState<BaseMessage[]>(initialMessages)
   const messageManagerRef = useRef(new MessageTupleManager())
 
   const [isStreaming, setIsStreaming] = useState(false)
@@ -118,6 +107,15 @@ export const useStream = ({ designSessionId, initialMessages }: Props) => {
       })
     }
   }, [])
+
+  useEffect(() => {
+    const key = `${LG_INITIAL_MESSAGE_PREFIX}:${designSessionId}`
+    const stored = sessionStorage.getItem(key)
+    if (!stored) return
+    const msg = coerceMessageLikeToMessage(JSON.parse(stored))
+    sessionStorage.removeItem(key)
+    if (isHumanMessage(msg)) setMessages((prev) => [msg, ...prev])
+  }, [designSessionId])
 
   return {
     messages,

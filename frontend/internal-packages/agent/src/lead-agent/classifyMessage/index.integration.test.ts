@@ -25,6 +25,11 @@ const createTestStateAndConfig = async (
     userInput,
     messages: messages || [new HumanMessage(userInput)],
     schemaData: schemaData || { tables: {}, enums: {}, extensions: {} },
+    analyzedRequirements: {
+      businessRequirement: '',
+      functionalRequirements: {},
+      nonFunctionalRequirements: {},
+    },
     testcases: [],
     buildingSchemaId: context.buildingSchemaId,
     latestVersionNumber: context.latestVersionNumber,

@@ -135,12 +135,11 @@ type State = {
  * This handles the conversion from the workflow's data structure to the artifact schema
  */
 export const transformStateToArtifact = (state: State): Artifact => {
-  const businessRequirement =
-    state.analyzedRequirements?.businessRequirement ?? ''
+  const businessRequirement = state.analyzedRequirements.businessRequirement
 
-  const requirements = state.analyzedRequirements
-    ? convertAnalyzedRequirementsToArtifact(state.analyzedRequirements)
-    : []
+  const requirements = convertAnalyzedRequirementsToArtifact(
+    state.analyzedRequirements,
+  )
 
   if (state.testcases.length > 0) {
     mergeTestCasesIntoRequirements(requirements, state.testcases)

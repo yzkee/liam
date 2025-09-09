@@ -179,7 +179,7 @@ export const createSessionWithSchema = async (
     deepModeling: params.isDeepModelingEnabled.toString(),
   })
 
-  const redirectTo = `/app/design_sessions/${designSessionId}?${queryParams.toString()}`
+  const redirectTo = `/design_sessions/${designSessionId}?${queryParams.toString()}`
 
   return {
     success: true,

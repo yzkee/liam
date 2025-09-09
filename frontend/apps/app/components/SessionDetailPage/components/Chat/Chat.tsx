@@ -2,7 +2,7 @@
 
 import type { BaseMessage } from '@langchain/core/messages'
 import type { Schema } from '@liam-hq/schema'
-import { type FC, useEffect, useRef, useTransition } from 'react'
+import { type FC, useTransition } from 'react'
 import type { TimelineItemEntry } from '../../types'
 import styles from './Chat.module.css'
 import { ChatInput } from './components/ChatInput'
@@ -29,18 +29,8 @@ export const Chat: FC<Props> = ({
   onMessageSend,
   isWorkflowRunning = false,
 }) => {
-  const { containerRef, scrollToBottom, locked } =
-    useScrollToBottom<HTMLDivElement>()
+  const { containerRef } = useScrollToBottom<HTMLDivElement>(messages.length)
   const [, startTransition] = useTransition()
-  const prevMessageLengthRef = useRef(messages.length)
-
-  // Auto-scroll when new messages are added
-  useEffect(() => {
-    if (messages.length > prevMessageLengthRef.current && !locked) {
-      scrollToBottom()
-    }
-    prevMessageLengthRef.current = messages.length
-  }, [messages.length, locked, scrollToBottom])
 
   const startAIResponse = async (content: string) => {
     const optimisticMessage: TimelineItemEntry = {

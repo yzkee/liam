@@ -5,12 +5,13 @@ type Options = {
   behavior?: ScrollBehavior
 }
 
-export const useScrollToBottom = <T extends HTMLElement>({
-  threshold = 0,
-  behavior = 'smooth',
-}: Options = {}) => {
+export const useScrollToBottom = <T extends HTMLElement>(
+  itemsLength: number,
+  { threshold = 0, behavior = 'smooth' }: Options = {},
+) => {
   const containerRef = useRef<T | null>(null)
   const [locked, setLocked] = useState(false)
+  const prevItemsLengthRef = useRef(itemsLength)
 
   const scrollToBottom = useCallback(() => {
     const el = containerRef.current
@@ -18,9 +19,13 @@ export const useScrollToBottom = <T extends HTMLElement>({
     el.scrollTo({ top: el.scrollHeight, behavior })
   }, [behavior])
 
+  // Auto-scroll when not locked (items added or lock state changed)
   useEffect(() => {
-    if (!locked) scrollToBottom()
-  }, [locked, scrollToBottom])
+    if (!locked) {
+      scrollToBottom()
+    }
+    prevItemsLengthRef.current = itemsLength
+  }, [itemsLength, locked, scrollToBottom])
 
   useEffect(() => {
     const el = containerRef.current

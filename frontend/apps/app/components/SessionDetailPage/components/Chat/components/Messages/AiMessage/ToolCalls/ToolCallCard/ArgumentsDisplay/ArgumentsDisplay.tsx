@@ -52,6 +52,38 @@ export const ArgumentsDisplay: FC<Props> = ({
   const [showTopGradient, setShowTopGradient] = useState(false)
   const [showBottomGradient, setShowBottomGradient] = useState(false)
 
+  // Extract easing function
+  const calculateEaseProgress = (progress: number): number => {
+    return progress < 0.5
+      ? 2 * progress * progress
+      : 1 - (-2 * progress + 2) ** 2 / 2
+  }
+
+  // Extract smooth scroll animation
+  const animateScroll = (
+    element: HTMLElement,
+    targetScroll: number,
+    duration: number,
+  ) => {
+    const startTime = performance.now()
+    const initialScrollTop = element.scrollTop
+    const scrollDistance = targetScroll - initialScrollTop
+
+    const scrollStep = () => {
+      const elapsed = performance.now() - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      const easeProgress = calculateEaseProgress(progress)
+
+      element.scrollTop = initialScrollTop + scrollDistance * easeProgress
+
+      if (progress < 1) {
+        requestAnimationFrame(scrollStep)
+      }
+    }
+
+    requestAnimationFrame(scrollStep)
+  }
+
   // Wait for all lines to be calculated before starting animation
   useEffect(() => {
     if (isAnimated && displayLines.length > 0 && !isReady) {
@@ -90,36 +122,12 @@ export const ArgumentsDisplay: FC<Props> = ({
           setTimeout(() => {
             if (containerRef.current && !isExpanded) {
               const element = containerRef.current
-              const startTime = performance.now()
-
-              const initialScrollTop = element.scrollTop
               const { scrollHeight, clientHeight } = element
 
               // Only animate if scrolling is needed
               if (scrollHeight > clientHeight) {
                 const targetScroll = scrollHeight - clientHeight
-                const scrollDistance = targetScroll - initialScrollTop
-
-                const scrollStep = () => {
-                  const elapsed = performance.now() - startTime
-                  const progress = Math.min(elapsed / animationDuration, 1)
-
-                  // Use same easing as CSS animation (ease)
-                  const easeProgress =
-                    progress < 0.5
-                      ? 2 * progress * progress
-                      : 1 - (-2 * progress + 2) ** 2 / 2
-
-                  // Scroll from initial position to target
-                  element.scrollTop =
-                    initialScrollTop + scrollDistance * easeProgress
-
-                  if (progress < 1) {
-                    requestAnimationFrame(scrollStep)
-                  }
-                }
-
-                requestAnimationFrame(scrollStep)
+                animateScroll(element, targetScroll, animationDuration)
               }
             }
           }, animationDelay) // Wait for CSS animation delay
@@ -182,41 +190,49 @@ export const ArgumentsDisplay: FC<Props> = ({
   const [wasScrollable, setWasScrollable] = useState(false)
   // Remove hover state - button is now in parent
 
-  // Handle scroll events to show/hide gradients
-  const handleScroll = () => {
-    if (!containerRef.current) return
-
-    const { scrollTop, scrollHeight, clientHeight } = containerRef.current
-
-    // Only show gradients if content is scrollable
+  // Helper to update gradient visibility
+  const updateGradients = (
+    scrollTop: number,
+    scrollHeight: number,
+    clientHeight: number,
+  ) => {
     const scrollable = scrollHeight > clientHeight
-
-    // Track if content was ever scrollable
-    if (scrollable && !isExpanded) {
-      setWasScrollable(true)
-    }
-
-    // Show gradients when scrollable (both collapsed and expanded)
     if (scrollable) {
-      // Show top gradient if not at top
       setShowTopGradient(scrollTop > 5)
-
-      // Show bottom gradient if not at bottom
       setShowBottomGradient(scrollTop < scrollHeight - clientHeight - 5)
     } else {
-      // Hide gradients when not scrollable
       setShowTopGradient(false)
       setShowBottomGradient(false)
     }
+    return scrollable
+  }
 
-    // Notify parent about overflow state
-    // For animated content, wait until we have some lines before detecting overflow
+  // Helper to track scrollable state
+  const trackScrollableState = (scrollable: boolean) => {
+    if (scrollable && !isExpanded) {
+      setWasScrollable(true)
+    }
+  }
+
+  // Helper to notify overflow detection
+  const notifyOverflowIfNeeded = (scrollable: boolean) => {
     if (onOverflowDetected) {
       const shouldNotify = !isAnimated || visibleLines.length > 3
       if (shouldNotify) {
         onOverflowDetected(wasScrollable || scrollable)
       }
     }
+  }
+
+  // Handle scroll events to show/hide gradients
+  const handleScroll = () => {
+    if (!containerRef.current) return
+
+    const { scrollTop, scrollHeight, clientHeight } = containerRef.current
+    const scrollable = updateGradients(scrollTop, scrollHeight, clientHeight)
+
+    trackScrollableState(scrollable)
+    notifyOverflowIfNeeded(scrollable)
   }
 
   // Re-check scroll when expand state changes
@@ -247,31 +263,13 @@ export const ArgumentsDisplay: FC<Props> = ({
   // Initial check for overflow after DOM layout
   useLayoutEffect(() => {
     const checkOverflow = () => {
-      if (containerRef.current) {
-        const { scrollTop, scrollHeight, clientHeight } = containerRef.current
-        const scrollable = scrollHeight > clientHeight
+      if (!containerRef.current) return
 
-        // Track if content was ever scrollable
-        if (scrollable && !isExpanded) {
-          setWasScrollable(true)
-        }
+      const { scrollTop, scrollHeight, clientHeight } = containerRef.current
+      const scrollable = updateGradients(scrollTop, scrollHeight, clientHeight)
 
-        // Initialize gradients for scrollable content (both collapsed and expanded)
-        if (scrollable) {
-          setShowTopGradient(scrollTop > 5)
-          setShowBottomGradient(scrollTop < scrollHeight - clientHeight - 5)
-        }
-
-        // Notify parent about overflow state
-        // Only notify after animation has had time to stabilize
-        if (onOverflowDetected) {
-          // For animated content, wait until we have some lines before detecting overflow
-          const shouldNotify = !isAnimated || visibleLines.length > 3
-          if (shouldNotify) {
-            onOverflowDetected(wasScrollable || scrollable)
-          }
-        }
-      }
+      trackScrollableState(scrollable)
+      notifyOverflowIfNeeded(scrollable)
     }
 
     // Check immediately and after any potential layout changes

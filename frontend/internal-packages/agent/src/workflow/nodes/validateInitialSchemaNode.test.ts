@@ -1,26 +1,11 @@
 import { AIMessage, HumanMessage } from '@langchain/core/messages'
 import { END, START, StateGraph } from '@langchain/langgraph'
 import { aColumn, aSchema, aTable } from '@liam-hq/schema'
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { getTestConfig } from '../../../test-utils/workflowTestHelpers'
 import type { WorkflowState } from '../../types'
 import { WorkflowTerminationError } from '../../utils/errorHandling'
 import { workflowAnnotation } from '../../workflowAnnotation'
-
-// Mock @liam-hq/schema to include isEmptySchema
-vi.mock('@liam-hq/schema', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@liam-hq/schema')>()
-  return {
-    ...actual,
-    isEmptySchema: (schema: Parameters<typeof actual.isEmptySchema>[0]) => {
-      return (
-        Object.keys(schema.tables || {}).length === 0 &&
-        Object.keys(schema.enums || {}).length === 0
-      )
-    },
-  }
-})
-
 import { validateInitialSchemaNode } from './validateInitialSchemaNode'
 
 // Mock OPENAI_API_KEY for getTestConfig

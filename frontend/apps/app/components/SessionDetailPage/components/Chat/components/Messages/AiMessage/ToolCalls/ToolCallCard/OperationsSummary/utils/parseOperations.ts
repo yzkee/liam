@@ -32,45 +32,63 @@ const isConstraintInfo = (value: unknown): value is ConstraintInfo => {
   return typeof value === 'object' && value !== null
 }
 
+// Helper function to check if path is a table creation
+const isTableCreation = (path: string): boolean => {
+  return !!(
+    path.match(/\/tables\/[^/]+$/) &&
+    !path.includes('/columns/') &&
+    !path.includes('/constraints/') &&
+    !path.includes('/indexes/')
+  )
+}
+
+// Helper to format table message
+const formatTableMessage = (path: string): string => {
+  const tableName = extractTableName(path)
+  return `Creating table '${tableName}'`
+}
+
+// Helper to format column message
+const formatColumnMessage = (path: string, value: unknown): string => {
+  const columnName = extractColumnName(path)
+  const columnInfo = isColumnInfo(value) ? value : {}
+  const type = columnInfo.type || 'unknown'
+  return `  Adding column '${columnName}' (${type})`
+}
+
+// Helper to format index message
+const formatIndexMessage = (path: string, value: unknown): string => {
+  const indexName = extractIndexName(path)
+  const indexInfo = isIndexInfo(value) ? value : {}
+  const columns = indexInfo.columns ? indexInfo.columns.join(', ') : ''
+  return `  Adding index '${indexName}'${columns ? ` on (${columns})` : ''}`
+}
+
+// Helper to format constraint message
+const formatConstraintMessage = (path: string, value: unknown): string => {
+  const constraintName = extractConstraintName(path)
+  const constraintInfo = isConstraintInfo(value) ? value : {}
+  const type = constraintInfo.type || 'constraint'
+  return `  Adding ${type} '${constraintName}'`
+}
+
 const getAddOperationMessage = (
   path: string | undefined,
   value: unknown,
 ): string => {
   if (!path) return 'Adding new element...'
 
-  // Create table
-  if (
-    path.match(/\/tables\/[^/]+$/) &&
-    !path.includes('/columns/') &&
-    !path.includes('/constraints/') &&
-    !path.includes('/indexes/')
-  ) {
-    const tableName = extractTableName(path)
-    return `Creating table '${tableName}'`
+  if (isTableCreation(path)) {
+    return formatTableMessage(path)
   }
-
-  // Add column
   if (path.includes('/columns/')) {
-    const columnName = extractColumnName(path)
-    const columnInfo = isColumnInfo(value) ? value : {}
-    const type = columnInfo.type || 'unknown'
-    return `  Adding column '${columnName}' (${type})`
+    return formatColumnMessage(path, value)
   }
-
-  // Add index
   if (path.includes('/indexes/')) {
-    const indexName = extractIndexName(path)
-    const indexInfo = isIndexInfo(value) ? value : {}
-    const columns = indexInfo.columns ? indexInfo.columns.join(', ') : ''
-    return `  Adding index '${indexName}'${columns ? ` on (${columns})` : ''}`
+    return formatIndexMessage(path, value)
   }
-
-  // Add constraint
   if (path.includes('/constraints/')) {
-    const constraintName = extractConstraintName(path)
-    const constraintInfo = isConstraintInfo(value) ? value : {}
-    const type = constraintInfo.type || 'constraint'
-    return `  Adding ${type} '${constraintName}'`
+    return formatConstraintMessage(path, value)
   }
 
   return 'Adding new element...'

@@ -147,66 +147,182 @@ const formatConstraint = (path: string, value: unknown): string => {
   return `  Adding ${type} '${constraintName}'${columns}${references}`
 }
 
+// Helper function to format add operations
+const formatAddOperation = (
+  path: string | undefined,
+  value: unknown,
+): string | null => {
+  if (!path) return null
+
+  if (path.match(/\/enums\/[^/]+$/)) {
+    return formatEnum(path)
+  }
+  if (path.match(/\/extensions\/[^/]+$/)) {
+    return formatExtension(path)
+  }
+  if (path.match(/\/tables\/[^/]+$/)) {
+    return formatTable(path)
+  }
+  if (path.includes('/columns/')) {
+    return formatColumn(path, value)
+  }
+  if (path.includes('/indexes/')) {
+    return formatIndex(path, value)
+  }
+  if (path.includes('/constraints/')) {
+    return formatConstraint(path, value)
+  }
+
+  return null
+}
+
+// Helper function to format remove operations
+const formatRemoveOperation = (path: string | undefined): string => {
+  if (!path) return 'Removing unknown'
+
+  if (path.includes('/tables/')) {
+    const tableName = path.match(/\/tables\/([^/]+)/)?.[1] ?? 'table'
+    return `Removing table '${tableName}'`
+  }
+  if (path.includes('/columns/')) {
+    const columnName = path.match(/\/columns\/([^/]+)/)?.[1] ?? 'column'
+    return `  Removing column '${columnName}'`
+  }
+
+  return `Removing ${path}`
+}
+
+// Helper function to format replace operations
+const formatReplaceOperation = (path: string | undefined): string => {
+  if (!path) return 'Updating unknown'
+
+  if (path.includes('/columns/')) {
+    const columnName = path.match(/\/columns\/([^/]+)/)?.[1] ?? 'column'
+    return `  Updating column '${columnName}'`
+  }
+
+  return `Updating ${path}`
+}
+
+// Main function to format a single operation
+const formatSingleOperation = (op: Operation): string | null => {
+  const operationType = op.op || op.type
+  const path = op.path
+  const value = op.value
+
+  if (operationType === 'add') {
+    return formatAddOperation(path, value)
+  }
+  if (operationType === 'remove') {
+    return formatRemoveOperation(path)
+  }
+  if (operationType === 'replace') {
+    return formatReplaceOperation(path)
+  }
+  if (operationType) {
+    return `${operationType}: ${path || 'unknown path'}`
+  }
+
+  return null
+}
+
 const formatOperations = (operations: Operation[]): string[] => {
   const lines: string[] = []
 
-  operations.forEach((op) => {
-    const operationType = op.op || op.type
-    const path = op.path
-    const value = op.value
-
-    // Create enum
-    if (operationType === 'add' && path?.match(/\/enums\/[^/]+$/)) {
-      lines.push(formatEnum(path))
+  for (const op of operations) {
+    const formatted = formatSingleOperation(op)
+    if (formatted) {
+      lines.push(formatted)
     }
-    // Create extension
-    else if (operationType === 'add' && path?.match(/\/extensions\/[^/]+$/)) {
-      lines.push(formatExtension(path))
-    }
-    // Create table
-    else if (operationType === 'add' && path?.match(/\/tables\/[^/]+$/)) {
-      lines.push(formatTable(path))
-    }
-    // Add column
-    else if (operationType === 'add' && path?.includes('/columns/')) {
-      lines.push(formatColumn(path, value))
-    }
-    // Add index
-    else if (operationType === 'add' && path?.includes('/indexes/')) {
-      lines.push(formatIndex(path, value))
-    }
-    // Add constraint
-    else if (operationType === 'add' && path?.includes('/constraints/')) {
-      lines.push(formatConstraint(path, value))
-    }
-    // Remove operation
-    else if (operationType === 'remove') {
-      if (path?.includes('/tables/')) {
-        const tableName = path.match(/\/tables\/([^/]+)/)?.[1] ?? 'table'
-        lines.push(`Removing table '${tableName}'`)
-      } else if (path?.includes('/columns/')) {
-        const columnName = path.match(/\/columns\/([^/]+)/)?.[1] ?? 'column'
-        lines.push(`  Removing column '${columnName}'`)
-      } else {
-        lines.push(`Removing ${path}`)
-      }
-    }
-    // Update operation
-    else if (operationType === 'replace') {
-      if (path?.includes('/columns/')) {
-        const columnName = path.match(/\/columns\/([^/]+)/)?.[1] ?? 'column'
-        lines.push(`  Updating column '${columnName}'`)
-      } else {
-        lines.push(`Updating ${path}`)
-      }
-    }
-    // Other operations
-    else if (operationType) {
-      lines.push(`${operationType}: ${path || 'unknown path'}`)
-    }
-  })
+  }
 
   return lines.length > 0 ? lines : ['Processing...']
+}
+
+// Helper to format array items
+const formatArrayItem = (
+  item: unknown,
+  index: number,
+  indent: string,
+  depth: number,
+): string[] => {
+  if (typeof item === 'object' && item !== null) {
+    return [`${indent}[${index}]:`, ...formatObject(item, depth + 1)]
+  }
+  return [`${indent}[${index}]: ${JSON.stringify(item)}`]
+}
+
+// Helper to format simple arrays inline
+const formatSimpleArray = (arr: unknown[], indent: string): string | null => {
+  if (
+    arr.length <= 3 &&
+    arr.every((item) => typeof item !== 'object' || item === null)
+  ) {
+    return `${indent}[${arr.map((item) => JSON.stringify(item)).join(', ')}]`
+  }
+  return null
+}
+
+// Helper to format array values
+const formatArrayValue = (
+  value: unknown[],
+  key: string,
+  indent: string,
+  depth: number,
+): string[] => {
+  const lines: string[] = []
+
+  if (value.length === 0) {
+    lines.push(`${indent}${key}: []`)
+  } else if (
+    value.length <= 5 &&
+    value.every((item) => typeof item !== 'object' || item === null)
+  ) {
+    lines.push(
+      `${indent}${key}: [${value.map((item) => JSON.stringify(item)).join(', ')}]`,
+    )
+  } else if (value.length > 0 && typeof value[0] === 'object') {
+    lines.push(`${indent}${key}: [${value.length} items]`)
+    value.forEach((item, i) => {
+      lines.push(`${indent}  [${i}]:`)
+      lines.push(...formatObject(item, depth + 2))
+    })
+  } else {
+    lines.push(`${indent}${key}: ${JSON.stringify(value)}`)
+  }
+
+  return lines
+}
+
+// Helper to format primitive values
+const formatPrimitiveValue = (value: unknown): string => {
+  if (typeof value === 'string' && value.length > 50) {
+    return `"${value.substring(0, 47)}..."`
+  }
+  return JSON.stringify(value)
+}
+
+// Helper to format object property
+const formatObjectProperty = (
+  key: string,
+  value: unknown,
+  indent: string,
+  depth: number,
+): string[] => {
+  const lines: string[] = []
+
+  if (typeof value === 'object' && value !== null) {
+    if (Array.isArray(value)) {
+      lines.push(...formatArrayValue(value, key, indent, depth))
+    } else {
+      lines.push(`${indent}${key}:`)
+      lines.push(...formatObject(value, depth + 1))
+    }
+  } else {
+    lines.push(`${indent}${key}: ${formatPrimitiveValue(value)}`)
+  }
+
+  return lines
 }
 
 const formatObject = (obj: unknown, depth = 0): string[] => {
@@ -222,67 +338,20 @@ const formatObject = (obj: unknown, depth = 0): string[] => {
   }
 
   if (Array.isArray(obj)) {
-    // For short arrays, display inline
-    if (
-      obj.length <= 3 &&
-      obj.every((item) => typeof item !== 'object' || item === null)
-    ) {
-      return [
-        `${indent}[${obj.map((item) => JSON.stringify(item)).join(', ')}]`,
-      ]
+    const simpleFormat = formatSimpleArray(obj, indent)
+    if (simpleFormat) {
+      return [simpleFormat]
     }
 
-    // For longer arrays, show items with better formatting
     obj.forEach((item, index) => {
-      if (typeof item === 'object' && item !== null) {
-        lines.push(`${indent}[${index}]:`)
-        lines.push(...formatObject(item, depth + 1))
-      } else {
-        lines.push(`${indent}[${index}]: ${JSON.stringify(item)}`)
-      }
+      lines.push(...formatArrayItem(item, index, indent, depth))
     })
     return lines
   }
 
-  // Object formatting with improved readability
-  const entries = Object.entries(obj)
-
-  entries.forEach(([key, value]) => {
-    if (typeof value === 'object' && value !== null) {
-      if (Array.isArray(value)) {
-        // Compact display for simple arrays
-        if (value.length === 0) {
-          lines.push(`${indent}${key}: []`)
-        } else if (
-          value.length <= 5 &&
-          value.every((item) => typeof item !== 'object' || item === null)
-        ) {
-          lines.push(
-            `${indent}${key}: [${value.map((item) => JSON.stringify(item)).join(', ')}]`,
-          )
-        } else if (value.length > 0 && typeof value[0] === 'object') {
-          lines.push(`${indent}${key}: [${value.length} items]`)
-          // Show all items - user can use expand/collapse to manage
-          value.forEach((item, i) => {
-            lines.push(`${indent}  [${i}]:`)
-            lines.push(...formatObject(item, depth + 2))
-          })
-        } else {
-          lines.push(`${indent}${key}: ${JSON.stringify(value)}`)
-        }
-      } else {
-        // For nested objects, add a colon and indent
-        lines.push(`${indent}${key}:`)
-        lines.push(...formatObject(value, depth + 1))
-      }
-    } else {
-      // Format primitive values with better display
-      const valueStr =
-        typeof value === 'string' && value.length > 50
-          ? `"${value.substring(0, 47)}..."`
-          : JSON.stringify(value)
-      lines.push(`${indent}${key}: ${valueStr}`)
-    }
+  // Object formatting
+  Object.entries(obj).forEach(([key, value]) => {
+    lines.push(...formatObjectProperty(key, value, indent, depth))
   })
 
   return lines

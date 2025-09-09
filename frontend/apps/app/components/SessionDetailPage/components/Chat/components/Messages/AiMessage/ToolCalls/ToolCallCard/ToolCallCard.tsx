@@ -37,6 +37,38 @@ type Props = {
 
 type Status = 'pending' | 'running' | 'completed' | 'error'
 
+// Custom hook for tool data processing
+const useToolData = (
+  toolCall: ToolCallItem,
+  toolMessage: ToolMessageType | undefined,
+) => {
+  const parsedArguments = useMemo(
+    () => parseToolArguments(toolCall.function.arguments),
+    [toolCall.function.arguments],
+  )
+
+  const toolInfo = useMemo(
+    () => getToolDisplayInfo(toolCall.function.name),
+    [toolCall.function.name],
+  )
+
+  const result = useMemo(() => {
+    if (toolMessage) {
+      return extractResponseFromMessage(toolMessage)
+    }
+    return 'Tool call result not found.'
+  }, [toolMessage])
+
+  const resultStatus = useMemo(() => {
+    const lowerResult = result.toLowerCase()
+    if (lowerResult.includes('error')) return 'error'
+    if (lowerResult.includes('successfully')) return 'success'
+    return 'neutral'
+  }, [result])
+
+  return { parsedArguments, toolInfo, result, resultStatus }
+}
+
 // Custom hook for animation state management
 const useAnimationState = (status: Status, isPreCompleted: boolean) => {
   const [argumentsReady, setArgumentsReady] = useState(true)
@@ -99,97 +131,34 @@ const useExpandState = (status: Status, isPreCompleted: boolean) => {
   }
 }
 
-export const ToolCallCard: FC<Props> = ({
-  toolCall,
-  status = 'completed',
-  error,
-  toolMessage,
-  onNavigate,
-}) => {
-  // Determine if this is a pre-completed tool (no animation needed)
-  const isPreCompleted = status === 'completed'
-
-  // Use custom hooks for state management
-  const animationState = useAnimationState(status, isPreCompleted)
-  const expandState = useExpandState(status, isPreCompleted)
-
-  // Refs for scroll management
+// Custom hook for scroll and overflow management
+const useScrollManagement = (
+  expandState: ReturnType<typeof useExpandState>,
+  status: Status,
+  result: string,
+) => {
   const contentRef = useRef<HTMLDivElement>(null)
   const resultContentRef = useRef<HTMLDivElement>(null)
 
-  const parsedArguments = useMemo(
-    () => parseToolArguments(toolCall.function.arguments),
-    [toolCall.function.arguments],
-  )
-
-  const toolInfo = useMemo(
-    () => getToolDisplayInfo(toolCall.function.name),
-    [toolCall.function.name],
-  )
-
-  // Extract result from toolMessage if available
-  const result = useMemo(() => {
-    if (toolMessage) {
-      return extractResponseFromMessage(toolMessage)
-    }
-    return 'Tool call result not found.'
-  }, [toolMessage, toolCall])
-
-  // Check result status
-  const resultStatus = useMemo(() => {
-    const lowerResult = result.toLowerCase()
-    if (lowerResult.includes('error')) return 'error'
-    if (lowerResult.includes('successfully')) return 'success'
-    return 'neutral'
-  }, [result])
-
-  // Notify when arguments are ready
-  const handleArgumentsReady = () => {
-    animationState.setArgumentsReady(true)
-  }
-
-  const handleToggle = () => {
-    expandState.setIsCollapsed((prev) => !prev)
-  }
-
-  const isRunning = status === 'pending' || status === 'running'
-
-  // Handler for when a line is added in ArgumentsDisplay
   const handleLineAdded = () => {
+    const isRunning = status === 'pending' || status === 'running'
     if (contentRef.current && !expandState.isCollapsed && isRunning) {
-      // Use requestAnimationFrame to ensure DOM is updated
       requestAnimationFrame(() => {
         if (contentRef.current) {
           const element = contentRef.current
           const { scrollHeight, clientHeight } = element
-
-          // Auto-scroll when content exceeds container height
           if (scrollHeight > clientHeight) {
-            // Scroll to bottom to show new content
             element.scrollTop = element.scrollHeight
-            // Auto-scroll executed
           }
         }
       })
     }
   }
 
-  // Handler for ArgumentsDisplay overflow detection
   const handleArgumentsOverflow = (hasOverflow: boolean) => {
     expandState.setNeedsExpandButton(hasOverflow)
   }
 
-  // Toggle arguments expand/collapse
-  const handleToggleArgumentsExpand = () => {
-    expandState.setIsArgumentsExpanded((prev) => !prev)
-  }
-
-  // Toggle result expand/collapse
-  const handleToggleResultExpand = () => {
-    expandState.setIsResultExpanded((prev) => !prev)
-  }
-
-  // Check if result needs expand button and is scrollable
   useEffect(() => {
     if (resultContentRef.current && result && status === 'completed') {
       const element = resultContentRef.current
@@ -200,6 +169,132 @@ export const ToolCallCard: FC<Props> = ({
       )
     }
   }, [result, status, expandState.isResultExpanded, expandState])
+
+  return {
+    contentRef,
+    resultContentRef,
+    handleLineAdded,
+    handleArgumentsOverflow,
+  }
+}
+
+// Custom hook for event handlers
+const useEventHandlers = (
+  animationState: ReturnType<typeof useAnimationState>,
+  expandState: ReturnType<typeof useExpandState>,
+  onNavigate?: (tab: 'erd' | 'artifact') => void,
+  toolInfo?: ReturnType<typeof useToolData>['toolInfo'],
+) => {
+  const handleArgumentsReady = () => {
+    animationState.setArgumentsReady(true)
+  }
+
+  const handleToggle = () => {
+    expandState.setIsCollapsed((prev) => !prev)
+  }
+
+  const handleToggleArgumentsExpand = () => {
+    expandState.setIsArgumentsExpanded((prev) => !prev)
+  }
+
+  const handleToggleResultExpand = () => {
+    expandState.setIsResultExpanded((prev) => !prev)
+  }
+
+  const handleNavigateClick = () => {
+    if (onNavigate && toolInfo?.resultAction) {
+      const tab = toolInfo.resultAction.type === 'erd' ? 'erd' : 'artifact'
+      onNavigate(tab)
+    }
+  }
+
+  return {
+    handleArgumentsReady,
+    handleToggle,
+    handleToggleArgumentsExpand,
+    handleToggleResultExpand,
+    handleNavigateClick,
+  }
+}
+
+// Component for expand/collapse button with tooltip
+const ExpandButton: FC<{
+  isExpanded: boolean
+  onClick: () => void
+  ariaLabel: { expanded: string; collapsed: string }
+  className: string
+}> = ({ isExpanded, onClick, ariaLabel, className }) => (
+  <ArrowTooltipProvider>
+    <ArrowTooltipRoot>
+      <ArrowTooltipTrigger asChild>
+        <button
+          className={className}
+          onClick={onClick}
+          aria-label={isExpanded ? ariaLabel.expanded : ariaLabel.collapsed}
+          type="button"
+        >
+          {isExpanded ? (
+            <FoldVertical size={14} />
+          ) : (
+            <UnfoldVertical size={14} />
+          )}
+        </button>
+      </ArrowTooltipTrigger>
+      <ArrowTooltipPortal>
+        <ArrowTooltipContent side="left" align="center">
+          {isExpanded ? 'Collapse' : 'Expand'}
+        </ArrowTooltipContent>
+      </ArrowTooltipPortal>
+    </ArrowTooltipRoot>
+  </ArrowTooltipProvider>
+)
+
+// Component for header chevron icon
+const ChevronIcon: FC<{ isCollapsed: boolean; isHovering: boolean }> = ({
+  isCollapsed,
+  isHovering,
+}) => {
+  const className = clsx(
+    styles.chevron,
+    !isHovering ? styles.chevronHidden : '',
+  )
+  return isCollapsed ? (
+    <ChevronRight className={className} />
+  ) : (
+    <ChevronDown className={className} />
+  )
+}
+
+export const ToolCallCard: FC<Props> = ({
+  toolCall,
+  status = 'completed',
+  error,
+  toolMessage,
+  onNavigate,
+}) => {
+  const isPreCompleted = status === 'completed'
+  const isRunning = status === 'pending' || status === 'running'
+
+  // Use custom hooks
+  const animationState = useAnimationState(status, isPreCompleted)
+  const expandState = useExpandState(status, isPreCompleted)
+  const { parsedArguments, toolInfo, result, resultStatus } = useToolData(
+    toolCall,
+    toolMessage,
+  )
+  const {
+    contentRef,
+    resultContentRef,
+    handleLineAdded,
+    handleArgumentsOverflow,
+  } = useScrollManagement(expandState, status, result)
+  const {
+    handleArgumentsReady,
+    handleToggle,
+    handleToggleArgumentsExpand,
+    handleToggleResultExpand,
+    handleNavigateClick,
+  } = useEventHandlers(animationState, expandState, onNavigate, toolInfo)
 
   return (
     <div
@@ -225,21 +320,10 @@ export const ToolCallCard: FC<Props> = ({
                   isRunning ? styles.iconAnimated : '',
                 )}
               />
-              {expandState.isCollapsed ? (
-                <ChevronRight
-                  className={clsx(
-                    styles.chevron,
-                    !expandState.isHovering ? styles.chevronHidden : '',
-                  )}
-                />
-              ) : (
-                <ChevronDown
-                  className={clsx(
-                    styles.chevron,
-                    !expandState.isHovering ? styles.chevronHidden : '',
-                  )}
-                />
-              )}
+              <ChevronIcon
+                isCollapsed={expandState.isCollapsed}
+                isHovering={expandState.isHovering}
+              />
             </div>
             <div className={styles.titleWrapper}>
               <span className={styles.toolName}>{toolInfo.displayName}</span>
@@ -270,44 +354,22 @@ export const ToolCallCard: FC<Props> = ({
             <div className={styles.argumentsHeader}>
               <span className={styles.argumentsTitle}>ARGUMENTS</span>
               {expandState.needsExpandButton && (
-                <ArrowTooltipProvider>
-                  <ArrowTooltipRoot>
-                    <ArrowTooltipTrigger asChild>
-                      <button
-                        className={styles.argumentsExpandButton}
-                        onClick={handleToggleArgumentsExpand}
-                        aria-label={
-                          expandState.isArgumentsExpanded
-                            ? 'Collapse arguments'
-                            : 'Expand arguments'
-                        }
-                        type="button"
-                      >
-                        {expandState.isArgumentsExpanded ? (
-                          <FoldVertical size={14} />
-                        ) : (
-                          <UnfoldVertical size={14} />
-                        )}
-                      </button>
-                    </ArrowTooltipTrigger>
-                    <ArrowTooltipPortal>
-                      <ArrowTooltipContent side="left" align="center">
-                        {expandState.isArgumentsExpanded
-                          ? 'Collapse'
-                          : 'Expand'}
-                      </ArrowTooltipContent>
-                    </ArrowTooltipPortal>
-                  </ArrowTooltipRoot>
-                </ArrowTooltipProvider>
+                <ExpandButton
+                  isExpanded={expandState.isArgumentsExpanded}
+                  onClick={handleToggleArgumentsExpand}
+                  ariaLabel={{
+                    expanded: 'Collapse arguments',
+                    collapsed: 'Expand arguments',
+                  }}
+                  className={styles.argumentsExpandButton}
+                />
               )}
             </div>
             <ArgumentsDisplay
               args={parsedArguments}
               isAnimated={
                 !isPreCompleted &&
-                (animationState.animationStarted ||
-                  status === 'pending' ||
-                  status === 'running')
+                (animationState.animationStarted || isRunning)
               }
               onLineAdded={handleLineAdded}
               onReady={handleArgumentsReady}
@@ -320,10 +382,14 @@ export const ToolCallCard: FC<Props> = ({
             />
           </div>
 
-          {/* Result display - shown after arguments animation completes or for pre-completed tools */}
-          {result &&
-            status === 'completed' &&
-            (isPreCompleted || animationState.argumentsAnimationComplete) && (
+          {/* Result display */}
+          {(() => {
+            const shouldShowResult =
+              result &&
+              status === 'completed' &&
+              (isPreCompleted || animationState.argumentsAnimationComplete)
+            if (!shouldShowResult) return null
+            return (
               <div className={styles.result}>
                 <div className={styles.resultHeader}>
                   <div className={styles.resultTitleWrapper}>
@@ -336,45 +402,30 @@ export const ToolCallCard: FC<Props> = ({
                     )}
                   </div>
                   {expandState.needsResultExpandButton && (
-                    <ArrowTooltipProvider>
-                      <ArrowTooltipRoot>
-                        <ArrowTooltipTrigger asChild>
-                          <button
-                            className={styles.resultExpandButton}
-                            onClick={handleToggleResultExpand}
-                            aria-label={
-                              expandState.isResultExpanded
-                                ? 'Collapse result'
-                                : 'Expand result'
-                            }
-                            type="button"
-                          >
-                            {expandState.isResultExpanded ? (
-                              <FoldVertical size={14} />
-                            ) : (
-                              <UnfoldVertical size={14} />
-                            )}
-                          </button>
-                        </ArrowTooltipTrigger>
-                        <ArrowTooltipPortal>
-                          <ArrowTooltipContent side="left" align="center">
-                            {expandState.isResultExpanded
-                              ? 'Collapse'
-                              : 'Expand'}
-                          </ArrowTooltipContent>
-                        </ArrowTooltipPortal>
-                      </ArrowTooltipRoot>
-                    </ArrowTooltipProvider>
+                    <ExpandButton
+                      isExpanded={expandState.isResultExpanded}
+                      onClick={handleToggleResultExpand}
+                      ariaLabel={{
+                        expanded: 'Collapse result',
+                        collapsed: 'Expand result',
+                      }}
+                      className={styles.resultExpandButton}
+                    />
                   )}
                 </div>
                 <div className={styles.resultContentWrapper}>
-                  {expandState.isResultScrollable &&
-                    !expandState.isResultExpanded && (
+                  {(() => {
+                    const showGradients =
+                      expandState.isResultScrollable &&
+                      !expandState.isResultExpanded
+                    if (!showGradients) return null
+                    return (
                       <>
                         <div className={styles.resultGradientTop} />
                         <div className={styles.resultGradientBottom} />
                       </>
-                    )}
+                    )
+                  })()}
                   <div
                     className={styles.resultContent}
                     ref={resultContentRef}
@@ -391,22 +442,15 @@ export const ToolCallCard: FC<Props> = ({
                     <Button
                       size="sm"
                       variant="outline-overlay"
-                      onClick={() => {
-                        if (onNavigate && toolInfo.resultAction) {
-                          const tab =
-                            toolInfo.resultAction.type === 'erd'
-                              ? 'erd'
-                              : 'artifact'
-                          onNavigate(tab)
-                        }
-                      }}
+                      onClick={handleNavigateClick}
                     >
                       {toolInfo.resultAction.label}
                     </Button>
                   </div>
                 )}
               </div>
-            )}
+            )
+          })()}
 
           {/* Error display */}
           {error && status === 'error' && (

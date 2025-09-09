@@ -29,6 +29,16 @@ function addAdditionalPropertiesFalse(schema: unknown): unknown {
     result['additionalProperties'] = false
   }
 
+  // CRITICAL FIX for OpenAI strict mode:
+  // Objects with only additionalProperties (no properties) need empty properties object
+  if (
+    result['type'] === 'object' &&
+    'additionalProperties' in result &&
+    !('properties' in result)
+  ) {
+    result['properties'] = {}
+  }
+
   return result
 }
 

@@ -7,6 +7,7 @@ import {
   ArrowTooltipProvider,
   ArrowTooltipRoot,
   ArrowTooltipTrigger,
+  Button,
   ChevronDown,
   ChevronRight,
   FoldVertical,
@@ -30,6 +31,7 @@ type Props = {
   status?: 'pending' | 'running' | 'completed' | 'error'
   error?: string
   toolMessage?: ToolMessageType | undefined
+  onNavigate?: (tab: 'erd' | 'artifact') => void
 }
 
 export const ToolCallCard: FC<Props> = ({
@@ -37,6 +39,7 @@ export const ToolCallCard: FC<Props> = ({
   status = 'completed',
   error,
   toolMessage,
+  onNavigate,
 }) => {
   // Determine if this is a pre-completed tool (no animation needed)
   const isPreCompleted = status === 'completed'
@@ -340,6 +343,23 @@ export const ToolCallCard: FC<Props> = ({
                   </div>
                 </div>
               </div>
+              {/* Action button for viewing artifacts */}
+              {toolInfo.resultAction && (
+                <div className={styles.resultAction}>
+                  <Button
+                    size="sm"
+                    variant="outline-overlay"
+                    onClick={() => {
+                      if (onNavigate && toolInfo.resultAction) {
+                        const tab = toolInfo.resultAction.type === 'erd' ? 'erd' : 'artifact'
+                        onNavigate(tab)
+                      }
+                    }}
+                  >
+                    {toolInfo.resultAction.label}
+                  </Button>
+                </div>
+              )}
             </div>
           )}
 

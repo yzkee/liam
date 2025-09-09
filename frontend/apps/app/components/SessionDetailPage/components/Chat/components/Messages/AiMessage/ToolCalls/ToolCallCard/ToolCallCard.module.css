@@ -435,6 +435,13 @@
   overflow-y: auto;
 }
 
+/* Result action button container */
+.resultAction {
+  margin-top: var(--spacing-3);
+  display: flex;
+  justify-content: flex-end;
+}
+
 /* 開いている時のスタイル */
 .container[data-collapsed='false'] .content {
   position: relative;

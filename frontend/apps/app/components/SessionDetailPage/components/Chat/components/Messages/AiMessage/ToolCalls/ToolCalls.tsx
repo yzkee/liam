@@ -14,6 +14,7 @@ type ToolCallWithMessage = {
 type Props = {
   toolCallsWithMessages: ToolCallWithMessage[]
   isStreaming?: boolean
+  onNavigate?: (tab: 'erd' | 'artifact') => void
 }
 
 type ToolCallStatus = 'pending' | 'running' | 'completed' | 'error'
@@ -23,7 +24,7 @@ type ToolCallState = {
   error?: string
 }
 
-export const ToolCalls: FC<Props> = ({ toolCallsWithMessages, isStreaming = false }) => {
+export const ToolCalls: FC<Props> = ({ toolCallsWithMessages, isStreaming = false, onNavigate }) => {
   const [toolCallStates, setToolCallStates] = useState<
     Record<string, ToolCallState>
   >({})
@@ -116,6 +117,7 @@ export const ToolCalls: FC<Props> = ({ toolCallsWithMessages, isStreaming = fals
             status={state.status}
             error={state.error}
             toolMessage={toolMessage}
+            onNavigate={onNavigate}
           />
         )
       })}

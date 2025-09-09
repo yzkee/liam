@@ -1,7 +1,4 @@
-import { dispatchCustomEvent } from '@langchain/core/callbacks/dispatch'
 import {
-  AIMessage,
-  AIMessageChunk,
   type BaseMessage,
   HumanMessage,
   SystemMessage,
@@ -9,6 +6,7 @@ import {
 import { ChatOpenAI } from '@langchain/openai'
 import { fromAsyncThrowable } from '@liam-hq/neverthrow'
 import { removeReasoningFromMessages } from '../../utils/messageCleanup'
+import { streamLLMResponse } from '../../utils/streamingLlmUtils'
 import { saveTestcaseTool } from '../tools/saveTestcaseTool'
 import {
   humanPromptTemplateForTestcaseGeneration,
@@ -64,31 +62,10 @@ export async function generateTestcaseNode(
     )
   }
 
-  const stream = streamResult.value
-
-  // OpenAI ("chatcmpl-...") and LangGraph ("run-...") use different id formats,
-  // so we overwrite with a UUID to unify chunk ids for consistent handling.
-  const id = crypto.randomUUID()
-  let accumulatedChunk: AIMessageChunk | null = null
-
-  for await (const _chunk of stream) {
-    const chunk = new AIMessageChunk({ ..._chunk, id, name: 'qa-agent' })
-    await dispatchCustomEvent('messages', chunk)
-
-    // Accumulate chunks using concat method
-    accumulatedChunk = accumulatedChunk ? accumulatedChunk.concat(chunk) : chunk
-  }
-
-  // Convert the final accumulated chunk to AIMessage
-  const response = accumulatedChunk
-    ? new AIMessage({
-        content: accumulatedChunk.content,
-        additional_kwargs: accumulatedChunk.additional_kwargs,
-        ...(accumulatedChunk.tool_calls && {
-          tool_calls: accumulatedChunk.tool_calls,
-        }),
-      })
-    : new AIMessage('')
+  const response = await streamLLMResponse(streamResult.value, {
+    agentName: 'qa',
+    eventType: 'messages',
+  })
 
   return {
     messages: [response],

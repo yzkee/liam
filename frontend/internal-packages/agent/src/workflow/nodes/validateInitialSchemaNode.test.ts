@@ -1,22 +1,12 @@
 import { AIMessage, HumanMessage } from '@langchain/core/messages'
 import { END, START, StateGraph } from '@langchain/langgraph'
 import { aColumn, aSchema, aTable } from '@liam-hq/schema'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { getTestConfig } from '../../../test-utils/workflowTestHelpers'
 import type { WorkflowState } from '../../types'
 import { WorkflowTerminationError } from '../../utils/errorHandling'
 import { workflowAnnotation } from '../../workflowAnnotation'
 import { validateInitialSchemaNode } from './validateInitialSchemaNode'
-
-// Mock OPENAI_API_KEY for getTestConfig
-// validateInitialSchemaNode doesn't use OpenAI API, so dummy key is sufficient
-beforeAll(() => {
-  process.env['OPENAI_API_KEY'] = 'dummy-key-for-testing'
-})
-
-afterAll(() => {
-  delete process.env['OPENAI_API_KEY']
-})
 
 describe('validateInitialSchemaNode Integration', () => {
   describe('First execution scenarios', () => {
@@ -28,7 +18,7 @@ describe('validateInitialSchemaNode Integration', () => {
         .addEdge('validateInitialSchema', END)
         .compile()
 
-      const { config, context } = await getTestConfig()
+      const { config, context } = await getTestConfig({ useOpenAI: false })
 
       const state: WorkflowState = {
         messages: [new HumanMessage('Create a new database schema')],
@@ -68,7 +58,7 @@ describe('validateInitialSchemaNode Integration', () => {
         .addEdge('validateInitialSchema', END)
         .compile()
 
-      const { config, context } = await getTestConfig()
+      const { config, context } = await getTestConfig({ useOpenAI: false })
 
       const state: WorkflowState = {
         messages: [new HumanMessage('Update my existing schema')],
@@ -133,7 +123,7 @@ describe('validateInitialSchemaNode Integration', () => {
         .addEdge('validateInitialSchema', END)
         .compile()
 
-      const { config, context } = await getTestConfig()
+      const { config, context } = await getTestConfig({ useOpenAI: false })
 
       const state: WorkflowState = {
         messages: [
@@ -189,7 +179,7 @@ describe('validateInitialSchemaNode Integration', () => {
   describe('Error handling scenarios', () => {
     it('should fail when schema contains invalid column type', async () => {
       // Arrange
-      const { context } = await getTestConfig()
+      const { context } = await getTestConfig({ useOpenAI: false })
 
       const state: WorkflowState = {
         messages: [new HumanMessage('Test validation error with invalid DDL')],

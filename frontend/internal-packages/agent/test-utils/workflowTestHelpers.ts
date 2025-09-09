@@ -31,7 +31,9 @@ export const outputStream = async <T extends Record<string, unknown>>(
  * Gets the minimal configuration needed for integration tests
  * Directly sets up the test environment without creating unnecessary state
  */
-export const getTestConfig = async (): Promise<{
+export const getTestConfig = async (options?: {
+  useOpenAI?: boolean
+}): Promise<{
   config: RunnableConfig
   context: {
     buildingSchemaId: string
@@ -41,6 +43,11 @@ export const getTestConfig = async (): Promise<{
     organizationId: string
   }
 }> => {
+  // Provide dummy API key for tests that don't actually use OpenAI
+  if (options?.useOpenAI === false && !process.env['OPENAI_API_KEY']) {
+    process.env['OPENAI_API_KEY'] = 'dummy-key-for-testing'
+  }
+
   const logger = createLogger('ERROR') // Only show errors during test setup
 
   const setupResult = await validateEnvironment()

@@ -43,6 +43,9 @@ export const getTestConfig = async (options?: {
     organizationId: string
   }
 }> => {
+  // Store original API key value to restore later
+  const originalApiKey = process.env['OPENAI_API_KEY']
+
   // Provide dummy API key for tests that don't actually use OpenAI
   if (options?.useOpenAI === false && !process.env['OPENAI_API_KEY']) {
     process.env['OPENAI_API_KEY'] = 'dummy-key-for-testing'
@@ -53,6 +56,13 @@ export const getTestConfig = async (options?: {
   const setupResult = await validateEnvironment()
     .andThen(setupDatabaseAndUser(logger))
     .andThen(findOrCreateDesignSession(undefined))
+
+  // Restore original API key value to prevent leaking across tests
+  if (originalApiKey === undefined) {
+    delete process.env['OPENAI_API_KEY']
+  } else {
+    process.env['OPENAI_API_KEY'] = originalApiKey
+  }
 
   if (setupResult.isErr()) {
     throw setupResult.error

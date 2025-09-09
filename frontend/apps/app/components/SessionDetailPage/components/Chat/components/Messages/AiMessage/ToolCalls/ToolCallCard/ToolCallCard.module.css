@@ -65,7 +65,9 @@
   height: 16px;
   color: var(--color-gray-100);
   position: absolute;
-  transition: opacity 0.3s ease, transform 0.2s ease;
+  transition:
+    opacity 0.3s ease,
+    transform 0.2s ease;
 }
 
 .chevronHidden {
@@ -145,7 +147,8 @@
 }
 
 @keyframes glow {
-  0%, 100% {
+  0%,
+  100% {
     color: var(--color-gray-100);
   }
   50% {
@@ -157,15 +160,6 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
-}
-
-.badge {
-  padding: 2px 8px;
-  border-radius: var(--border-radius-sm);
-  background-color: var(--color-green-alpha-20, rgba(34, 197, 94, 0.2));
-  color: var(--color-green-500, #22c55e);
-  font-size: var(--font-size-2);
-  font-weight: 500;
 }
 
 .badgeError {
@@ -183,45 +177,14 @@
 
 .content {
   overflow: hidden;
-  transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-              opacity 0.4s ease-out,
-              padding 0.5s cubic-bezier(0.4, 0, 0.2, 1),
-              margin 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.4s ease-out,
+    padding 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    margin 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Gradient overlays for scroll indication */
-.gradientTop,
-.gradientBottom {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 30px;
-  pointer-events: none;
-  z-index: 10;
-}
-
-.gradientTop {
-  top: 0;
-  background: linear-gradient(
-    180deg,
-    var(--color-gray-900) 0%,
-    var(--color-gray-900-alpha-90, rgba(35, 37, 38, 0.9)) 30%,
-    var(--color-gray-900-alpha-60, rgba(35, 37, 38, 0.6)) 60%,
-    transparent 100%
-  );
-}
-
-.gradientBottom {
-  bottom: 0;
-  background: linear-gradient(
-    0deg,
-    var(--color-gray-900) 0%,
-    var(--color-gray-900-alpha-90, rgba(35, 37, 38, 0.9)) 30%,
-    var(--color-gray-900-alpha-60, rgba(35, 37, 38, 0.6)) 60%,
-    transparent 100%
-  );
-}
-
 @keyframes slideDown {
   from {
     opacity: 0;
@@ -231,12 +194,6 @@
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-.description {
-  margin: 0 0 var(--spacing-3) 0;
-  font-size: var(--font-size-3);
-  color: var(--color-gray-300);
 }
 
 .arguments {
@@ -289,7 +246,9 @@
   align-items: center;
   justify-content: center;
   color: var(--color-gray-400);
-  transition: color 0.15s ease, transform 0.15s ease;
+  transition:
+    color 0.15s ease,
+    transform 0.15s ease;
   border-radius: var(--border-radius-sm);
 }
 
@@ -344,18 +303,6 @@
 .errorTitle {
   display: block;
   margin-bottom: var(--spacing-2);
-}
-
-.argumentsContent {
-  padding: var(--spacing-2);
-  border-radius: var(--border-radius-base);
-  background-color: var(--color-gray-900);
-  font-family: var(--code-font);
-  font-size: var(--font-size-2);
-  overflow-x: auto;
-  white-space: pre;
-  color: var(--color-gray-100);
-  min-height: 60px; /* Consistent height for arguments display */
 }
 
 .resultContentWrapper {
@@ -415,14 +362,6 @@
 
 .resultMessage {
   padding: 0;
-}
-
-.resultMessageIcon {
-  width: 14px;
-  height: 14px;
-  color: var(--color-green-500, #22c55e);
-  margin-top: 2px;
-  flex-shrink: 0;
 }
 
 .errorContent {

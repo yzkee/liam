@@ -1,10 +1,17 @@
 import { type BaseMessage, isAIMessage } from '@langchain/core/messages'
 import * as v from 'valibot'
-import { additionalKwargsSchema, type ToolCalls } from '@/components/SessionDetailPage/schema'
+import {
+  additionalKwargsSchema,
+  type ToolCalls,
+} from '@/components/SessionDetailPage/schema'
 
 export function extractToolCallsFromMessage(message: BaseMessage): ToolCalls {
   // First check if the message has tool_calls directly (for AIMessage)
-  if (isAIMessage(message) && message.tool_calls && message.tool_calls.length > 0) {
+  if (
+    isAIMessage(message) &&
+    message.tool_calls &&
+    message.tool_calls.length > 0
+  ) {
     // Map LangChain's tool_calls format to our expected format
     return message.tool_calls.map((tc, index) => ({
       id: tc.id || `tool-${Date.now()}-${index}`,
@@ -12,7 +19,8 @@ export function extractToolCallsFromMessage(message: BaseMessage): ToolCalls {
       index,
       function: {
         name: tc.name,
-        arguments: typeof tc.args === 'string' ? tc.args : JSON.stringify(tc.args),
+        arguments:
+          typeof tc.args === 'string' ? tc.args : JSON.stringify(tc.args),
       },
     }))
   }
@@ -22,7 +30,7 @@ export function extractToolCallsFromMessage(message: BaseMessage): ToolCalls {
   if (!parsed.success) {
     return []
   }
-  
+
   if (parsed.output.tool_calls === undefined) {
     return []
   }

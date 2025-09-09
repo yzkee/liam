@@ -5,39 +5,74 @@ type Operation = {
   value?: unknown
 }
 
-const getAddOperationMessage = (path: string | undefined, value: unknown): string => {
+type ColumnInfo = {
+  type?: string
+  [key: string]: unknown
+}
+
+type IndexInfo = {
+  columns?: string[]
+  [key: string]: unknown
+}
+
+type ConstraintInfo = {
+  type?: string
+  [key: string]: unknown
+}
+
+const isColumnInfo = (value: unknown): value is ColumnInfo => {
+  return typeof value === 'object' && value !== null
+}
+
+const isIndexInfo = (value: unknown): value is IndexInfo => {
+  return typeof value === 'object' && value !== null
+}
+
+const isConstraintInfo = (value: unknown): value is ConstraintInfo => {
+  return typeof value === 'object' && value !== null
+}
+
+const getAddOperationMessage = (
+  path: string | undefined,
+  value: unknown,
+): string => {
   if (!path) return 'Adding new element...'
-  
-  // テーブル作成
-  if (path.match(/\/tables\/[^/]+$/) && !path.includes('/columns/') && !path.includes('/constraints/') && !path.includes('/indexes/')) {
+
+  // Create table
+  if (
+    path.match(/\/tables\/[^/]+$/) &&
+    !path.includes('/columns/') &&
+    !path.includes('/constraints/') &&
+    !path.includes('/indexes/')
+  ) {
     const tableName = extractTableName(path)
     return `Creating table '${tableName}'`
   }
-  
-  // カラム追加
+
+  // Add column
   if (path.includes('/columns/')) {
     const columnName = extractColumnName(path)
-    const columnInfo = value as any
-    const type = columnInfo?.type || 'unknown'
+    const columnInfo = isColumnInfo(value) ? value : {}
+    const type = columnInfo.type || 'unknown'
     return `  Adding column '${columnName}' (${type})`
   }
-  
-  // インデックス追加
+
+  // Add index
   if (path.includes('/indexes/')) {
     const indexName = extractIndexName(path)
-    const indexInfo = value as any
-    const columns = indexInfo?.columns ? indexInfo.columns.join(', ') : ''
+    const indexInfo = isIndexInfo(value) ? value : {}
+    const columns = indexInfo.columns ? indexInfo.columns.join(', ') : ''
     return `  Adding index '${indexName}'${columns ? ` on (${columns})` : ''}`
   }
-  
-  // 制約追加
+
+  // Add constraint
   if (path.includes('/constraints/')) {
     const constraintName = extractConstraintName(path)
-    const constraintInfo = value as any
-    const type = constraintInfo?.type || 'constraint'
+    const constraintInfo = isConstraintInfo(value) ? value : {}
+    const type = constraintInfo.type || 'constraint'
     return `  Adding ${type} '${constraintName}'`
   }
-  
+
   return 'Adding new element...'
 }
 

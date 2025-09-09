@@ -9,8 +9,8 @@ import {
   useState,
 } from 'react'
 import styles from './ArgumentsDisplay.module.css'
+import { SyntaxHighlightedLine } from './SyntaxHighlightedLine'
 import { formatArguments } from './utils/formatArguments'
-import { highlightSyntax } from './utils/highlightSyntax'
 
 type Props = {
   args: unknown
@@ -85,38 +85,40 @@ export const ArgumentsDisplay: FC<Props> = ({
           // Continuously adjust scroll during the animation period
           const animationDuration = 300 // CSS fadeIn duration
           const animationDelay = currentIndex * 50 // CSS animation delay
-          
+
           // Start scrolling after the CSS animation delay
           setTimeout(() => {
             if (containerRef.current && !isExpanded) {
               const element = containerRef.current
               const startTime = performance.now()
-              
+
               const initialScrollTop = element.scrollTop
               const { scrollHeight, clientHeight } = element
-              
+
               // Only animate if scrolling is needed
               if (scrollHeight > clientHeight) {
                 const targetScroll = scrollHeight - clientHeight
                 const scrollDistance = targetScroll - initialScrollTop
-                
+
                 const scrollStep = () => {
                   const elapsed = performance.now() - startTime
                   const progress = Math.min(elapsed / animationDuration, 1)
-                  
+
                   // Use same easing as CSS animation (ease)
-                  const easeProgress = progress < 0.5
-                    ? 2 * progress * progress
-                    : 1 - ((-2 * progress + 2) ** 2) / 2
-                  
+                  const easeProgress =
+                    progress < 0.5
+                      ? 2 * progress * progress
+                      : 1 - (-2 * progress + 2) ** 2 / 2
+
                   // Scroll from initial position to target
-                  element.scrollTop = initialScrollTop + (scrollDistance * easeProgress)
-                  
+                  element.scrollTop =
+                    initialScrollTop + scrollDistance * easeProgress
+
                   if (progress < 1) {
                     requestAnimationFrame(scrollStep)
                   }
                 }
-                
+
                 requestAnimationFrame(scrollStep)
               }
             }
@@ -124,7 +126,7 @@ export const ArgumentsDisplay: FC<Props> = ({
 
           // Notify parent for potential scrolling
           onLineAdded?.()
-          
+
           // Check if this was the last line
           if (currentIndex + 1 === displayLines.length) {
             // Notify that animation is complete
@@ -137,15 +139,19 @@ export const ArgumentsDisplay: FC<Props> = ({
 
       return () => clearTimeout(timer)
     }
-    
+
     // When animation completes, ensure we're at the bottom
-    if (isReady && currentIndex === displayLines.length && displayLines.length > 0) {
+    if (
+      isReady &&
+      currentIndex === displayLines.length &&
+      displayLines.length > 0
+    ) {
       // Add a small delay to ensure DOM is fully updated
       setTimeout(() => {
         if (containerRef.current) {
           const element = containerRef.current
           const { scrollHeight, clientHeight } = element
-          
+
           // Force scroll to the absolute bottom using scrollHeight
           if (scrollHeight > clientHeight) {
             element.scrollTop = scrollHeight
@@ -153,9 +159,17 @@ export const ArgumentsDisplay: FC<Props> = ({
         }
       }, 100)
     }
-    
+
     return undefined
-  }, [currentIndex, displayLines, isAnimated, isReady, onLineAdded, isExpanded, onAnimationComplete])
+  }, [
+    currentIndex,
+    displayLines,
+    isAnimated,
+    isReady,
+    onLineAdded,
+    isExpanded,
+    onAnimationComplete,
+  ])
 
   // Immediately notify ready for non-animated content
   useEffect(() => {
@@ -292,17 +306,11 @@ export const ArgumentsDisplay: FC<Props> = ({
         style={containerStyle}
       >
         {visibleLines.map((line, index) => (
-          <div
+          <SyntaxHighlightedLine
             key={`${index}-${line}`}
-            className={styles.line}
-            style={
-              isAnimated
-                ? {
-                    animationDelay: `${index * 0.05}s`,
-                  }
-                : undefined
-            }
-            dangerouslySetInnerHTML={{ __html: highlightSyntax(line) }}
+            line={line}
+            isAnimated={isAnimated}
+            index={index}
           />
         ))}
       </div>

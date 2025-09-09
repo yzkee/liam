@@ -16,15 +16,20 @@ type Props = {
   isAnimated?: boolean
 }
 
-export const OperationsSummary: FC<Props> = ({ operations, isAnimated = true }) => {
+export const OperationsSummary: FC<Props> = ({
+  operations,
+  isAnimated = true,
+}) => {
   // Memoize parsed operations to prevent re-parsing
   const summaryLines = useMemo(() => parseOperations(operations), [operations])
-  
+
   // Initialize state - show all lines immediately if not animated
-  const [displayedLines, setDisplayedLines] = useState<string[]>(() => 
-    isAnimated ? [] : summaryLines
+  const [displayedLines, setDisplayedLines] = useState<string[]>(() =>
+    isAnimated ? [] : summaryLines,
   )
-  const [currentIndex, setCurrentIndex] = useState(isAnimated ? 0 : summaryLines.length)
+  const [currentIndex, setCurrentIndex] = useState(
+    isAnimated ? 0 : summaryLines.length,
+  )
   const scrollRef = useRef<HTMLDivElement>(null)
   const hasStarted = useRef(false)
 
@@ -40,7 +45,7 @@ export const OperationsSummary: FC<Props> = ({ operations, isAnimated = true }) 
     if (!hasStarted.current && summaryLines.length > 0) {
       hasStarted.current = true
     }
-    
+
     if (hasStarted.current && currentIndex < summaryLines.length) {
       const timer = setTimeout(() => {
         const nextLine = summaryLines[currentIndex]
@@ -68,9 +73,13 @@ export const OperationsSummary: FC<Props> = ({ operations, isAnimated = true }) 
         <div
           key={`${index}-${line}`}
           className={styles.line}
-          style={isAnimated ? {
-            animationDelay: `${index * 0.05}s`,
-          } : undefined}
+          style={
+            isAnimated
+              ? {
+                  animationDelay: `${index * 0.05}s`,
+                }
+              : undefined
+          }
         >
           {line}
         </div>

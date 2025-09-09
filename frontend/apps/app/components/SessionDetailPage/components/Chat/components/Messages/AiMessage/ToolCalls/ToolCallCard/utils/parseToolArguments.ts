@@ -4,7 +4,7 @@ export const parseToolArguments = (
   try {
     const parsed = JSON.parse(argumentsString)
     if (typeof parsed === 'object' && parsed !== null) {
-      return parsed as Record<string, unknown>
+      return parsed
     }
     return null
   } catch {

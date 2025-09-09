@@ -29,63 +29,313 @@ const schemaDesignCall: ToolCallsType[number] = {
       operations: [
         // Users table
         { op: 'add', path: '/tables/users', value: { name: 'users' } },
-        { op: 'add', path: '/tables/users/columns/id', value: { name: 'id', type: 'uuid', notNull: true } },
-        { op: 'add', path: '/tables/users/columns/email', value: { name: 'email', type: 'varchar(255)', notNull: true, unique: true } },
-        { op: 'add', path: '/tables/users/columns/username', value: { name: 'username', type: 'varchar(100)', notNull: true, unique: true } },
-        { op: 'add', path: '/tables/users/columns/password_hash', value: { name: 'password_hash', type: 'varchar(255)', notNull: true } },
-        { op: 'add', path: '/tables/users/columns/first_name', value: { name: 'first_name', type: 'varchar(100)' } },
-        { op: 'add', path: '/tables/users/columns/last_name', value: { name: 'last_name', type: 'varchar(100)' } },
-        { op: 'add', path: '/tables/users/columns/avatar_url', value: { name: 'avatar_url', type: 'text' } },
-        { op: 'add', path: '/tables/users/columns/is_active', value: { name: 'is_active', type: 'boolean', default: true } },
-        { op: 'add', path: '/tables/users/columns/email_verified_at', value: { name: 'email_verified_at', type: 'timestamp' } },
-        { op: 'add', path: '/tables/users/columns/created_at', value: { name: 'created_at', type: 'timestamp', notNull: true } },
-        { op: 'add', path: '/tables/users/columns/updated_at', value: { name: 'updated_at', type: 'timestamp', notNull: true } },
-        { op: 'add', path: '/tables/users/constraints/pk_users', value: { type: 'primary_key', columns: ['id'] } },
-        { op: 'add', path: '/tables/users/indexes/idx_email', value: { columns: ['email'] } },
-        { op: 'add', path: '/tables/users/indexes/idx_username', value: { columns: ['username'] } },
-        
+        {
+          op: 'add',
+          path: '/tables/users/columns/id',
+          value: { name: 'id', type: 'uuid', notNull: true },
+        },
+        {
+          op: 'add',
+          path: '/tables/users/columns/email',
+          value: {
+            name: 'email',
+            type: 'varchar(255)',
+            notNull: true,
+            unique: true,
+          },
+        },
+        {
+          op: 'add',
+          path: '/tables/users/columns/username',
+          value: {
+            name: 'username',
+            type: 'varchar(100)',
+            notNull: true,
+            unique: true,
+          },
+        },
+        {
+          op: 'add',
+          path: '/tables/users/columns/password_hash',
+          value: { name: 'password_hash', type: 'varchar(255)', notNull: true },
+        },
+        {
+          op: 'add',
+          path: '/tables/users/columns/first_name',
+          value: { name: 'first_name', type: 'varchar(100)' },
+        },
+        {
+          op: 'add',
+          path: '/tables/users/columns/last_name',
+          value: { name: 'last_name', type: 'varchar(100)' },
+        },
+        {
+          op: 'add',
+          path: '/tables/users/columns/avatar_url',
+          value: { name: 'avatar_url', type: 'text' },
+        },
+        {
+          op: 'add',
+          path: '/tables/users/columns/is_active',
+          value: { name: 'is_active', type: 'boolean', default: true },
+        },
+        {
+          op: 'add',
+          path: '/tables/users/columns/email_verified_at',
+          value: { name: 'email_verified_at', type: 'timestamp' },
+        },
+        {
+          op: 'add',
+          path: '/tables/users/columns/created_at',
+          value: { name: 'created_at', type: 'timestamp', notNull: true },
+        },
+        {
+          op: 'add',
+          path: '/tables/users/columns/updated_at',
+          value: { name: 'updated_at', type: 'timestamp', notNull: true },
+        },
+        {
+          op: 'add',
+          path: '/tables/users/constraints/pk_users',
+          value: { type: 'primary_key', columns: ['id'] },
+        },
+        {
+          op: 'add',
+          path: '/tables/users/indexes/idx_email',
+          value: { columns: ['email'] },
+        },
+        {
+          op: 'add',
+          path: '/tables/users/indexes/idx_username',
+          value: { columns: ['username'] },
+        },
+
         // Organizations table
-        { op: 'add', path: '/tables/organizations', value: { name: 'organizations' } },
-        { op: 'add', path: '/tables/organizations/columns/id', value: { name: 'id', type: 'uuid', notNull: true } },
-        { op: 'add', path: '/tables/organizations/columns/name', value: { name: 'name', type: 'varchar(255)', notNull: true } },
-        { op: 'add', path: '/tables/organizations/columns/slug', value: { name: 'slug', type: 'varchar(100)', notNull: true, unique: true } },
-        { op: 'add', path: '/tables/organizations/columns/description', value: { name: 'description', type: 'text' } },
-        { op: 'add', path: '/tables/organizations/columns/logo_url', value: { name: 'logo_url', type: 'text' } },
-        { op: 'add', path: '/tables/organizations/columns/owner_id', value: { name: 'owner_id', type: 'uuid', notNull: true } },
-        { op: 'add', path: '/tables/organizations/columns/created_at', value: { name: 'created_at', type: 'timestamp', notNull: true } },
-        { op: 'add', path: '/tables/organizations/columns/updated_at', value: { name: 'updated_at', type: 'timestamp', notNull: true } },
-        { op: 'add', path: '/tables/organizations/constraints/pk_organizations', value: { type: 'primary_key', columns: ['id'] } },
-        { op: 'add', path: '/tables/organizations/constraints/fk_owner', value: { type: 'foreign_key', columns: ['owner_id'], references: { table: 'users', columns: ['id'] } } },
-        
+        {
+          op: 'add',
+          path: '/tables/organizations',
+          value: { name: 'organizations' },
+        },
+        {
+          op: 'add',
+          path: '/tables/organizations/columns/id',
+          value: { name: 'id', type: 'uuid', notNull: true },
+        },
+        {
+          op: 'add',
+          path: '/tables/organizations/columns/name',
+          value: { name: 'name', type: 'varchar(255)', notNull: true },
+        },
+        {
+          op: 'add',
+          path: '/tables/organizations/columns/slug',
+          value: {
+            name: 'slug',
+            type: 'varchar(100)',
+            notNull: true,
+            unique: true,
+          },
+        },
+        {
+          op: 'add',
+          path: '/tables/organizations/columns/description',
+          value: { name: 'description', type: 'text' },
+        },
+        {
+          op: 'add',
+          path: '/tables/organizations/columns/logo_url',
+          value: { name: 'logo_url', type: 'text' },
+        },
+        {
+          op: 'add',
+          path: '/tables/organizations/columns/owner_id',
+          value: { name: 'owner_id', type: 'uuid', notNull: true },
+        },
+        {
+          op: 'add',
+          path: '/tables/organizations/columns/created_at',
+          value: { name: 'created_at', type: 'timestamp', notNull: true },
+        },
+        {
+          op: 'add',
+          path: '/tables/organizations/columns/updated_at',
+          value: { name: 'updated_at', type: 'timestamp', notNull: true },
+        },
+        {
+          op: 'add',
+          path: '/tables/organizations/constraints/pk_organizations',
+          value: { type: 'primary_key', columns: ['id'] },
+        },
+        {
+          op: 'add',
+          path: '/tables/organizations/constraints/fk_owner',
+          value: {
+            type: 'foreign_key',
+            columns: ['owner_id'],
+            references: { table: 'users', columns: ['id'] },
+          },
+        },
+
         // Organization members junction table
-        { op: 'add', path: '/tables/organization_members', value: { name: 'organization_members' } },
-        { op: 'add', path: '/tables/organization_members/columns/id', value: { name: 'id', type: 'uuid', notNull: true } },
-        { op: 'add', path: '/tables/organization_members/columns/organization_id', value: { name: 'organization_id', type: 'uuid', notNull: true } },
-        { op: 'add', path: '/tables/organization_members/columns/user_id', value: { name: 'user_id', type: 'uuid', notNull: true } },
-        { op: 'add', path: '/tables/organization_members/columns/role', value: { name: 'role', type: 'varchar(50)', notNull: true, default: 'member' } },
-        { op: 'add', path: '/tables/organization_members/columns/invited_by', value: { name: 'invited_by', type: 'uuid' } },
-        { op: 'add', path: '/tables/organization_members/columns/joined_at', value: { name: 'joined_at', type: 'timestamp', notNull: true } },
-        { op: 'add', path: '/tables/organization_members/constraints/pk_org_members', value: { type: 'primary_key', columns: ['id'] } },
-        { op: 'add', path: '/tables/organization_members/constraints/fk_organization', value: { type: 'foreign_key', columns: ['organization_id'], references: { table: 'organizations', columns: ['id'] } } },
-        { op: 'add', path: '/tables/organization_members/constraints/fk_user', value: { type: 'foreign_key', columns: ['user_id'], references: { table: 'users', columns: ['id'] } } },
-        { op: 'add', path: '/tables/organization_members/constraints/uq_org_user', value: { type: 'unique', columns: ['organization_id', 'user_id'] } },
-        
+        {
+          op: 'add',
+          path: '/tables/organization_members',
+          value: { name: 'organization_members' },
+        },
+        {
+          op: 'add',
+          path: '/tables/organization_members/columns/id',
+          value: { name: 'id', type: 'uuid', notNull: true },
+        },
+        {
+          op: 'add',
+          path: '/tables/organization_members/columns/organization_id',
+          value: { name: 'organization_id', type: 'uuid', notNull: true },
+        },
+        {
+          op: 'add',
+          path: '/tables/organization_members/columns/user_id',
+          value: { name: 'user_id', type: 'uuid', notNull: true },
+        },
+        {
+          op: 'add',
+          path: '/tables/organization_members/columns/role',
+          value: {
+            name: 'role',
+            type: 'varchar(50)',
+            notNull: true,
+            default: 'member',
+          },
+        },
+        {
+          op: 'add',
+          path: '/tables/organization_members/columns/invited_by',
+          value: { name: 'invited_by', type: 'uuid' },
+        },
+        {
+          op: 'add',
+          path: '/tables/organization_members/columns/joined_at',
+          value: { name: 'joined_at', type: 'timestamp', notNull: true },
+        },
+        {
+          op: 'add',
+          path: '/tables/organization_members/constraints/pk_org_members',
+          value: { type: 'primary_key', columns: ['id'] },
+        },
+        {
+          op: 'add',
+          path: '/tables/organization_members/constraints/fk_organization',
+          value: {
+            type: 'foreign_key',
+            columns: ['organization_id'],
+            references: { table: 'organizations', columns: ['id'] },
+          },
+        },
+        {
+          op: 'add',
+          path: '/tables/organization_members/constraints/fk_user',
+          value: {
+            type: 'foreign_key',
+            columns: ['user_id'],
+            references: { table: 'users', columns: ['id'] },
+          },
+        },
+        {
+          op: 'add',
+          path: '/tables/organization_members/constraints/uq_org_user',
+          value: { type: 'unique', columns: ['organization_id', 'user_id'] },
+        },
+
         // Projects table
         { op: 'add', path: '/tables/projects', value: { name: 'projects' } },
-        { op: 'add', path: '/tables/projects/columns/id', value: { name: 'id', type: 'uuid', notNull: true } },
-        { op: 'add', path: '/tables/projects/columns/organization_id', value: { name: 'organization_id', type: 'uuid', notNull: true } },
-        { op: 'add', path: '/tables/projects/columns/name', value: { name: 'name', type: 'varchar(255)', notNull: true } },
-        { op: 'add', path: '/tables/projects/columns/description', value: { name: 'description', type: 'text' } },
-        { op: 'add', path: '/tables/projects/columns/status', value: { name: 'status', type: 'varchar(50)', notNull: true, default: 'active' } },
-        { op: 'add', path: '/tables/projects/columns/visibility', value: { name: 'visibility', type: 'varchar(20)', notNull: true, default: 'private' } },
-        { op: 'add', path: '/tables/projects/columns/created_by', value: { name: 'created_by', type: 'uuid', notNull: true } },
-        { op: 'add', path: '/tables/projects/columns/created_at', value: { name: 'created_at', type: 'timestamp', notNull: true } },
-        { op: 'add', path: '/tables/projects/columns/updated_at', value: { name: 'updated_at', type: 'timestamp', notNull: true } },
-        { op: 'add', path: '/tables/projects/constraints/pk_projects', value: { type: 'primary_key', columns: ['id'] } },
-        { op: 'add', path: '/tables/projects/constraints/fk_project_org', value: { type: 'foreign_key', columns: ['organization_id'], references: { table: 'organizations', columns: ['id'] } } },
-        { op: 'add', path: '/tables/projects/constraints/fk_created_by', value: { type: 'foreign_key', columns: ['created_by'], references: { table: 'users', columns: ['id'] } } },
-        { op: 'add', path: '/tables/projects/indexes/idx_org_projects', value: { columns: ['organization_id'] } },
-        { op: 'add', path: '/tables/projects/indexes/idx_status', value: { columns: ['status'] } },
+        {
+          op: 'add',
+          path: '/tables/projects/columns/id',
+          value: { name: 'id', type: 'uuid', notNull: true },
+        },
+        {
+          op: 'add',
+          path: '/tables/projects/columns/organization_id',
+          value: { name: 'organization_id', type: 'uuid', notNull: true },
+        },
+        {
+          op: 'add',
+          path: '/tables/projects/columns/name',
+          value: { name: 'name', type: 'varchar(255)', notNull: true },
+        },
+        {
+          op: 'add',
+          path: '/tables/projects/columns/description',
+          value: { name: 'description', type: 'text' },
+        },
+        {
+          op: 'add',
+          path: '/tables/projects/columns/status',
+          value: {
+            name: 'status',
+            type: 'varchar(50)',
+            notNull: true,
+            default: 'active',
+          },
+        },
+        {
+          op: 'add',
+          path: '/tables/projects/columns/visibility',
+          value: {
+            name: 'visibility',
+            type: 'varchar(20)',
+            notNull: true,
+            default: 'private',
+          },
+        },
+        {
+          op: 'add',
+          path: '/tables/projects/columns/created_by',
+          value: { name: 'created_by', type: 'uuid', notNull: true },
+        },
+        {
+          op: 'add',
+          path: '/tables/projects/columns/created_at',
+          value: { name: 'created_at', type: 'timestamp', notNull: true },
+        },
+        {
+          op: 'add',
+          path: '/tables/projects/columns/updated_at',
+          value: { name: 'updated_at', type: 'timestamp', notNull: true },
+        },
+        {
+          op: 'add',
+          path: '/tables/projects/constraints/pk_projects',
+          value: { type: 'primary_key', columns: ['id'] },
+        },
+        {
+          op: 'add',
+          path: '/tables/projects/constraints/fk_project_org',
+          value: {
+            type: 'foreign_key',
+            columns: ['organization_id'],
+            references: { table: 'organizations', columns: ['id'] },
+          },
+        },
+        {
+          op: 'add',
+          path: '/tables/projects/constraints/fk_created_by',
+          value: {
+            type: 'foreign_key',
+            columns: ['created_by'],
+            references: { table: 'users', columns: ['id'] },
+          },
+        },
+        {
+          op: 'add',
+          path: '/tables/projects/indexes/idx_org_projects',
+          value: { columns: ['organization_id'] },
+        },
+        {
+          op: 'add',
+          path: '/tables/projects/indexes/idx_status',
+          value: { columns: ['status'] },
+        },
       ],
     }),
   },
@@ -131,7 +381,7 @@ const saveRequirementsCall: ToolCallsType[number] = {
           'Data export functionality',
           'Account deletion with grace period',
         ],
-        'Authorization': [
+        Authorization: [
           'Role-based access control (RBAC)',
           'Permission management system',
           'Resource-level permissions',
@@ -226,7 +476,7 @@ export const SchemaDesign: Story = {
   name: 'Schema Design Tool',
   args: {
     toolCallsWithMessages: [
-      { toolCall: schemaDesignCall, toolMessage: undefined }
+      { toolCall: schemaDesignCall, toolMessage: undefined },
     ],
     isStreaming: true,
   },
@@ -236,7 +486,7 @@ export const SaveRequirements: Story = {
   name: 'Save Requirements Tool',
   args: {
     toolCallsWithMessages: [
-      { toolCall: saveRequirementsCall, toolMessage: undefined }
+      { toolCall: saveRequirementsCall, toolMessage: undefined },
     ],
     isStreaming: true,
   },
@@ -246,7 +496,7 @@ export const SaveTestcases: Story = {
   name: 'Save Testcases and DML Tool',
   args: {
     toolCallsWithMessages: [
-      { toolCall: saveTestcasesCall, toolMessage: undefined }
+      { toolCall: saveTestcasesCall, toolMessage: undefined },
     ],
     isStreaming: true,
   },
@@ -264,4 +514,3 @@ export const AllToolsCompleted: Story = {
     isStreaming: false,
   },
 }
-

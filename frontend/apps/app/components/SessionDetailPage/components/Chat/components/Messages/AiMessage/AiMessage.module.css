@@ -44,6 +44,11 @@
   flex-direction: column;
 }
 
+.markdownWrapper {
+  display: flex;
+  flex-direction: column;
+}
+
 .copyButtonWrapper {
   display: flex;
   justify-content: flex-end;

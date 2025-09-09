@@ -24,17 +24,22 @@ type ToolCallState = {
   error?: string
 }
 
-export const ToolCalls: FC<Props> = ({ toolCallsWithMessages, isStreaming = false, onNavigate }) => {
+export const ToolCalls: FC<Props> = ({
+  toolCallsWithMessages,
+  isStreaming = false,
+  onNavigate,
+}) => {
   const [toolCallStates, setToolCallStates] = useState<
     Record<string, ToolCallState>
   >({})
 
   // Filter out routeToAgent tool calls
   const filteredToolCalls = useMemo(
-    () => toolCallsWithMessages.filter(
-      ({ toolCall }) => toolCall.function.name !== 'routeToAgent'
-    ),
-    [toolCallsWithMessages]
+    () =>
+      toolCallsWithMessages.filter(
+        ({ toolCall }) => toolCall.function.name !== 'routeToAgent',
+      ),
+    [toolCallsWithMessages],
   )
 
   // Initialize tool call states
@@ -46,7 +51,7 @@ export const ToolCalls: FC<Props> = ({ toolCallsWithMessages, isStreaming = fals
         // If streaming (new execution), start with pending for animation
         const initialStatus = isStreaming ? 'pending' : 'completed'
         newStates[tc.id] = {
-          status: initialStatus
+          status: initialStatus,
         }
       }
     })
@@ -59,7 +64,7 @@ export const ToolCalls: FC<Props> = ({ toolCallsWithMessages, isStreaming = fals
   useEffect(() => {
     // Only run tools if streaming
     if (!isStreaming) return
-    
+
     const runTools = async () => {
       for (const { toolCall: tc } of filteredToolCalls) {
         // Wait before starting (for better visibility)

@@ -35,19 +35,20 @@ const getAgentInfo = (name: string | undefined) => {
 type Props = {
   message: AIMessage
   toolMessages?: ToolMessage[]
+  onNavigate?: (tab: 'erd' | 'artifact') => void
 }
 
-export const AiMessage: FC<Props> = ({ message, toolMessages }) => {
+export const AiMessage: FC<Props> = ({ message, toolMessages, onNavigate }) => {
   const { avatar, name } = getAgentInfo(message.name)
   const messageContentString = extractResponseFromMessage(message)
   const reasoningText = extractReasoningFromMessage(message)
   const toolCalls = extractToolCallsFromMessage(message)
-  
+
   // Combine toolCalls with their corresponding toolMessages
   const toolCallsWithMessages = useMemo(() => {
     return toolCalls.map((toolCall, index) => ({
       toolCall,
-      toolMessage: toolMessages?.[index]
+      toolMessage: toolMessages?.[index],
     }))
   }, [toolCalls, toolMessages])
 
@@ -74,7 +75,10 @@ export const AiMessage: FC<Props> = ({ message, toolMessages }) => {
               </div>
             </div>
           )}
-          <ToolCalls toolCallsWithMessages={toolCallsWithMessages} />
+          <ToolCalls
+            toolCallsWithMessages={toolCallsWithMessages}
+            onNavigate={onNavigate}
+          />
         </div>
       </div>
     </div>

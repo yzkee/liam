@@ -52,7 +52,7 @@ export async function designSchemaNode(
   return {
     ...state,
     messages: [response],
-    latestVersionNumber: state.latestVersionNumber + 1,
-    designSchemaRetryCount: state.designSchemaRetryCount + 1,
+    // Don't modify latestVersionNumber here - let invokeSchemaDesignToolNode handle it
+    designSchemaRetryCount: (state.designSchemaRetryCount ?? 0) + 1,
   }
 }

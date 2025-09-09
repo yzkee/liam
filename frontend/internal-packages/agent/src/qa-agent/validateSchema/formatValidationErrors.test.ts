@@ -30,6 +30,33 @@ describe('formatValidationErrors', () => {
     `)
   })
 
+  it('should format multiple errors in single test case', () => {
+    const results: TestcaseDmlExecutionResult[] = [
+      {
+        testCaseId: 'test-1',
+        testCaseTitle: 'Complex Transaction Test',
+        success: false,
+        failedOperation: {
+          error: 'invalid input syntax for type uuid',
+          sql: "INSERT INTO accounts (id) VALUES ('invalid-uuid')",
+        },
+        executedAt: new Date('2024-01-01T00:00:00Z'),
+      },
+    ]
+
+    const formatted = formatValidationErrors(results)
+
+    expect(formatted).toMatchInlineSnapshot(`
+      "Database validation found 1 issues. Please fix the following errors:
+
+      ### ❌ **Test Case:** Complex Transaction Test
+      #### 1. Error: \`invalid input syntax for type uuid\`
+      \`\`\`sql
+      INSERT INTO accounts (id) VALUES ('invalid-uuid')
+      \`\`\`"
+    `)
+  })
+
   it('should format errors from multiple test cases', () => {
     const results: TestcaseDmlExecutionResult[] = [
       {
@@ -79,7 +106,7 @@ describe('formatValidationErrors', () => {
     `)
   })
 
-  it('should truncate long SQL statements', () => {
+  it('should display full long SQL statements', () => {
     const longSql = `INSERT INTO very_long_table_name_with_many_columns (
       column1, column2, column3, column4, column5, column6, column7, column8,
       column9, column10, column11, column12, column13, column14, column15,
@@ -116,7 +143,12 @@ describe('formatValidationErrors', () => {
             column1, column2, column3, column4, column5, column6, column7, column8,
             column9, column10, column11, column12, column13, column14, column15,
             column16, column17, column18, column19, column20, column21, column22,
-            column23, co...
+            column23, column24, column25, column26, column27, column28, column29,
+            column30, column31, column32, column33, column34, column35
+          ) VALUES (
+            'value1', 'value2', 'value3', 'value4', 'value5', 'value6', 'value7',
+            'value8', 'value9', 'value10', 'value11', 'value12', 'value13'
+          )
       \`\`\`"
     `)
   })
@@ -156,13 +188,16 @@ describe('formatValidationErrors', () => {
     `)
   })
 
-  it('should handle empty failed operations array', () => {
+  it('should handle failed case without SQL details', () => {
     const results: TestcaseDmlExecutionResult[] = [
       {
         testCaseId: 'test-1',
-        testCaseTitle: 'Test with empty failures',
+        testCaseTitle: 'Test with minimal error info',
         success: false,
-        failedOperation: undefined,
+        failedOperation: {
+          error: 'Unknown error occurred',
+          sql: '',
+        },
         executedAt: new Date('2024-01-01T00:00:00Z'),
       },
     ]
@@ -172,31 +207,12 @@ describe('formatValidationErrors', () => {
     expect(formatted).toMatchInlineSnapshot(`
       "Database validation found 1 issues. Please fix the following errors:
 
-      ### ❌ **Test Case:** Test with empty failures"
+      ### ❌ **Test Case:** Test with minimal error info
+      #### 1. Error: \`Unknown error occurred\`
+      \`\`\`sql
+
+      \`\`\`"
     `)
-  })
-
-  it('should return success message when all tests pass', () => {
-    const results: TestcaseDmlExecutionResult[] = [
-      {
-        testCaseId: 'test-1',
-        testCaseTitle: 'Successful Test 1',
-        success: true,
-        executedAt: new Date('2024-01-01T00:00:00Z'),
-      },
-      {
-        testCaseId: 'test-2',
-        testCaseTitle: 'Successful Test 2',
-        success: true,
-        executedAt: new Date('2024-01-01T00:00:00Z'),
-      },
-    ]
-
-    const formatted = formatValidationErrors(results)
-
-    expect(formatted).toMatchInlineSnapshot(
-      `"Database validation complete: all checks passed successfully"`,
-    )
   })
 
   it('should handle special characters in error messages', () => {
@@ -219,10 +235,37 @@ describe('formatValidationErrors', () => {
       "Database validation found 1 issues. Please fix the following errors:
 
       ### ❌ **Test Case:** Test with Special Characters
-      #### 1. Error: \`Error with \`backticks\` and "quotes" and 'single quotes'\`
+      #### 1. Error: \`Error with \`backticks\` and \"quotes\" and 'single quotes'\`
       \`\`\`sql
       INSERT INTO test VALUES ('data')
       \`\`\`"
     `)
+  })
+
+  it('should return success message when no errors', () => {
+    const results: TestcaseDmlExecutionResult[] = [
+      {
+        testCaseId: 'test-1',
+        testCaseTitle: 'Successful Test',
+        success: true,
+        executedAt: new Date('2024-01-01T00:00:00Z'),
+      },
+    ]
+
+    const formatted = formatValidationErrors(results)
+
+    expect(formatted).toMatchInlineSnapshot(
+      `"Database validation complete: all checks passed successfully"`,
+    )
+  })
+
+  it('should return success message when empty results', () => {
+    const results: TestcaseDmlExecutionResult[] = []
+
+    const formatted = formatValidationErrors(results)
+
+    expect(formatted).toMatchInlineSnapshot(
+      `"Database validation complete: all checks passed successfully"`,
+    )
   })
 })

@@ -1,4 +1,7 @@
+import { dispatchCustomEvent } from '@langchain/core/callbacks/dispatch'
 import {
+  AIMessage,
+  AIMessageChunk,
   type BaseMessage,
   HumanMessage,
   SystemMessage,
@@ -43,25 +46,51 @@ export async function generateTestcaseNode(
 
   const cleanedMessages = removeReasoningFromMessages(messages)
 
-  const invokeModel = fromAsyncThrowable(() =>
-    model.invoke([
+  const streamModel = fromAsyncThrowable(() => {
+    return model.stream([
       new SystemMessage(SYSTEM_PROMPT_FOR_TESTCASE_GENERATION),
       new HumanMessage(contextMessage),
       // Include all previous messages in this subgraph's scope
       ...cleanedMessages,
-    ]),
-  )
+    ])
+  })
 
-  const result = await invokeModel()
+  const streamResult = await streamModel()
 
-  if (result.isErr()) {
+  if (streamResult.isErr()) {
     // eslint-disable-next-line no-throw-error/no-throw-error -- Required for LangGraph retry mechanism
     throw new Error(
-      `Failed to generate test case for ${currentRequirement.category}: ${result.error.message}`,
+      `Failed to generate test case for ${currentRequirement.category}: ${streamResult.error.message}`,
     )
   }
 
+  const stream = streamResult.value
+
+  // OpenAI ("chatcmpl-...") and LangGraph ("run-...") use different id formats,
+  // so we overwrite with a UUID to unify chunk ids for consistent handling.
+  const id = crypto.randomUUID()
+  let accumulatedChunk: AIMessageChunk | null = null
+
+  for await (const _chunk of stream) {
+    const chunk = new AIMessageChunk({ ..._chunk, id, name: 'qa-agent' })
+    await dispatchCustomEvent('messages', chunk)
+
+    // Accumulate chunks using concat method
+    accumulatedChunk = accumulatedChunk ? accumulatedChunk.concat(chunk) : chunk
+  }
+
+  // Convert the final accumulated chunk to AIMessage
+  const response = accumulatedChunk
+    ? new AIMessage({
+        content: accumulatedChunk.content,
+        additional_kwargs: accumulatedChunk.additional_kwargs,
+        ...(accumulatedChunk.tool_calls && {
+          tool_calls: accumulatedChunk.tool_calls,
+        }),
+      })
+    : new AIMessage('')
+
   return {
-    messages: [result.value],
+    messages: [response],
   }
 }

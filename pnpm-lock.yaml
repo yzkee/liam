@@ -240,6 +240,9 @@ importers:
       concurrently:
         specifier: 9.2.0
         version: 9.2.0
+      eslint:
+        specifier: 9.33.0
+        version: 9.33.0(jiti@2.5.1)
       fs-extra:
         specifier: 11.3.1
         version: 11.3.1
@@ -18099,7 +18102,7 @@ snapshots:
       isstream: 0.1.2
       jsonwebtoken: 9.0.2
       mime-types: 2.1.35
-      retry-axios: 2.6.0(axios@1.11.0(debug@4.4.1))
+      retry-axios: 2.6.0(axios@1.11.0)
       tough-cookie: 4.1.4
     transitivePeerDependencies:
       - supports-color
@@ -20765,7 +20768,7 @@ snapshots:
       onetime: 7.0.0
       signal-exit: 4.1.0
 
-  retry-axios@2.6.0(axios@1.11.0(debug@4.4.1)):
+  retry-axios@2.6.0(axios@1.11.0):
     dependencies:
       axios: 1.11.0(debug@4.4.1)
 

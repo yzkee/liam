@@ -140,7 +140,7 @@ export const SessionDetailPageClient: FC<Props> = ({
     }
 
     triggerInitialWorkflow()
-  }, [messages, designSessionId, isDeepModelingEnabled])
+  }, [messages, designSessionId, isDeepModelingEnabled, start, status])
 
   // Show Output if artifact exists OR workflow is not pending
   const shouldShowOutput = hasRealtimeArtifact || status !== 'pending'

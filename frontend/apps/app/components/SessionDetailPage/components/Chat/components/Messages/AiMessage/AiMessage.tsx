@@ -1,15 +1,13 @@
 import type { AIMessage, ToolMessage } from '@langchain/core/messages'
 import type { FC } from 'react'
+import { useMemo } from 'react'
 import { match } from 'ts-pattern'
 import * as v from 'valibot'
-import { MarkdownContent } from '../../../../../../MarkdownContent'
-import {
-  extractReasoningFromMessage,
-  extractResponseFromMessage,
-  extractToolCallsFromMessage,
-} from '../../../../../utils'
-import { CopyButton } from '../../../../CopyButton'
-import markdownStyles from '../Markdown.module.css'
+import { MarkdownContent } from '@/components/MarkdownContent'
+import { CopyButton } from '@/components/SessionDetailPage/components/CopyButton'
+import { extractReasoningFromMessage } from '../utils/extractReasoningFromMessage'
+import { extractResponseFromMessage } from '../utils/extractResponseFromMessage'
+import { extractToolCallsFromMessage } from '../utils/extractToolCallsFromMessage'
 import { DBAgent, LeadAgent, PMAgent, QAAgent } from './AgentAvatar'
 import styles from './AiMessage.module.css'
 import { ReasoningMessage } from './ReasoningMessage'
@@ -36,7 +34,7 @@ const getAgentInfo = (name: string | undefined) => {
 
 type Props = {
   message: AIMessage
-  toolMessages: ToolMessage[]
+  toolMessages?: ToolMessage[]
 }
 
 export const AiMessage: FC<Props> = ({ message, toolMessages }) => {
@@ -44,6 +42,14 @@ export const AiMessage: FC<Props> = ({ message, toolMessages }) => {
   const messageContentString = extractResponseFromMessage(message)
   const reasoningText = extractReasoningFromMessage(message)
   const toolCalls = extractToolCallsFromMessage(message)
+  
+  // Combine toolCalls with their corresponding toolMessages
+  const toolCallsWithMessages = useMemo(() => {
+    return toolCalls.map((toolCall, index) => ({
+      toolCall,
+      toolMessage: toolMessages?.[index]
+    }))
+  }, [toolCalls, toolMessages])
 
   return (
     <div className={styles.wrapper}>
@@ -56,7 +62,7 @@ export const AiMessage: FC<Props> = ({ message, toolMessages }) => {
           {reasoningText && <ReasoningMessage content={reasoningText} />}
           {messageContentString !== '' && (
             <div className={styles.responseMessageWrapper}>
-              <div className={markdownStyles.markdownWrapper}>
+              <div className={styles.markdownWrapper}>
                 <MarkdownContent content={messageContentString} />
               </div>
               <div className={styles.copyButtonWrapper}>
@@ -68,7 +74,7 @@ export const AiMessage: FC<Props> = ({ message, toolMessages }) => {
               </div>
             </div>
           )}
-          <ToolCalls toolCalls={toolCalls} toolMessages={toolMessages} />
+          <ToolCalls toolCallsWithMessages={toolCallsWithMessages} />
         </div>
       </div>
     </div>

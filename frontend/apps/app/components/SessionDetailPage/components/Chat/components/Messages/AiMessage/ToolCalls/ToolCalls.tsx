@@ -1,36 +1,115 @@
+'use client'
+
 import type { ToolMessage as ToolMessageType } from '@langchain/core/messages'
-import type { FC } from 'react'
-import type { ToolCalls as ToolCallsType } from '../../../../../../schema'
-import { ToolCall } from './ToolCall'
+import { type FC, useEffect, useState } from 'react'
+import type { ToolCalls as ToolCallsType } from '../../schema'
+import { ToolCallCard } from './ToolCallCard'
 import styles from './ToolCalls.module.css'
 
-type Props = {
-  toolCalls: ToolCallsType
-  toolMessages: ToolMessageType[]
+type ToolCallWithMessage = {
+  toolCall: ToolCallsType[number]
+  toolMessage?: ToolMessageType
 }
 
-/**
- * TODO: Design Improvement
- *
- * ## Current Implementation
- * Displays tool calls made by AI during conversation with basic styling
- *
- * ## Areas for Enhancement
- * 1. Visual Design - Improve card appearance and spacing
- * 2. Icon System - Add specific icons for different tool types
- * 3. Argument Display - Better formatting for JSON arguments
- */
-export const ToolCalls: FC<Props> = ({ toolCalls, toolMessages }) => {
-  if (toolCalls.length === 0) return null
+type Props = {
+  toolCallsWithMessages: ToolCallWithMessage[]
+  isStreaming?: boolean
+}
+
+type ToolCallStatus = 'pending' | 'running' | 'completed' | 'error'
+
+type ToolCallState = {
+  status: ToolCallStatus
+  error?: string
+}
+
+export const ToolCalls: FC<Props> = ({ toolCallsWithMessages, isStreaming = false }) => {
+  const [toolCallStates, setToolCallStates] = useState<
+    Record<string, ToolCallState>
+  >({})
+
+  // Initialize tool call states
+  useEffect(() => {
+    const newStates: Record<string, ToolCallState> = {}
+    toolCallsWithMessages.forEach(({ toolCall: tc }) => {
+      if (!toolCallStates[tc.id]) {
+        // If not streaming (loading existing session), show as completed immediately
+        // If streaming (new execution), start with pending for animation
+        const initialStatus = isStreaming ? 'pending' : 'completed'
+        newStates[tc.id] = {
+          status: initialStatus
+        }
+      }
+    })
+    if (Object.keys(newStates).length > 0) {
+      setToolCallStates((prev) => ({ ...prev, ...newStates }))
+    }
+  }, [toolCallsWithMessages, isStreaming])
+
+  // Execute tools sequentially - Only for streaming
+  useEffect(() => {
+    // Only run tools if streaming
+    if (!isStreaming) return
+    
+    const runTools = async () => {
+      for (const { toolCall: tc } of toolCallsWithMessages) {
+        // Wait before starting (for better visibility)
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+
+        // Update to running state
+        setToolCallStates((prev) => {
+          // Skip if already processed
+          if (
+            prev[tc.id]?.status === 'running' ||
+            prev[tc.id]?.status === 'completed' ||
+            prev[tc.id]?.status === 'error'
+          ) {
+            return prev
+          }
+          return {
+            ...prev,
+            [tc.id]: { ...prev[tc.id], status: 'running' },
+          }
+        })
+
+        // Simulate execution time
+        // Shorter time for non-streaming (2s) vs streaming (5s)
+        const executionTime = isStreaming ? 5000 : 2000
+        await new Promise((resolve) => setTimeout(resolve, executionTime))
+
+        // Update to completed state without hardcoded result
+        setToolCallStates((prev) => ({
+          ...prev,
+          [tc.id]: {
+            ...prev[tc.id],
+            status: 'completed',
+            // Don't set result here - it should come from toolMessage
+          },
+        }))
+      }
+    }
+
+    // Run for all tools to show animation
+    if (toolCallsWithMessages.length > 0) {
+      runTools()
+    }
+  }, [toolCallsWithMessages, isStreaming])
+
+  if (toolCallsWithMessages.length === 0) return null
 
   return (
     <div className={styles.container}>
-      <div className={styles.title}>Tool Calls ({toolCalls.length})</div>
-      {toolCalls.map((tc, _idx) => {
-        const toolMessage = toolMessages.find(
-          (msg) => msg.tool_call_id === tc.id,
+      {toolCallsWithMessages.map(({ toolCall: tc, toolMessage }) => {
+        const state = toolCallStates[tc.id] || { status: 'pending' }
+        return (
+          <ToolCallCard
+            key={tc.id}
+            toolCall={tc}
+            status={state.status}
+            error={state.error}
+            toolMessage={toolMessage}
+          />
         )
-        return <ToolCall key={tc.id} toolCall={tc} toolMessage={toolMessage} />
       })}
     </div>
   )

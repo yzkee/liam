@@ -1113,6 +1113,4 @@ describe('evaluate', () => {
     },
     TIMEOUT,
   )
-
-  
 })

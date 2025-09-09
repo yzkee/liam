@@ -1,7 +1,7 @@
 import { AIMessage, HumanMessage } from '@langchain/core/messages'
 import { END, START, StateGraph } from '@langchain/langgraph'
 import { aColumn, aSchema, aTable } from '@liam-hq/schema'
-import { describe, expect, it, vi } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { getTestConfig } from '../../../test-utils/workflowTestHelpers'
 import type { WorkflowState } from '../../types'
 import { WorkflowTerminationError } from '../../utils/errorHandling'
@@ -22,6 +22,16 @@ vi.mock('@liam-hq/schema', async (importOriginal) => {
 })
 
 import { validateInitialSchemaNode } from './validateInitialSchemaNode'
+
+// Mock OPENAI_API_KEY for getTestConfig
+// validateInitialSchemaNode doesn't use OpenAI API, so dummy key is sufficient
+beforeAll(() => {
+  process.env['OPENAI_API_KEY'] = 'dummy-key-for-testing'
+})
+
+afterAll(() => {
+  delete process.env['OPENAI_API_KEY']
+})
 
 describe('validateInitialSchemaNode Integration', () => {
   describe('First execution scenarios', () => {

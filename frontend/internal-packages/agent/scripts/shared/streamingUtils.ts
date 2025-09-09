@@ -1,3 +1,4 @@
+import { isAIMessage, isBaseMessage } from '@langchain/core/messages'
 import { gray } from 'yoctocolors'
 import { isMessageContentError } from '../../src/utils/toolMessageUtils'
 import { hasProperty, isObject } from './scriptUtils'
@@ -285,26 +286,27 @@ export const processStreamChunk = (logger: Logger, chunk: unknown) => {
     return
   }
 
-  const lastMessage = messages[messages.length - 1]
+  // Process ALL messages in the chunk, not just the last one
+  messages.forEach((message: unknown) => {
+    // Use LangChain's isBaseMessage for proper type checking
+    if (!isBaseMessage(message)) {
+      return
+    }
 
-  const messageType = getMessageType(lastMessage)
+    const messageType = getMessageType(message)
 
-  // Debug: log full message structure
-  if (isObject(lastMessage)) {
-    const kwargsAdditional =
-      isObject(lastMessage['kwargs']) &&
-      hasProperty(lastMessage['kwargs'], 'additional_kwargs')
-        ? lastMessage['kwargs']['additional_kwargs']
-        : undefined
+    // Debug: log full message structure for each message
+    // Use official BaseMessage properties for type safety
+    const toolCalls = isAIMessage(message) ? message.tool_calls : undefined
 
-    logger.debug('Full Message:', {
+    logger.debug(`Full Message (${messageType}):`, {
       messageType,
-      content: lastMessage['content'],
-      toolCalls: lastMessage['tool_calls'],
-      additionalKwargs: kwargsAdditional,
+      content: message.content,
+      toolCalls,
+      additionalKwargs: message.additional_kwargs,
     })
-  }
 
-  // Log essential information
-  logMessageContent(logger, messageType, lastMessage)
+    // Log essential information for each message
+    logMessageContent(logger, messageType, message)
+  })
 }

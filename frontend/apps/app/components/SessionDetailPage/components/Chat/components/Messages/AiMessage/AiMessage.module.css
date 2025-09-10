@@ -47,6 +47,9 @@
 .markdownWrapper {
   display: flex;
   flex-direction: column;
+  font-size: var(--font-size-4);
+  line-height: 1.6;
+  color: var(--global-body-text);
 }
 
 .copyButtonWrapper {

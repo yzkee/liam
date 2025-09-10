@@ -26,7 +26,7 @@ type ToolCallState = {
 
 export const ToolCalls: FC<Props> = ({
   toolCallsWithMessages,
-  isStreaming = false,
+  isStreaming = false, // Default to false for loaded sessions
   onNavigate,
 }) => {
   const [toolCallStates, setToolCallStates] = useState<

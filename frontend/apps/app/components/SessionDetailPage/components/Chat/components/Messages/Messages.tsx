@@ -12,9 +12,14 @@ import { HumanMessage } from './HumanMessage'
 type Props = {
   messages: BaseMessage[]
   onNavigate?: (tab: 'erd' | 'artifact') => void
+  isWorkflowRunning?: boolean
 }
 
-export const Messages: FC<Props> = ({ messages, onNavigate }) => {
+export const Messages: FC<Props> = ({
+  messages,
+  onNavigate,
+  isWorkflowRunning = false,
+}) => {
   return messages.map((message, index) => {
     if (isAIMessage(message)) {
       // Find tool messages that follow this AI message
@@ -38,6 +43,7 @@ export const Messages: FC<Props> = ({ messages, onNavigate }) => {
           message={message}
           toolMessages={toolMessages}
           onNavigate={onNavigate}
+          isWorkflowRunning={isWorkflowRunning}
         />
       )
     }

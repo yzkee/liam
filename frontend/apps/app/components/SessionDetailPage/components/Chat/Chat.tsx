@@ -61,7 +61,11 @@ export const Chat: FC<Props> = ({
   return (
     <div className={styles.wrapper}>
       <div className={styles.messagesContainer} ref={containerRef}>
-        <Messages messages={messages} onNavigate={onNavigate} />
+        <Messages
+          messages={messages}
+          onNavigate={onNavigate}
+          isWorkflowRunning={isWorkflowRunning}
+        />
         {isWorkflowRunning && <WorkflowRunningIndicator />}
       </div>
       <ChatInput

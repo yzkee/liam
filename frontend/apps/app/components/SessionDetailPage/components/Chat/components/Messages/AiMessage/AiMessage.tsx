@@ -36,9 +36,15 @@ type Props = {
   message: AIMessage
   toolMessages?: ToolMessage[]
   onNavigate?: (tab: 'erd' | 'artifact') => void
+  isWorkflowRunning?: boolean
 }
 
-export const AiMessage: FC<Props> = ({ message, toolMessages, onNavigate }) => {
+export const AiMessage: FC<Props> = ({
+  message,
+  toolMessages,
+  onNavigate,
+  isWorkflowRunning = false,
+}) => {
   const { avatar, name } = getAgentInfo(message.name)
   const messageContentString = extractResponseFromMessage(message)
   const reasoningText = extractReasoningFromMessage(message)
@@ -78,6 +84,7 @@ export const AiMessage: FC<Props> = ({ message, toolMessages, onNavigate }) => {
           <ToolCalls
             toolCallsWithMessages={toolCallsWithMessages}
             onNavigate={onNavigate}
+            isStreaming={isWorkflowRunning}
           />
         </div>
       </div>

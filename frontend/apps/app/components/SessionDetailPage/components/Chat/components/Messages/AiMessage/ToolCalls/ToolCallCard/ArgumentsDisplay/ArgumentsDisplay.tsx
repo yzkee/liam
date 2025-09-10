@@ -37,13 +37,23 @@ export const ArgumentsDisplay: FC<Props> = ({
   // Format arguments into display lines
   const displayLines = useMemo(() => formatArguments(args), [args])
 
-  // Initialize state - show all lines immediately if not animated
-  const [visibleLines, setVisibleLines] = useState<string[]>(() =>
-    isAnimated ? [] : displayLines,
-  )
-  const [currentIndex, setCurrentIndex] = useState(
-    isAnimated ? 0 : displayLines.length,
-  )
+  // Initialize state - for non-animated content, show all lines immediately
+  const [visibleLines, setVisibleLines] = useState<string[]>(() => {
+    // If not animated, show all lines immediately
+    if (!isAnimated) {
+      return displayLines
+    }
+    // For animated content, start with empty array
+    return []
+  })
+  const [currentIndex, setCurrentIndex] = useState(() => {
+    // If not animated, set index to the end
+    if (!isAnimated) {
+      return displayLines.length
+    }
+    // For animated content, start at 0
+    return 0
+  })
   // For non-animated content, start as ready immediately
   const [isReady, setIsReady] = useState(!isAnimated)
 
@@ -99,8 +109,8 @@ export const ArgumentsDisplay: FC<Props> = ({
   }, [displayLines.length, isAnimated, isReady, onReady])
 
   useEffect(() => {
-    // Skip animation if not animated
-    if (!isAnimated) {
+    // For non-animated content, update visible lines when displayLines changes
+    if (!isAnimated && displayLines.length > 0) {
       setVisibleLines(displayLines)
       setCurrentIndex(displayLines.length)
       return

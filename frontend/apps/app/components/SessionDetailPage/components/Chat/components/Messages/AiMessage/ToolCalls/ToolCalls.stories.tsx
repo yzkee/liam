@@ -3,7 +3,6 @@ import type { ToolCalls as ToolCallsType } from '@/components/SessionDetailPage/
 import { ToolCalls } from './ToolCalls'
 
 const meta: Meta<typeof ToolCalls> = {
-  title: 'SessionDetailPage/Messages/ToolCalls',
   component: ToolCalls,
   parameters: {
     layout: 'padded',

@@ -19,7 +19,7 @@
   box-sizing: border-box;
 }
 
-/* グラデーションオーバーレイ */
+/* Gradient overlays */
 .wrapper {
   position: relative;
 }
@@ -56,7 +56,7 @@
   );
 }
 
-/* カスタムスクロールバー */
+/* Custom scrollbar */
 .container::-webkit-scrollbar {
   width: 6px;
 }

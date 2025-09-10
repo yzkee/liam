@@ -7,7 +7,6 @@ import { MarkdownContent } from '../../../../../../MarkdownContent'
 import { CopyButton } from '../../../../CopyButton'
 import markdownStyles from '../Markdown.module.css'
 import {
-  extractResponseFromMessage,
   extractToolCallsFromMessage,
 } from '../utils'
 import { DBAgent, LeadAgent, PMAgent, QAAgent } from './AgentAvatar'
@@ -41,7 +40,7 @@ type Props = {
 
 export const AiMessage: FC<Props> = ({ message, toolMessages }) => {
   const { avatar, name } = getAgentInfo(message.name)
-  const messageContentString = extractResponseFromMessage(message)
+  const messageContentString = message.text
   const reasoningText = extractReasoningFromMessage(message)
   const toolCalls = extractToolCallsFromMessage(message)
 

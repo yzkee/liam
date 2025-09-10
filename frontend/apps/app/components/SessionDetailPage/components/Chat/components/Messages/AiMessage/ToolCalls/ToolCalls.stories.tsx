@@ -21,7 +21,10 @@ export default meta
 type Story = StoryObj<typeof ToolCalls>
 
 // Mock ToolMessages for stories
-const createMockToolMessage = (content: string, toolCallId: string): ToolMessage => ({
+const createMockToolMessage = (
+  content: string,
+  toolCallId: string,
+): ToolMessage => ({
   id: `msg_${toolCallId}`,
   content,
   tool_call_id: toolCallId,
@@ -520,12 +523,12 @@ export const SchemaDesign: Story = {
   name: 'Schema Design Tool',
   args: {
     toolCallsWithMessages: [
-      { 
-        toolCall: schemaDesignCall, 
+      {
+        toolCall: schemaDesignCall,
         toolMessage: createMockToolMessage(
           'Database schema has been successfully designed and updated. All tables, columns, constraints, and indexes have been created.',
-          'call_1'
-        )
+          'call_1',
+        ),
       },
     ],
     isStreaming: true,
@@ -536,12 +539,12 @@ export const SaveRequirements: Story = {
   name: 'Save Requirements Tool',
   args: {
     toolCallsWithMessages: [
-      { 
-        toolCall: saveRequirementsCall, 
+      {
+        toolCall: saveRequirementsCall,
         toolMessage: createMockToolMessage(
           'Business and functional requirements have been successfully saved to artifact. The requirements document is now available for review.',
-          'call_2'
-        )
+          'call_2',
+        ),
       },
     ],
     isStreaming: true,
@@ -552,12 +555,12 @@ export const SaveTestcases: Story = {
   name: 'Save Testcases and DML Tool',
   args: {
     toolCallsWithMessages: [
-      { 
-        toolCall: saveTestcasesCall, 
+      {
+        toolCall: saveTestcasesCall,
         toolMessage: createMockToolMessage(
           'Test cases and DML operations have been successfully saved. Ready for execution and validation.',
-          'call_3'
-        )
+          'call_3',
+        ),
       },
     ],
     isStreaming: true,
@@ -568,12 +571,12 @@ export const SaveSingleTestcase: Story = {
   name: 'Save Single Testcase',
   args: {
     toolCallsWithMessages: [
-      { 
-        toolCall: saveTestcaseCall, 
+      {
+        toolCall: saveTestcaseCall,
         toolMessage: createMockToolMessage(
           'Test case has been successfully saved.',
-          'call_4'
-        )
+          'call_4',
+        ),
       },
     ],
     isStreaming: true,
@@ -584,12 +587,12 @@ export const RunTest: Story = {
   name: 'Run Test Tool',
   args: {
     toolCallsWithMessages: [
-      { 
-        toolCall: runTestCall, 
+      {
+        toolCall: runTestCall,
         toolMessage: createMockToolMessage(
           'All test cases have been executed successfully. 3/3 tests passed.',
-          'call_5'
-        )
+          'call_5',
+        ),
       },
     ],
     isStreaming: true,
@@ -601,40 +604,40 @@ export const AllToolsCompleted: Story = {
   name: 'All Tools (Completed - Reload Behavior)',
   args: {
     toolCallsWithMessages: [
-      { 
-        toolCall: schemaDesignCall, 
+      {
+        toolCall: schemaDesignCall,
         toolMessage: createMockToolMessage(
           'Database schema has been successfully designed and updated.',
-          'call_1'
-        )
+          'call_1',
+        ),
       },
-      { 
-        toolCall: saveRequirementsCall, 
+      {
+        toolCall: saveRequirementsCall,
         toolMessage: createMockToolMessage(
           'Requirements have been successfully saved to artifact.',
-          'call_2'
-        )
+          'call_2',
+        ),
       },
-      { 
-        toolCall: saveTestcasesCall, 
+      {
+        toolCall: saveTestcasesCall,
         toolMessage: createMockToolMessage(
           'Test cases and DML have been successfully saved.',
-          'call_3'
-        )
+          'call_3',
+        ),
       },
-      { 
-        toolCall: saveTestcaseCall, 
+      {
+        toolCall: saveTestcaseCall,
         toolMessage: createMockToolMessage(
           'Single test case has been saved.',
-          'call_4'
-        )
+          'call_4',
+        ),
       },
-      { 
-        toolCall: runTestCall, 
+      {
+        toolCall: runTestCall,
         toolMessage: createMockToolMessage(
           'All tests executed successfully. 3/3 tests passed.',
-          'call_5'
-        )
+          'call_5',
+        ),
       },
     ],
     isStreaming: false,

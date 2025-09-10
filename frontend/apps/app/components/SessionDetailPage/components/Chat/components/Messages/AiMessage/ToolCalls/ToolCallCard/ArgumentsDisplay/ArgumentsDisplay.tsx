@@ -177,6 +177,7 @@ export const ArgumentsDisplay: FC<Props> = ({
     onLineAdded,
     isExpanded,
     onAnimationComplete,
+    animateScroll,
   ])
 
   // Immediately notify ready for non-animated content
@@ -240,7 +241,7 @@ export const ArgumentsDisplay: FC<Props> = ({
     requestAnimationFrame(() => {
       handleScroll()
     })
-  }, [isExpanded])
+  }, [handleScroll])
 
   // Setup scroll listener
   useEffect(() => {
@@ -258,7 +259,7 @@ export const ArgumentsDisplay: FC<Props> = ({
       }
     }
     return undefined
-  }, [visibleLines, isExpanded]) // Re-check when content or expand state changes
+  }, [handleScroll]) // Re-check when content or expand state changes
 
   // Initial check for overflow after DOM layout
   useLayoutEffect(() => {
@@ -278,7 +279,7 @@ export const ArgumentsDisplay: FC<Props> = ({
     // Also check after a small delay to handle async content loading
     const timer = setTimeout(checkOverflow, 100)
     return () => clearTimeout(timer)
-  }, [visibleLines, isExpanded, isAnimated, onOverflowDetected, wasScrollable]) // Re-check when key properties change
+  }, [notifyOverflowIfNeeded, trackScrollableState, updateGradients]) // Re-check when key properties change
 
   // Don't show anything during preparation phase
   if (isAnimated && !isReady && displayLines.length > 0) {

@@ -67,7 +67,11 @@ const useToolData = (
   const resultStatus = useMemo(() => {
     const lowerResult = result.toLowerCase()
     if (lowerResult.includes('error')) return 'error'
-    if (lowerResult.includes('successfully') || lowerResult.includes('completed')) return 'success'
+    if (
+      lowerResult.includes('successfully') ||
+      lowerResult.includes('completed')
+    )
+      return 'success'
     return 'neutral'
   }, [result])
 

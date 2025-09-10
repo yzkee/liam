@@ -65,7 +65,7 @@ export const OperationsSummary: FC<Props> = ({
     if (scrollRef.current && isAnimated) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
-  }, [displayedLines, isAnimated])
+  }, [isAnimated])
 
   return (
     <div className={styles.container} ref={scrollRef}>

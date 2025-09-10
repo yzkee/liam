@@ -34,10 +34,28 @@ export const getToolDisplayInfo = (toolName: string): ToolDisplayInfo => {
       }
     case 'saveTestcasesAndDmlTool':
       return {
-        displayName: 'Save Test Cases and DML',
-        description: 'Saving test cases and data manipulation language',
+        displayName: 'Save Test Case',
+        description: 'Saving test case with data manipulation language',
         resultAction: {
-          label: 'View Test Cases',
+          label: 'View Test Case',
+          type: 'testcases',
+        },
+      }
+    case 'saveTestcase':
+      return {
+        displayName: 'Save Test Case',
+        description: 'Saving a single test case with DML operation',
+        resultAction: {
+          label: 'View Test Case',
+          type: 'testcases',
+        },
+      }
+    case 'runTestTool':
+      return {
+        displayName: 'Run Test Cases',
+        description: 'Executing all test cases and validating results',
+        resultAction: {
+          label: 'View Test Results',
           type: 'testcases',
         },
       }

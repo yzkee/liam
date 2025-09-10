@@ -3,8 +3,7 @@
   "linter": {
     "rules": {
       "correctness": {
-        "noUndeclaredDependencies": "off",
-        "useExhaustiveDependencies": "error"
+        "noUndeclaredDependencies": "off"
       }
     }
   }

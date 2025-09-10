@@ -1,6 +1,7 @@
 type ToolDisplayInfo = {
   displayName: string
   description: string
+  defaultSuccessMessage?: string
   resultAction?: {
     label: string
     type: 'erd' | 'artifact' | 'testcases'
@@ -18,6 +19,7 @@ export const getToolDisplayInfo = (toolName: string): ToolDisplayInfo => {
       return {
         displayName: 'Database Schema Design',
         description: 'Applying database schema changes',
+        defaultSuccessMessage: 'Database schema has been successfully designed and updated.',
         resultAction: {
           label: 'View ERD',
           type: 'erd',
@@ -27,6 +29,7 @@ export const getToolDisplayInfo = (toolName: string): ToolDisplayInfo => {
       return {
         displayName: 'Save Requirements',
         description: 'Saving business and functional requirements',
+        defaultSuccessMessage: 'Requirements have been successfully saved to artifact.',
         resultAction: {
           label: 'View Artifact',
           type: 'artifact',
@@ -36,6 +39,7 @@ export const getToolDisplayInfo = (toolName: string): ToolDisplayInfo => {
       return {
         displayName: 'Save Test Case',
         description: 'Saving test case with data manipulation language',
+        defaultSuccessMessage: 'Test case and DML have been successfully saved.',
         resultAction: {
           label: 'View Test Case',
           type: 'testcases',
@@ -45,6 +49,7 @@ export const getToolDisplayInfo = (toolName: string): ToolDisplayInfo => {
       return {
         displayName: 'Save Test Case',
         description: 'Saving a single test case with DML operation',
+        defaultSuccessMessage: 'Test case has been successfully saved.',
         resultAction: {
           label: 'View Test Case',
           type: 'testcases',
@@ -54,6 +59,7 @@ export const getToolDisplayInfo = (toolName: string): ToolDisplayInfo => {
       return {
         displayName: 'Run Test Cases',
         description: 'Executing all test cases and validating results',
+        defaultSuccessMessage: 'All test cases have been executed successfully.',
         resultAction: {
           label: 'View Test Results',
           type: 'testcases',

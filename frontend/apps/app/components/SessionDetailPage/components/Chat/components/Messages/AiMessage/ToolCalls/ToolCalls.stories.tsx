@@ -1,3 +1,4 @@
+import type { ToolMessage } from '@langchain/core/messages'
 import type { Meta, StoryObj } from '@storybook/nextjs'
 import type { ToolCalls as ToolCallsType } from '@/components/SessionDetailPage/schema'
 import { ToolCalls } from './ToolCalls'
@@ -18,6 +19,20 @@ const meta: Meta<typeof ToolCalls> = {
 
 export default meta
 type Story = StoryObj<typeof ToolCalls>
+
+// Mock ToolMessages for stories
+const createMockToolMessage = (content: string, toolCallId: string): ToolMessage => ({
+  id: `msg_${toolCallId}`,
+  content,
+  tool_call_id: toolCallId,
+  name: 'tool',
+  lc_namespace: ['langchain_core', 'messages'],
+  lc_id: ['langchain_core', 'messages', 'ToolMessage'],
+  lc_kwargs: {
+    content,
+    tool_call_id: toolCallId,
+  },
+})
 
 const schemaDesignCall: ToolCallsType[number] = {
   id: 'call_1',
@@ -476,7 +491,13 @@ export const SchemaDesign: Story = {
   name: 'Schema Design Tool',
   args: {
     toolCallsWithMessages: [
-      { toolCall: schemaDesignCall, toolMessage: undefined },
+      { 
+        toolCall: schemaDesignCall, 
+        toolMessage: createMockToolMessage(
+          'Database schema has been successfully designed and updated. All tables, columns, constraints, and indexes have been created.',
+          'call_1'
+        )
+      },
     ],
     isStreaming: true,
   },
@@ -486,7 +507,13 @@ export const SaveRequirements: Story = {
   name: 'Save Requirements Tool',
   args: {
     toolCallsWithMessages: [
-      { toolCall: saveRequirementsCall, toolMessage: undefined },
+      { 
+        toolCall: saveRequirementsCall, 
+        toolMessage: createMockToolMessage(
+          'Business and functional requirements have been successfully saved to artifact. The requirements document is now available for review.',
+          'call_2'
+        )
+      },
     ],
     isStreaming: true,
   },
@@ -496,7 +523,13 @@ export const SaveTestcases: Story = {
   name: 'Save Testcases and DML Tool',
   args: {
     toolCallsWithMessages: [
-      { toolCall: saveTestcasesCall, toolMessage: undefined },
+      { 
+        toolCall: saveTestcasesCall, 
+        toolMessage: createMockToolMessage(
+          'Test cases and DML operations have been successfully saved. Ready for execution and validation.',
+          'call_3'
+        )
+      },
     ],
     isStreaming: true,
   },
@@ -507,9 +540,27 @@ export const AllToolsCompleted: Story = {
   name: 'All Tools (Completed - Reload Behavior)',
   args: {
     toolCallsWithMessages: [
-      { toolCall: schemaDesignCall, toolMessage: undefined },
-      { toolCall: saveRequirementsCall, toolMessage: undefined },
-      { toolCall: saveTestcasesCall, toolMessage: undefined },
+      { 
+        toolCall: schemaDesignCall, 
+        toolMessage: createMockToolMessage(
+          'Database schema has been successfully designed and updated.',
+          'call_1'
+        )
+      },
+      { 
+        toolCall: saveRequirementsCall, 
+        toolMessage: createMockToolMessage(
+          'Requirements have been successfully saved to artifact.',
+          'call_2'
+        )
+      },
+      { 
+        toolCall: saveTestcasesCall, 
+        toolMessage: createMockToolMessage(
+          'Test cases and DML have been successfully saved.',
+          'call_3'
+        )
+      },
     ],
     isStreaming: false,
   },

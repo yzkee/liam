@@ -56,8 +56,9 @@ const useToolData = (
     if (toolMessage) {
       return extractResponseFromMessage(toolMessage)
     }
-    return 'Tool call result not found.'
-  }, [toolMessage])
+    // Use tool-specific default message if available
+    return toolInfo.defaultSuccessMessage || 'Tool execution completed.'
+  }, [toolMessage, toolInfo])
 
   const resultStatus = useMemo(() => {
     const lowerResult = result.toLowerCase()

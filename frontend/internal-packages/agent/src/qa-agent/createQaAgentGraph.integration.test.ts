@@ -104,7 +104,6 @@ describe('createQaAgentGraph Integration', () => {
       designSessionId: context.designSessionId,
       buildingSchemaId: context.buildingSchemaId,
       latestVersionNumber: context.latestVersionNumber,
-      dmlExecutionErrors: undefined,
       next: END,
     }
 

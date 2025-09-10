@@ -486,6 +486,35 @@ const saveTestcasesCall: ToolCallsType[number] = {
   },
 }
 
+const saveTestcaseCall: ToolCallsType[number] = {
+  id: 'call_4',
+  type: 'function',
+  index: 3,
+  function: {
+    name: 'saveTestcase',
+    arguments: JSON.stringify({
+      name: 'User Profile Update Test',
+      description: 'Verify that users can update their profile information',
+      dmlOperation: {
+        sql: "UPDATE users SET first_name = 'John', last_name = 'Doe' WHERE id = '123'",
+        type: 'update',
+      },
+    }),
+  },
+}
+
+const runTestCall: ToolCallsType[number] = {
+  id: 'call_5',
+  type: 'function',
+  index: 4,
+  function: {
+    name: 'runTestTool',
+    arguments: JSON.stringify({
+      testIds: ['test_1', 'test_2', 'test_3'],
+    }),
+  },
+}
+
 // Individual tool stories
 export const SchemaDesign: Story = {
   name: 'Schema Design Tool',
@@ -535,6 +564,38 @@ export const SaveTestcases: Story = {
   },
 }
 
+export const SaveSingleTestcase: Story = {
+  name: 'Save Single Testcase',
+  args: {
+    toolCallsWithMessages: [
+      { 
+        toolCall: saveTestcaseCall, 
+        toolMessage: createMockToolMessage(
+          'Test case has been successfully saved.',
+          'call_4'
+        )
+      },
+    ],
+    isStreaming: true,
+  },
+}
+
+export const RunTest: Story = {
+  name: 'Run Test Tool',
+  args: {
+    toolCallsWithMessages: [
+      { 
+        toolCall: runTestCall, 
+        toolMessage: createMockToolMessage(
+          'All test cases have been executed successfully. 3/3 tests passed.',
+          'call_5'
+        )
+      },
+    ],
+    isStreaming: true,
+  },
+}
+
 // Static/Completed versions for reload behavior testing
 export const AllToolsCompleted: Story = {
   name: 'All Tools (Completed - Reload Behavior)',
@@ -559,6 +620,20 @@ export const AllToolsCompleted: Story = {
         toolMessage: createMockToolMessage(
           'Test cases and DML have been successfully saved.',
           'call_3'
+        )
+      },
+      { 
+        toolCall: saveTestcaseCall, 
+        toolMessage: createMockToolMessage(
+          'Single test case has been saved.',
+          'call_4'
+        )
+      },
+      { 
+        toolCall: runTestCall, 
+        toolMessage: createMockToolMessage(
+          'All tests executed successfully. 3/3 tests passed.',
+          'call_5'
         )
       },
     ],

@@ -54,6 +54,10 @@ const useToolData = (
 
   const result = useMemo(() => {
     if (toolMessage) {
+      // Handle both real ToolMessage instances and mock objects
+      if (typeof toolMessage.content === 'string') {
+        return toolMessage.content
+      }
       return extractResponseFromMessage(toolMessage)
     }
     // Use tool-specific default message if available

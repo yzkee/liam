@@ -1,6 +1,5 @@
 import { type BaseMessage, isAIMessage } from '@langchain/core/messages'
 import { parsePartialJson } from '@langchain/core/output_parsers'
-import { getContentString } from './getContentString'
 
 // Helper function to extract response from content block
 function extractResponseFromBlock(block: unknown): string | null {
@@ -97,11 +96,23 @@ function processRawResponse(rawResponse: unknown): string {
 // Helper function to extract content from response object
 function extractContentFromResponseObject(content: unknown): string {
   if (typeof content === 'string') {
-    return getContentString(content)
+    return content
   }
 
   if (Array.isArray(content)) {
-    return getContentString(content)
+    const texts = content
+      .filter((c): c is { type: 'text'; text: string } => {
+        return (
+          c &&
+          typeof c === 'object' &&
+          'type' in c &&
+          'text' in c &&
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+          (c as Record<string, unknown>).type === 'text'
+        )
+      })
+      .map((c) => c.text)
+    return texts.join(' ')
   }
 
   if (content !== null && content !== undefined) {
@@ -112,7 +123,7 @@ function extractContentFromResponseObject(content: unknown): string {
 }
 
 export function extractResponseFromMessage(message: BaseMessage): string {
-  if (!isAIMessage(message)) return getContentString(message.content)
+  if (!isAIMessage(message)) return message.text
 
   // Iterate through all content entries to find response
   if (Array.isArray(message.content)) {
@@ -125,7 +136,7 @@ export function extractResponseFromMessage(message: BaseMessage): string {
   const rawResponse = toolCall?.args?.response
 
   if (!toolCall || rawResponse === undefined) {
-    return getContentString(message.content)
+    return message.text
   }
 
   // Process the raw response

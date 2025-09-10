@@ -22,8 +22,8 @@ type Story = StoryObj<typeof ToolCalls>
 
 // Mock ToolMessages for stories
 const createMockToolMessage = (
-  content: string,
-  toolCallId: string,
+  _content: string,
+  _toolCallId: string,
 ): ToolMessage | undefined => {
   // Return undefined to use default message handling in ToolCallCard
   // This avoids type assertion issues while still testing the UI

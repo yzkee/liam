@@ -2,6 +2,7 @@
 
 import {
   type FC,
+  useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -53,36 +54,35 @@ export const ArgumentsDisplay: FC<Props> = ({
   const [showBottomGradient, setShowBottomGradient] = useState(false)
 
   // Extract easing function
-  const calculateEaseProgress = (progress: number): number => {
+  const calculateEaseProgress = useCallback((progress: number): number => {
     return progress < 0.5
       ? 2 * progress * progress
       : 1 - (-2 * progress + 2) ** 2 / 2
-  }
+  }, [])
 
   // Extract smooth scroll animation
-  const animateScroll = (
-    element: HTMLElement,
-    targetScroll: number,
-    duration: number,
-  ) => {
-    const startTime = performance.now()
-    const initialScrollTop = element.scrollTop
-    const scrollDistance = targetScroll - initialScrollTop
+  const animateScroll = useCallback(
+    (element: HTMLElement, targetScroll: number, duration: number) => {
+      const startTime = performance.now()
+      const initialScrollTop = element.scrollTop
+      const scrollDistance = targetScroll - initialScrollTop
 
-    const scrollStep = () => {
-      const elapsed = performance.now() - startTime
-      const progress = Math.min(elapsed / duration, 1)
-      const easeProgress = calculateEaseProgress(progress)
+      const scrollStep = () => {
+        const elapsed = performance.now() - startTime
+        const progress = Math.min(elapsed / duration, 1)
+        const easeProgress = calculateEaseProgress(progress)
 
-      element.scrollTop = initialScrollTop + scrollDistance * easeProgress
+        element.scrollTop = initialScrollTop + scrollDistance * easeProgress
 
-      if (progress < 1) {
-        requestAnimationFrame(scrollStep)
+        if (progress < 1) {
+          requestAnimationFrame(scrollStep)
+        }
       }
-    }
 
-    requestAnimationFrame(scrollStep)
-  }
+      requestAnimationFrame(scrollStep)
+    },
+    [calculateEaseProgress],
+  )
 
   // Wait for all lines to be calculated before starting animation
   useEffect(() => {
@@ -192,41 +192,46 @@ export const ArgumentsDisplay: FC<Props> = ({
   // Remove hover state - button is now in parent
 
   // Helper to update gradient visibility
-  const updateGradients = (
-    scrollTop: number,
-    scrollHeight: number,
-    clientHeight: number,
-  ) => {
-    const scrollable = scrollHeight > clientHeight
-    if (scrollable) {
-      setShowTopGradient(scrollTop > 5)
-      setShowBottomGradient(scrollTop < scrollHeight - clientHeight - 5)
-    } else {
-      setShowTopGradient(false)
-      setShowBottomGradient(false)
-    }
-    return scrollable
-  }
+  const updateGradients = useCallback(
+    (scrollTop: number, scrollHeight: number, clientHeight: number) => {
+      const scrollable = scrollHeight > clientHeight
+      if (scrollable) {
+        setShowTopGradient(scrollTop > 5)
+        setShowBottomGradient(scrollTop < scrollHeight - clientHeight - 5)
+      } else {
+        setShowTopGradient(false)
+        setShowBottomGradient(false)
+      }
+      return scrollable
+    },
+    [],
+  )
 
   // Helper to track scrollable state
-  const trackScrollableState = (scrollable: boolean) => {
-    if (scrollable && !isExpanded) {
-      setWasScrollable(true)
-    }
-  }
+  const trackScrollableState = useCallback(
+    (scrollable: boolean) => {
+      if (scrollable && !isExpanded) {
+        setWasScrollable(true)
+      }
+    },
+    [isExpanded],
+  )
 
   // Helper to notify overflow detection
-  const notifyOverflowIfNeeded = (scrollable: boolean) => {
-    if (onOverflowDetected) {
-      const shouldNotify = !isAnimated || visibleLines.length > 3
-      if (shouldNotify) {
-        onOverflowDetected(wasScrollable || scrollable)
+  const notifyOverflowIfNeeded = useCallback(
+    (scrollable: boolean) => {
+      if (onOverflowDetected) {
+        const shouldNotify = !isAnimated || visibleLines.length > 3
+        if (shouldNotify) {
+          onOverflowDetected(wasScrollable || scrollable)
+        }
       }
-    }
-  }
+    },
+    [onOverflowDetected, isAnimated, visibleLines.length, wasScrollable],
+  )
 
   // Handle scroll events to show/hide gradients
-  const handleScroll = () => {
+  const handleScroll = useCallback(() => {
     if (!containerRef.current) return
 
     const { scrollTop, scrollHeight, clientHeight } = containerRef.current
@@ -234,7 +239,7 @@ export const ArgumentsDisplay: FC<Props> = ({
 
     trackScrollableState(scrollable)
     notifyOverflowIfNeeded(scrollable)
-  }
+  }, [updateGradients, trackScrollableState, notifyOverflowIfNeeded])
 
   // Re-check scroll when expand state changes
   useEffect(() => {
@@ -279,7 +284,7 @@ export const ArgumentsDisplay: FC<Props> = ({
     // Also check after a small delay to handle async content loading
     const timer = setTimeout(checkOverflow, 100)
     return () => clearTimeout(timer)
-  }, [notifyOverflowIfNeeded, trackScrollableState, updateGradients]) // Re-check when key properties change
+  }, [updateGradients, trackScrollableState, notifyOverflowIfNeeded]) // Re-check when key properties change
 
   // Don't show anything during preparation phase
   if (isAnimated && !isReady && displayLines.length > 0) {

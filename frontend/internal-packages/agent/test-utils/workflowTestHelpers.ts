@@ -17,6 +17,7 @@ import {
 import {
   handleReasoningMessage,
   handleRegularMessage,
+  handleToolCallMessage,
 } from '../src/streaming/server/handlers'
 
 /**
@@ -118,6 +119,7 @@ export const outputStreamEvents = async (
   const messageManager = new MessageTupleManager()
   const lastOutputContent = new Map<string, string>()
   const lastReasoningContent = new Map<string, string>()
+  const lastToolCallsContent = new Map<string, number>()
 
   for await (const ev of stream) {
     if (!isLangChainStreamEvent(ev)) continue
@@ -138,6 +140,7 @@ export const outputStreamEvents = async (
     const message = coerceMessageLikeToMessage(result.chunk)
 
     handleReasoningMessage(message, messageId, lastReasoningContent)
+    handleToolCallMessage(message, messageId, lastToolCallsContent)
     handleRegularMessage(message, messageId, lastOutputContent)
   }
 }

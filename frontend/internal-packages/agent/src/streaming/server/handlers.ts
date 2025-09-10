@@ -1,5 +1,6 @@
-import type { BaseMessage } from '@langchain/core/messages'
+import { type BaseMessage, isAIMessage } from '@langchain/core/messages'
 import { gray, italic } from 'yoctocolors'
+import { extractToolCallsFromMessage } from '../core/extractToolCallsFromMessage'
 import { extractReasoningFromMessage } from '../core/reasoningExtractor'
 import { formatStreamingMessage } from './formatters'
 
@@ -49,4 +50,27 @@ export const handleRegularMessage = (
   )
 
   process.stdout.write(formattedOutput)
+}
+
+export const handleToolCallMessage = (
+  message: BaseMessage,
+  messageId: string,
+  lastToolCallsContent: Map<string, number>,
+): void => {
+  // Only handle AI messages that can have tool calls
+  if (!isAIMessage(message)) return
+
+  const currentToolCalls = extractToolCallsFromMessage(message)
+  const lastToolCallsCount = lastToolCallsContent.get(messageId) || 0
+
+  // Only show new tool calls
+  const newToolCalls = currentToolCalls.slice(lastToolCallsCount)
+  if (newToolCalls.length === 0) return
+
+  lastToolCallsContent.set(messageId, currentToolCalls.length)
+
+  for (const toolCall of newToolCalls) {
+    const toolCallOutput = `\n\n🔧 ${toolCall.name}(${JSON.stringify(toolCall.args)})`
+    process.stdout.write(toolCallOutput)
+  }
 }

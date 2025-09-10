@@ -80,6 +80,7 @@ const useToolData = (
 
 // Custom hook for animation state management
 const useAnimationState = (status: Status, isPreCompleted: boolean) => {
+  // For pre-completed content (initial load), start as ready immediately
   const [argumentsReady, setArgumentsReady] = useState(true)
   const [animationStarted, setAnimationStarted] = useState(false)
   const [argumentsAnimationComplete, setArgumentsAnimationComplete] =

@@ -44,7 +44,8 @@ export const ArgumentsDisplay: FC<Props> = ({
   const [currentIndex, setCurrentIndex] = useState(
     isAnimated ? 0 : displayLines.length,
   )
-  const [isReady, setIsReady] = useState(false)
+  // For non-animated content, start as ready immediately
+  const [isReady, setIsReady] = useState(!isAnimated)
 
   // Remove internal expand state - now controlled by parent
 

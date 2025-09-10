@@ -1,6 +1,13 @@
 'use client'
 
-import { type FC, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  type FC,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import styles from './OperationsSummary.module.css'
 import { parseOperations } from './utils/parseOperations'
 
@@ -60,8 +67,8 @@ export const OperationsSummary: FC<Props> = ({
     return undefined
   }, [currentIndex, summaryLines, isAnimated])
 
-  useEffect(() => {
-    // Auto-scroll only when animated
+  useLayoutEffect(() => {
+    // Auto-scroll only when animated and when new lines are added
     if (scrollRef.current && isAnimated) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }

@@ -13,6 +13,11 @@ import styles from './ArgumentsDisplay.module.css'
 import { SyntaxHighlightedLine } from './SyntaxHighlightedLine'
 import { formatArguments } from './utils/formatArguments'
 
+// Animation timing constants
+const LINE_ADD_INTERVAL_MS = 300
+const ANIMATION_DELAY_PER_INDEX_MS = 50
+const ANIMATION_COMPLETE_DELAY_MS = 100
+const ANIMATION_DURATION_MS = 300
 type Props = {
   args: unknown
   isAnimated?: boolean
@@ -102,7 +107,7 @@ export const ArgumentsDisplay: FC<Props> = ({
       const readyTimer = setTimeout(() => {
         setIsReady(true)
         onReady?.()
-      }, 50)
+      }, ANIMATION_DELAY_PER_INDEX_MS)
       return () => clearTimeout(readyTimer)
     }
     return undefined
@@ -126,8 +131,8 @@ export const ArgumentsDisplay: FC<Props> = ({
 
           // Scroll synchronously with CSS animation
           // Continuously adjust scroll during the animation period
-          const animationDuration = 300 // CSS fadeIn duration
-          const animationDelay = currentIndex * 50 // CSS animation delay
+          const animationDuration = ANIMATION_DURATION_MS // CSS fadeIn duration
+          const animationDelay = currentIndex * ANIMATION_DELAY_PER_INDEX_MS // CSS animation delay
 
           // Start scrolling after the CSS animation delay
           setTimeout(() => {
@@ -151,10 +156,10 @@ export const ArgumentsDisplay: FC<Props> = ({
             // Notify that animation is complete
             setTimeout(() => {
               onAnimationComplete?.()
-            }, 100) // Small delay to ensure smooth visual completion
+            }, ANIMATION_COMPLETE_DELAY_MS) // Small delay to ensure smooth visual completion
           }
         }
-      }, 300) // Add one line every 300ms
+      }, LINE_ADD_INTERVAL_MS) // Add one line every 300ms
 
       return () => clearTimeout(timer)
     }
@@ -176,7 +181,7 @@ export const ArgumentsDisplay: FC<Props> = ({
             element.scrollTop = scrollHeight
           }
         }
-      }, 100)
+      }, ANIMATION_COMPLETE_DELAY_MS)
     }
 
     return undefined

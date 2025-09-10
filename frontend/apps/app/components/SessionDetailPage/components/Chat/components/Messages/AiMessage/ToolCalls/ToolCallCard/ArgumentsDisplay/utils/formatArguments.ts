@@ -33,7 +33,15 @@ type RequirementsArgs = {
 }
 
 const isRequirementsArgs = (args: unknown): args is RequirementsArgs => {
-  return typeof args === 'object' && args !== null
+  if (typeof args !== 'object' || args === null) {
+    return false
+  }
+  // Check for at least one of the expected properties
+  return (
+    'businessRequirement' in args ||
+    'functionalRequirements' in args ||
+    'nonFunctionalRequirements' in args
+  )
 }
 
 const formatSaveRequirements = (args: unknown): string[] => {
@@ -60,13 +68,18 @@ const formatSaveRequirements = (args: unknown): string[] => {
     lines.push('⚙️ Functional Requirements:')
     Object.entries(argsObj.functionalRequirements).forEach(
       ([category, requirements]) => {
-        if (Array.isArray(requirements)) {
-          lines.push(`  ${category}:`)
-          requirements.forEach((req: string, index: number) => {
-            lines.push(`    ${index + 1}. ${req}`)
-          })
-          lines.push(' ') // Minimal space for visual separation
+        if (!Array.isArray(requirements)) {
+          return
         }
+        lines.push(`  ${category}:`)
+        requirements.forEach((req: unknown, index: number) => {
+          if (typeof req === 'string') {
+            lines.push(`    ${index + 1}. ${req}`)
+          } else {
+            lines.push(`    ${index + 1}. ${String(req)}`)
+          }
+        })
+        lines.push(' ') // Minimal space for visual separation
       },
     )
   }
@@ -79,13 +92,18 @@ const formatSaveRequirements = (args: unknown): string[] => {
     lines.push('🔧 Non-Functional Requirements:')
     Object.entries(argsObj.nonFunctionalRequirements).forEach(
       ([category, requirements]) => {
-        if (Array.isArray(requirements)) {
-          lines.push(`  ${category}:`)
-          requirements.forEach((req: string, index: number) => {
-            lines.push(`    ${index + 1}. ${req}`)
-          })
-          lines.push(' ') // Minimal space for visual separation
+        if (!Array.isArray(requirements)) {
+          return
         }
+        lines.push(`  ${category}:`)
+        requirements.forEach((req: unknown, index: number) => {
+          if (typeof req === 'string') {
+            lines.push(`    ${index + 1}. ${req}`)
+          } else {
+            lines.push(`    ${index + 1}. ${String(req)}`)
+          }
+        })
+        lines.push(' ') // Minimal space for visual separation
       },
     )
   }
@@ -121,7 +139,7 @@ const formatColumn = (path: string, value: unknown): string => {
   const unique = valueTyped.unique ? ' UNIQUE' : ''
   const defaultVal =
     valueTyped.default !== undefined
-      ? ` DEFAULT ${String(valueTyped.default).replace(/'/g, "''")}`
+      ? ` DEFAULT ${JSON.stringify(valueTyped.default)}`
       : ''
   return `  Adding column '${columnName}' (${type}${notNull}${unique}${defaultVal})`
 }

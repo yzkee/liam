@@ -65,41 +65,96 @@ export const ToolCalls: FC<Props> = ({
     // Only run tools if streaming
     if (!isStreaming) return
 
+    // Create an AbortController for cancellation
+    const abortController = new AbortController()
+    const cancelled = { value: false }
+
+    // Helper to create a cancellable delay
+    const wait = (ms: number): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => {
+          if (!cancelled.value) {
+            resolve()
+          } else {
+            reject(new Error('Cancelled'))
+          }
+        }, ms)
+        abortController.signal.addEventListener('abort', () => {
+          clearTimeout(timer)
+          reject(new Error('Cancelled'))
+        })
+      })
+    }
+
     const runTools = async () => {
       for (const { toolCall: tc } of filteredToolCalls) {
-        // Wait before starting (for better visibility)
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+        // Check if cancelled before starting
+        if (cancelled.value) break
 
-        // Update to running state
-        setToolCallStates((prev) => {
-          // Skip if already processed
-          if (
-            prev[tc.id]?.status === 'running' ||
-            prev[tc.id]?.status === 'completed' ||
-            prev[tc.id]?.status === 'error'
-          ) {
-            return prev
+        // Skip if already completed in state
+        const currentState = toolCallStates[tc.id]
+        if (
+          currentState?.status === 'completed' ||
+          currentState?.status === 'error'
+        ) {
+          continue
+        }
+
+        try {
+          // Wait before starting (for better visibility)
+          await wait(1000)
+
+          // Check if cancelled after wait
+          if (cancelled.value) break
+
+          // Update to running state
+          setToolCallStates((prev) => {
+            // Check again if cancelled
+            if (cancelled.value) return prev
+
+            // Skip if already processed
+            if (
+              prev[tc.id]?.status === 'running' ||
+              prev[tc.id]?.status === 'completed' ||
+              prev[tc.id]?.status === 'error'
+            ) {
+              return prev
+            }
+            return {
+              ...prev,
+              [tc.id]: { ...prev[tc.id], status: 'running' },
+            }
+          })
+
+          // Simulate execution time
+          // Shorter time for non-streaming (2s) vs streaming (5s)
+          const executionTime = isStreaming ? 5000 : 2000
+          await wait(executionTime)
+
+          // Check if cancelled after execution
+          if (cancelled.value) break
+
+          // Update to completed state without hardcoded result
+          setToolCallStates((prev) => {
+            // Check again if cancelled
+            if (cancelled.value) return prev
+
+            return {
+              ...prev,
+              [tc.id]: {
+                ...prev[tc.id],
+                status: 'completed',
+                // Don't set result here - it should come from toolMessage
+              },
+            }
+          })
+        } catch (error) {
+          // If cancelled, just break out of the loop
+          if (error instanceof Error && error.message === 'Cancelled') {
+            break
           }
-          return {
-            ...prev,
-            [tc.id]: { ...prev[tc.id], status: 'running' },
-          }
-        })
-
-        // Simulate execution time
-        // Shorter time for non-streaming (2s) vs streaming (5s)
-        const executionTime = isStreaming ? 5000 : 2000
-        await new Promise((resolve) => setTimeout(resolve, executionTime))
-
-        // Update to completed state without hardcoded result
-        setToolCallStates((prev) => ({
-          ...prev,
-          [tc.id]: {
-            ...prev[tc.id],
-            status: 'completed',
-            // Don't set result here - it should come from toolMessage
-          },
-        }))
+          // Handle other errors if needed
+        }
       }
     }
 
@@ -107,7 +162,13 @@ export const ToolCalls: FC<Props> = ({
     if (filteredToolCalls.length > 0) {
       runTools()
     }
-  }, [filteredToolCalls, isStreaming])
+
+    // Cleanup function
+    return () => {
+      cancelled.value = true
+      abortController.abort()
+    }
+  }, [filteredToolCalls, isStreaming, toolCallStates])
 
   if (filteredToolCalls.length === 0) return null
 

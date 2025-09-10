@@ -22,18 +22,61 @@ export const Messages: FC<Props> = ({
 }) => {
   return messages.map((message, index) => {
     if (isAIMessage(message)) {
-      // Find tool messages that follow this AI message
-      const toolMessages: ToolMessage[] = []
-      let nextIndex = index + 1
+      // Extract tool call IDs from the AI message
+      const toolCallIds =
+        message.tool_calls
+          ?.map((tc) => tc.id)
+          .filter((id): id is string => Boolean(id)) || []
 
-      // Collect all tool messages that immediately follow this AI message
-      while (nextIndex < messages.length) {
-        const nextMessage = messages[nextIndex]
-        if (nextMessage && isToolMessage(nextMessage)) {
-          toolMessages.push(nextMessage)
-          nextIndex++
-        } else {
-          break
+      // Find tool messages that match the tool call IDs
+      const toolMessages: ToolMessage[] = []
+
+      if (toolCallIds.length > 0) {
+        // Filter all messages for matching tool messages
+        const matchingToolMessages = messages.filter(
+          (msg): msg is ToolMessage => {
+            if (!isToolMessage(msg)) return false
+            // Check if the tool message references any of the AI message's tool calls
+            // Tool messages might have a toolCallId field
+            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+            const msgWithToolCall = msg as ToolMessage & {
+              tool_call_id?: string
+              toolCallId?: string
+            }
+            const msgToolCallId =
+              msgWithToolCall.tool_call_id || msgWithToolCall.toolCallId
+            return Boolean(msgToolCallId && toolCallIds.includes(msgToolCallId))
+          },
+        )
+
+        // Sort by original index to preserve chronological order
+        matchingToolMessages.sort((a, b) => {
+          const aIndex = messages.indexOf(a)
+          const bIndex = messages.indexOf(b)
+          return aIndex - bIndex
+        })
+
+        // Deduplicate and add to toolMessages
+        const seen = new Set<string>()
+        for (const msg of matchingToolMessages) {
+          if (msg.id && !seen.has(msg.id)) {
+            seen.add(msg.id)
+            toolMessages.push(msg)
+          }
+        }
+      }
+
+      // Fallback: if no tool call IDs or no matches, collect immediate following tool messages
+      if (toolMessages.length === 0) {
+        let nextIndex = index + 1
+        while (nextIndex < messages.length) {
+          const nextMessage = messages[nextIndex]
+          if (nextMessage && isToolMessage(nextMessage)) {
+            toolMessages.push(nextMessage)
+            nextIndex++
+          } else {
+            break
+          }
         }
       }
 

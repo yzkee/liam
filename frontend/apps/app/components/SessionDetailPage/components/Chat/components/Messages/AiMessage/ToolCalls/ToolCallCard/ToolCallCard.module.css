@@ -403,3 +403,57 @@
   margin: 0;
   pointer-events: none;
 }
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .container {
+    transition: none;
+  }
+
+  .header {
+    transition: none;
+  }
+
+  .chevron {
+    transition: none;
+  }
+
+  .icon {
+    transition: none;
+  }
+
+  .iconAnimated {
+    animation: none;
+  }
+
+  .toolName {
+    transition: none;
+  }
+
+  .container[data-status='pending'] .toolName,
+  .container[data-status='running'] .toolName {
+    animation: none;
+  }
+
+  .statusText {
+    transition: none;
+  }
+
+  .content {
+    transition: none;
+  }
+
+  .argumentsExpandButton,
+  .resultExpandButton {
+    transition: none;
+  }
+
+  .result,
+  .error {
+    animation: none;
+  }
+
+  .resultContent {
+    transition: none;
+  }
+}

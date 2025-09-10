@@ -152,11 +152,16 @@ const useScrollManagement = (
 ) => {
   const contentRef = useRef<HTMLDivElement>(null)
   const resultContentRef = useRef<HTMLDivElement>(null)
+  const rafRef = useRef<number | null>(null)
 
   const handleLineAdded = () => {
     const isRunning = status === 'pending' || status === 'running'
     if (contentRef.current && !expandState.isCollapsed && isRunning) {
-      requestAnimationFrame(() => {
+      // Cancel any existing animation frame
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current)
+      }
+      rafRef.current = requestAnimationFrame(() => {
         if (contentRef.current) {
           const element = contentRef.current
           const { scrollHeight, clientHeight } = element
@@ -164,6 +169,7 @@ const useScrollManagement = (
             element.scrollTop = element.scrollHeight
           }
         }
+        rafRef.current = null
       })
     }
   }
@@ -171,6 +177,15 @@ const useScrollManagement = (
   const handleArgumentsOverflow = (hasOverflow: boolean) => {
     expandState.setNeedsExpandButton(hasOverflow)
   }
+
+  // Cleanup animation frame on unmount
+  useEffect(() => {
+    return () => {
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     if (resultContentRef.current && result && status === 'completed') {

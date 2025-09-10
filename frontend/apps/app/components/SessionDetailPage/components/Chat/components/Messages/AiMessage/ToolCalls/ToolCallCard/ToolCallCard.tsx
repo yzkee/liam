@@ -60,14 +60,14 @@ const useToolData = (
       }
       return extractResponseFromMessage(toolMessage)
     }
-    // Use tool-specific default message if available
-    return toolInfo.defaultSuccessMessage || 'Tool execution completed.'
-  }, [toolMessage, toolInfo])
+    // Use default message
+    return 'Tool execution completed.'
+  }, [toolMessage])
 
   const resultStatus = useMemo(() => {
     const lowerResult = result.toLowerCase()
     if (lowerResult.includes('error')) return 'error'
-    if (lowerResult.includes('successfully')) return 'success'
+    if (lowerResult.includes('successfully') || lowerResult.includes('completed')) return 'success'
     return 'neutral'
   }, [result])
 

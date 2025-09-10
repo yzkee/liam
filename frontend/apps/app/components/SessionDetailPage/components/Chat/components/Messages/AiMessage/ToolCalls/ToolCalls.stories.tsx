@@ -20,15 +20,8 @@ const meta: Meta<typeof ToolCalls> = {
 export default meta
 type Story = StoryObj<typeof ToolCalls>
 
-// Mock ToolMessages for stories
-const createMockToolMessage = (
-  _content: string,
-  _toolCallId: string,
-): ToolMessage | undefined => {
-  // Return undefined to use default message handling in ToolCallCard
-  // This avoids type assertion issues while still testing the UI
-  return undefined
-}
+// Note: We use undefined for toolMessage to test default message handling in ToolCallCard
+// This avoids type assertion issues while still properly testing the UI
 
 const schemaDesignCall: ToolCallsType[number] = {
   id: 'call_1',
@@ -518,10 +511,7 @@ export const SchemaDesign: Story = {
     toolCallsWithMessages: [
       {
         toolCall: schemaDesignCall,
-        toolMessage: createMockToolMessage(
-          'Database schema has been successfully designed and updated. All tables, columns, constraints, and indexes have been created.',
-          'call_1',
-        ),
+        toolMessage: undefined, // Use default message: "Tool execution completed."
       },
     ],
     isStreaming: true,
@@ -534,10 +524,7 @@ export const SaveRequirements: Story = {
     toolCallsWithMessages: [
       {
         toolCall: saveRequirementsCall,
-        toolMessage: createMockToolMessage(
-          'Business and functional requirements have been successfully saved to artifact. The requirements document is now available for review.',
-          'call_2',
-        ),
+        toolMessage: undefined, // Use default message: "Tool execution completed."
       },
     ],
     isStreaming: true,
@@ -550,10 +537,7 @@ export const SaveTestcases: Story = {
     toolCallsWithMessages: [
       {
         toolCall: saveTestcasesCall,
-        toolMessage: createMockToolMessage(
-          'Test cases and DML operations have been successfully saved. Ready for execution and validation.',
-          'call_3',
-        ),
+        toolMessage: undefined, // Use default message: "Tool execution completed."
       },
     ],
     isStreaming: true,
@@ -566,10 +550,7 @@ export const SaveSingleTestcase: Story = {
     toolCallsWithMessages: [
       {
         toolCall: saveTestcaseCall,
-        toolMessage: createMockToolMessage(
-          'Test case has been successfully saved.',
-          'call_4',
-        ),
+        toolMessage: undefined, // Use default message: "Tool execution completed."
       },
     ],
     isStreaming: true,
@@ -582,10 +563,7 @@ export const RunTest: Story = {
     toolCallsWithMessages: [
       {
         toolCall: runTestCall,
-        toolMessage: createMockToolMessage(
-          'All test cases have been executed successfully. 3/3 tests passed.',
-          'call_5',
-        ),
+        toolMessage: undefined, // Use default message: "Tool execution completed."
       },
     ],
     isStreaming: true,
@@ -599,38 +577,23 @@ export const AllToolsCompleted: Story = {
     toolCallsWithMessages: [
       {
         toolCall: schemaDesignCall,
-        toolMessage: createMockToolMessage(
-          'Database schema has been successfully designed and updated.',
-          'call_1',
-        ),
+        toolMessage: undefined, // Use default message: "Tool execution completed."
       },
       {
         toolCall: saveRequirementsCall,
-        toolMessage: createMockToolMessage(
-          'Requirements have been successfully saved to artifact.',
-          'call_2',
-        ),
+        toolMessage: undefined, // Use default message: "Tool execution completed."
       },
       {
         toolCall: saveTestcasesCall,
-        toolMessage: createMockToolMessage(
-          'Test cases and DML have been successfully saved.',
-          'call_3',
-        ),
+        toolMessage: undefined, // Use default message: "Tool execution completed."
       },
       {
         toolCall: saveTestcaseCall,
-        toolMessage: createMockToolMessage(
-          'Single test case has been saved.',
-          'call_4',
-        ),
+        toolMessage: undefined, // Use default message: "Tool execution completed."
       },
       {
         toolCall: runTestCall,
-        toolMessage: createMockToolMessage(
-          'All tests executed successfully. 3/3 tests passed.',
-          'call_5',
-        ),
+        toolMessage: undefined, // Use default message: "Tool execution completed."
       },
     ],
     isStreaming: false,

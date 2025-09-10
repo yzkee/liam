@@ -58,9 +58,7 @@ export const ToolCalls: FC<Props> = ({
     if (Object.keys(newStates).length > 0) {
       setToolCallStates((prev) => ({ ...prev, ...newStates }))
     }
-    // biome-ignore lint/correctness/useExhaustiveDependencies: toolCallStates is managed internally
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filteredToolCalls, isStreaming])
+  }, [filteredToolCalls, isStreaming, toolCallStates])
 
   // Execute tools sequentially - Only for streaming
   useEffect(() => {

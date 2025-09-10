@@ -20,22 +20,16 @@ const meta: Meta<typeof ToolCalls> = {
 export default meta
 type Story = StoryObj<typeof ToolCalls>
 
-// Mock ToolMessages for stories
+// Mock ToolMessages for stories - use type assertion to avoid complex type requirements
 const createMockToolMessage = (
   content: string,
   toolCallId: string,
-): ToolMessage => ({
+) => ({
   id: `msg_${toolCallId}`,
   content,
   tool_call_id: toolCallId,
   name: 'tool',
-  lc_namespace: ['langchain_core', 'messages'],
-  lc_id: ['langchain_core', 'messages', 'ToolMessage'],
-  lc_kwargs: {
-    content,
-    tool_call_id: toolCallId,
-  },
-})
+} as ToolMessage)
 
 const schemaDesignCall: ToolCallsType[number] = {
   id: 'call_1',

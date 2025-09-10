@@ -1,4 +1,3 @@
-import type { ToolMessage } from '@langchain/core/messages'
 import type { Meta, StoryObj } from '@storybook/nextjs'
 import type { ToolCalls as ToolCallsType } from '@/components/SessionDetailPage/schema'
 import { ToolCalls } from './ToolCalls'
@@ -571,6 +570,22 @@ export const RunTest: Story = {
 }
 
 // Static/Completed versions for reload behavior testing
+export const LoadedSession: Story = {
+  args: {
+    toolCallsWithMessages: [
+      {
+        toolCall: schemaDesignCall,
+        toolMessage: undefined,
+      },
+      {
+        toolCall: saveRequirementsCall,
+        toolMessage: undefined,
+      },
+    ],
+    isStreaming: false, // This simulates loading an existing session
+  },
+}
+
 export const AllToolsCompleted: Story = {
   name: 'All Tools (Completed - Reload Behavior)',
   args: {

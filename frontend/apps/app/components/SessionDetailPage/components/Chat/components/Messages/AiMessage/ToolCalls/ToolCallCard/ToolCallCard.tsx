@@ -81,7 +81,8 @@ const useToolData = (
 // Custom hook for animation state management
 const useAnimationState = (status: Status, isPreCompleted: boolean) => {
   // For pre-completed content (initial load), start as ready immediately
-  const [argumentsReady, setArgumentsReady] = useState(true)
+  // For streaming content, wait for ArgumentsDisplay to be ready
+  const [argumentsReady, setArgumentsReady] = useState(isPreCompleted)
   const [animationStarted, setAnimationStarted] = useState(false)
   const [argumentsAnimationComplete, setArgumentsAnimationComplete] =
     useState(isPreCompleted)
@@ -90,7 +91,9 @@ const useAnimationState = (status: Status, isPreCompleted: boolean) => {
     if (status === 'pending' || status === 'running') {
       setAnimationStarted(true)
       setArgumentsAnimationComplete(false)
+      // For streaming, argumentsReady will be set by onReady callback
     } else if (status === 'completed' && !animationStarted && !isPreCompleted) {
+      // For immediate completion without animation
       setArgumentsReady(true)
       setArgumentsAnimationComplete(true)
     }
@@ -355,12 +358,7 @@ export const ToolCallCard: FC<Props> = ({
       <div className={styles.contentWrapper}>
         <div className={styles.content} ref={contentRef}>
           {/* Arguments display - use ArgumentsDisplay for all tools */}
-          <div
-            className={styles.arguments}
-            style={{
-              visibility: animationState.argumentsReady ? 'visible' : 'hidden',
-            }}
-          >
+          <div className={styles.arguments}>
             <div className={styles.argumentsHeader}>
               <span className={styles.argumentsTitle}>ARGUMENTS</span>
               {expandState.needsExpandButton && (

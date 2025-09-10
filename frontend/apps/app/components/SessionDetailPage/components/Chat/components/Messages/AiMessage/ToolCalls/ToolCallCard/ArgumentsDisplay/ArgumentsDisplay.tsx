@@ -287,7 +287,8 @@ export const ArgumentsDisplay: FC<Props> = ({
     return () => clearTimeout(timer)
   }, [updateGradients, trackScrollableState, notifyOverflowIfNeeded]) // Re-check when key properties change
 
-  // Don't show anything during preparation phase
+  // Don't show anything during preparation phase (only for animated content)
+  // For non-animated content, always show
   if (isAnimated && !isReady && displayLines.length > 0) {
     return null
   }

@@ -138,13 +138,20 @@ const formatConstraint = (path: string, value: unknown): string => {
     path.match(/\/constraints\/([^/]+)/)?.[1] ?? 'constraint'
   const valueTyped = isValueWithColumns(value) ? value : {}
   const type = valueTyped.type || 'constraint'
+
+  // Format constraint type with proper casing
+  const formattedType = type
+    .replace('primary_key', 'PRIMARY KEY')
+    .replace('foreign_key', 'FOREIGN KEY')
+    .replace('unique', 'UNIQUE')
+
   const columns = valueTyped.columns
     ? ` on (${valueTyped.columns.join(', ')})`
     : ''
   const references = valueTyped.references
     ? ` -> ${valueTyped.references.table}(${valueTyped.references.columns.join(', ')})`
     : ''
-  return `  Adding ${type} '${constraintName}'${columns}${references}`
+  return `  Adding ${formattedType} '${constraintName}'${columns}${references}`
 }
 
 // Helper function to format add operations

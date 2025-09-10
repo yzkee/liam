@@ -63,8 +63,9 @@ export const SyntaxHighlightedLine: FC<Props> = ({
   // Simple parsing without dangerouslySetInnerHTML
   const renderLine = () => {
     // Check for action keywords at the start
+    // Matches both snake_case (e.g., foreign_key) and regular case (e.g., FOREIGN KEY)
     const actionPattern =
-      /^(\s*)(Creating table|Adding column|Adding index|Adding primary_key|Adding foreign_key|Removing|Updating|Enabling extension|Creating enum)/i
+      /^(\s*)(Creating table|Adding column|Adding index|Adding primary[_ ]key|Adding foreign[_ ]key|Adding FOREIGN KEY|Adding PRIMARY KEY|Adding constraint|Adding unique|Removing|Updating|Enabling extension|Creating enum)/i
     const actionMatch = line.match(actionPattern)
 
     if (actionMatch) {

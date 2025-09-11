@@ -82,6 +82,7 @@ describe('invokeSchemaDesignToolNode Integration', () => {
       prompt: 'Test schema design',
       next: END,
       designSchemaRetryCount: 0,
+      schemaDesignSuccessful: false,
     }
 
     // Act
@@ -147,6 +148,7 @@ describe('invokeSchemaDesignToolNode Integration', () => {
       prompt: 'Test invalid schema design',
       next: END,
       designSchemaRetryCount: 0,
+      schemaDesignSuccessful: false,
     }
 
     // Act

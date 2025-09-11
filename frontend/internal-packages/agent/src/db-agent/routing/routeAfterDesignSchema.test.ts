@@ -19,6 +19,7 @@ const createDbAgentState = (
   prompt: 'test input',
   next: END,
   designSchemaRetryCount,
+  schemaDesignSuccessful: false,
 })
 
 describe('routeAfterDesignSchema', () => {

@@ -53,6 +53,7 @@ export const invokeSchemaDesignToolNode = async (
     return {
       ...state,
       error: configurableResult.error,
+      schemaDesignSuccessful: false,
     }
   }
   const { repositories } = configurableResult.value
@@ -76,15 +77,18 @@ export const invokeSchemaDesignToolNode = async (
 
   const messages = result.messages
   if (!Array.isArray(messages)) {
-    return result
+    return {
+      ...result,
+      schemaDesignSuccessful: false,
+    }
   }
 
   let updatedResult = {
     ...state,
-    ...result,
-    messages: messages,
+    messages: [...state.messages, ...messages], // Append new messages to existing ones
     // Preserve retry counter - will be reset only on success
     designSchemaRetryCount: state.designSchemaRetryCount,
+    schemaDesignSuccessful: false, // Default to false
   }
 
   if (wasSchemaDesignToolSuccessful(messages)) {
@@ -100,6 +104,7 @@ export const invokeSchemaDesignToolNode = async (
         latestVersionNumber: schemaResult.value.latestVersionNumber,
         // Reset retry counter only after confirmed successful tool execution
         designSchemaRetryCount: 0,
+        schemaDesignSuccessful: true, // Set to true on success
       }
     } else {
       console.warn(

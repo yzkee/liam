@@ -1,4 +1,5 @@
 import type { AIMessage, ToolMessage } from '@langchain/core/messages'
+import { extractReasoningFromMessage } from '@liam-hq/agent/client'
 import type { FC } from 'react'
 import { match } from 'ts-pattern'
 import * as v from 'valibot'
@@ -6,7 +7,6 @@ import { MarkdownContent } from '../../../../../../MarkdownContent'
 import { CopyButton } from '../../../../CopyButton'
 import markdownStyles from '../Markdown.module.css'
 import {
-  extractReasoningFromMessage,
   extractResponseFromMessage,
   extractToolCallsFromMessage,
 } from '../utils'

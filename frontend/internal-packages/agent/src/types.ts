@@ -2,7 +2,6 @@ import type { Schema } from '@liam-hq/schema'
 import type { ResultAsync } from 'neverthrow'
 import type * as v from 'valibot'
 import type { Repositories } from './repositories'
-import type { AnalyzedRequirements } from './utils/schema/analyzedRequirements'
 import type { reasoningSchema } from './utils/validationSchema'
 import type { workflowAnnotation } from './workflowAnnotation'
 

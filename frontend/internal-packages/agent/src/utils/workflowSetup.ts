@@ -120,6 +120,7 @@ export const setupWorkflowState = (
             nonFunctionalRequirements: {},
           },
           testcases: [],
+          schemaIssues: [],
           organizationId,
           buildingSchemaId,
           latestVersionNumber,

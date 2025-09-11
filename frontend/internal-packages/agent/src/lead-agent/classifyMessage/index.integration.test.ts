@@ -31,6 +31,7 @@ const createTestStateAndConfig = async (
       nonFunctionalRequirements: {},
     },
     testcases: [],
+    schemaIssues: [],
     buildingSchemaId: context.buildingSchemaId,
     latestVersionNumber: context.latestVersionNumber,
     designSessionId: context.designSessionId,

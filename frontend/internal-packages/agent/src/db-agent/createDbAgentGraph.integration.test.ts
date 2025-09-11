@@ -19,12 +19,6 @@ describe('createDbAgentGraph Integration', () => {
 
     const initialState: DbAgentState = {
       messages: [new HumanMessage(userInput)],
-      analyzedRequirements: {
-        businessRequirement: '',
-        functionalRequirements: {},
-        nonFunctionalRequirements: {},
-      },
-      testcases: [],
       schemaData: aSchema(),
       designSessionId: context.designSessionId,
       buildingSchemaId: context.buildingSchemaId,

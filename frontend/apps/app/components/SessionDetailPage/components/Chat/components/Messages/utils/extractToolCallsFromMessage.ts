@@ -1,9 +1,6 @@
-import { type BaseMessage, isAIMessage } from '@langchain/core/messages'
+import type { AIMessage } from '@langchain/core/messages'
 import * as v from 'valibot'
-import {
-  additionalKwargsSchema,
-  type ToolCalls,
-} from '@/components/SessionDetailPage/schema'
+import { type ToolCalls, toolCallsSchema } from '../../../../../schema'
 
 type ToolCallInput = {
   id?: string
@@ -52,26 +49,17 @@ function mapToolCall(tc: ToolCallInput, index: number): ToolCalls[number] {
   }
 }
 
-export function extractToolCallsFromMessage(message: BaseMessage): ToolCalls {
-  // First check if the message has tool_calls directly (for AIMessage)
-  if (
-    isAIMessage(message) &&
-    message.tool_calls &&
-    message.tool_calls.length > 0
-  ) {
-    // Map LangChain's tool_calls format to our expected format
+export function extractToolCallsFromMessage(message: AIMessage): ToolCalls {
+  // First try to parse with schema validation
+  const parsed = v.safeParse(toolCallsSchema, message.tool_calls)
+  if (parsed.success && parsed.output !== undefined) {
+    return parsed.output
+  }
+
+  // If parsing fails, map manually with helper functions
+  if (message.tool_calls && message.tool_calls.length > 0) {
     return message.tool_calls.map(mapToolCall)
   }
 
-  // Fall back to checking additional_kwargs (for backward compatibility)
-  const parsed = v.safeParse(additionalKwargsSchema, message.additional_kwargs)
-  if (!parsed.success) {
-    return []
-  }
-
-  if (parsed.output.tool_calls === undefined) {
-    return []
-  }
-
-  return parsed.output.tool_calls
+  return []
 }

@@ -1,13 +1,12 @@
 import type { AIMessage, ToolMessage } from '@langchain/core/messages'
+import { extractReasoningFromMessage } from '@liam-hq/agent/client'
 import type { FC } from 'react'
 import { useMemo } from 'react'
 import { match } from 'ts-pattern'
 import * as v from 'valibot'
-import { MarkdownContent } from '@/components/MarkdownContent'
-import { CopyButton } from '@/components/SessionDetailPage/components/CopyButton'
-import { extractReasoningFromMessage } from '../utils/extractReasoningFromMessage'
-import { extractResponseFromMessage } from '../utils/extractResponseFromMessage'
-import { extractToolCallsFromMessage } from '../utils/extractToolCallsFromMessage'
+import { MarkdownContent } from '../../../../../../MarkdownContent'
+import { CopyButton } from '../../../../CopyButton'
+import { extractToolCallsFromMessage } from '../utils'
 import { DBAgent, LeadAgent, PMAgent, QAAgent } from './AgentAvatar'
 import styles from './AiMessage.module.css'
 import { ReasoningMessage } from './ReasoningMessage'
@@ -46,7 +45,7 @@ export const AiMessage: FC<Props> = ({
   isWorkflowRunning = false,
 }) => {
   const { avatar, name } = getAgentInfo(message.name)
-  const messageContentString = extractResponseFromMessage(message)
+  const messageContentString = message.text
   const reasoningText = extractReasoningFromMessage(message)
   const toolCalls = extractToolCallsFromMessage(message)
 

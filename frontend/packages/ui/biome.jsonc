@@ -5,9 +5,6 @@
     "rules": {
       "nursery": {
         "useUniqueElementIds": "error"
-      },
-      "correctness": {
-        "useExhaustiveDependencies": "error"
       }
     }
   }

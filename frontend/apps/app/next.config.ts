@@ -88,8 +88,19 @@ const nextConfig: NextConfig = {
       config.externals['@swc/wasm'] = '@swc/wasm'
     }
 
-    // NOTE: Prisma internals installation script was removed as it's no longer needed
-    // The packages are now handled through webpack externals configuration above
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    config.plugins.push({
+      // biome-ignore lint/suspicious/noExplicitAny: webpack types are incomplete so we need to use any here
+      apply: (compiler: any) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        compiler.hooks.afterEmit.tap('InstallPrismaInternals', () => {
+          execSync('node scripts/install-prisma-internals.mjs', {
+            stdio: 'inherit',
+            cwd: __dirname,
+          })
+        })
+      },
+    })
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     config.plugins = [...config.plugins]

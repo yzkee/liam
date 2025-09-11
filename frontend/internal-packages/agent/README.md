@@ -231,23 +231,17 @@ The `qaAgent` node is implemented as a **LangGraph subgraph** that encapsulates 
 %%{init: {'flowchart': {'curve': 'linear'}}}%%
 graph TD;
 	__start__([<p>__start__</p>]):::first
-	validateSchemaRequirements(validateSchemaRequirements)
-	generateTestcase(generateTestcase)
-	invokeSaveTool(invokeSaveTool)
+	testcaseGeneration(testcaseGeneration)
 	validateSchema(validateSchema)
 	invokeRunTestTool(invokeRunTestTool)
 	__end__([<p>__end__</p>]):::last
 	invokeRunTestTool --> __end__;
-	validateSchemaRequirements --> generateTestcase;
-	generateTestcase --> invokeSaveTool;
-	invokeSaveTool --> validateSchema;
+	testcaseGeneration --> validateSchema;
 	validateSchema --> invokeRunTestTool;
-	__start__ -.-> validateSchemaRequirements;
+	__start__ -.-> testcaseGeneration;
 	__start__ -.-> validateSchema;
 	__start__ -.-> invokeRunTestTool;
 	__start__ -.-> __end__;
-	generateTestcase -.-> validateSchema;
-	validateSchemaRequirements -.-> __end__;
 	classDef default fill:#f2f0ff,line-height:1.2;
 	classDef first fill-opacity:0;
 	classDef last fill:#bfb6fc;

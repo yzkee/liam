@@ -12,12 +12,3 @@ const toolCallSchema = v.object({
 
 export const toolCallsSchema = v.array(toolCallSchema)
 export type ToolCalls = v.InferOutput<typeof toolCallsSchema>
-
-const reasoningSchema = v.object({
-  content: v.string(),
-})
-
-export const additionalKwargsSchema = v.object({
-  reasoning: v.optional(reasoningSchema),
-  tool_calls: v.optional(toolCallsSchema),
-})

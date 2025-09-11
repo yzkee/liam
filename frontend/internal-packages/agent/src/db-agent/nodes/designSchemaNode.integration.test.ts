@@ -23,7 +23,6 @@ describe('designSchemaNode Integration', () => {
       'Create a user management system with users, roles, and permissions tables'
 
     const state: WorkflowState = {
-      userInput,
       messages: [new HumanMessage(userInput)],
       schemaData: {
         tables: {},

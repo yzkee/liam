@@ -22,7 +22,6 @@ const createTestStateAndConfig = async (
   const { config, context } = await getTestConfig()
 
   const state: WorkflowState = {
-    userInput,
     messages: messages || [new HumanMessage(userInput)],
     schemaData: schemaData || { tables: {}, enums: {}, extensions: {} },
     analyzedRequirements: {

@@ -23,7 +23,6 @@ describe('validateInitialSchemaNode Integration', () => {
         designSessionId: context.designSessionId,
         organizationId: context.organizationId,
         userId: context.userId,
-        userInput: 'Create a new database schema',
         schemaData: aSchema({
           tables: {},
           enums: {},
@@ -61,7 +60,6 @@ describe('validateInitialSchemaNode Integration', () => {
         designSessionId: context.designSessionId,
         organizationId: context.organizationId,
         userId: context.userId,
-        userInput: 'Update my existing schema',
         schemaData: aSchema({
           tables: {
             users: aTable({
@@ -119,7 +117,6 @@ describe('validateInitialSchemaNode Integration', () => {
         designSessionId: context.designSessionId,
         organizationId: context.organizationId,
         userId: context.userId,
-        userInput: 'Follow-up message',
         schemaData: aSchema({
           tables: {
             users: aTable({
@@ -162,7 +159,6 @@ describe('validateInitialSchemaNode Integration', () => {
         designSessionId: context.designSessionId,
         organizationId: context.organizationId,
         userId: context.userId,
-        userInput: 'Test validation error with invalid DDL',
         schemaData: aSchema({
           tables: {
             invalid_table: aTable({

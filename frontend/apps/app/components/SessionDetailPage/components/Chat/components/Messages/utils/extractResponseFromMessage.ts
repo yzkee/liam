@@ -75,7 +75,6 @@ function processResponse(rawResponse: unknown): string {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const responseObj = response as { content: unknown }
     // Type assertion needed as getContentString expects MessageContent
-    // biome-ignore lint/suspicious/noExplicitAny: MessageContent type mismatch requires any
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return getContentString(responseObj.content as any)
   }

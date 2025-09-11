@@ -1,6 +1,6 @@
 import type { ToolMessage as ToolMessageType } from '@langchain/core/messages'
 import { useMemo } from 'react'
-import type { ToolCalls } from '@/components/SessionDetailPage/schema'
+import type { ToolCalls } from '../../../../../../../../../SessionDetailPage/schema'
 import { extractResponseFromMessage } from '../../../../utils/extractResponseFromMessage'
 import { getToolDisplayInfo } from '../utils/getToolDisplayInfo'
 import { parseToolArguments } from '../utils/parseToolArguments'

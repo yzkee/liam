@@ -2,7 +2,7 @@
 
 import type { ToolMessage as ToolMessageType } from '@langchain/core/messages'
 import { type FC, useEffect, useMemo, useState } from 'react'
-import type { ToolCalls as ToolCallsType } from '@/components/SessionDetailPage/schema'
+import type { ToolCalls as ToolCallsType } from '../../../../../../../SessionDetailPage/schema'
 import { ToolCallCard } from './ToolCallCard'
 import styles from './ToolCalls.module.css'
 

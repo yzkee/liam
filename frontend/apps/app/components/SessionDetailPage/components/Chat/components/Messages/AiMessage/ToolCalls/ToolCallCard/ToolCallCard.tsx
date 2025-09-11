@@ -18,7 +18,7 @@ import {
 } from '@liam-hq/ui'
 import clsx from 'clsx'
 import type { FC } from 'react'
-import type { ToolCalls } from '@/components/SessionDetailPage/schema'
+import type { ToolCalls } from '../../../../../../../../SessionDetailPage/schema'
 import { ArgumentsDisplay } from './ArgumentsDisplay'
 import { useAnimationState } from './hooks/useAnimationState'
 import { useEventHandlers } from './hooks/useEventHandlers'

@@ -15,7 +15,6 @@ export const dbAgentAnnotation = Annotation.Root({
     default: () => END,
   }),
 
-  // DB Agent private state for retry tracking
   designSchemaRetryCount: Annotation<number>({
     reducer: (current, update) => update ?? current ?? 0,
     default: () => 0,

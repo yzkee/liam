@@ -106,7 +106,7 @@ export const ArgumentsDisplay: FC<Props> = ({
       // Minimal delay to ensure DOM is ready (reduce from 100ms to 50ms)
       const readyTimer = setTimeout(() => {
         setIsReady(true)
-        onReady?.()
+        onReady()
       }, ANIMATION_DELAY_PER_INDEX_MS)
       return () => clearTimeout(readyTimer)
     }
@@ -149,13 +149,13 @@ export const ArgumentsDisplay: FC<Props> = ({
           }, animationDelay) // Wait for CSS animation delay
 
           // Notify parent for potential scrolling
-          onLineAdded?.()
+          onLineAdded()
 
           // Check if this was the last line
           if (currentIndex + 1 === displayLines.length) {
             // Notify that animation is complete
             setTimeout(() => {
-              onAnimationComplete?.()
+              onAnimationComplete()
             }, ANIMATION_COMPLETE_DELAY_MS) // Small delay to ensure smooth visual completion
           }
         }
@@ -236,11 +236,9 @@ export const ArgumentsDisplay: FC<Props> = ({
   // Helper to notify overflow detection
   const notifyOverflowIfNeeded = useCallback(
     (scrollable: boolean) => {
-      if (onOverflowDetected) {
-        const shouldNotify = !isAnimated || visibleLines.length > 3
-        if (shouldNotify) {
-          onOverflowDetected(wasScrollable || scrollable)
-        }
+      const shouldNotify = !isAnimated || visibleLines.length > 3
+      if (shouldNotify) {
+        onOverflowDetected(wasScrollable || scrollable)
       }
     },
     [onOverflowDetected, isAnimated, visibleLines.length, wasScrollable],

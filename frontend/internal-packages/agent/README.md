@@ -296,6 +296,80 @@ const qaAgentSubgraph = createQaAgentGraph();
 graph.addNode("qaAgent", qaAgentSubgraph); // No retry policy - handled internally
 ```
 
+## Testcase Generation Subgraph
+
+The `testcaseGeneration` node is implemented as a **LangGraph subgraph** that encapsulates test case generation logic as an independent, reusable component following multi-agent system best practices. This subgraph is used within the QA Agent's map-reduce pattern for parallel test case generation.
+
+### Testcase Generation Architecture
+
+```mermaid
+%%{init: {'flowchart': {'curve': 'linear'}}}%%
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	validateSchemaRequirements(validateSchemaRequirements)
+	generateTestcase(generateTestcase)
+	invokeSaveTool(invokeSaveTool)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> validateSchemaRequirements;
+	invokeSaveTool --> generateTestcase;
+	generateTestcase -.-> invokeSaveTool;
+	generateTestcase -.-> __end__;
+	validateSchemaRequirements -.-> generateTestcase;
+	validateSchemaRequirements -.-> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2;
+	classDef first fill-opacity:0;
+	classDef last fill:#bfb6fc;
+```
+
+### Testcase Generation Components
+
+#### 1. validateSchemaRequirements Node
+
+- **Purpose**: Pre-validation node that checks if schema can fulfill requirements before test generation
+- **Performed by**: Schema validation logic with requirement analysis
+- **Retry Policy**: maxAttempts: 3 (internal to subgraph)
+- **Decision Making**: Routes to generateTestcase if sufficient, or END if schema is insufficient
+
+#### 2. generateTestcase Node
+
+- **Purpose**: Generates test cases and DML operations for a single requirement
+- **Performed by**: GPT-5-nano with specialized test case generation prompts
+- **Retry Policy**: maxAttempts: 3 (internal to subgraph)
+- **Tool Integration**: Uses saveTestcaseTool for structured test case output
+
+#### 3. invokeSaveTool Node
+
+- **Purpose**: Executes saveTestcaseTool to persist generated test cases
+- **Performed by**: ToolNode with saveTestcaseTool
+- **Retry Policy**: maxAttempts: 3 (internal to subgraph)
+- **Output**: Saves test cases with DML operations to workflow state
+
+### Testcase Generation Flow Patterns
+
+1. **Schema Validation Flow**: `START → validateSchemaRequirements → END` (when schema is insufficient)
+2. **Simple Generation**: `START → validateSchemaRequirements → generateTestcase → END` (when no tool calls needed)
+3. **Iterative Generation**: `START → validateSchemaRequirements → generateTestcase → invokeSaveTool → generateTestcase → ... → END`
+
+### Testcase Generation Benefits
+
+- **🔄 Reusability**: Can be used across multiple workflows requiring test case generation
+- **🧪 Independent Testing**: Dedicated test suite for testcase generation logic (`index.test.ts`)
+- **🏗️ Separation of Concerns**: Test case generation logic isolated from main QA workflow
+- **⚡ Optimized Retry Strategy**: Internal retry policy prevents double-retry scenarios
+- **📊 Encapsulated State**: Self-contained error handling and state management
+- **🎯 Pre-validation**: Schema validation prevents unnecessary test generation attempts
+
+### Integration
+
+The Testcase Generation subgraph is integrated into the QA Agent as part of the map-reduce pattern:
+
+```typescript
+import { testcaseGeneration } from "./testcaseGeneration";
+
+// Used within QA Agent's map-reduce pattern for parallel test generation
+const testcaseResults = await testcaseGeneration.invoke(state, config);
+```
+
 ### Conditional Edge Logic
 
 - **analyzeRequirements**: Routes to `saveRequirementToArtifact` when requirements are successfully analyzed, retries `analyzeRequirements` with retry count tracking (max 3 attempts), fallback to `finalizeArtifacts` when max retries exceeded

@@ -38,7 +38,7 @@ async function main() {
   const requestedDatasets =
     args.length > 0
       ? args
-      : ['default', 'entity-extraction', 'ambiguous-recall']
+      : ['default', 'entity-extraction', 'ambiguous-recall', 'relational-inference']
 
   // Define all available datasets
   const allDatasets = [
@@ -48,15 +48,17 @@ async function main() {
       path: join(workspacePath, 'entity-extraction'),
     },
     { name: 'ambiguous-recall', path: join(workspacePath, 'ambiguous-recall') },
+    {
+      name: 'relational-inference',
+      path: join(workspacePath, 'relational-inference'),
+    },
   ]
 
   // Filter to requested datasets
   const datasets = allDatasets.filter((d) => requestedDatasets.includes(d.name))
 
   if (datasets.length === 0) {
-    handleCliError(
-      'No valid datasets specified. Available: default, entity-extraction',
-    )
+    handleCliError('No valid datasets specified. Available: default, entity-extraction, ambiguous-recall, relational-inference')
     return
   }
 

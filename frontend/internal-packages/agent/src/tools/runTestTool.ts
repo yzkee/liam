@@ -262,20 +262,9 @@ export const runTestTool: StructuredTool = tool(
     })
     await dispatchCustomEvent(SSE_EVENTS.MESSAGES, toolMessage)
 
-    // Check for execution errors
-    const hasErrors = dmlSqlResults.some((result: SqlResult) => !result.success)
     const updateData = {
       testcases: updatedTestcases,
       messages: [toolMessage],
-      ...(hasErrors && {
-        dmlExecutionErrors: dmlSqlResults
-          .filter((result: SqlResult) => !result.success)
-          .map(
-            (result: SqlResult) =>
-              `SQL: ${result.sql}, Error: ${JSON.stringify(result.result)}`,
-          )
-          .join('; '),
-      }),
     }
 
     return new Command({

@@ -24,7 +24,6 @@ graph TD;
 
   it('should create and return a compiled testcase generation subgraph', async () => {
     const compiledTestcaseGraph = testcaseGeneration
-    expect(compiledTestcaseGraph).toBeDefined()
 
     const graph = await compiledTestcaseGraph.getGraphAsync()
     const mermaid = graph.drawMermaid()

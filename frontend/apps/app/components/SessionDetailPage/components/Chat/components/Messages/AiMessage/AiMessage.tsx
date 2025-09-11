@@ -6,9 +6,7 @@ import * as v from 'valibot'
 import { MarkdownContent } from '../../../../../../MarkdownContent'
 import { CopyButton } from '../../../../CopyButton'
 import markdownStyles from '../Markdown.module.css'
-import {
-  extractToolCallsFromMessage,
-} from '../utils'
+import { extractToolCallsFromMessage } from '../utils'
 import { DBAgent, LeadAgent, PMAgent, QAAgent } from './AgentAvatar'
 import styles from './AiMessage.module.css'
 import { ReasoningMessage } from './ReasoningMessage'

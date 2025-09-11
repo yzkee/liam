@@ -8,14 +8,16 @@ export const convertRequirementsToPrompt = (
 Functional Requirements:
 ${Object.entries(requirements.functionalRequirements)
   .map(
-    ([category, requirements]) => `- ${category}: ${requirements.join(', ')}`,
+    ([category, requirements]) =>
+      `- ${category}: ${requirements.map((req) => req.desc).join(', ')}`,
   )
   .join('\n')}
 
 Non-Functional Requirements:
 ${Object.entries(requirements.nonFunctionalRequirements)
   .map(
-    ([category, requirements]) => `- ${category}: ${requirements.join(', ')}`,
+    ([category, requirements]) =>
+      `- ${category}: ${requirements.map((req) => req.desc).join(', ')}`,
   )
   .join('\n')}`.trim()
 }

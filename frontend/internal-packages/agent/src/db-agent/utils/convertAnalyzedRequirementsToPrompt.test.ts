@@ -7,12 +7,23 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
     const analyzedRequirements: AnalyzedRequirements = {
       businessRequirement: 'Build a user management system',
       functionalRequirements: {
-        authentication: ['Login', 'Logout', 'Password reset'],
-        userManagement: ['Create user', 'Update user', 'Delete user'],
+        authentication: [
+          { id: '1', desc: 'Login' },
+          { id: '2', desc: 'Logout' },
+          { id: '3', desc: 'Password reset' },
+        ],
+        userManagement: [
+          { id: '4', desc: 'Create user' },
+          { id: '5', desc: 'Update user' },
+          { id: '6', desc: 'Delete user' },
+        ],
       },
       nonFunctionalRequirements: {
-        security: ['Password encryption', 'Session management'],
-        performance: ['Fast response times'],
+        security: [
+          { id: '7', desc: 'Password encryption' },
+          { id: '8', desc: 'Session management' },
+        ],
+        performance: [{ id: '9', desc: 'Fast response times' }],
       },
     }
 
@@ -54,10 +65,10 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
     const analyzedRequirements: AnalyzedRequirements = {
       businessRequirement: '',
       functionalRequirements: {
-        basic: ['feature1'],
+        basic: [{ id: '1', desc: 'feature1' }],
       },
       nonFunctionalRequirements: {
-        quality: ['reliable'],
+        quality: [{ id: '2', desc: 'reliable' }],
       },
     }
 

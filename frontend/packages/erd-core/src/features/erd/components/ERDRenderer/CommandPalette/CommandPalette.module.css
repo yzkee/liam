@@ -18,7 +18,7 @@
 }
 
 .content[data-state='closed'] {
-  animation: contentHide 100ms cubic-bezier(0.7, 0, 0.84, 0);
+  animation: contentHide 75ms cubic-bezier(0.7, 0, 0.84, 0);
 }
 
 .overlay {
@@ -35,7 +35,7 @@
 }
 
 .overlay[data-state='closed'] {
-  animation: overlayHide 100ms cubic-bezier(0.7, 0, 0.84, 0);
+  animation: overlayHide 75ms cubic-bezier(0.7, 0, 0.84, 0);
 }
 
 @keyframes overlayShow {

@@ -34,7 +34,7 @@ const getAgentInfo = (name: string | undefined) => {
 type Props = {
   message: AIMessage
   toolMessages?: ToolMessage[]
-  onNavigate?: (tab: 'erd' | 'artifact') => void
+  onNavigate: (tab: 'erd' | 'artifact') => void
   isWorkflowRunning?: boolean
 }
 

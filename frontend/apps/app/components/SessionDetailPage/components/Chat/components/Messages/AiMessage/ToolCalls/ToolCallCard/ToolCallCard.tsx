@@ -32,7 +32,7 @@ type Props = {
   status?: 'pending' | 'running' | 'completed' | 'error'
   error?: string
   toolMessage?: ToolMessageType | undefined
-  onNavigate?: (tab: 'erd' | 'artifact') => void
+  onNavigate: (tab: 'erd' | 'artifact') => void
 }
 
 type Status = 'pending' | 'running' | 'completed' | 'error'
@@ -210,7 +210,7 @@ const useScrollManagement = (
 const useEventHandlers = (
   animationState: ReturnType<typeof useAnimationState>,
   expandState: ReturnType<typeof useExpandState>,
-  onNavigate?: (tab: 'erd' | 'artifact') => void,
+  onNavigate: (tab: 'erd' | 'artifact') => void,
   toolInfo?: ReturnType<typeof useToolData>['toolInfo'],
 ) => {
   const handleArgumentsReady = () => {

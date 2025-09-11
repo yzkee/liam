@@ -80,7 +80,7 @@ const collectFollowingToolMessages = (
 
 type Props = {
   messages: BaseMessage[]
-  onNavigate?: (tab: 'erd' | 'artifact') => void
+  onNavigate: (tab: 'erd' | 'artifact') => void
   isWorkflowRunning?: boolean
 }
 

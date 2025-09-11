@@ -16,7 +16,7 @@ type ToolCallWithMessage = {
 type Props = {
   toolCallsWithMessages: ToolCallWithMessage[]
   isStreaming?: boolean
-  onNavigate?: (tab: 'erd' | 'artifact') => void
+  onNavigate: (tab: 'erd' | 'artifact') => void
 }
 
 type ToolCallStatus = 'pending' | 'running' | 'completed' | 'error'

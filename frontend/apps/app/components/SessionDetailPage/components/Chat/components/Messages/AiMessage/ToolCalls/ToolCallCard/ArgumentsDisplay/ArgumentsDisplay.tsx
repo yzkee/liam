@@ -20,21 +20,21 @@ const ANIMATION_COMPLETE_DELAY_MS = 100
 const ANIMATION_DURATION_MS = 300
 type Props = {
   args: unknown
-  isAnimated?: boolean
-  onLineAdded?: () => void
-  onReady?: () => void
-  isExpanded?: boolean
-  onOverflowDetected?: (hasOverflow: boolean) => void
-  toolName?: string
-  onAnimationComplete?: () => void
+  isAnimated: boolean
+  onLineAdded: () => void
+  onReady: () => void
+  isExpanded: boolean
+  onOverflowDetected: (hasOverflow: boolean) => void
+  toolName: string
+  onAnimationComplete: () => void
 }
 
 export const ArgumentsDisplay: FC<Props> = ({
   args,
-  isAnimated = true,
+  isAnimated,
   onLineAdded,
   onReady,
-  isExpanded = false,
+  isExpanded,
   onOverflowDetected,
   toolName,
   onAnimationComplete,

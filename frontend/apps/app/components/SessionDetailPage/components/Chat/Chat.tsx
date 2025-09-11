@@ -21,7 +21,7 @@ type Props = {
   isWorkflowRunning?: boolean
   // onArtifactLinkClick: () => void
   // isDeepModelingEnabled: boolean
-  onNavigate?: (tab: 'erd' | 'artifact') => void
+  onNavigate: (tab: 'erd' | 'artifact') => void
 }
 
 export const Chat: FC<Props> = ({

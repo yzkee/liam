@@ -22,7 +22,7 @@ const toolCallSchema = v.object({
   }),
 })
 
-export const toolCallsSchema = v.array(toolCallSchema)
+const toolCallsSchema = v.array(toolCallSchema)
 export type ToolCalls = v.InferOutput<typeof toolCallsSchema>
 
 export const additionalKwargsSchema = v.object({

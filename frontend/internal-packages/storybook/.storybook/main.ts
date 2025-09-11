@@ -1,12 +1,7 @@
-import { createRequire } from "node:module";
-import { fileURLToPath } from 'node:url';
-import path, { dirname, join } from 'node:path';
-import type { StorybookConfig } from '@storybook/nextjs'
+// biome-ignore lint/style/noCommonJs: Storybook config requires CommonJS
+const path = require('node:path')
 
-const require = createRequire(import.meta.url);
-const __dirname = dirname(fileURLToPath(import.meta.url));
-
-const config: StorybookConfig = {
+const config = {
   stories: [
     {
       directory: '../../../apps/app',
@@ -25,10 +20,13 @@ const config: StorybookConfig = {
     },
   ],
 
-  addons: [getAbsolutePath("@storybook/addon-links"), getAbsolutePath("@storybook/addon-docs")],
+  addons: [
+    getAbsolutePath('@storybook/addon-links'),
+    getAbsolutePath('@storybook/addon-docs'),
+  ],
 
   framework: {
-    name: getAbsolutePath("@storybook/nextjs"),
+    name: getAbsolutePath('@storybook/nextjs'),
     options: {},
   },
 
@@ -43,11 +41,13 @@ const config: StorybookConfig = {
       }
     }
     return config
-  }
+  },
 }
 
-export default config
+// biome-ignore lint/style/noCommonJs: Storybook config requires CommonJS
+module.exports = config
 
-function getAbsolutePath(value: string): any {
-  return dirname(require.resolve(join(value, "package.json")));
+function getAbsolutePath(value) {
+  // Return the module name as-is for Storybook to resolve
+  return value
 }

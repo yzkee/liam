@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import type { ToolCalls as ToolCallsType } from '@/components/SessionDetailPage/schema'
+import type { ToolCalls as ToolCallsType } from '../../../../../../../SessionDetailPage/schema'
 import { ToolCalls } from './ToolCalls'
 
 const meta: Meta<typeof ToolCalls> = {

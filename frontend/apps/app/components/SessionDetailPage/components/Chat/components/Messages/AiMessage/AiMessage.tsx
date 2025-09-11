@@ -33,7 +33,7 @@ const getAgentInfo = (name: string | undefined) => {
 
 type Props = {
   message: AIMessage
-  toolMessages?: ToolMessage[]
+  toolMessages: ToolMessage[]
   onNavigate: (tab: 'erd' | 'artifact') => void
   isWorkflowRunning?: boolean
 }
@@ -53,7 +53,7 @@ export const AiMessage: FC<Props> = ({
   const toolCallsWithMessages = useMemo(() => {
     return toolCalls.map((toolCall, index) => ({
       toolCall,
-      toolMessage: toolMessages?.[index],
+      toolMessage: toolMessages[index],
     }))
   }, [toolCalls, toolMessages])
 

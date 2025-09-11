@@ -35,14 +35,14 @@ type Props = {
   message: AIMessage
   toolMessages: ToolMessage[]
   onNavigate: (tab: 'erd' | 'artifact') => void
-  isWorkflowRunning?: boolean
+  isWorkflowRunning: boolean
 }
 
 export const AiMessage: FC<Props> = ({
   message,
   toolMessages,
   onNavigate,
-  isWorkflowRunning = false,
+  isWorkflowRunning,
 }) => {
   const { avatar, name } = getAgentInfo(message.name)
   const messageContentString = message.text

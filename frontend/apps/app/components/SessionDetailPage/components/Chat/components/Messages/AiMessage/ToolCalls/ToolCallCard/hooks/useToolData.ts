@@ -1,7 +1,6 @@
 import type { ToolMessage as ToolMessageType } from '@langchain/core/messages'
 import { useMemo } from 'react'
 import type { ToolCalls } from '../../../../../../../../../SessionDetailPage/schema'
-import { extractResponseFromMessage } from '../../../../utils/extractResponseFromMessage'
 import { getToolDisplayInfo } from '../utils/getToolDisplayInfo'
 import { parseToolArguments } from '../utils/parseToolArguments'
 
@@ -21,17 +20,10 @@ export const useToolData = (
     [toolCall.function.name],
   )
 
-  const result = useMemo(() => {
-    if (toolMessage) {
-      // Handle both real ToolMessage instances and mock objects
-      if (typeof toolMessage.content === 'string') {
-        return toolMessage.content
-      }
-      return extractResponseFromMessage(toolMessage)
-    }
-    // Use default message
-    return 'Tool execution completed.'
-  }, [toolMessage])
+  const result = useMemo(
+    () => toolMessage?.text ?? 'Tool call result not found.',
+    [toolMessage],
+  )
 
   const resultStatus = useMemo(() => {
     const lowerResult = result.toLowerCase()

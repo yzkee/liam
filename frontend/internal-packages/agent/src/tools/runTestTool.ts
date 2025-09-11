@@ -1,5 +1,5 @@
 import { dispatchCustomEvent } from '@langchain/core/callbacks/dispatch'
-import { AIMessage, ToolMessage } from '@langchain/core/messages'
+import { ToolMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import type { StructuredTool } from '@langchain/core/tools'
 import { tool } from '@langchain/core/tools'
@@ -244,10 +244,6 @@ export const runTestTool: StructuredTool = tool(
 
     // Generate validation message
     const validationMessage = formatValidationErrors(testcaseExecutionResults)
-    const validationAIMessage = new AIMessage({
-      content: validationMessage,
-      name: 'SchemaValidator',
-    })
 
     // Create tool success message
     const totalTests = testcaseExecutionResults.length
@@ -257,7 +253,7 @@ export const runTestTool: StructuredTool = tool(
     const summary =
       failedTests === 0
         ? `All ${totalTests} test cases passed successfully`
-        : `${passedTests}/${totalTests} test cases passed, ${failedTests} failed`
+        : `${passedTests}/${totalTests} test cases passed, ${failedTests} failed\n\n${validationMessage}`
 
     const toolMessage = new ToolMessage({
       id: uuidv4(),
@@ -268,7 +264,7 @@ export const runTestTool: StructuredTool = tool(
 
     const updateData = {
       testcases: updatedTestcases,
-      messages: [validationAIMessage, toolMessage],
+      messages: [toolMessage],
     }
 
     return new Command({

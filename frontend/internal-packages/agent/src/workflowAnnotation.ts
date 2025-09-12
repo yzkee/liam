@@ -6,7 +6,6 @@ import type { AnalyzedRequirements } from './utils/schema/analyzedRequirements'
 
 export const workflowAnnotation = Annotation.Root({
   ...MessagesAnnotation.spec,
-  userInput: Annotation<string>,
   analyzedRequirements: Annotation<AnalyzedRequirements>({
     reducer: (x, y) => y ?? x,
     default: () => ({

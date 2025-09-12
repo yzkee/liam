@@ -21,8 +21,6 @@ describe('summarizeWorkflow Integration', () => {
 
     // Explicitly define the state needed for summarization
     const state: WorkflowState = {
-      userInput:
-        'Create a user management system with users, roles, and permissions tables',
       messages: [
         new HumanMessage(
           'Create a user management system with users, roles, and permissions tables',

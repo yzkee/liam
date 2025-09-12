@@ -434,38 +434,8 @@ const saveRequirementsCall: ToolCallsType[number] = {
   },
 }
 
-const saveTestcasesCall: ToolCallsType[number] = {
-  id: 'call_3',
-  name: 'saveTestcase',
-  type: 'tool_call',
-  args: {
-    testcasesWithDml: [
-      {
-        name: 'User Registration Test',
-        description: 'Verify that new users can register successfully',
-        dmlOperations: [
-          {
-            sql: "INSERT INTO users (id, email, password) VALUES ('123', 'test@example.com', 'hashed_password')",
-            type: 'insert',
-          },
-        ],
-      },
-      {
-        name: 'Login Test',
-        description: 'Verify that existing users can login successfully',
-        dmlOperations: [
-          {
-            sql: "SELECT * FROM users WHERE email = 'test@example.com'",
-            type: 'select',
-          },
-        ],
-      },
-    ],
-  },
-}
-
 const saveTestcaseCall: ToolCallsType[number] = {
-  id: 'call_4',
+  id: 'call_3',
   name: 'saveTestcase',
   type: 'tool_call',
   args: {
@@ -479,7 +449,7 @@ const saveTestcaseCall: ToolCallsType[number] = {
 }
 
 const runTestCall: ToolCallsType[number] = {
-  id: 'call_5',
+  id: 'call_4',
   name: 'runTestTool',
   type: 'tool_call',
   args: {
@@ -514,21 +484,8 @@ export const SaveRequirements: Story = {
   },
 }
 
-export const SaveTestcases: Story = {
-  name: 'Save Testcases and DML Tool',
-  args: {
-    toolCallsWithMessages: [
-      {
-        toolCall: saveTestcasesCall,
-        toolMessage: undefined, // Use default message: "Tool execution completed."
-      },
-    ],
-    isStreaming: true,
-  },
-}
-
-export const SaveSingleTestcase: Story = {
-  name: 'Save Single Testcase',
+export const SaveTestcase: Story = {
+  name: 'Save Testcase Tool',
   args: {
     toolCallsWithMessages: [
       {
@@ -580,10 +537,6 @@ export const AllToolsCompleted: Story = {
       },
       {
         toolCall: saveRequirementsCall,
-        toolMessage: undefined, // Use default message: "Tool execution completed."
-      },
-      {
-        toolCall: saveTestcasesCall,
         toolMessage: undefined, // Use default message: "Tool execution completed."
       },
       {

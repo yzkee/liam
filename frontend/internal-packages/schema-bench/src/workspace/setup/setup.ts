@@ -29,6 +29,19 @@ const createWorkspaceDirectories = (workspacePath: string): SetupResult => {
   }
 }
 
+const copyFilesFromDir = (sourceDir: string, targetDir: string): void => {
+  if (fs.existsSync(sourceDir)) {
+    const files = fs.readdirSync(sourceDir)
+    for (const file of files) {
+      const sourcePath = path.join(sourceDir, file)
+      const targetPath = path.join(targetDir, file)
+      if (!fs.existsSync(targetPath)) {
+        fs.copyFileSync(sourcePath, targetPath)
+      }
+    }
+  }
+}
+
 const copyDefaultData = (
   defaultDataPath: string,
   workspacePath: string,
@@ -39,29 +52,19 @@ const copyDefaultData = (
     'execution',
     'reference',
   )
+  const readmeSourcePath = path.join(defaultDataPath, 'README.md')
   const inputTargetDir = path.join(workspacePath, 'execution', 'input')
   const referenceTargetDir = path.join(workspacePath, 'execution', 'reference')
 
   try {
-    if (fs.existsSync(inputSourceDir)) {
-      const inputFiles = fs.readdirSync(inputSourceDir)
-      for (const file of inputFiles) {
-        const sourcePath = path.join(inputSourceDir, file)
-        const targetPath = path.join(inputTargetDir, file)
-        if (!fs.existsSync(targetPath)) {
-          fs.copyFileSync(sourcePath, targetPath)
-        }
-      }
-    }
+    copyFilesFromDir(inputSourceDir, inputTargetDir)
+    copyFilesFromDir(referenceSourceDir, referenceTargetDir)
 
-    if (fs.existsSync(referenceSourceDir)) {
-      const referenceFiles = fs.readdirSync(referenceSourceDir)
-      for (const file of referenceFiles) {
-        const sourcePath = path.join(referenceSourceDir, file)
-        const targetPath = path.join(referenceTargetDir, file)
-        if (!fs.existsSync(targetPath)) {
-          fs.copyFileSync(sourcePath, targetPath)
-        }
+    // Copy README.md if present at dataset root
+    if (fs.existsSync(readmeSourcePath)) {
+      const readmeTargetPath = path.join(workspacePath, 'README.md')
+      if (!fs.existsSync(readmeTargetPath)) {
+        fs.copyFileSync(readmeSourcePath, readmeTargetPath)
       }
     }
 

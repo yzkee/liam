@@ -2,6 +2,7 @@ import { type BaseMessage, isAIMessage } from '@langchain/core/messages'
 import { gray, italic } from 'yoctocolors'
 import { extractToolCallsFromMessage } from '../core/extractToolCallsFromMessage'
 import { extractReasoningFromMessage } from '../core/reasoningExtractor'
+import { formatToolCallArgs } from './formatToolCallArgs'
 import { formatStreamingMessage } from './formatters'
 
 export const handleReasoningMessage = (
@@ -70,7 +71,9 @@ export const handleToolCallMessage = (
   lastToolCallsContent.set(messageId, currentToolCalls.length)
 
   for (const toolCall of newToolCalls) {
-    const toolCallOutput = `\n\n🔧 ${toolCall.name}(${JSON.stringify(toolCall.args)})`
+    const formattedArgs = formatToolCallArgs(toolCall.args)
+    const argsDisplay = formattedArgs ? `(${formattedArgs})` : '()'
+    const toolCallOutput = `\n\n🔧 ${toolCall.name}${argsDisplay}`
     process.stdout.write(toolCallOutput)
   }
 }

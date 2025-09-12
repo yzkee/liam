@@ -12,9 +12,10 @@ graph TD;
 	invokeSaveTool(invokeSaveTool)
 	__end__([<p>__end__</p>]):::last
 	__start__ --> validateSchemaRequirements;
-	invokeSaveTool --> generateTestcase;
 	generateTestcase -.-> invokeSaveTool;
 	generateTestcase -.-> __end__;
+	invokeSaveTool -.-> generateTestcase;
+	invokeSaveTool -.-> __end__;
 	validateSchemaRequirements -.-> generateTestcase;
 	validateSchemaRequirements -.-> __end__;
 	classDef default fill:#f2f0ff,line-height:1.2;

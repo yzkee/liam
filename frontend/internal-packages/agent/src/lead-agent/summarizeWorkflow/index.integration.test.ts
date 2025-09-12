@@ -47,6 +47,7 @@ describe('summarizeWorkflow Integration', () => {
         nonFunctionalRequirements: {},
       },
       testcases: [],
+      schemaIssues: [],
       buildingSchemaId: context.buildingSchemaId,
       latestVersionNumber: context.latestVersionNumber,
       designSessionId: context.designSessionId,

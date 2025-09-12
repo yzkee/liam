@@ -1,8 +1,8 @@
 'use client'
 
 import type { ToolMessage as ToolMessageType } from '@langchain/core/messages'
+import type { ToolCalls as ToolCallsType } from '@liam-hq/agent/client'
 import { type FC, useEffect, useMemo, useState } from 'react'
-import type { ToolCalls as ToolCallsType } from '../../../../../../../SessionDetailPage/schema'
 import { ToolCallCard } from './ToolCallCard'
 import styles from './ToolCalls.module.css'
 

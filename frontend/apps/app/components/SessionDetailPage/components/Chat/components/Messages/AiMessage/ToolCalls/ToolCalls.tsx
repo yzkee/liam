@@ -2,7 +2,7 @@
 
 import type { ToolMessage as ToolMessageType } from '@langchain/core/messages'
 import type { ToolCalls as ToolCallsType } from '@liam-hq/agent/client'
-import { type FC, useEffect, useMemo, useState } from 'react'
+import { type FC, useEffect, useState } from 'react'
 import { ToolCallCard } from './ToolCallCard'
 import styles from './ToolCalls.module.css'
 
@@ -68,19 +68,10 @@ export const ToolCalls: FC<Props> = ({
     Record<string, ToolCallState>
   >({})
 
-  // Filter out routeToAgent tool calls
-  const filteredToolCalls = useMemo(
-    () =>
-      toolCallsWithMessages.filter(
-        ({ toolCall }) => toolCall.name !== 'routeToAgent',
-      ),
-    [toolCallsWithMessages],
-  )
-
   // Initialize tool call states
   useEffect(() => {
     const newStates: Record<string, ToolCallState> = {}
-    filteredToolCalls.forEach(({ toolCall: tc }) => {
+    toolCallsWithMessages.forEach(({ toolCall: tc }) => {
       if (!toolCallStates[tc.id]) {
         // If not streaming (loading existing session), show as completed immediately
         // If streaming (new execution), start with pending for animation
@@ -93,7 +84,7 @@ export const ToolCalls: FC<Props> = ({
     if (Object.keys(newStates).length > 0) {
       setToolCallStates((prev) => ({ ...prev, ...newStates }))
     }
-  }, [filteredToolCalls, isStreaming, toolCallStates])
+  }, [toolCallsWithMessages, isStreaming, toolCallStates])
 
   // Execute tools sequentially - Only for streaming
   useEffect(() => {
@@ -151,7 +142,7 @@ export const ToolCalls: FC<Props> = ({
       const wait = (ms: number) =>
         createCancellableWait(ms, abortController, cancelled)
 
-      for (const { toolCall: tc } of filteredToolCalls) {
+      for (const { toolCall: tc } of toolCallsWithMessages) {
         if (cancelled.value || shouldSkipToolCall(toolCallStates[tc.id])) {
           continue
         }
@@ -166,7 +157,7 @@ export const ToolCalls: FC<Props> = ({
     }
 
     // Run for all tools to show animation
-    if (filteredToolCalls.length > 0) {
+    if (toolCallsWithMessages.length > 0) {
       runTools()
     }
 
@@ -175,13 +166,13 @@ export const ToolCalls: FC<Props> = ({
       cancelled.value = true
       abortController.abort()
     }
-  }, [filteredToolCalls, isStreaming, toolCallStates])
+  }, [toolCallsWithMessages, isStreaming, toolCallStates])
 
-  if (filteredToolCalls.length === 0) return null
+  if (toolCallsWithMessages.length === 0) return null
 
   return (
     <div className={styles.container}>
-      {filteredToolCalls.map(({ toolCall: tc, toolMessage }) => {
+      {toolCallsWithMessages.map(({ toolCall: tc, toolMessage }) => {
         const state = toolCallStates[tc.id] || { status: 'pending' }
         return (
           <ToolCallCard

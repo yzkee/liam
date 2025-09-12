@@ -1,3 +1,5 @@
+import type { ToolName } from '@liam-hq/agent'
+
 type ToolDisplayInfo = {
   displayName: string
   description: string
@@ -7,13 +9,8 @@ type ToolDisplayInfo = {
   }
 }
 
-export const getToolDisplayInfo = (toolName: string): ToolDisplayInfo => {
+export const getToolDisplayInfo = (toolName: ToolName): ToolDisplayInfo => {
   switch (toolName) {
-    case 'routeToAgent':
-      return {
-        displayName: 'Routing to Agent',
-        description: 'Routing user request to specialized agent',
-      }
     case 'schemaDesignTool':
       return {
         displayName: 'Database Schema Design',
@@ -30,15 +27,6 @@ export const getToolDisplayInfo = (toolName: string): ToolDisplayInfo => {
         resultAction: {
           label: 'View Artifact',
           type: 'artifact',
-        },
-      }
-    case 'saveTestcasesAndDmlTool':
-      return {
-        displayName: 'Save Test Cases and DML',
-        description: 'Saving test cases with data manipulation language',
-        resultAction: {
-          label: 'View Test Cases',
-          type: 'testcases',
         },
       }
     case 'saveTestcase':
@@ -58,11 +46,6 @@ export const getToolDisplayInfo = (toolName: string): ToolDisplayInfo => {
           label: 'View Test Results',
           type: 'testcases',
         },
-      }
-    default:
-      return {
-        displayName: toolName,
-        description: '',
       }
   }
 }

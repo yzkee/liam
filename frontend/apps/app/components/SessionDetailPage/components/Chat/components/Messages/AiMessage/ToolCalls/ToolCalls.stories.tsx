@@ -436,7 +436,7 @@ const saveRequirementsCall: ToolCallsType[number] = {
 
 const saveTestcasesCall: ToolCallsType[number] = {
   id: 'call_3',
-  name: 'saveTestcasesAndDmlTool',
+  name: 'saveTestcase',
   type: 'tool_call',
   args: {
     testcasesWithDml: [

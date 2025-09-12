@@ -1,8 +1,7 @@
 import type { ToolMessage as ToolMessageType } from '@langchain/core/messages'
+import type { ToolCalls } from '@liam-hq/agent/client'
 import { useMemo } from 'react'
-import type { ToolCalls } from '../../../../../../../../../SessionDetailPage/schema'
 import { getToolDisplayInfo } from '../utils/getToolDisplayInfo'
-import { parseToolArguments } from '../utils/parseToolArguments'
 
 type ToolCallItem = ToolCalls[number]
 
@@ -10,14 +9,11 @@ export const useToolData = (
   toolCall: ToolCallItem,
   toolMessage: ToolMessageType | undefined,
 ) => {
-  const parsedArguments = useMemo(
-    () => parseToolArguments(toolCall.function.arguments),
-    [toolCall.function.arguments],
-  )
+  const parsedArguments = useMemo(() => toolCall.args, [toolCall.args])
 
   const toolInfo = useMemo(
-    () => getToolDisplayInfo(toolCall.function.name),
-    [toolCall.function.name],
+    () => getToolDisplayInfo(toolCall.name),
+    [toolCall.name],
   )
 
   const result = useMemo(

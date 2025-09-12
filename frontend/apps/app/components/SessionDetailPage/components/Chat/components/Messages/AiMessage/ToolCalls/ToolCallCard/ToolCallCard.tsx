@@ -1,6 +1,7 @@
 'use client'
 
 import type { ToolMessage as ToolMessageType } from '@langchain/core/messages'
+import type { ToolCalls } from '@liam-hq/agent/client'
 import {
   ArrowTooltipContent,
   ArrowTooltipPortal,
@@ -18,7 +19,6 @@ import {
 } from '@liam-hq/ui'
 import clsx from 'clsx'
 import type { FC } from 'react'
-import type { ToolCalls } from '../../../../../../../../SessionDetailPage/schema'
 import { ArgumentsDisplay } from './ArgumentsDisplay'
 import { useAnimationState } from './hooks/useAnimationState'
 import { useEventHandlers } from './hooks/useEventHandlers'
@@ -190,7 +190,7 @@ export const ToolCallCard: FC<Props> = ({
               onReady={handleArgumentsReady}
               isExpanded={expandState.isArgumentsExpanded}
               onOverflowDetected={handleArgumentsOverflow}
-              toolName={toolCall.function.name}
+              toolName={toolCall.name}
               onAnimationComplete={() =>
                 animationState.setArgumentsAnimationComplete(true)
               }

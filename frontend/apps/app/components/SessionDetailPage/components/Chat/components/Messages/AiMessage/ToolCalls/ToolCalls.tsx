@@ -72,7 +72,7 @@ export const ToolCalls: FC<Props> = ({
   const filteredToolCalls = useMemo(
     () =>
       toolCallsWithMessages.filter(
-        ({ toolCall }) => toolCall.function.name !== 'routeToAgent',
+        ({ toolCall }) => toolCall.name !== 'routeToAgent',
       ),
     [toolCallsWithMessages],
   )

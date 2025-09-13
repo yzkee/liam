@@ -1,6 +1,6 @@
 import type { Table } from '@liam-hq/schema'
 import { Rows3 as Rows3Icon } from '@liam-hq/ui'
-import type { FC } from 'react'
+import { type FC, useCallback } from 'react'
 import { CollapsibleHeader } from '../CollapsibleHeader'
 import styles from './Columns.module.css'
 import { ColumnsItem } from './ColumnsItem'
@@ -12,6 +12,14 @@ type Props = {
 export const Columns: FC<Props> = ({ table }) => {
   // NOTE: 300px is the height of one item in the list(when comments are lengthy)
   const contentMaxHeight = Object.keys(table.columns).length * 300
+
+  const scrollToElement = useCallback((elementId: string) => {
+    const element = document.getElementById(elementId)
+    if (!element) return
+
+    element.scrollIntoView({ behavior: 'smooth' })
+  }, [])
+
   return (
     <CollapsibleHeader
       title="Columns"
@@ -26,6 +34,7 @@ export const Columns: FC<Props> = ({ table }) => {
             tableId={table.name}
             column={column}
             constraints={table.constraints}
+            scrollToElement={scrollToElement}
           />
         </div>
       ))}

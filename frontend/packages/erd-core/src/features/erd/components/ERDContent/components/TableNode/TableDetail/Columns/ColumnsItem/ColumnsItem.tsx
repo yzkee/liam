@@ -15,13 +15,24 @@ import { NotNull } from './NotNull'
 import { PrimaryKey } from './PrimaryKey'
 import { Type } from './Type'
 
+const columnElementId = (tableName: string, columnName: string) =>
+  `${tableName}__columns__${columnName}`
+
 type Props = {
   tableId: string
   column: Column
   constraints: Constraints
+  scrollToElement: (id: string) => void
 }
 
-export const ColumnsItem: FC<Props> = ({ tableId, column, constraints }) => {
+export const ColumnsItem: FC<Props> = ({
+  tableId,
+  column,
+  constraints,
+  scrollToElement,
+}) => {
+  const elementId = columnElementId(tableId, column.name)
+
   const { operations } = useSchemaOrThrow()
   const { showDiff } = useUserEditingOrThrow()
 
@@ -47,8 +58,23 @@ export const ColumnsItem: FC<Props> = ({ tableId, column, constraints }) => {
   )
 
   return (
-    <div className={clsx(styles.wrapper, diffStyle)}>
-      <h3 className={styles.heading}>{column.name}</h3>
+    <div id={elementId} className={clsx(styles.wrapper, diffStyle)}>
+      <h3 className={styles.heading}>
+        <a
+          href={`#${elementId}`}
+          onClick={(event) => {
+            // Do not call preventDefault to allow the default link behavior when ⌘ key is pressed
+            if (event.metaKey || event.ctrlKey) {
+              return
+            }
+
+            event.preventDefault()
+            scrollToElement(elementId)
+          }}
+        >
+          {column.name}
+        </a>
+      </h3>
       {column.comment && <Comment tableId={tableId} column={column} />}
       <GridTableRoot>
         <Type tableId={tableId} column={column} />

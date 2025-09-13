@@ -72,7 +72,7 @@ export const ColumnsItem: FC<Props> = ({
             scrollToElement(elementId)
           }}
         >
-          {column.name}
+          {column.name} #
         </a>
       </h3>
       {column.comment && <Comment tableId={tableId} column={column} />}

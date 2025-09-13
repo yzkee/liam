@@ -49,4 +49,6 @@
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.1s var(--default-timing-function);
+  padding-top: 40px;
+  margin-top: -40px;
 }

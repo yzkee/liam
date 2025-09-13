@@ -57,9 +57,17 @@ export const UserEditingProvider: FC<Props> = ({
     location.hash = hash ?? ''
   }, [])
 
-  const [activeTableName, setActiveTableName] = useQueryState(
+  const [activeTableName, _setActiveTableName] = useQueryState(
     'active',
     parseAsString.withDefault('').withOptions({ history: 'push' }),
+  )
+
+  const setActiveTableName: typeof _setActiveTableName = useCallback(
+    (...args) => {
+      setTimeout(() => setHash(null), 0)
+      return _setActiveTableName(...args)
+    },
+    [setHash, _setActiveTableName],
   )
 
   const [showMode, setShowMode] = useQueryState(

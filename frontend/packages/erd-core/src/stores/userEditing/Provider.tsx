@@ -49,14 +49,6 @@ export const UserEditingProvider: FC<Props> = ({
   showDiff: initialShowDiff = false,
   defaultShowMode = 'TABLE_NAME',
 }) => {
-  const [hash, _setHash] = useState(
-    typeof location === 'object' ? location.hash : null,
-  )
-  const setHash = useCallback((hash: string | null) => {
-    _setHash(hash)
-    location.hash = hash ?? ''
-  }, [])
-
   const [activeTableName, _setActiveTableName] = useQueryState(
     'active',
     parseAsString.withDefault('').withOptions({ history: 'push' }),
@@ -64,10 +56,10 @@ export const UserEditingProvider: FC<Props> = ({
 
   const setActiveTableName: typeof _setActiveTableName = useCallback(
     (...args) => {
-      setTimeout(() => setHash(null), 0)
+      location.hash = ''
       return _setActiveTableName(...args)
     },
-    [setHash, _setActiveTableName],
+    [_setActiveTableName],
   )
 
   const [showMode, setShowMode] = useQueryState(
@@ -218,8 +210,6 @@ export const UserEditingProvider: FC<Props> = ({
         // URL synchronized state
         activeTableName,
         setActiveTableName,
-        hash,
-        setHash,
         showMode,
         setShowMode,
         hiddenNodeIds,

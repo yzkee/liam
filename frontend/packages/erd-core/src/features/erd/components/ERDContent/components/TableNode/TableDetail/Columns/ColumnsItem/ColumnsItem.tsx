@@ -22,15 +22,9 @@ type Props = {
   tableId: string
   column: Column
   constraints: Constraints
-  scrollToElement: (id: string) => void
 }
 
-export const ColumnsItem: FC<Props> = ({
-  tableId,
-  column,
-  constraints,
-  scrollToElement,
-}) => {
+export const ColumnsItem: FC<Props> = ({ tableId, column, constraints }) => {
   const elementId = columnElementId(tableId, column.name)
 
   const { operations } = useSchemaOrThrow()
@@ -60,20 +54,7 @@ export const ColumnsItem: FC<Props> = ({
   return (
     <div id={elementId} className={clsx(styles.wrapper, diffStyle)}>
       <h3 className={styles.heading}>
-        <a
-          href={`#${elementId}`}
-          onClick={(event) => {
-            // Do not call preventDefault to allow the default link behavior when ⌘ key is pressed
-            if (event.metaKey || event.ctrlKey) {
-              return
-            }
-
-            event.preventDefault()
-            scrollToElement(elementId)
-          }}
-        >
-          {column.name} #
-        </a>
+        <a href={`#${elementId}`}>{column.name} #</a>
       </h3>
       {column.comment && <Comment tableId={tableId} column={column} />}
       <GridTableRoot>

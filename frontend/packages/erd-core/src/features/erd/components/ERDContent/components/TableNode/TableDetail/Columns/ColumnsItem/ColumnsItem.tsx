@@ -22,9 +22,15 @@ type Props = {
   tableId: string
   column: Column
   constraints: Constraints
+  focusedElementId: string
 }
 
-export const ColumnsItem: FC<Props> = ({ tableId, column, constraints }) => {
+export const ColumnsItem: FC<Props> = ({
+  tableId,
+  column,
+  constraints,
+  focusedElementId,
+}) => {
   const elementId = columnElementId(tableId, column.name)
 
   const { operations } = useSchemaOrThrow()
@@ -53,6 +59,7 @@ export const ColumnsItem: FC<Props> = ({ tableId, column, constraints }) => {
 
   return (
     <div id={elementId} className={clsx(styles.wrapper, diffStyle)}>
+      {elementId === focusedElementId && <span>blink circle</span>}
       <h3 className={styles.heading}>
         <a className={styles.link} href={`#${elementId}`}>
           {column.name}

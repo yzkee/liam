@@ -24,6 +24,7 @@ describe('id', () => {
         tableId="users"
         column={aColumn({ name: 'id', type: 'bigserial' })}
         constraints={{}}
+        focusedElementId={'users__columns__created_at'}
       />,
       { wrapper },
     )
@@ -45,6 +46,7 @@ describe('type', () => {
         tableId="users"
         column={aColumn({ name: 'id', type: 'bigserial' })}
         constraints={{}}
+        focusedElementId={'users__columns__created_at'}
       />,
       { wrapper },
     )
@@ -61,6 +63,7 @@ describe('default value', () => {
         tableId="users"
         column={aColumn({ default: null })}
         constraints={{}}
+        focusedElementId={'users__columns__created_at'}
       />,
       { wrapper },
     )
@@ -74,6 +77,7 @@ describe('default value', () => {
         tableId="users"
         column={aColumn({ default: 100 })}
         constraints={{}}
+        focusedElementId={'users__columns__created_at'}
       />,
       { wrapper },
     )
@@ -95,6 +99,7 @@ describe('primary key constraint', () => {
             columnNames: ['id'],
           }),
         }}
+        focusedElementId={'users__columns__created_at'}
       />,
       { wrapper },
     )
@@ -110,6 +115,7 @@ describe('not null', () => {
         tableId="users"
         column={aColumn({ name: 'id', notNull: true })}
         constraints={{}}
+        focusedElementId={'users__columns__created_at'}
       />,
       { wrapper },
     )
@@ -123,6 +129,7 @@ describe('not null', () => {
         tableId="users"
         column={aColumn({ name: 'id', notNull: false })}
         constraints={{}}
+        focusedElementId={'users__columns__created_at'}
       />,
       { wrapper },
     )

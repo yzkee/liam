@@ -300,4 +300,143 @@ describe('PGliteInstanceManager', () => {
       })
     })
   })
+
+  describe('COMMENT Statement String Processing', () => {
+    it('should handle COMMENT statements with apostrophes in possessive form', async () => {
+      const sql = `
+CREATE TABLE users (
+  id UUID PRIMARY KEY,
+  full_name TEXT,
+  bio TEXT
+);
+
+COMMENT ON TABLE users IS 'User''s account information';
+COMMENT ON COLUMN users.id IS 'User''s unique identifier';
+COMMENT ON COLUMN users.full_name IS 'User''s display name';
+COMMENT ON COLUMN users.bio IS 'User''s biography';
+      `
+
+      const results = await manager.executeQuery(sql, [])
+
+      expect(results).toHaveLength(5)
+      
+      // CREATE TABLE should succeed
+      expect(results[0]?.success).toBe(true)
+      expect(results[0]?.sql).toContain('CREATE TABLE')
+      
+      // All COMMENT statements should succeed and start with COMMENT, not OMMENT
+      for (let i = 1; i <= 4; i++) {
+        expect(results[i]?.success).toBe(true)
+        expect(results[i]?.sql.trim()).toMatch(/^COMMENT ON/)
+        expect(results[i]?.sql).not.toMatch(/^OMMENT/)
+      }
+    })
+
+    it('should handle multiple COMMENT statements after table with escaped apostrophes', async () => {
+      const sql = `
+CREATE TABLE organizations (
+  id UUID PRIMARY KEY,
+  name TEXT NOT NULL,
+  owner_id UUID,
+  description TEXT
+);
+COMMENT ON TABLE organizations IS 'Organization''s main table';
+COMMENT ON COLUMN organizations.name IS 'Organization''s display name';
+COMMENT ON COLUMN organizations.owner_id IS 'Organization''s owner reference';
+COMMENT ON COLUMN organizations.description IS 'Organization''s detailed description';
+
+CREATE TABLE teams (
+  id UUID PRIMARY KEY,
+  org_id UUID REFERENCES organizations(id),
+  name TEXT
+);
+
+COMMENT ON TABLE teams IS 'Team''s information';
+COMMENT ON COLUMN teams.name IS 'Team''s name';
+      `
+
+      const results = await manager.executeQuery(sql, [])
+
+      // Should have: 2 CREATE TABLE + 6 COMMENT statements
+      expect(results).toHaveLength(8)
+      
+      // Check all statements succeed
+      results.forEach(result => {
+        expect(result.success).toBe(true)
+      })
+
+      // Check COMMENT statements are not truncated
+      const commentStatements = results.filter(r => r.sql.includes('COMMENT ON'))
+      expect(commentStatements).toHaveLength(6)
+      
+      commentStatements.forEach(result => {
+        expect(result.sql.trim()).toMatch(/^COMMENT ON/)
+        expect(result.sql).not.toMatch(/^OMMENT/)
+      })
+    })
+
+    it('should fail to parse SQL containing U+2019 (right single quotation mark)', async () => {
+      // This test demonstrates that U+2019 causes a parse error
+      // U+2019 (') is not a valid SQL string delimiter and breaks parsing
+      const sql = `
+CREATE TABLE products (
+  id UUID PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT
+);
+
+COMMENT ON TABLE products IS 'Product's main table';
+COMMENT ON COLUMN products.name IS 'Product's display name';
+COMMENT ON COLUMN products.description IS 'Product's detailed info';
+      `
+
+      const results = await manager.executeQuery(sql, [])
+
+      // Current behavior on main branch: U+2019 causes a parse error
+      // The entire SQL is returned as a single failed result
+      expect(results).toHaveLength(1)
+      expect(results[0]?.success).toBe(false)
+      expect(results[0]?.result.error).toContain('Parse error: syntax error at or near "s"')
+      
+      // The error occurs because U+2019 is interpreted as closing the string,
+      // making the 's' in "Product's" appear as invalid SQL syntax
+    })
+
+    it.skip('should demonstrate the OMMENT truncation bug with U+2019 (devin branch behavior)', async () => {
+      // This test is skipped on main branch but shows the bug that exists in devin branch
+      // where U+2019 causes subsequent statements to be truncated
+      const sql = `
+CREATE TABLE products (
+  id UUID PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT
+);
+
+COMMENT ON TABLE products IS 'Product's main table';
+COMMENT ON COLUMN products.name IS 'Product's display name';
+COMMENT ON COLUMN products.description IS 'Product's detailed info';
+      `
+
+      const results = await manager.executeQuery(sql, [])
+
+      // On devin branch with PR #3492, this would produce:
+      expect(results).toHaveLength(4)
+      
+      // 1. CREATE TABLE succeeds
+      expect(results[0]?.success).toBe(true)
+      expect(results[0]?.sql).toContain('CREATE TABLE products')
+      
+      // 2. First COMMENT succeeds (contains U+2019)
+      expect(results[1]?.success).toBe(true)
+      expect(results[1]?.sql).toContain('COMMENT ON TABLE products')
+      
+      // 3. Second COMMENT is truncated to "OMMENT" - this is the bug!
+      expect(results[2]?.success).toBe(false)
+      expect(results[2]?.sql).toMatch(/^OMMENT ON COLUMN/)
+      
+      // 4. Third COMMENT is truncated to "MENT" - cumulative offset
+      expect(results[3]?.success).toBe(false)
+      expect(results[3]?.sql).toMatch(/^MENT ON COLUMN/)
+    })
+  })
 })

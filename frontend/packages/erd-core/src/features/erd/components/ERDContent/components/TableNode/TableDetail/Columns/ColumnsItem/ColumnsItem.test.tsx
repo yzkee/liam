@@ -18,7 +18,7 @@ const wrapper: FC<PropsWithChildren> = ({ children }) => (
 )
 
 describe('id', () => {
-  it('renders column name as a inked heading', () => {
+  it('renders column name as a linked heading', () => {
     render(
       <ColumnsItem
         tableId="users"

@@ -6,8 +6,7 @@
   "exports": {
     "./eslint/index.js": "./eslint/index.js",
     "./eslint/base.js": "./eslint/base.js",
-    "./tsconfig/base.json": "./tsconfig/base.json",
-    "./tsconfig": "./tsconfig"
+    "./tsconfig/base.json": "./tsconfig/base.json"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.2",

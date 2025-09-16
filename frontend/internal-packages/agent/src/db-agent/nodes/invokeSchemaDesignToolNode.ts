@@ -53,6 +53,7 @@ export const invokeSchemaDesignToolNode = async (
     return {
       ...state,
       error: configurableResult.error,
+      schemaDesignSuccessful: false,
     }
   }
   const { repositories } = configurableResult.value
@@ -76,13 +77,18 @@ export const invokeSchemaDesignToolNode = async (
 
   const messages = result.messages
   if (!Array.isArray(messages)) {
-    return result
+    return {
+      ...result,
+      schemaDesignSuccessful: false,
+    }
   }
 
   let updatedResult = {
     ...state,
-    ...result,
-    messages: messages,
+    messages: [...state.messages, ...messages],
+    // Preserve retry counter - will be reset only on success
+    designSchemaRetryCount: state.designSchemaRetryCount,
+    schemaDesignSuccessful: false, // Default to false
   }
 
   if (wasSchemaDesignToolSuccessful(messages)) {
@@ -96,6 +102,8 @@ export const invokeSchemaDesignToolNode = async (
         ...updatedResult,
         schemaData: schemaResult.value.schema,
         latestVersionNumber: schemaResult.value.latestVersionNumber,
+        designSchemaRetryCount: 0,
+        schemaDesignSuccessful: true,
       }
     } else {
       console.warn(

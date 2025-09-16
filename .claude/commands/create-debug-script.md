@@ -47,8 +47,6 @@ ELSE:
    // How to run this script:
    // pnpm dlx tsx scripts/debug-[purpose].ts
 
-   #!/usr/bin/env node
-
    // === Configuration ===
    // If env vars needed, calculate path from script to root .env:
    // import { config } from 'dotenv'

@@ -16,7 +16,6 @@ This directory contains a comprehensive guide for LangGraph.js - a low-level orc
 
 ### Production & Platform
 - **[advanced-features.md](advanced-features.md)** - Subgraphs, retries, caching, runtime configuration, and structured output
-- **[platform.md](platform.md)** - LangGraph Platform deployment, authentication, assistants, and frontend integration
 
 ## 🔗 Reference Links
 
@@ -33,8 +32,3 @@ This directory contains a comprehensive guide for LangGraph.js - a low-level orc
 ### Tutorials
 - [Quick Start](https://langchain-ai.github.io/langgraphjs/tutorials/introduction/)
 - [Multi-agent Systems](https://langchain-ai.github.io/langgraphjs/tutorials/#multi-agent-systems)
-- [Human-in-the-loop Tutorials](https://langchain-ai.github.io/langgraphjs/tutorials/#human-in-the-loop)
-
-### LangGraph Platform
-- [Platform Documentation](https://langchain-ai.github.io/langgraphjs/cloud/)
-- [LangGraph Studio](https://langchain-ai.github.io/langgraphjs/cloud/how-tos/test_deployment/)

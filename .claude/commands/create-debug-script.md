@@ -9,7 +9,7 @@ Create a one-off TypeScript debug script for quick testing and debugging. The sc
 - **FACTS FIRST**: Real results always trump user expectations
 - **CELEBRATE CONTRADICTIONS**: When results ≠ expectations, highlight this as the key finding
 - **COMPLETE NEUTRALITY**: Report observations without bias toward user hypotheses
-- **NEVER rationalize unexpected results** - they are the most valuable discoveries
+- **NEVER RATIONALIZE UNEXPECTED RESULTS**: They are the most valuable discoveries
 
 ## Constraints
 - **Minimal imports** - Prefer Node.js built-ins and existing packages when possible

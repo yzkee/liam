@@ -54,7 +54,9 @@ export const ColumnsItem: FC<Props> = ({ tableId, column, constraints }) => {
   return (
     <div id={elementId} className={clsx(styles.wrapper, diffStyle)}>
       <h3 className={styles.heading}>
-        <a href={`#${elementId}`}>{column.name} #</a>
+        <a className={styles.link} href={`#${elementId}`}>
+          {column.name} #
+        </a>
       </h3>
       {column.comment && <Comment tableId={tableId} column={column} />}
       <GridTableRoot>

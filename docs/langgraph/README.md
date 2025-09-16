@@ -10,8 +10,6 @@ This directory contains a comprehensive guide for LangGraph.js - a low-level orc
 - **[state-management.md](state-management.md)** - State schema design, updates, and persistence patterns
 
 ### Advanced Features
-- **[persistence-memory.md](persistence-memory.md)** - Thread-level persistence, memory management, and subgraph persistence
-- **[human-in-the-loop.md](human-in-the-loop.md)** - Interrupts, tool call review, breakpoints, and time travel
 - **[streaming.md](streaming.md)** - Stream modes, token-level streaming, and custom data streaming
 - **[tool-calling.md](tool-calling.md)** - ToolNode usage, patterns, and state updates from tools
 - **[multi-agent.md](multi-agent.md)** - Agent communication, supervisory patterns, and multi-turn conversations

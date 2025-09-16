@@ -8,12 +8,12 @@ const MAX_DESIGN_RETRY_COUNT = 3
  * Determines the next node based on whether the last message contains tool calls
  * and handles retry logic for failed schema design attempts
  *
- * Note: With tool_choice forcing tool usage, this function will never return 'END'
- * in practice, as the LLM will always generate tool calls.
+ * With tool_choice forcing tool usage, the LLM will always generate tool calls,
+ * so this function will route to either invokeSchemaDesignTool or retry designSchema.
  */
 export const routeAfterDesignSchema = (
   state: DbAgentState,
-): 'invokeSchemaDesignTool' | 'END' | 'designSchema' => {
+): 'invokeSchemaDesignTool' | 'designSchema' => {
   const { messages, designSchemaRetryCount } = state
   const lastMessage = messages[messages.length - 1]
 

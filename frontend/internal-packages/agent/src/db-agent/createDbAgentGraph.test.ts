@@ -12,7 +12,6 @@ graph TD;
 	__end__([<p>__end__</p>]):::last
 	__start__ --> designSchema;
 	designSchema -.-> invokeSchemaDesignTool;
-	designSchema -. &nbsp;END&nbsp; .-> __end__;
 	invokeSchemaDesignTool -. &nbsp;END&nbsp; .-> __end__;
 	invokeSchemaDesignTool -.-> designSchema;
 	designSchema -.-> designSchema;

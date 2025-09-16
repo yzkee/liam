@@ -16,7 +16,6 @@ This directory contains a comprehensive guide for LangGraph.js - a low-level orc
 
 ### Production & Platform
 - **[advanced-features.md](advanced-features.md)** - Subgraphs, retries, caching, runtime configuration, and structured output
-- **[prebuilt-agents.md](prebuilt-agents.md)** - ReAct agents and custom agent patterns
 - **[platform.md](platform.md)** - LangGraph Platform deployment, authentication, assistants, and frontend integration
 
 ## 🔗 Reference Links

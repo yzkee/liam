@@ -4,9 +4,6 @@ This directory contains a comprehensive guide for LangGraph.js - a low-level orc
 
 ## 📁 Documentation Structure
 
-### Getting Started
-- **[installation.md](installation.md)** - Installation and setup
-
 ### Core Concepts
 - **[core-concepts.md](core-concepts.md)** - Graph state definition, basic construction, and node patterns
 - **[control-flow.md](control-flow.md)** - Branching, map-reduce, conditional routing, and loop control

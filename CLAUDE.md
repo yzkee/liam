@@ -136,6 +136,10 @@ function saveUser(data: UserData, userId: string) {
 ## Pull Requests
 When creating pull requests, refer to @.github/pull_request_template.md for the required information and format.
 
+## AI/ML Development
+For AI and machine learning development guidance:
+- [`docs/langgraph/README.md`](docs/langgraph/README.md) - LangGraph.js complete guide
+
 ## Important Files
 - `frontend/apps/docs/content/docs/contributing/repository-architecture.mdx` - Detailed package structure
 - `.cursorrules` - Contains detailed coding standards and guidelines

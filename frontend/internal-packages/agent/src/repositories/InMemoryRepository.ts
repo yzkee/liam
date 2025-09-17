@@ -2,7 +2,6 @@ import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
 import { MemorySaver } from '@langchain/langgraph-checkpoint'
 import type { Artifact } from '@liam-hq/artifact'
 import type { Tables } from '@liam-hq/db/supabase/database.types'
-import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import type { Schema } from '@liam-hq/schema'
 import { schemaSchema } from '@liam-hq/schema'
 import { applyPatch } from 'fast-json-patch'
@@ -31,11 +30,6 @@ type InMemoryRepositoryState = {
   designSessions: Map<string, DesignSessionData>
   timelineItems: Map<string, Tables<'timeline_items'>>
   artifacts: Map<string, Tables<'artifacts'>>
-  validationQueries: Map<
-    string,
-    { id: string; designSessionId: string; queryString: string }
-  >
-  validationResults: Map<string, SqlResult[]>
   workflowRuns: Map<string, Tables<'workflow_runs'>>
   versions: Map<string, { id: string; schema: Schema; versionNumber: number }>
   buildingSchemas: Map<
@@ -70,8 +64,6 @@ export class InMemoryRepository implements SchemaRepository {
       designSessions: new Map(),
       timelineItems: new Map(),
       artifacts: new Map(),
-      validationQueries: new Map(),
-      validationResults: new Map(),
       workflowRuns: new Map(),
       versions: new Map(),
       buildingSchemas: new Map(),
@@ -271,7 +263,6 @@ export class InMemoryRepository implements SchemaRepository {
         type: 'query_result',
         assistant_role: null,
         user_id: null,
-        query_result_id: params.queryResultId,
       }
     } else if (params.type === 'error') {
       timelineItem = {
@@ -409,36 +400,6 @@ export class InMemoryRepository implements SchemaRepository {
     return { success: true, artifact }
   }
 
-  async createValidationQuery(params: {
-    designSessionId: string
-    queryString: string
-  }): Promise<
-    { success: true; queryId: string } | { success: false; error: string }
-  > {
-    const queryId = this.generateId()
-
-    this.state.validationQueries.set(queryId, {
-      id: queryId,
-      designSessionId: params.designSessionId,
-      queryString: params.queryString,
-    })
-
-    return { success: true, queryId }
-  }
-
-  async createValidationResults(params: {
-    validationQueryId: string
-    results: SqlResult[]
-  }): Promise<{ success: true } | { success: false; error: string }> {
-    if (!this.state.validationQueries.has(params.validationQueryId)) {
-      return { success: false, error: 'Validation query not found' }
-    }
-
-    this.state.validationResults.set(params.validationQueryId, params.results)
-
-    return { success: true }
-  }
-
   async createWorkflowRun(
     params: CreateWorkflowRunParams,
   ): Promise<WorkflowRunResult> {
@@ -494,10 +455,6 @@ export class InMemoryRepository implements SchemaRepository {
 
   getWorkflowRun(workflowRunId: string): Tables<'workflow_runs'> | null {
     return this.state.workflowRuns.get(workflowRunId) || null
-  }
-
-  getValidationResults(queryId: string): SqlResult[] | null {
-    return this.state.validationResults.get(queryId) || null
   }
 
   /**

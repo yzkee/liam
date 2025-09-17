@@ -23,8 +23,6 @@ import type { ReviewFeedbacksOverride } from './reviewFeedbacks'
 import type { ReviewSuggestionSnippetsOverride } from './reviewSuggestionSnippets'
 import type { SchemaFilePathsOverride } from './schemaFilePaths'
 import type { TimelineItemsOverride } from './timelineItems'
-import type { ValidationQueriesOverride } from './validationQueries'
-import type { ValidationResultsOverride } from './validationResults'
 
 export type AppDatabaseOverrides = MergeDeep<
   DatabaseGenerated,
@@ -47,8 +45,6 @@ export type AppDatabaseOverrides = MergeDeep<
     GithubPullRequestsOverride &
     DesignSessionsOverride &
     BuildingSchemasOverride &
-    ValidationQueriesOverride &
-    ValidationResultsOverride &
     TimelineItemsOverride &
     ArtifactsOverride &
     CheckpointsOverride &

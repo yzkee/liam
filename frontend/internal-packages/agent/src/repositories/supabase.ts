@@ -3,7 +3,6 @@ import type { Artifact } from '@liam-hq/artifact'
 import { artifactSchema } from '@liam-hq/artifact'
 import { type SupabaseClientType, toResultAsync } from '@liam-hq/db'
 import type { Json, Tables } from '@liam-hq/db/supabase/database.types'
-import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import type { Schema } from '@liam-hq/schema'
 import {
   applyPatchOperations,
@@ -74,8 +73,7 @@ export class SupabaseSchemaRepository implements SchemaRepository {
           organization_id,
           design_session_id,
           building_schema_version_id,
-          assistant_role,
-          query_result_id
+          assistant_role
         )
       `,
       )
@@ -410,8 +408,6 @@ export class SupabaseSchemaRepository implements SchemaRepository {
       'buildingSchemaVersionId' in params
         ? params.buildingSchemaVersionId
         : null
-    const queryResultId =
-      'queryResultId' in params ? params.queryResultId : null
     const now = new Date().toISOString()
 
     const { data: timelineItem, error } = await this.client
@@ -422,7 +418,6 @@ export class SupabaseSchemaRepository implements SchemaRepository {
         type,
         user_id: userId,
         building_schema_version_id: buildingSchemaVersionId,
-        query_result_id: queryResultId,
         updated_at: now,
         assistant_role: assistantRole,
       })
@@ -604,64 +599,6 @@ export class SupabaseSchemaRepository implements SchemaRepository {
     return {
       success: true,
       artifact: artifactData,
-    }
-  }
-
-  async createValidationQuery(params: {
-    designSessionId: string
-    queryString: string
-  }): Promise<
-    { success: true; queryId: string } | { success: false; error: string }
-  > {
-    const { data: validationQuery, error } = await this.client
-      .from('validation_queries')
-      .insert({
-        design_session_id: params.designSessionId,
-        query_string: params.queryString,
-      })
-      .select('id')
-      .single()
-
-    if (error) {
-      console.error('Failed to create validation query:', error)
-      return {
-        success: false,
-        error: error.message,
-      }
-    }
-
-    return {
-      success: true,
-      queryId: validationQuery.id,
-    }
-  }
-
-  async createValidationResults(params: {
-    validationQueryId: string
-    results: SqlResult[]
-  }): Promise<{ success: true } | { success: false; error: string }> {
-    const validationResults = params.results.map((result) => ({
-      validation_query_id: params.validationQueryId,
-      result_set: [JSON.parse(JSON.stringify(result.result))],
-      executed_at: result.metadata.timestamp,
-      status: result.success ? 'success' : 'failure',
-      error_message: result.success ? null : JSON.stringify(result.result),
-    }))
-
-    const { error } = await this.client
-      .from('validation_results')
-      .insert(validationResults)
-
-    if (error) {
-      console.error('Failed to create validation results:', error)
-      return {
-        success: false,
-        error: error.message,
-      }
-    }
-
-    return {
-      success: true,
     }
   }
 

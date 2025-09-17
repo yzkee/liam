@@ -44,7 +44,7 @@ export const PublicSessionDetailPage = async ({
   const { data: timelineItems } = await supabase
     .from('timeline_items')
     .select(
-      'id, design_session_id, content, created_at, updated_at, building_schema_version_id, type, query_result_id, assistant_role',
+      'id, design_session_id, content, created_at, updated_at, building_schema_version_id, type, assistant_role',
     )
     .eq('design_session_id', designSessionId)
     .order('created_at', { ascending: true })
@@ -111,6 +111,8 @@ export const PublicSessionDetailPage = async ({
       organization_id: 'public', // Dummy value for public access
       user_id: null, // Public access doesn't have user info
       updated_at: item.updated_at ?? new Date().toISOString(),
+      building_schema_version_id: null,
+      assistant_role: null,
     })),
   }
 

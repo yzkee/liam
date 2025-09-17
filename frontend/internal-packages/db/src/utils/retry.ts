@@ -1,24 +1,14 @@
-import type { Result } from 'neverthrow'
+import { ResultAsync } from 'neverthrow'
 
 /**
- * Configuration for retry operations
+ * Retry configuration for Supabase operations
  */
-type RetryConfig = {
-  maxAttempts: number
-  baseDelayMs: number
-  maxDelayMs: number
-  backoffMultiplier: number
-}
-
-/**
- * Default retry configuration for Supabase operations
- */
-const DEFAULT_SUPABASE_RETRY_CONFIG: RetryConfig = {
+const RETRY_CONFIG = {
   maxAttempts: 3,
   baseDelayMs: 1000,
   maxDelayMs: 8000,
   backoffMultiplier: 2,
-}
+} as const
 
 /**
  * Determines if an error is retryable based on common network/fetch failures
@@ -48,36 +38,51 @@ function isRetryableError(error: unknown): boolean {
 }
 
 /**
+ * Options for retry configuration
+ */
+type RetryOptions = {
+  maxAttempts?: number
+  baseDelayMs?: number
+  maxDelayMs?: number
+  backoffMultiplier?: number
+}
+
+/**
  * Retry a function with exponential backoff using Result types
  */
-export async function retryWithExponentialBackoff<T, E>(
-  fn: () => Promise<Result<T, E>>,
-  config: RetryConfig = DEFAULT_SUPABASE_RETRY_CONFIG,
-): Promise<Result<T, E>> {
-  for (let attempt = 1; attempt <= config.maxAttempts; attempt++) {
+export function retry<T, E>(
+  fn: () => ResultAsync<T, E>,
+  options?: RetryOptions,
+): ResultAsync<T, E> {
+  const maxAttempts = options?.maxAttempts ?? RETRY_CONFIG.maxAttempts
+  const baseDelayMs = options?.baseDelayMs ?? RETRY_CONFIG.baseDelayMs
+  const maxDelayMs = options?.maxDelayMs ?? RETRY_CONFIG.maxDelayMs
+  const backoffMultiplier =
+    options?.backoffMultiplier ?? RETRY_CONFIG.backoffMultiplier
+
+  const attemptRetry = async (attemptNumber: number): Promise<T> => {
     const result = await fn()
 
     if (result.isOk()) {
-      return result
+      return result.value
     }
 
-    if (attempt === config.maxAttempts || !isRetryableError(result.error)) {
-      return result
+    if (attemptNumber >= maxAttempts || !isRetryableError(result.error)) {
+      throw result.error
     }
 
-    // Calculate delay with exponential backoff
     const delay = Math.min(
-      config.baseDelayMs * config.backoffMultiplier ** (attempt - 1),
-      config.maxDelayMs,
-    )
-
-    console.warn(
-      `Supabase operation failed (attempt ${attempt}/${config.maxAttempts}), retrying in ${delay}ms:`,
-      result.error,
+      baseDelayMs * backoffMultiplier ** (attemptNumber - 1),
+      maxDelayMs,
     )
 
     await new Promise((resolve) => setTimeout(resolve, delay))
+    return attemptRetry(attemptNumber + 1)
   }
 
-  return await fn()
+  return ResultAsync.fromPromise(
+    attemptRetry(1),
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    (error) => error as E,
+  )
 }

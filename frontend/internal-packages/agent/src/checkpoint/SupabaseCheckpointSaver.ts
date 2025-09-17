@@ -10,8 +10,7 @@ import {
   WRITES_IDX_MAP,
 } from '@langchain/langgraph-checkpoint'
 import type { Database, Json, SupabaseClientType } from '@liam-hq/db'
-import { retryWithExponentialBackoff } from '@liam-hq/db'
-import { err, ok } from 'neverthrow'
+import { retry, toResultAsync } from '@liam-hq/db'
 import {
   base64ToUint8Array,
   hexToUint8Array,
@@ -298,15 +297,13 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
         updated_at: new Date().toISOString(),
       }
 
-    const checkpointResult = await retryWithExponentialBackoff(async () => {
-      const result = await this.client
-        .from('checkpoints')
-        .upsert(checkpointInsert, {
+    const checkpointResult = await retry(() =>
+      toResultAsync(
+        this.client.from('checkpoints').upsert(checkpointInsert, {
           onConflict: 'thread_id,checkpoint_ns,checkpoint_id,organization_id',
-        })
-
-      return result.error ? err(result.error) : ok(result)
-    })
+        }),
+      ),
+    )
 
     if (checkpointResult.isErr()) {
       // BaseCheckpointSaver expects exceptions to be thrown
@@ -324,16 +321,14 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
     )
 
     if (blobs.length > 0) {
-      const blobResult = await retryWithExponentialBackoff(async () => {
-        const result = await this.client
-          .from('checkpoint_blobs')
-          .upsert(blobs, {
+      const blobResult = await retry(() =>
+        toResultAsync(
+          this.client.from('checkpoint_blobs').upsert(blobs, {
             onConflict:
               'thread_id,checkpoint_ns,channel,version,organization_id',
-          })
-
-        return result.error ? err(result.error) : ok(result)
-      })
+          }),
+        ),
+      )
 
       if (blobResult.isErr()) {
         // BaseCheckpointSaver expects exceptions to be thrown
@@ -373,16 +368,14 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
     )
 
     if (dumpedWrites.length > 0) {
-      const writesResult = await retryWithExponentialBackoff(async () => {
-        const result = await this.client
-          .from('checkpoint_writes')
-          .upsert(dumpedWrites, {
+      const writesResult = await retry(() =>
+        toResultAsync(
+          this.client.from('checkpoint_writes').upsert(dumpedWrites, {
             onConflict:
               'thread_id,checkpoint_ns,checkpoint_id,task_id,idx,organization_id',
-          })
-
-        return result.error ? err(result.error) : ok(result)
-      })
+          }),
+        ),
+      )
 
       if (writesResult.isErr()) {
         // BaseCheckpointSaver expects exceptions to be thrown
@@ -403,15 +396,15 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
    * Required for compatibility with LangGraph 0.4.x
    */
   async deleteThread(threadId: string): Promise<void> {
-    const checkpointsResult = await retryWithExponentialBackoff(async () => {
-      const result = await this.client
-        .from('checkpoints')
-        .delete()
-        .eq('thread_id', threadId)
-        .eq('organization_id', this.organizationId)
-
-      return result.error ? err(result.error) : ok(result)
-    })
+    const checkpointsResult = await retry(() =>
+      toResultAsync(
+        this.client
+          .from('checkpoints')
+          .delete()
+          .eq('thread_id', threadId)
+          .eq('organization_id', this.organizationId),
+      ),
+    )
 
     if (checkpointsResult.isErr()) {
       // eslint-disable-next-line no-throw-error/no-throw-error
@@ -420,15 +413,15 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
       )
     }
 
-    const writesResult = await retryWithExponentialBackoff(async () => {
-      const result = await this.client
-        .from('checkpoint_writes')
-        .delete()
-        .eq('thread_id', threadId)
-        .eq('organization_id', this.organizationId)
-
-      return result.error ? err(result.error) : ok(result)
-    })
+    const writesResult = await retry(() =>
+      toResultAsync(
+        this.client
+          .from('checkpoint_writes')
+          .delete()
+          .eq('thread_id', threadId)
+          .eq('organization_id', this.organizationId),
+      ),
+    )
 
     if (writesResult.isErr()) {
       // eslint-disable-next-line no-throw-error/no-throw-error
@@ -437,15 +430,15 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
       )
     }
 
-    const blobsResult = await retryWithExponentialBackoff(async () => {
-      const result = await this.client
-        .from('checkpoint_blobs')
-        .delete()
-        .eq('thread_id', threadId)
-        .eq('organization_id', this.organizationId)
-
-      return result.error ? err(result.error) : ok(result)
-    })
+    const blobsResult = await retry(() =>
+      toResultAsync(
+        this.client
+          .from('checkpoint_blobs')
+          .delete()
+          .eq('thread_id', threadId)
+          .eq('organization_id', this.organizationId),
+      ),
+    )
 
     if (blobsResult.isErr()) {
       // eslint-disable-next-line no-throw-error/no-throw-error

@@ -33,17 +33,6 @@ export const fetchDesignSessionWithTimelineItems = (
             number,
             patch
           ),
-          validation_queries!query_result_id (
-            id,
-            query_string,
-            validation_results (
-              id,
-              result_set,
-              status,
-              error_message,
-              executed_at
-            )
-          )
         )
       `)
       .eq('id', designSessionId)

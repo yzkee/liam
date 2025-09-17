@@ -28,7 +28,6 @@ export type TimelineItem = Pick<
   | 'design_session_id'
   | 'building_schema_version_id'
   | 'assistant_role'
-  | 'query_result_id'
 > & {
   users?: {
     id: string
@@ -39,17 +38,6 @@ export type TimelineItem = Pick<
     id: string
     number: number
     patch: Database['public']['Tables']['building_schema_versions']['Row']['patch']
-  } | null
-  validation_queries?: {
-    id: string
-    query_string: string
-    validation_results?: Array<{
-      id: string
-      result_set: unknown[] | null
-      status: string
-      error_message: string | null
-      executed_at: string
-    }>
   } | null
   // TODO: Backend needs to add artifact_action field to timeline_items table
   // This field should be set to 'created' when PM agent creates requirements artifact
@@ -72,13 +60,7 @@ type AssistantRole = Database['public']['Enums']['assistant_role_enum']
 type BaseTimelineItemEntry = {
   id: string
   content: string
-  type:
-    | 'user'
-    | 'assistant'
-    | 'schema_version'
-    | 'error'
-    | 'assistant_log'
-    | 'query_result'
+  type: 'user' | 'assistant' | 'schema_version' | 'error' | 'assistant_log'
   timestamp: Date
   // Backend artifact_action field - used to determine when to show view links
   artifactAction?: 'created' | 'updated' | null
@@ -115,16 +97,9 @@ export type AssistantLogTimelineItemEntry = BaseTimelineItemEntry & {
   role: AssistantRole
 }
 
-export type QueryResultTimelineItemEntry = BaseTimelineItemEntry & {
-  type: 'query_result'
-  queryResultId: string
-  results: unknown
-}
-
 export type TimelineItemEntry =
   | UserTimelineItemEntry
   | AssistantTimelineItemEntry
   | SchemaVersionTimelineItemEntry
   | ErrorTimelineItemEntry
   | AssistantLogTimelineItemEntry
-  | QueryResultTimelineItemEntry

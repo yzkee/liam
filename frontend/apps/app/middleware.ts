@@ -97,7 +97,7 @@ export async function middleware(request: NextRequest) {
     process.env.VERCEL_ENV === 'production'
   ) {
     const allowedSource = 'liambx.com'
-    const rewriteSource = request.headers.get('x-forwarded-host')
+    const rewriteSource = request.headers.get('x-liam-rewrite-source')
 
     // Block direct access to /erd/* - only allow access via rewrite in production
     if (rewriteSource !== allowedSource) {

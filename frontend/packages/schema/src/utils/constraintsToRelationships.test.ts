@@ -51,8 +51,8 @@ describe('constraintsToRelationships', () => {
     const result = constraintsToRelationships(tables)
 
     expect(result).toEqual({
-      fk_posts_user: {
-        name: 'fk_posts_user',
+      posts_fk_posts_user_0: {
+        name: 'posts_fk_posts_user_0',
         primaryTableName: 'users',
         primaryColumnName: 'id',
         foreignTableName: 'posts',
@@ -111,7 +111,9 @@ describe('constraintsToRelationships', () => {
 
     const result = constraintsToRelationships(tables)
 
-    expect(result['fk_profiles_user']?.cardinality).toBe('ONE_TO_ONE')
+    expect(result['profiles_fk_profiles_user_0']?.cardinality).toBe(
+      'ONE_TO_ONE',
+    )
   })
 
   it('should detect ONE_TO_ONE relationship when column has UNIQUE constraint', () => {
@@ -161,7 +163,9 @@ describe('constraintsToRelationships', () => {
 
     const result = constraintsToRelationships(tables)
 
-    expect(result['fk_profiles_user']?.cardinality).toBe('ONE_TO_ONE')
+    expect(result['profiles_fk_profiles_user_0']?.cardinality).toBe(
+      'ONE_TO_ONE',
+    )
   })
 
   it('should handle multiple foreign key constraints', () => {
@@ -231,9 +235,11 @@ describe('constraintsToRelationships', () => {
     const result = constraintsToRelationships(tables)
 
     expect(Object.keys(result)).toHaveLength(2)
-    expect(result['fk_posts_user']).toBeDefined()
-    expect(result['fk_posts_category']).toBeDefined()
-    expect(result['fk_posts_category']?.deleteConstraint).toBe('SET_NULL')
+    expect(result['posts_fk_posts_user_0']).toBeDefined()
+    expect(result['posts_fk_posts_category_0']).toBeDefined()
+    expect(result['posts_fk_posts_category_0']?.deleteConstraint).toBe(
+      'SET_NULL',
+    )
   })
 
   it('should ignore non-foreign key constraints', () => {
@@ -342,8 +348,8 @@ describe('constraintsToRelationships', () => {
     const result = constraintsToRelationships(tables)
 
     expect(Object.keys(result)).toHaveLength(2)
-    expect(result['fk_stores_region_0']).toEqual({
-      name: 'fk_stores_region_0',
+    expect(result['stores_fk_stores_region_0']).toEqual({
+      name: 'stores_fk_stores_region_0',
       primaryTableName: 'regions',
       primaryColumnName: 'country_code',
       foreignTableName: 'stores',
@@ -352,8 +358,8 @@ describe('constraintsToRelationships', () => {
       updateConstraint: 'CASCADE',
       deleteConstraint: 'CASCADE',
     })
-    expect(result['fk_stores_region_1']).toEqual({
-      name: 'fk_stores_region_1',
+    expect(result['stores_fk_stores_region_1']).toEqual({
+      name: 'stores_fk_stores_region_1',
       primaryTableName: 'regions',
       primaryColumnName: 'region_code',
       foreignTableName: 'stores',
@@ -421,7 +427,102 @@ describe('constraintsToRelationships', () => {
 
     const result = constraintsToRelationships(tables)
 
-    expect(result['fk_profiles_user_0']?.cardinality).toBe('ONE_TO_ONE')
-    expect(result['fk_profiles_user_1']?.cardinality).toBe('ONE_TO_ONE')
+    expect(result['user_profiles_fk_profiles_user_0']?.cardinality).toBe(
+      'ONE_TO_ONE',
+    )
+    expect(result['user_profiles_fk_profiles_user_1']?.cardinality).toBe(
+      'ONE_TO_ONE',
+    )
+  })
+
+  it('should ensure unique relationship names across multiple tables with same foreign key names', () => {
+    const tables = {
+      tableA: aTable({
+        name: 'tableA',
+        columns: {
+          id: aColumn({
+            name: 'id',
+            type: 'bigint',
+            notNull: true,
+          }),
+        },
+      }),
+      tableB: aTable({
+        name: 'tableB',
+        columns: {
+          id: aColumn({
+            name: 'id',
+            type: 'bigint',
+            notNull: true,
+          }),
+          a_id: aColumn({
+            name: 'a_id',
+            type: 'bigint',
+            notNull: true,
+          }),
+        },
+        constraints: {
+          fk_common: {
+            type: 'FOREIGN KEY',
+            name: 'fk_common',
+            columnNames: ['a_id'],
+            targetTableName: 'tableA',
+            targetColumnNames: ['id'],
+            updateConstraint: 'CASCADE',
+            deleteConstraint: 'CASCADE',
+          },
+        },
+      }),
+      tableC: aTable({
+        name: 'tableC',
+        columns: {
+          id: aColumn({
+            name: 'id',
+            type: 'bigint',
+            notNull: true,
+          }),
+          a_id: aColumn({
+            name: 'a_id',
+            type: 'bigint',
+            notNull: true,
+          }),
+        },
+        constraints: {
+          fk_common: {
+            type: 'FOREIGN KEY',
+            name: 'fk_common',
+            columnNames: ['a_id'],
+            targetTableName: 'tableA',
+            targetColumnNames: ['id'],
+            updateConstraint: 'CASCADE',
+            deleteConstraint: 'CASCADE',
+          },
+        },
+      }),
+    }
+
+    const result = constraintsToRelationships(tables)
+
+    expect(Object.keys(result)).toHaveLength(2)
+    expect(result['tableB_fk_common_0']).toEqual({
+      name: 'tableB_fk_common_0',
+      primaryTableName: 'tableA',
+      primaryColumnName: 'id',
+      foreignTableName: 'tableB',
+      foreignColumnName: 'a_id',
+      cardinality: 'ONE_TO_MANY',
+      updateConstraint: 'CASCADE',
+      deleteConstraint: 'CASCADE',
+    })
+    expect(result['tableC_fk_common_0']).toEqual({
+      name: 'tableC_fk_common_0',
+      primaryTableName: 'tableA',
+      primaryColumnName: 'id',
+      foreignTableName: 'tableC',
+      foreignColumnName: 'a_id',
+      cardinality: 'ONE_TO_MANY',
+      updateConstraint: 'CASCADE',
+      deleteConstraint: 'CASCADE',
+    })
   })
 })

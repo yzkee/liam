@@ -118,7 +118,7 @@ describe('convertSchemaToNodes', () => {
 
       expect(edges).toHaveLength(1)
       expect(edges[0]).toEqual({
-        id: 'posts_user_id_fkey',
+        id: 'posts_posts_user_id_fkey_0',
         type: 'relationship',
         source: 'users',
         target: 'posts',
@@ -126,7 +126,7 @@ describe('convertSchemaToNodes', () => {
         targetHandle: 'posts-user_id',
         data: {
           relationship: expect.objectContaining({
-            name: 'posts_user_id_fkey',
+            name: 'posts_posts_user_id_fkey_0',
             primaryTableName: 'users',
             primaryColumnName: 'id',
             foreignTableName: 'posts',
@@ -191,8 +191,8 @@ describe('convertSchemaToNodes', () => {
 
       expect(edges).toHaveLength(2)
       expect(edges.map((edge) => edge.id)).toEqual([
-        'posts_user_id_fkey',
-        'comments_post_id_fkey',
+        'posts_posts_user_id_fkey_0',
+        'comments_comments_post_id_fkey_0',
       ])
     })
 

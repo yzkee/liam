@@ -35,6 +35,7 @@ type Props = {
   initialWorkflowRunStatus: WorkflowRunStatus | null
   isDeepModelingEnabled: boolean
   initialIsPublic: boolean
+  initialCheckpointError?: string | null
 }
 
 export const SessionDetailPageClient: FC<Props> = ({
@@ -47,6 +48,7 @@ export const SessionDetailPageClient: FC<Props> = ({
   initialWorkflowRunStatus,
   isDeepModelingEnabled,
   initialIsPublic,
+  initialCheckpointError,
 }) => {
   const designSessionId = designSessionWithTimelineItems.id
 
@@ -105,10 +107,13 @@ export const SessionDetailPageClient: FC<Props> = ({
   )
 
   const chatMessages = mapStoredMessagesToChatMessages(initialMessages)
-  const { isStreaming, messages, start } = useStream({
+  const { isStreaming, messages, start, error } = useStream({
     initialMessages: chatMessages,
     designSessionId,
   })
+
+  // Combine streaming error with checkpoint errors
+  const combinedError = error || initialCheckpointError
   // Track if initial workflow has been triggered to prevent multiple executions
   const hasTriggeredInitialWorkflow = useRef(false)
 
@@ -158,6 +163,7 @@ export const SessionDetailPageClient: FC<Props> = ({
             messages={messages}
             isWorkflowRunning={status === 'pending' || isStreaming}
             onMessageSend={addOrUpdateTimelineItem}
+            error={combinedError}
           />
         </div>
         {hasSelectedVersion && (

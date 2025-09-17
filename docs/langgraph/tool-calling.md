@@ -1,418 +1,377 @@
 # Tool Calling
 
-LangGraph provides powerful tool calling capabilities that allow agents to interact with external systems and perform actions. This guide covers the different patterns for implementing and using tools in LangGraph.js.
+LangGraph provides comprehensive tool calling capabilities that allow agents to interact with external systems and APIs. This guide covers the different approaches to implementing tool calling in LangGraph.js based on the official documentation.
 
 ## ToolNode Usage
 
-### Basic ToolNode Setup
-Create and configure tools for use within LangGraph nodes.
+### How to call tools using ToolNode
+
+ToolNode is a LangChain Runnable that takes graph state (with a list of messages) as input and outputs state update with the result of tool calls.
 
 ```typescript
-import { tool } from '@langchain/core/tools'
-import { ToolNode } from '@langchain/langgraph/prebuilt'
-import * as v from 'valibot'
+import { ToolNode } from "@langchain/langgraph/prebuilt";
+import { tool } from "@langchain/core/tools";
+import { z } from "zod";
 
-// Define a basic tool
-const calculatorTool = tool(
-  async (input: { operation: string; a: number; b: number }) => {
-    const { operation, a, b } = input
-    switch (operation) {
-      case 'add':
-        return `${a} + ${b} = ${a + b}`
-      case 'multiply':
-        return `${a} * ${b} = ${a * b}`
-      default:
-        throw new Error(`Unknown operation: ${operation}`)
+// Define tools
+const getWeather = tool(
+  (input) => {
+    if (["sf", "san francisco"].includes(input.location.toLowerCase())) {
+      return "It's 60 degrees and foggy.";
+    } else {
+      return "It's 90 degrees and sunny.";
     }
   },
   {
-    name: 'calculator',
-    description: 'Perform basic arithmetic operations',
-    schema: v.object({
-      operation: v.string(),
-      a: v.number(),
-      b: v.number()
-    })
+    name: "get_weather",
+    description: "Call to get the current weather.",
+    schema: z.object({
+      location: z.string().describe("Location to get the weather for."),
+    }),
   }
-)
+);
 
-// Create a ToolNode
-const toolNode = new ToolNode([calculatorTool])
+// Create ToolNode
+const toolNode = new ToolNode([getWeather]);
+
+// Manual invocation
+const toolResult = await toolNode.invoke({
+  messages: [
+    new AIMessage({
+      content: "",
+      tool_calls: [
+        {
+          name: "get_weather",
+          args: { location: "sf" },
+          id: "tool_call_id",
+        },
+      ],
+    }),
+  ],
+});
 ```
 
-### Tool Registration and Binding
-Register multiple tools and bind them to language models.
+### Using with chat models
+
+Integrate ToolNode with chat models for automatic tool calling in conversational flows.
 
 ```typescript
-import { ChatOpenAI } from '@langchain/openai'
+import { ChatAnthropic } from "@langchain/anthropic";
+import { StateGraph, Annotation, START } from "@langchain/langgraph";
 
-// Define multiple tools
-const tools = [
-  calculatorTool,
-  schemaDesignTool,
-  validationTool
-]
+const StateAnnotation = Annotation.Root({
+  messages: Annotation<BaseMessage[]>({
+    reducer: (x, y) => x.concat(y),
+  }),
+});
 
-// Bind tools to the language model
-const llmWithTools = new ChatOpenAI({
-  model: 'gpt-4',
-  temperature: 0
-}).bindTools(tools)
+// Bind tools to model
+const model = new ChatAnthropic({
+  model: "claude-3-5-sonnet-20240620",
+  temperature: 0,
+}).bindTools([getWeather]);
 
-// Create ToolNode with multiple tools
-const multiToolNode = new ToolNode(tools)
+const callModel = async (state: typeof StateAnnotation.State) => {
+  const response = await model.invoke(state.messages);
+  return { messages: [response] };
+};
 
-// Add to graph
-graph
-  .addNode('agent', llmWithTools)
-  .addNode('tools', multiToolNode)
-  .addEdge('agent', 'tools')
-  .addEdge('tools', 'agent')
+const shouldContinue = (state: typeof StateAnnotation.State) => {
+  const messages = state.messages;
+  const lastMessage = messages[messages.length - 1] as AIMessage;
+  
+  if (lastMessage.tool_calls?.length) {
+    return "tools";
+  }
+  return "__end__";
+};
+
+// Create workflow with ToolNode
+const workflow = new StateGraph(StateAnnotation)
+  .addNode("agent", callModel)
+  .addNode("tools", new ToolNode([getWeather]))
+  .addEdge(START, "agent")
+  .addConditionalEdges("agent", shouldContinue)
+  .addEdge("tools", "agent");
+
+const app = workflow.compile();
 ```
 
-### Multiple Tool Execution
-Handle scenarios where multiple tools need to be executed in sequence or parallel.
+### ReAct Agent
+
+Complete ReAct agent implementation using ToolNode for tool execution.
 
 ```typescript
-// Sequential tool execution
-export async function sequentialToolExecution(state: AgentState) {
-  const results = []
-  
-  for (const toolCall of state.toolCalls) {
-    const tool = findTool(toolCall.name)
-    const result = await tool.invoke(toolCall.args)
-    results.push({
-      toolCallId: toolCall.id,
-      result
+// ReAct Agent with ToolNode
+const reactAgent = async () => {
+  const workflow = new StateGraph(StateAnnotation)
+    .addNode("agent", callModel)
+    .addNode("tools", new ToolNode([getWeather]))
+    .addEdge(START, "agent")
+    .addConditionalEdges("agent", shouldContinue, {
+      tools: "tools",
+      __end__: "__end__",
     })
-  }
-  
-  return { ...state, toolResults: results }
-}
+    .addEdge("tools", "agent");
 
-// Parallel tool execution
-export async function parallelToolExecution(state: AgentState) {
-  const toolPromises = state.toolCalls.map(async (toolCall) => {
-    const tool = findTool(toolCall.name)
-    const result = await tool.invoke(toolCall.args)
-    return {
-      toolCallId: toolCall.id,
-      result
-    }
-  })
-  
-  const results = await Promise.all(toolPromises)
-  return { ...state, toolResults: results }
-}
+  const app = workflow.compile();
+
+  const finalState = await app.invoke({
+    messages: [new HumanMessage("what is the weather in sf")],
+  });
+
+  console.log(finalState.messages[finalState.messages.length - 1].content);
+};
 ```
 
 ## Tool Calling Patterns
 
-### Force Tool Calling
-Ensure that specific tools are called when certain conditions are met.
+### How to force an agent to call a tool
+
+Force agents to call specific tools first before making any plans, useful for executing specific actions in your application.
 
 ```typescript
-// Force tool calling with conditional logic
-export async function forceToolCalling(state: AgentState) {
-  const { messages, requiresValidation } = state
-  
-  if (requiresValidation) {
-    // Force validation tool call
-    const validationCall = {
-      id: crypto.randomUUID(),
-      name: 'validateSchema',
-      args: { schema: state.currentSchema }
-    }
-    
-    return {
-      ...state,
-      messages: [
-        ...messages,
-        new AIMessage({
-          content: '',
-          tool_calls: [validationCall]
-        })
-      ]
-    }
-  }
-  
-  return state
-}
+import { StateGraph, Annotation, START } from "@langchain/langgraph";
+import { ChatOpenAI } from "@langchain/openai";
 
-// Force specific tool based on state conditions
-export function shouldForceToolCall(state: AgentState): string | null {
-  if (state.schemaErrors?.length > 0) {
-    return 'schemaValidationTool'
-  }
-  if (state.requiresTestGeneration) {
-    return 'testGenerationTool'
-  }
-  return null
-}
-```
+const StateAnnotation = Annotation.Root({
+  messages: Annotation<BaseMessage[]>({
+    reducer: (x, y) => x.concat(y),
+  }),
+});
 
-### Tool Call Error Handling
-Implement robust error handling for tool execution failures.
-
-```typescript
-// Comprehensive tool error handling
-export async function handleToolErrors(state: AgentState) {
-  const results = []
-  
-  for (const toolCall of state.toolCalls) {
-    try {
-      const tool = findTool(toolCall.name)
-      const result = await tool.invoke(toolCall.args)
-      
-      results.push({
-        toolCallId: toolCall.id,
-        result,
-        success: true
-      })
-    } catch (error) {
-      // Handle different types of errors
-      if (error instanceof ValidationError) {
-        results.push({
-          toolCallId: toolCall.id,
-          error: `Validation failed: ${error.message}`,
-          success: false,
-          retryable: true
-        })
-      } else if (error instanceof NetworkError) {
-        results.push({
-          toolCallId: toolCall.id,
-          error: `Network error: ${error.message}`,
-          success: false,
-          retryable: true
-        })
-      } else {
-        results.push({
-          toolCallId: toolCall.id,
-          error: `Tool execution failed: ${error.message}`,
-          success: false,
-          retryable: false
-        })
-      }
-    }
-  }
-  
-  return { ...state, toolResults: results }
-}
-```
-
-### Runtime Values to Tools
-Pass dynamic runtime values and configuration to tools.
-
-```typescript
-// Pass runtime configuration to tools
-export const schemaDesignTool = tool(
-  async (input: unknown, config: RunnableConfig): Promise<string> => {
-    // Extract runtime configuration
-    const toolConfigurable = getToolConfigurable(config)
-    if (toolConfigurable.isErr()) {
-      throw new Error(`Configuration error: ${toolConfigurable.error.message}`)
-    }
-    
-    const { repositories, buildingSchemaId, designSessionId } = toolConfigurable.value
-    
-    // Use runtime values in tool execution
-    const schemaResult = await repositories.schema.getSchema(designSessionId)
-    const operations = parseOperations(input)
-    
-    // Apply operations with runtime context
-    return await applySchemaOperations(operations, schemaResult.value, {
-      buildingSchemaId,
-      designSessionId
-    })
+// Set up the tools
+const search = tool(
+  async (input) => {
+    return "Cold, with a low of 3℃";
   },
   {
-    name: 'schemaDesignTool',
-    description: 'Design database schemas with runtime configuration',
-    schema: operationsSchema
+    name: "search",
+    description: "Use to surf the web, fetch current information, check the weather, and retrieve other information.",
+    schema: z.object({
+      query: z.string().describe("The query to use in your search."),
+    }),
   }
-)
+);
 
-// Configure tools with runtime values
-export function configureToolsWithRuntime(
-  tools: StructuredTool[],
-  runtimeConfig: RuntimeConfig
-) {
-  return tools.map(tool => ({
-    ...tool,
-    invoke: (input: any, config?: RunnableConfig) => 
-      tool.invoke(input, {
-        ...config,
-        configurable: {
-          ...config?.configurable,
-          ...runtimeConfig
-        }
-      })
-  }))
+// Set up the model with forced tool calling
+const model = new ChatOpenAI({
+  model: "gpt-4o-mini",
+  temperature: 0,
+});
+
+// First model that forces tool calling
+const firstModel = model.bindTools([search], {
+  tool_choice: "search", // Force the search tool to be called
+});
+
+// Regular model for follow-up
+const regularModel = model.bindTools([search]);
+
+// Define the agent state
+const AgentState = Annotation.Root({
+  messages: Annotation<BaseMessage[]>({
+    reducer: (x, y) => x.concat(y),
+  }),
+});
+
+// Define the nodes
+const callFirstModel = async (state: typeof AgentState.State) => {
+  const response = await firstModel.invoke(state.messages);
+  return { messages: [response] };
+};
+
+const callModel = async (state: typeof AgentState.State) => {
+  const response = await regularModel.invoke(state.messages);
+  return { messages: [response] };
+};
+
+// Define the graph
+const workflow = new StateGraph(AgentState)
+  .addNode("first_agent", callFirstModel)
+  .addNode("agent", callModel)
+  .addNode("tools", new ToolNode([search]))
+  .addEdge(START, "first_agent")
+  .addEdge("first_agent", "tools")
+  .addEdge("tools", "agent")
+  .addConditionalEdges("agent", shouldContinue)
+  .addEdge("tools", "agent");
+
+const app = workflow.compile();
+```
+
+### How to handle tool calling errors
+
+Implement robust error handling for tool execution failures with retry logic and graceful degradation.
+
+```typescript
+import { ToolNode } from "@langchain/langgraph/prebuilt";
+
+// Tool that might fail
+const unreliableTool = tool(
+  async (input) => {
+    if (Math.random() < 0.5) {
+      throw new Error("Tool execution failed");
+    }
+    return "Success!";
+  },
+  {
+    name: "unreliable_tool",
+    description: "A tool that might fail",
+    schema: z.object({
+      input: z.string(),
+    }),
+  }
+);
+
+// Custom error handling ToolNode
+class ErrorHandlingToolNode extends ToolNode {
+  async invoke(input: any, config?: any) {
+    try {
+      return await super.invoke(input, config);
+    } catch (error) {
+      // Handle tool execution errors
+      const errorMessage = new ToolMessage({
+        content: `Tool execution failed: ${error.message}`,
+        tool_call_id: input.messages[input.messages.length - 1].tool_calls?.[0]?.id || "unknown",
+      });
+      
+      return { messages: [errorMessage] };
+    }
+  }
 }
+
+// Use error handling ToolNode
+const errorHandlingToolNode = new ErrorHandlingToolNode([unreliableTool]);
+
+const workflow = new StateGraph(StateAnnotation)
+  .addNode("agent", callModel)
+  .addNode("tools", errorHandlingToolNode)
+  .addEdge(START, "agent")
+  .addConditionalEdges("agent", shouldContinue)
+  .addEdge("tools", "agent");
+```
+
+### How to pass runtime values to tools
+
+Pass runtime configuration and values to tools during execution.
+
+```typescript
+// Tool that uses runtime configuration
+const configurableTool = tool(
+  async (input, config) => {
+    const userId = config?.configurable?.user_id;
+    const apiKey = config?.configurable?.api_key;
+    
+    // Use runtime configuration
+    return `Processing ${input.query} for user ${userId} with API key ${apiKey?.slice(0, 8)}...`;
+  },
+  {
+    name: "configurable_tool",
+    description: "A tool that uses runtime configuration",
+    schema: z.object({
+      query: z.string().describe("The query to process"),
+    }),
+  }
+);
+
+// Pass runtime values through config
+const result = await app.invoke(
+  { messages: [new HumanMessage("process my data")] },
+  {
+    configurable: {
+      user_id: "user123",
+      api_key: "sk-1234567890abcdef",
+    },
+  }
+);
+
+// Access config in nodes
+const nodeWithConfig = async (state: typeof StateAnnotation.State, config: RunnableConfig) => {
+  const userId = config?.configurable?.user_id;
+  console.log(`Processing for user: ${userId}`);
+  
+  const response = await model.invoke(state.messages, config);
+  return { messages: [response] };
+};
 ```
 
 ## State Updates from Tools
 
-### Tool-driven State Changes
-Allow tools to modify the graph state based on their execution results.
+### How to update graph state from tools
+
+Allow tools to modify the graph state directly through their results and custom state management.
 
 ```typescript
-// Tool that updates state based on execution results
-export async function stateUpdatingToolNode(state: DbAgentState) {
-  const toolResult = await schemaDesignTool.invoke(
-    { operations: state.operations },
-    { configurable: getToolConfigurable(state) }
-  )
-  
-  // Parse tool result and update state accordingly
-  if (toolResult.includes('successfully updated')) {
-    return {
-      ...state,
-      schemaUpdated: true,
-      lastOperation: 'schema_update',
-      errors: [],
-      nextAction: 'generateTestcase'
-    }
-  } else if (toolResult.includes('validation failed')) {
-    return {
-      ...state,
-      schemaUpdated: false,
-      errors: extractErrors(toolResult),
-      nextAction: 'retry_design'
-    }
-  }
-  
-  return state
-}
+// Extended state annotation with additional fields
+const ExtendedStateAnnotation = Annotation.Root({
+  messages: Annotation<BaseMessage[]>({
+    reducer: (x, y) => x.concat(y),
+  }),
+  user_info: Annotation<Record<string, any>>({
+    reducer: (x, y) => ({ ...x, ...y }),
+  }),
+  operation_count: Annotation<number>({
+    reducer: (x, y) => (x || 0) + (y || 0),
+  }),
+});
 
-// Extract structured updates from tool results
-export function parseToolStateUpdates(toolResult: string): Partial<DbAgentState> {
-  const updates: Partial<DbAgentState> = {}
-  
-  if (toolResult.includes('DDL validation successful')) {
-    updates.validationStatus = 'passed'
-    updates.canProceed = true
+// Tool that updates multiple state fields
+const stateUpdatingTool = tool(
+  async (input) => {
+    // Perform operation
+    const result = await performOperation(input.operation);
+    
+    // Return structured data that can update state
+    return JSON.stringify({
+      result: result,
+      state_updates: {
+        user_info: { last_operation: input.operation },
+        operation_count: 1,
+      },
+    });
+  },
+  {
+    name: "update_state_tool",
+    description: "Tool that updates graph state",
+    schema: z.object({
+      operation: z.string().describe("Operation to perform"),
+    }),
   }
-  
-  if (toolResult.includes('new version created')) {
-    updates.versionCreated = true
-    updates.needsVersioning = false
-  }
-  
-  return updates
-}
-```
+);
 
-### Tool Result Processing
-Process and transform tool results for use in subsequent nodes.
-
-```typescript
-// Process tool results for downstream consumption
-export function processToolResults(toolResults: ToolResult[]): ProcessedResults {
-  const successful = toolResults.filter(r => r.success)
-  const failed = toolResults.filter(r => !r.success)
+// Custom node to process tool results and update state
+const processToolResults = async (state: typeof ExtendedStateAnnotation.State) => {
+  const lastMessage = state.messages[state.messages.length - 1];
   
-  return {
-    successCount: successful.length,
-    failureCount: failed.length,
-    results: successful.map(r => r.result),
-    errors: failed.map(r => r.error),
-    shouldRetry: failed.some(r => r.retryable),
-    nextAction: determineNextAction(successful, failed)
-  }
-}
-
-// Transform tool results into actionable state updates
-export function transformToolResults(
-  results: ToolResult[],
-  currentState: AgentState
-): Partial<AgentState> {
-  const updates: Partial<AgentState> = {}
-  
-  for (const result of results) {
-    switch (result.toolName) {
-      case 'schemaDesignTool':
-        updates.schemaOperationResult = result.result
-        updates.schemaModified = result.success
-        break
-      case 'validationTool':
-        updates.validationResult = result.result
-        updates.isValid = result.success
-        break
-      case 'testGenerationTool':
-        updates.testCases = parseTestCases(result.result)
-        updates.testsGenerated = result.success
-        break
+  if (lastMessage._getType() === "tool") {
+    try {
+      const toolResult = JSON.parse(lastMessage.content as string);
+      
+      if (toolResult.state_updates) {
+        return {
+          messages: [new AIMessage(`Operation completed: ${toolResult.result}`)],
+          ...toolResult.state_updates,
+        };
+      }
+    } catch (error) {
+      // Handle parsing errors
+      console.error("Failed to parse tool result:", error);
     }
   }
   
-  return updates
-}
-```
+  return { messages: [] };
+};
 
-### Tool Chaining Patterns
-Chain multiple tools together for complex workflows.
+// Workflow with state updates
+const stateUpdatingWorkflow = new StateGraph(ExtendedStateAnnotation)
+  .addNode("agent", callModel)
+  .addNode("tools", new ToolNode([stateUpdatingTool]))
+  .addNode("process_results", processToolResults)
+  .addEdge(START, "agent")
+  .addConditionalEdges("agent", shouldContinue)
+  .addEdge("tools", "process_results")
+  .addEdge("process_results", "agent");
 
-```typescript
-// Chain tools in sequence with state passing
-export async function chainedToolExecution(state: WorkflowState) {
-  // Step 1: Design schema
-  const designResult = await schemaDesignTool.invoke({
-    operations: state.operations
-  })
-  
-  if (!designResult.includes('successfully updated')) {
-    throw new Error('Schema design failed')
-  }
-  
-  // Step 2: Validate schema
-  const validationResult = await validationTool.invoke({
-    schema: state.currentSchema
-  })
-  
-  if (!validationResult.includes('validation passed')) {
-    throw new Error('Schema validation failed')
-  }
-  
-  // Step 3: Generate tests
-  const testResult = await testGenerationTool.invoke({
-    schema: state.currentSchema,
-    requirements: state.requirements
-  })
-  
-  return {
-    ...state,
-    designComplete: true,
-    validationPassed: true,
-    testsGenerated: true,
-    results: {
-      design: designResult,
-      validation: validationResult,
-      tests: testResult
-    }
-  }
-}
-
-// Conditional tool chaining based on results
-export async function conditionalToolChain(state: AgentState) {
-  let currentState = { ...state }
-  
-  // Always start with validation
-  const validationResult = await validationTool.invoke(currentState.data)
-  currentState.validationResult = validationResult
-  
-  // Chain next tool based on validation result
-  if (validationResult.success) {
-    const optimizationResult = await optimizationTool.invoke(currentState.data)
-    currentState.optimizationResult = optimizationResult
-  } else {
-    const repairResult = await repairTool.invoke({
-      data: currentState.data,
-      errors: validationResult.errors
-    })
-    currentState.repairResult = repairResult
-  }
-  
-  return currentState
-}
+const app = stateUpdatingWorkflow.compile();
 ```

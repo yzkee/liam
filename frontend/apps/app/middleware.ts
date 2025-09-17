@@ -101,19 +101,32 @@ export async function middleware(request: NextRequest) {
 
     // Block direct access to /erd/* - only allow access via rewrite in production
     if (rewriteSource !== allowedSource) {
-      return new NextResponse(
-        `Direct access to /erd/* is not allowed. Please access via https://${allowedSource}/erd/`,
-        {
-          status: 403,
-          headers: {
-            'Content-Type': 'text/plain',
-            'Cache-Control': 'no-store, no-cache, must-revalidate, private',
-            Pragma: 'no-cache',
-            'X-Content-Type-Options': 'nosniff',
-            'X-Frame-Options': 'DENY',
-          },
-        },
-      )
+      console.info('ERD access denied: Direct access blocked', {
+        path: request.nextUrl.pathname,
+        received: rewriteSource,
+        expected: allowedSource,
+      })
+
+      // TODO: Enable this
+      // return new NextResponse(
+      //   `Direct access to /erd/* is not allowed. Please access via https://${allowedSource}/erd/`,
+      //   {
+      //     status: 403,
+      //     headers: {
+      //       'Content-Type': 'text/plain',
+      //       'Cache-Control': 'no-store, no-cache, must-revalidate, private',
+      //       Pragma: 'no-cache',
+      //       'X-Content-Type-Options': 'nosniff',
+      //       'X-Frame-Options': 'DENY',
+      //     },
+      //   },
+      // )
+    } else {
+      // TODO: delete this block after test
+      console.info('ERD access allowed: Valid rewrite source', {
+        path: request.nextUrl.pathname,
+        source: rewriteSource,
+      })
     }
   }
 

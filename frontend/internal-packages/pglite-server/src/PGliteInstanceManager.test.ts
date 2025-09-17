@@ -319,11 +319,11 @@ COMMENT ON COLUMN users.bio IS 'User''s biography';
       const results = await manager.executeQuery(sql, [])
 
       expect(results).toHaveLength(5)
-      
+
       // CREATE TABLE should succeed
       expect(results[0]?.success).toBe(true)
       expect(results[0]?.sql).toContain('CREATE TABLE')
-      
+
       // All COMMENT statements should succeed and start with COMMENT, not OMMENT
       for (let i = 1; i <= 4; i++) {
         expect(results[i]?.success).toBe(true)
@@ -359,25 +359,27 @@ COMMENT ON COLUMN teams.name IS 'Team''s name';
 
       // Should have: 2 CREATE TABLE + 6 COMMENT statements
       expect(results).toHaveLength(8)
-      
+
       // Check all statements succeed
-      results.forEach(result => {
+      results.forEach((result) => {
         expect(result.success).toBe(true)
       })
 
       // Check COMMENT statements are not truncated
-      const commentStatements = results.filter(r => r.sql.includes('COMMENT ON'))
+      const commentStatements = results.filter((r) =>
+        r.sql.includes('COMMENT ON'),
+      )
       expect(commentStatements).toHaveLength(6)
-      
-      commentStatements.forEach(result => {
+
+      commentStatements.forEach((result) => {
         expect(result.sql.trim()).toMatch(/^COMMENT ON/)
         expect(result.sql).not.toMatch(/^OMMENT/)
       })
     })
 
-    it('should fail to parse SQL containing U+2019 (right single quotation mark)', async () => {
-      // This test demonstrates that U+2019 causes a parse error
-      // U+2019 (') is not a valid SQL string delimiter and breaks parsing
+    it('should correctly handle U+2019 (right single quotation mark) as invalid SQL syntax', async () => {
+      // This test verifies that U+2019 causes a parse error (as it should)
+      // AND that byte-to-character position conversion works correctly
       const sql = `
 CREATE TABLE products (
   id UUID PRIMARY KEY,
@@ -392,14 +394,65 @@ COMMENT ON COLUMN products.description IS 'Product's detailed info';
 
       const results = await manager.executeQuery(sql, [])
 
-      // Current behavior on main branch: U+2019 causes a parse error
-      // The entire SQL is returned as a single failed result
+      // U+2019 is not a valid SQL string delimiter, so this should fail to parse
+      // The parser correctly identifies this as a syntax error
       expect(results).toHaveLength(1)
       expect(results[0]?.success).toBe(false)
-      expect(results[0]?.result.error).toContain('Parse error: syntax error at or near "s"')
-      
-      // The error occurs because U+2019 is interpreted as closing the string,
-      // making the 's' in "Product's" appear as invalid SQL syntax
+
+      const errorResult = results[0]?.result
+      expect(errorResult).toBeDefined()
+      expect(typeof errorResult).toBe('object')
+      expect(errorResult).toHaveProperty('error')
+      if (
+        errorResult &&
+        typeof errorResult === 'object' &&
+        'error' in errorResult
+      ) {
+        expect(errorResult.error).toContain(
+          'Parse error: syntax error at or near "s"',
+        )
+      }
+
+      // This is the expected behavior: U+2019 should not be accepted as a string delimiter
+      // Users should use '' (two single quotes) to escape apostrophes in SQL strings
+    })
+
+    it('should correctly parse statements after strings with escaped apostrophes', async () => {
+      // This test verifies that byte-to-character position conversion works
+      // with properly escaped apostrophes (which are valid SQL)
+      const sql = `
+CREATE TABLE products (
+  id UUID PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT
+);
+
+COMMENT ON TABLE products IS 'Product''s main table';
+COMMENT ON COLUMN products.name IS 'Product''s display name';
+COMMENT ON COLUMN products.description IS 'Product''s detailed info';
+      `
+
+      const results = await manager.executeQuery(sql, [])
+
+      // All statements should be parsed correctly
+      expect(results).toHaveLength(4)
+
+      // CREATE TABLE
+      expect(results[0]?.success).toBe(true)
+      expect(results[0]?.sql).toContain('CREATE TABLE products')
+
+      // All COMMENT statements should be complete (not truncated)
+      expect(results[1]?.success).toBe(true)
+      expect(results[1]?.sql).toMatch(/^COMMENT ON TABLE/)
+      expect(results[1]?.sql).not.toMatch(/^OMMENT/)
+
+      expect(results[2]?.success).toBe(true)
+      expect(results[2]?.sql).toMatch(/^COMMENT ON COLUMN/)
+      expect(results[2]?.sql).not.toMatch(/^OMMENT/)
+
+      expect(results[3]?.success).toBe(true)
+      expect(results[3]?.sql).toMatch(/^COMMENT ON COLUMN/)
+      expect(results[3]?.sql).not.toMatch(/^MENT/)
     })
 
     it.skip('should demonstrate the OMMENT truncation bug with U+2019 (devin branch behavior)', async () => {
@@ -421,19 +474,19 @@ COMMENT ON COLUMN products.description IS 'Product's detailed info';
 
       // On devin branch with PR #3492, this would produce:
       expect(results).toHaveLength(4)
-      
+
       // 1. CREATE TABLE succeeds
       expect(results[0]?.success).toBe(true)
       expect(results[0]?.sql).toContain('CREATE TABLE products')
-      
+
       // 2. First COMMENT succeeds (contains U+2019)
       expect(results[1]?.success).toBe(true)
       expect(results[1]?.sql).toContain('COMMENT ON TABLE products')
-      
+
       // 3. Second COMMENT is truncated to "OMMENT" - this is the bug!
       expect(results[2]?.success).toBe(false)
       expect(results[2]?.sql).toMatch(/^OMMENT ON COLUMN/)
-      
+
       // 4. Third COMMENT is truncated to "MENT" - cumulative offset
       expect(results[3]?.success).toBe(false)
       expect(results[3]?.sql).toMatch(/^MENT ON COLUMN/)

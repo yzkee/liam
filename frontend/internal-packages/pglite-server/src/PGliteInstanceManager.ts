@@ -179,6 +179,30 @@ export class PGliteInstanceManager {
   }
 
   /**
+   * Convert byte position to character position in a string
+   * PostgreSQL parser returns byte positions, but JavaScript uses character positions
+   */
+  private byteToCharPosition(str: string, bytePos: number): number {
+    if (bytePos === 0) return 0
+
+    const encoder = new TextEncoder()
+    let currentBytePos = 0
+    let charPos = 0
+
+    while (charPos < str.length && currentBytePos < bytePos) {
+      const char = str[charPos]
+      const charBytes = encoder.encode(char)
+      currentBytePos += charBytes.length
+
+      if (currentBytePos <= bytePos) {
+        charPos++
+      }
+    }
+
+    return charPos
+  }
+
+  /**
    * Extract individual SQL statements from the original SQL text using parsed AST metadata
    */
   private extractStatements(originalSql: string, stmts: RawStmt[]): string[] {
@@ -192,16 +216,22 @@ export class PGliteInstanceManager {
       const stmt = stmts[i]
       if (!stmt) continue
 
-      const startPos = stmt.stmt_location || 0
+      // Convert byte positions to character positions
+      const startBytePos = stmt.stmt_location || 0
+      const startPos = this.byteToCharPosition(originalSql, startBytePos)
 
       let endPos: number
       if (stmt.stmt_len !== undefined) {
-        // Use explicit statement length if available
-        endPos = startPos + stmt.stmt_len
+        // stmt_len is in bytes, so we need to convert the end position too
+        const endBytePos = startBytePos + stmt.stmt_len
+        endPos = this.byteToCharPosition(originalSql, endBytePos)
       } else if (i < stmts.length - 1) {
         // Use start of next statement as end position
         const nextStmt = stmts[i + 1]
-        endPos = nextStmt?.stmt_location || originalSql.length
+        const nextBytePos =
+          nextStmt?.stmt_location ||
+          new TextEncoder().encode(originalSql).length
+        endPos = this.byteToCharPosition(originalSql, nextBytePos)
       } else {
         // Last statement goes to end of string
         endPos = originalSql.length

@@ -61,23 +61,9 @@ async function loadSessionData(designSessionId: string): Promise<
   const baseMessages = await getMessages(config)
   const messages = serializeMessages(baseMessages)
 
-  // Fetch checkpoint errors from LangGraph memory
-  let checkpointError: string | null = null
-  try {
-    const checkpointErrors = await getCheckpointErrors(config)
-    if (checkpointErrors.length > 0) {
-      const latestError = checkpointErrors[0]
-      if (latestError) {
-        checkpointError =
-          checkpointErrors.length === 1
-            ? latestError.errorMessage
-            : `${latestError.errorMessage} (${checkpointErrors.length} total errors found in history)`
-      }
-    }
-  } catch (error) {
-    console.error('Failed to fetch checkpoint errors:', error)
-    // Don't fail the entire page load if checkpoint errors can't be fetched
-  }
+  // Fetch checkpoint error from LangGraph memory
+  const checkpointErrors = await getCheckpointErrors(config)
+  const checkpointError = checkpointErrors[0]?.errorMessage || null
 
   const buildingSchema = await getBuildingSchema(designSessionId)
   if (!buildingSchema) {

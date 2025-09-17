@@ -13,7 +13,6 @@ import { getBuildingSchema } from './services/buildingSchema/server/getBuildingS
 import { buildPrevSchema } from './services/buildPrevSchema/server/buildPrevSchema'
 import { getDesignSessionWithTimelineItems } from './services/designSessionWithTimelineItems/server/getDesignSessionWithTimelineItems'
 import { getVersions } from './services/getVersions'
-import { getWorkflowRunStatus } from './services/workflowRuns/server/getWorkflowRunStatus'
 import type { DesignSessionWithTimelineItems, Version } from './types'
 
 type Props = {
@@ -102,8 +101,6 @@ export const SessionDetailPage: FC<Props> = async ({
       })) ?? initialSchema)
     : initialSchema
 
-  const initialWorkflowRunStatus = await getWorkflowRunStatus(designSessionId)
-
   // Fetch initial public share status
   const { isPublic: initialIsPublic } =
     await checkPublicShareStatus(designSessionId)
@@ -117,7 +114,6 @@ export const SessionDetailPage: FC<Props> = async ({
         initialDisplayedSchema={initialSchema}
         initialPrevSchema={initialPrevSchema}
         initialVersions={versions}
-        initialWorkflowRunStatus={initialWorkflowRunStatus}
         isDeepModelingEnabled={isDeepModelingEnabled}
         initialIsPublic={initialIsPublic}
       />

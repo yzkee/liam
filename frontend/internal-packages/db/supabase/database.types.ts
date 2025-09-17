@@ -1333,6 +1333,7 @@ export type Database = {
           design_session_id: string
           id: string
           organization_id: string
+          query_result_id: string | null
           type: Database['public']['Enums']['timeline_item_type_enum']
           updated_at: string
           user_id: string | null
@@ -1347,6 +1348,7 @@ export type Database = {
           design_session_id: string
           id?: string
           organization_id: string
+          query_result_id?: string | null
           type: Database['public']['Enums']['timeline_item_type_enum']
           updated_at: string
           user_id?: string | null
@@ -1361,6 +1363,7 @@ export type Database = {
           design_session_id?: string
           id?: string
           organization_id?: string
+          query_result_id?: string | null
           type?: Database['public']['Enums']['timeline_item_type_enum']
           updated_at?: string
           user_id?: string | null
@@ -1385,6 +1388,13 @@ export type Database = {
             columns: ['organization_id']
             isOneToOne: false
             referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'timeline_items_query_result_id_fkey'
+            columns: ['query_result_id']
+            isOneToOne: false
+            referencedRelation: 'validation_queries'
             referencedColumns: ['id']
           },
           {
@@ -1417,47 +1427,95 @@ export type Database = {
         }
         Relationships: []
       }
-      workflow_runs: {
+      validation_queries: {
         Row: {
           created_at: string
           design_session_id: string
           id: string
-          organization_id: string | null
-          status: Database['public']['Enums']['workflow_run_status']
+          organization_id: string
+          query_string: string
           updated_at: string
-          workflow_run_id: string
         }
         Insert: {
           created_at?: string
           design_session_id: string
           id?: string
-          organization_id?: string | null
-          status?: Database['public']['Enums']['workflow_run_status']
+          organization_id: string
+          query_string: string
           updated_at?: string
-          workflow_run_id: string
         }
         Update: {
           created_at?: string
           design_session_id?: string
           id?: string
-          organization_id?: string | null
-          status?: Database['public']['Enums']['workflow_run_status']
+          organization_id?: string
+          query_string?: string
           updated_at?: string
-          workflow_run_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: 'workflow_runs_design_session_id_fkey'
+            foreignKeyName: 'validation_queries_design_session_id_fkey'
             columns: ['design_session_id']
             isOneToOne: false
             referencedRelation: 'design_sessions'
             referencedColumns: ['id']
           },
           {
-            foreignKeyName: 'workflow_runs_organization_id_fkey'
+            foreignKeyName: 'validation_queries_organization_id_fkey'
             columns: ['organization_id']
             isOneToOne: false
             referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      validation_results: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          executed_at: string
+          id: string
+          organization_id: string
+          result_set: Json[] | null
+          status: string
+          updated_at: string
+          validation_query_id: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          executed_at?: string
+          id?: string
+          organization_id: string
+          result_set?: Json[] | null
+          status: string
+          updated_at?: string
+          validation_query_id: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          executed_at?: string
+          id?: string
+          organization_id?: string
+          result_set?: Json[] | null
+          status?: string
+          updated_at?: string
+          validation_query_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'validation_results_organization_id_fkey'
+            columns: ['organization_id']
+            isOneToOne: false
+            referencedRelation: 'organizations'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'validation_results_validation_query_id_fkey'
+            columns: ['validation_query_id']
+            isOneToOne: false
+            referencedRelation: 'validation_queries'
             referencedColumns: ['id']
           },
         ]

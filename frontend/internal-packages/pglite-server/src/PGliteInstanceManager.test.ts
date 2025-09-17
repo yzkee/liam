@@ -455,6 +455,112 @@ COMMENT ON COLUMN products.description IS 'Product''s detailed info';
       expect(results[3]?.sql).not.toMatch(/^MENT/)
     })
 
+    it('should correctly handle statements with emojis and multi-byte characters', async () => {
+      // This test verifies byte-to-character position conversion with emojis
+      // Emojis are typically 3-4 bytes in UTF-8
+      const sql = `
+CREATE TABLE tasks (
+  id UUID PRIMARY KEY,
+  title TEXT NOT NULL,
+  status TEXT,
+  notes TEXT
+);
+
+COMMENT ON TABLE tasks IS '📝 Task management table';
+COMMENT ON COLUMN tasks.title IS '🚀 Task title/name';
+COMMENT ON COLUMN tasks.status IS '✅ Current status: pending/done';
+COMMENT ON COLUMN tasks.notes IS '💡 Additional notes and comments';
+      `
+
+      const results = await manager.executeQuery(sql, [])
+
+      // All statements should be parsed correctly
+      expect(results).toHaveLength(5)
+
+      // CREATE TABLE
+      expect(results[0]?.success).toBe(true)
+      expect(results[0]?.sql).toContain('CREATE TABLE tasks')
+
+      // All COMMENT statements should be complete (not truncated)
+      // Each should start with "COMMENT ON" not "OMMENT" or "MMENT" etc.
+      for (let i = 1; i <= 4; i++) {
+        expect(results[i]?.success).toBe(true)
+        expect(results[i]?.sql.trim()).toMatch(/^COMMENT ON/)
+        expect(results[i]?.sql).not.toMatch(/^[OM]MMENT/)
+        expect(results[i]?.sql).not.toMatch(/^MMENT/)
+        expect(results[i]?.sql).not.toMatch(/^MENT/)
+        expect(results[i]?.sql).not.toMatch(/^ENT/)
+      }
+
+      // Verify emoji content is preserved
+      expect(results[1]?.sql).toContain('📝')
+      expect(results[2]?.sql).toContain('🚀')
+      expect(results[3]?.sql).toContain('✅')
+      expect(results[4]?.sql).toContain('💡')
+    })
+
+    it('should handle mixed multi-byte characters (emojis, Japanese, Chinese)', async () => {
+      // Test with various multi-byte characters from different languages
+      // eslint-disable-next-line no-non-english/no-non-english-characters
+      const sql = `
+CREATE TABLE international (
+  id UUID PRIMARY KEY,
+  name_en TEXT,
+  name_ja TEXT,
+  name_zh TEXT,
+  description TEXT
+);
+
+COMMENT ON TABLE international IS '🌍 国際化テーブル';
+COMMENT ON COLUMN international.name_ja IS '日本語の名前';
+COMMENT ON COLUMN international.name_zh IS '中文名称';
+COMMENT ON COLUMN international.description IS '🔥 Hot product! おすすめ商品 热门产品';
+
+CREATE TABLE categories (
+  id UUID PRIMARY KEY,
+  icon TEXT,
+  label TEXT
+);
+
+COMMENT ON TABLE categories IS 'カテゴリ管理 📚';
+COMMENT ON COLUMN categories.icon IS 'Emoji icon like 🎮🎨🎬';
+      `
+
+      const results = await manager.executeQuery(sql, [])
+
+      // Should have: 2 CREATE TABLE + 6 COMMENT statements
+      expect(results).toHaveLength(8)
+
+      // All statements should succeed
+      results.forEach((result) => {
+        expect(result.success).toBe(true)
+      })
+
+      // Check that no COMMENT statements are truncated
+      const commentStatements = results.filter((r) =>
+        r.sql.includes('COMMENT ON'),
+      )
+      expect(commentStatements).toHaveLength(6)
+
+      commentStatements.forEach((result) => {
+        expect(result.sql.trim()).toMatch(/^COMMENT ON/)
+        // Should not match truncated patterns
+        expect(result.sql).not.toMatch(/^OMMENT/)
+        expect(result.sql).not.toMatch(/^MMENT/)
+        expect(result.sql).not.toMatch(/^MENT/)
+      })
+
+      // Verify multi-byte content is preserved
+      expect(results.some((r) => r.sql.includes('🌍'))).toBe(true)
+      // eslint-disable-next-line no-non-english/no-non-english-characters
+      expect(results.some((r) => r.sql.includes('日本語'))).toBe(true)
+      // eslint-disable-next-line no-non-english/no-non-english-characters
+      expect(results.some((r) => r.sql.includes('中文'))).toBe(true)
+      expect(results.some((r) => r.sql.includes('🔥'))).toBe(true)
+      // eslint-disable-next-line no-non-english/no-non-english-characters
+      expect(results.some((r) => r.sql.includes('おすすめ'))).toBe(true)
+    })
+
     it.skip('should demonstrate the OMMENT truncation bug with U+2019 (devin branch behavior)', async () => {
       // This test is skipped on main branch but shows the bug that exists in devin branch
       // where U+2019 causes subsequent statements to be truncated

@@ -189,14 +189,18 @@ export class PGliteInstanceManager {
     let currentBytePos = 0
     let charPos = 0
 
-    while (charPos < str.length && currentBytePos < bytePos) {
-      const char = str[charPos]
+    for (const char of str) {
       const charBytes = encoder.encode(char)
-      currentBytePos += charBytes.length
+      const nextBytePos = currentBytePos + charBytes.length
 
-      if (currentBytePos <= bytePos) {
-        charPos++
+      if (nextBytePos > bytePos) {
+        // We've gone past the target byte position
+        break
       }
+
+      currentBytePos = nextBytePos
+      // For surrogate pairs and multi-byte chars, char.length might be > 1
+      charPos += char.length
     }
 
     return charPos

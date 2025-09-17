@@ -38,7 +38,7 @@ async function loadSessionData(designSessionId: string): Promise<
       messages: StoredMessage[]
       buildingSchema: NonNullable<Awaited<ReturnType<typeof getBuildingSchema>>>
       initialSchema: Schema
-      checkpointError: string | null
+      workflowError: string | null
     },
     Error
   >
@@ -66,7 +66,7 @@ async function loadSessionData(designSessionId: string): Promise<
     repositories.schema.checkpointer,
     designSessionId,
   )
-  const checkpointError = checkpointErrors[0] || null
+  const workflowError = checkpointErrors[0] || null
 
   const buildingSchema = await getBuildingSchema(designSessionId)
   if (!buildingSchema) {
@@ -85,7 +85,7 @@ async function loadSessionData(designSessionId: string): Promise<
     messages,
     buildingSchema,
     initialSchema,
-    checkpointError,
+    workflowError,
   })
 }
 
@@ -104,7 +104,7 @@ export const SessionDetailPage: FC<Props> = async ({
     messages,
     buildingSchema,
     initialSchema,
-    checkpointError,
+    workflowError,
   } = result.value
 
   const versions = await getVersions(buildingSchema.id)
@@ -134,7 +134,7 @@ export const SessionDetailPage: FC<Props> = async ({
         initialWorkflowRunStatus={initialWorkflowRunStatus}
         isDeepModelingEnabled={isDeepModelingEnabled}
         initialIsPublic={initialIsPublic}
-        initialCheckpointError={checkpointError}
+        initialWorkflowError={workflowError}
       />
     </ViewModeProvider>
   )

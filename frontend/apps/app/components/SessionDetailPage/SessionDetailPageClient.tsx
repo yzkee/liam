@@ -35,7 +35,7 @@ type Props = {
   initialWorkflowRunStatus: WorkflowRunStatus | null
   isDeepModelingEnabled: boolean
   initialIsPublic: boolean
-  initialCheckpointError?: string | null
+  initialWorkflowError?: string | null
 }
 
 export const SessionDetailPageClient: FC<Props> = ({
@@ -48,7 +48,7 @@ export const SessionDetailPageClient: FC<Props> = ({
   initialWorkflowRunStatus,
   isDeepModelingEnabled,
   initialIsPublic,
-  initialCheckpointError,
+  initialWorkflowError,
 }) => {
   const designSessionId = designSessionWithTimelineItems.id
 
@@ -112,8 +112,8 @@ export const SessionDetailPageClient: FC<Props> = ({
     designSessionId,
   })
 
-  // Combine streaming error with checkpoint errors
-  const combinedError = error || initialCheckpointError
+  // Combine streaming error with workflow errors
+  const combinedError = error || initialWorkflowError
   // Track if initial workflow has been triggered to prevent multiple executions
   const hasTriggeredInitialWorkflow = useRef(false)
 

@@ -148,7 +148,10 @@ export async function getCheckpointErrors(config: {
 
   const errors: CheckpointError[] = []
 
-  // Query checkpoint_writes table directly for __error__ channel data using repository method
+  // NOTE: We use direct database access instead of checkpointer.getTuple() because
+  // the __error__ channel is not available through the high-level API.
+  // checkpointer.getTuple() only provides standard channels like 'messages'
+  // but __error__ channel data requires direct checkpoint_writes table access.
   const { data: checkpointWrites, error } =
     await repositories.schema.getCheckpointErrorData(thread_id)
 
@@ -180,7 +183,6 @@ export async function getCheckpointErrors(config: {
     })
   }
 
-  // Sort errors by timestamp (most recent first)
   return errors.sort(
     (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
   )

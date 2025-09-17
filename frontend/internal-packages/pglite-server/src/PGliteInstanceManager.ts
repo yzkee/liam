@@ -207,6 +207,43 @@ export class PGliteInstanceManager {
   }
 
   /**
+   * Get valid start byte position from statement
+   */
+  private getStartBytePos(stmt: RawStmt, sqlByteLength: number): number {
+    // Handle stmt_location: -1 means unknown/invalid position
+    // Only use stmt_location if it's a valid non-negative number
+    let startBytePos = 0
+    if (stmt.stmt_location !== undefined && stmt.stmt_location >= 0) {
+      startBytePos = stmt.stmt_location
+    }
+    // Clamp start position to valid range
+    return Math.max(0, Math.min(startBytePos, sqlByteLength))
+  }
+
+  /**
+   * Get valid end byte position for statement
+   */
+  private getEndBytePos(
+    stmt: RawStmt,
+    nextStmt: RawStmt | undefined,
+    startBytePos: number,
+    sqlByteLength: number,
+  ): number {
+    // Use explicit statement length if available and valid
+    if (stmt.stmt_len !== undefined && stmt.stmt_len > 0) {
+      return startBytePos + stmt.stmt_len
+    }
+
+    // Try to use next statement's start position if valid
+    if (nextStmt?.stmt_location !== undefined && nextStmt.stmt_location >= 0) {
+      return nextStmt.stmt_location
+    }
+
+    // Fallback to end of SQL
+    return sqlByteLength
+  }
+
+  /**
    * Extract individual SQL statements from the original SQL text using parsed AST metadata
    */
   private extractStatements(originalSql: string, stmts: RawStmt[]): string[] {
@@ -215,31 +252,26 @@ export class PGliteInstanceManager {
     }
 
     const statements: string[] = []
+    const sqlByteLength = new TextEncoder().encode(originalSql).length
 
     for (let i = 0; i < stmts.length; i++) {
       const stmt = stmts[i]
       if (!stmt) continue
 
-      // Convert byte positions to character positions
-      const startBytePos = stmt.stmt_location || 0
+      const startBytePos = this.getStartBytePos(stmt, sqlByteLength)
       const startPos = this.byteToCharPosition(originalSql, startBytePos)
 
-      let endPos: number
-      if (stmt.stmt_len !== undefined) {
-        // stmt_len is in bytes, so we need to convert the end position too
-        const endBytePos = startBytePos + stmt.stmt_len
-        endPos = this.byteToCharPosition(originalSql, endBytePos)
-      } else if (i < stmts.length - 1) {
-        // Use start of next statement as end position
-        const nextStmt = stmts[i + 1]
-        const nextBytePos =
-          nextStmt?.stmt_location ||
-          new TextEncoder().encode(originalSql).length
-        endPos = this.byteToCharPosition(originalSql, nextBytePos)
-      } else {
-        // Last statement goes to end of string
-        endPos = originalSql.length
-      }
+      const nextStmt = i < stmts.length - 1 ? stmts[i + 1] : undefined
+      let endBytePos = this.getEndBytePos(
+        stmt,
+        nextStmt,
+        startBytePos,
+        sqlByteLength,
+      )
+
+      // Clamp end position to valid range and ensure it's not before start
+      endBytePos = Math.max(startBytePos, Math.min(endBytePos, sqlByteLength))
+      const endPos = this.byteToCharPosition(originalSql, endBytePos)
 
       const statementText = originalSql.slice(startPos, endPos).trim()
       if (statementText) {

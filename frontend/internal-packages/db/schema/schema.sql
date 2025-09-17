@@ -875,40 +875,6 @@ $$;
 ALTER FUNCTION "public"."set_timeline_items_organization_id"() OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."set_validation_queries_organization_id"() RETURNS "trigger"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-BEGIN
-  NEW.organization_id := (
-    SELECT "organization_id" 
-    FROM "public"."design_sessions" 
-    WHERE "id" = NEW.design_session_id
-  );
-  RETURN NEW;
-END;
-$$;
-
-
-ALTER FUNCTION "public"."set_validation_queries_organization_id"() OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."set_validation_results_organization_id"() RETURNS "trigger"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-BEGIN
-  NEW.organization_id := (
-    SELECT "organization_id" 
-    FROM "public"."validation_queries" 
-    WHERE "id" = NEW.validation_query_id
-  );
-  RETURN NEW;
-END;
-$$;
-
-
-ALTER FUNCTION "public"."set_validation_results_organization_id"() OWNER TO "postgres";
-
-
 CREATE OR REPLACE FUNCTION "public"."sync_existing_users"() RETURNS "void"
     LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$
@@ -1542,7 +1508,6 @@ CREATE TABLE IF NOT EXISTS "public"."timeline_items" (
     "organization_id" "uuid" NOT NULL,
     "building_schema_version_id" "uuid",
     "type" "public"."timeline_item_type_enum" NOT NULL,
-    "query_result_id" "uuid",
     "assistant_role" "public"."assistant_role_enum"
 );
 
@@ -1559,36 +1524,6 @@ CREATE TABLE IF NOT EXISTS "public"."users" (
 
 
 ALTER TABLE "public"."users" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."validation_queries" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "design_session_id" "uuid" NOT NULL,
-    "query_string" "text" NOT NULL,
-    "organization_id" "uuid" NOT NULL,
-    "created_at" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    "updated_at" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
-);
-
-
-ALTER TABLE "public"."validation_queries" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."validation_results" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "validation_query_id" "uuid" NOT NULL,
-    "result_set" "jsonb"[],
-    "executed_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "status" "text" NOT NULL,
-    "error_message" "text",
-    "organization_id" "uuid" NOT NULL,
-    "created_at" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    "updated_at" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT "validation_results_status_check" CHECK (("status" = ANY (ARRAY['success'::"text", 'failure'::"text"])))
-);
-
-
-ALTER TABLE "public"."validation_results" OWNER TO "postgres";
 
 
 ALTER TABLE ONLY "public"."artifacts"
@@ -1806,16 +1741,6 @@ ALTER TABLE ONLY "public"."users"
 
 
 
-ALTER TABLE ONLY "public"."validation_queries"
-    ADD CONSTRAINT "validation_queries_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."validation_results"
-    ADD CONSTRAINT "validation_results_pkey" PRIMARY KEY ("id");
-
-
-
 CREATE INDEX "building_schema_versions_building_schema_id_idx" ON "public"."building_schema_versions" USING "btree" ("building_schema_id");
 
 
@@ -1944,30 +1869,6 @@ CREATE INDEX "timeline_items_building_schema_version_id_idx" ON "public"."timeli
 
 
 
-CREATE INDEX "timeline_items_query_result_id_idx" ON "public"."timeline_items" USING "btree" ("query_result_id") WHERE ("query_result_id" IS NOT NULL);
-
-
-
-CREATE INDEX "validation_queries_design_session_id_idx" ON "public"."validation_queries" USING "btree" ("design_session_id");
-
-
-
-CREATE INDEX "validation_queries_organization_id_idx" ON "public"."validation_queries" USING "btree" ("organization_id");
-
-
-
-CREATE INDEX "validation_results_executed_at_idx" ON "public"."validation_results" USING "btree" ("executed_at");
-
-
-
-CREATE INDEX "validation_results_organization_id_idx" ON "public"."validation_results" USING "btree" ("organization_id");
-
-
-
-CREATE INDEX "validation_results_validation_query_id_idx" ON "public"."validation_results" USING "btree" ("validation_query_id");
-
-
-
 CREATE OR REPLACE TRIGGER "check_last_organization_member" BEFORE DELETE ON "public"."organization_members" FOR EACH ROW EXECUTE FUNCTION "public"."prevent_delete_last_organization_member"();
 
 
@@ -2053,14 +1954,6 @@ CREATE OR REPLACE TRIGGER "set_schema_file_paths_organization_id_trigger" BEFORE
 
 
 CREATE OR REPLACE TRIGGER "set_timeline_items_organization_id_trigger" BEFORE INSERT OR UPDATE ON "public"."timeline_items" FOR EACH ROW EXECUTE FUNCTION "public"."set_timeline_items_organization_id"();
-
-
-
-CREATE OR REPLACE TRIGGER "set_validation_queries_organization_id_trigger" BEFORE INSERT OR UPDATE ON "public"."validation_queries" FOR EACH ROW EXECUTE FUNCTION "public"."set_validation_queries_organization_id"();
-
-
-
-CREATE OR REPLACE TRIGGER "set_validation_results_organization_id_trigger" BEFORE INSERT OR UPDATE ON "public"."validation_results" FOR EACH ROW EXECUTE FUNCTION "public"."set_validation_results_organization_id"();
 
 
 
@@ -2373,32 +2266,7 @@ ALTER TABLE ONLY "public"."timeline_items"
 
 
 ALTER TABLE ONLY "public"."timeline_items"
-    ADD CONSTRAINT "timeline_items_query_result_id_fkey" FOREIGN KEY ("query_result_id") REFERENCES "public"."validation_queries"("id") ON DELETE CASCADE;
-
-
-
-ALTER TABLE ONLY "public"."timeline_items"
     ADD CONSTRAINT "timeline_items_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON UPDATE CASCADE ON DELETE RESTRICT;
-
-
-
-ALTER TABLE ONLY "public"."validation_queries"
-    ADD CONSTRAINT "validation_queries_design_session_id_fkey" FOREIGN KEY ("design_session_id") REFERENCES "public"."design_sessions"("id") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
-ALTER TABLE ONLY "public"."validation_queries"
-    ADD CONSTRAINT "validation_queries_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON UPDATE CASCADE ON DELETE RESTRICT;
-
-
-
-ALTER TABLE ONLY "public"."validation_results"
-    ADD CONSTRAINT "validation_results_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON UPDATE CASCADE ON DELETE RESTRICT;
-
-
-
-ALTER TABLE ONLY "public"."validation_results"
-    ADD CONSTRAINT "validation_results_validation_query_id_fkey" FOREIGN KEY ("validation_query_id") REFERENCES "public"."validation_queries"("id") ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 
@@ -2520,26 +2388,6 @@ CREATE POLICY "authenticated_users_can_delete_org_public_share_settings" ON "pub
   WHERE ("ds"."organization_id" IN ( SELECT "organization_members"."organization_id"
            FROM "public"."organization_members"
           WHERE ("organization_members"."user_id" = "auth"."uid"()))))));
-
-
-
-CREATE POLICY "authenticated_users_can_delete_org_validation_queries" ON "public"."validation_queries" FOR DELETE TO "authenticated" USING (("organization_id" IN ( SELECT "organization_members"."organization_id"
-   FROM "public"."organization_members"
-  WHERE ("organization_members"."user_id" = "auth"."uid"()))));
-
-
-
-COMMENT ON POLICY "authenticated_users_can_delete_org_validation_queries" ON "public"."validation_queries" IS 'Authenticated users can only delete validation queries in organizations they are members of';
-
-
-
-CREATE POLICY "authenticated_users_can_delete_org_validation_results" ON "public"."validation_results" FOR DELETE TO "authenticated" USING (("organization_id" IN ( SELECT "organization_members"."organization_id"
-   FROM "public"."organization_members"
-  WHERE ("organization_members"."user_id" = "auth"."uid"()))));
-
-
-
-COMMENT ON POLICY "authenticated_users_can_delete_org_validation_results" ON "public"."validation_results" IS 'Authenticated users can only delete validation results in organizations they are members of';
 
 
 
@@ -2718,26 +2566,6 @@ CREATE POLICY "authenticated_users_can_insert_org_timeline_items" ON "public"."t
 
 
 COMMENT ON POLICY "authenticated_users_can_insert_org_timeline_items" ON "public"."timeline_items" IS 'Authenticated users can only create timeline items in organizations they are members of';
-
-
-
-CREATE POLICY "authenticated_users_can_insert_org_validation_queries" ON "public"."validation_queries" FOR INSERT TO "authenticated" WITH CHECK (("organization_id" IN ( SELECT "organization_members"."organization_id"
-   FROM "public"."organization_members"
-  WHERE ("organization_members"."user_id" = "auth"."uid"()))));
-
-
-
-COMMENT ON POLICY "authenticated_users_can_insert_org_validation_queries" ON "public"."validation_queries" IS 'Authenticated users can only create validation queries in organizations they are members of';
-
-
-
-CREATE POLICY "authenticated_users_can_insert_org_validation_results" ON "public"."validation_results" FOR INSERT TO "authenticated" WITH CHECK (("organization_id" IN ( SELECT "organization_members"."organization_id"
-   FROM "public"."organization_members"
-  WHERE ("organization_members"."user_id" = "auth"."uid"()))));
-
-
-
-COMMENT ON POLICY "authenticated_users_can_insert_org_validation_results" ON "public"."validation_results" IS 'Authenticated users can only create validation results in organizations they are members of';
 
 
 
@@ -3031,26 +2859,6 @@ COMMENT ON POLICY "authenticated_users_can_select_org_timeline_items" ON "public
 
 
 
-CREATE POLICY "authenticated_users_can_select_org_validation_queries" ON "public"."validation_queries" FOR SELECT TO "authenticated" USING (("organization_id" IN ( SELECT "organization_members"."organization_id"
-   FROM "public"."organization_members"
-  WHERE ("organization_members"."user_id" = "auth"."uid"()))));
-
-
-
-COMMENT ON POLICY "authenticated_users_can_select_org_validation_queries" ON "public"."validation_queries" IS 'Authenticated users can only view validation queries belonging to organizations they are members of';
-
-
-
-CREATE POLICY "authenticated_users_can_select_org_validation_results" ON "public"."validation_results" FOR SELECT TO "authenticated" USING (("organization_id" IN ( SELECT "organization_members"."organization_id"
-   FROM "public"."organization_members"
-  WHERE ("organization_members"."user_id" = "auth"."uid"()))));
-
-
-
-COMMENT ON POLICY "authenticated_users_can_select_org_validation_results" ON "public"."validation_results" IS 'Authenticated users can only view validation results belonging to organizations they are members of';
-
-
-
 CREATE POLICY "authenticated_users_can_update_org_artifacts" ON "public"."artifacts" FOR UPDATE TO "authenticated" USING (("organization_id" IN ( SELECT "organization_members"."organization_id"
    FROM "public"."organization_members"
   WHERE ("organization_members"."user_id" = "auth"."uid"())))) WITH CHECK (("organization_id" IN ( SELECT "organization_members"."organization_id"
@@ -3221,30 +3029,6 @@ COMMENT ON POLICY "authenticated_users_can_update_org_timeline_items" ON "public
 
 
 
-CREATE POLICY "authenticated_users_can_update_org_validation_queries" ON "public"."validation_queries" FOR UPDATE TO "authenticated" USING (("organization_id" IN ( SELECT "organization_members"."organization_id"
-   FROM "public"."organization_members"
-  WHERE ("organization_members"."user_id" = "auth"."uid"())))) WITH CHECK (("organization_id" IN ( SELECT "organization_members"."organization_id"
-   FROM "public"."organization_members"
-  WHERE ("organization_members"."user_id" = "auth"."uid"()))));
-
-
-
-COMMENT ON POLICY "authenticated_users_can_update_org_validation_queries" ON "public"."validation_queries" IS 'Authenticated users can only update validation queries in organizations they are members of';
-
-
-
-CREATE POLICY "authenticated_users_can_update_org_validation_results" ON "public"."validation_results" FOR UPDATE TO "authenticated" USING (("organization_id" IN ( SELECT "organization_members"."organization_id"
-   FROM "public"."organization_members"
-  WHERE ("organization_members"."user_id" = "auth"."uid"())))) WITH CHECK (("organization_id" IN ( SELECT "organization_members"."organization_id"
-   FROM "public"."organization_members"
-  WHERE ("organization_members"."user_id" = "auth"."uid"()))));
-
-
-
-COMMENT ON POLICY "authenticated_users_can_update_org_validation_results" ON "public"."validation_results" IS 'Authenticated users can only update validation results in organizations they are members of';
-
-
-
 ALTER TABLE "public"."building_schema_versions" ENABLE ROW LEVEL SECURITY;
 
 
@@ -3404,14 +3188,6 @@ COMMENT ON POLICY "service_role_can_delete_all_projects" ON "public"."projects" 
 
 
 
-CREATE POLICY "service_role_can_delete_all_validation_queries" ON "public"."validation_queries" FOR DELETE TO "service_role" USING (true);
-
-
-
-CREATE POLICY "service_role_can_delete_all_validation_results" ON "public"."validation_results" FOR DELETE TO "service_role" USING (true);
-
-
-
 CREATE POLICY "service_role_can_insert_all_artifacts" ON "public"."artifacts" FOR INSERT TO "service_role" WITH CHECK (true);
 
 
@@ -3501,14 +3277,6 @@ CREATE POLICY "service_role_can_insert_all_review_suggestion_snippets" ON "publi
 
 
 CREATE POLICY "service_role_can_insert_all_timeline_items" ON "public"."timeline_items" FOR INSERT TO "service_role" WITH CHECK (true);
-
-
-
-CREATE POLICY "service_role_can_insert_all_validation_queries" ON "public"."validation_queries" FOR INSERT TO "service_role" WITH CHECK (true);
-
-
-
-CREATE POLICY "service_role_can_insert_all_validation_results" ON "public"."validation_results" FOR INSERT TO "service_role" WITH CHECK (true);
 
 
 
@@ -3604,14 +3372,6 @@ CREATE POLICY "service_role_can_select_all_timeline_items" ON "public"."timeline
 
 
 
-CREATE POLICY "service_role_can_select_all_validation_queries" ON "public"."validation_queries" FOR SELECT TO "service_role" USING (true);
-
-
-
-CREATE POLICY "service_role_can_select_all_validation_results" ON "public"."validation_results" FOR SELECT TO "service_role" USING (true);
-
-
-
 CREATE POLICY "service_role_can_update_all_artifacts" ON "public"."artifacts" FOR UPDATE TO "service_role" USING (true) WITH CHECK (true);
 
 
@@ -3668,14 +3428,6 @@ CREATE POLICY "service_role_can_update_all_timeline_items" ON "public"."timeline
 
 
 
-CREATE POLICY "service_role_can_update_all_validation_queries" ON "public"."validation_queries" FOR UPDATE TO "service_role" USING (true) WITH CHECK (true);
-
-
-
-CREATE POLICY "service_role_can_update_all_validation_results" ON "public"."validation_results" FOR UPDATE TO "service_role" USING (true) WITH CHECK (true);
-
-
-
 ALTER TABLE "public"."timeline_items" ENABLE ROW LEVEL SECURITY;
 
 
@@ -3689,19 +3441,9 @@ CREATE POLICY "users_same_organization_select_policy" ON "public"."users" FOR SE
 
 
 
-ALTER TABLE "public"."validation_queries" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."validation_results" ENABLE ROW LEVEL SECURITY;
-
-
 
 
 ALTER PUBLICATION "supabase_realtime" OWNER TO "postgres";
-
-
-
-
 
 
 ALTER PUBLICATION "supabase_realtime" ADD TABLE ONLY "public"."artifacts";
@@ -4625,16 +4367,6 @@ GRANT ALL ON FUNCTION "public"."set_timeline_items_organization_id"() TO "servic
 
 
 
-GRANT ALL ON FUNCTION "public"."set_validation_queries_organization_id"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."set_validation_queries_organization_id"() TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."set_validation_results_organization_id"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."set_validation_results_organization_id"() TO "service_role";
-
-
-
 GRANT ALL ON FUNCTION "public"."sparsevec_cmp"("public"."sparsevec", "public"."sparsevec") TO "postgres";
 GRANT ALL ON FUNCTION "public"."sparsevec_cmp"("public"."sparsevec", "public"."sparsevec") TO "anon";
 GRANT ALL ON FUNCTION "public"."sparsevec_cmp"("public"."sparsevec", "public"."sparsevec") TO "authenticated";
@@ -5182,26 +4914,12 @@ GRANT SELECT("type") ON TABLE "public"."timeline_items" TO "anon";
 
 
 
-GRANT SELECT("query_result_id") ON TABLE "public"."timeline_items" TO "anon";
-
-
-
 GRANT SELECT("assistant_role") ON TABLE "public"."timeline_items" TO "anon";
 
 
 
 GRANT ALL ON TABLE "public"."users" TO "authenticated";
 GRANT ALL ON TABLE "public"."users" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."validation_queries" TO "authenticated";
-GRANT ALL ON TABLE "public"."validation_queries" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."validation_results" TO "authenticated";
-GRANT ALL ON TABLE "public"."validation_results" TO "service_role";
 
 
 

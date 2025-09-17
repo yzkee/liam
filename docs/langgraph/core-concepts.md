@@ -11,11 +11,8 @@ import { BaseMessage } from "@langchain/core/messages";
 import { Annotation } from "@langchain/langgraph";
 
 const GraphAnnotation = Annotation.Root({
-  // Define a 'messages' channel to store an array of BaseMessage objects
   messages: Annotation<BaseMessage[]>({
-    // Reducer function: Combines the current state with new messages
     reducer: (currentState, updateValue) => currentState.concat(updateValue),
-    // Default function: Initialize the channel with an empty array
     default: () => [],
   }),
 });
@@ -23,7 +20,7 @@ const GraphAnnotation = Annotation.Root({
 
 ### Custom State with Annotation.Root
 
-You can define custom state structures using `Annotation.Root` with multiple channels:
+You can define custom state structures using `Annotation.Root` with multiple channels. Each channel can optionally have `reducer` and `default` functions:
 
 ```typescript
 const QuestionAnswerAnnotation = Annotation.Root({
@@ -34,7 +31,7 @@ const QuestionAnswerAnnotation = Annotation.Root({
 
 ### State Reducers and Merging Strategies
 
-Each channel can optionally have `reducer` and `default` functions. The `reducer` function defines how new values are combined with the existing state:
+The `reducer` function defines how new values are combined with the existing state. The `default` function provides an initial value for the channel:
 
 ```typescript
 const GraphAnnotation = Annotation.Root({
@@ -45,11 +42,20 @@ const GraphAnnotation = Annotation.Root({
 });
 ```
 
+You can merge multiple annotations using the `spec` property:
+
+```typescript
+const MergedAnnotation = Annotation.Root({
+  ...QuestionAnswerAnnotation.spec,
+  ...GraphAnnotation.spec,
+});
+```
+
 ## Basic Graph Construction
 
 ### StateGraph Initialization
 
-Finally, instantiating your graph using the annotations is as simple as passing the annotation to the `StateGraph` constructor:
+Instantiate your graph by passing the annotation to the `StateGraph` constructor:
 
 ```typescript
 import { StateGraph } from "@langchain/langgraph";
@@ -59,34 +65,28 @@ const workflow = new StateGraph(GraphAnnotation);
 
 ### Adding Nodes and Edges
 
-Once you have a `StateGraph` instance, you can add nodes and edges to define your workflow:
+Add nodes and edges to define your workflow structure:
 
 ```typescript
-// Add nodes to the graph
 workflow.addNode("nodeA", nodeAFunction);
 workflow.addNode("nodeB", nodeBFunction);
-
-// Add edges between nodes
 workflow.addEdge("nodeA", "nodeB");
 ```
 
 ### START and END Usage
 
-LangGraph provides special `START` and `END` constants for defining entry and exit points:
+Use special `START` and `END` constants for entry and exit points:
 
 ```typescript
 import { START, END } from "@langchain/langgraph";
 
-// Connect START to your first node
 workflow.addEdge(START, "nodeA");
-
-// Connect your last node to END
 workflow.addEdge("nodeB", END);
 ```
 
 ### Graph Compilation
 
-After defining your graph structure, you need to compile it before execution:
+Compile the graph before execution:
 
 ```typescript
 const app = workflow.compile();
@@ -96,7 +96,7 @@ const app = workflow.compile();
 
 ### Simple Node Functions
 
-Node functions receive the current state and return updates to that state:
+Node functions receive the current state and return updates:
 
 ```typescript
 function simpleNode(state: typeof GraphAnnotation.State) {
@@ -108,11 +108,10 @@ function simpleNode(state: typeof GraphAnnotation.State) {
 
 ### Async Nodes with External Calls
 
-Nodes can be asynchronous and make external API calls:
+Nodes can be asynchronous for external API calls:
 
 ```typescript
 async function asyncNode(state: typeof GraphAnnotation.State) {
-  // Make external API call
   const response = await fetch("https://api.example.com/data");
   const data = await response.json();
   
@@ -124,12 +123,11 @@ async function asyncNode(state: typeof GraphAnnotation.State) {
 
 ### Error Handling in Nodes
 
-Implement proper error handling within your node functions:
+Implement proper error handling patterns:
 
 ```typescript
 async function nodeWithErrorHandling(state: typeof GraphAnnotation.State) {
   try {
-    // Potentially failing operation
     const result = await riskyOperation();
     return {
       messages: [new AIMessage(`Success: ${result}`)]
@@ -142,18 +140,40 @@ async function nodeWithErrorHandling(state: typeof GraphAnnotation.State) {
 }
 ```
 
-### State Update Patterns
+### Node Retry Policies
 
-Nodes should return partial state updates that will be merged with the existing state:
+Configure retry policies for nodes that may fail:
 
 ```typescript
-function stateUpdateNode(state: typeof GraphAnnotation.State) {
-  // Access current state
-  const currentMessages = state.messages;
-  
-  // Return partial update
-  return {
-    messages: [new AIMessage(`Processed ${currentMessages.length} messages`)]
-  };
-}
+workflow.addNode("retryableNode", retryableFunction, {
+  retryPolicy: {
+    initialInterval: 1000,
+    backoffFactor: 2,
+    maxInterval: 10000,
+    maxAttempts: 3,
+  },
+});
+```
+
+### Node Caching
+
+Cache expensive node operations with TTL configuration:
+
+```typescript
+workflow.addNode("expensiveNode", expensiveFunction, {
+  cachePolicy: {
+    ttl: 300,
+    keySerializer: (state) => JSON.stringify(state.input),
+  },
+});
+```
+
+### Deferred Node Execution
+
+Defer node execution until all other pending tasks complete:
+
+```typescript
+workflow.addNode("deferredNode", deferredFunction, {
+  defer: true,
+});
 ```

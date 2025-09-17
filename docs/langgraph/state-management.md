@@ -4,17 +4,14 @@
 
 ### Using Annotation for State Definition
 
-The `Annotation` function is the recommended way to define your graph state for new `StateGraph` graphs. The `Annotation.Root` function is used to create the top-level state object, where each field represents a channel in the graph.
+The `Annotation` function is the recommended way to define your graph state for new `StateGraph` graphs. The `Annotation.Root` function creates the top-level state object:
 
 ```typescript
 import { BaseMessage } from "@langchain/core/messages";
 import { Annotation } from "@langchain/langgraph";
 
 const GraphAnnotation = Annotation.Root({
-  // Define a 'messages' channel to store an array of BaseMessage objects
   messages: Annotation<BaseMessage[]>({
-    // Reducer function: Combines the current state with new messages
-    // Default function: Initialize the channel with an empty array
     reducer: (currentState, updateValue) => currentState.concat(updateValue),
     default: () => [],
   }),
@@ -23,101 +20,243 @@ const GraphAnnotation = Annotation.Root({
 
 ### Input/Output Schema Separation
 
-Each channel can optionally have `reducer` and `default` functions. The `reducer` function defines how new values are combined with the existing state. The `default` function provides an initial value for the channel.
+Define separate input and output schemas for your graph using different annotation objects:
 
 ```typescript
-const QuestionAnswerAnnotation = Annotation.Root({
+const InputAnnotation = Annotation.Root({
   question: Annotation<string>(),
+});
+
+const OutputAnnotation = Annotation.Root({
   answer: Annotation<string>(),
+});
+
+const GraphAnnotation = Annotation.Root({
+  ...InputAnnotation.spec,
+  ...OutputAnnotation.spec,
 });
 ```
 
 ### Private vs Public State
 
-Above, all we're doing is defining the channels, and then passing the un-instantiated `Annotation` function as the value. It is important to note we always pass in the TypeScript type of each channel as the first generics argument to `Annotation`. Doing this ensures our graph state is type safe, and we can get the proper types when defining our nodes.
+Pass private state between nodes using input annotations that are not part of the main graph state:
 
 ```typescript
-type QuestionAnswerAnnotationType = typeof QuestionAnswerAnnotation.State;
+const PrivateAnnotation = Annotation.Root({
+  privateData: Annotation<string>(),
+});
 
-// This is equivalent to the following type:
-type QuestionAnswerAnnotationType = {
-  question: string;
-  answer: string;
+function nodeWithPrivateState(
+  state: typeof GraphAnnotation.State,
+  config: { configurable: { privateInput: typeof PrivateAnnotation.State } }
+) {
+  const privateData = config.configurable.privateInput.privateData;
+  return {
+    answer: `Processed: ${privateData}`
+  };
 }
 ```
 
 ### Nested State Structures
 
-If you have two graph state annotations, you can merge the two into a single annotation by using the `spec` value:
+Merge multiple annotations using the `spec` property:
 
 ```typescript
-const MergedAnnotation = Annotation.Root({
-  ...QuestionAnswerAnnotation.spec,
-  ...GraphAnnotation.spec,
+const UserAnnotation = Annotation.Root({
+  userId: Annotation<string>(),
+  userName: Annotation<string>(),
 });
-```
 
-The type of the merged annotation is the intersection of the two annotations:
+const SessionAnnotation = Annotation.Root({
+  sessionId: Annotation<string>(),
+  timestamp: Annotation<number>(),
+});
 
-```typescript
-type MergedAnnotationType = {
-  messages: BaseMessage[];
-  question: string;
-  answer: string;
-}
+const CombinedAnnotation = Annotation.Root({
+  ...UserAnnotation.spec,
+  ...SessionAnnotation.spec,
+  messages: Annotation<BaseMessage[]>({
+    reducer: (currentState, updateValue) => currentState.concat(updateValue),
+    default: () => [],
+  }),
+});
 ```
 
 ## State Updates and Merging
 
 ### Custom Reducers
 
-The `Annotation` function is a convenience wrapper around the low level implementation of how states are defined in LangGraph. Defining state using the `channels` object (which is what `Annotation` is a wrapper of) is still possible, although not recommended for most cases.
+Define custom reducer functions to control how state updates are merged:
 
 ```typescript
-import { StateGraph } from "@langchain/langgraph";
-
-interface WorkflowChannelsState {
-  messages: BaseMessage[];
-  question: string;
-  answer: string;
-}
-
-const workflowWithChannels = new StateGraph<WorkflowChannelsState>({
-  channels: {
-    messages: {
-      reducer: (currentState, updateValue) => currentState.concat(updateValue),
-      default: () => [],
-    },
-  }
+const GraphAnnotation = Annotation.Root({
+  messages: Annotation<BaseMessage[]>({
+    reducer: (currentState, updateValue) => currentState.concat(updateValue),
+    default: () => [],
+  }),
+  counter: Annotation<number>({
+    reducer: (currentState, updateValue) => currentState + updateValue,
+    default: () => 0,
+  }),
 });
 ```
 
 ### State Validation
 
-Finally, instantiating your graph using the annotations is as simple as passing the annotation to the `StateGraph` constructor:
+Ensure type safety by passing the annotation to the `StateGraph` constructor:
 
 ```typescript
 import { StateGraph } from "@langchain/langgraph";
 
-const workflow = new StateGraph(MergedAnnotation);
+const workflow = new StateGraph(GraphAnnotation);
 ```
 
 ### Partial Updates
 
-Each channel can optionally have `reducer` and `default` functions. The `reducer` function defines how new values are combined with the existing state. The `default` function provides an initial value for the channel.
+Return partial state updates from nodes that will be merged with existing state:
 
-For more information on reducers, see the [reducers conceptual guide](https://langchain-ai.github.io/langgraphjs/concepts/low_level/#reducers).
+```typescript
+function updateNode(state: typeof GraphAnnotation.State) {
+  return {
+    counter: 1,
+    messages: [new AIMessage("Counter incremented")]
+  };
+}
+```
+
+### Updating State from Tools
+
+Use the `Command` object to update graph state from tools:
+
+```typescript
+import { Command } from "@langchain/langgraph";
+
+const lookupUserInfo = tool(async (input, config) => {
+  const userInfo = await getUserInfo(input.userId);
+  
+  return new Command({
+    update: {
+      userInfo: userInfo,
+      messages: [
+        new ToolMessage({
+          content: `Successfully looked up user information`,
+          tool_call_id: config.tool_call_id,
+        }),
+      ],
+    },
+  });
+}, {
+  name: "lookup_user_info",
+  description: "Use this to look up user information",
+  schema: z.object({
+    userId: z.string(),
+  }),
+});
+```
 
 ## State Persistence Patterns
 
-### Stateful vs Stateless Nodes
+### Thread-level Persistence
 
-The `Annotation` function is a convenience wrapper around the low level implementation of how states are defined in LangGraph. Defining state using the `channels` object provides more control over state management patterns.
+Add thread-level persistence using checkpointers:
 
-### Cross-invocation State
+```typescript
+import { MemorySaver } from "@langchain/langgraph";
 
-When defining state channels, you can specify how state persists across different invocations of your graph. The reducer functions determine how new state updates are merged with existing state.
+const checkpointer = new MemorySaver();
+const graph = workflow.compile({ checkpointer });
+```
 
-### State Cleanup Strategies
+### Cross-thread Persistence
 
-State channels can be configured with default values and reducer functions that handle state initialization and cleanup. The `default` function provides initial values, while reducer functions control how state is updated and maintained throughout the graph execution.
+Implement cross-thread persistence using the `Store` interface:
+
+```typescript
+import { InMemoryStore } from "@langchain/langgraph";
+
+const store = new InMemoryStore();
+const graph = workflow.compile({ 
+  checkpointer,
+  store 
+});
+
+// Access store in nodes
+function nodeWithStore(
+  state: typeof GraphAnnotation.State,
+  config: { store: InMemoryStore }
+) {
+  const userMemory = await config.store.get(
+    ["users", state.userId], 
+    "memory"
+  );
+  
+  return {
+    messages: [new AIMessage(`Retrieved memory: ${userMemory}`)]
+  };
+}
+```
+
+### PostgreSQL Persistence
+
+Use PostgreSQL for production persistence:
+
+```typescript
+import { PostgresSaver } from "@langchain/langgraph-checkpoint-postgres";
+
+const checkpointer = PostgresSaver.fromConnString("postgresql://...");
+const graph = workflow.compile({ checkpointer });
+```
+
+### State Editing
+
+Edit graph state using breakpoints and `updateState`:
+
+```typescript
+const graph = workflow.compile({ 
+  checkpointer,
+  interruptBefore: ["nodeA"] 
+});
+
+// Run until breakpoint
+const result = await graph.invoke(
+  { messages: [new HumanMessage("Hello")] },
+  { configurable: { thread_id: "1" } }
+);
+
+// Update state at breakpoint
+await graph.updateState(
+  { configurable: { thread_id: "1" } },
+  { messages: [new AIMessage("Updated message")] }
+);
+
+// Resume execution
+const finalResult = await graph.invoke(
+  null,
+  { configurable: { thread_id: "1" } }
+);
+```
+
+### Subgraph State Management
+
+Manage state in subgraphs with persistence:
+
+```typescript
+const subgraph = new StateGraph(SubgraphAnnotation)
+  .addNode("subNode", subNodeFunction)
+  .addEdge(START, "subNode")
+  .addEdge("subNode", END)
+  .compile({ checkpointer });
+
+// Add subgraph to main graph
+workflow.addNode("subgraphNode", subgraph);
+
+// View and update subgraph state
+const subgraphState = await subgraph.getState({
+  configurable: { thread_id: "subgraph-1" }
+});
+
+await subgraph.updateState(
+  { configurable: { thread_id: "subgraph-1" } },
+  { subgraphData: "updated" }
+);
+```

@@ -4,78 +4,109 @@
 
 ### Basic Parallel Branches
 
-LangGraph supports parallel execution through branching patterns. You can create branches that execute multiple nodes simultaneously:
+LangGraph supports fan-out and fan-in patterns for parallel execution. You can create branches that execute multiple nodes simultaneously:
 
 ```typescript
 import { StateGraph, START, END } from "@langchain/langgraph";
 
 const workflow = new StateGraph(GraphAnnotation);
 
-// Add parallel nodes
-workflow.addNode("branchA", branchAFunction);
-workflow.addNode("branchB", branchBFunction);
-workflow.addNode("merge", mergeFunction);
+workflow.addNode("nodeA", nodeAFunction);
+workflow.addNode("nodeB", nodeBFunction);
+workflow.addNode("nodeC", nodeCFunction);
+workflow.addNode("nodeD", nodeDFunction);
 
-// Create parallel branches from START
-workflow.addEdge(START, "branchA");
-workflow.addEdge(START, "branchB");
+// Fan-out: START connects to multiple nodes
+workflow.addEdge(START, "nodeA");
+workflow.addEdge(START, "nodeB");
 
-// Merge results
-workflow.addEdge("branchA", "merge");
-workflow.addEdge("branchB", "merge");
-workflow.addEdge("merge", END);
+// Fan-in: Multiple nodes connect to one node
+workflow.addEdge("nodeA", "nodeC");
+workflow.addEdge("nodeB", "nodeC");
+
+workflow.addEdge("nodeC", "nodeD");
+workflow.addEdge("nodeD", END);
 ```
 
 ### Multiple Entry Points
 
-You can define multiple entry points for different execution paths:
+Define multiple entry points for different execution paths:
 
 ```typescript
-// Multiple starting nodes
 workflow.addEdge(START, "entryA");
 workflow.addEdge(START, "entryB");
 ```
 
 ### Synchronized Execution
 
-Use merge nodes to synchronize parallel execution branches before continuing:
+Use merge nodes to synchronize parallel execution branches with stable sorting:
 
 ```typescript
 function mergeFunction(state: typeof GraphAnnotation.State) {
-  // Combine results from parallel branches
   return {
     messages: [new AIMessage("Merged parallel execution results")]
   };
 }
 ```
 
+### Conditional Branching
+
+Implement conditional branching based on state values:
+
+```typescript
+function routingCondition(state: typeof GraphAnnotation.State) {
+  if (state.messages.length > 5) {
+    return "processLarge";
+  } else {
+    return "processSmall";
+  }
+}
+
+workflow.addConditionalEdges(
+  "router",
+  routingCondition,
+  {
+    "processLarge": "largeProcessor",
+    "processSmall": "smallProcessor"
+  }
+);
+```
+
 ## Map-Reduce Pattern
 
 ### Map-Reduce Workflow Setup
 
-Implement map-reduce patterns by distributing work across parallel nodes and aggregating results:
+Implement map-reduce patterns using the `Send` API for distributing work across parallel nodes:
 
 ```typescript
-const mapReduceWorkflow = new StateGraph(GraphAnnotation);
+import { Send } from "@langchain/langgraph";
 
-// Map phase - parallel processing
-mapReduceWorkflow.addNode("mapper1", mapperFunction1);
-mapReduceWorkflow.addNode("mapper2", mapperFunction2);
-mapReduceWorkflow.addNode("mapper3", mapperFunction3);
+function mapFunction(state: typeof GraphAnnotation.State) {
+  const items = state.items;
+  return items.map((item, index) => 
+    new Send("processItem", { item, index })
+  );
+}
 
-// Reduce phase - aggregation
-mapReduceWorkflow.addNode("reducer", reducerFunction);
+workflow.addNode("map", mapFunction);
+workflow.addNode("processItem", processItemFunction);
+workflow.addNode("reduce", reduceFunction);
+
+workflow.addConditionalEdges("map", mapFunction, ["processItem"]);
+workflow.addEdge("processItem", "reduce");
 ```
 
 ### Parallel Task Processing
 
-Each mapper node processes a portion of the data independently:
+Each mapper node processes data independently with distributed state:
 
 ```typescript
-function mapperFunction1(state: typeof GraphAnnotation.State) {
-  // Process subset of data
-  const processedData = processDataSubset(state.data, 0, 100);
-  return { processedResults: processedData };
+function processItemFunction(state: typeof GraphAnnotation.State) {
+  const { item, index } = state;
+  const processedData = processItem(item);
+  return { 
+    processedResults: [{ index, data: processedData }]
+  };
 }
 ```
 
@@ -84,11 +115,11 @@ function mapperFunction1(state: typeof GraphAnnotation.State) {
 The reducer node combines results from all mapper nodes:
 
 ```typescript
-function reducerFunction(state: typeof GraphAnnotation.State) {
-  // Aggregate all processed results
-  const finalResult = aggregateResults(state.processedResults);
+function reduceFunction(state: typeof GraphAnnotation.State) {
+  const sortedResults = state.processedResults.sort((a, b) => a.index - b.index);
+  const finalResult = sortedResults.map(r => r.data);
   return { 
-    messages: [new AIMessage(`Final result: ${finalResult}`)]
+    messages: [new AIMessage(`Final result: ${JSON.stringify(finalResult)}`)]
   };
 }
 ```
@@ -148,7 +179,7 @@ workflow.addConditionalEdges(
   {
     "processLarge": "largeProcessor",
     "processSmall": "smallProcessor",
-    "__default__": "fallbackProcessor"  // Fallback route
+    "__default__": "fallbackProcessor"
   }
 );
 ```
@@ -157,41 +188,46 @@ workflow.addConditionalEdges(
 
 ### Recursion Limit Configuration
 
-Configure recursion limits to prevent infinite loops:
+Configure recursion limits to prevent infinite loops using supersteps:
 
 ```typescript
 const app = workflow.compile({
-  recursionLimit: 100  // Maximum number of steps
+  recursionLimit: 100
 });
 ```
 
 ### Loop Detection and Prevention
 
-Implement loop detection in your routing logic:
+Implement conditional termination to control loops:
 
 ```typescript
-function loopAwareRouting(state: typeof GraphAnnotation.State) {
-  // Track visited nodes to prevent loops
-  const visitedNodes = state.visitedNodes || [];
-  const currentNode = "processingNode";
-  
-  if (visitedNodes.includes(currentNode)) {
-    return "exitLoop";  // Break the loop
+function shouldContinue(state: typeof GraphAnnotation.State) {
+  if (state.iterations >= 10) {
+    return END;
   }
-  
-  return "continueProcessing";
+  return "continueLoop";
 }
+
+workflow.addConditionalEdges(
+  "loopNode",
+  shouldContinue,
+  {
+    "continueLoop": "loopNode",
+    [END]: END
+  }
+);
 ```
 
 ### Graceful Loop Termination
 
-Handle loop termination gracefully:
+Handle loop termination with proper state management:
 
 ```typescript
 function terminationNode(state: typeof GraphAnnotation.State) {
   return {
     messages: [new AIMessage("Loop terminated gracefully")],
-    completed: true
+    completed: true,
+    iterations: (state.iterations || 0) + 1
   };
 }
 ```
@@ -200,13 +236,12 @@ function terminationNode(state: typeof GraphAnnotation.State) {
 
 ### Using Command for Flow Control
 
-The Command pattern can be used to control flow execution:
+Use the `Command` object to control execution flow and navigate between nodes:
 
 ```typescript
 import { Command } from "@langchain/langgraph";
 
 function commandNode(state: typeof GraphAnnotation.State) {
-  // Use Command to control execution flow
   if (state.shouldSkip) {
     return new Command({
       goto: "skipNode"
@@ -239,7 +274,7 @@ function commandWithStateUpdate(state: typeof GraphAnnotation.State) {
 
 ### Advanced Command Patterns
 
-Use commands for complex control flow scenarios:
+Use commands for complex control flow scenarios including navigation to parent graphs:
 
 ```typescript
 function advancedCommandNode(state: typeof GraphAnnotation.State) {
@@ -261,4 +296,14 @@ function advancedCommandNode(state: typeof GraphAnnotation.State) {
     goto: "continueProcessing"
   });
 }
+```
+
+### Deferred Node Execution
+
+Defer node execution until all other pending tasks are completed:
+
+```typescript
+workflow.addNode("deferredNode", deferredFunction, {
+  defer: true
+});
 ```

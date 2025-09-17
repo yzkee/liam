@@ -1,12 +1,4 @@
-import type { WorkflowConfigurable } from './types'
-
-export type CheckpointError = {
-  checkpointId: string
-  timestamp: string
-  errorMessage: string
-  nodeSource: string
-  metadata?: Record<string, unknown>
-}
+import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
 
 type ErrorInfo = {
   message: string
@@ -51,19 +43,13 @@ function extractErrorInfo(errorChannelData: unknown): ErrorInfo {
  * This function examines checkpoint history to find errors that occurred during
  * workflow execution, particularly from validateInitialSchemaNode and other error-prone nodes.
  */
-export async function getCheckpointErrors(config: {
-  configurable: WorkflowConfigurable
-}): Promise<CheckpointError[]> {
-  const { thread_id, repositories } = config.configurable
-  const { checkpointer } = repositories.schema
-
-  if (!thread_id) {
-    return []
-  }
-
+export async function getCheckpointErrors(
+  checkpointer: BaseCheckpointSaver,
+  threadId: string,
+): Promise<string[]> {
   const checkpointConfig = {
     configurable: {
-      thread_id,
+      thread_id: threadId,
     },
   }
 
@@ -72,30 +58,17 @@ export async function getCheckpointErrors(config: {
     return []
   }
 
-  const errors: CheckpointError[] = []
+  const errorMessages: string[] = []
 
   // Check pendingWrites for __error__ channel
   if (checkpointTuple.pendingWrites) {
-    for (const [taskId, channel, value] of checkpointTuple.pendingWrites) {
+    for (const [, channel, value] of checkpointTuple.pendingWrites) {
       if (channel === '__error__') {
         const errorInfo = extractErrorInfo(value)
-
-        errors.push({
-          checkpointId: checkpointTuple.checkpoint.id,
-          timestamp: new Date(checkpointTuple.checkpoint.ts).toISOString(),
-          errorMessage: errorInfo.message,
-          nodeSource: errorInfo.nodeSource,
-          metadata: {
-            errorData: value,
-            source: 'checkpointer.getTuple pendingWrites',
-            taskId,
-          },
-        })
+        errorMessages.push(errorInfo.message)
       }
     }
   }
 
-  return errors.sort(
-    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-  )
+  return errorMessages
 }

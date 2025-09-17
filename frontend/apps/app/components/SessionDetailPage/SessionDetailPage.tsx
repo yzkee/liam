@@ -62,8 +62,11 @@ async function loadSessionData(designSessionId: string): Promise<
   const messages = serializeMessages(baseMessages)
 
   // Fetch checkpoint error from LangGraph memory
-  const checkpointErrors = await getCheckpointErrors(config)
-  const checkpointError = checkpointErrors[0]?.errorMessage || null
+  const checkpointErrors = await getCheckpointErrors(
+    repositories.schema.checkpointer,
+    designSessionId,
+  )
+  const checkpointError = checkpointErrors[0] || null
 
   const buildingSchema = await getBuildingSchema(designSessionId)
   if (!buildingSchema) {

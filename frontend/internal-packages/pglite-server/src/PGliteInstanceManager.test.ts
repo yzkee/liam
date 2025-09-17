@@ -377,9 +377,9 @@ COMMENT ON COLUMN teams.name IS 'Team''s name';
       })
     })
 
-    it('should correctly handle U+2019 (right single quotation mark) as invalid SQL syntax', async () => {
-      // This test verifies that U+2019 causes a parse error (as it should)
-      // AND that byte-to-character position conversion works correctly
+    it('should correctly handle U+2019 (right single quotation mark) in SQL strings', async () => {
+      // This test verifies that U+2019 within SQL string literals is handled correctly
+      // and that byte-to-character position conversion works properly with multi-byte chars
       const sql = `
 CREATE TABLE products (
   id UUID PRIMARY KEY,
@@ -387,34 +387,41 @@ CREATE TABLE products (
   description TEXT
 );
 
-COMMENT ON TABLE products IS 'Product's main table';
-COMMENT ON COLUMN products.name IS 'Product's display name';
-COMMENT ON COLUMN products.description IS 'Product's detailed info';
+COMMENT ON TABLE products IS 'Product\u2019s main table';
+COMMENT ON COLUMN products.name IS 'Product\u2019s display name';
+COMMENT ON COLUMN products.description IS 'Product\u2019s detailed info';
       `
 
       const results = await manager.executeQuery(sql, [])
 
-      // U+2019 is not a valid SQL string delimiter, so this should fail to parse
-      // The parser correctly identifies this as a syntax error
-      expect(results).toHaveLength(1)
-      expect(results[0]?.success).toBe(false)
+      // The parser successfully handles U+2019 within string literals
+      expect(results).toHaveLength(4)
 
-      const errorResult = results[0]?.result
-      expect(errorResult).toBeDefined()
-      expect(typeof errorResult).toBe('object')
-      expect(errorResult).toHaveProperty('error')
-      if (
-        errorResult &&
-        typeof errorResult === 'object' &&
-        'error' in errorResult
-      ) {
-        expect(errorResult.error).toContain(
-          'Parse error: syntax error at or near "s"',
-        )
-      }
+      // CREATE TABLE statement
+      expect(results[0]?.success).toBe(true)
+      expect(results[0]?.sql).toContain('CREATE TABLE products')
 
-      // This is the expected behavior: U+2019 should not be accepted as a string delimiter
-      // Users should use '' (two single quotes) to escape apostrophes in SQL strings
+      // COMMENT statements with U+2019 preserved
+      const commentStatements = results.slice(1)
+      expect(commentStatements).toHaveLength(3)
+
+      commentStatements.forEach((result) => {
+        expect(result.success).toBe(true)
+        expect(result.sql).toMatch(/^COMMENT ON/)
+        // Verify that U+2019 is preserved in the extracted SQL
+        expect(result.sql).toContain('\u2019')
+      })
+
+      // Verify specific COMMENT statements
+      expect(results[1]?.sql).toBe(
+        "COMMENT ON TABLE products IS 'Product\u2019s main table'",
+      )
+      expect(results[2]?.sql).toBe(
+        "COMMENT ON COLUMN products.name IS 'Product\u2019s display name'",
+      )
+      expect(results[3]?.sql).toBe(
+        "COMMENT ON COLUMN products.description IS 'Product\u2019s detailed info'",
+      )
     })
 
     it('should correctly parse statements after strings with escaped apostrophes', async () => {

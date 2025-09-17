@@ -377,53 +377,6 @@ COMMENT ON COLUMN teams.name IS 'Team''s name';
       })
     })
 
-    it('should correctly handle U+2019 (right single quotation mark) in SQL strings', async () => {
-      // This test verifies that U+2019 within SQL string literals is handled correctly
-      // and that byte-to-character position conversion works properly with multi-byte chars
-      const sql = `
-CREATE TABLE products (
-  id UUID PRIMARY KEY,
-  name TEXT NOT NULL,
-  description TEXT
-);
-
-COMMENT ON TABLE products IS 'Product\u2019s main table';
-COMMENT ON COLUMN products.name IS 'Product\u2019s display name';
-COMMENT ON COLUMN products.description IS 'Product\u2019s detailed info';
-      `
-
-      const results = await manager.executeQuery(sql, [])
-
-      // The parser successfully handles U+2019 within string literals
-      expect(results).toHaveLength(4)
-
-      // CREATE TABLE statement
-      expect(results[0]?.success).toBe(true)
-      expect(results[0]?.sql).toContain('CREATE TABLE products')
-
-      // COMMENT statements with U+2019 preserved
-      const commentStatements = results.slice(1)
-      expect(commentStatements).toHaveLength(3)
-
-      commentStatements.forEach((result) => {
-        expect(result.success).toBe(true)
-        expect(result.sql).toMatch(/^COMMENT ON/)
-        // Verify that U+2019 is preserved in the extracted SQL
-        expect(result.sql).toContain('\u2019')
-      })
-
-      // Verify specific COMMENT statements
-      expect(results[1]?.sql).toBe(
-        "COMMENT ON TABLE products IS 'Product\u2019s main table'",
-      )
-      expect(results[2]?.sql).toBe(
-        "COMMENT ON COLUMN products.name IS 'Product\u2019s display name'",
-      )
-      expect(results[3]?.sql).toBe(
-        "COMMENT ON COLUMN products.description IS 'Product\u2019s detailed info'",
-      )
-    })
-
     it('should correctly parse statements after strings with escaped apostrophes', async () => {
       // This test verifies that byte-to-character position conversion works
       // with properly escaped apostrophes (which are valid SQL)
@@ -506,8 +459,9 @@ COMMENT ON COLUMN tasks.notes IS '💡 Additional notes and comments';
       expect(results[4]?.sql).toContain('💡')
     })
 
-    it('should handle mixed multi-byte characters (emojis, Japanese, Chinese)', async () => {
+    it('should handle mixed multi-byte characters (emojis, Japanese, Chinese, U+2019)', async () => {
       // Test with various multi-byte characters from different languages
+      // Including U+2019 (curly apostrophe) which is 3 bytes in UTF-8
       // eslint-disable-next-line no-non-english/no-non-english-characters
       const sql = `
 CREATE TABLE international (
@@ -531,12 +485,20 @@ CREATE TABLE categories (
 
 COMMENT ON TABLE categories IS 'カテゴリ管理 📚';
 COMMENT ON COLUMN categories.icon IS 'Emoji icon like 🎮🎨🎬';
+
+CREATE TABLE products (
+  id UUID PRIMARY KEY,
+  name TEXT
+);
+
+COMMENT ON TABLE products IS 'Product\u2019s main table';
+COMMENT ON COLUMN products.name IS 'Product\u2019s display name';
       `
 
       const results = await manager.executeQuery(sql, [])
 
-      // Should have: 2 CREATE TABLE + 6 COMMENT statements
-      expect(results).toHaveLength(8)
+      // Should have: 3 CREATE TABLE + 8 COMMENT statements
+      expect(results).toHaveLength(11)
 
       // All statements should succeed
       results.forEach((result) => {
@@ -547,7 +509,7 @@ COMMENT ON COLUMN categories.icon IS 'Emoji icon like 🎮🎨🎬';
       const commentStatements = results.filter((r) =>
         r.sql.includes('COMMENT ON'),
       )
-      expect(commentStatements).toHaveLength(6)
+      expect(commentStatements).toHaveLength(8)
 
       commentStatements.forEach((result) => {
         expect(result.sql.trim()).toMatch(/^COMMENT ON/)
@@ -566,6 +528,20 @@ COMMENT ON COLUMN categories.icon IS 'Emoji icon like 🎮🎨🎬';
       expect(results.some((r) => r.sql.includes('🔥'))).toBe(true)
       // eslint-disable-next-line no-non-english/no-non-english-characters
       expect(results.some((r) => r.sql.includes('おすすめ'))).toBe(true)
+
+      // Verify U+2019 (curly apostrophe) is preserved
+      expect(results.some((r) => r.sql.includes('\u2019'))).toBe(true)
+      // Verify specific statements with U+2019
+      const productsComments = results.filter(
+        (r) => r.sql.includes('products') && r.sql.includes('COMMENT'),
+      )
+      expect(productsComments).toHaveLength(2)
+      expect(productsComments[0]?.sql).toBe(
+        "COMMENT ON TABLE products IS 'Product\u2019s main table'",
+      )
+      expect(productsComments[1]?.sql).toBe(
+        "COMMENT ON COLUMN products.name IS 'Product\u2019s display name'",
+      )
     })
 
     it('should handle statements with invalid stmt_location (-1)', async () => {

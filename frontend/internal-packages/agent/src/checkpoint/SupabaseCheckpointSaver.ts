@@ -10,6 +10,8 @@ import {
   WRITES_IDX_MAP,
 } from '@langchain/langgraph-checkpoint'
 import type { Database, Json, SupabaseClientType } from '@liam-hq/db'
+import { err, ok } from 'neverthrow'
+import { retryWithExponentialBackoff } from '../utils/retry'
 import {
   base64ToUint8Array,
   hexToUint8Array,
@@ -296,16 +298,22 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
         updated_at: new Date().toISOString(),
       }
 
-    const { error: checkpointError } = await this.client
-      .from('checkpoints')
-      .upsert(checkpointInsert, {
-        onConflict: 'thread_id,checkpoint_ns,checkpoint_id,organization_id',
-      })
+    const checkpointResult = await retryWithExponentialBackoff(async () => {
+      const result = await this.client
+        .from('checkpoints')
+        .upsert(checkpointInsert, {
+          onConflict: 'thread_id,checkpoint_ns,checkpoint_id,organization_id',
+        })
 
-    if (checkpointError) {
+      return result.error ? err(result.error) : ok(result)
+    })
+
+    if (checkpointResult.isErr()) {
       // BaseCheckpointSaver expects exceptions to be thrown
       // eslint-disable-next-line no-throw-error/no-throw-error
-      throw new Error(`Failed to save checkpoint: ${checkpointError.message}`)
+      throw new Error(
+        `Failed to save checkpoint: ${checkpointResult.error.message}`,
+      )
     }
 
     const blobs = await this._dumpBlobs(
@@ -316,16 +324,23 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
     )
 
     if (blobs.length > 0) {
-      const { error: blobError } = await this.client
-        .from('checkpoint_blobs')
-        .upsert(blobs, {
-          onConflict: 'thread_id,checkpoint_ns,channel,version,organization_id',
-        })
+      const blobResult = await retryWithExponentialBackoff(async () => {
+        const result = await this.client
+          .from('checkpoint_blobs')
+          .upsert(blobs, {
+            onConflict:
+              'thread_id,checkpoint_ns,channel,version,organization_id',
+          })
 
-      if (blobError) {
+        return result.error ? err(result.error) : ok(result)
+      })
+
+      if (blobResult.isErr()) {
         // BaseCheckpointSaver expects exceptions to be thrown
         // eslint-disable-next-line no-throw-error/no-throw-error
-        throw new Error(`Failed to save checkpoint blobs: ${blobError.message}`)
+        throw new Error(
+          `Failed to save checkpoint blobs: ${blobResult.error.message}`,
+        )
       }
     }
 
@@ -358,17 +373,23 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
     )
 
     if (dumpedWrites.length > 0) {
-      const { error } = await this.client
-        .from('checkpoint_writes')
-        .upsert(dumpedWrites, {
-          onConflict:
-            'thread_id,checkpoint_ns,checkpoint_id,task_id,idx,organization_id',
-        })
+      const writesResult = await retryWithExponentialBackoff(async () => {
+        const result = await this.client
+          .from('checkpoint_writes')
+          .upsert(dumpedWrites, {
+            onConflict:
+              'thread_id,checkpoint_ns,checkpoint_id,task_id,idx,organization_id',
+          })
 
-      if (error) {
+        return result.error ? err(result.error) : ok(result)
+      })
+
+      if (writesResult.isErr()) {
         // BaseCheckpointSaver expects exceptions to be thrown
         // eslint-disable-next-line no-throw-error/no-throw-error
-        throw new Error(`Failed to save checkpoint writes: ${error.message}`)
+        throw new Error(
+          `Failed to save checkpoint writes: ${writesResult.error.message}`,
+        )
       }
     }
   }
@@ -382,42 +403,54 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
    * Required for compatibility with LangGraph 0.4.x
    */
   async deleteThread(threadId: string): Promise<void> {
-    const { error: checkpointsError } = await this.client
-      .from('checkpoints')
-      .delete()
-      .eq('thread_id', threadId)
-      .eq('organization_id', this.organizationId)
+    const checkpointsResult = await retryWithExponentialBackoff(async () => {
+      const result = await this.client
+        .from('checkpoints')
+        .delete()
+        .eq('thread_id', threadId)
+        .eq('organization_id', this.organizationId)
 
-    if (checkpointsError) {
+      return result.error ? err(result.error) : ok(result)
+    })
+
+    if (checkpointsResult.isErr()) {
       // eslint-disable-next-line no-throw-error/no-throw-error
       throw new Error(
-        `Failed to delete checkpoints for thread ${threadId}: ${checkpointsError.message}`,
+        `Failed to delete checkpoints for thread ${threadId}: ${checkpointsResult.error.message}`,
       )
     }
 
-    const { error: writesError } = await this.client
-      .from('checkpoint_writes')
-      .delete()
-      .eq('thread_id', threadId)
-      .eq('organization_id', this.organizationId)
+    const writesResult = await retryWithExponentialBackoff(async () => {
+      const result = await this.client
+        .from('checkpoint_writes')
+        .delete()
+        .eq('thread_id', threadId)
+        .eq('organization_id', this.organizationId)
 
-    if (writesError) {
+      return result.error ? err(result.error) : ok(result)
+    })
+
+    if (writesResult.isErr()) {
       // eslint-disable-next-line no-throw-error/no-throw-error
       throw new Error(
-        `Failed to delete checkpoint writes for thread ${threadId}: ${writesError.message}`,
+        `Failed to delete checkpoint writes for thread ${threadId}: ${writesResult.error.message}`,
       )
     }
 
-    const { error: blobsError } = await this.client
-      .from('checkpoint_blobs')
-      .delete()
-      .eq('thread_id', threadId)
-      .eq('organization_id', this.organizationId)
+    const blobsResult = await retryWithExponentialBackoff(async () => {
+      const result = await this.client
+        .from('checkpoint_blobs')
+        .delete()
+        .eq('thread_id', threadId)
+        .eq('organization_id', this.organizationId)
 
-    if (blobsError) {
+      return result.error ? err(result.error) : ok(result)
+    })
+
+    if (blobsResult.isErr()) {
       // eslint-disable-next-line no-throw-error/no-throw-error
       throw new Error(
-        `Failed to delete checkpoint blobs for thread ${threadId}: ${blobsError.message}`,
+        `Failed to delete checkpoint blobs for thread ${threadId}: ${blobsResult.error.message}`,
       )
     }
   }

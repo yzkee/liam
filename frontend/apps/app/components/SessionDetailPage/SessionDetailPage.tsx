@@ -1,5 +1,9 @@
 import type { BaseMessage, StoredMessage } from '@langchain/core/messages'
-import { createSupabaseRepositories, getMessages } from '@liam-hq/agent'
+import {
+  createSupabaseRepositories,
+  getCheckpointErrors,
+  getMessages,
+} from '@liam-hq/agent'
 import type { Schema } from '@liam-hq/schema'
 import { schemaSchema } from '@liam-hq/schema'
 import { err, ok, type Result } from 'neverthrow'
@@ -34,6 +38,7 @@ async function loadSessionData(designSessionId: string): Promise<
       messages: StoredMessage[]
       buildingSchema: NonNullable<Awaited<ReturnType<typeof getBuildingSchema>>>
       initialSchema: Schema
+      checkpointError: string | null
     },
     Error
   >
@@ -56,6 +61,24 @@ async function loadSessionData(designSessionId: string): Promise<
   const baseMessages = await getMessages(config)
   const messages = serializeMessages(baseMessages)
 
+  // Fetch checkpoint errors from LangGraph memory
+  let checkpointError: string | null = null
+  try {
+    const checkpointErrors = await getCheckpointErrors(config)
+    if (checkpointErrors.length > 0) {
+      const latestError = checkpointErrors[0]
+      if (latestError) {
+        checkpointError =
+          checkpointErrors.length === 1
+            ? latestError.errorMessage
+            : `${latestError.errorMessage} (${checkpointErrors.length} total errors found in history)`
+      }
+    }
+  } catch (error) {
+    console.error('Failed to fetch checkpoint errors:', error)
+    // Don't fail the entire page load if checkpoint errors can't be fetched
+  }
+
   const buildingSchema = await getBuildingSchema(designSessionId)
   if (!buildingSchema) {
     return err(new Error('Building schema not found for design session'))
@@ -73,6 +96,7 @@ async function loadSessionData(designSessionId: string): Promise<
     messages,
     buildingSchema,
     initialSchema,
+    checkpointError,
   })
 }
 
@@ -91,6 +115,7 @@ export const SessionDetailPage: FC<Props> = async ({
     messages,
     buildingSchema,
     initialSchema,
+    checkpointError,
   } = result.value
 
   const versions = await getVersions(buildingSchema.id)
@@ -120,6 +145,7 @@ export const SessionDetailPage: FC<Props> = async ({
         initialWorkflowRunStatus={initialWorkflowRunStatus}
         isDeepModelingEnabled={isDeepModelingEnabled}
         initialIsPublic={initialIsPublic}
+        initialCheckpointError={checkpointError}
       />
     </ViewModeProvider>
   )

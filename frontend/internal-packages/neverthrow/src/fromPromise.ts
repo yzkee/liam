@@ -1,7 +1,5 @@
 import { ResultAsync } from 'neverthrow'
-
-const defaultErrorFn = (error: unknown): Error =>
-  error instanceof Error ? error : new Error(String(error))
+import { defaultErrorFn } from './defaultErrorFn'
 
 export function fromPromise<T>(promise: Promise<T>): ResultAsync<T, Error>
 export function fromPromise<T, E extends Error>(

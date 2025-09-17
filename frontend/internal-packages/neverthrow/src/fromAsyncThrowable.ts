@@ -1,7 +1,5 @@
 import { ResultAsync } from 'neverthrow'
-
-const defaultErrorFn = (error: unknown): Error =>
-  error instanceof Error ? error : new Error(String(error))
+import { defaultErrorFn } from './defaultErrorFn'
 
 export function fromAsyncThrowable<A extends readonly unknown[], T>(
   fn: (...args: A) => Promise<T>,

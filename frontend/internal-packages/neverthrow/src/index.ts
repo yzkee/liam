@@ -1,7 +1,5 @@
 import { Result } from 'neverthrow'
-
-const defaultErrorFn = (error: unknown): Error =>
-  error instanceof Error ? error : new Error(String(error))
+import { defaultErrorFn } from './defaultErrorFn'
 
 export function fromThrowable<A extends readonly unknown[], T>(
   fn: (...args: A) => T,

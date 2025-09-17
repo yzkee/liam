@@ -10,8 +10,8 @@ import {
   WRITES_IDX_MAP,
 } from '@langchain/langgraph-checkpoint'
 import type { Database, Json, SupabaseClientType } from '@liam-hq/db'
+import { retryWithExponentialBackoff } from '@liam-hq/db'
 import { err, ok } from 'neverthrow'
-import { retryWithExponentialBackoff } from '../utils/retry'
 import {
   base64ToUint8Array,
   hexToUint8Array,

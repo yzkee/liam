@@ -743,26 +743,4 @@ export class SupabaseSchemaRepository implements SchemaRepository {
       userName: data.name,
     }
   }
-
-  /**
-   * Get error data from checkpoint_writes table for a specific thread
-   */
-  async getCheckpointErrorData(threadId: string): Promise<{
-    data: Array<{
-      checkpoint_id: string
-      thread_id: string
-      channel: string
-      blob: string
-      created_at: string | null
-    }> | null
-    error: unknown
-  }> {
-    return await this.client
-      .from('checkpoint_writes')
-      .select('checkpoint_id, thread_id, channel, blob, created_at')
-      .eq('thread_id', threadId)
-      .eq('channel', '__error__')
-      .order('created_at', { ascending: false })
-      .limit(1)
-  }
 }

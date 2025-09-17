@@ -514,21 +514,4 @@ export class InMemoryRepository implements SchemaRepository {
       userName: `Test User ${userId}`,
     }
   }
-
-  async getCheckpointErrorData(_threadId: string): Promise<{
-    data: Array<{
-      checkpoint_id: string
-      thread_id: string
-      channel: string
-      blob: string
-      created_at: string | null
-    }> | null
-    error: unknown
-  }> {
-    // Mock implementation - return empty data for tests
-    return {
-      data: [],
-      error: null,
-    }
-  }
 }

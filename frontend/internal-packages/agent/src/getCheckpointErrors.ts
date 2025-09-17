@@ -1,40 +1,19 @@
 import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
 
-type ErrorInfo = {
-  message: string
-  nodeSource: string
-}
-
 /**
- * Extract error information from error channel data
+ * Type guard to check if data has message property
  */
-function extractErrorInfo(errorChannelData: unknown): ErrorInfo {
-  let errorMessage = 'Unknown error'
-  let nodeSource = 'unknown'
-
-  if (typeof errorChannelData === 'string') {
-    errorMessage = errorChannelData
-  } else if (
-    typeof errorChannelData === 'object' &&
-    errorChannelData !== null
-  ) {
-    if ('message' in errorChannelData) {
-      errorMessage = String(errorChannelData.message)
-    }
-    if ('node' in errorChannelData) {
-      nodeSource = String(errorChannelData.node)
-    }
-    if (
-      'error' in errorChannelData &&
-      typeof errorChannelData.error === 'object' &&
-      errorChannelData.error !== null &&
-      'message' in errorChannelData.error
-    ) {
-      errorMessage = String(errorChannelData.error.message)
-    }
+function hasMessage(data: unknown): data is { message: string } {
+  if (typeof data !== 'object' || data === null) {
+    return false
   }
 
-  return { message: errorMessage, nodeSource }
+  if (!('message' in data)) {
+    return false
+  }
+
+  // TypeScript knows data has 'message' property after the check above
+  return typeof data.message === 'string'
 }
 
 /**
@@ -63,9 +42,8 @@ export async function getCheckpointErrors(
   // Check pendingWrites for __error__ channel
   if (checkpointTuple.pendingWrites) {
     for (const [, channel, value] of checkpointTuple.pendingWrites) {
-      if (channel === '__error__') {
-        const errorInfo = extractErrorInfo(value)
-        errorMessages.push(errorInfo.message)
+      if (channel === '__error__' && hasMessage(value)) {
+        errorMessages.push(value.message)
       }
     }
   }

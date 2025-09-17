@@ -218,20 +218,6 @@ export type SchemaRepository = {
   getUserInfo(userId: string): Promise<UserInfo | null>
 
   /**
-   * Get error data from checkpoint_writes table for a specific thread
-   */
-  getCheckpointErrorData(threadId: string): Promise<{
-    data: Array<{
-      checkpoint_id: string
-      thread_id: string
-      channel: string
-      blob: string
-      created_at: string | null
-    }> | null
-    error: unknown
-  }>
-
-  /**
    * The checkpoint saver instance
    */
   checkpointer: BaseCheckpointSaver

@@ -74,12 +74,20 @@ Use conditional edges to route execution based on state values with `addConditio
 
 ### Recursion Limit Configuration
 
-Configure recursion limits to prevent infinite loops using supersteps:
+Configure recursion limits to prevent infinite loops by passing `recursionLimit` in the config when invoking the graph:
 
 ```typescript
-const app = workflow.compile({
-  recursionLimit: 100
-});
+import { GraphRecursionError } from "@langchain/langgraph";
+
+try {
+  await graph.invoke(inputs, { recursionLimit: 4 });
+} catch (error) {
+  if (error instanceof GraphRecursionError) {
+    console.log("Recursion Error");
+  } else {
+    throw error;
+  }
+}
 ```
 
 

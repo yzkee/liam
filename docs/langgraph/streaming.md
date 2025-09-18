@@ -11,32 +11,86 @@ LangGraph supports multiple streaming modes. The main ones are:
 This streaming mode streams back values of the graph. This is the full state of the graph after each node is called.
 
 ```typescript
-import { StateGraph, Annotation } from "@langchain/langgraph";
-import { ChatAnthropic } from "@langchain/anthropic";
+import { Annotation } from "@langchain/langgraph";
+import { BaseMessage } from "@langchain/core/messages";
 
-// Define the state
 const StateAnnotation = Annotation.Root({
   messages: Annotation<BaseMessage[]>({
     reducer: (x, y) => x.concat(y),
   }),
 });
+```
 
-// Create the graph
-const workflow = new StateGraph(StateAnnotation)
+This guide covers `streamMode="values"`.
+
+```typescript
+// process.env.OPENAI_API_KEY = "sk-...";
+```
+
+```typescript
+import { StateGraph, MessagesAnnotation } from "@langchain/langgraph";
+import { ChatOpenAI } from "@langchain/openai";
+import { ToolNode } from "@langchain/langgraph/prebuilt";
+import { z } from "zod";
+import { tool } from "@langchain/core/tools";
+import { AIMessage, HumanMessage } from "@langchain/core/messages";
+
+const getWeather = tool(
+  async ({ city }) => {
+    if (city === "nyc") {
+      return "It might be cloudy in nyc";
+    } else if (city === "sf") {
+      return "It's always sunny in sf";
+    } else {
+      throw new Error("Unknown city.");
+    }
+  },
+  {
+    name: "get_weather",
+    description: "Use this to get weather information",
+    schema: z.object({
+      city: z.enum(["nyc", "sf"]),
+    }),
+  }
+);
+
+const tools = [getWeather];
+const toolNode = new ToolNode(tools);
+
+const model = new ChatOpenAI({ model: "gpt-4o" }).bindTools(tools);
+
+const shouldContinue = (state: typeof MessagesAnnotation.State) => {
+  const messages = state.messages;
+  const lastMessage = messages[messages.length - 1] as AIMessage;
+
+  if (lastMessage.tool_calls?.length) {
+    return "tools";
+  }
+  return "__end__";
+};
+
+const callModel = async (state: typeof MessagesAnnotation.State) => {
+  const messages = state.messages;
+  const response = await model.invoke(messages);
+  return { messages: [response] };
+};
+
+const workflow = new StateGraph(MessagesAnnotation)
   .addNode("agent", callModel)
-  .addNode("action", callTool)
-  .addEdge(START, "agent")
+  .addNode("tools", toolNode)
+  .addEdge("__start__", "agent")
   .addConditionalEdges("agent", shouldContinue)
-  .addEdge("action", "agent");
+  .addEdge("tools", "agent");
 
 const app = workflow.compile();
+```
 
-// Stream values - get full state after each node
-for await (const chunk of await app.stream(
-  { messages: [new HumanMessage("what is the weather in sf")] },
-  { streamMode: "values" }
-)) {
-  console.log("Full state:", chunk);
+```typescript
+const inputs = { messages: [new HumanMessage("what is the weather in sf")] };
+for await (const output of await app.stream(inputs, {
+  streamMode: "values",
+})) {
+  console.log("Full state:", output);
 }
 ```
 
@@ -45,12 +99,11 @@ for await (const chunk of await app.stream(
 This streaming mode streams back updates to the graph. This is the update to the state of the graph after each node is called.
 
 ```typescript
-// Stream updates - get only the changes from each node
-for await (const chunk of await app.stream(
-  { messages: [new HumanMessage("what is the weather in sf")] },
-  { streamMode: "updates" }
-)) {
-  console.log("Node updates:", chunk);
+const inputs = { messages: [new HumanMessage("what is the weather in sf")] };
+for await (const output of await app.stream(inputs, {
+  streamMode: "updates",
+})) {
+  console.log("Node updates:", output);
 }
 ```
 
@@ -59,12 +112,11 @@ for await (const chunk of await app.stream(
 LangGraph supports configuring multiple streaming modes at the same time.
 
 ```typescript
-// Combine multiple stream modes
-for await (const chunk of await app.stream(
-  { messages: [new HumanMessage("what is the weather in sf")] },
-  { streamMode: ["values", "updates"] }
-)) {
-  console.log("Combined stream:", chunk);
+const inputs = { messages: [new HumanMessage("what is the weather in sf")] };
+for await (const output of await app.stream(inputs, {
+  streamMode: ["values", "updates"],
+})) {
+  console.log("Combined stream:", output);
 }
 ```
 
@@ -75,58 +127,126 @@ for await (const chunk of await app.stream(
 In this example, we will stream tokens from the language model powering an agent. We will use a ReAct agent as an example.
 
 ```typescript
-import { ChatAnthropic } from "@langchain/anthropic";
-import { StateGraph, Annotation, START } from "@langchain/langgraph";
+import { StateGraph, MessagesAnnotation } from "@langchain/langgraph";
+import { ChatOpenAI } from "@langchain/openai";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
+import { z } from "zod";
+import { tool } from "@langchain/core/tools";
+import { AIMessage, HumanMessage } from "@langchain/core/messages";
 
-const StateAnnotation = Annotation.Root({
-  messages: Annotation<BaseMessage[]>({
-    reducer: (x, y) => x.concat(y),
-  }),
-});
+const getWeather = tool(
+  async ({ city }) => {
+    if (city === "nyc") {
+      return "It might be cloudy in nyc";
+    } else if (city === "sf") {
+      return "It's always sunny in sf";
+    } else {
+      throw new Error("Unknown city.");
+    }
+  },
+  {
+    name: "get_weather",
+    description: "Use this to get weather information",
+    schema: z.object({
+      city: z.enum(["nyc", "sf"]),
+    }),
+  }
+);
 
-const model = new ChatAnthropic({
-  model: "claude-3-5-sonnet-20240620",
-  temperature: 0,
-}).bindTools(tools);
+const tools = [getWeather];
+const toolNode = new ToolNode(tools);
 
-const callModel = async (state: typeof StateAnnotation.State) => {
-  const response = await model.invoke(state.messages);
+const model = new ChatOpenAI({ model: "gpt-4o-mini" }).bindTools(tools);
+
+const shouldContinue = (state: typeof MessagesAnnotation.State) => {
+  const messages = state.messages;
+  const lastMessage = messages[messages.length - 1] as AIMessage;
+
+  if (lastMessage.tool_calls?.length) {
+    return "tools";
+  }
+  return "__end__";
+};
+
+const callModel = async (state: typeof MessagesAnnotation.State) => {
+  const messages = state.messages;
+  const response = await model.invoke(messages);
   return { messages: [response] };
 };
 
-const workflow = new StateGraph(StateAnnotation)
+const workflow = new StateGraph(MessagesAnnotation)
   .addNode("agent", callModel)
-  .addNode("tools", new ToolNode(tools))
-  .addEdge(START, "agent")
+  .addNode("tools", toolNode)
+  .addEdge("__start__", "agent")
   .addConditionalEdges("agent", shouldContinue)
   .addEdge("tools", "agent");
 
 const app = workflow.compile();
+```
 
-// Stream tokens using streamEvents
-for await (const chunk of app.streamEvents(
-  { messages: [new HumanMessage("what is the weather in sf")] },
-  { version: "v2" }
-)) {
-  if (chunk.event === "on_chat_model_stream") {
-    console.log(chunk.data.chunk.content);
+```typescript
+const inputs = { messages: [new HumanMessage("what is the weather in sf")] };
+const eventStream = await app.streamEvents(inputs, { version: "v2" });
+
+for await (const { event, data } of eventStream) {
+  if (event === "on_chat_model_stream") {
+    console.log(data.chunk.content);
   }
 }
 ```
 
 ### How to stream LLM tokens (without LangChain models)
 
-This how-to guide closely follows the others in this directory, showing how to incorporate the functionality into a prototypical agent in LangGraph.
+In this guide, we will stream tokens from the language model powering an agent without using LangChain chat models. We'll be using the OpenAI client library directly in a ReAct agent as an example.
 
 ```typescript
 import OpenAI from "openai";
-import { StateGraph, Annotation, START } from "@langchain/langgraph";
+import { StateGraph, MessagesAnnotation } from "@langchain/langgraph";
+import { ToolNode } from "@langchain/langgraph/prebuilt";
+import { z } from "zod";
+import { tool } from "@langchain/core/tools";
+import { AIMessage, HumanMessage } from "@langchain/core/messages";
 import { dispatchCustomEvent } from "@langchain/core/callbacks/dispatch";
+import type { RunnableConfig } from "@langchain/core/runnables";
 
 const openaiClient = new OpenAI();
 
-const callModel = async (state: typeof StateAnnotation.State, config: RunnableConfig) => {
+const getWeather = tool(
+  async ({ city }) => {
+    if (city === "nyc") {
+      return "It might be cloudy in nyc";
+    } else if (city === "sf") {
+      return "It's always sunny in sf";
+    } else {
+      throw new Error("Unknown city.");
+    }
+  },
+  {
+    name: "get_weather",
+    description: "Use this to get weather information",
+    schema: z.object({
+      city: z.enum(["nyc", "sf"]),
+    }),
+  }
+);
+
+const tools = [getWeather];
+const toolNode = new ToolNode(tools);
+
+const shouldContinue = (state: typeof MessagesAnnotation.State) => {
+  const messages = state.messages;
+  const lastMessage = messages[messages.length - 1] as AIMessage;
+
+  if (lastMessage.tool_calls?.length) {
+    return "tools";
+  }
+  return "__end__";
+};
+
+const callModel = async (
+  state: typeof MessagesAnnotation.State,
+  config: RunnableConfig
+) => {
   const messages = state.messages.map((m) => ({
     role: m.getType() === "human" ? "user" : "assistant",
     content: m.content as string,
@@ -136,27 +256,79 @@ const callModel = async (state: typeof StateAnnotation.State, config: RunnableCo
     model: "gpt-4o-mini",
     messages,
     stream: true,
+    tools: [
+      {
+        type: "function",
+        function: {
+          name: "get_weather",
+          description: "Use this to get weather information",
+          parameters: {
+            type: "object",
+            properties: {
+              city: {
+                type: "string",
+                enum: ["nyc", "sf"],
+              },
+            },
+            required: ["city"],
+          },
+        },
+      },
+    ],
   });
 
   let content = "";
+  let toolCalls: any[] = [];
   for await (const chunk of stream) {
-    const delta = chunk.choices[0]?.delta?.content || "";
-    content += delta;
-    
-    // Dispatch custom streaming event
-    await dispatchCustomEvent("custom_event", { content: delta }, config);
+    const delta = chunk.choices[0]?.delta;
+    if (delta?.content) {
+      content += delta.content;
+      await dispatchCustomEvent("custom_event", { content: delta.content }, config);
+    }
+    if (delta?.tool_calls) {
+      for (const toolCall of delta.tool_calls) {
+        if (!toolCalls[toolCall.index]) {
+          toolCalls[toolCall.index] = {
+            id: toolCall.id,
+            type: "function",
+            function: { name: "", arguments: "" },
+          };
+        }
+        if (toolCall.function?.name) {
+          toolCalls[toolCall.index].function.name += toolCall.function.name;
+        }
+        if (toolCall.function?.arguments) {
+          toolCalls[toolCall.index].function.arguments += toolCall.function.arguments;
+        }
+      }
+    }
   }
 
-  return { messages: [new AIMessage(content)] };
+  const response = new AIMessage({
+    content,
+    tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
+  });
+
+  return { messages: [response] };
 };
 
-// Stream custom events
-for await (const chunk of app.streamEvents(
-  { messages: [new HumanMessage("tell me a joke")] },
-  { version: "v2" }
-)) {
-  if (chunk.event === "on_custom_event") {
-    console.log(chunk.data.content);
+const workflow = new StateGraph(MessagesAnnotation)
+  .addNode("agent", callModel)
+  .addNode("tools", toolNode)
+  .addEdge("__start__", "agent")
+  .addConditionalEdges("agent", shouldContinue)
+  .addEdge("tools", "agent");
+
+const app = workflow.compile();
+```
+
+```typescript
+const inputs = { messages: [new HumanMessage("what is the weather in sf")] };
+const eventStream = await app.streamEvents(inputs, { version: "v2" });
+
+for await (const { event, data } of eventStream) {
+  if (event === "on_custom_event") {
+    console.log(data.content);
   }
 }
 ```
@@ -165,63 +337,108 @@ for await (const chunk of app.streamEvents(
 
 ### How to stream custom data
 
-You can stream custom data from your nodes in addition to the standard graph state.
+The most common use case for streaming from inside a node is to stream LLM tokens, but you may also want to stream custom data.
+
+For example, if you have a long-running tool call, you can dispatch custom events between the steps and use these custom events to monitor progress. You could also surface these custom events to an end user of your application to show them how the current task is progressing.
+
+You can do so in two ways:
+
+- using your graph's `.stream` method with `streamMode: "custom"`
+- emitting custom events using `dispatchCustomEvent` with `streamEvents`.
+
+Below we'll see how to use both APIs.
 
 ```typescript
+import { StateGraph, MessagesAnnotation } from "@langchain/langgraph";
 import { dispatchCustomEvent } from "@langchain/core/callbacks/dispatch";
+import type { RunnableConfig } from "@langchain/core/runnables";
+import { HumanMessage } from "@langchain/core/messages";
 
-// Method 1: Using streamMode: "custom"
-const customNode = async (state: typeof StateAnnotation.State, config: RunnableConfig) => {
-  // Stream custom data using config.writer
-  config.writer?.({
-    type: "progress",
-    step: "processing",
-    progress: 0.5,
-  });
-
-  // Perform work
-  const result = await processData(state);
-  
-  config.writer?.({
-    type: "complete",
-    result: result.summary,
-  });
-  
-  return result;
+const myNode = async (
+  state: typeof MessagesAnnotation.State,
+  config: RunnableConfig
+) => {
+  console.log("--- Node 1 ---");
+  return { messages: state.messages };
 };
 
-// Stream custom content
-for await (const chunk of await app.stream(
-  { messages: [new HumanMessage("process this")] },
-  { streamMode: "custom" }
-)) {
-  console.log("Custom data:", chunk);
+const myOtherNode = async (
+  state: typeof MessagesAnnotation.State,
+  config: RunnableConfig
+) => {
+  console.log("--- Node 2 ---");
+  
+  // Use the config.writer to write custom data to the stream
+  config.writer?.({
+    myCustomData: "some_value",
+    moreCustomData: "some_other_value",
+  });
+  
+  return { messages: state.messages };
+};
+
+const graph = new StateGraph(MessagesAnnotation)
+  .addNode("myNode", myNode)
+  .addNode("myOtherNode", myOtherNode)
+  .addEdge("__start__", "myNode")
+  .addEdge("myNode", "myOtherNode")
+  .addEdge("myOtherNode", "__end__")
+  .compile();
+```
+
+```typescript
+const inputs = { messages: [new HumanMessage("hello world")] };
+
+for await (const chunk of await graph.stream(inputs, {
+  streamMode: "custom",
+})) {
+  console.log(chunk);
 }
+```
 
-// Method 2: Using dispatchCustomEvent with streamEvents
-const eventNode = async (state: typeof StateAnnotation.State, config: RunnableConfig) => {
-  await dispatchCustomEvent("progress_update", {
-    step: "processing",
-    progress: 0.5,
+```typescript
+const myNodeWithEvents = async (
+  state: typeof MessagesAnnotation.State,
+  config: RunnableConfig
+) => {
+  console.log("--- Node 1 ---");
+  
+  await dispatchCustomEvent("my_custom_event", {
+    message: "hello from node 1",
   }, config);
   
-  const result = await processData(state);
-  
-  await dispatchCustomEvent("step_complete", {
-    step: "processing",
-    result: result.summary,
-  }, config);
-  
-  return result;
+  return { messages: state.messages };
 };
 
-// Stream custom events
-for await (const chunk of app.streamEvents(
-  { messages: [new HumanMessage("process this")] },
-  { version: "v2" }
-)) {
-  if (chunk.event === "on_custom_event") {
-    console.log("Custom event:", chunk.data);
+const myOtherNodeWithEvents = async (
+  state: typeof MessagesAnnotation.State,
+  config: RunnableConfig
+) => {
+  console.log("--- Node 2 ---");
+  
+  await dispatchCustomEvent("my_custom_event", {
+    message: "hello from node 2",
+  }, config);
+  
+  return { messages: state.messages };
+};
+
+const graphWithEvents = new StateGraph(MessagesAnnotation)
+  .addNode("myNode", myNodeWithEvents)
+  .addNode("myOtherNode", myOtherNodeWithEvents)
+  .addEdge("__start__", "myNode")
+  .addEdge("myNode", "myOtherNode")
+  .addEdge("myOtherNode", "__end__")
+  .compile();
+```
+
+```typescript
+const inputs = { messages: [new HumanMessage("hello world")] };
+const eventStream = await graphWithEvents.streamEvents(inputs, { version: "v2" });
+
+for await (const { event, data } of eventStream) {
+  if (event === "on_custom_event") {
+    console.log(data);
   }
 }
 ```
@@ -230,12 +447,14 @@ for await (const chunk of app.streamEvents(
 
 ### How to stream events from within a tool
 
-You can stream events from within a tool to provide real-time updates during tool execution.
+If your LangGraph graph needs to use tools that call LLMs (or any other LangChain Runnable objects - other graphs, LCEL chains, retrievers, etc.), you might want to stream events from the underlying Runnable. This guide shows how you can do that.
 
 ```typescript
+import { z } from "zod";
 import { tool } from "@langchain/core/tools";
 import { ChatAnthropic } from "@langchain/anthropic";
-import { z } from "zod";
+import { ChatPromptTemplate } from "@langchain/core/prompts";
+import { createReactAgent } from "@langchain/langgraph/prebuilt";
 
 const getItems = tool(
   async (input, config) => {
@@ -250,7 +469,6 @@ const getItems = tool(
 
     const chain = template.pipe(model);
     
-    // Add custom tags for filtering
     const response = await chain.invoke(
       { input: input.input },
       { ...config, tags: ["my_tool"] }
@@ -267,55 +485,129 @@ const getItems = tool(
   }
 );
 
-// Stream events from tools with tag filtering
-for await (const chunk of app.streamEvents(
-  { messages: [new HumanMessage("get some items")] },
-  { 
-    version: "v2",
-    includeTags: ["my_tool"]
-  }
-)) {
-  if (chunk.event === "on_chat_model_stream") {
-    console.log("Tool streaming:", chunk.data.chunk.content);
+const tools = [getItems];
+
+const model = new ChatAnthropic({
+  model: "claude-3-5-sonnet-20240620",
+  temperature: 0,
+});
+
+const graph = createReactAgent({ llm: model, tools });
+```
+
+```typescript
+import { HumanMessage } from "@langchain/core/messages";
+
+const inputs = { messages: [new HumanMessage("get some items")] };
+const eventStream = await graph.streamEvents(inputs, { 
+  version: "v2",
+  includeTags: ["my_tool"]
+});
+
+for await (const { event, data } of eventStream) {
+  if (event === "on_chat_model_stream") {
+    console.log(data.chunk.content);
   }
 }
 ```
 
 ### How to stream from the final node
 
-You can stream data specifically from the final node in your graph execution.
+One common pattern for graphs is to stream LLM tokens from inside the final node only. This guide demonstrates how you can do this.
 
 ```typescript
-const finalNode = async (state: typeof StateAnnotation.State, config: RunnableConfig) => {
-  // Process final results
-  const finalResult = await processFinalResults(state);
+import { z } from "zod";
+import { tool } from "@langchain/core/tools";
+import { ChatAnthropic } from "@langchain/anthropic";
+
+const getWeather = tool(async ({ city }) => {
+  if (city === "nyc") {
+    return "It might be cloudy in nyc";
+  } else if (city === "sf") {
+    return "It's always sunny in sf";
+  } else {
+    throw new Error("Unknown city.");
+  }
+}, {
+  name: "get_weather",
+  schema: z.object({
+    city: z.enum(["nyc", "sf"]),
+  }),
+  description: "Use this to get weather information",
+});
+
+const tools = [getWeather];
+
+const model = new ChatAnthropic({
+  model: "claude-3-5-sonnet-20240620",
+}).bindTools(tools);
+
+const finalModel = new ChatAnthropic({
+  model: "claude-3-5-sonnet-20240620",
+}).withConfig({
+  tags: ["final_node"],
+});
+```
+
+```typescript
+import { StateGraph, MessagesAnnotation } from "@langchain/langgraph";
+import { ToolNode } from "@langchain/langgraph/prebuilt";
+import { AIMessage, HumanMessage, SystemMessage } from "@langchain/core/messages";
+
+const shouldContinue = async (state: typeof MessagesAnnotation.State) => {
+  const messages = state.messages;
+  const lastMessage: AIMessage = messages[messages.length - 1];
   
-  // Stream final node events
-  await dispatchCustomEvent("final_result", {
-    result: finalResult,
-    timestamp: new Date().toISOString(),
-  }, config);
-  
-  return { messages: [new AIMessage(finalResult)] };
+  if (lastMessage.tool_calls?.length) {
+    return "tools";
+  }
+  return "final";
 };
 
-// Add final node to workflow
-const workflow = new StateGraph(StateAnnotation)
-  .addNode("agent", callModel)
-  .addNode("tools", new ToolNode(tools))
-  .addNode("final", finalNode)
-  .addEdge(START, "agent")
-  .addConditionalEdges("agent", shouldContinue)
-  .addEdge("tools", "agent")
-  .addEdge("agent", "final");
+const callModel = async (state: typeof MessagesAnnotation.State) => {
+  const messages = state.messages;
+  const response = await model.invoke(messages);
+  return { messages: [response] };
+};
 
-// Stream events from final node
-for await (const chunk of app.streamEvents(
-  { messages: [new HumanMessage("complete the task")] },
-  { version: "v2" }
-)) {
-  if (chunk.event === "on_custom_event" && chunk.name === "final_result") {
-    console.log("Final result:", chunk.data);
+const callFinalModel = async (state: typeof MessagesAnnotation.State) => {
+  const messages = state.messages;
+  const lastAIMessage = messages[messages.length - 1];
+  
+  const response = await finalModel.invoke([
+    new SystemMessage("Rewrite this in the voice of Al Roker"),
+    new HumanMessage({ content: lastAIMessage.content })
+  ]);
+  
+  response.id = lastAIMessage.id;
+  return { messages: [response] };
+};
+
+const toolNode = new ToolNode<typeof MessagesAnnotation.State>(tools);
+
+const graph = new StateGraph(MessagesAnnotation)
+  .addNode("agent", callModel)
+  .addNode("tools", toolNode)
+  .addNode("final", callFinalModel)
+  .addEdge("__start__", "agent")
+  .addConditionalEdges("agent", shouldContinue, {
+    tools: "tools",
+    final: "final",
+  })
+  .addEdge("tools", "agent")
+  .addEdge("final", "__end__")
+  .compile();
+```
+
+```typescript
+const inputs = { messages: [new HumanMessage("What's the weather in nyc?")] };
+const eventStream = await graph.streamEvents(inputs, { version: "v2" });
+
+for await (const { event, tags, data } of eventStream) {
+  if (event === "on_chat_model_stream" && tags.includes("final_node")) {
+    if (data.chunk.content) {
+      console.log(data.chunk.content, "|");
+    }
   }
 }
 ```

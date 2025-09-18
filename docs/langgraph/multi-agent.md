@@ -2,6 +2,18 @@
 
 Multi-agent systems in LangGraph allow you to create complex workflows where multiple specialized agents collaborate to solve problems. This guide covers the patterns and techniques for implementing multi-agent architectures based on the official documentation.
 
+## Related Links
+
+For more detailed information, refer to the official LangGraph.js documentation:
+
+### Multi-agent Systems
+- [How to build a multi-agent network (functional API)](https://langchain-ai.github.io/langgraphjs/how-tos/multi-agent-network-functional/)
+- [How to add multi-turn conversation in a multi-agent application (functional API)](https://langchain-ai.github.io/langgraphjs/how-tos/multi-agent-multi-turn-convo-functional/)
+
+### Related Features
+- [How to manage conversation history](https://langchain-ai.github.io/langgraphjs/how-tos/manage-conversation-history/)
+- [How to add and use subgraphs](https://langchain-ai.github.io/langgraphjs/how-tos/subgraph/)
+
 ## Agent Communication Patterns & Supervisory Patterns & Multi-turn Conversations
 
 ### How to build a multi-agent network (functional API)

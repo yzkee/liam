@@ -2,6 +2,24 @@
 
 LangGraph provides comprehensive tool calling capabilities that allow agents to interact with external systems and APIs. This guide covers the different approaches to implementing tool calling in LangGraph.js based on the official documentation.
 
+## Related Links
+
+For more detailed information, refer to the official LangGraph.js documentation:
+
+### ToolNode Usage
+- [How to call tools using ToolNode](https://langchain-ai.github.io/langgraphjs/how-tos/tool-calling/)
+
+### Tool Calling Patterns
+- [How to force an agent to call a tool](https://langchain-ai.github.io/langgraphjs/how-tos/force-calling-a-tool-first/)
+- [How to handle tool calling errors](https://langchain-ai.github.io/langgraphjs/how-tos/tool-calling-errors/)
+- [How to pass runtime values to tools](https://langchain-ai.github.io/langgraphjs/how-tos/pass-run-time-values-to-tools/)
+
+### State Updates from Tools
+- [How to update graph state from tools](https://langchain-ai.github.io/langgraphjs/how-tos/update-state-from-tools/)
+
+### Additional Tool-related Features
+- [How to stream events from within a tool](https://langchain-ai.github.io/langgraphjs/how-tos/streaming-events-from-within-tools/)
+
 ## ToolNode Usage
 
 ### How to call tools using ToolNode

@@ -260,3 +260,22 @@ await subgraph.updateState(
   { subgraphData: "updated" }
 );
 ```
+
+## References
+
+For more detailed information and advanced usage patterns, refer to the official LangGraphJS documentation:
+
+### State Schema Design
+- [How to define graph state](https://langchain-ai.github.io/langgraphjs/how-tos/define-state/) - Complete guide to state definition with Annotation.Root and custom reducers
+- [Have a separate input and output schema](https://langchain-ai.github.io/langgraphjs/how-tos/input_output_schema/) - Separating input/output schemas for better type safety
+- [Pass private state between nodes inside the graph](https://langchain-ai.github.io/langgraphjs/how-tos/pass_private_state/) - Managing private state between nodes
+
+### State Updates and Merging
+- [How to update graph state from tools](https://langchain-ai.github.io/langgraphjs/how-tos/update-state-from-tools/) - Using Command objects to update state from tool calls
+
+### State Persistence Patterns
+- [How to add thread-level persistence to your graph](https://langchain-ai.github.io/langgraphjs/how-tos/persistence/) - Basic persistence with checkpointers like MemorySaver
+- [How to add cross-thread persistence](https://langchain-ai.github.io/langgraphjs/how-tos/cross-thread-persistence/) - Cross-thread persistence using Store interface
+- [How to use a Postgres checkpointer for persistence](https://langchain-ai.github.io/langgraphjs/how-tos/persistence-postgres/) - Production-ready PostgreSQL persistence
+- [How to edit graph state](https://langchain-ai.github.io/langgraphjs/how-tos/edit-graph-state/) - Editing state with breakpoints and updateState
+- [How to view and update state in subgraphs](https://langchain-ai.github.io/langgraphjs/how-tos/subgraphs-manage-state/) - Managing state in nested subgraph configurations

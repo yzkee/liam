@@ -307,3 +307,22 @@ workflow.addNode("deferredNode", deferredFunction, {
   defer: true
 });
 ```
+
+## References
+
+For more detailed information and advanced usage patterns, refer to the official LangGraphJS documentation:
+
+### Branching and Parallel Execution
+- [How to create branches for parallel execution](https://langchain-ai.github.io/langgraphjs/how-tos/branching/) - Complete guide to fan-out/fan-in patterns and conditional branching
+
+### Map-Reduce Pattern
+- [How to create map-reduce branches for parallel execution](https://langchain-ai.github.io/langgraphjs/how-tos/map-reduce/) - Implementing map-reduce workflows with the Send API
+
+### Recursion and Loop Control
+- [How to create and control loops with recursion limits](https://langchain-ai.github.io/langgraphjs/how-tos/recursion-limit/) - Managing recursion limits and preventing infinite loops
+
+### Command Pattern for Control Flow
+- [How to combine control flow and state updates with Command](https://langchain-ai.github.io/langgraphjs/how-tos/command/) - Using Command objects for advanced flow control
+
+### Additional Control Flow
+- [How to defer node execution](https://langchain-ai.github.io/langgraphjs/how-tos/defer-node-execution/) - Deferring execution until other pending tasks complete

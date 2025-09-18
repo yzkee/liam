@@ -177,3 +177,20 @@ workflow.addNode("deferredNode", deferredFunction, {
   defer: true,
 });
 ```
+
+## References
+
+For more detailed information and advanced usage patterns, refer to the official LangGraphJS documentation:
+
+### Graph State Definition
+- [How to define graph state](https://langchain-ai.github.io/langgraphjs/how-tos/define-state/) - Complete guide to state definition with Annotation.Root
+- [Have a separate input and output schema](https://langchain-ai.github.io/langgraphjs/how-tos/input_output_schema/) - Separating input/output schemas for better type safety
+- [Pass private state between nodes inside the graph](https://langchain-ai.github.io/langgraphjs/how-tos/pass_private_state/) - Managing private state that doesn't persist in main graph state
+
+### Basic Graph Construction
+- [How to define graph state](https://langchain-ai.github.io/langgraphjs/how-tos/define-state/) - StateGraph initialization and basic construction patterns
+
+### Node Implementation Patterns
+- [How to add node retries](https://langchain-ai.github.io/langgraphjs/how-tos/node-retry-policies/) - Configuring retry policies for resilient node execution
+- [How to cache expensive nodes](https://langchain-ai.github.io/langgraphjs/how-tos/node-caching/) - Implementing caching strategies with TTL configuration
+- [How to defer node execution](https://langchain-ai.github.io/langgraphjs/how-tos/defer-node-execution/) - Deferring node execution until other tasks complete

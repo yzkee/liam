@@ -2,7 +2,7 @@
 
 import clsx from 'clsx'
 import { type FC, useEffect, useState } from 'react'
-import { generateHeadingId } from '../utils'
+import { generateHeadingId } from '../utils/generateHeadingId'
 import styles from './TableOfContents.module.css'
 
 type TocItem = {

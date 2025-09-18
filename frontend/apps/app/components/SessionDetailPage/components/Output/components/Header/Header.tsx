@@ -19,7 +19,6 @@ type Props = ComponentProps<typeof VersionDropdown> & {
   schema: Schema
   tabValue: OutputTabValue
   artifactDoc?: string
-  hasArtifact?: boolean
   designSessionId: string
   initialIsPublic: boolean
 }
@@ -50,7 +49,6 @@ export const Header: FC<Props> = ({
   schema,
   tabValue,
   artifactDoc,
-  hasArtifact,
   designSessionId,
   initialIsPublic,
   ...propsForVersionDropdown
@@ -88,7 +86,7 @@ export const Header: FC<Props> = ({
           <div className={styles.divider} />
           <VersionDropdown {...propsForVersionDropdown} />
         </div>
-        {hasArtifact && (
+        {!!artifactDoc && (
           <TabsTrigger
             value={ARTIFACT_TAB.value}
             className={clsx(styles.tab, styles.artifactTrigger)}

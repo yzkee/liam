@@ -16,7 +16,7 @@ import {
   SUCCESS_STATUS,
 } from './constants'
 import { TableOfContents } from './TableOfContents/TableOfContents'
-import { generateHeadingId } from './utils/generateHeadingId'
+import { generateHeadingId } from './utils'
 
 type CodeProps = {
   className?: string

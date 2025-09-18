@@ -1,4 +1,4 @@
-import { generateHeadingId } from '../../utils/generateHeadingId'
+import { generateHeadingId } from '../../utils'
 
 export type TocItem = {
   id: string

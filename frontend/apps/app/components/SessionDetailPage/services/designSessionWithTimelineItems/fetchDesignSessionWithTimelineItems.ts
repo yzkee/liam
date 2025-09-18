@@ -21,7 +21,6 @@ export const fetchDesignSessionWithTimelineItems = (
           organization_id,
           design_session_id,
           building_schema_version_id,
-          query_result_id,
           assistant_role,
           users (
             id,
@@ -32,17 +31,6 @@ export const fetchDesignSessionWithTimelineItems = (
             id,
             number,
             patch
-          ),
-          validation_queries!query_result_id (
-            id,
-            query_string,
-            validation_results (
-              id,
-              result_set,
-              status,
-              error_message,
-              executed_at
-            )
           )
         )
       `)

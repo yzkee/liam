@@ -1,6 +1,7 @@
 import { AIMessage, HumanMessage } from '@langchain/core/messages'
+import { v4 as uuidv4 } from 'uuid'
 import { describe, expect, it } from 'vitest'
-import { WorkflowTerminationError } from '../../shared/errorHandling'
+import { WorkflowTerminationError } from '../../utils/errorHandling'
 import type { PmAgentState } from '../pmAgentAnnotations'
 import { routeAfterAnalyzeRequirements } from './routeAfterAnalyzeRequirements'
 
@@ -25,8 +26,12 @@ describe('routeAfterAnalyzeRequirements', () => {
       const state = createPmAgentState({
         analyzedRequirements: {
           businessRequirement: 'Test business requirement',
-          functionalRequirements: { feature1: ['req1'] },
-          nonFunctionalRequirements: { performance: ['req2'] },
+          functionalRequirements: {
+            feature1: [{ id: uuidv4(), desc: 'req1' }],
+          },
+          nonFunctionalRequirements: {
+            performance: [{ id: uuidv4(), desc: 'req2' }],
+          },
         },
       })
 
@@ -50,8 +55,12 @@ describe('routeAfterAnalyzeRequirements', () => {
         messages: [messageWithToolCalls],
         analyzedRequirements: {
           businessRequirement: 'Test business requirement',
-          functionalRequirements: { feature1: ['req1'] },
-          nonFunctionalRequirements: { performance: ['req2'] },
+          functionalRequirements: {
+            feature1: [{ id: uuidv4(), desc: 'req1' }],
+          },
+          nonFunctionalRequirements: {
+            performance: [{ id: uuidv4(), desc: 'req2' }],
+          },
         },
       })
 

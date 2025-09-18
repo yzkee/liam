@@ -1,11 +1,16 @@
+import { resolve } from 'node:path'
+import { config } from 'dotenv'
 import { defineConfig } from 'vitest/config'
+
+config({ path: resolve(__dirname, '../../../.env') })
+config({ path: resolve(__dirname, '../../../.env.local') })
 
 export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
     include: ['**/*.integration.test.ts'],
-    testTimeout: 300000,
+    testTimeout: 1800000,
     reporters: ['dot'],
     env: {
       // Disable background callbacks for LangChain to ensure proper tracing in tests

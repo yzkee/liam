@@ -37,6 +37,7 @@ export {
   aColumn,
   aForeignKeyConstraint,
   anIndex,
+  aPrimaryKeyConstraint,
   aSchema,
   aTable,
   aUniqueConstraint,
@@ -64,4 +65,5 @@ export {
   type Relationship,
   type Relationships,
 } from './utils/constraintsToRelationships.js'
+export { isEmptySchema } from './utils/isEmptySchema.js'
 export { isPrimaryKey } from './utils/isPrimaryKey.js'

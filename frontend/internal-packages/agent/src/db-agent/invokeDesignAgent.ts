@@ -1,29 +1,36 @@
-import { dispatchCustomEvent } from '@langchain/core/callbacks/dispatch'
 import {
-  AIMessage,
-  AIMessageChunk,
+  type AIMessage,
+  type AIMessageChunk,
   type BaseMessage,
+  HumanMessage,
   SystemMessage,
 } from '@langchain/core/messages'
 import { ChatOpenAI } from '@langchain/openai'
 import { fromAsyncThrowable } from '@liam-hq/neverthrow'
-import { ResultAsync } from 'neverthrow'
-import { v4 as uuidv4 } from 'uuid'
+import { okAsync, ResultAsync } from 'neverthrow'
 import * as v from 'valibot'
-import { SSE_EVENTS } from '../client'
-import { reasoningSchema } from '../langchain/utils/schema'
-import type { Reasoning } from '../langchain/utils/types'
+import { SSE_EVENTS } from '../streaming/constants'
+import type { Reasoning } from '../types'
+import { streamLLMResponse } from '../utils/streamingLlmUtils'
+import { reasoningSchema } from '../utils/validationSchema'
 import type { ToolConfigurable } from './getToolConfigurable'
-import { type DesignAgentPromptVariables, designAgentPrompt } from './prompt'
+import {
+  type ContextPromptVariables,
+  contextPromptTemplate,
+  SYSTEM_PROMPT,
+} from './prompt'
 import { schemaDesignTool } from './tools/schemaDesignTool'
 
 const AGENT_NAME = 'db' as const
 
 const model = new ChatOpenAI({
-  model: 'gpt-5',
-  reasoning: { effort: 'medium', summary: 'detailed' },
+  model: 'gpt-5-mini',
+  reasoning: { effort: 'low', summary: 'detailed' },
   useResponsesApi: true,
-}).bindTools([schemaDesignTool])
+}).bindTools([schemaDesignTool], {
+  strict: true,
+  tool_choice: schemaDesignTool.name,
+})
 
 type DesignAgentResult = {
   response: AIMessage
@@ -31,63 +38,40 @@ type DesignAgentResult = {
 }
 
 export const invokeDesignAgent = (
-  variables: DesignAgentPromptVariables,
+  variables: ContextPromptVariables,
   messages: BaseMessage[],
   configurable: ToolConfigurable,
 ): ResultAsync<DesignAgentResult, Error> => {
-  const formatPrompt = ResultAsync.fromSafePromise(
-    designAgentPrompt.format(variables),
+  const formatContextPrompt = ResultAsync.fromSafePromise(
+    contextPromptTemplate.format(variables),
   )
-  const invoke = fromAsyncThrowable((systemPrompt: string) =>
-    model.stream([new SystemMessage(systemPrompt), ...messages], {
-      configurable,
+
+  const stream = fromAsyncThrowable((contextPrompt: string) =>
+    model.stream(
+      [
+        new SystemMessage(SYSTEM_PROMPT),
+        new HumanMessage(contextPrompt),
+        ...messages,
+      ],
+      { configurable },
+    ),
+  )
+
+  const response = fromAsyncThrowable((stream: AsyncIterable<AIMessageChunk>) =>
+    streamLLMResponse(stream, {
+      agentName: AGENT_NAME,
+      eventType: SSE_EVENTS.MESSAGES,
     }),
   )
 
-  return formatPrompt.andThen(invoke).andThen((stream) => {
-    return ResultAsync.fromPromise(
-      (async () => {
-        // OpenAI ("chatcmpl-...") and LangGraph ("run-...") use different id formats,
-        // so we overwrite with a UUID to unify chunk ids for consistent handling.
-        const id = uuidv4()
-        let accumulatedChunk: AIMessageChunk | null = null
+  return formatContextPrompt
+    .andThen(stream)
+    .andThen(response)
+    .andThen((response) => {
+      const reasoningPayload = response.additional_kwargs?.['reasoning']
+      const parsed = v.safeParse(reasoningSchema, reasoningPayload)
+      const reasoning = parsed.success ? parsed.output : null
 
-        for await (const _chunk of stream) {
-          const chunk = new AIMessageChunk({ ..._chunk, id, name: AGENT_NAME })
-          await dispatchCustomEvent(SSE_EVENTS.MESSAGES, chunk)
-
-          // Accumulate chunks using concat method
-          accumulatedChunk = accumulatedChunk
-            ? accumulatedChunk.concat(chunk)
-            : chunk
-        }
-
-        // Convert the final accumulated chunk to AIMessage
-        // Note: AIMessageChunk.concat() doesn't preserve the name field,
-        // so we need to explicitly set it
-        const response = accumulatedChunk
-          ? new AIMessage({
-              id,
-              content: accumulatedChunk.content,
-              additional_kwargs: accumulatedChunk.additional_kwargs,
-              name: AGENT_NAME, // Always set name as concat() doesn't preserve it
-              ...(accumulatedChunk.tool_calls && {
-                tool_calls: accumulatedChunk.tool_calls,
-              }),
-            })
-          : new AIMessage({ id, content: '', name: AGENT_NAME })
-
-        const reasoningPayload =
-          accumulatedChunk?.additional_kwargs?.['reasoning']
-        const parsed = v.safeParse(reasoningSchema, reasoningPayload)
-        const reasoning = parsed.success ? parsed.output : null
-
-        return {
-          response,
-          reasoning,
-        }
-      })(),
-      (error) => (error instanceof Error ? error : new Error(String(error))),
-    )
-  })
+      return okAsync({ response, reasoning })
+    })
 }

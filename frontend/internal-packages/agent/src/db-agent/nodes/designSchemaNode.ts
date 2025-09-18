@@ -1,7 +1,7 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
-import { getConfigurable } from '../../chat/workflow/shared/getConfigurable'
-import { WorkflowTerminationError } from '../../shared/errorHandling'
 import { convertSchemaToText } from '../../utils/convertSchemaToText'
+import { WorkflowTerminationError } from '../../utils/errorHandling'
+import { getConfigurable } from '../../utils/getConfigurable'
 import { removeReasoningFromMessages } from '../../utils/messageCleanup'
 import { invokeDesignAgent } from '../invokeDesignAgent'
 import type { DbAgentState } from '../shared/dbAgentAnnotation'
@@ -29,12 +29,19 @@ export async function designSchemaNode(
   // This prevents the "reasoning without required following item" error
   const messages = removeReasoningFromMessages(state.messages)
 
-  const invokeResult = await invokeDesignAgent({ schemaText }, messages, {
-    buildingSchemaId: state.buildingSchemaId,
-    latestVersionNumber: state.latestVersionNumber,
-    designSessionId: state.designSessionId,
-    repositories,
-  })
+  const invokeResult = await invokeDesignAgent(
+    {
+      schemaText,
+      prompt: state.prompt,
+    },
+    messages,
+    {
+      buildingSchemaId: state.buildingSchemaId,
+      latestVersionNumber: state.latestVersionNumber,
+      designSessionId: state.designSessionId,
+      repositories,
+    },
+  )
 
   if (invokeResult.isErr()) {
     throw new WorkflowTerminationError(invokeResult.error, 'designSchemaNode')
@@ -44,7 +51,10 @@ export async function designSchemaNode(
 
   return {
     ...state,
-    messages: [response],
-    latestVersionNumber: state.latestVersionNumber + 1,
+    messages: [...state.messages, response],
+    // Don't modify latestVersionNumber here - let invokeSchemaDesignToolNode handle it
+    designSchemaRetryCount: (state.designSchemaRetryCount ?? 0) + 1,
+    // Reset success flag when retrying
+    schemaDesignSuccessful: false,
   }
 }

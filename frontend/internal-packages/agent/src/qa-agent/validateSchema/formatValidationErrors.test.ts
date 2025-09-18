@@ -20,9 +20,7 @@ describe('formatValidationErrors', () => {
     const formatted = formatValidationErrors(results)
 
     expect(formatted).toMatchInlineSnapshot(`
-      "Database validation found 1 issues. Please fix the following errors:
-
-      ### ❌ **Test Case:** Test Insert Operation
+      "### ❌ **Test Case:** Test Insert Operation
       #### 1. Error: \`duplicate key value violates unique constraint\`
       \`\`\`sql
       INSERT INTO users (id, name) VALUES (1, 'John')
@@ -47,9 +45,7 @@ describe('formatValidationErrors', () => {
     const formatted = formatValidationErrors(results)
 
     expect(formatted).toMatchInlineSnapshot(`
-      "Database validation found 1 issues. Please fix the following errors:
-
-      ### ❌ **Test Case:** Complex Transaction Test
+      "### ❌ **Test Case:** Complex Transaction Test
       #### 1. Error: \`invalid input syntax for type uuid\`
       \`\`\`sql
       INSERT INTO accounts (id) VALUES ('invalid-uuid')
@@ -90,9 +86,7 @@ describe('formatValidationErrors', () => {
     const formatted = formatValidationErrors(results)
 
     expect(formatted).toMatchInlineSnapshot(`
-      "Database validation found 2 issues. Please fix the following errors:
-
-      ### ❌ **Test Case:** First Test Case
+      "### ❌ **Test Case:** First Test Case
       #### 1. Error: \`table1 does not exist\`
       \`\`\`sql
       INSERT INTO table1 VALUES (1)
@@ -106,7 +100,7 @@ describe('formatValidationErrors', () => {
     `)
   })
 
-  it('should truncate long SQL statements', () => {
+  it('should display full long SQL statements', () => {
     const longSql = `INSERT INTO very_long_table_name_with_many_columns (
       column1, column2, column3, column4, column5, column6, column7, column8,
       column9, column10, column11, column12, column13, column14, column15,
@@ -134,16 +128,19 @@ describe('formatValidationErrors', () => {
     const formatted = formatValidationErrors(results)
 
     expect(formatted).toMatchInlineSnapshot(`
-      "Database validation found 1 issues. Please fix the following errors:
-
-      ### ❌ **Test Case:** Long SQL Test
+      "### ❌ **Test Case:** Long SQL Test
       #### 1. Error: \`syntax error\`
       \`\`\`sql
       INSERT INTO very_long_table_name_with_many_columns (
             column1, column2, column3, column4, column5, column6, column7, column8,
             column9, column10, column11, column12, column13, column14, column15,
             column16, column17, column18, column19, column20, column21, column22,
-            column23, co...
+            column23, column24, column25, column26, column27, column28, column29,
+            column30, column31, column32, column33, column34, column35
+          ) VALUES (
+            'value1', 'value2', 'value3', 'value4', 'value5', 'value6', 'value7',
+            'value8', 'value9', 'value10', 'value11', 'value12', 'value13'
+          )
       \`\`\`"
     `)
   })
@@ -170,9 +167,7 @@ describe('formatValidationErrors', () => {
     const formatted = formatValidationErrors(results)
 
     expect(formatted).toMatchInlineSnapshot(`
-      "Database validation found 1 issues. Please fix the following errors:
-
-      ### ❌ **Test Case:** SQL with Comments
+      "### ❌ **Test Case:** SQL with Comments
       #### 1. Error: \`some error\`
       \`\`\`sql
       -- This is a comment
@@ -200,9 +195,7 @@ describe('formatValidationErrors', () => {
     const formatted = formatValidationErrors(results)
 
     expect(formatted).toMatchInlineSnapshot(`
-      "Database validation found 1 issues. Please fix the following errors:
-
-      ### ❌ **Test Case:** Test with minimal error info
+      "### ❌ **Test Case:** Test with minimal error info
       #### 1. Error: \`Unknown error occurred\`
       \`\`\`sql
 
@@ -227,10 +220,8 @@ describe('formatValidationErrors', () => {
     const formatted = formatValidationErrors(results)
 
     expect(formatted).toMatchInlineSnapshot(`
-      "Database validation found 1 issues. Please fix the following errors:
-
-      ### ❌ **Test Case:** Test with Special Characters
-      #### 1. Error: \`Error with \`backticks\` and \"quotes\" and 'single quotes'\`
+      "### ❌ **Test Case:** Test with Special Characters
+      #### 1. Error: \`Error with \`backticks\` and "quotes" and 'single quotes'\`
       \`\`\`sql
       INSERT INTO test VALUES ('data')
       \`\`\`"

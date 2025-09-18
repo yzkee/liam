@@ -1,6 +1,6 @@
 import type { ToolMessage as ToolMessageType } from '@langchain/core/messages'
+import type { ToolCalls as ToolCallsType } from '@liam-hq/agent/client'
 import type { FC } from 'react'
-import type { ToolCalls as ToolCallsType } from '../../schema'
 import { ToolCall } from './ToolCall'
 import styles from './ToolCalls.module.css'
 
@@ -25,11 +25,13 @@ export const ToolCalls: FC<Props> = ({ toolCalls, toolMessages }) => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.title}>Tool Calls ({toolCalls.length})</div>
       {toolCalls.map((tc, _idx) => {
         const toolMessage = toolMessages.find(
           (msg) => msg.tool_call_id === tc.id,
         )
+        if (!toolMessage) {
+          return null
+        }
         return <ToolCall key={tc.id} toolCall={tc} toolMessage={toolMessage} />
       })}
     </div>

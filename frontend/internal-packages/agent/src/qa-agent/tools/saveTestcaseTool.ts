@@ -4,11 +4,12 @@ import type { RunnableConfig } from '@langchain/core/runnables'
 import { type StructuredTool, tool } from '@langchain/core/tools'
 import { Command } from '@langchain/langgraph'
 import { dmlOperationSchema } from '@liam-hq/artifact'
+import { type PgParseResult, pgParse } from '@liam-hq/schema/parser'
 import { v4 as uuidv4 } from 'uuid'
 import * as v from 'valibot'
-import { SSE_EVENTS } from '../../client'
-import { WorkflowTerminationError } from '../../shared/errorHandling'
-import { toJsonSchema } from '../../shared/jsonSchema'
+import { SSE_EVENTS } from '../../streaming/constants'
+import { WorkflowTerminationError } from '../../utils/errorHandling'
+import { toJsonSchema } from '../../utils/jsonSchema'
 import { type Testcase, testcaseSchema } from '../types'
 
 const dmlOperationWithoutLogsSchema = v.omit(dmlOperationSchema, [
@@ -16,7 +17,7 @@ const dmlOperationWithoutLogsSchema = v.omit(dmlOperationSchema, [
 ])
 
 const testcaseWithDmlSchema = v.object({
-  ...v.omit(testcaseSchema, ['id', 'dmlOperation']).entries,
+  ...v.omit(testcaseSchema, ['id', 'requirementId', 'dmlOperation']).entries,
   dmlOperation: dmlOperationWithoutLogsSchema,
 })
 
@@ -30,20 +31,43 @@ const configSchema = v.object({
   toolCall: v.object({
     id: v.string(),
   }),
+  configurable: v.object({
+    requirementId: v.pipe(v.string(), v.uuid()),
+  }),
 })
 
 /**
- * Extract tool call ID from config
+ * Validate SQL syntax using pgParse
  */
-const getToolCallId = (config: RunnableConfig): string => {
+const validateSqlSyntax = async (sql: string): Promise<void> => {
+  const parseResult: PgParseResult = await pgParse(sql)
+
+  if (parseResult.error) {
+    // LangGraph tool nodes require throwing errors to trigger retry mechanism
+    // eslint-disable-next-line no-throw-error/no-throw-error
+    throw new Error(
+      `SQL syntax error: ${parseResult.error.message}. Please fix the SQL and try again.`,
+    )
+  }
+}
+
+/**
+ * Extract tool call ID and requirementId from config
+ */
+const getConfigData = (
+  config: RunnableConfig,
+): { toolCallId: string; requirementId: string } => {
   const configParseResult = v.safeParse(configSchema, config)
   if (!configParseResult.success) {
     throw new WorkflowTerminationError(
-      new Error('Tool call ID not found in config'),
+      new Error('Tool call ID or requirementId not found in config'),
       'saveTestcaseTool',
     )
   }
-  return configParseResult.output.toolCall.id
+  return {
+    toolCallId: configParseResult.output.toolCall.id,
+    requirementId: configParseResult.output.configurable.requirementId,
+  }
 }
 
 export const saveTestcaseTool: StructuredTool = tool(
@@ -62,7 +86,10 @@ export const saveTestcaseTool: StructuredTool = tool(
 
     const { testcaseWithDml } = parsed.output
 
-    const toolCallId = getToolCallId(config)
+    // Validate SQL syntax before saving
+    await validateSqlSyntax(testcaseWithDml.dmlOperation.sql)
+
+    const { toolCallId, requirementId } = getConfigData(config)
 
     const testcaseId = uuidv4()
 
@@ -73,6 +100,7 @@ export const saveTestcaseTool: StructuredTool = tool(
 
     const testcase: Testcase = {
       id: testcaseId,
+      requirementId: requirementId,
       requirementType: testcaseWithDml.requirementType,
       requirementCategory: testcaseWithDml.requirementCategory,
       requirement: testcaseWithDml.requirement,

@@ -3,10 +3,10 @@ import { END, START, StateGraph } from '@langchain/langgraph'
 import { describe, it } from 'vitest'
 import {
   getTestConfig,
-  outputStream,
+  outputStreamEvents,
 } from '../../../test-utils/workflowTestHelpers'
-import { workflowAnnotation } from '../../chat/workflow/shared/workflowAnnotation'
-import type { WorkflowState } from '../../chat/workflow/types'
+import type { WorkflowState } from '../../types'
+import { workflowAnnotation } from '../../workflowAnnotation'
 import { summarizeWorkflow } from './index'
 
 describe('summarizeWorkflow Integration', () => {
@@ -21,8 +21,6 @@ describe('summarizeWorkflow Integration', () => {
 
     // Explicitly define the state needed for summarization
     const state: WorkflowState = {
-      userInput:
-        'Create a user management system with users, roles, and permissions tables',
       messages: [
         new HumanMessage(
           'Create a user management system with users, roles, and permissions tables',
@@ -41,7 +39,13 @@ describe('summarizeWorkflow Integration', () => {
         }),
       ],
       schemaData: { tables: {}, enums: {}, extensions: {} }, // Not used by summarizeWorkflow
+      analyzedRequirements: {
+        businessRequirement: '',
+        functionalRequirements: {},
+        nonFunctionalRequirements: {},
+      },
       testcases: [],
+      schemaIssues: [],
       buildingSchemaId: context.buildingSchemaId,
       latestVersionNumber: context.latestVersionNumber,
       designSessionId: context.designSessionId,
@@ -51,9 +55,13 @@ describe('summarizeWorkflow Integration', () => {
     }
 
     // Act
-    const stream = await graph.stream(state, config)
+    const streamEvents = graph.streamEvents(state, {
+      ...config,
+      streamMode: 'messages',
+      version: 'v2',
+    })
 
     // Assert (Output)
-    await outputStream(stream)
+    await outputStreamEvents(streamEvents)
   })
 })

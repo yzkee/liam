@@ -14,11 +14,12 @@ graph TD;
 	dbAgent(dbAgent)
 	qaAgent(qaAgent)
 	__end__([<p>__end__</p>]):::last
-	__start__ --> validateInitialSchema;
 	dbAgent --> qaAgent;
 	pmAgent --> dbAgent;
 	qaAgent --> leadAgent;
 	validateInitialSchema --> leadAgent;
+	__start__ -.-> validateInitialSchema;
+	__start__ -.-> leadAgent;
 	leadAgent -.-> pmAgent;
 	leadAgent -.-> __end__;
 	classDef default fill:#f2f0ff,line-height:1.2;
@@ -43,9 +44,6 @@ interface WorkflowState {
   // Requirements analysis
   analyzedRequirements?: AnalyzedRequirements;
   testcases: Testcase[];
-
-  // DML execution results
-  dmlExecutionErrors?: string;
 }
 ```
 
@@ -176,9 +174,10 @@ graph TD;
 	invokeSchemaDesignTool(invokeSchemaDesignTool)
 	__end__([<p>__end__</p>]):::last
 	__start__ --> designSchema;
-	invokeSchemaDesignTool --> designSchema;
 	designSchema -.-> invokeSchemaDesignTool;
-	designSchema -. &nbsp;generateTestcase&nbsp; .-> __end__;
+	invokeSchemaDesignTool -. &nbsp;END&nbsp; .-> __end__;
+	invokeSchemaDesignTool -.-> designSchema;
+	designSchema -.-> designSchema;
 	classDef default fill:#f2f0ff,line-height:1.2;
 	classDef first fill-opacity:0;
 	classDef last fill:#bfb6fc;
@@ -201,8 +200,9 @@ graph TD;
 
 ### Subgraph Flow Patterns
 
-1. **Simple Design**: `START → designSchema → END` (when no tool calls needed)
-2. **Iterative Design**: `START → designSchema → invokeSchemaDesignTool → designSchema → ... → END`
+1. **Successful Design**: `START → designSchema → invokeSchemaDesignTool → END`
+2. **Retry on Error**: `START → designSchema → invokeSchemaDesignTool → designSchema → invokeSchemaDesignTool → END`
+3. **Retry on No Tool Call**: `START → designSchema → designSchema (retry) → invokeSchemaDesignTool → END`
 
 ### Subgraph Benefits
 
@@ -235,11 +235,14 @@ graph TD;
 	__start__([<p>__start__</p>]):::first
 	testcaseGeneration(testcaseGeneration)
 	validateSchema(validateSchema)
+	invokeRunTestTool(invokeRunTestTool)
 	__end__([<p>__end__</p>]):::last
+	invokeRunTestTool --> __end__;
 	testcaseGeneration --> validateSchema;
-	validateSchema --> __end__;
+	validateSchema --> invokeRunTestTool;
 	__start__ -.-> testcaseGeneration;
 	__start__ -.-> validateSchema;
+	__start__ -.-> invokeRunTestTool;
 	__start__ -.-> __end__;
 	classDef default fill:#f2f0ff,line-height:1.2;
 	classDef first fill-opacity:0;
@@ -250,23 +253,78 @@ graph TD;
 
 #### 1. testcaseGeneration Node
 
-- **Purpose**: Implements map-reduce pattern for parallel testcase generation
+- **Purpose**: Implements map-reduce pattern for parallel testcase generation using a dedicated subgraph
 - **Performed by**: Multiple parallel instances of testcase generation subgraph
 - **Retry Policy**: maxAttempts: 3 (internal to subgraph)
 - **Output**: AI-generated test cases with DML operations using tool calls
 
-#### 2. validateSchema Node
+**Testcase Generation Subgraph Architecture:**
+
+```mermaid
+%%{init: {'flowchart': {'curve': 'linear'}}}%%
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	validateSchemaRequirements(validateSchemaRequirements)
+	generateTestcase(generateTestcase)
+	invokeSaveTool(invokeSaveTool)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> validateSchemaRequirements;
+	generateTestcase -.-> invokeSaveTool;
+	generateTestcase -.-> __end__;
+	invokeSaveTool -.-> generateTestcase;
+	invokeSaveTool -.-> __end__;
+	validateSchemaRequirements -.-> generateTestcase;
+	validateSchemaRequirements -.-> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2;
+	classDef first fill-opacity:0;
+	classDef last fill:#bfb6fc;
+```
+
+**Subgraph Components:**
+- **validateSchemaRequirements**: Pre-validation node that checks if schema can fulfill requirements before test generation
+- **generateTestcase**: Generates test cases and DML operations using GPT-5-nano with specialized prompts
+- **invokeSaveTool**: Executes saveTestcaseTool to persist generated test cases with DML operations
+
+#### 2. validateSchemaRequirements Node
+
+- **Purpose**: Pre-validation node that checks if schema can fulfill requirements before test generation
+- **Performed by**: Schema validation logic with requirement analysis
+- **Retry Policy**: maxAttempts: 3 (internal to testcaseGeneration subgraph)
+- **Decision Making**: Routes to generateTestcase if sufficient, or END if schema is insufficient
+
+#### 3. generateTestcase Node
+
+- **Purpose**: Generates test cases and DML operations for a single requirement
+- **Performed by**: GPT-5-nano with specialized test case generation prompts
+- **Retry Policy**: maxAttempts: 3 (internal to testcaseGeneration subgraph)
+- **Tool Integration**: Uses saveTestcaseTool for structured test case output
+
+#### 4. invokeSaveTool Node
+
+- **Purpose**: Executes saveTestcaseTool to persist generated test cases
+- **Performed by**: ToolNode with saveTestcaseTool
+- **Retry Policy**: maxAttempts: 3 (internal to testcaseGeneration subgraph)
+- **Output**: Saves test cases with DML operations to workflow state
+
+#### 5. validateSchema Node
+
+- **Purpose**: Creates AI message to trigger test execution for schema validation
+- **Performed by**: validateSchemaNode function
+- **Retry Policy**: maxAttempts: 3 (internal to subgraph)
+- **Output**: Generates tool call for runTestTool execution
+
+#### 6. invokeRunTestTool Node
 
 - **Purpose**: Executes DML statements and validates schema functionality
-- **Performed by**: DML Generation Agent with database execution
+- **Performed by**: ToolNode with runTestTool
 - **Retry Policy**: maxAttempts: 3 (internal to subgraph)
 - **Validation**: Schema integrity and DML execution results
 
 ### QA Agent Flow Patterns
 
-1. **Map-Reduce Flow**: `START → testcaseGeneration (parallel) → validateSchema → END`
-2. **Parallel Processing**: Multiple testcase generation instances run concurrently
-3. **Comprehensive Validation**: All testcases are validated together after generation
+1. **Map-Reduce Flow**: `START → testcaseGeneration (parallel) → validateSchema → invokeRunTestTool → END`
+2. **Parallel Processing**: Multiple testcase generation instances run concurrently  
+3. **Split Validation**: Test case generation and execution are now separated - generation creates test cases, then validation triggers test execution via the new runTestTool
 
 ### QA Agent Benefits
 
@@ -287,6 +345,7 @@ import { createQaAgentGraph } from "./qa-agent/createQaAgentGraph";
 const qaAgentSubgraph = createQaAgentGraph();
 graph.addNode("qaAgent", qaAgentSubgraph); // No retry policy - handled internally
 ```
+
 
 ### Conditional Edge Logic
 

@@ -63,6 +63,8 @@ function generateColumnDefinition(
 
   if (column.default !== null) {
     // Special handling for jsonb type to prevent double-escaping
+    // NOTE: This is a workaround for issues that have surfaced with default values.
+    // A simpler approach with type-specific handling might be possible.
     if (column.type === 'jsonb' && typeof column.default === 'string') {
       const trimmed = column.default.trim()
       // If it's a cast expression (contains ::), use as-is

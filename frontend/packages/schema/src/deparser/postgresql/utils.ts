@@ -62,7 +62,24 @@ function generateColumnDefinition(
   }
 
   if (column.default !== null) {
-    definition += ` DEFAULT ${formatDefaultValue(column.default)}`
+    // Special handling for jsonb type to prevent double-escaping
+    if (column.type === 'jsonb' && typeof column.default === 'string') {
+      const trimmed = column.default.trim()
+      // If it's a cast expression (contains ::), use as-is
+      if (trimmed.includes('::')) {
+        definition += ` DEFAULT ${column.default}`
+      }
+      // If already quoted (but not a cast expression), use as-is
+      else if (trimmed.startsWith("'") && trimmed.endsWith("'")) {
+        definition += ` DEFAULT ${column.default}`
+      }
+      // Unquoted JSON, let formatDefaultValue handle it
+      else {
+        definition += ` DEFAULT ${formatDefaultValue(column.default)}`
+      }
+    } else {
+      definition += ` DEFAULT ${formatDefaultValue(column.default)}`
+    }
   }
 
   return definition

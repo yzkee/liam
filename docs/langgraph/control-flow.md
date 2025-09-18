@@ -37,9 +37,6 @@ workflow.addEdge(START, "entryA");
 workflow.addEdge(START, "entryB");
 ```
 
-### Synchronized Execution
-
-Use merge nodes to synchronize parallel execution branches with stable sorting.
 
 ## Map-Reduce Pattern
 
@@ -65,13 +62,6 @@ workflow.addConditionalEdges("map", mapFunction, ["processItem"]);
 workflow.addEdge("processItem", "reduce");
 ```
 
-### Parallel Task Processing
-
-Each mapper node processes data independently with distributed state.
-
-### Result Aggregation
-
-The reducer node combines results from all mapper nodes.
 
 ## Conditional Routing
 
@@ -79,13 +69,6 @@ The reducer node combines results from all mapper nodes.
 
 Use conditional edges to route execution based on state values with `addConditionalEdges`.
 
-### Complex Condition Evaluation
-
-Implement complex routing logic with multiple criteria for different execution paths.
-
-### Fallback Routing Patterns
-
-Provide fallback routes using `__default__` for unexpected conditions.
 
 ## Recursion Limits and Loop Control
 
@@ -99,27 +82,9 @@ const app = workflow.compile({
 });
 ```
 
-### Loop Detection and Prevention
-
-Use supersteps to detect and prevent infinite loops with conditional termination.
-
-### Graceful Loop Termination
-
-Handle loop termination with proper state management patterns.
 
 ## Command Pattern for Control Flow
 
-### Using Command for Flow Control
-
-Use the `Command` object with the `goto` parameter to control execution flow and navigate between nodes.
-
-### Combining State Updates with Routing
-
-Commands can combine state updates with routing decisions using both `update` and `goto` parameters.
-
-### Advanced Command Patterns
-
-Use commands for complex control flow scenarios including navigation to parent graphs.
 
 ### Deferred Node Execution
 

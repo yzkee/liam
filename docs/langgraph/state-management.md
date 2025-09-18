@@ -38,15 +38,72 @@ const GraphAnnotation = Annotation.Root({
 ```
 
 
-### Nested State Structures
+### Private State Between Nodes
 
-Merge multiple annotations using the `spec` property for complex state structures.
+You can pass state between nodes that should NOT be part of the main schema of the graph. This is useful for intermediate working logic that doesn't need to be in the main input/output schema.
+
+Here's an example of a RAG pipeline that uses private state for search queries and documents:
+
+```typescript
+import { Annotation, StateGraph } from "@langchain/langgraph";
+
+// The overall state of the graph
+const OverallStateAnnotation = Annotation.Root({
+  question: Annotation<string>,
+  answer: Annotation<string>,
+});
+
+// This is what the node that generates the query will return
+const QueryOutputAnnotation = Annotation.Root({
+  query: Annotation<string>,
+});
+
+// This is what the node that retrieves the documents will return
+const DocumentOutputAnnotation = Annotation.Root({
+  docs: Annotation<string[]>,
+});
+
+// This is what the node that retrieves the documents will return
+const GenerateOutputAnnotation = Annotation.Root({
+  ...OverallStateAnnotation.spec,
+  ...DocumentOutputAnnotation.spec
+});
+
+// Node to generate query
+const generateQuery = async (state: typeof OverallStateAnnotation.State) => {
+  return {
+    query: state.question + " rephrased as a query!",
+  };
+};
+
+// Node to retrieve documents
+const retrieveDocuments = async (state: typeof QueryOutputAnnotation.State) => {
+  return {
+    docs: [state.query, "some random document"],
+  };
+};
+
+// Node to generate answer
+const generate = async (state: typeof GenerateOutputAnnotation.State) => {
+  return {
+    answer: state.docs.concat([state.question]).join("\n\n"),
+  };
+};
+
+const graph = new StateGraph(OverallStateAnnotation)
+  .addNode("generate_query", generateQuery)
+  .addNode("retrieve_documents", retrieveDocuments, {input: QueryOutputAnnotation})
+  .addNode("generate", generate, {input: GenerateOutputAnnotation})
+  .addEdge("__start__", "generate_query")
+  .addEdge("generate_query", "retrieve_documents")
+  .addEdge("retrieve_documents", "generate")
+  .compile();
+```
+
+The intermediate states populated by the `input` annotations are not present in the final output, keeping the main schema clean.
 
 ## State Updates and Merging
 
-### Custom Reducers
-
-Define custom reducer functions to control how state updates are merged with `reducer` and `default` functions.
 
 ### State Validation
 
@@ -58,13 +115,6 @@ import { StateGraph } from "@langchain/langgraph";
 const workflow = new StateGraph(GraphAnnotation);
 ```
 
-### Partial Updates
-
-Return partial state updates from nodes that will be merged with existing state.
-
-### Updating State from Tools
-
-Use the `Command` object with the `update` parameter to update graph state from tool calls.
 
 ## State Persistence Patterns
 
@@ -79,9 +129,6 @@ const checkpointer = new MemorySaver();
 const graph = workflow.compile({ checkpointer });
 ```
 
-### Cross-thread Persistence
-
-Implement cross-thread persistence using the `Store` interface with namespaces for data organization.
 
 ### PostgreSQL Persistence
 
@@ -94,13 +141,6 @@ const checkpointer = PostgresSaver.fromConnString("postgresql://...");
 const graph = workflow.compile({ checkpointer });
 ```
 
-### State Editing
-
-Edit graph state using breakpoints with `interruptBefore` and `updateState` method for state modifications.
-
-### Subgraph State Management
-
-Manage state in subgraphs with persistence using `getState` and `updateState` methods for nested configurations.
 
 ## References
 
@@ -111,12 +151,6 @@ For more detailed information and advanced usage patterns, refer to the official
 - [Have a separate input and output schema](https://langchain-ai.github.io/langgraphjs/how-tos/input_output_schema/) - Separating input/output schemas for better type safety
 - [Pass private state between nodes inside the graph](https://langchain-ai.github.io/langgraphjs/how-tos/pass_private_state/) - Managing private state between nodes
 
-### State Updates and Merging
-- [How to update graph state from tools](https://langchain-ai.github.io/langgraphjs/how-tos/update-state-from-tools/) - Using Command objects to update state from tool calls
-
 ### State Persistence Patterns
 - [How to add thread-level persistence to your graph](https://langchain-ai.github.io/langgraphjs/how-tos/persistence/) - Basic persistence with checkpointers like MemorySaver
-- [How to add cross-thread persistence](https://langchain-ai.github.io/langgraphjs/how-tos/cross-thread-persistence/) - Cross-thread persistence using Store interface
 - [How to use a Postgres checkpointer for persistence](https://langchain-ai.github.io/langgraphjs/how-tos/persistence-postgres/) - Production-ready PostgreSQL persistence
-- [How to edit graph state](https://langchain-ai.github.io/langgraphjs/how-tos/edit-graph-state/) - Editing state with breakpoints and updateState
-- [How to view and update state in subgraphs](https://langchain-ai.github.io/langgraphjs/how-tos/subgraphs-manage-state/) - Managing state in nested subgraph configurations

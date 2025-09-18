@@ -39,38 +39,7 @@ workflow.addEdge(START, "entryB");
 
 ### Synchronized Execution
 
-Use merge nodes to synchronize parallel execution branches with stable sorting:
-
-```typescript
-function mergeFunction(state: typeof GraphAnnotation.State) {
-  return {
-    messages: [new AIMessage("Merged parallel execution results")]
-  };
-}
-```
-
-### Conditional Branching
-
-Implement conditional branching based on state values:
-
-```typescript
-function routingCondition(state: typeof GraphAnnotation.State) {
-  if (state.messages.length > 5) {
-    return "processLarge";
-  } else {
-    return "processSmall";
-  }
-}
-
-workflow.addConditionalEdges(
-  "router",
-  routingCondition,
-  {
-    "processLarge": "largeProcessor",
-    "processSmall": "smallProcessor"
-  }
-);
-```
+Use merge nodes to synchronize parallel execution branches with stable sorting.
 
 ## Map-Reduce Pattern
 
@@ -98,91 +67,25 @@ workflow.addEdge("processItem", "reduce");
 
 ### Parallel Task Processing
 
-Each mapper node processes data independently with distributed state:
-
-```typescript
-function processItemFunction(state: typeof GraphAnnotation.State) {
-  const { item, index } = state;
-  const processedData = processItem(item);
-  return { 
-    processedResults: [{ index, data: processedData }]
-  };
-}
-```
+Each mapper node processes data independently with distributed state.
 
 ### Result Aggregation
 
-The reducer node combines results from all mapper nodes:
-
-```typescript
-function reduceFunction(state: typeof GraphAnnotation.State) {
-  const sortedResults = state.processedResults.sort((a, b) => a.index - b.index);
-  const finalResult = sortedResults.map(r => r.data);
-  return { 
-    messages: [new AIMessage(`Final result: ${JSON.stringify(finalResult)}`)]
-  };
-}
-```
+The reducer node combines results from all mapper nodes.
 
 ## Conditional Routing
 
 ### Dynamic Routing Based on State
 
-Use conditional edges to route execution based on state values:
-
-```typescript
-function routingCondition(state: typeof GraphAnnotation.State) {
-  if (state.messages.length > 5) {
-    return "processLarge";
-  } else {
-    return "processSmall";
-  }
-}
-
-workflow.addConditionalEdges(
-  "router",
-  routingCondition,
-  {
-    "processLarge": "largeProcessor",
-    "processSmall": "smallProcessor"
-  }
-);
-```
+Use conditional edges to route execution based on state values with `addConditionalEdges`.
 
 ### Complex Condition Evaluation
 
-Implement complex routing logic with multiple conditions:
-
-```typescript
-function complexRoutingCondition(state: typeof GraphAnnotation.State) {
-  const messageCount = state.messages.length;
-  const hasErrors = state.messages.some(msg => msg.content.includes("error"));
-  
-  if (hasErrors) {
-    return "errorHandler";
-  } else if (messageCount > 10) {
-    return "batchProcessor";
-  } else {
-    return "standardProcessor";
-  }
-}
-```
+Implement complex routing logic with multiple criteria for different execution paths.
 
 ### Fallback Routing Patterns
 
-Always provide fallback routes for unexpected conditions:
-
-```typescript
-workflow.addConditionalEdges(
-  "router",
-  routingCondition,
-  {
-    "processLarge": "largeProcessor",
-    "processSmall": "smallProcessor",
-    "__default__": "fallbackProcessor"
-  }
-);
-```
+Provide fallback routes using `__default__` for unexpected conditions.
 
 ## Recursion Limits and Loop Control
 
@@ -198,105 +101,25 @@ const app = workflow.compile({
 
 ### Loop Detection and Prevention
 
-Implement conditional termination to control loops:
-
-```typescript
-function shouldContinue(state: typeof GraphAnnotation.State) {
-  if (state.iterations >= 10) {
-    return END;
-  }
-  return "continueLoop";
-}
-
-workflow.addConditionalEdges(
-  "loopNode",
-  shouldContinue,
-  {
-    "continueLoop": "loopNode",
-    [END]: END
-  }
-);
-```
+Use supersteps to detect and prevent infinite loops with conditional termination.
 
 ### Graceful Loop Termination
 
-Handle loop termination with proper state management:
-
-```typescript
-function terminationNode(state: typeof GraphAnnotation.State) {
-  return {
-    messages: [new AIMessage("Loop terminated gracefully")],
-    completed: true,
-    iterations: (state.iterations || 0) + 1
-  };
-}
-```
+Handle loop termination with proper state management patterns.
 
 ## Command Pattern for Control Flow
 
 ### Using Command for Flow Control
 
-Use the `Command` object to control execution flow and navigate between nodes:
-
-```typescript
-import { Command } from "@langchain/langgraph";
-
-function commandNode(state: typeof GraphAnnotation.State) {
-  if (state.shouldSkip) {
-    return new Command({
-      goto: "skipNode"
-    });
-  }
-  
-  return {
-    messages: [new AIMessage("Processing normally")]
-  };
-}
-```
+Use the `Command` object with the `goto` parameter to control execution flow and navigate between nodes.
 
 ### Combining State Updates with Routing
 
-Commands can combine state updates with routing decisions:
-
-```typescript
-function commandWithStateUpdate(state: typeof GraphAnnotation.State) {
-  const updatedState = {
-    messages: [new AIMessage("State updated")],
-    processedCount: (state.processedCount || 0) + 1
-  };
-  
-  return new Command({
-    update: updatedState,
-    goto: "nextNode"
-  });
-}
-```
+Commands can combine state updates with routing decisions using both `update` and `goto` parameters.
 
 ### Advanced Command Patterns
 
-Use commands for complex control flow scenarios including navigation to parent graphs:
-
-```typescript
-function advancedCommandNode(state: typeof GraphAnnotation.State) {
-  if (state.error) {
-    return new Command({
-      update: { errorHandled: true },
-      goto: "errorRecovery"
-    });
-  }
-  
-  if (state.completed) {
-    return new Command({
-      goto: END
-    });
-  }
-  
-  return new Command({
-    update: { step: (state.step || 0) + 1 },
-    goto: "continueProcessing"
-  });
-}
-```
+Use commands for complex control flow scenarios including navigation to parent graphs.
 
 ### Deferred Node Execution
 

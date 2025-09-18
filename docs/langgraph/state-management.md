@@ -37,25 +37,6 @@ const GraphAnnotation = Annotation.Root({
 });
 ```
 
-### Private vs Public State
-
-Pass private state between nodes using input annotations that are not part of the main graph state:
-
-```typescript
-const PrivateAnnotation = Annotation.Root({
-  privateData: Annotation<string>(),
-});
-
-function nodeWithPrivateState(
-  state: typeof GraphAnnotation.State,
-  config: { configurable: { privateInput: typeof PrivateAnnotation.State } }
-) {
-  const privateData = config.configurable.privateInput.privateData;
-  return {
-    answer: `Processed: ${privateData}`
-  };
-}
-```
 
 ### Nested State Structures
 

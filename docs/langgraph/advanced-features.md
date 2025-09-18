@@ -137,42 +137,77 @@ import { MemorySaver } from "@langchain/langgraph";
 
 const checkpointer = new MemorySaver();
 
-// Create graph with checkpointer
-const graph = new StateGraph(StateAnnotation)
-  .addNode("node1", node1Function)
-  .addNode("node2", node2Function)
-  .addEdge(START, "node1")
-  .addEdge("node1", "node2")
-  .addEdge("node2", END)
+// Create parent and subgraph with checkpointer
+const parentGraph = new StateGraph(ParentState)
+  .addNode("subgraph_node", callSubgraph)
+  .addEdge(START, "subgraph_node")
+  .addEdge("subgraph_node", END)
   .compile({ checkpointer });
 
-// Run with thread for state persistence
+// Stream with subgraph visibility
 const config = { configurable: { thread_id: "1" } };
-const result = await graph.invoke({ input: "test" }, config);
-
-// Resume from a specific checkpoint
-const checkpoints = await graph.getStateHistory(config);
-const specificCheckpoint = checkpoints[1]; // Get specific checkpoint
-
-// Resume from that checkpoint
-const resumedResult = await graph.invoke(
-  null, 
-  { ...config, configurable: { ...config.configurable, checkpoint_id: specificCheckpoint.id } }
+const stream = parentGraph.stream(
+  { user_input: "test input" },
+  { ...config, subgraphs: true }
 );
+
+for await (const chunk of stream) {
+  console.log(chunk);
+}
+
+// Get state history including subgraph states
+const stateHistory = parentGraph.getStateHistory(config);
+for await (const state of stateHistory) {
+  console.log("State:", state.values);
+  console.log("Next:", state.next);
+  console.log("Tasks:", state.tasks);
+}
+
+// Resume from specific subgraph node
+const resumeConfig = {
+  ...config,
+  configurable: {
+    ...config.configurable,
+    checkpoint_ns: "subgraph_node:subgraph",
+    checkpoint_id: "specific_checkpoint_id"
+  }
+};
+
+const resumedResult = await parentGraph.invoke(null, resumeConfig);
 ```
 
 #### Modifying Subgraph State
 
 ```typescript
-// Update state at a specific checkpoint
-await graph.updateState(
-  config,
-  { new_field: "updated_value" },
-  "node1" // Update as if coming from this node
+// Update state of a subgraph
+await parentGraph.updateState(
+  {
+    configurable: {
+      thread_id: "1",
+      checkpoint_ns: "subgraph_node:subgraph"
+    }
+  },
+  { processed_data: "updated value" },
+  "process" // Update as if coming from this subgraph node
 );
 
-// Continue execution after state modification
-const continuedResult = await graph.invoke(null, config);
+// Acting as a subgraph node
+await parentGraph.updateState(
+  config,
+  { final_response: "direct update" },
+  "subgraph_node"
+);
+
+// Acting as the entire subgraph
+await parentGraph.updateState(
+  {
+    configurable: {
+      thread_id: "1",
+      checkpoint_ns: "subgraph_node:subgraph"
+    }
+  },
+  { processed_data: "subgraph update" }
+);
 ```
 
 ### How to Transform Inputs and Outputs of Subgraphs
@@ -278,125 +313,67 @@ Node retries allow you to automatically retry failed nodes with configurable pol
 #### Basic Retry Configuration
 
 ```typescript
-import { StateGraph, Annotation, START, END } from "@langchain/langgraph";
+import { StateGraph, Annotation, START, END, RetryPolicy } from "@langchain/langgraph";
 
 const State = Annotation.Root({
   input: Annotation<string>,
-  output: Annotation<string>,
-  attempts: Annotation<number>
+  output: Annotation<string>
 });
 
-// Node that might fail
-function unreliableNode(state: typeof State.State) {
-  const attempts = (state.attempts || 0) + 1;
-  
-  // Simulate random failure
-  if (Math.random() < 0.7 && attempts < 3) {
-    throw new Error(`Attempt ${attempts} failed`);
-  }
-  
-  return {
-    output: `Success on attempt ${attempts}`,
-    attempts
-  };
+function callModel(state: typeof State.State) {
+  // Your model calling logic here
+  return { output: `Processed: ${state.input}` };
 }
+
+// Basic retry policy
+const retryPolicy: RetryPolicy = {};
 
 // Create graph with retry policy
 const graph = new StateGraph(State)
-  .addNode("unreliable", unreliableNode, {
-    retry: {
-      maxAttempts: 3,
-      retryOn: (error: Error) => {
-        // Retry on specific error types
-        return error.message.includes("failed");
-      }
-    }
-  })
-  .addEdge(START, "unreliable")
-  .addEdge("unreliable", END)
+  .addNode("call_model", callModel, { retryPolicy })
+  .addEdge(START, "call_model")
+  .addEdge("call_model", END)
   .compile();
 ```
 
 #### Advanced Retry Policies
 
 ```typescript
-// Custom retry configuration with exponential backoff
-const advancedGraph = new StateGraph(State)
-  .addNode("api_call", apiCallNode, {
-    retry: {
-      maxAttempts: 5,
-      retryOn: (error: Error) => {
-        // Retry on network errors but not on validation errors
-        return error.name === "NetworkError" || error.message.includes("timeout");
-      },
-      backoff: {
-        type: "exponential",
-        initialDelay: 1000, // 1 second
-        maxDelay: 30000,    // 30 seconds
-        multiplier: 2
-      }
-    }
-  })
-  .addNode("fallback", fallbackNode)
-  .addEdge(START, "api_call")
-  .addEdge("api_call", END)
-  .addEdge("api_call", "fallback") // Fallback after all retries fail
-  .addEdge("fallback", END)
-  .compile();
-
-function apiCallNode(state: typeof State.State) {
-  // Simulate API call that might fail
-  if (Math.random() < 0.5) {
-    throw new Error("NetworkError: Connection timeout");
+// Custom retry policy with maxAttempts
+const advancedRetryPolicy: RetryPolicy = {
+  maxAttempts: 5,
+  retryOn: (e: any): boolean => {
+    // Custom retry logic
+    return e.message.includes("rate limit") || e.message.includes("timeout");
   }
-  return { output: "API call successful" };
-}
+};
 
-function fallbackNode(state: typeof State.State) {
-  return { output: "Fallback response used" };
-}
+const advancedGraph = new StateGraph(State)
+  .addNode("call_model", callModel, { retryPolicy: advancedRetryPolicy })
+  .addEdge(START, "call_model")
+  .addEdge("call_model", END)
+  .compile();
 ```
 
-#### Conditional Retry Logic
+#### Retry Policy Examples
 
 ```typescript
-// Retry with custom conditions
-function smartRetryNode(state: typeof State.State) {
-  const attempts = (state.attempts || 0) + 1;
-  
-  try {
-    // Your main logic here
-    const result = performOperation(state.input);
-    return { output: result, attempts };
-  } catch (error) {
-    // Custom retry decision logic
-    if (shouldRetry(error, attempts)) {
-      throw error; // Will trigger retry
-    } else {
-      // Don't retry, handle gracefully
-      return { 
-        output: `Failed after ${attempts} attempts: ${error.message}`,
-        attempts 
-      };
-    }
+// Example with different retry conditions
+const conditionalRetryPolicy: RetryPolicy = {
+  retryOn: (e: any): boolean => {
+    // Don't retry on authentication errors
+    if (e.message.includes("unauthorized")) return false;
+    // Retry on temporary failures
+    if (e.message.includes("temporary")) return true;
+    return false;
   }
-}
+};
 
-function shouldRetry(error: Error, attempts: number): boolean {
-  // Custom retry logic
-  if (attempts >= 3) return false;
-  if (error.message.includes("permanent")) return false;
-  if (error.message.includes("rate_limit")) return true;
-  return true;
-}
-
-function performOperation(input: string): string {
-  // Simulate operation that might fail
-  if (Math.random() < 0.6) {
-    throw new Error("temporary_failure");
-  }
-  return `Processed: ${input}`;
-}
+const conditionalGraph = new StateGraph(State)
+  .addNode("conditional_node", callModel, { retryPolicy: conditionalRetryPolicy })
+  .addEdge(START, "conditional_node")
+  .addEdge("conditional_node", END)
+  .compile();
 ```
 
 ### How to Cache Expensive Nodes
@@ -409,115 +386,68 @@ Node caching helps avoid repeating expensive operations by storing and reusing r
 import { StateGraph, Annotation, START, END } from "@langchain/langgraph";
 import { InMemoryCache } from "@langchain/langgraph-checkpoint";
 
-const StateAnnotation = Annotation.Root({
-  items: Annotation<string[]>,
-  default: () => [],
-  reducer: (acc, item) => [...acc, ...item]
+const CacheState = Annotation.Root({
+  query: Annotation<string>,
+  result: Annotation<string>
 });
 
-// Configure cache policy
+function expensiveOperation(state: typeof CacheState.State) {
+  // Expensive computation
+  return { result: `Computed result for: ${state.query}` };
+}
+
+// Create cache instance
 const cache = new InMemoryCache();
 
-const graph = new StateGraph(StateAnnotation)
-  .addNode("node", expensiveNode, {
-    cache: {
-      policy: "ttl",
-      ttl: 120, // 120 seconds TTL
-      keySerializer: (state) => `key_${JSON.stringify(state.items)}`
-    }
+// Create graph with caching
+const cachedGraph = new StateGraph(CacheState)
+  .addNode("expensive", expensiveOperation, {
+    cachePolicy: { ttl: 120 } // Cache for 2 minutes
   })
-  .addEdge(START, "node")
-  .addEdge("node", END)
+  .addEdge(START, "expensive")
+  .addEdge("expensive", END)
   .compile({ cache });
-
-function expensiveNode(state: typeof StateAnnotation.State) {
-  console.log("Performing expensive operation...");
-  // Simulate expensive computation
-  const result = state.items.map(item => `processed_${item}`);
-  return { items: result };
-}
 ```
 
-#### Advanced Caching with Custom Serialization
+#### Advanced Caching with Custom Keys
 
 ```typescript
-// Custom cache key generation
-const advancedCacheGraph = new StateGraph(StateAnnotation)
-  .addNode("expensive_computation", computationNode, {
-    cache: {
-      policy: "ttl",
+// Custom cache key function
+function customKeyFunc(state: typeof CacheState.State): string {
+  return `custom_${state.query}`;
+}
+
+const advancedCachedGraph = new StateGraph(CacheState)
+  .addNode("cached_operation", expensiveOperation, {
+    cachePolicy: { 
       ttl: 300, // 5 minutes
-      keySerializer: (state) => {
-        // Create cache key based on specific state properties
-        const relevantData = {
-          items: state.items.sort(), // Sort for consistent keys
-        };
-        return `computation_${JSON.stringify(relevantData)}`;
-      }
+      keyFunc: customKeyFunc
     }
   })
-  .addEdge(START, "expensive_computation")
-  .addEdge("expensive_computation", END)
+  .addEdge(START, "cached_operation")
+  .addEdge("cached_operation", END)
   .compile({ cache });
-
-function computationNode(state: typeof StateAnnotation.State) {
-  console.log("Running expensive computation...");
-  
-  // Simulate heavy computation
-  const results = state.items.map(item => `computed_${item}`);
-  
-  return { items: results };
-}
 ```
 
-#### Cache Performance Comparison
+#### Cache Management
 
 ```typescript
-// Example showing performance benefits
-async function demonstrateCaching() {
-  const input = { items: ["item1", "item2", "item3"] };
-  
-  console.time("First run (no cache)");
-  const result1 = await graph.invoke(input);
-  console.timeEnd("First run (no cache)");
-  
-  console.time("Second run (cached)");
-  const result2 = await graph.invoke(input);
-  console.timeEnd("Second run (cached)");
-  
-  console.log("Results identical:", JSON.stringify(result1) === JSON.stringify(result2));
-}
-
-// Cache invalidation patterns
-function invalidateCache(cacheKey: string) {
-  cache.delete(cacheKey);
-}
-
-// Conditional caching
-const conditionalCacheGraph = new StateGraph(StateAnnotation)
-  .addNode("conditional_cache", conditionalNode, {
-    cache: {
-      policy: "ttl",
-      ttl: 60,
-      shouldCache: (state, result) => {
-        // Only cache successful results with more than 2 items
-        return result.items && result.items.length > 2;
-      }
-    }
+// Example of using cache with different TTL values
+const shortCacheGraph = new StateGraph(CacheState)
+  .addNode("short_cache", expensiveOperation, {
+    cachePolicy: { ttl: 30 } // 30 seconds
   })
-  .addEdge(START, "conditional_cache")
-  .addEdge("conditional_cache", END)
+  .addEdge(START, "short_cache")
+  .addEdge("short_cache", END)
   .compile({ cache });
 
-function conditionalNode(state: typeof StateAnnotation.State) {
-  if (state.items.length === 0) {
-    throw new Error("No items to process");
-  }
-  
-  return {
-    items: state.items.map(item => `cached_${item}`)
-  };
-}
+const longCacheGraph = new StateGraph(CacheState)
+  .addNode("long_cache", expensiveOperation, {
+    cachePolicy: { ttl: 3600 } // 1 hour
+  })
+  .addEdge(START, "long_cache")
+  .addEdge("long_cache", END)
+  .compile({ cache });
 ```
 
 ## Runtime Configuration
@@ -530,161 +460,126 @@ Runtime configuration allows you to dynamically modify graph behavior without ch
 
 ```typescript
 import { StateGraph, Annotation, START, END } from "@langchain/langgraph";
+import { RunnableConfig } from "@langchain/core/runnables";
 
-// Define configuration schema
-interface GraphConfig {
-  model: string;
-  temperature: number;
-  maxTokens: number;
-  userId?: string;
-}
-
-const State = Annotation.Root({
-  messages: Annotation<string[]>,
-  response: Annotation<string>
+const ConfigState = Annotation.Root({
+  input: Annotation<string>,
+  output: Annotation<string>
 });
 
 // Node that uses runtime configuration
-function configurableNode(state: typeof State.State, config: GraphConfig) {
-  console.log(`Using model: ${config.model} with temperature: ${config.temperature}`);
+function configurableNode(state: typeof ConfigState.State, config?: RunnableConfig) {
+  const modelName = config?.configurable?.model || "default-model";
+  const temperature = config?.configurable?.temperature || 0.5;
   
-  // Use configuration to modify behavior
-  const response = generateResponse(state.messages, {
-    model: config.model,
-    temperature: config.temperature,
-    maxTokens: config.maxTokens
-  });
+  // Use configuration in your logic
+  const result = `Processed with ${modelName} (temp: ${temperature})`;
   
-  return { response };
+  return { output: result };
 }
 
-function generateResponse(messages: string[], options: any): string {
-  // Simulate model-specific response generation
-  return `Response using ${options.model} with temperature ${options.temperature}`;
-}
-
-// Create graph with configuration support
-const configurableGraph = new StateGraph(State)
-  .addNode("respond", configurableNode)
-  .addEdge(START, "respond")
-  .addEdge("respond", END)
+// Create graph
+const configurableGraph = new StateGraph(ConfigState)
+  .addNode("process", configurableNode)
+  .addEdge(START, "process")
+  .addEdge("process", END)
   .compile();
-```
 
-#### Dynamic Model Selection
-
-```typescript
-// Configuration for different environments
-const developmentConfig: GraphConfig = {
-  model: "gpt-3.5-turbo",
-  temperature: 0.7,
-  maxTokens: 1000
-};
-
-const productionConfig: GraphConfig = {
-  model: "gpt-4",
-  temperature: 0.3,
-  maxTokens: 2000
-};
-
-// Environment-specific configuration
-function getConfig(environment: string): GraphConfig {
-  switch (environment) {
-    case "development":
-      return developmentConfig;
-    case "production":
-      return productionConfig;
-    case "testing":
-      return {
-        model: "mock-model",
-        temperature: 0.0,
-        maxTokens: 500
-      };
-    default:
-      return developmentConfig;
+// Run with specific configuration
+const result = await configurableGraph.invoke(
+  { input: "test input" },
+  {
+    configurable: {
+      model: "gpt-4",
+      temperature: 0.7
+    }
   }
-}
-
-// Usage with different configurations
-async function runWithConfig(input: any, environment: string) {
-  const config = getConfig(environment);
-  return await configurableGraph.invoke(input, { config });
-}
+);
 ```
 
-#### User-Specific Configuration
+#### Environment-Specific Configuration
 
 ```typescript
-// User-specific settings
-interface UserConfig extends GraphConfig {
-  userId: string;
-  preferences: {
-    verbosity: "low" | "medium" | "high";
-    language: string;
-    customInstructions?: string;
+// Node that adapts based on environment configuration
+function environmentNode(state: typeof ConfigState.State, config?: RunnableConfig) {
+  const environment = config?.configurable?.environment || "development";
+  const user = config?.configurable?.user || "anonymous";
+  
+  let modelConfig;
+  switch (environment) {
+    case "production":
+      modelConfig = { model: "gpt-4", temperature: 0.3 };
+      break;
+    case "staging":
+      modelConfig = { model: "gpt-3.5-turbo", temperature: 0.5 };
+      break;
+    default:
+      modelConfig = { model: "gpt-3.5-turbo", temperature: 0.8 };
+  }
+  
+  return {
+    output: `Environment: ${environment}, User: ${user}, Model: ${modelConfig.model}`
   };
 }
 
-function userAwareNode(state: typeof State.State, config: UserConfig) {
-  const { userId, preferences } = config;
-  
-  console.log(`Processing for user ${userId} with ${preferences.verbosity} verbosity`);
-  
-  let response = generateResponse(state.messages, config);
-  
-  // Apply user preferences
-  if (preferences.verbosity === "high") {
-    response = `Detailed explanation: ${response}`;
-  } else if (preferences.verbosity === "low") {
-    response = response.split(".")[0] + "."; // First sentence only
-  }
-  
-  if (preferences.customInstructions) {
-    response = `${preferences.customInstructions}\n\n${response}`;
-  }
-  
-  return { response };
-}
-
-const userAwareGraph = new StateGraph(State)
-  .addNode("user_respond", userAwareNode)
-  .addEdge(START, "user_respond")
-  .addEdge("user_respond", END)
+const environmentGraph = new StateGraph(ConfigState)
+  .addNode("env_process", environmentNode)
+  .addEdge(START, "env_process")
+  .addEdge("env_process", END)
   .compile();
 
-// Usage with user configuration
-const userConfig: UserConfig = {
-  userId: "user123",
-  model: "gpt-4",
-  temperature: 0.5,
-  maxTokens: 1500,
-  preferences: {
-    verbosity: "high",
-    language: "en",
-    customInstructions: "Always be helpful and concise."
+// Run with environment configuration
+const envResult = await environmentGraph.invoke(
+  { input: "test" },
+  {
+    configurable: {
+      environment: "production",
+      user: "john_doe"
+    }
   }
-};
-
-await userAwareGraph.invoke(
-  { messages: ["Hello, how are you?"] },
-  { config: userConfig }
 );
 ```
 
 #### Feature Flags and A/B Testing
 
 ```typescript
-// Feature flag configuration
-interface FeatureFlags {
-  enableNewAlgorithm: boolean;
-  useAdvancedProcessing: boolean;
-  experimentGroup: "A" | "B" | "control";
-  debugMode: boolean;
+// Node with feature flag logic using runtime configuration
+function featureFlagNode(state: typeof ConfigState.State, config?: RunnableConfig) {
+  const useNewAlgorithm = config?.configurable?.use_new_algorithm || false;
+  const enableExperimental = config?.configurable?.experimental_feature || false;
+  
+  let result = state.input;
+  
+  if (useNewAlgorithm) {
+    result = `New algorithm: ${result}`;
+  } else {
+    result = `Legacy algorithm: ${result}`;
+  }
+  
+  if (enableExperimental) {
+    result += " [EXPERIMENTAL]";
+  }
+  
+  return { output: result };
 }
 
-interface ConfigWithFeatures extends GraphConfig {
-  features: FeatureFlags;
-}
+const featureFlagGraph = new StateGraph(ConfigState)
+  .addNode("feature_process", featureFlagNode)
+  .addEdge(START, "feature_process")
+  .addEdge("feature_process", END)
+  .compile();
+
+// Run with feature flags
+const flagResult = await featureFlagGraph.invoke(
+  { input: "test input" },
+  {
+    configurable: {
+      use_new_algorithm: true,
+      experimental_feature: false
+    }
+  }
+);
+```
 
 function featureFlagNode(state: typeof State.State, config: ConfigWithFeatures) {
   const { features } = config;
@@ -789,319 +684,165 @@ async function runWithValidatedConfig(input: any, config: ConfigWithFeatures) {
 
 Structured output ensures that your agent responses follow a specific format, making them easier to parse and integrate with other systems.
 
-#### Basic Structured Response with Tool Calling
+#### Basic Structured Response
 
 ```typescript
 import { StateGraph, Annotation, START, END } from "@langchain/langgraph";
+import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 
 // Define response schema
-const WeatherResponseSchema = z.object({
-  location: z.string(),
+const Response = z.object({
   temperature: z.number(),
-  condition: z.string(),
-  humidity: z.number(),
-  additionalInfo: z.string().optional()
+  other_notes: z.string()
 });
 
-type WeatherResponse = z.infer<typeof WeatherResponseSchema>;
-
-const State = Annotation.Root({
-  query: Annotation<string>,
-  structuredResponse: Annotation<WeatherResponse>
-});
-
-// Tool for structured weather response
-const weatherTool = {
-  name: "respond_with_weather",
-  description: "Respond with structured weather information",
-  schema: WeatherResponseSchema,
-  function: async (args: WeatherResponse): Promise<WeatherResponse> => {
-    // Validate the structured response
-    return WeatherResponseSchema.parse(args);
+// Create a final response tool
+const finalResponseTool = tool(
+  async (input) => {
+    return input;
+  },
+  {
+    name: "Response",
+    description: "The final response",
+    schema: Response
   }
-};
+);
 
-function structuredWeatherNode(state: typeof State.State) {
-  // Get weather data
-  const weatherData: WeatherResponse = {
-    location: extractLocation(state.query),
-    temperature: 25,
-    condition: getRandomCondition(),
-    humidity: 60
-  };
-  
-  // Validate against schema
-  const validatedResponse = WeatherResponseSchema.parse(weatherData);
-  
-  return { structuredResponse: validatedResponse };
-}
-
-function extractLocation(query: string): string {
-  // Simple location extraction
-  const match = query.match(/weather in ([A-Za-z\s]+)/i);
-  return match ? match[1].trim() : "Unknown Location";
-}
-
-function getRandomCondition(): string {
-  const conditions = ["sunny", "cloudy", "rainy"];
-  return conditions[Math.floor(Math.random() * conditions.length)];
-}
-
-const weatherGraph = new StateGraph(State)
-  .addNode("get_weather", structuredWeatherNode)
-  .addEdge(START, "get_weather")
-  .addEdge("get_weather", END)
-  .compile();
-```
-
-#### Complex Structured Output with Nested Objects
-
-```typescript
-// Complex response schema with nested structures
-const AnalysisResponseSchema = z.object({
-  summary: z.string(),
-  sentiment: z.object({
-    score: z.number().min(-1).max(1),
-    label: z.enum(["positive", "negative", "neutral"]),
-    confidence: z.number().min(0).max(1)
-  }),
-  keyTopics: z.array(z.object({
-    topic: z.string(),
-    relevance: z.number().min(0).max(1),
-    mentions: z.number()
-  })),
-  recommendations: z.array(z.string()),
-  metadata: z.object({
-    processedAt: z.string(),
-    model: z.string(),
-    version: z.string()
+const StructuredState = Annotation.Root({
+  messages: Annotation<any[]>({
+    reducer: (x, y) => x.concat(y)
   })
 });
 
-type AnalysisResponse = z.infer<typeof AnalysisResponseSchema>;
-
-const AnalysisState = Annotation.Root({
-  text: Annotation<string>,
-  analysis: Annotation<AnalysisResponse>
-});
-
-function textAnalysisNode(state: typeof AnalysisState.State) {
-  const text = state.text;
+// Node that calls model with structured output
+function callModel(state: typeof StructuredState.State) {
+  // Bind the final response tool to the model
+  const modelWithTools = model.bindTools([finalResponseTool]);
   
-  // Perform analysis (simplified)
-  const analysis: AnalysisResponse = {
-    summary: `Analysis of ${text.length} characters of text`,
-    sentiment: {
-      score: 0.5,
-      label: "positive",
-      confidence: 0.8
-    },
-    keyTopics: [
-      {
-        topic: "main_theme",
-        relevance: 0.9,
-        mentions: 3
-      }
-    ],
-    recommendations: [
-      "Consider expanding on the main theme"
-    ],
-    metadata: {
-      processedAt: new Date().toISOString(),
-      model: "analysis-v1",
-      version: "1.0.0"
-    }
-  };
-  
-  // Validate the structured response
-  const validatedAnalysis = AnalysisResponseSchema.parse(analysis);
-  
-  return { analysis: validatedAnalysis };
+  const response = modelWithTools.invoke(state.messages);
+  return { messages: [response] };
 }
 
-const analysisGraph = new StateGraph(AnalysisState)
-  .addNode("analyze", textAnalysisNode)
-  .addEdge(START, "analyze")
-  .addEdge("analyze", END)
+// Router to check if we should continue or finish
+function shouldContinue(state: typeof StructuredState.State) {
+  const lastMessage = state.messages[state.messages.length - 1];
+  
+  // Check if the last message contains tool calls
+  if (lastMessage.tool_calls && lastMessage.tool_calls.length > 0) {
+    // Check if any tool call is the final response tool
+    const hasFinalResponse = lastMessage.tool_calls.some(
+      (toolCall: any) => toolCall.name === "Response"
+    );
+    
+    if (hasFinalResponse) {
+      return "final";
+    }
+  }
+  
+  return "continue";
+}
+
+const structuredGraph = new StateGraph(StructuredState)
+  .addNode("agent", callModel)
+  .addNode("final", (state) => state)
+  .addEdge(START, "agent")
+  .addConditionalEdges("agent", shouldContinue, {
+    continue: "agent",
+    final: "final"
+  })
+  .addEdge("final", END)
   .compile();
 ```
 
-#### Streaming Structured JSON
+#### Response Formatting and Validation
 
 ```typescript
-// Streaming structured responses
-const StreamingState = Annotation.Root({
-  query: Annotation<string>,
-  partialResponse: Annotation<Partial<WeatherResponse>>,
-  finalResponse: Annotation<WeatherResponse>
+// Enhanced response schema with validation
+const DetailedResponse = z.object({
+  answer: z.string().min(1, "Answer cannot be empty"),
+  confidence: z.number().min(0).max(1),
+  category: z.enum(["factual", "opinion", "analysis"]),
+  sources: z.array(z.string()).min(1, "At least one source required")
 });
 
-function streamingStructuredNode(state: typeof StreamingState.State) {
-  // Build response incrementally
-  const partial: Partial<WeatherResponse> = {};
-  
-  // Add location
-  partial.location = extractLocation(state.query);
-  
-  // Add temperature
-  partial.temperature = 25;
-  
-  // Add condition
-  partial.condition = getRandomCondition();
-  
-  // Add humidity
-  partial.humidity = 60;
-  
-  // Validate final complete response
-  const finalResponse = WeatherResponseSchema.parse(partial);
-  
-  return { 
-    partialResponse: partial,
-    finalResponse 
-  };
+// Create detailed response tool
+const detailedResponseTool = tool(
+  async (input) => {
+    // Validate the input matches our schema
+    const validated = DetailedResponse.parse(input);
+    return validated;
+  },
+  {
+    name: "DetailedResponse",
+    description: "Provide a detailed structured response",
+    schema: DetailedResponse
+  }
+);
+
+// Node that uses the detailed response tool
+function detailedResponseNode(state: typeof StructuredState.State) {
+  const modelWithDetailedTool = model.bindTools([detailedResponseTool]);
+  const response = modelWithDetailedTool.invoke(state.messages);
+  return { messages: [response] };
 }
 
-// Response validation and error handling
-function validateAndFormatResponse<T>(
-  data: unknown, 
-  schema: z.ZodSchema<T>
-): { success: boolean; data?: T; errors?: string[] } {
-  try {
-    const validatedData = schema.parse(data);
-    return { success: true, data: validatedData };
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return {
-        success: false,
-        errors: error.errors.map(err => `${err.path.join('.')}: ${err.message}`)
-      };
-    }
-    return {
-      success: false,
-      errors: ["Unknown validation error"]
-    };
-  }
-}
-
-// Usage with validation
-async function getStructuredWeather(query: string): Promise<WeatherResponse> {
-  const result = await weatherGraph.invoke({ query });
-  
-  const validation = validateAndFormatResponse(
-    result.structuredResponse, 
-    WeatherResponseSchema
-  );
-  
-  if (!validation.success) {
-    throw new Error(`Validation failed: ${validation.errors?.join(", ")}`);
-  }
-  
-  return validation.data!;
-}
+const detailedGraph = new StateGraph(StructuredState)
+  .addNode("detailed_agent", detailedResponseNode)
+  .addEdge(START, "detailed_agent")
+  .addEdge("detailed_agent", END)
+  .compile();
 ```
 
-#### Dynamic Schema Selection
+#### Multiple Response Formats
 
 ```typescript
-// Multiple response schemas based on query type
-const QuestionResponseSchema = z.object({
-  type: z.literal("question"),
-  answer: z.string(),
-  confidence: z.number(),
-  sources: z.array(z.string())
+// Multiple response format schemas
+const TextResponse = z.object({
+  format: z.literal("text"),
+  content: z.string()
 });
 
-const TaskResponseSchema = z.object({
-  type: z.literal("task"),
-  steps: z.array(z.string()),
-  estimatedTime: z.string(),
-  difficulty: z.enum(["easy", "medium", "hard"])
+const JsonResponse = z.object({
+  format: z.literal("json"),
+  data: z.record(z.any())
 });
 
-const GeneralResponseSchema = z.object({
-  type: z.literal("general"),
-  response: z.string(),
-  category: z.string()
-});
-
-type ResponseType = 
-  | z.infer<typeof QuestionResponseSchema>
-  | z.infer<typeof TaskResponseSchema>
-  | z.infer<typeof GeneralResponseSchema>;
-
-const DynamicState = Annotation.Root({
-  input: Annotation<string>,
-  responseType: Annotation<"question" | "task" | "general">,
-  response: Annotation<ResponseType>
-});
-
-function classifyAndRespond(state: typeof DynamicState.State) {
-  const input = state.input.toLowerCase();
-  
-  // Classify the input type
-  let responseType: "question" | "task" | "general";
-  if (input.includes("?") || input.startsWith("what") || input.startsWith("how")) {
-    responseType = "question";
-  } else if (input.includes("do") || input.includes("create") || input.includes("make")) {
-    responseType = "task";
-  } else {
-    responseType = "general";
+// Create tools for different formats
+const textResponseTool = tool(
+  async (input) => input,
+  {
+    name: "TextResponse",
+    description: "Respond in text format",
+    schema: TextResponse
   }
-  
-  // Generate appropriate structured response
-  let response: ResponseType;
-  
-  switch (responseType) {
-    case "question":
-      response = {
-        type: "question",
-        answer: `Answer to: ${state.input}`,
-        confidence: Math.random(),
-        sources: ["source1.com", "source2.com"]
-      };
-      break;
-    case "task":
-      response = {
-        type: "task",
-        steps: ["Step 1", "Step 2", "Step 3"],
-        estimatedTime: "30 minutes",
-        difficulty: "medium"
-      };
-      break;
-    default:
-      response = {
-        type: "general",
-        response: `General response to: ${state.input}`,
-        category: "conversation"
-      };
+);
+
+const jsonResponseTool = tool(
+  async (input) => input,
+  {
+    name: "JsonResponse", 
+    description: "Respond in JSON format",
+    schema: JsonResponse
   }
+);
+
+// Node that can use multiple response formats
+function multiFormatNode(state: typeof StructuredState.State) {
+  const modelWithMultipleTools = model.bindTools([
+    textResponseTool,
+    jsonResponseTool
+  ]);
   
-  return { responseType, response };
+  const response = modelWithMultipleTools.invoke(state.messages);
+  return { messages: [response] };
 }
 
-const dynamicGraph = new StateGraph(DynamicState)
-  .addNode("classify_respond", classifyAndRespond)
-  .addEdge(START, "classify_respond")
-  .addEdge("classify_respond", END)
+const multiFormatGraph = new StateGraph(StructuredState)
+  .addNode("multi_format_agent", multiFormatNode)
+  .addEdge(START, "multi_format_agent")
+  .addEdge("multi_format_agent", END)
   .compile();
-
-// Usage with type-safe responses
-async function getTypedResponse(input: string): Promise<ResponseType> {
-  const result = await dynamicGraph.invoke({ input });
-  
-  // Validate based on response type
-  switch (result.responseType) {
-    case "question":
-      return QuestionResponseSchema.parse(result.response);
-    case "task":
-      return TaskResponseSchema.parse(result.response);
-    case "general":
-      return GeneralResponseSchema.parse(result.response);
-    default:
-      throw new Error("Unknown response type");
-  }
-}
 ```
 
 ## Additional Advanced Features
@@ -1116,9 +857,10 @@ Deferred node execution allows you to delay the execution of a node until all ot
 import { StateGraph, Annotation, START, END } from "@langchain/langgraph";
 
 const StateAnnotation = Annotation.Root({
-  aggregate: Annotation<string[]>,
-  default: () => [],
-  reducer: (acc, value) => [...acc, ...value]
+  aggregate: Annotation<string[]>({
+    default: () => [],
+    reducer: (acc, value) => [...acc, ...value]
+  })
 });
 
 const graph = new StateGraph(StateAnnotation)
@@ -1130,97 +872,101 @@ const graph = new StateGraph(StateAnnotation)
     console.log(`Adding "B" to ${state.aggregate.join(", ")}`);
     return { aggregate: ["B"] };
   })
-  .addNode("b2", (state) => {
-    console.log(`Adding "B.2" to ${state.aggregate.join(", ")}`);
-    return { aggregate: ["B.2"] };
-  }, { defer: true }) // Defer this node execution
-  .addEdge(START, "a")
-  .addEdge(START, "b")
-  .addEdge("a", "b2")
-  .addEdge("b", "b2")
-  .addEdge("b2", END)
-  .compile();
-```
-
-#### Map-Reduce Pattern with Deferred Execution
-
-```typescript
-// Complex workflow with multiple branches
-const MapReduceState = Annotation.Root({
-  items: Annotation<string[]>,
-  processed: Annotation<string[]>,
-  default: () => [],
-  reducer: (acc, value) => [...acc, ...value]
-});
-
-function mapNode1(state: typeof MapReduceState.State) {
-  console.log("Processing in map node 1");
-  return { 
-    processed: state.items.slice(0, 2).map(item => `map1_${item}`)
-  };
-}
-
-function mapNode2(state: typeof MapReduceState.State) {
-  console.log("Processing in map node 2");
-  return { 
-    processed: state.items.slice(2).map(item => `map2_${item}`)
-  };
-}
-
-function reduceNode(state: typeof MapReduceState.State) {
-  console.log("Reducing all processed items");
-  const reduced = state.processed.join(" + ");
-  return { processed: [reduced] };
-}
-
-const mapReduceGraph = new StateGraph(MapReduceState)
-  .addNode("map1", mapNode1)
-  .addNode("map2", mapNode2)
-  .addNode("reduce", reduceNode, { defer: true }) // Wait for all map nodes
-  .addEdge(START, "map1")
-  .addEdge(START, "map2")
-  .addEdge("map1", "reduce")
-  .addEdge("map2", "reduce")
-  .addEdge("reduce", END)
-  .compile();
-
-// Usage
-const result = await mapReduceGraph.invoke({
-  items: ["item1", "item2", "item3", "item4"]
-});
-console.log("Final result:", result.processed);
-```
-
-#### Conditional Deferred Execution
-
-```typescript
-// Deferred execution with conditions
-const ConditionalState = Annotation.Root({
-  data: Annotation<any[]>,
-  results: Annotation<string[]>,
-  shouldDefer: Annotation<boolean>
-});
-
-function conditionalDeferredNode(state: typeof ConditionalState.State) {
-  console.log("Executing conditionally deferred node");
-  return {
-    results: [`Processed ${state.data.length} items`]
-  };
-}
-
-function determineDefer(state: typeof ConditionalState.State) {
-  // Decide whether to defer based on state
-  return { shouldDefer: state.data.length > 5 };
-}
-
-const conditionalGraph = new StateGraph(ConditionalState)
-  .addNode("check", determineDefer)
-  .addNode("process", conditionalDeferredNode, { 
-    defer: (state) => state.shouldDefer // Dynamic defer decision
+  .addNode("b_2", (state) => {
+    console.log(`Adding "B_2" to ${state.aggregate.join(", ")}`);
+    return { aggregate: ["B_2"] };
+  }, { defer: true })
+  .addNode("c", (state) => {
+    console.log(`Adding "C" to ${state.aggregate.join(", ")}`);
+    return { aggregate: ["C"] };
   })
-  .addEdge(START, "check")
-  .addEdge("check", "process")
-  .addEdge("process", END)
+  .addNode("d", (state) => {
+    console.log(`Adding "D" to ${state.aggregate.join(", ")}`);
+    return { aggregate: ["D"] };
+  })
+  .addEdge(START, "a")
+  .addEdge("a", "b")
+  .addEdge("a", "c")
+  .addEdge("b", "b_2")
+  .addEdge(["b_2", "c"], "d")
+  .addEdge("d", END)
+  .compile();
+```
+
+#### Advanced Deferred Execution
+
+```typescript
+// Example with multiple deferred nodes
+const AdvancedStateAnnotation = Annotation.Root({
+  aggregate: Annotation<string[]>({
+    default: () => [],
+    reducer: (acc, value) => [...acc, ...value]
+  }),
+  input: Annotation<string>
+});
+
+const advancedDeferredGraph = new StateGraph(AdvancedStateAnnotation)
+  .addNode("start_node", (state) => {
+    return { aggregate: ["START"] };
+  })
+  .addNode("parallel_1", (state) => {
+    return { aggregate: ["P1"] };
+  })
+  .addNode("parallel_2", (state) => {
+    return { aggregate: ["P2"] };
+  }, { defer: true })
+  .addNode("parallel_3", (state) => {
+    return { aggregate: ["P3"] };
+  })
+  .addNode("end_node", (state) => {
+    return { aggregate: ["END"] };
+  })
+  .addEdge(START, "start_node")
+  .addEdge("start_node", "parallel_1")
+  .addEdge("start_node", "parallel_2")
+  .addEdge("start_node", "parallel_3")
+  .addEdge(["parallel_1", "parallel_2", "parallel_3"], "end_node")
+  .addEdge("end_node", END)
+  .compile();
+```
+
+#### Deferred Execution with Dependencies
+
+```typescript
+// Example showing deferred execution with complex dependencies
+const DependencyStateAnnotation = Annotation.Root({
+  aggregate: Annotation<string[]>({
+    default: () => [],
+    reducer: (acc, value) => [...acc, ...value]
+  }),
+  ready: Annotation<boolean>
+});
+
+const dependencyGraph = new StateGraph(DependencyStateAnnotation)
+  .addNode("setup", (state) => {
+    return { 
+      aggregate: ["SETUP"],
+      ready: true
+    };
+  })
+  .addNode("worker_1", (state) => {
+    return { aggregate: ["WORKER_1"] };
+  })
+  .addNode("worker_2", (state) => {
+    return { aggregate: ["WORKER_2"] };
+  }, { defer: true })
+  .addNode("worker_3", (state) => {
+    return { aggregate: ["WORKER_3"] };
+  }, { defer: true })
+  .addNode("cleanup", (state) => {
+    return { aggregate: ["CLEANUP"] };
+  })
+  .addEdge(START, "setup")
+  .addEdge("setup", "worker_1")
+  .addEdge("setup", "worker_2")
+  .addEdge("setup", "worker_3")
+  .addEdge(["worker_1", "worker_2", "worker_3"], "cleanup")
+  .addEdge("cleanup", END)
   .compile();
 ```
 
@@ -1228,227 +974,184 @@ const conditionalGraph = new StateGraph(ConditionalState)
 
 This pattern allows agents to return tool results directly as the final answer, bypassing additional processing when the tool output is sufficient.
 
-#### Basic Direct Tool Return
+#### Basic Direct Return
 
 ```typescript
 import { StateGraph, Annotation, START, END } from "@langchain/langgraph";
+import { DynamicStructuredTool } from "@langchain/core/tools";
+import { z } from "zod";
 
-const State = Annotation.Root({
-  messages: Annotation<string[]>,
-  toolResult: Annotation<any>,
-  finalAnswer: Annotation<string>
+// Tool schema with return_direct field
+const directReturnTool = new DynamicStructuredTool({
+  name: "get_weather",
+  description: "Get weather information",
+  schema: z.object({
+    location: z.string().describe("The location to get weather for"),
+    return_direct: z.boolean().describe("Whether to return the result directly").default(false)
+  }),
+  func: async ({ location, return_direct }) => {
+    const weather = `Weather in ${location}: Sunny, 72°F`;
+    return weather;
+  }
 });
 
-// Tool that can provide direct answers
-const searchTool = {
-  name: "search",
-  description: "Search for information",
-  function: async (query: string) => {
-    // Simulate search results
-    return {
-      query,
-      results: [`Result 1 for ${query}`, `Result 2 for ${query}`],
-      directAnswer: `Direct answer for: ${query}`,
-      confidence: Math.random()
-    };
-  }
-};
+const DirectReturnState = Annotation.Root({
+  messages: Annotation<any[]>({
+    reducer: (x, y) => x.concat(y)
+  })
+});
 
-function agentNode(state: typeof State.State) {
+// Node that calls model with tools
+function callModel(state: typeof DirectReturnState.State) {
+  const modelWithTools = model.bindTools([directReturnTool]);
+  const response = modelWithTools.invoke(state.messages);
+  return { messages: [response] };
+}
+
+// Router to check for direct return
+function shouldContinue(state: typeof DirectReturnState.State) {
   const lastMessage = state.messages[state.messages.length - 1];
   
-  // Determine if we should use a tool
-  if (lastMessage.includes("search")) {
-    const query = extractQuery(lastMessage);
-    const toolResult = searchTool.function(query);
+  if (lastMessage.tool_calls && lastMessage.tool_calls.length > 0) {
+    // Check if any tool call has return_direct set to true
+    const hasDirectReturn = lastMessage.tool_calls.some(
+      (toolCall: any) => toolCall.args?.return_direct === true
+    );
     
-    // Check if tool result can be returned directly
-    if (shouldReturnDirectly(toolResult)) {
-      return {
-        toolResult,
-        finalAnswer: toolResult.directAnswer
-      };
+    if (hasDirectReturn) {
+      return "tools";
     }
   }
   
-  // Continue with normal processing
-  return {
-    finalAnswer: `Processed: ${lastMessage}`
-  };
+  return "final";
 }
 
-function shouldReturnDirectly(toolResult: any): boolean {
-  // Decide based on tool result quality
-  return toolResult.confidence > 0.8;
+// Tool execution node
+function callTools(state: typeof DirectReturnState.State) {
+  const lastMessage = state.messages[state.messages.length - 1];
+  const toolMessages = [];
+  
+  for (const toolCall of lastMessage.tool_calls) {
+    if (toolCall.args?.return_direct) {
+      // Execute tool and return result directly
+      const result = directReturnTool.invoke(toolCall.args);
+      toolMessages.push({
+        tool_call_id: toolCall.id,
+        type: "tool",
+        content: result
+      });
+    }
+  }
+  
+  return { messages: toolMessages };
 }
 
-function extractQuery(message: string): string {
-  return message.replace("search", "").trim();
-}
-
-const directReturnGraph = new StateGraph(State)
-  .addNode("agent", agentNode)
+const directReturnGraph = new StateGraph(DirectReturnState)
+  .addNode("agent", callModel)
+  .addNode("tools", callTools)
+  .addNode("final", (state) => state)
   .addEdge(START, "agent")
-  .addEdge("agent", END)
+  .addConditionalEdges("agent", shouldContinue, {
+    tools: "tools",
+    final: "final"
+  })
+  .addEdge("tools", END)
+  .addEdge("final", END)
   .compile();
 ```
 
 #### Advanced Direct Return with Multiple Tools
 
 ```typescript
-// Multiple tools with different return strategies
-const calculatorTool = {
+// Multiple tools with different return behaviors
+const calculatorTool = new DynamicStructuredTool({
   name: "calculator",
-  function: (expression: string) => {
-    // Simple calculator implementation
-    const result = 42; // Simplified for example
-    return {
-      expression,
-      result,
-      isExact: true,
-      explanation: `${expression} = ${result}`
-    };
+  description: "Perform calculations",
+  schema: z.object({
+    expression: z.string(),
+    return_direct: z.boolean().default(true)
+  }),
+  func: async ({ expression }) => {
+    return `Result: ${expression} = 42`;
   }
-};
-
-const weatherTool = {
-  name: "weather",
-  function: (location: string) => {
-    return {
-      location,
-      temperature: 25,
-      condition: "sunny",
-      canReturnDirectly: true,
-      formatted: `Weather in ${location}: sunny, 25°C`
-    };
-  }
-};
-
-function smartAgentNode(state: typeof State.State) {
-  const lastMessage = state.messages[state.messages.length - 1];
-  
-  // Calculator tool
-  if (lastMessage.includes("calculate") || /\d+[\+\-\*\/]\d+/.test(lastMessage)) {
-    const expression = extractMathExpression(lastMessage);
-    const result = calculatorTool.function(expression);
-    
-    if (result.isExact) {
-      return {
-        toolResult: result,
-        finalAnswer: result.explanation
-      };
-    }
-  }
-  
-  // Weather tool
-  if (lastMessage.includes("weather")) {
-    const location = extractLocation(lastMessage);
-    const result = weatherTool.function(location);
-    
-    if (result.canReturnDirectly) {
-      return {
-        toolResult: result,
-        finalAnswer: result.formatted
-      };
-    }
-  }
-  
-  // Default processing
-  return {
-    finalAnswer: `I need more information to help with: ${lastMessage}`
-  };
-}
-
-function extractMathExpression(message: string): string {
-  const match = message.match(/(\d+[\+\-\*\/]\d+)/);
-  return match ? match[1] : message;
-}
-
-function extractLocation(message: string): string {
-  const match = message.match(/weather in ([A-Za-z\s]+)/i);
-  return match ? match[1].trim() : "Unknown";
-}
-
-const smartGraph = new StateGraph(State)
-  .addNode("smart_agent", smartAgentNode)
-  .addEdge(START, "smart_agent")
-  .addEdge("smart_agent", END)
-  .compile();
-```
-
-#### Conditional Tool Return with Fallback
-
-```typescript
-// Tool return with fallback processing
-const ConditionalState = Annotation.Root({
-  query: Annotation<string>,
-  toolResults: Annotation<any[]>,
-  needsProcessing: Annotation<boolean>,
-  finalResponse: Annotation<string>
 });
 
-function toolCallNode(state: typeof ConditionalState.State) {
-  const query = state.query;
-  const results = [];
+const searchTool = new DynamicStructuredTool({
+  name: "search",
+  description: "Search for information", 
+  schema: z.object({
+    query: z.string(),
+    return_direct: z.boolean().default(false)
+  }),
+  func: async ({ query }) => {
+    return `Search results for: ${query}`;
+  }
+});
+
+// Enhanced tool calling node
+function enhancedCallModel(state: typeof DirectReturnState.State) {
+  const modelWithTools = model.bindTools([calculatorTool, searchTool]);
+  const response = modelWithTools.invoke(state.messages);
+  return { messages: [response] };
+}
+
+// Enhanced router for multiple tool types
+function enhancedShouldContinue(state: typeof DirectReturnState.State) {
+  const lastMessage = state.messages[state.messages.length - 1];
   
-  // Try multiple tools
-  if (query.includes("weather")) {
-    const weatherResult = weatherTool.function(extractLocation(query));
-    results.push(weatherResult);
-    
-    if (weatherResult.canReturnDirectly) {
-      return {
-        toolResults: results,
-        needsProcessing: false,
-        finalResponse: weatherResult.formatted
-      };
+  if (lastMessage.tool_calls && lastMessage.tool_calls.length > 0) {
+    // Check each tool call for direct return
+    for (const toolCall of lastMessage.tool_calls) {
+      if (toolCall.name === "calculator" && toolCall.args?.return_direct !== false) {
+        return "direct_tools";
+      }
+      if (toolCall.name === "search" && toolCall.args?.return_direct === true) {
+        return "direct_tools";
+      }
     }
+    return "tools";
   }
   
-  if (query.includes("calculate")) {
-    const calcResult = calculatorTool.function(extractMathExpression(query));
-    results.push(calcResult);
-    
-    if (calcResult.isExact) {
-      return {
-        toolResults: results,
-        needsProcessing: false,
-        finalResponse: calcResult.explanation
-      };
+  return "final";
+}
+
+// Enhanced tool execution
+function enhancedCallTools(state: typeof DirectReturnState.State) {
+  const lastMessage = state.messages[state.messages.length - 1];
+  const toolMessages = [];
+  
+  for (const toolCall of lastMessage.tool_calls) {
+    let result;
+    if (toolCall.name === "calculator") {
+      result = calculatorTool.invoke(toolCall.args);
+    } else if (toolCall.name === "search") {
+      result = searchTool.invoke(toolCall.args);
     }
+    
+    toolMessages.push({
+      tool_call_id: toolCall.id,
+      type: "tool",
+      content: result
+    });
   }
   
-  // Need additional processing
-  return {
-    toolResults: results,
-    needsProcessing: true
-  };
+  return { messages: toolMessages };
 }
 
-function processingNode(state: typeof ConditionalState.State) {
-  // Additional processing when direct return isn't suitable
-  const processed = state.toolResults.map(result => 
-    `Processed: ${JSON.stringify(result)}`
-  ).join("\n");
-  
-  return {
-    finalResponse: `After processing:\n${processed}`
-  };
-}
-
-function shouldProcess(state: typeof ConditionalState.State) {
-  return state.needsProcessing ? "process" : END;
-}
-
-const conditionalToolGraph = new StateGraph(ConditionalState)
-  .addNode("tool_call", toolCallNode)
-  .addNode("process", processingNode)
-  .addEdge(START, "tool_call")
-  .addConditionalEdges("tool_call", shouldProcess, {
-    process: "process",
-    [END]: END
+const enhancedDirectReturnGraph = new StateGraph(DirectReturnState)
+  .addNode("agent", enhancedCallModel)
+  .addNode("tools", enhancedCallTools)
+  .addNode("direct_tools", enhancedCallTools)
+  .addNode("final", (state) => state)
+  .addEdge(START, "agent")
+  .addConditionalEdges("agent", enhancedShouldContinue, {
+    tools: "tools",
+    direct_tools: "direct_tools",
+    final: "final"
   })
-  .addEdge("process", END)
+  .addEdge("tools", "agent")
+  .addEdge("direct_tools", END)
+  .addEdge("final", END)
   .compile();
 ```
 
@@ -1459,187 +1162,213 @@ Managing agent steps involves controlling the flow of conversation history and i
 #### Basic Step Management
 
 ```typescript
+import { StateGraph, Annotation, START, END } from "@langchain/langgraph";
+import { BaseMessage, ToolMessage } from "@langchain/core/messages";
+
 const StepState = Annotation.Root({
-  messages: Annotation<string[]>,
-  stepCount: Annotation<number>,
-  maxSteps: Annotation<number>,
-  currentStep: Annotation<string>
+  messages: Annotation<BaseMessage[]>({
+    reducer: (x, y) => x.concat(y)
+  })
 });
 
-function stepManagedNode(state: typeof StepState.State) {
-  const stepCount = (state.stepCount || 0) + 1;
+// Node that manages message history and limits steps
+function callModel(state: typeof StepState.State) {
+  // Limit to most recent N messages to manage context
+  const modelMessages = [];
   
-  // Check step limit
-  if (stepCount > state.maxSteps) {
-    return {
-      stepCount,
-      currentStep: "max_steps_reached",
-      messages: [...state.messages, "Maximum steps reached"]
-    };
+  // Iterate through messages in reverse to get most recent
+  for (let i = state.messages.length - 1; i >= 0; i--) {
+    modelMessages.unshift(state.messages[i]);
+    
+    // Stop if we have enough messages (e.g., 5 messages)
+    if (modelMessages.length >= 5) {
+      break;
+    }
   }
   
-  // Process current step
-  const newMessage = `Step ${stepCount}: Processing...`;
+  // Ensure we don't end with a tool message
+  if (modelMessages.length > 0 && ToolMessage.isInstance(modelMessages[modelMessages.length - 1])) {
+    // Add a human message to continue the conversation
+    modelMessages.push(new HumanMessage("Please continue."));
+  }
   
-  return {
-    stepCount,
-    currentStep: `step_${stepCount}`,
-    messages: [...state.messages, newMessage]
-  };
+  const response = model.invoke(modelMessages);
+  return { messages: [response] };
 }
 
+// Router to control execution flow
 function shouldContinue(state: typeof StepState.State) {
-  if (state.stepCount >= state.maxSteps) {
-    return END;
+  const lastMessage = state.messages[state.messages.length - 1];
+  
+  // Continue if the last message has tool calls
+  if (lastMessage.tool_calls && lastMessage.tool_calls.length > 0) {
+    return "tools";
   }
   
-  // Continue if we haven't reached the goal
+  return "final";
+}
+
+// Tool execution node
+function callTools(state: typeof StepState.State) {
   const lastMessage = state.messages[state.messages.length - 1];
-  return lastMessage.includes("Processing") ? "continue" : END;
+  const toolMessages = [];
+  
+  for (const toolCall of lastMessage.tool_calls) {
+    // Execute tool and create tool message
+    const result = `Tool ${toolCall.name} executed with args: ${JSON.stringify(toolCall.args)}`;
+    toolMessages.push(new ToolMessage({
+      content: result,
+      tool_call_id: toolCall.id
+    }));
+  }
+  
+  return { messages: toolMessages };
 }
 
 const stepManagedGraph = new StateGraph(StepState)
-  .addNode("process_step", stepManagedNode)
-  .addEdge(START, "process_step")
-  .addConditionalEdges("process_step", shouldContinue, {
-    continue: "process_step",
-    [END]: END
+  .addNode("agent", callModel)
+  .addNode("tools", callTools)
+  .addNode("final", (state) => state)
+  .addEdge(START, "agent")
+  .addConditionalEdges("agent", shouldContinue, {
+    tools: "tools",
+    final: "final"
   })
+  .addEdge("tools", "agent")
+  .addEdge("final", END)
   .compile();
 ```
 
-#### Message History Truncation
+#### Advanced Step Control with Message Truncation
 
 ```typescript
-// Manage conversation history to prevent context overflow
-const ConversationState = Annotation.Root({
-  messages: Annotation<string[]>,
-  maxMessages: Annotation<number>,
-  summary: Annotation<string>
-});
-
-function truncateMessages(messages: string[], maxMessages: number): {
-  truncated: string[];
-  summary: string;
-} {
-  if (messages.length <= maxMessages) {
-    return { truncated: messages, summary: "" };
+// Enhanced message management with truncation
+function advancedCallModel(state: typeof StepState.State) {
+  const modelMessages = [];
+  
+  // More sophisticated message selection
+  for (let i = state.messages.length - 1; i >= 0; i--) {
+    const message = state.messages[i];
+    modelMessages.unshift(message);
+    
+    // Stop if we have enough context (e.g., 10 messages)
+    if (modelMessages.length >= 10) {
+      break;
+    }
+    
+    // Always include the first message if it's a system message
+    if (i === 0 && message.type === "system") {
+      if (!modelMessages.includes(message)) {
+        modelMessages.unshift(message);
+      }
+    }
   }
   
-  // Keep recent messages and summarize older ones
-  const recentMessages = messages.slice(-maxMessages);
-  const oldMessages = messages.slice(0, -maxMessages);
+  // Ensure proper message flow
+  if (modelMessages.length > 0) {
+    const lastMessage = modelMessages[modelMessages.length - 1];
+    if (ToolMessage.isInstance(lastMessage)) {
+      // Don't end with a tool message
+      const response = model.invoke(modelMessages.slice(0, -1));
+      return { messages: [response] };
+    }
+  }
   
-  const summary = `Previous conversation summary: ${oldMessages.length} messages covering topics: ${
-    oldMessages.slice(0, 3).join(", ")
-  }...`;
-  
-  return { truncated: recentMessages, summary };
+  const response = model.invoke(modelMessages);
+  return { messages: [response] };
 }
 
-function conversationNode(state: typeof ConversationState.State) {
-  const newMessage = `Message ${state.messages.length + 1}: New input`;
-  const allMessages = [...state.messages, newMessage];
+// Step counting and limiting
+function stepLimitingRouter(state: typeof StepState.State) {
+  // Count agent steps (non-tool messages from assistant)
+  const agentSteps = state.messages.filter(
+    msg => msg.type === "ai" && (!msg.tool_calls || msg.tool_calls.length === 0)
+  ).length;
   
-  // Truncate if necessary
-  const { truncated, summary } = truncateMessages(allMessages, state.maxMessages);
+  // Limit to 5 agent steps
+  if (agentSteps >= 5) {
+    return "final";
+  }
   
-  return {
-    messages: truncated,
-    summary: summary || state.summary
-  };
+  const lastMessage = state.messages[state.messages.length - 1];
+  if (lastMessage.tool_calls && lastMessage.tool_calls.length > 0) {
+    return "tools";
+  }
+  
+  return "final";
 }
 
-const conversationGraph = new StateGraph(ConversationState)
-  .addNode("conversation", conversationNode)
-  .addEdge(START, "conversation")
-  .addEdge("conversation", END)
+const advancedStepGraph = new StateGraph(StepState)
+  .addNode("agent", advancedCallModel)
+  .addNode("tools", callTools)
+  .addNode("final", (state) => state)
+  .addEdge(START, "agent")
+  .addConditionalEdges("agent", stepLimitingRouter, {
+    tools: "tools",
+    final: "final"
+  })
+  .addEdge("tools", "agent")
+  .addEdge("final", END)
   .compile();
-
-// Usage with message management
-const result = await conversationGraph.invoke({
-  messages: ["Hello", "How are you?", "Tell me about AI"],
-  maxMessages: 5,
-  summary: ""
-});
 ```
 
-#### Recursive Step Processing
+#### Message History Management
 
 ```typescript
-// Handle recursive or iterative processing
-const RecursiveState = Annotation.Root({
-  data: Annotation<any>,
-  iterations: Annotation<number>,
-  maxIterations: Annotation<number>,
-  converged: Annotation<boolean>,
-  history: Annotation<any[]>
-});
-
-function recursiveProcessingNode(state: typeof RecursiveState.State) {
-  const iterations = (state.iterations || 0) + 1;
+// Comprehensive message management with different strategies
+function messageManagementNode(state: typeof StepState.State) {
+  // Strategy 1: Keep only recent messages
+  const recentMessages = state.messages.slice(-8);
   
-  // Process data
-  const processedData = processIteration(state.data, iterations);
+  // Strategy 2: Keep system message + recent messages
+  const systemMessage = state.messages.find(msg => msg.type === "system");
+  const nonSystemMessages = state.messages.filter(msg => msg.type !== "system").slice(-6);
+  const managedMessages = systemMessage ? [systemMessage, ...nonSystemMessages] : nonSystemMessages;
   
-  // Check convergence
-  const converged = checkConvergence(state.data, processedData);
+  // Strategy 3: Remove intermediate tool messages but keep final results
+  const compactMessages = [];
+  for (let i = 0; i < state.messages.length; i++) {
+    const message = state.messages[i];
+    
+    // Always keep system and human messages
+    if (message.type === "system" || message.type === "human") {
+      compactMessages.push(message);
+      continue;
+    }
+    
+    // For AI messages, keep if they don't have tool calls or if they're the last in a sequence
+    if (message.type === "ai") {
+      const nextMessage = state.messages[i + 1];
+      if (!message.tool_calls || !nextMessage || nextMessage.type !== "tool") {
+        compactMessages.push(message);
+      }
+    }
+    
+    // Keep tool messages only if they're the final result
+    if (message.type === "tool") {
+      const nextMessage = state.messages[i + 1];
+      if (!nextMessage || nextMessage.type !== "tool") {
+        compactMessages.push(message);
+      }
+    }
+  }
   
-  // Update history
-  const history = [...(state.history || []), {
-    iteration: iterations,
-    data: processedData,
-    timestamp: Date.now()
-  }];
-  
-  return {
-    data: processedData,
-    iterations,
-    converged,
-    history
-  };
+  const response = model.invoke(managedMessages);
+  return { messages: [response] };
 }
 
-function processIteration(data: any, iteration: number): any {
-  // Iterative processing
-  return {
-    value: data.value ? data.value * 0.9 : 1.0,
-    iteration,
-    processed: true
-  };
-}
-
-function checkConvergence(oldData: any, newData: any): boolean {
-  if (!oldData.value || !newData.value) return false;
-  return Math.abs(oldData.value - newData.value) < 0.001;
-}
-
-function shouldContinueRecursive(state: typeof RecursiveState.State) {
-  if (state.converged) return END;
-  if (state.iterations >= state.maxIterations) return END;
-  return "continue";
-}
-
-const recursiveGraph = new StateGraph(RecursiveState)
-  .addNode("process", recursiveProcessingNode)
-  .addEdge(START, "process")
-  .addConditionalEdges("process", shouldContinueRecursive, {
-    continue: "process",
-    [END]: END
+const messageManagementGraph = new StateGraph(StepState)
+  .addNode("managed_agent", messageManagementNode)
+  .addNode("tools", callTools)
+  .addNode("final", (state) => state)
+  .addEdge(START, "managed_agent")
+  .addConditionalEdges("managed_agent", shouldContinue, {
+    tools: "tools",
+    final: "final"
   })
+  .addEdge("tools", "managed_agent")
+  .addEdge("final", END)
   .compile();
-
-// Usage with recursive processing
-const recursiveResult = await recursiveGraph.invoke({
-  data: { value: 10.0 },
-  iterations: 0,
-  maxIterations: 100,
-  converged: false,
-  history: []
-});
-
-console.log(`Converged after ${recursiveResult.iterations} iterations`);
-console.log(`Final value: ${recursiveResult.data.value}`);
 ```
 
 ## Related Links

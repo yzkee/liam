@@ -4,24 +4,6 @@ This guide covers how to use LangGraph's prebuilt ToolNode for tool calling.
 
 ToolNode is a LangChain Runnable that takes graph state (with a list of messages) as input and outputs state update with the result of tool calls. It is designed to work well out-of-box with LangGraph's prebuilt ReAct agent, but can also work with any StateGraph as long as its state has a messages key with an appropriate reducer.
 
-## Related Links
-
-For more detailed information, refer to the official LangGraph.js documentation:
-
-### ToolNode Usage
-- [How to call tools using ToolNode](https://langchain-ai.github.io/langgraphjs/how-tos/tool-calling/)
-
-### Tool Calling Patterns
-- [How to force an agent to call a tool](https://langchain-ai.github.io/langgraphjs/how-tos/force-calling-a-tool-first/)
-- [How to handle tool calling errors](https://langchain-ai.github.io/langgraphjs/how-tos/tool-calling-errors/)
-- [How to pass runtime values to tools](https://langchain-ai.github.io/langgraphjs/how-tos/pass-run-time-values-to-tools/)
-
-### State Updates from Tools
-- [How to update graph state from tools](https://langchain-ai.github.io/langgraphjs/how-tos/update-state-from-tools/)
-
-### Additional Tool-related Features
-- [How to stream events from within a tool](https://langchain-ai.github.io/langgraphjs/how-tos/streaming-events-from-within-tools/)
-
 ## ToolNode Usage
 
 ### How to call tools using ToolNode
@@ -395,3 +377,21 @@ const stateUpdatingWorkflow = new StateGraph(ExtendedStateAnnotation)
 
 const app = stateUpdatingWorkflow.compile();
 ```
+
+## Related Links
+
+For more detailed information, refer to the official LangGraph.js documentation:
+
+### ToolNode Usage
+- [How to call tools using ToolNode](https://langchain-ai.github.io/langgraphjs/how-tos/tool-calling/)
+
+### Tool Calling Patterns
+- [How to force an agent to call a tool](https://langchain-ai.github.io/langgraphjs/how-tos/force-calling-a-tool-first/)
+- [How to handle tool calling errors](https://langchain-ai.github.io/langgraphjs/how-tos/tool-calling-errors/)
+- [How to pass runtime values to tools](https://langchain-ai.github.io/langgraphjs/how-tos/pass-run-time-values-to-tools/)
+
+### State Updates from Tools
+- [How to update graph state from tools](https://langchain-ai.github.io/langgraphjs/how-tos/update-state-from-tools/)
+
+### Additional Tool-related Features
+- [How to stream events from within a tool](https://langchain-ai.github.io/langgraphjs/how-tos/streaming-events-from-within-tools/)

@@ -2,18 +2,6 @@
 
 In this how-to guide we will demonstrate how to implement a multi-agent network architecture where each agent can communicate with every other agent (many-to-many connections) and can decide which agent to call next. We will be using LangGraph's functional API — individual agents will be defined as tasks and the agent handoffs will be defined in the main entrypoint.
 
-## Related Links
-
-For more detailed information, refer to the official LangGraph.js documentation:
-
-### Multi-agent Systems
-- [How to build a multi-agent network (functional API)](https://langchain-ai.github.io/langgraphjs/how-tos/multi-agent-network-functional/)
-- [How to add multi-turn conversation in a multi-agent application (functional API)](https://langchain-ai.github.io/langgraphjs/how-tos/multi-agent-multi-turn-convo-functional/)
-
-### Related Features
-- [How to manage conversation history](https://langchain-ai.github.io/langgraphjs/how-tos/manage-conversation-history/)
-- [How to add and use subgraphs](https://langchain-ai.github.io/langgraphjs/how-tos/subgraph/)
-
 ## Agent Communication Patterns & Supervisory Patterns & Multi-turn Conversations
 
 ### How to build a multi-agent network (functional API)
@@ -374,3 +362,15 @@ const result = await multiAgentApp.invoke({
   messages: [new HumanMessage("I need help finding a good restaurant in Tokyo")],
 });
 ```
+
+## Related Links
+
+For more detailed information, refer to the official LangGraph.js documentation:
+
+### Multi-agent Systems
+- [How to build a multi-agent network (functional API)](https://langchain-ai.github.io/langgraphjs/how-tos/multi-agent-network-functional/)
+- [How to add multi-turn conversation in a multi-agent application (functional API)](https://langchain-ai.github.io/langgraphjs/how-tos/multi-agent-multi-turn-convo-functional/)
+
+### Related Features
+- [How to manage conversation history](https://langchain-ai.github.io/langgraphjs/how-tos/manage-conversation-history/)
+- [How to add and use subgraphs](https://langchain-ai.github.io/langgraphjs/how-tos/subgraph/)

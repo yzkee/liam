@@ -4,26 +4,6 @@ LangGraph supports multiple streaming modes. The main ones are:
 - `values`: This streaming mode streams back values of the graph. This is the full state of the graph after each node is called.
 - `updates`: This streaming mode streams back updates to the graph. This is the update to the state of the graph after each node is called.
 
-## Related Links
-
-For more detailed information, refer to the official LangGraph.js documentation:
-
-### Stream Modes
-- [How to stream the full state of your graph](https://langchain-ai.github.io/langgraphjs/how-tos/stream-values/)
-- [How to stream state updates of your graph](https://langchain-ai.github.io/langgraphjs/how-tos/stream-updates/)
-- [How to configure multiple streaming modes](https://langchain-ai.github.io/langgraphjs/how-tos/stream-multiple/)
-
-### Token-level Streaming
-- [How to stream LLM tokens](https://langchain-ai.github.io/langgraphjs/how-tos/stream-tokens/)
-- [How to stream LLM tokens without LangChain models](https://langchain-ai.github.io/langgraphjs/how-tos/streaming-tokens-without-langchain/)
-
-### Custom Data Streaming
-- [How to stream custom data](https://langchain-ai.github.io/langgraphjs/how-tos/streaming-content/)
-
-### Streaming from Tools and Nodes
-- [How to stream events from within a tool](https://langchain-ai.github.io/langgraphjs/how-tos/streaming-events-from-within-tools/)
-- [How to stream from the final node](https://langchain-ai.github.io/langgraphjs/how-tos/streaming-from-final-node/)
-
 ## Stream Modes
 
 ### How to stream the full state of your graph
@@ -339,3 +319,23 @@ for await (const chunk of app.streamEvents(
   }
 }
 ```
+
+## Related Links
+
+For more detailed information, refer to the official LangGraph.js documentation:
+
+### Stream Modes
+- [How to stream the full state of your graph](https://langchain-ai.github.io/langgraphjs/how-tos/stream-values/)
+- [How to stream state updates of your graph](https://langchain-ai.github.io/langgraphjs/how-tos/stream-updates/)
+- [How to configure multiple streaming modes](https://langchain-ai.github.io/langgraphjs/how-tos/stream-multiple/)
+
+### Token-level Streaming
+- [How to stream LLM tokens](https://langchain-ai.github.io/langgraphjs/how-tos/stream-tokens/)
+- [How to stream LLM tokens without LangChain models](https://langchain-ai.github.io/langgraphjs/how-tos/streaming-tokens-without-langchain/)
+
+### Custom Data Streaming
+- [How to stream custom data](https://langchain-ai.github.io/langgraphjs/how-tos/streaming-content/)
+
+### Streaming from Tools and Nodes
+- [How to stream events from within a tool](https://langchain-ai.github.io/langgraphjs/how-tos/streaming-events-from-within-tools/)
+- [How to stream from the final node](https://langchain-ai.github.io/langgraphjs/how-tos/streaming-from-final-node/)

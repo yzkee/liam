@@ -20,7 +20,7 @@ const toolSchema = toJsonSchema(schemaDesignToolSchema)
 
 const validateAndExecuteDDL = async (
   schema: Schema,
-): Promise<{ ddlStatements: string; results: SqlResult[] }> => {
+): Promise<{ results: SqlResult[] }> => {
   // Validate DDL by generating and executing it
   const ddlResult = postgresqlSchemaDeparser(schema)
 
@@ -64,7 +64,7 @@ const validateAndExecuteDDL = async (
     )
   }
 
-  return { results, ddlStatements }
+  return { results }
 }
 
 export const schemaDesignTool: StructuredTool = tool(
@@ -105,41 +105,27 @@ export const schemaDesignTool: StructuredTool = tool(
       )
     }
 
-    const { ddlStatements, results } = await validateAndExecuteDDL(
-      applyResult.value,
-    )
+    const { results } = await validateAndExecuteDDL(applyResult.value)
 
-    const queryResult = await repositories.schema.createValidationQuery({
+    const successfulStatements = results.filter(
+      (result) => result.success,
+    ).length
+    const totalStatements = results.length
+    const summary = `DDL validation successful: ${successfulStatements}/${totalStatements} statements executed successfully`
+
+    const result = await repositories.schema.createTimelineItem({
       designSessionId,
-      queryString: ddlStatements,
+      content: summary,
+      type: 'assistant_log',
+      role: 'db',
     })
 
-    if (queryResult.success) {
-      await repositories.schema.createValidationResults({
-        validationQueryId: queryResult.queryId,
-        results,
-      })
-
-      const successfulStatements = results.filter(
-        (result) => result.success,
-      ).length
-      const totalStatements = results.length
-      const summary = `DDL validation successful: ${successfulStatements}/${totalStatements} statements executed successfully`
-
-      const result = await repositories.schema.createTimelineItem({
-        designSessionId,
-        content: summary,
-        type: 'query_result',
-        queryResultId: queryResult.queryId,
-      })
-
-      if (!result.success) {
-        // LangGraph tool nodes require throwing errors to trigger retry mechanism
-        // eslint-disable-next-line no-throw-error/no-throw-error
-        throw new Error(
-          `Failed to create timeline item for DDL execution results: ${result.error}. Please try again.`,
-        )
-      }
+    if (!result.success) {
+      // LangGraph tool nodes require throwing errors to trigger retry mechanism
+      // eslint-disable-next-line no-throw-error/no-throw-error
+      throw new Error(
+        `Failed to create timeline item for DDL execution results: ${result.error}. Please try again.`,
+      )
     }
 
     const versionResult = await repositories.schema.createVersion({
@@ -156,11 +142,6 @@ export const schemaDesignTool: StructuredTool = tool(
         `Failed to create schema version after DDL validation: ${errorMessage}. Please try again.`,
       )
     }
-
-    const successfulStatements = results.filter(
-      (result) => result.success,
-    ).length
-    const totalStatements = results.length
 
     return `Schema successfully updated. The operations have been applied to the database schema, DDL validation successful (${successfulStatements}/${totalStatements} statements executed successfully), and new version created.`
   },

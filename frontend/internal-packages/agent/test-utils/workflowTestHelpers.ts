@@ -5,6 +5,7 @@ import {
 import type { RunnableConfig } from '@langchain/core/runnables'
 import {
   createLogger,
+  getLogLevel,
   setupDatabaseAndUser,
   validateEnvironment,
 } from '../scripts/shared/scriptUtils'
@@ -70,7 +71,7 @@ export const getTestConfig = async (options?: {
     process.env['OPENAI_API_KEY'] = 'dummy-key-for-testing'
   }
 
-  const logger = createLogger('ERROR') // Only show errors during test setup
+  const logger = createLogger(getLogLevel(process.env['LOG_LEVEL']))
 
   const setupResult = await validateEnvironment()
     .andThen(setupDatabaseAndUser(logger))

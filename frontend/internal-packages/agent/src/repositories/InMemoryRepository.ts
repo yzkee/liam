@@ -2,7 +2,6 @@ import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
 import { MemorySaver } from '@langchain/langgraph-checkpoint'
 import type { Artifact } from '@liam-hq/artifact'
 import type { Tables } from '@liam-hq/db/supabase/database.types'
-import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import type { Schema } from '@liam-hq/schema'
 import { schemaSchema } from '@liam-hq/schema'
 import { applyPatch } from 'fast-json-patch'
@@ -13,17 +12,14 @@ import type {
   CreateArtifactParams,
   CreateTimelineItemParams,
   CreateVersionParams,
-  CreateWorkflowRunParams,
   DesignSessionData,
   SchemaData,
   SchemaRepository,
   TimelineItemResult,
   UpdateArtifactParams,
   UpdateTimelineItemParams,
-  UpdateWorkflowRunStatusParams,
   UserInfo,
   VersionResult,
-  WorkflowRunResult,
 } from './types'
 
 type InMemoryRepositoryState = {
@@ -31,12 +27,6 @@ type InMemoryRepositoryState = {
   designSessions: Map<string, DesignSessionData>
   timelineItems: Map<string, Tables<'timeline_items'>>
   artifacts: Map<string, Tables<'artifacts'>>
-  validationQueries: Map<
-    string,
-    { id: string; designSessionId: string; queryString: string }
-  >
-  validationResults: Map<string, SqlResult[]>
-  workflowRuns: Map<string, Tables<'workflow_runs'>>
   versions: Map<string, { id: string; schema: Schema; versionNumber: number }>
   buildingSchemas: Map<
     string,
@@ -55,7 +45,6 @@ type InMemoryRepositoryOptions = {
   schemas?: Record<string, Schema>
   designSessions?: Record<string, Partial<DesignSessionData>>
   artifacts?: Record<string, Artifact>
-  workflowRuns?: Record<string, Partial<Tables<'workflow_runs'>>>
 }
 
 export class InMemoryRepository implements SchemaRepository {
@@ -70,9 +59,6 @@ export class InMemoryRepository implements SchemaRepository {
       designSessions: new Map(),
       timelineItems: new Map(),
       artifacts: new Map(),
-      validationQueries: new Map(),
-      validationResults: new Map(),
-      workflowRuns: new Map(),
       versions: new Map(),
       buildingSchemas: new Map(),
     }
@@ -115,19 +101,6 @@ export class InMemoryRepository implements SchemaRepository {
         })
       },
     )
-
-    Object.entries(options.workflowRuns || {}).forEach(([id, workflowRun]) => {
-      this.state.workflowRuns.set(id, {
-        id,
-        workflow_run_id: workflowRun.workflow_run_id || id,
-        design_session_id:
-          workflowRun.design_session_id || 'test-design-session-id',
-        organization_id: workflowRun.organization_id || 'test-org-id',
-        status: workflowRun.status || 'pending',
-        created_at: workflowRun.created_at || new Date().toISOString(),
-        updated_at: workflowRun.updated_at || new Date().toISOString(),
-      })
-    })
   }
 
   private generateId(): string {
@@ -236,7 +209,6 @@ export class InMemoryRepository implements SchemaRepository {
       organization_id: 'test-org-id',
       design_session_id: params.designSessionId,
       building_schema_version_id: null,
-      query_result_id: null,
       assistant_role: null,
       type: 'user',
     }
@@ -271,7 +243,6 @@ export class InMemoryRepository implements SchemaRepository {
         type: 'query_result',
         assistant_role: null,
         user_id: null,
-        query_result_id: params.queryResultId,
       }
     } else if (params.type === 'error') {
       timelineItem = {
@@ -409,77 +380,6 @@ export class InMemoryRepository implements SchemaRepository {
     return { success: true, artifact }
   }
 
-  async createValidationQuery(params: {
-    designSessionId: string
-    queryString: string
-  }): Promise<
-    { success: true; queryId: string } | { success: false; error: string }
-  > {
-    const queryId = this.generateId()
-
-    this.state.validationQueries.set(queryId, {
-      id: queryId,
-      designSessionId: params.designSessionId,
-      queryString: params.queryString,
-    })
-
-    return { success: true, queryId }
-  }
-
-  async createValidationResults(params: {
-    validationQueryId: string
-    results: SqlResult[]
-  }): Promise<{ success: true } | { success: false; error: string }> {
-    if (!this.state.validationQueries.has(params.validationQueryId)) {
-      return { success: false, error: 'Validation query not found' }
-    }
-
-    this.state.validationResults.set(params.validationQueryId, params.results)
-
-    return { success: true }
-  }
-
-  async createWorkflowRun(
-    params: CreateWorkflowRunParams,
-  ): Promise<WorkflowRunResult> {
-    const id = this.generateId()
-    const now = new Date().toISOString()
-
-    const workflowRun: Tables<'workflow_runs'> = {
-      id,
-      workflow_run_id: params.workflowRunId,
-      design_session_id: params.designSessionId,
-      organization_id: 'test-org-id',
-      status: 'pending',
-      created_at: now,
-      updated_at: now,
-    }
-
-    this.state.workflowRuns.set(params.workflowRunId, workflowRun)
-
-    return { success: true, workflowRun }
-  }
-
-  async updateWorkflowRunStatus(
-    params: UpdateWorkflowRunStatusParams,
-  ): Promise<WorkflowRunResult> {
-    const workflowRun = this.state.workflowRuns.get(params.workflowRunId)
-
-    if (!workflowRun) {
-      return { success: false, error: 'Workflow run not found' }
-    }
-
-    const updated = {
-      ...workflowRun,
-      status: params.status,
-      updated_at: new Date().toISOString(),
-    }
-
-    this.state.workflowRuns.set(params.workflowRunId, updated)
-
-    return { success: true, workflowRun: updated }
-  }
-
   // Helper methods for testing
   getCurrentSchema(designSessionId: string): Schema | null {
     const schemaData = this.state.schemas.get(designSessionId)
@@ -490,14 +390,6 @@ export class InMemoryRepository implements SchemaRepository {
     return Array.from(this.state.timelineItems.values()).filter(
       (item) => item.design_session_id === designSessionId,
     )
-  }
-
-  getWorkflowRun(workflowRunId: string): Tables<'workflow_runs'> | null {
-    return this.state.workflowRuns.get(workflowRunId) || null
-  }
-
-  getValidationResults(queryId: string): SqlResult[] | null {
-    return this.state.validationResults.get(queryId) || null
   }
 
   /**

@@ -5,7 +5,7 @@ import type { StructuredTool } from '@langchain/core/tools'
 import { tool } from '@langchain/core/tools'
 import { Command } from '@langchain/langgraph'
 import type { DmlOperation } from '@liam-hq/artifact'
-import type { SqlResult } from '@liam-hq/pglite-server/src/types'
+import type { SqlResult } from '@liam-hq/pglite-server'
 import { v4 as uuidv4 } from 'uuid'
 import * as v from 'valibot'
 import type { Testcase } from '../qa-agent/types'
@@ -132,42 +132,6 @@ export const runTestTool: StructuredTool = tool(
       designSessionId,
       artifact,
     })
-
-    // Convert test results to SQL results format for database storage
-    const dmlSqlResults: SqlResult[] = testcaseExecutionResults.map(
-      (result) => ({
-        sql: `Test Case: ${result.testCaseTitle}`,
-        result: result.success
-          ? { executed: true }
-          : { error: result.failedOperation?.error },
-        success: result.success,
-        id: `testcase-${result.testCaseId}`,
-        metadata: {
-          executionTime: 0,
-          timestamp: result.executedAt.toISOString(),
-        },
-      }),
-    )
-
-    // Save validation query and results to database
-    const combinedStatements = [
-      ddlStatements ? 'DDL Statements' : '',
-      'DML operations executed individually',
-    ]
-      .filter(Boolean)
-      .join('\n')
-
-    const queryResult = await repositories.schema.createValidationQuery({
-      designSessionId,
-      queryString: combinedStatements,
-    })
-
-    if (queryResult.success) {
-      await repositories.schema.createValidationResults({
-        validationQueryId: queryResult.queryId,
-        results: dmlSqlResults,
-      })
-    }
 
     // Generate validation message
     const validationMessage = formatValidationErrors(testcaseExecutionResults)

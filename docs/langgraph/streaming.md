@@ -1,6 +1,8 @@
 # Streaming
 
-LangGraph provides multiple streaming modes to handle real-time data flow and provide responsive user experiences. This guide covers the different streaming approaches available in LangGraph.js based on the official documentation.
+LangGraph supports multiple streaming modes. The main ones are:
+- `values`: This streaming mode streams back values of the graph. This is the full state of the graph after each node is called.
+- `updates`: This streaming mode streams back updates to the graph. This is the update to the state of the graph after each node is called.
 
 ## Related Links
 
@@ -26,7 +28,7 @@ For more detailed information, refer to the official LangGraph.js documentation:
 
 ### How to stream the full state of your graph
 
-Stream the complete state of the graph after each node execution. This mode provides full state snapshots at each step.
+This streaming mode streams back values of the graph. This is the full state of the graph after each node is called.
 
 ```typescript
 import { StateGraph, Annotation } from "@langchain/langgraph";
@@ -60,7 +62,7 @@ for await (const chunk of await app.stream(
 
 ### How to stream state updates of your graph
 
-Stream only the updates/changes made by each node, providing incremental state changes.
+This streaming mode streams back updates to the graph. This is the update to the state of the graph after each node is called.
 
 ```typescript
 // Stream updates - get only the changes from each node
@@ -74,7 +76,7 @@ for await (const chunk of await app.stream(
 
 ### How to configure multiple streaming modes
 
-You can combine multiple streaming modes to get different perspectives on the execution.
+LangGraph supports configuring multiple streaming modes at the same time.
 
 ```typescript
 // Combine multiple stream modes
@@ -90,7 +92,7 @@ for await (const chunk of await app.stream(
 
 ### How to stream LLM tokens
 
-Stream individual tokens from language model responses for real-time text generation.
+In this example, we will stream tokens from the language model powering an agent. We will use a ReAct agent as an example.
 
 ```typescript
 import { ChatAnthropic } from "@langchain/anthropic";
@@ -135,7 +137,7 @@ for await (const chunk of app.streamEvents(
 
 ### How to stream LLM tokens (without LangChain models)
 
-Handle streaming from custom or non-LangChain language models using OpenAI client directly.
+This how-to guide closely follows the others in this directory, showing how to incorporate the functionality into a prototypical agent in LangGraph.
 
 ```typescript
 import OpenAI from "openai";
@@ -183,7 +185,7 @@ for await (const chunk of app.streamEvents(
 
 ### How to stream custom data
 
-Stream custom data and progress information during graph execution.
+You can stream custom data from your nodes in addition to the standard graph state.
 
 ```typescript
 import { dispatchCustomEvent } from "@langchain/core/callbacks/dispatch";
@@ -248,7 +250,7 @@ for await (const chunk of app.streamEvents(
 
 ### How to stream events from within a tool
 
-Stream progress and results from tool executions within nodes using custom tags.
+You can stream events from within a tool to provide real-time updates during tool execution.
 
 ```typescript
 import { tool } from "@langchain/core/tools";
@@ -301,7 +303,7 @@ for await (const chunk of app.streamEvents(
 
 ### How to stream from the final node
 
-Stream results specifically from the final node in your graph execution.
+You can stream data specifically from the final node in your graph execution.
 
 ```typescript
 const finalNode = async (state: typeof StateAnnotation.State, config: RunnableConfig) => {

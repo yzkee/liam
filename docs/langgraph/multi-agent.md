@@ -1,6 +1,6 @@
 # Multi-agent Systems
 
-Multi-agent systems in LangGraph allow you to create complex workflows where multiple specialized agents collaborate to solve problems. This guide covers the patterns and techniques for implementing multi-agent architectures based on the official documentation.
+In this how-to guide we will demonstrate how to implement a multi-agent network architecture where each agent can communicate with every other agent (many-to-many connections) and can decide which agent to call next. We will be using LangGraph's functional API — individual agents will be defined as tasks and the agent handoffs will be defined in the main entrypoint.
 
 ## Related Links
 
@@ -18,7 +18,7 @@ For more detailed information, refer to the official LangGraph.js documentation:
 
 ### How to build a multi-agent network (functional API)
 
-Build a multi-agent network architecture where each agent can communicate with every other agent (many-to-many connections) and can decide which agent to call next using LangGraph's functional API.
+In this how-to guide we will demonstrate how to implement a multi-agent network architecture where each agent can communicate with every other agent (many-to-many connections) and can decide which agent to call next.
 
 ```typescript
 import { entrypoint, task } from "@langchain/langgraph";
@@ -84,7 +84,7 @@ const result = await mainEntrypoint.invoke({
 
 ### How to add multi-turn conversation in a multi-agent application (functional API)
 
-Implement multi-turn conversations where agents can maintain context and hand off conversations seamlessly.
+This guide shows how to add multi-turn conversation capabilities to a multi-agent application using LangGraph's functional API.
 
 ```typescript
 import { entrypoint, task } from "@langchain/langgraph";
@@ -155,7 +155,7 @@ const response3 = await app.invoke({
 
 ### How to manage conversation history
 
-Manage conversation history effectively in multi-agent systems to maintain context and improve agent coordination.
+When building chatbots, one of the most important considerations is how to manage conversation history. Too much history can distract the model, while too little history can make the conversation feel impersonal.
 
 ```typescript
 import { StateGraph, Annotation, START } from "@langchain/langgraph";
@@ -245,7 +245,7 @@ const conversationApp = conversationWorkflow.compile({
 
 ### How to add and use subgraphs
 
-Use subgraphs to implement specialized agent behaviors and create modular multi-agent architectures.
+Subgraphs allow you to create modular, reusable components within your LangGraph applications. This guide shows how to create and use subgraphs effectively.
 
 ```typescript
 import { StateGraph, Annotation, START, END } from "@langchain/langgraph";

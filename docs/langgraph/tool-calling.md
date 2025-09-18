@@ -1,6 +1,8 @@
 # Tool Calling
 
-LangGraph provides comprehensive tool calling capabilities that allow agents to interact with external systems and APIs. This guide covers the different approaches to implementing tool calling in LangGraph.js based on the official documentation.
+This guide covers how to use LangGraph's prebuilt ToolNode for tool calling.
+
+ToolNode is a LangChain Runnable that takes graph state (with a list of messages) as input and outputs state update with the result of tool calls. It is designed to work well out-of-box with LangGraph's prebuilt ReAct agent, but can also work with any StateGraph as long as its state has a messages key with an appropriate reducer.
 
 ## Related Links
 
@@ -24,7 +26,7 @@ For more detailed information, refer to the official LangGraph.js documentation:
 
 ### How to call tools using ToolNode
 
-ToolNode is a LangChain Runnable that takes graph state (with a list of messages) as input and outputs state update with the result of tool calls.
+This guide covers how to use LangGraph's prebuilt ToolNode for tool calling.
 
 ```typescript
 import { ToolNode } from "@langchain/langgraph/prebuilt";
@@ -71,7 +73,7 @@ const toolResult = await toolNode.invoke({
 
 ### Using with chat models
 
-Integrate ToolNode with chat models for automatic tool calling in conversational flows.
+ToolNode is designed to work well out-of-box with LangGraph's prebuilt ReAct agent, but can also work with any StateGraph as long as its state has a messages key with an appropriate reducer.
 
 ```typescript
 import { ChatAnthropic } from "@langchain/anthropic";
@@ -146,7 +148,7 @@ const reactAgent = async () => {
 
 ### How to force an agent to call a tool
 
-Force agents to call specific tools first before making any plans, useful for executing specific actions in your application.
+Sometimes you want to force an agent to call a tool first, before it makes any plans. This can be useful if you want to force the agent to call a specific tool.
 
 ```typescript
 import { StateGraph, Annotation, START } from "@langchain/langgraph";
@@ -220,7 +222,7 @@ const app = workflow.compile();
 
 ### How to handle tool calling errors
 
-Implement robust error handling for tool execution failures with retry logic and graceful degradation.
+When tools encounter errors during execution, it's important to handle them gracefully to prevent the agent from getting stuck or producing unhelpful responses.
 
 ```typescript
 import { ToolNode } from "@langchain/langgraph/prebuilt";
@@ -272,7 +274,7 @@ const workflow = new StateGraph(StateAnnotation)
 
 ### How to pass runtime values to tools
 
-Pass runtime configuration and values to tools during execution.
+Sometimes you may want to pass runtime values to your tools - values that are only known when the graph is invoked and not when it's defined.
 
 ```typescript
 // Tool that uses runtime configuration
@@ -318,7 +320,7 @@ const nodeWithConfig = async (state: typeof StateAnnotation.State, config: Runna
 
 ### How to update graph state from tools
 
-Allow tools to modify the graph state directly through their results and custom state management.
+By default, ToolNode will add tool outputs as ToolMessages to the messages list. However, you may want to update other parts of the graph state based on tool outputs.
 
 ```typescript
 // Extended state annotation with additional fields

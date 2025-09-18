@@ -14,16 +14,11 @@ import { useRealtimeArtifact } from './components/Output/components/Artifact/hoo
 import { OutputPlaceholder } from './components/OutputPlaceholder'
 import { useRealtimeTimelineItems } from './hooks/useRealtimeTimelineItems'
 import { useRealtimeVersionsWithSchema } from './hooks/useRealtimeVersionsWithSchema'
-import { useRealtimeWorkflowRuns } from './hooks/useRealtimeWorkflowRuns'
 import { useStream } from './hooks/useStream'
 import { SQL_REVIEW_COMMENTS } from './mock'
 import styles from './SessionDetailPage.module.css'
 import { convertTimelineItemToTimelineItemEntry } from './services/convertTimelineItemToTimelineItemEntry'
-import type {
-  DesignSessionWithTimelineItems,
-  Version,
-  WorkflowRunStatus,
-} from './types'
+import type { DesignSessionWithTimelineItems, Version } from './types'
 
 type Props = {
   buildingSchemaId: string
@@ -32,7 +27,6 @@ type Props = {
   initialDisplayedSchema: Schema
   initialPrevSchema: Schema
   initialVersions: Version[]
-  initialWorkflowRunStatus: WorkflowRunStatus | null
   isDeepModelingEnabled: boolean
   initialIsPublic: boolean
 }
@@ -44,7 +38,6 @@ export const SessionDetailPageClient: FC<Props> = ({
   initialDisplayedSchema,
   initialPrevSchema,
   initialVersions,
-  initialWorkflowRunStatus,
   isDeepModelingEnabled,
   initialIsPublic,
 }) => {
@@ -96,13 +89,6 @@ export const SessionDetailPageClient: FC<Props> = ({
 
   // Use realtime artifact hook to monitor artifact changes
   const { artifact } = useRealtimeArtifact(designSessionId)
-  const hasRealtimeArtifact = !!artifact
-
-  // Use realtime workflow status
-  const { status } = useRealtimeWorkflowRuns(
-    designSessionId,
-    initialWorkflowRunStatus,
-  )
 
   const chatMessages = mapStoredMessagesToChatMessages(initialMessages)
   const { isStreaming, messages, start } = useStream({
@@ -124,9 +110,6 @@ export const SessionDetailPageClient: FC<Props> = ({
       const firstItem = messages[0]
       if (!firstItem || !isHumanMessage(firstItem)) return
 
-      // Check if there's already a workflow running
-      if (status === 'pending') return
-
       // Mark as triggered before the async call
       hasTriggeredInitialWorkflow.current = true
 
@@ -139,10 +122,9 @@ export const SessionDetailPageClient: FC<Props> = ({
     }
 
     triggerInitialWorkflow()
-  }, [messages, designSessionId, isDeepModelingEnabled, start, status])
+  }, [messages, designSessionId, isDeepModelingEnabled, start])
 
-  // Show Output if artifact exists OR workflow is not pending
-  const shouldShowOutput = hasRealtimeArtifact || status !== 'pending'
+  const shouldShowOutput = artifact !== null
 
   return (
     <div className={styles.container}>
@@ -156,7 +138,7 @@ export const SessionDetailPageClient: FC<Props> = ({
           <Chat
             schemaData={displayedSchema}
             messages={messages}
-            isWorkflowRunning={status === 'pending' || isStreaming}
+            isWorkflowRunning={isStreaming}
             onMessageSend={addOrUpdateTimelineItem}
           />
         </div>

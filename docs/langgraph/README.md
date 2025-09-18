@@ -5,7 +5,7 @@ This directory contains a comprehensive guide for LangGraph.js - a low-level orc
 ## ⚠️ Important Guidelines
 
 ### Avoid createReactAgent
-**Do not use `createReactAgent` from `@langchain/langgraph/prebuilt` in production applications.** This function abstracts away prompt engineering and violates [Factor 2: Own Your Prompts](https://github.com/humanlayer/12-factor-agents/blob/main/content/factor-02-own-your-prompts.md) from the 12-factor-agents methodology.
+**Do not use `createReactAgent` from `@langchain/langgraph/prebuilt`.** This function abstracts away prompt engineering and violates [Factor 2: Own Your Prompts](https://github.com/humanlayer/12-factor-agents/blob/main/content/factor-02-own-your-prompts.md) from the 12-factor-agents methodology.
 
 **Why this matters:**
 - `createReactAgent` is a "black box" that hides the prompt engineering from you

@@ -8,6 +8,7 @@ export const FAILURE_STATUS = 'Failed'
 export const generateHeadingId = (text: string): string => {
   return text
     .toLowerCase()
-    .replace(/[^\w]+/g, '-')
-    .replace(/(^-|-$)/g, '')
+    .trim()
+    .replace(/[^\p{L}\p{N}_-]+/gu, '-')
+    .replace(/^-+|-+$/g, '')
 }

@@ -40,47 +40,13 @@ const GraphAnnotation = Annotation.Root({
 
 ### Nested State Structures
 
-Merge multiple annotations using the `spec` property:
-
-```typescript
-const UserAnnotation = Annotation.Root({
-  userId: Annotation<string>(),
-  userName: Annotation<string>(),
-});
-
-const SessionAnnotation = Annotation.Root({
-  sessionId: Annotation<string>(),
-  timestamp: Annotation<number>(),
-});
-
-const CombinedAnnotation = Annotation.Root({
-  ...UserAnnotation.spec,
-  ...SessionAnnotation.spec,
-  messages: Annotation<BaseMessage[]>({
-    reducer: (currentState, updateValue) => currentState.concat(updateValue),
-    default: () => [],
-  }),
-});
-```
+Merge multiple annotations using the `spec` property for complex state structures.
 
 ## State Updates and Merging
 
 ### Custom Reducers
 
-Define custom reducer functions to control how state updates are merged:
-
-```typescript
-const GraphAnnotation = Annotation.Root({
-  messages: Annotation<BaseMessage[]>({
-    reducer: (currentState, updateValue) => currentState.concat(updateValue),
-    default: () => [],
-  }),
-  counter: Annotation<number>({
-    reducer: (currentState, updateValue) => currentState + updateValue,
-    default: () => 0,
-  }),
-});
-```
+Define custom reducer functions to control how state updates are merged with `reducer` and `default` functions.
 
 ### State Validation
 
@@ -94,46 +60,11 @@ const workflow = new StateGraph(GraphAnnotation);
 
 ### Partial Updates
 
-Return partial state updates from nodes that will be merged with existing state:
-
-```typescript
-function updateNode(state: typeof GraphAnnotation.State) {
-  return {
-    counter: 1,
-    messages: [new AIMessage("Counter incremented")]
-  };
-}
-```
+Return partial state updates from nodes that will be merged with existing state.
 
 ### Updating State from Tools
 
-Use the `Command` object to update graph state from tools:
-
-```typescript
-import { Command } from "@langchain/langgraph";
-
-const lookupUserInfo = tool(async (input, config) => {
-  const userInfo = await getUserInfo(input.userId);
-  
-  return new Command({
-    update: {
-      userInfo: userInfo,
-      messages: [
-        new ToolMessage({
-          content: `Successfully looked up user information`,
-          tool_call_id: config.tool_call_id,
-        }),
-      ],
-    },
-  });
-}, {
-  name: "lookup_user_info",
-  description: "Use this to look up user information",
-  schema: z.object({
-    userId: z.string(),
-  }),
-});
-```
+Use the `Command` object with the `update` parameter to update graph state from tool calls.
 
 ## State Persistence Patterns
 
@@ -150,32 +81,7 @@ const graph = workflow.compile({ checkpointer });
 
 ### Cross-thread Persistence
 
-Implement cross-thread persistence using the `Store` interface:
-
-```typescript
-import { InMemoryStore } from "@langchain/langgraph";
-
-const store = new InMemoryStore();
-const graph = workflow.compile({ 
-  checkpointer,
-  store 
-});
-
-// Access store in nodes
-function nodeWithStore(
-  state: typeof GraphAnnotation.State,
-  config: { store: InMemoryStore }
-) {
-  const userMemory = await config.store.get(
-    ["users", state.userId], 
-    "memory"
-  );
-  
-  return {
-    messages: [new AIMessage(`Retrieved memory: ${userMemory}`)]
-  };
-}
-```
+Implement cross-thread persistence using the `Store` interface with namespaces for data organization.
 
 ### PostgreSQL Persistence
 
@@ -190,57 +96,11 @@ const graph = workflow.compile({ checkpointer });
 
 ### State Editing
 
-Edit graph state using breakpoints and `updateState`:
-
-```typescript
-const graph = workflow.compile({ 
-  checkpointer,
-  interruptBefore: ["nodeA"] 
-});
-
-// Run until breakpoint
-const result = await graph.invoke(
-  { messages: [new HumanMessage("Hello")] },
-  { configurable: { thread_id: "1" } }
-);
-
-// Update state at breakpoint
-await graph.updateState(
-  { configurable: { thread_id: "1" } },
-  { messages: [new AIMessage("Updated message")] }
-);
-
-// Resume execution
-const finalResult = await graph.invoke(
-  null,
-  { configurable: { thread_id: "1" } }
-);
-```
+Edit graph state using breakpoints with `interruptBefore` and `updateState` method for state modifications.
 
 ### Subgraph State Management
 
-Manage state in subgraphs with persistence:
-
-```typescript
-const subgraph = new StateGraph(SubgraphAnnotation)
-  .addNode("subNode", subNodeFunction)
-  .addEdge(START, "subNode")
-  .addEdge("subNode", END)
-  .compile({ checkpointer });
-
-// Add subgraph to main graph
-workflow.addNode("subgraphNode", subgraph);
-
-// View and update subgraph state
-const subgraphState = await subgraph.getState({
-  configurable: { thread_id: "subgraph-1" }
-});
-
-await subgraph.updateState(
-  { configurable: { thread_id: "subgraph-1" } },
-  { subgraphData: "updated" }
-);
-```
+Manage state in subgraphs with persistence using `getState` and `updateState` methods for nested configurations.
 
 ## References
 

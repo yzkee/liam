@@ -1,12 +1,8 @@
 # Multi-agent Systems
 
+## How to build a multi-agent network (functional API)
+
 In this how-to guide we will demonstrate how to implement a multi-agent network architecture where each agent can communicate with every other agent (many-to-many connections) and can decide which agent to call next. We will be using LangGraph's functional API — individual agents will be defined as tasks and the agent handoffs will be defined in the main entrypoint.
-
-## Agent Communication Patterns & Supervisory Patterns & Multi-turn Conversations
-
-### How to build a multi-agent network (functional API)
-
-In this how-to guide we will demonstrate how to implement a multi-agent network architecture where each agent can communicate with every other agent (many-to-many connections) and can decide which agent to call next.
 
 ```typescript
 import { entrypoint, task } from "@langchain/langgraph";
@@ -70,78 +66,91 @@ const result = await mainEntrypoint.invoke({
 });
 ```
 
-### How to add multi-turn conversation in a multi-agent application (functional API)
+## How to add multi-turn conversation in a multi-agent application (functional API)
 
-This guide shows how to add multi-turn conversation capabilities to a multi-agent application using LangGraph's functional API.
+In this how-to guide, we'll build an application that allows an end-user to engage in a multi-turn conversation with one or more agents. We'll create a node that uses an `interrupt` to collect user input and routes back to the active agent.
+
+The agents will be implemented as tasks in a workflow that executes agent steps and determines the next action:
+
+1. **Wait for user input** to continue the conversation, or
+2. **Route to another agent** (or back to itself, such as in a loop) via a handoff.
 
 ```typescript
-import { entrypoint, task } from "@langchain/langgraph";
+import { entrypoint, task, interrupt } from "@langchain/langgraph";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
-import { MemorySaver } from "@langchain/langgraph";
+import { tool } from "@langchain/core/tools";
+import { z } from "zod";
 
-// Create memory saver for conversation persistence
-const memory = new MemorySaver();
+// Define tools for agent handoffs
+const transferToTravelAdvisor = tool(
+  async () => {
+    return "Successfully transferred to travel_advisor.";
+  },
+  {
+    name: "transferToTravelAdvisor",
+    description: "Transfer to travel advisor for trip planning help.",
+    schema: z.object({}),
+    returnDirect: true,
+  }
+);
 
-// Define specialized agents with conversation context
-const travelPlannerAgent = createReactAgent({
+const transferToHotelAdvisor = tool(
+  async () => {
+    return "Successfully transferred to hotel_advisor.";
+  },
+  {
+    name: "transferToHotelAdvisor",
+    description: "Transfer to hotel advisor for accommodation help.",
+    schema: z.object({}),
+    returnDirect: true,
+  }
+);
+
+// Create agents
+const travelAdvisor = createReactAgent({
   llm: model,
-  tools: [transferToHotelAdvisor, transferToRestaurantAdvisor],
-  stateModifier: `You are a travel planner. You help users plan their trips by:
-  1. Understanding their travel preferences
-  2. Coordinating with hotel and restaurant advisors
-  3. Creating comprehensive travel itineraries
-  
-  Maintain conversation context and remember user preferences throughout the conversation.`,
+  tools: [transferToHotelAdvisor],
+  stateModifier: "You are a travel advisor. Help users plan their trips.",
 });
 
-const hotelSpecialistAgent = createReactAgent({
+const hotelAdvisor = createReactAgent({
   llm: model,
-  tools: [transferToTravelPlanner, transferToRestaurantAdvisor],
-  stateModifier: `You are a hotel specialist. You help users find the perfect accommodations by:
-  1. Understanding their budget and preferences
-  2. Recommending suitable hotels
-  3. Providing booking assistance
-  
-  Remember previous conversation context when making recommendations.`,
+  tools: [transferToTravelAdvisor],
+  stateModifier: "You are a hotel advisor. Help users find accommodations.",
 });
 
-// Define tasks with conversation memory
-const travelPlannerTask = task(travelPlannerAgent, "travel_planner");
-const hotelSpecialistTask = task(hotelSpecialistAgent, "hotel_specialist");
+// Define tasks
+const travelAdvisorTask = task(travelAdvisor, "travel_advisor");
+const hotelAdvisorTask = task(hotelAdvisor, "hotel_advisor");
 
-// Multi-turn conversation entrypoint
-const conversationalTravelAssistant = entrypoint({
-  name: "conversational_travel_assistant",
-  description: "A conversational travel assistant that maintains context across multiple turns",
-  tasks: [travelPlannerTask, hotelSpecialistTask],
-  defaultTask: travelPlannerTask,
+// Create entrypoint
+const multiTurnEntrypoint = entrypoint({
+  name: "multi_turn_assistant",
+  description: "A multi-turn travel assistant",
+  tasks: [travelAdvisorTask, hotelAdvisorTask],
+  defaultTask: travelAdvisorTask,
 });
 
-// Compile with memory for conversation persistence
-const app = conversationalTravelAssistant.compile({
-  checkpointer: memory,
-});
-
-// Multi-turn conversation example
+// Test multi-turn conversation
 const config = { configurable: { thread_id: "conversation_1" } };
 
-// First turn
-const response1 = await app.invoke({
-  messages: [{ role: "user", content: "I'm planning a trip to Paris" }]
+let result = await multiTurnEntrypoint.invoke({
+  messages: [{ role: "user", content: "I want to plan a trip to Paris" }]
 }, config);
 
-// Second turn - context is maintained
-const response2 = await app.invoke({
-  messages: [{ role: "user", content: "What hotels would you recommend?" }]
-}, config);
-
-// Third turn - agent can reference previous conversation
-const response3 = await app.invoke({
-  messages: [{ role: "user", content: "Actually, let's also look at restaurants near those hotels" }]
-}, config);
+// Continue the conversation
+while (true) {
+  const userInput = await interrupt("Please provide your next message:");
+  
+  result = await multiTurnEntrypoint.invoke({
+    messages: [{ role: "user", content: userInput }]
+  }, config);
+  
+  console.log("Assistant:", result.messages[result.messages.length - 1].content);
+}
 ```
 
-### How to manage conversation history
+## How to manage conversation history
 
 When building chatbots, one of the most important considerations is how to manage conversation history. Too much history can distract the model, while too little history can make the conversation feel impersonal.
 
@@ -149,218 +158,141 @@ When building chatbots, one of the most important considerations is how to manag
 import { StateGraph, Annotation, START } from "@langchain/langgraph";
 import { BaseMessage, HumanMessage, AIMessage } from "@langchain/core/messages";
 
-// Define state with conversation history management
-const ConversationState = Annotation.Root({
+// Define state
+const AgentState = Annotation.Root({
   messages: Annotation<BaseMessage[]>({
     reducer: (x, y) => x.concat(y),
   }),
-  conversation_summary: Annotation<string>({
-    reducer: (x, y) => y ?? x,
-  }),
-  active_agent: Annotation<string>({
-    reducer: (x, y) => y ?? x,
-  }),
 });
 
-// Conversation summarizer node
-const summarizeConversation = async (state: typeof ConversationState.State) => {
-  const { messages } = state;
-  
-  // Only summarize if we have enough messages
-  if (messages.length < 10) {
-    return {};
-  }
-  
-  // Create summary of conversation history
-  const conversationText = messages
-    .slice(0, -5) // Keep last 5 messages unsummarized
-    .map(msg => `${msg.getType()}: ${msg.content}`)
-    .join("\n");
-    
-  const summaryPrompt = `Summarize this conversation history concisely:
-${conversationText}
-
-Summary:`;
-
-  const summary = await model.invoke([new HumanMessage(summaryPrompt)]);
-  
-  // Keep only recent messages plus summary
-  const recentMessages = messages.slice(-5);
-  const summaryMessage = new AIMessage({
-    content: `[Conversation Summary] ${summary.content}`,
-    additional_kwargs: { is_summary: true }
-  });
-  
-  return {
-    messages: [summaryMessage, ...recentMessages],
-    conversation_summary: summary.content,
-  };
+// Filter messages to keep only the most recent
+const filterMessages = (messages: BaseMessage[]) => {
+  return messages.slice(-1); // Keep only the last message
 };
 
-// Agent node that uses conversation history
-const agentWithHistory = async (state: typeof ConversationState.State) => {
-  const { messages, conversation_summary, active_agent } = state;
+// Agent node that uses filtered messages
+const agent = async (state: typeof AgentState.State) => {
+  const { messages } = state;
+  const filteredMessages = filterMessages(messages);
   
-  // Prepare context with summary if available
-  let contextMessages = messages;
-  if (conversation_summary) {
-    const contextPrompt = `Previous conversation summary: ${conversation_summary}
-    
-Current conversation:`;
-    contextMessages = [new HumanMessage(contextPrompt), ...messages.slice(-5)];
-  }
-  
-  const response = await model.invoke(contextMessages);
+  const response = await model.invoke(filteredMessages);
   
   return {
     messages: [response],
-    active_agent: "main_agent",
   };
 };
 
-// Build workflow with conversation management
-const conversationWorkflow = new StateGraph(ConversationState)
-  .addNode("summarize", summarizeConversation)
-  .addNode("agent", agentWithHistory)
-  .addEdge(START, "summarize")
-  .addEdge("summarize", "agent")
-  .addEdge("agent", "summarize");
+// Build workflow
+const workflow = new StateGraph(AgentState)
+  .addNode("agent", agent)
+  .addEdge(START, "agent");
 
-const conversationApp = conversationWorkflow.compile({
-  checkpointer: memory,
-});
+const app = workflow.compile();
 ```
 
-### How to add and use subgraphs
+## How to add and use subgraphs
 
-Subgraphs allow you to create modular, reusable components within your LangGraph applications. This guide shows how to create and use subgraphs effectively.
+Subgraphs allow you to build complex systems with multiple components that are themselves graphs. A common use case for using subgraphs is building multi-agent systems.
+
+### Add a node with the compiled subgraph
 
 ```typescript
-import { StateGraph, Annotation, START, END } from "@langchain/langgraph";
-import { MemorySaver } from "@langchain/langgraph";
+import { StateGraph, Annotation } from "@langchain/langgraph";
 
-// Define subgraph state for specialized agent
-const SpecialistState = Annotation.Root({
-  messages: Annotation<BaseMessage[]>({
-    reducer: (x, y) => x.concat(y),
-  }),
-  specialist_type: Annotation<string>({
-    reducer: (x, y) => y ?? x,
-  }),
-  analysis_result: Annotation<any>({
-    reducer: (x, y) => y ?? x,
-  }),
+const SubgraphStateAnnotation = Annotation.Root({
+  foo: Annotation<string>, // note that this key is shared with the parent graph state
+  bar: Annotation<string>,
 });
 
-// Create specialist subgraph
-const createSpecialistSubgraph = (specialistType: string) => {
-  const specialistNode = async (state: typeof SpecialistState.State) => {
-    const { messages } = state;
-    
-    const specialistPrompt = `You are a ${specialistType} specialist. 
-Analyze the following request and provide expert advice:
-${messages[messages.length - 1].content}`;
-
-    const response = await model.invoke([new HumanMessage(specialistPrompt)]);
-    
-    return {
-      messages: [response],
-      specialist_type: specialistType,
-      analysis_result: {
-        type: specialistType,
-        recommendation: response.content,
-        confidence: 0.9,
-      },
-    };
-  };
-
-  return new StateGraph(SpecialistState)
-    .addNode("analyze", specialistNode)
-    .addEdge(START, "analyze")
-    .addEdge("analyze", END)
-    .compile();
+const subgraphNode1 = async (state: typeof SubgraphStateAnnotation.State) => {
+  return { bar: "bar" };
 };
 
-// Create different specialist subgraphs
-const hotelSpecialistGraph = createSpecialistSubgraph("hotel");
-const restaurantSpecialistGraph = createSpecialistSubgraph("restaurant");
-const activitySpecialistGraph = createSpecialistSubgraph("activity");
+const subgraphNode2 = async (state: typeof SubgraphStateAnnotation.State) => {
+  // note that this node is using a state key ('bar') that is only available in the subgraph
+  // and is sending update on the shared state key ('foo')
+  return { foo: state.foo + state.bar };
+};
 
-// Main coordinator state
-const CoordinatorState = Annotation.Root({
-  messages: Annotation<BaseMessage[]>({
-    reducer: (x, y) => x.concat(y),
-  }),
-  specialist_results: Annotation<any[]>({
-    reducer: (x, y) => [...(x || []), ...(y || [])],
-  }),
-  current_specialist: Annotation<string>({
-    reducer: (x, y) => y ?? x,
-  }),
+const subgraphBuilder = new StateGraph(SubgraphStateAnnotation)
+  .addNode("subgraphNode1", subgraphNode1)
+  .addNode("subgraphNode2", subgraphNode2)
+  .addEdge("__start__", "subgraphNode1")
+  .addEdge("subgraphNode1", "subgraphNode2");
+
+const subgraph = subgraphBuilder.compile();
+
+// Define parent graph
+const ParentStateAnnotation = Annotation.Root({
+  foo: Annotation<string>,
 });
 
-// Coordinator that routes to subgraphs
-const coordinatorNode = async (state: typeof CoordinatorState.State) => {
-  const { messages } = state;
-  const lastMessage = messages[messages.length - 1].content;
-  
-  // Determine which specialist to consult
-  let specialist = "hotel";
-  if (lastMessage.toLowerCase().includes("restaurant") || lastMessage.toLowerCase().includes("food")) {
-    specialist = "restaurant";
-  } else if (lastMessage.toLowerCase().includes("activity") || lastMessage.toLowerCase().includes("tour")) {
-    specialist = "activity";
-  }
-  
+const node1 = async (state: typeof ParentStateAnnotation.State) => {
   return {
-    current_specialist: specialist,
+    foo: "hi! " + state.foo,
   };
 };
 
-// Subgraph invoker
-const invokeSpecialist = async (state: typeof CoordinatorState.State) => {
-  const { messages, current_specialist } = state;
-  
-  let subgraph;
-  switch (current_specialist) {
-    case "restaurant":
-      subgraph = restaurantSpecialistGraph;
-      break;
-    case "activity":
-      subgraph = activitySpecialistGraph;
-      break;
-    default:
-      subgraph = hotelSpecialistGraph;
-  }
-  
-  // Invoke the specialist subgraph
-  const result = await subgraph.invoke({
-    messages,
-    specialist_type: current_specialist,
+const builder = new StateGraph(ParentStateAnnotation)
+  .addNode("node1", node1)
+  // note that we're adding the compiled subgraph as a node to the parent graph
+  .addNode("node2", subgraph)
+  .addEdge("__start__", "node1")
+  .addEdge("node1", "node2");
+
+const graph = builder.compile();
+```
+
+### Add a node function that invokes the subgraph
+
+```typescript
+import { StateGraph, Annotation } from "@langchain/langgraph";
+
+const SubgraphAnnotation = Annotation.Root({
+  bar: Annotation<string>, // note that this key is shared with the parent graph state
+  baz: Annotation<string>,
+});
+
+const subgraphNodeOne = async (state: typeof SubgraphAnnotation.State) => {
+  return { baz: "baz" };
+};
+
+const subgraphNodeTwo = async (state: typeof SubgraphAnnotation.State) => {
+  return { bar: state.bar + state.baz };
+};
+
+const subgraphCalledInFunction = new StateGraph(SubgraphAnnotation)
+  .addNode("subgraphNode1", subgraphNodeOne)
+  .addNode("subgraphNode2", subgraphNodeTwo)
+  .addEdge("__start__", "subgraphNode1")
+  .addEdge("subgraphNode1", "subgraphNode2")
+  .compile();
+
+// Define parent graph
+const ParentAnnotation = Annotation.Root({
+  foo: Annotation<string>,
+});
+
+const nodeOne = async (state: typeof ParentAnnotation.State) => {
+  return {
+    foo: "hi! " + state.foo,
+  };
+};
+
+const nodeTwo = async (state: typeof ParentAnnotation.State) => {
+  const response = await subgraphCalledInFunction.invoke({
+    bar: state.foo,
   });
-  
-  return {
-    messages: result.messages,
-    specialist_results: [result.analysis_result],
-  };
+  return { foo: response.bar };
 };
 
-// Build main workflow with subgraphs
-const multiAgentWorkflow = new StateGraph(CoordinatorState)
-  .addNode("coordinator", coordinatorNode)
-  .addNode("specialist", invokeSpecialist)
-  .addEdge(START, "coordinator")
-  .addEdge("coordinator", "specialist")
-  .addEdge("specialist", END);
-
-const multiAgentApp = multiAgentWorkflow.compile({
-  checkpointer: new MemorySaver(),
-});
-
-// Usage with subgraphs
-const result = await multiAgentApp.invoke({
-  messages: [new HumanMessage("I need help finding a good restaurant in Tokyo")],
-});
+const graphWithFunction = new StateGraph(ParentStateAnnotation)
+  .addNode("node1", nodeOne)
+  // note that we're adding the compiled subgraph as a node to the parent graph
+  .addNode("node2", nodeTwo)
+  .addEdge("__start__", "node1")
+  .addEdge("node1", "node2")
+  .compile();
 ```
 
 ## Related Links

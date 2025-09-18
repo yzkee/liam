@@ -106,39 +106,6 @@ function simpleNode(state: typeof GraphAnnotation.State) {
 }
 ```
 
-### Async Nodes with External Calls
-
-Nodes can be asynchronous for external API calls:
-
-```typescript
-async function asyncNode(state: typeof GraphAnnotation.State) {
-  const response = await fetch("https://api.example.com/data");
-  const data = await response.json();
-  
-  return {
-    messages: [new AIMessage(`Received data: ${JSON.stringify(data)}`)]
-  };
-}
-```
-
-### Error Handling in Nodes
-
-Implement proper error handling patterns:
-
-```typescript
-async function nodeWithErrorHandling(state: typeof GraphAnnotation.State) {
-  try {
-    const result = await riskyOperation();
-    return {
-      messages: [new AIMessage(`Success: ${result}`)]
-    };
-  } catch (error) {
-    return {
-      messages: [new AIMessage(`Error occurred: ${error.message}`)]
-    };
-  }
-}
-```
 
 ### Node Retry Policies
 

@@ -2,6 +2,11 @@
 
 ## Subgraphs
 
+**Related Links:**
+- [How to add and use subgraphs](https://langchain-ai.github.io/langgraphjs/how-tos/subgraph/)
+- [How to view and update state in subgraphs](https://langchain-ai.github.io/langgraphjs/how-tos/subgraphs-manage-state/)
+- [How to transform inputs and outputs of a subgraph](https://langchain-ai.github.io/langgraphjs/how-tos/subgraph-transform-state/)
+
 ### How to Add and Use Subgraphs
 
 Subgraphs allow you to compose complex workflows by embedding one graph within another. This is useful for creating modular, reusable components and organizing complex logic.
@@ -271,6 +276,10 @@ function combineResults(existing: string, newResult: string): string {
 
 ## Node Retries and Caching
 
+**Related Links:**
+- [How to add node retries](https://langchain-ai.github.io/langgraphjs/how-tos/node-retry-policies/)
+- [How to cache expensive nodes](https://langchain-ai.github.io/langgraphjs/how-tos/node-caching/)
+
 ### How to Add Node Retries
 
 Node retries allow you to automatically retry failed nodes with configurable policies, improving the reliability of your graph execution.
@@ -529,6 +538,9 @@ function conditionalNode(state: typeof StateAnnotation.State) {
 ```
 
 ## Runtime Configuration
+
+**Related Links:**
+- [How to add runtime configuration to your graph](https://langchain-ai.github.io/langgraphjs/how-tos/configuration/)
 
 ### How to Add Runtime Configuration to Your Graph
 
@@ -798,6 +810,9 @@ async function runWithValidatedConfig(input: any, config: ConfigWithFeatures) {
 ```
 
 ## Structured Output
+
+**Related Links:**
+- [How to have an agent respond in structured format](https://langchain-ai.github.io/langgraphjs/how-tos/respond-in-format/)
 
 ### How to Have Agent Respond in Structured Format
 
@@ -1461,6 +1476,11 @@ Monitor your deployment performance using the built-in metrics:
 Access these metrics through the LangGraph Platform dashboard or via the monitoring API.
 
 ## Additional Advanced Features
+
+**Related Links:**
+- [How to defer node execution](https://langchain-ai.github.io/langgraphjs/how-tos/defer-node-execution/)
+- [How to let an agent return tool results directly](https://langchain-ai.github.io/langgraphjs/how-tos/dynamically-returning-directly/)
+- [How to manage agent steps](https://langchain-ai.github.io/langgraphjs/how-tos/managing-agent-steps/)
 
 ### How to Defer Node Execution
 

@@ -487,28 +487,6 @@ Tools can access the config.configurable field for values like user IDs that are
 
 However, it can be convenient to access intermediate runtime values which are not known ahead of time, but are progressively generated as a graph executes, such as the current graph state. This guide will cover two techniques for this: The getCurrentTaskInput utility function, and closures.
 
-#### Setup
-
-Install the following to run this guide:
-
-```typescript
-npm install @langchain/langgraph @langchain/openai @langchain/core
-```
-
-Next, configure your environment to connect to your model provider.
-
-```typescript
-export OPENAI_API_KEY=your-api-key
-```
-
-Optionally, set your API key for LangSmith tracing, which will give us best-in-class observability.
-
-```typescript
-export LANGCHAIN_TRACING_V2="true"
-export LANGCHAIN_CALLBACKS_BACKGROUND="true"
-export LANGCHAIN_API_KEY=your-api-key
-```
-
 #### The getCurrentTaskInput Utility Function
 
 The getCurrentTaskInput utility function makes it easier to get the current state in areas of your application that might be called indirectly, like tool handlers.

@@ -1154,25 +1154,19 @@ const enhancedDirectReturnGraph = new StateGraph(DirectReturnState)
 
 In this example we will build a ReAct Agent that explicitly manages intermediate steps. The previous examples just put all messages into the model, but that extra context can distract the agent and add latency to the API calls. In this example we will only include the N most recent messages in the chat history.
 
-#### Setup
+#### Define the nodes
 
 ```typescript
 import { Annotation } from "@langchain/langgraph";
-import { BaseMessage } from "@langchain/core/messages";
+import { BaseMessage, END } from "@langchain/langgraph";
+import { AIMessage, ToolMessage } from "@langchain/core/messages";
+import { RunnableConfig } from "@langchain/core/runnables";
 
 const AgentState = Annotation.Root({
   messages: Annotation<BaseMessage[]>({
     reducer: (x, y) => x.concat(y),
   }),
 });
-```
-
-#### Define the nodes
-
-```typescript
-import { END } from "@langchain/langgraph";
-import { AIMessage, ToolMessage } from "@langchain/core/messages";
-import { RunnableConfig } from "@langchain/core/runnables";
 
 // Define the function that determines whether to continue or not
 const shouldContinue = (state: typeof AgentState.State) => {

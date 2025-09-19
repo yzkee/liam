@@ -38,8 +38,8 @@ const subgraph = new StateGraph(SubgraphState)
   .compile();
 
 // Parent graph node that uses the subgraph
-function callSubgraph(state: typeof ParentState.State) {
-  const result = subgraph.invoke({ user_input: state.user_input });
+async function callSubgraph(state: typeof ParentState.State) {
+  const result = await subgraph.invoke({ user_input: state.user_input });
   return {
     final_response: result.processed_data
   };
@@ -93,8 +93,8 @@ const grandchildGraph = new StateGraph(GrandchildState)
   .compile();
 
 // Child graph node that calls grandchild
-function childNode(state: typeof ChildState.State) {
-  const result = grandchildGraph.invoke({
+async function childNode(state: typeof ChildState.State) {
+  const result = await grandchildGraph.invoke({
     name: "test",
     path: []
   });
@@ -111,8 +111,8 @@ const childGraph = new StateGraph(ChildState)
   .compile();
 
 // Parent graph node
-function parentNode(state: typeof ParentState.State) {
-  const result = childGraph.invoke({ aggregate: [] });
+async function parentNode(state: typeof ParentState.State) {
+  const result = await childGraph.invoke({ aggregate: [] });
   return {
     messages: [...state.messages, ...result.aggregate]
   };
@@ -243,15 +243,15 @@ const childGraph = new StateGraph(ChildState)
   .compile();
 
 // Parent node with input/output transformation
-function transformAndCall(state: typeof ParentState.State) {
+async function transformAndCall(state: typeof ParentState.State) {
   // Transform parent state to child state format
   const childInput = {
     query: state.user_request.toUpperCase() // Transform input
   };
-  
+
   // Call child graph
-  const childResult = childGraph.invoke(childInput);
-  
+  const childResult = await childGraph.invoke(childInput);
+
   // Transform child result back to parent state format
   return {
     final_answer: `Final: ${childResult.response}` // Transform output
@@ -269,7 +269,7 @@ const parentGraph = new StateGraph(ParentState)
 
 ```typescript
 // Advanced transformation with multiple fields
-function complexTransform(state: typeof ParentState.State) {
+async function complexTransform(state: typeof ParentState.State) {
   // Extract and transform multiple fields
   const transformedInput = {
     query: extractQuery(state.user_request),
@@ -279,9 +279,9 @@ function complexTransform(state: typeof ParentState.State) {
       source: "parent_graph"
     }
   };
-  
-  const result = childGraph.invoke(transformedInput);
-  
+
+  const result = await childGraph.invoke(transformedInput);
+
   // Combine results with existing state
   return {
     final_answer: combineResults(state.final_answer, result.response),
@@ -576,103 +576,6 @@ const flagResult = await featureFlagGraph.invoke(
 );
 ```
 
-function featureFlagNode(state: typeof State.State, config: ConfigWithFeatures) {
-  const { features } = config;
-  
-  let response: string;
-  
-  // Feature flag: new algorithm
-  if (features.enableNewAlgorithm) {
-    response = processWithNewAlgorithm(state.messages);
-  } else {
-    response = processWithLegacyAlgorithm(state.messages);
-  }
-  
-  // Feature flag: advanced processing
-  if (features.useAdvancedProcessing) {
-    response = enhanceResponse(response);
-  }
-  
-  // A/B testing
-  if (features.experimentGroup === "A") {
-    response = `[Experiment A] ${response}`;
-  } else if (features.experimentGroup === "B") {
-    response = `[Experiment B] ${response.toUpperCase()}`;
-  }
-  
-  // Debug information
-  if (features.debugMode) {
-    console.log(`Debug: Processed with flags:`, features);
-    response = `${response}\n[Debug: ${JSON.stringify(features)}]`;
-  }
-  
-  return { response };
-}
-
-function processWithNewAlgorithm(messages: string[]): string {
-  return `New algorithm result for: ${messages.join(", ")}`;
-}
-
-function processWithLegacyAlgorithm(messages: string[]): string {
-  return `Legacy result for: ${messages.join(", ")}`;
-}
-
-function enhanceResponse(response: string): string {
-  return `Enhanced: ${response}`;
-}
-
-// Configuration schema validation
-function validateConfig(config: ConfigWithFeatures): boolean {
-  if (!config.model || typeof config.temperature !== "number") {
-    throw new Error("Invalid configuration: missing required fields");
-  }
-  
-  if (config.temperature < 0 || config.temperature > 2) {
-    throw new Error("Invalid temperature: must be between 0 and 2");
-  }
-  
-  return true;
-}
-
-// Create graph with feature flags
-const featureFlagGraph = new StateGraph(State)
-  .addNode("feature_node", featureFlagNode)
-  .addEdge(START, "feature_node")
-  .addEdge("feature_node", END)
-  .compile();
-
-// Example configurations for different scenarios
-const configA: ConfigWithFeatures = {
-  model: "gpt-4",
-  temperature: 0.7,
-  maxTokens: 1000,
-  features: {
-    enableNewAlgorithm: true,
-    useAdvancedProcessing: false,
-    experimentGroup: "A",
-    debugMode: false
-  }
-};
-
-const configB: ConfigWithFeatures = {
-  model: "gpt-4",
-  temperature: 0.7,
-  maxTokens: 1000,
-  features: {
-    enableNewAlgorithm: true,
-    useAdvancedProcessing: true,
-    experimentGroup: "B",
-    debugMode: true
-  }
-};
-
-// Usage with validation
-async function runWithValidatedConfig(input: any, config: ConfigWithFeatures) {
-  validateConfig(config);
-  return await featureFlagGraph.invoke(input, { config });
-}
-```
-
 ## Structured Output
 
 ### How to Have Agent Respond in Structured Format
@@ -684,13 +587,17 @@ Structured output ensures that your agent responses follow a specific format, ma
 ```typescript
 import { StateGraph, Annotation, START, END } from "@langchain/langgraph";
 import { tool } from "@langchain/core/tools";
-import * as v from "valibot";
+import { z } from "zod";
+import { ChatAnthropic } from "@langchain/anthropic";
 
 // Define response schema
-const Response = v.object({
-  temperature: v.number(),
-  other_notes: v.string()
+const Response = z.object({
+  temperature: z.number().describe("the temperature"),
+  other_notes: z.string().describe("any other notes about the weather")
 });
+
+// Initialize model
+const model = new ChatAnthropic({ model: "claude-3-sonnet-20240229" });
 
 // Create a final response tool
 const finalResponseTool = tool(
@@ -711,11 +618,11 @@ const StructuredState = Annotation.Root({
 });
 
 // Node that calls model with structured output
-function callModel(state: typeof StructuredState.State) {
+async function callModel(state: typeof StructuredState.State) {
   // Bind the final response tool to the model
   const modelWithTools = model.bindTools([finalResponseTool]);
-  
-  const response = modelWithTools.invoke(state.messages);
+
+  const response = await modelWithTools.invoke(state.messages);
   return { messages: [response] };
 }
 
@@ -776,9 +683,9 @@ const detailedResponseTool = tool(
 );
 
 // Node that uses the detailed response tool
-function detailedResponseNode(state: typeof StructuredState.State) {
+async function detailedResponseNode(state: typeof StructuredState.State) {
   const modelWithDetailedTool = model.bindTools([detailedResponseTool]);
-  const response = modelWithDetailedTool.invoke(state.messages);
+  const response = await modelWithDetailedTool.invoke(state.messages);
   return { messages: [response] };
 }
 
@@ -823,13 +730,13 @@ const jsonResponseTool = tool(
 );
 
 // Node that can use multiple response formats
-function multiFormatNode(state: typeof StructuredState.State) {
+async function multiFormatNode(state: typeof StructuredState.State) {
   const modelWithMultipleTools = model.bindTools([
     textResponseTool,
     jsonResponseTool
   ]);
-  
-  const response = modelWithMultipleTools.invoke(state.messages);
+
+  const response = await modelWithMultipleTools.invoke(state.messages);
   return { messages: [response] };
 }
 
@@ -974,15 +881,19 @@ This pattern allows agents to return tool results directly as the final answer, 
 ```typescript
 import { StateGraph, Annotation, START, END } from "@langchain/langgraph";
 import { DynamicStructuredTool } from "@langchain/core/tools";
-import * as v from "valibot";
+import { z } from "zod";
+import { ChatAnthropic } from "@langchain/anthropic";
+
+// Initialize model
+const model = new ChatAnthropic({ model: "claude-3-sonnet-20240229" });
 
 // Tool schema with return_direct field
 const directReturnTool = new DynamicStructuredTool({
   name: "get_weather",
   description: "Get weather information",
-  schema: v.object({
-    location: v.pipe(v.string(), v.description("The location to get weather for")),
-    return_direct: v.pipe(v.boolean(), v.description("Whether to return the result directly"), v.optional(v.literal(false)))
+  schema: z.object({
+    location: z.string().describe("The location to get weather for"),
+    return_direct: z.boolean().describe("Whether to return the result directly").optional()
   }),
   func: async ({ location, return_direct }) => {
     const weather = `Weather in ${location}: Sunny, 72°F`;
@@ -997,9 +908,9 @@ const DirectReturnState = Annotation.Root({
 });
 
 // Node that calls model with tools
-function callModel(state: typeof DirectReturnState.State) {
+async function callModel(state: typeof DirectReturnState.State) {
   const modelWithTools = model.bindTools([directReturnTool]);
-  const response = modelWithTools.invoke(state.messages);
+  const response = await modelWithTools.invoke(state.messages);
   return { messages: [response] };
 }
 
@@ -1022,14 +933,14 @@ function shouldContinue(state: typeof DirectReturnState.State) {
 }
 
 // Tool execution node
-function callTools(state: typeof DirectReturnState.State) {
+async function callTools(state: typeof DirectReturnState.State) {
   const lastMessage = state.messages[state.messages.length - 1];
   const toolMessages = [];
-  
+
   for (const toolCall of lastMessage.tool_calls) {
     if (toolCall.args?.return_direct) {
       // Execute tool and return result directly
-      const result = directReturnTool.invoke(toolCall.args);
+      const result = await directReturnTool.invoke(toolCall.args);
       toolMessages.push({
         tool_call_id: toolCall.id,
         type: "tool",
@@ -1037,7 +948,7 @@ function callTools(state: typeof DirectReturnState.State) {
       });
     }
   }
-  
+
   return { messages: toolMessages };
 }
 
@@ -1062,9 +973,9 @@ const directReturnGraph = new StateGraph(DirectReturnState)
 const calculatorTool = new DynamicStructuredTool({
   name: "calculator",
   description: "Perform calculations",
-  schema: v.object({
-    expression: v.string(),
-    return_direct: v.pipe(v.boolean(), v.optional(v.literal(true)))
+  schema: z.object({
+    expression: z.string(),
+    return_direct: z.boolean().default(true).optional()
   }),
   func: async ({ expression }) => {
     return `Result: ${expression} = 42`;
@@ -1073,10 +984,10 @@ const calculatorTool = new DynamicStructuredTool({
 
 const searchTool = new DynamicStructuredTool({
   name: "search",
-  description: "Search for information", 
-  schema: v.object({
-    query: v.string(),
-    return_direct: v.pipe(v.boolean(), v.optional(v.literal(false)))
+  description: "Search for information",
+  schema: z.object({
+    query: z.string(),
+    return_direct: z.boolean().default(false).optional()
   }),
   func: async ({ query }) => {
     return `Search results for: ${query}`;
@@ -1084,9 +995,9 @@ const searchTool = new DynamicStructuredTool({
 });
 
 // Enhanced tool calling node
-function enhancedCallModel(state: typeof DirectReturnState.State) {
+async function enhancedCallModel(state: typeof DirectReturnState.State) {
   const modelWithTools = model.bindTools([calculatorTool, searchTool]);
-  const response = modelWithTools.invoke(state.messages);
+  const response = await modelWithTools.invoke(state.messages);
   return { messages: [response] };
 }
 
@@ -1111,25 +1022,25 @@ function enhancedShouldContinue(state: typeof DirectReturnState.State) {
 }
 
 // Enhanced tool execution
-function enhancedCallTools(state: typeof DirectReturnState.State) {
+async function enhancedCallTools(state: typeof DirectReturnState.State) {
   const lastMessage = state.messages[state.messages.length - 1];
   const toolMessages = [];
-  
+
   for (const toolCall of lastMessage.tool_calls) {
     let result;
     if (toolCall.name === "calculator") {
-      result = calculatorTool.invoke(toolCall.args);
+      result = await calculatorTool.invoke(toolCall.args);
     } else if (toolCall.name === "search") {
-      result = searchTool.invoke(toolCall.args);
+      result = await searchTool.invoke(toolCall.args);
     }
-    
+
     toolMessages.push({
       tool_call_id: toolCall.id,
       type: "tool",
       content: result
     });
   }
-  
+
   return { messages: toolMessages };
 }
 
@@ -1157,10 +1068,17 @@ In this example we will build a ReAct Agent that explicitly manages intermediate
 #### Define the nodes
 
 ```typescript
-import { Annotation } from "@langchain/langgraph";
-import { BaseMessage, END } from "@langchain/langgraph";
+import { Annotation, START, END, StateGraph } from "@langchain/langgraph";
+import { BaseMessage } from "@langchain/core/messages";
 import { AIMessage, ToolMessage } from "@langchain/core/messages";
 import { RunnableConfig } from "@langchain/core/runnables";
+import { ChatAnthropic } from "@langchain/anthropic";
+import { ToolNode } from "@langchain/langgraph/prebuilt";
+
+// Initialize model and tools
+const model = new ChatAnthropic({ model: "claude-3-sonnet-20240229" });
+const boundModel = model.bindTools([/* your tools here */]);
+const toolNode = new ToolNode([/* your tools here */]);
 
 const AgentState = Annotation.Root({
   messages: Annotation<BaseMessage[]>({
@@ -1208,8 +1126,6 @@ const callModel = async (
 #### Define the graph
 
 ```typescript
-import { START, StateGraph } from "@langchain/langgraph";
-
 // Define a new graph
 const workflow = new StateGraph(AgentState)
   .addNode("agent", callModel)
@@ -1218,6 +1134,10 @@ const workflow = new StateGraph(AgentState)
   .addConditionalEdges(
     "agent",
     shouldContinue,
+    {
+      tools: "tools",
+      [END]: END
+    }
   )
   .addEdge("tools", "agent");
 

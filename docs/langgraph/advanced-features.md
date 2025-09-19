@@ -1152,218 +1152,85 @@ const enhancedDirectReturnGraph = new StateGraph(DirectReturnState)
 
 ### How to Manage Agent Steps
 
-Managing agent steps involves controlling the flow of conversation history and intermediate processing steps to optimize performance and maintain context.
+In this example we will build a ReAct Agent that explicitly manages intermediate steps. The previous examples just put all messages into the model, but that extra context can distract the agent and add latency to the API calls. In this example we will only include the N most recent messages in the chat history.
 
-#### Basic Step Management
+#### Setup
 
 ```typescript
-import { StateGraph, Annotation, START, END } from "@langchain/langgraph";
-import { BaseMessage, ToolMessage } from "@langchain/core/messages";
+import { Annotation } from "@langchain/langgraph";
+import { BaseMessage } from "@langchain/core/messages";
 
-const StepState = Annotation.Root({
+const AgentState = Annotation.Root({
   messages: Annotation<BaseMessage[]>({
-    reducer: (x, y) => x.concat(y)
-  })
+    reducer: (x, y) => x.concat(y),
+  }),
 });
+```
 
-// Node that manages message history and limits steps
-function callModel(state: typeof StepState.State) {
-  // Limit to most recent N messages to manage context
-  const modelMessages = [];
-  
-  // Iterate through messages in reverse to get most recent
+#### Define the nodes
+
+```typescript
+import { END } from "@langchain/langgraph";
+import { AIMessage, ToolMessage } from "@langchain/core/messages";
+import { RunnableConfig } from "@langchain/core/runnables";
+
+// Define the function that determines whether to continue or not
+const shouldContinue = (state: typeof AgentState.State) => {
+  const { messages } = state;
+  const lastMessage = messages[messages.length - 1] as AIMessage;
+  // If there is no function call, then we finish
+  if (!lastMessage.tool_calls || lastMessage.tool_calls.length === 0) {
+    return END;
+  }
+  // Otherwise if there is, we continue
+  return "tools";
+};
+
+// Here we don't pass all messages to the model but rather only pass the `N` most recent.
+// Note that this is a terribly simplistic way to handle messages meant as an illustration,
+// and there may be other methods you may want to look into depending on your use case.
+// We also have to make sure we don't truncate the chat history to include the tool message first,
+// as this would cause an API error.
+const callModel = async (
+  state: typeof AgentState.State,
+  config?: RunnableConfig,
+) => {
+  let modelMessages = [];
   for (let i = state.messages.length - 1; i >= 0; i--) {
-    modelMessages.unshift(state.messages[i]);
-    
-    // Stop if we have enough messages (e.g., 5 messages)
+    modelMessages.push(state.messages[i]);
     if (modelMessages.length >= 5) {
-      break;
+      if (!ToolMessage.isInstance(modelMessages[modelMessages.length - 1])) {
+        break;
+      }
     }
   }
-  
-  // Ensure we don't end with a tool message
-  if (modelMessages.length > 0 && ToolMessage.isInstance(modelMessages[modelMessages.length - 1])) {
-    // Add a human message to continue the conversation
-    modelMessages.push(new HumanMessage("Please continue."));
-  }
-  
-  const response = model.invoke(modelMessages);
+  modelMessages.reverse();
+  const response = await boundModel.invoke(modelMessages, config);
+  // We return an object, because this will get added to the existing list
   return { messages: [response] };
-}
+};
+```
 
-// Router to control execution flow
-function shouldContinue(state: typeof StepState.State) {
-  const lastMessage = state.messages[state.messages.length - 1];
-  
-  // Continue if the last message has tool calls
-  if (lastMessage.tool_calls && lastMessage.tool_calls.length > 0) {
-    return "tools";
-  }
-  
-  return "final";
-}
+#### Define the graph
 
-// Tool execution node
-function callTools(state: typeof StepState.State) {
-  const lastMessage = state.messages[state.messages.length - 1];
-  const toolMessages = [];
-  
-  for (const toolCall of lastMessage.tool_calls) {
-    // Execute tool and create tool message
-    const result = `Tool ${toolCall.name} executed with args: ${JSON.stringify(toolCall.args)}`;
-    toolMessages.push(new ToolMessage({
-      content: result,
-      tool_call_id: toolCall.id
-    }));
-  }
-  
-  return { messages: toolMessages };
-}
+```typescript
+import { START, StateGraph } from "@langchain/langgraph";
 
-const stepManagedGraph = new StateGraph(StepState)
+// Define a new graph
+const workflow = new StateGraph(AgentState)
   .addNode("agent", callModel)
-  .addNode("tools", callTools)
-  .addNode("final", (state) => state)
+  .addNode("tools", toolNode)
   .addEdge(START, "agent")
-  .addConditionalEdges("agent", shouldContinue, {
-    tools: "tools",
-    final: "final"
-  })
-  .addEdge("tools", "agent")
-  .addEdge("final", END)
-  .compile();
-```
+  .addConditionalEdges(
+    "agent",
+    shouldContinue,
+  )
+  .addEdge("tools", "agent");
 
-#### Advanced Step Control with Message Truncation
-
-```typescript
-// Enhanced message management with truncation
-function advancedCallModel(state: typeof StepState.State) {
-  const modelMessages = [];
-  
-  // More sophisticated message selection
-  for (let i = state.messages.length - 1; i >= 0; i--) {
-    const message = state.messages[i];
-    modelMessages.unshift(message);
-    
-    // Stop if we have enough context (e.g., 10 messages)
-    if (modelMessages.length >= 10) {
-      break;
-    }
-    
-    // Always include the first message if it's a system message
-    if (i === 0 && message.type === "system") {
-      if (!modelMessages.includes(message)) {
-        modelMessages.unshift(message);
-      }
-    }
-  }
-  
-  // Ensure proper message flow
-  if (modelMessages.length > 0) {
-    const lastMessage = modelMessages[modelMessages.length - 1];
-    if (ToolMessage.isInstance(lastMessage)) {
-      // Don't end with a tool message
-      const response = model.invoke(modelMessages.slice(0, -1));
-      return { messages: [response] };
-    }
-  }
-  
-  const response = model.invoke(modelMessages);
-  return { messages: [response] };
-}
-
-// Step counting and limiting
-function stepLimitingRouter(state: typeof StepState.State) {
-  // Count agent steps (non-tool messages from assistant)
-  const agentSteps = state.messages.filter(
-    msg => msg.type === "ai" && (!msg.tool_calls || msg.tool_calls.length === 0)
-  ).length;
-  
-  // Limit to 5 agent steps
-  if (agentSteps >= 5) {
-    return "final";
-  }
-  
-  const lastMessage = state.messages[state.messages.length - 1];
-  if (lastMessage.tool_calls && lastMessage.tool_calls.length > 0) {
-    return "tools";
-  }
-  
-  return "final";
-}
-
-const advancedStepGraph = new StateGraph(StepState)
-  .addNode("agent", advancedCallModel)
-  .addNode("tools", callTools)
-  .addNode("final", (state) => state)
-  .addEdge(START, "agent")
-  .addConditionalEdges("agent", stepLimitingRouter, {
-    tools: "tools",
-    final: "final"
-  })
-  .addEdge("tools", "agent")
-  .addEdge("final", END)
-  .compile();
-```
-
-#### Message History Management
-
-```typescript
-// Comprehensive message management with different strategies
-function messageManagementNode(state: typeof StepState.State) {
-  // Strategy 1: Keep only recent messages
-  const recentMessages = state.messages.slice(-8);
-  
-  // Strategy 2: Keep system message + recent messages
-  const systemMessage = state.messages.find(msg => msg.type === "system");
-  const nonSystemMessages = state.messages.filter(msg => msg.type !== "system").slice(-6);
-  const managedMessages = systemMessage ? [systemMessage, ...nonSystemMessages] : nonSystemMessages;
-  
-  // Strategy 3: Remove intermediate tool messages but keep final results
-  const compactMessages = [];
-  for (let i = 0; i < state.messages.length; i++) {
-    const message = state.messages[i];
-    
-    // Always keep system and human messages
-    if (message.type === "system" || message.type === "human") {
-      compactMessages.push(message);
-      continue;
-    }
-    
-    // For AI messages, keep if they don't have tool calls or if they're the last in a sequence
-    if (message.type === "ai") {
-      const nextMessage = state.messages[i + 1];
-      if (!message.tool_calls || !nextMessage || nextMessage.type !== "tool") {
-        compactMessages.push(message);
-      }
-    }
-    
-    // Keep tool messages only if they're the final result
-    if (message.type === "tool") {
-      const nextMessage = state.messages[i + 1];
-      if (!nextMessage || nextMessage.type !== "tool") {
-        compactMessages.push(message);
-      }
-    }
-  }
-  
-  const response = model.invoke(managedMessages);
-  return { messages: [response] };
-}
-
-const messageManagementGraph = new StateGraph(StepState)
-  .addNode("managed_agent", messageManagementNode)
-  .addNode("tools", callTools)
-  .addNode("final", (state) => state)
-  .addEdge(START, "managed_agent")
-  .addConditionalEdges("managed_agent", shouldContinue, {
-    tools: "tools",
-    final: "final"
-  })
-  .addEdge("tools", "managed_agent")
-  .addEdge("final", END)
-  .compile();
+// Finally, we compile it!
+// This compiles it into a LangChain Runnable,
+// meaning you can use it as you would any other runnable
+const app = workflow.compile();
 ```
 
 ## Related Links

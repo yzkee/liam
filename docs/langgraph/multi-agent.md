@@ -66,90 +66,6 @@ const result = await mainEntrypoint.invoke({
 });
 ```
 
-## How to add multi-turn conversation in a multi-agent application (functional API)
-
-In this how-to guide, we'll build an application that allows an end-user to engage in a multi-turn conversation with one or more agents. We'll create a node that uses an `interrupt` to collect user input and routes back to the active agent.
-
-The agents will be implemented as tasks in a workflow that executes agent steps and determines the next action:
-
-1. **Wait for user input** to continue the conversation, or
-2. **Route to another agent** (or back to itself, such as in a loop) via a handoff.
-
-```typescript
-import { entrypoint, task, interrupt } from "@langchain/langgraph";
-import { createReactAgent } from "@langchain/langgraph/prebuilt";
-import { tool } from "@langchain/core/tools";
-import { z } from "zod";
-
-// Define tools for agent handoffs
-const transferToTravelAdvisor = tool(
-  async () => {
-    return "Successfully transferred to travel_advisor.";
-  },
-  {
-    name: "transferToTravelAdvisor",
-    description: "Transfer to travel advisor for trip planning help.",
-    schema: z.object({}),
-    returnDirect: true,
-  }
-);
-
-const transferToHotelAdvisor = tool(
-  async () => {
-    return "Successfully transferred to hotel_advisor.";
-  },
-  {
-    name: "transferToHotelAdvisor",
-    description: "Transfer to hotel advisor for accommodation help.",
-    schema: z.object({}),
-    returnDirect: true,
-  }
-);
-
-// Create agents
-const travelAdvisor = createReactAgent({
-  llm: model,
-  tools: [transferToHotelAdvisor],
-  stateModifier: "You are a travel advisor. Help users plan their trips.",
-});
-
-const hotelAdvisor = createReactAgent({
-  llm: model,
-  tools: [transferToTravelAdvisor],
-  stateModifier: "You are a hotel advisor. Help users find accommodations.",
-});
-
-// Define tasks
-const travelAdvisorTask = task(travelAdvisor, "travel_advisor");
-const hotelAdvisorTask = task(hotelAdvisor, "hotel_advisor");
-
-// Create entrypoint
-const multiTurnEntrypoint = entrypoint({
-  name: "multi_turn_assistant",
-  description: "A multi-turn travel assistant",
-  tasks: [travelAdvisorTask, hotelAdvisorTask],
-  defaultTask: travelAdvisorTask,
-});
-
-// Test multi-turn conversation
-const config = { configurable: { thread_id: "conversation_1" } };
-
-let result = await multiTurnEntrypoint.invoke({
-  messages: [{ role: "user", content: "I want to plan a trip to Paris" }]
-}, config);
-
-// Continue the conversation
-while (true) {
-  const userInput = await interrupt("Please provide your next message:");
-  
-  result = await multiTurnEntrypoint.invoke({
-    messages: [{ role: "user", content: userInput }]
-  }, config);
-  
-  console.log("Assistant:", result.messages[result.messages.length - 1].content);
-}
-```
-
 ## How to manage conversation history
 
 When building chatbots, one of the most important considerations is how to manage conversation history. Too much history can distract the model, while too little history can make the conversation feel impersonal.
@@ -301,7 +217,6 @@ For more detailed information, refer to the official LangGraph.js documentation:
 
 ### Multi-agent Systems
 - [How to build a multi-agent network (functional API)](https://langchain-ai.github.io/langgraphjs/how-tos/multi-agent-network-functional/)
-- [How to add multi-turn conversation in a multi-agent application (functional API)](https://langchain-ai.github.io/langgraphjs/how-tos/multi-agent-multi-turn-convo-functional/)
 
 ### Related Features
 - [How to manage conversation history](https://langchain-ai.github.io/langgraphjs/how-tos/manage-conversation-history/)

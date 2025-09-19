@@ -4,7 +4,7 @@ import { RETRY_POLICY } from '../utils/errorHandling'
 import { continueToRequirements } from './distributeRequirements'
 import { invokeRunTestToolNode } from './nodes/invokeRunTestToolNode'
 import { qaAgentAnnotation } from './shared/qaAgentAnnotation'
-import { testcaseGeneration } from './testcaseGeneration'
+import { createTestcaseGenerationGraph } from './testcaseGeneration'
 import { validateSchemaNode } from './validateSchema'
 
 export const createQaAgentGraph = (checkpointer?: BaseCheckpointSaver) => {
@@ -12,7 +12,7 @@ export const createQaAgentGraph = (checkpointer?: BaseCheckpointSaver) => {
 
   qaAgentGraph
     // Add nodes for map-reduce pattern
-    .addNode('testcaseGeneration', testcaseGeneration)
+    .addNode('testcaseGeneration', createTestcaseGenerationGraph(checkpointer))
 
     .addNode('validateSchema', validateSchemaNode, {
       retryPolicy: RETRY_POLICY,

@@ -1,5 +1,18 @@
 # @liam-hq/cli
 
+## 0.7.14
+
+### Patch Changes
+
+- [#3453](https://github.com/liam-hq/liam/pull/3453) - - 🐛 Fixed a bug where foreign key relationships with the same name were not visualized. / Thanks [@huuyafwww](https://github.com/huuyafwww)!
+  - Modified to be recognized as a unique foreign key.
+
+## 0.7.13
+
+### Patch Changes
+
+- [#3432](https://github.com/liam-hq/liam/pull/3432) - - 💄 add CommandPalette closing animation / Thanks [@tnyo43](https://github.com/tnyo43)!
+
 ## 0.7.12
 
 ### Patch Changes

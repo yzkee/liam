@@ -79,7 +79,10 @@ describe('invokeSchemaDesignToolNode Integration', () => {
       designSessionId: context.designSessionId,
       userId: context.userId,
       organizationId: context.organizationId,
+      prompt: 'Test schema design',
       next: END,
+      designSchemaRetryCount: 0,
+      schemaDesignSuccessful: false,
     }
 
     // Act
@@ -142,7 +145,10 @@ describe('invokeSchemaDesignToolNode Integration', () => {
       designSessionId: context.designSessionId,
       userId: context.userId,
       organizationId: context.organizationId,
+      prompt: 'Test invalid schema design',
       next: END,
+      designSchemaRetryCount: 0,
+      schemaDesignSuccessful: false,
     }
 
     // Act

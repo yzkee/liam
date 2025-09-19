@@ -15,6 +15,7 @@ This creates a benchmark workspace with multiple datasets:
 - entity-extraction: Checks whether specified table/column names appear (5 cases)
 - ambiguous-recall: Tests recall/search over ambiguous instructions
 - relational-inference: Evaluates implicit relationship inference (1:N, M:N, entity separation)
+- logical-deletion: Evaluates designs that avoid naive is_deleted and separate PII from business references
 
 System features:
 - Parallel dataset processing for faster execution
@@ -32,7 +33,7 @@ pnpm --filter @liam-hq/schema-bench executeLiamDB -all
 pnpm --filter @liam-hq/schema-bench executeLiamDB -entity-extraction
 
 # Run on multiple datasets
-pnpm --filter @liam-hq/schema-bench executeLiamDB -default -entity-extraction -relational-inference
+pnpm --filter @liam-hq/schema-bench executeLiamDB -default -entity-extraction -relational-inference -logical-deletion
 ```
 
 OpenAI:

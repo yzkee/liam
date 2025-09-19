@@ -9,9 +9,21 @@ export const dbAgentAnnotation = Annotation.Root({
   organizationId: Annotation<string>,
   userId: Annotation<string>,
   designSessionId: Annotation<string>,
+  prompt: Annotation<string>,
   next: Annotation<string>({
     reducer: (x, y) => y ?? x ?? END,
     default: () => END,
+  }),
+
+  designSchemaRetryCount: Annotation<number>({
+    reducer: (current, update) => update ?? current ?? 0,
+    default: () => 0,
+  }),
+
+  // Flag to indicate successful schema design tool execution
+  schemaDesignSuccessful: Annotation<boolean>({
+    reducer: (current, update) => update ?? current ?? false,
+    default: () => false,
   }),
 })
 

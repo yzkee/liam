@@ -43,6 +43,7 @@ async function main() {
           'entity-extraction',
           'ambiguous-recall',
           'relational-inference',
+          'logical-deletion',
         ]
 
   // Define all available datasets
@@ -57,6 +58,7 @@ async function main() {
       name: 'relational-inference',
       path: join(workspacePath, 'relational-inference'),
     },
+    { name: 'logical-deletion', path: join(workspacePath, 'logical-deletion') },
   ]
 
   // Filter to requested datasets
@@ -64,7 +66,7 @@ async function main() {
 
   if (datasets.length === 0) {
     handleCliError(
-      'No valid datasets specified. Available: default, entity-extraction, ambiguous-recall, relational-inference',
+      'No valid datasets specified. Available: default, entity-extraction, ambiguous-recall, relational-inference, logical-deletion',
     )
     return
   }

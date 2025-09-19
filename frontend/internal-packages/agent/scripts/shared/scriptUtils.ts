@@ -20,6 +20,19 @@ const LOG_LEVELS = {
 
 type LogLevel = keyof typeof LOG_LEVELS
 
+const isValidLogLevel = (level: string | undefined): level is LogLevel => {
+  return (
+    level === 'DEBUG' ||
+    level === 'INFO' ||
+    level === 'WARN' ||
+    level === 'ERROR'
+  )
+}
+
+export const getLogLevel = (maybeLogLevel?: string): LogLevel => {
+  return isValidLogLevel(maybeLogLevel) ? maybeLogLevel : 'INFO'
+}
+
 // Enhanced logger implementation with configurable log levels
 export const createLogger = (logLevel: LogLevel) => ({
   debug: (message: string, metadata?: Record<string, unknown>) => {

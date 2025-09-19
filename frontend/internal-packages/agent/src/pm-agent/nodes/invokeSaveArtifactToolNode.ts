@@ -26,5 +26,5 @@ export const invokeSaveArtifactToolNode = async (
     result = chunk
   }
 
-  return { ...result, artifactSaveSuccessful: true }
+  return result
 }

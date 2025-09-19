@@ -109,72 +109,157 @@ console.log(finalState.messages[finalState.messages.length - 1].content);
 
 ### How to force an agent to call a tool
 
-In this example we will build a ReAct agent that always calls a certain tool first, before making any plans. In this example, we will create an agent with a search tool. However, at the start we will force the agent to call the search tool (and then let it do whatever it wants after). This is useful when you know you want to execute specific actions in your application but also want the flexibility of letting the LLM follow up on the user's query after going through that fixed sequence.
+In this example we will build a ReAct agent that **always** calls a certain tool first, before making any plans. In this example, we will create an agent with a search tool. However, at the start we will force the agent to call the search tool (and then let it do whatever it wants after). This is useful when you know you want to execute specific actions in your application but also want the flexibility of letting the LLM follow up on the user's query after going through that fixed sequence.
 
 ```typescript
-import { ChatOpenAI } from "@langchain/openai";
-import { tool } from "@langchain/core/tools";
+import { DynamicStructuredTool } from "@langchain/core/tools";
 import { z } from "zod";
 
-const search = tool(
-  async (input) => {
-    return "Cold, with a low of 3℃";
+const searchTool = new DynamicStructuredTool({
+  name: "search",
+  description:
+    "Use to surf the web, fetch current information, check the weather, and retrieve other information.",
+  schema: z.object({
+    query: z.string().describe("The query to use in your search."),
+  }),
+  func: async ({ }: { query: string }) => {
+    // This is a placeholder for the actual implementation
+    return "Cold, with a low of 13 ℃";
   },
-  {
-    name: "search",
-    description: "Use to surf the web, fetch current information, check the weather, and retrieve other information.",
-    schema: z.object({
-      query: z.string().describe("The query to use in your search."),
-    }),
-  }
-);
-
-const model = new ChatOpenAI({
-  model: "gpt-4o",
-  temperature: 0,
 });
 
-const firstModel = model.bindTools([search], {
-  tool_choice: "search",
-});
-
-const regularModel = model.bindTools([search]);
+const tools = [searchTool];
 ```
 
 ```typescript
-import { StateGraph, MessagesAnnotation } from "@langchain/langgraph";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
-import { isAIMessage } from "@langchain/core/messages";
 
-const shouldContinue = (state: typeof MessagesAnnotation.State) => {
-  const messages = state.messages;
-  const lastMessage = messages[messages.length - 1];
-  if (isAIMessage(lastMessage) && lastMessage.tool_calls?.length) {
-    return "tools";
+const toolNode = new ToolNode(tools);
+```
+
+```typescript
+import { ChatOpenAI } from "@langchain/openai";
+
+const model = new ChatOpenAI({
+  temperature: 0,
+  model: "gpt-4o",
+});
+
+const boundModel = model.bindTools(tools);
+```
+
+```typescript
+import { Annotation } from "@langchain/langgraph";
+import { BaseMessage } from "@langchain/core/messages";
+
+const AgentState = Annotation.Root({
+  messages: Annotation<BaseMessage[]>({
+    reducer: (x, y) => x.concat(y),
+  }),
+});
+```
+
+```typescript
+import { AIMessage, AIMessageChunk } from "@langchain/core/messages";
+import { RunnableConfig } from "@langchain/core/runnables";
+import { concat } from "@langchain/core/utils/stream";
+
+// Define logic that will be used to determine which conditional edge to go down
+const shouldContinue = (state: typeof AgentState.State) => {
+  const { messages } = state;
+  const lastMessage = messages[messages.length - 1] as AIMessage;
+  // If there is no function call, then we finish
+  if (!lastMessage.tool_calls || lastMessage.tool_calls.length === 0) {
+    return "end";
   }
-  return "__end__";
+  // Otherwise if there is, we continue
+  return "continue";
 };
 
-const callFirstModel = async (state: typeof MessagesAnnotation.State) => {
-  const response = await firstModel.invoke(state.messages);
-  return { messages: [response] };
+// Define the function that calls the model
+const callModel = async (
+  state: typeof AgentState.State,
+  config?: RunnableConfig,
+) => {
+  const { messages } = state;
+  let response: AIMessageChunk | undefined;
+  for await (const message of await boundModel.stream(messages, config)) {
+    if (!response) {
+      response = message;
+    } else {
+      response = concat(response, message);
+    }
+  }
+  // We return an object, because this will get added to the existing list
+  return {
+    messages: response ? [response as AIMessage] : [],
+  };
 };
 
-const callModel = async (state: typeof MessagesAnnotation.State) => {
-  const response = await regularModel.invoke(state.messages);
-  return { messages: [response] };
+// This is the new first - the first call of the model we want to explicitly hard-code some action
+const firstModel = async (state: typeof AgentState.State) => {
+  const humanInput = state.messages[state.messages.length - 1].content || "";
+  return {
+    messages: [
+      new AIMessage({
+        content: "",
+        tool_calls: [
+          {
+            name: "search",
+            args: {
+              query: humanInput,
+            },
+            id: "tool_abcd123",
+          },
+        ],
+      }),
+    ],
+  };
 };
+```
 
-const workflow = new StateGraph(MessagesAnnotation)
-  .addNode("first_agent", callFirstModel)
+```typescript
+import { END, START, StateGraph } from "@langchain/langgraph";
+
+// Define a new graph
+const workflow = new StateGraph(AgentState)
+  // Define the new entrypoint
+  .addNode("first_agent", firstModel)
+  // Define the two nodes we will cycle between
   .addNode("agent", callModel)
-  .addNode("tools", new ToolNode([search]))
-  .addEdge("__start__", "first_agent")
-  .addEdge("first_agent", "tools")
-  .addEdge("tools", "agent")
-  .addConditionalEdges("agent", shouldContinue)
-  .addEdge("tools", "agent");
+  .addNode("action", toolNode)
+  // Set the entrypoint as `first_agent`
+  // by creating an edge from the virtual __start__ node to `first_agent`
+  .addEdge(START, "first_agent")
+  // We now add a conditional edge
+  .addConditionalEdges(
+    // First, we define the start node. We use `agent`.
+    // This means these are the edges taken after the `agent` node is called.
+    "agent",
+    // Next, we pass in the function that will determine which node is called next.
+    shouldContinue,
+    // Finally we pass in a mapping.
+    // The keys are strings, and the values are other nodes.
+    // END is a special node marking that the graph should finish.
+    // What will happen is we will call `should_continue`, and then the output of that
+    // will be matched against the keys in this mapping.
+    // Based on which one it matches, that node will then be called.
+    {
+      // If `tools`, then we call the tool node.
+      continue: "action",
+      // Otherwise we finish.
+      end: END,
+    },
+  )
+  // We now add a normal edge from `tools` to `agent`.
+  // This means that after `tools` is called, `agent` node is called next.
+  .addEdge("action", "agent")
+  // After we call the first agent, we know we want to go to action
+  .addEdge("first_agent", "action");
 
+// Finally, we compile it!
+// This compiles it into a LangChain Runnable,
+// meaning you can use it as you would any other runnable
 const app = workflow.compile();
 ```
 

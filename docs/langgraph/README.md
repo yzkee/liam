@@ -5,14 +5,14 @@ This directory contains a comprehensive guide for LangGraph.js - a low-level orc
 ## 📁 Documentation Structure
 
 ### Core Concepts
-- **[core-concepts.md](core-concepts.md)** - Graph state definition, basic construction, and node patterns
-- **[control-flow.md](control-flow.md)** - Branching, map-reduce, conditional routing, and loop control
-- **[state-management.md](state-management.md)** - State schema design, updates, and persistence patterns
+- @./core-concepts.md - Graph state definition, basic construction, and node patterns
+- @./control-flow.md - Branching, map-reduce, conditional routing, and loop control
+- @./state-management.md - State schema design, updates, and persistence patterns
 
 ### Advanced Features
-- **[streaming.md](streaming.md)** - Stream modes, token-level streaming, and custom data streaming
-- **[tool-calling.md](tool-calling.md)** - ToolNode usage, patterns, and state updates from tools
-- **[multi-agent.md](multi-agent.md)** - Agent communication, supervisory patterns, and multi-turn conversations
+- @./streaming.md - Stream modes, token-level streaming, and custom data streaming
+- @./tool-calling.md - ToolNode usage, patterns, and state updates from tools
+- @./multi-agent.md - Agent communication, supervisory patterns, and multi-turn conversations
 
 ### Production & Platform
 - **[advanced-features.md](advanced-features.md)** - Subgraphs, retries, caching, runtime configuration, and structured output

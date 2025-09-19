@@ -88,6 +88,7 @@ describe('invokeSaveArtifactToolNode Integration', () => {
         },
       }),
       analyzedRequirementsRetryCount: 0,
+      artifactSaveSuccessful: false,
     }
 
     const streamEvents = graph.streamEvents(state, {

@@ -269,27 +269,38 @@ LLMs aren't perfect at calling tools. The model may try to call a tool that does
 
 This guide covers some ways to build error handling into your graphs to mitigate these failure modes.
 
-```typescript
-import { StateGraph, MessagesAnnotation } from "@langchain/langgraph";
-import { ToolNode } from "@langchain/langgraph/prebuilt";
-import { ChatAnthropic } from "@langchain/anthropic";
-import { BaseMessage, isAIMessage } from "@langchain/core/messages";
+#### Using the prebuilt ToolNode
 
-const getWeather = tool((input) => {
-  if (["sf", "san francisco"].includes(input.location.toLowerCase())) {
-    return "It's 60 degrees and foggy.";
-  } else if (input.location.toLowerCase() === "san francisco") {
+To start, define a mock weather tool that has some hidden restrictions on input queries. The intent here is to simulate a real-world case where a model fails to call a tool correctly:
+
+```typescript
+import { z } from "zod";
+import { tool } from "@langchain/core/tools";
+
+const getWeather = tool(async ({ location }) => {
+  if (location === "SAN FRANCISCO") {
+    return "It's 60 degrees and foggy";
+  } else if (location.toLowerCase() === "san francisco") {
     throw new Error("Input queries must be all capitals");
   } else {
     throw new Error("Invalid input.");
   }
 }, {
   name: "get_weather",
-  description: "Call to get the current weather.",
+  description: "Call to get the current weather",
   schema: z.object({
-    location: z.string().describe("Location to get the weather for."),
+    location: z.string(),
   }),
 });
+```
+
+Next, set up a graph implementation of the ReAct agent. This agent takes some query as input, then repeatedly call tools until it has enough information to resolve the query. We'll use the prebuilt ToolNode to execute called tools, and a small, fast model powered by Anthropic:
+
+```typescript
+import { StateGraph, MessagesAnnotation } from "@langchain/langgraph";
+import { ToolNode } from "@langchain/langgraph/prebuilt";
+import { ChatAnthropic } from "@langchain/anthropic";
+import { BaseMessage, isAIMessage } from "@langchain/core/messages";
 
 const toolNode = new ToolNode([getWeather]);
 
@@ -299,7 +310,7 @@ const modelWithTools = new ChatAnthropic({
 }).bindTools([getWeather]);
 
 const shouldContinue = async (state: typeof MessagesAnnotation.State) => {
-  const messages = state.messages;
+  const { messages } = state;
   const lastMessage = messages[messages.length - 1];
   if (isAIMessage(lastMessage) && lastMessage.tool_calls?.length) {
     return "tools";
@@ -308,7 +319,8 @@ const shouldContinue = async (state: typeof MessagesAnnotation.State) => {
 };
 
 const callModel = async (state: typeof MessagesAnnotation.State) => {
-  const response = await modelWithTools.invoke(state.messages);
+  const { messages } = state;
+  const response = await modelWithTools.invoke(messages);
   return { messages: [response] };
 };
 
@@ -316,10 +328,156 @@ const app = new StateGraph(MessagesAnnotation)
   .addNode("agent", callModel)
   .addNode("tools", toolNode)
   .addEdge("__start__", "agent")
-  .addConditionalEdges("agent", shouldContinue)
   .addEdge("tools", "agent")
+  .addConditionalEdges("agent", shouldContinue, {
+    // Explicitly list possible destinations so that
+    // we can automatically draw the graph below.
+    tools: "tools",
+    __end__: "__end__",
+  })
   .compile();
 ```
+
+When you try to call the tool, you can see that the model calls the tool with a bad input, causing the tool to throw an error. The prebuilt ToolNode that executes the tool has some built-in error handling that captures the error and passes it back to the model so that it can try again.
+
+#### Custom strategies
+
+This is a fine default in many cases, but there are cases where custom fallbacks may be better.
+
+For example, the below tool requires as input a list of elements of a specific length - tricky for a small model! We'll also intentionally avoid pluralizing `topic` to trick the model into thinking it should pass a string:
+
+```typescript
+import { StringOutputParser } from "@langchain/core/output_parsers";
+
+const haikuRequestSchema = z.object({
+  topic: z.array(z.string()).length(3),
+});
+
+const masterHaikuGenerator = tool(async ({ topic }) => {
+  const model = new ChatAnthropic({
+    model: "claude-3-haiku-20240307",
+    temperature: 0,
+  });
+  const chain = model.pipe(new StringOutputParser());
+  const topics = topic.join(", ");
+  const haiku = await chain.invoke(`Write a haiku about ${topics}`);
+  return haiku;
+}, {
+  name: "master_haiku_generator",
+  description: "Generates a haiku based on the provided topics.",
+  schema: haikuRequestSchema,
+});
+```
+
+A better strategy might be to trim the failed attempt to reduce distraction, then fall back to a more advanced model. Here's an example - note the custom-built tool calling node instead of the prebuilt `ToolNode`:
+
+```typescript
+import { AIMessage, ToolMessage, RemoveMessage } from "@langchain/core/messages";
+
+const callTool = async (state: typeof MessagesAnnotation.State) => {
+  const { messages } = state;
+  const toolsByName = { master_haiku_generator: masterHaikuGenerator };
+  const lastMessage = messages[messages.length - 1] as AIMessage;
+  const outputMessages: ToolMessage[] = [];
+  for (const toolCall of lastMessage.tool_calls) {
+    try {
+      const toolResult = await toolsByName[toolCall.name].invoke(toolCall);
+      outputMessages.push(toolResult);
+    } catch (error: any) {
+      // Return the error if the tool call fails
+      outputMessages.push(
+        new ToolMessage({
+          content: error.message,
+          name: toolCall.name,
+          tool_call_id: toolCall.id!,
+          additional_kwargs: { error }
+        })
+      );
+    }
+  }
+  return { messages: outputMessages };
+};
+
+const model = new ChatAnthropic({
+  model: "claude-3-haiku-20240307",
+  temperature: 0,
+});
+
+const modelWithTools = model.bindTools([masterHaikuGenerator]);
+
+const betterModel = new ChatAnthropic({
+  model: "claude-3-5-sonnet-20240620",
+  temperature: 0,
+});
+
+const betterModelWithTools = betterModel.bindTools([masterHaikuGenerator]);
+
+const shouldContinue = async (state: typeof MessagesAnnotation.State) => {
+  const { messages } = state;
+  const lastMessage = messages[messages.length - 1];
+  if (isAIMessage(lastMessage) && lastMessage.tool_calls?.length) {
+    return "tools";
+  }
+  return "__end__";
+};
+
+const shouldFallback = async (state: typeof MessagesAnnotation.State) => {
+  const { messages } = state;
+  const failedToolMessages = messages.find((message) => {
+    return message._getType() === "tool" && message.additional_kwargs.error !== undefined;
+  });
+  if (failedToolMessages) {
+    return "remove_failed_tool_call_attempt";
+  }
+  return "agent";
+};
+
+const callModel = async (state: typeof MessagesAnnotation.State) => {
+  const { messages } = state;
+  const response = await modelWithTools.invoke(messages);
+  return { messages: [response] };
+};
+
+const removeFailedToolCallAttempt = async (state: typeof MessagesAnnotation.State) => {
+  const { messages } = state;
+  // Remove all messages from the most recent
+  // instance of AIMessage onwards.
+  const lastAIMessageIndex = messages
+    .map((msg, index) => ({ msg, index }))
+    .reverse()
+    .findIndex(({ msg }) => isAIMessage(msg));
+  const messagesToRemove = messages.slice(lastAIMessageIndex);
+  return { messages: messagesToRemove.map(m => new RemoveMessage({ id: m.id })) };
+};
+
+const callFallbackModel = async (state: typeof MessagesAnnotation.State) => {
+  const { messages } = state;
+  const response = await betterModelWithTools.invoke(messages);
+  return { messages: [response] };
+};
+
+const app = new StateGraph(MessagesAnnotation)
+  .addNode("tools", callTool)
+  .addNode("agent", callModel)
+  .addNode("remove_failed_tool_call_attempt", removeFailedToolCallAttempt)
+  .addNode("fallback_agent", callFallbackModel)
+  .addEdge("__start__", "agent")
+  .addConditionalEdges("agent", shouldContinue, {
+    // Explicitly list possible destinations so that
+    // we can automatically draw the graph below.
+    tools: "tools",
+    __end__: "__end__",
+  })
+  .addConditionalEdges("tools", shouldFallback, {
+    remove_failed_tool_call_attempt: "remove_failed_tool_call_attempt",
+    agent: "agent",
+  })
+  .addEdge("remove_failed_tool_call_attempt", "fallback_agent")
+  .addEdge("fallback_agent", "tools")
+  .compile();
+```
+
+The `tools` node will now return `ToolMessage`s with an `error` field in `additional_kwargs` if a tool call fails. If that happens, it will go to another node that removes the failed tool messages, and has a better model retry the tool call generation. We also add a trimming step via returning the special message modifier `RemoveMessage` to remove previous messages from the state.
 
 ### How to pass runtime values to tools
 

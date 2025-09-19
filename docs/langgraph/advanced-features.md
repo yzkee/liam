@@ -383,24 +383,21 @@ Node caching helps avoid repeating expensive operations by storing and reusing r
 #### Basic Node Caching
 
 ```typescript
-import { StateGraph, Annotation, START, END } from "@langchain/langgraph";
+import { StateGraph, MessagesAnnotation, START, END } from "@langchain/langgraph";
 import { InMemoryCache } from "@langchain/langgraph-checkpoint";
+import { BaseMessage, AIMessage } from "@langchain/core/messages";
 
-const CacheState = Annotation.Root({
-  query: Annotation<string>,
-  result: Annotation<string>
-});
-
-function expensiveOperation(state: typeof CacheState.State) {
-  // Expensive computation
-  return { result: `Computed result for: ${state.query}` };
+async function expensiveOperation(state: typeof MessagesAnnotation.State) {
+  // Simulate an expensive operation
+  await new Promise((resolve) => setTimeout(resolve, 3000));
+  return { messages: [{ type: "ai", content: "Hello, how are you?" }] };
 }
 
 // Create cache instance
 const cache = new InMemoryCache();
 
 // Create graph with caching
-const cachedGraph = new StateGraph(CacheState)
+const cachedGraph = new StateGraph(MessagesAnnotation)
   .addNode("expensive", expensiveOperation, {
     cachePolicy: { ttl: 120 } // Cache for 2 minutes
   })
@@ -412,16 +409,14 @@ const cachedGraph = new StateGraph(CacheState)
 #### Advanced Caching with Custom Keys
 
 ```typescript
-// Custom cache key function
-function customKeyFunc(state: typeof CacheState.State): string {
-  return `custom_${state.query}`;
-}
-
-const advancedCachedGraph = new StateGraph(CacheState)
+const advancedCachedGraph = new StateGraph(MessagesAnnotation)
   .addNode("cached_operation", expensiveOperation, {
     cachePolicy: { 
       ttl: 300, // 5 minutes
-      keyFunc: customKeyFunc
+      keyFunc([{messages}]: [{messages: BaseMessage[]}]) {
+        // Cache based on the content and relative position of the messages
+        return JSON.stringify(messages.map((m, idx) => [idx, m.content]));
+      }
     }
   })
   .addEdge(START, "cached_operation")
@@ -433,7 +428,7 @@ const advancedCachedGraph = new StateGraph(CacheState)
 
 ```typescript
 // Example of using cache with different TTL values
-const shortCacheGraph = new StateGraph(CacheState)
+const shortCacheGraph = new StateGraph(MessagesAnnotation)
   .addNode("short_cache", expensiveOperation, {
     cachePolicy: { ttl: 30 } // 30 seconds
   })
@@ -441,7 +436,7 @@ const shortCacheGraph = new StateGraph(CacheState)
   .addEdge("short_cache", END)
   .compile({ cache });
 
-const longCacheGraph = new StateGraph(CacheState)
+const longCacheGraph = new StateGraph(MessagesAnnotation)
   .addNode("long_cache", expensiveOperation, {
     cachePolicy: { ttl: 3600 } // 1 hour
   })

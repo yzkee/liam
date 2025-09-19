@@ -15,7 +15,7 @@ type Params = {
   initialVersions: Version[]
   initialDisplayedSchema: Schema
   initialPrevSchema: Schema
-  onChangeSelectedVersion?: (version: Version | null) => void
+  onChangeSelectedVersion: (version: Version) => void
 }
 
 export function useRealtimeVersionsWithSchema({
@@ -91,7 +91,9 @@ export function useRealtimeVersionsWithSchema({
   useEffect(() => {
     const targetVersion = versions[0] ?? null
     setSelectedVersion(targetVersion)
-    onChangeSelectedVersion?.(targetVersion)
+    if (targetVersion !== null) {
+      onChangeSelectedVersion(targetVersion)
+    }
   }, [versions, onChangeSelectedVersion])
 
   useEffect(() => {

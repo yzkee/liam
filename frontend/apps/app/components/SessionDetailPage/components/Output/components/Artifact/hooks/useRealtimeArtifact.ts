@@ -16,7 +16,7 @@ const artifactDataSchema = v.object({
 
 export function useRealtimeArtifact(
   designSessionId: string,
-  onChangeArtifact?: (artifact: Artifact | null) => void,
+  onChangeArtifact?: (artifact: Artifact) => void,
 ) {
   const { isPublic } = useViewMode()
   const [artifact, setArtifact] = useState<Artifact | null>(null)
@@ -123,6 +123,5 @@ export function useRealtimeArtifact(
     artifact,
     loading,
     error,
-    onChangeArtifact,
   }
 }

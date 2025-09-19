@@ -1,22 +1,22 @@
 'use client'
 
 import { syntaxCodeTagProps, syntaxCustomStyle, syntaxTheme } from '@liam-hq/ui'
-import type { FC, HTMLAttributes, ReactNode } from 'react'
+import { type FC, type HTMLAttributes, type ReactNode, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import rehypeRaw from 'rehype-raw'
 import remarkGfm from 'remark-gfm'
 import { CopyButton } from '../../../CopyButton'
 import styles from './Artifact.module.css'
-import { TableOfContents } from './TableOfContents/TableOfContents'
 import {
   EXECUTION_SECTION_TITLE,
   FAILURE_ICON,
   FAILURE_STATUS,
-  generateHeadingId,
   SUCCESS_ICON,
   SUCCESS_STATUS,
-} from './utils'
+} from './constants'
+import { TableOfContents } from './TableOfContents/TableOfContents'
+import { generateHeadingId } from './utils'
 
 type CodeProps = {
   className?: string
@@ -28,6 +28,11 @@ type Props = {
 }
 
 export const Artifact: FC<Props> = ({ doc }) => {
+  const headingIndexRef = useRef(0)
+
+  // Reset the heading index whenever the document changes
+  headingIndexRef.current = 0
+
   return (
     <div className={styles.container}>
       <div className={styles.head}>

@@ -3,6 +3,7 @@ import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
 import { designSchemaNode } from './nodes/designSchemaNode'
 import { invokeSchemaDesignToolNode } from './nodes/invokeSchemaDesignToolNode'
 import { routeAfterDesignSchema } from './routing/routeAfterDesignSchema'
+import type { DbAgentState } from './shared/dbAgentAnnotation'
 import { dbAgentAnnotation } from './shared/dbAgentAnnotation'
 
 /**
@@ -34,11 +35,25 @@ export const createDbAgentGraph = (checkpointer?: BaseCheckpointSaver) => {
     })
 
     .addEdge(START, 'designSchema')
-    .addEdge('invokeSchemaDesignTool', 'designSchema')
     .addConditionalEdges('designSchema', routeAfterDesignSchema, {
       invokeSchemaDesignTool: 'invokeSchemaDesignTool',
-      generateTestcase: END,
+      designSchema: 'designSchema', // Self-loop for retry
     })
+    .addConditionalEdges(
+      'invokeSchemaDesignTool',
+      (state: DbAgentState) => {
+        // Check if tool execution was successful
+        if (state.schemaDesignSuccessful) {
+          return 'END'
+        }
+        // Retry on failure
+        return 'designSchema'
+      },
+      {
+        END: END,
+        designSchema: 'designSchema', // Retry on error
+      },
+    )
 
   return checkpointer
     ? dbAgentGraph.compile({ checkpointer })

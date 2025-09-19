@@ -91,6 +91,38 @@ export async function updateSession(request: NextRequest) {
 }
 
 export async function middleware(request: NextRequest) {
+  // Check if accessing /erd/* paths directly without the proper rewrite header (production only)
+  if (
+    request.nextUrl.pathname.startsWith(ROUTE_PREFIXES.ERD) &&
+    process.env.VERCEL_ENV === 'production'
+  ) {
+    const allowedSource = 'liambx.com'
+    const rewriteSource = request.headers.get('x-liam-rewrite-source')
+
+    // Block direct access to /erd/* - only allow access via rewrite in production
+    if (rewriteSource !== allowedSource) {
+      console.info('ERD access denied: Direct access blocked', {
+        path: request.nextUrl.pathname,
+        received: rewriteSource,
+        expected: allowedSource,
+      })
+
+      return new NextResponse(
+        `Direct access to /erd/* is not allowed. Please access via https://${allowedSource}/erd/`,
+        {
+          status: 403,
+          headers: {
+            'Content-Type': 'text/plain',
+            'Cache-Control': 'no-store, no-cache, must-revalidate, private',
+            Pragma: 'no-cache',
+            'X-Content-Type-Options': 'nosniff',
+            'X-Frame-Options': 'DENY',
+          },
+        },
+      )
+    }
+  }
+
   const response = await updateSession(request)
   // NOTE: Set the x-url-path header to allow extracting the current path in layout.tsx and other components
   // @see: https://github.com/vercel/next.js/issues/43704#issuecomment-1411186664

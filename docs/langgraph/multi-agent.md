@@ -71,7 +71,7 @@ const result = await mainEntrypoint.invoke({
 When building chatbots, one of the most important considerations is how to manage conversation history. Too much history can distract the model, while too little history can make the conversation feel impersonal.
 
 ```typescript
-import { StateGraph, Annotation, START } from "@langchain/langgraph";
+import { Annotation, END, START, StateGraph } from "@langchain/langgraph";
 import { BaseMessage, HumanMessage, AIMessage } from "@langchain/core/messages";
 
 // Define state
@@ -101,7 +101,8 @@ const agent = async (state: typeof AgentState.State) => {
 // Build workflow
 const workflow = new StateGraph(AgentState)
   .addNode("agent", agent)
-  .addEdge(START, "agent");
+  .addEdge(START, "agent")
+  .addEdge("agent", END);
 
 const app = workflow.compile();
 ```
@@ -113,7 +114,7 @@ Subgraphs allow you to build complex systems with multiple components that are t
 ### Add a node with the compiled subgraph
 
 ```typescript
-import { StateGraph, Annotation } from "@langchain/langgraph";
+import { Annotation, END, START, StateGraph } from "@langchain/langgraph";
 
 const SubgraphStateAnnotation = Annotation.Root({
   foo: Annotation<string>, // note that this key is shared with the parent graph state
@@ -133,8 +134,9 @@ const subgraphNode2 = async (state: typeof SubgraphStateAnnotation.State) => {
 const subgraphBuilder = new StateGraph(SubgraphStateAnnotation)
   .addNode("subgraphNode1", subgraphNode1)
   .addNode("subgraphNode2", subgraphNode2)
-  .addEdge("__start__", "subgraphNode1")
-  .addEdge("subgraphNode1", "subgraphNode2");
+  .addEdge(START, "subgraphNode1")
+  .addEdge("subgraphNode1", "subgraphNode2")
+  .addEdge("subgraphNode2", END);
 
 const subgraph = subgraphBuilder.compile();
 
@@ -153,8 +155,9 @@ const builder = new StateGraph(ParentStateAnnotation)
   .addNode("node1", node1)
   // note that we're adding the compiled subgraph as a node to the parent graph
   .addNode("node2", subgraph)
-  .addEdge("__start__", "node1")
-  .addEdge("node1", "node2");
+  .addEdge(START, "node1")
+  .addEdge("node1", "node2")
+  .addEdge("node2", END);
 
 const graph = builder.compile();
 ```
@@ -162,7 +165,7 @@ const graph = builder.compile();
 ### Add a node function that invokes the subgraph
 
 ```typescript
-import { StateGraph, Annotation } from "@langchain/langgraph";
+import { Annotation, END, START, StateGraph } from "@langchain/langgraph";
 
 const SubgraphAnnotation = Annotation.Root({
   bar: Annotation<string>, // note that this key is shared with the parent graph state
@@ -180,8 +183,9 @@ const subgraphNodeTwo = async (state: typeof SubgraphAnnotation.State) => {
 const subgraphCalledInFunction = new StateGraph(SubgraphAnnotation)
   .addNode("subgraphNode1", subgraphNodeOne)
   .addNode("subgraphNode2", subgraphNodeTwo)
-  .addEdge("__start__", "subgraphNode1")
+  .addEdge(START, "subgraphNode1")
   .addEdge("subgraphNode1", "subgraphNode2")
+  .addEdge("subgraphNode2", END)
   .compile();
 
 // Define parent graph
@@ -206,8 +210,9 @@ const graphWithFunction = new StateGraph(ParentStateAnnotation)
   .addNode("node1", nodeOne)
   // note that we're adding the compiled subgraph as a node to the parent graph
   .addNode("node2", nodeTwo)
-  .addEdge("__start__", "node1")
+  .addEdge(START, "node1")
   .addEdge("node1", "node2")
+  .addEdge("node2", END)
   .compile();
 ```
 

@@ -11,7 +11,7 @@ LangGraph supports multiple streaming modes. The main ones are:
 This streaming mode streams back values of the graph. This is the full state of the graph after each node is called.
 
 ```typescript
-import { Annotation } from "@langchain/langgraph";
+import { Annotation, START } from "@langchain/langgraph";
 import { BaseMessage } from "@langchain/core/messages";
 
 const StateAnnotation = Annotation.Root({
@@ -28,7 +28,7 @@ This guide covers `streamMode="values"`.
 ```
 
 ```typescript
-import { StateGraph, MessagesAnnotation } from "@langchain/langgraph";
+import { END, START, StateGraph, MessagesAnnotation } from "@langchain/langgraph";
 import { ChatOpenAI } from "@langchain/openai";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { z } from "zod";
@@ -66,7 +66,7 @@ const shouldContinue = (state: typeof MessagesAnnotation.State) => {
   if (lastMessage.tool_calls?.length) {
     return "tools";
   }
-  return "__end__";
+  return END;
 };
 
 const callModel = async (state: typeof MessagesAnnotation.State) => {
@@ -78,7 +78,7 @@ const callModel = async (state: typeof MessagesAnnotation.State) => {
 const workflow = new StateGraph(MessagesAnnotation)
   .addNode("agent", callModel)
   .addNode("tools", toolNode)
-  .addEdge("__start__", "agent")
+  .addEdge(START, "agent")
   .addConditionalEdges("agent", shouldContinue)
   .addEdge("tools", "agent");
 
@@ -127,7 +127,7 @@ for await (const output of await app.stream(inputs, {
 In this example, we will stream tokens from the language model powering an agent. We will use a ReAct agent as an example.
 
 ```typescript
-import { StateGraph, MessagesAnnotation } from "@langchain/langgraph";
+import { END, START, StateGraph, MessagesAnnotation } from "@langchain/langgraph";
 import { ChatOpenAI } from "@langchain/openai";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { z } from "zod";
@@ -165,7 +165,7 @@ const shouldContinue = (state: typeof MessagesAnnotation.State) => {
   if (lastMessage.tool_calls?.length) {
     return "tools";
   }
-  return "__end__";
+  return END;
 };
 
 const callModel = async (state: typeof MessagesAnnotation.State) => {
@@ -177,7 +177,7 @@ const callModel = async (state: typeof MessagesAnnotation.State) => {
 const workflow = new StateGraph(MessagesAnnotation)
   .addNode("agent", callModel)
   .addNode("tools", toolNode)
-  .addEdge("__start__", "agent")
+  .addEdge(START, "agent")
   .addConditionalEdges("agent", shouldContinue)
   .addEdge("tools", "agent");
 
@@ -201,7 +201,7 @@ In this guide, we will stream tokens from the language model powering an agent w
 
 ```typescript
 import OpenAI from "openai";
-import { StateGraph, MessagesAnnotation } from "@langchain/langgraph";
+import { END, StateGraph, MessagesAnnotation } from "@langchain/langgraph";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { z } from "zod";
 import { tool } from "@langchain/core/tools";
@@ -240,7 +240,7 @@ const shouldContinue = (state: typeof MessagesAnnotation.State) => {
   if (lastMessage.tool_calls?.length) {
     return "tools";
   }
-  return "__end__";
+  return END;
 };
 
 const callModel = async (
@@ -315,7 +315,7 @@ const callModel = async (
 const workflow = new StateGraph(MessagesAnnotation)
   .addNode("agent", callModel)
   .addNode("tools", toolNode)
-  .addEdge("__start__", "agent")
+  .addEdge(START, "agent")
   .addConditionalEdges("agent", shouldContinue)
   .addEdge("tools", "agent");
 
@@ -349,7 +349,7 @@ You can do so in two ways:
 Below we'll see how to use both APIs.
 
 ```typescript
-import { StateGraph, MessagesAnnotation } from "@langchain/langgraph";
+import { END, StateGraph, MessagesAnnotation } from "@langchain/langgraph";
 import { dispatchCustomEvent } from "@langchain/core/callbacks/dispatch";
 import type { RunnableConfig } from "@langchain/core/runnables";
 import { HumanMessage } from "@langchain/core/messages";
@@ -380,9 +380,9 @@ const myOtherNode = async (
 const graph = new StateGraph(MessagesAnnotation)
   .addNode("myNode", myNode)
   .addNode("myOtherNode", myOtherNode)
-  .addEdge("__start__", "myNode")
+  .addEdge(START, "myNode")
   .addEdge("myNode", "myOtherNode")
-  .addEdge("myOtherNode", "__end__")
+  .addEdge("myOtherNode", END)
   .compile();
 ```
 
@@ -426,9 +426,9 @@ const myOtherNodeWithEvents = async (
 const graphWithEvents = new StateGraph(MessagesAnnotation)
   .addNode("myNode", myNodeWithEvents)
   .addNode("myOtherNode", myOtherNodeWithEvents)
-  .addEdge("__start__", "myNode")
+  .addEdge(START, "myNode")
   .addEdge("myNode", "myOtherNode")
-  .addEdge("myOtherNode", "__end__")
+  .addEdge("myOtherNode", END)
   .compile();
 ```
 
@@ -550,7 +550,7 @@ const finalModel = new ChatAnthropic({
 ```
 
 ```typescript
-import { StateGraph, MessagesAnnotation } from "@langchain/langgraph";
+import { END, StateGraph, MessagesAnnotation } from "@langchain/langgraph";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { AIMessage, HumanMessage, SystemMessage } from "@langchain/core/messages";
 
@@ -589,13 +589,13 @@ const graph = new StateGraph(MessagesAnnotation)
   .addNode("agent", callModel)
   .addNode("tools", toolNode)
   .addNode("final", callFinalModel)
-  .addEdge("__start__", "agent")
+  .addEdge(START, "agent")
   .addConditionalEdges("agent", shouldContinue, {
     tools: "tools",
     final: "final",
   })
   .addEdge("tools", "agent")
-  .addEdge("final", "__end__")
+  .addEdge("final", END)
   .compile();
 ```
 

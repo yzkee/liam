@@ -30,7 +30,8 @@ const getWeather = tool((input) => {
 ```
 
 ```typescript
-import { StateGraph, MessagesAnnotation } from "@langchain/langgraph";
+import { END, START, StateGraph } from "@langchain/langgraph";
+import { MessagesAnnotation } from "@langchain/langgraph";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { ChatAnthropic } from "@langchain/anthropic";
 import { BaseMessage, isAIMessage } from "@langchain/core/messages";
@@ -48,7 +49,7 @@ const shouldContinue = async (state: typeof MessagesAnnotation.State) => {
   if (isAIMessage(lastMessage) && lastMessage.tool_calls?.length) {
     return "tools";
   }
-  return "__end__";
+  return END;
 };
 
 const callModel = async (state: typeof MessagesAnnotation.State) => {
@@ -59,7 +60,7 @@ const callModel = async (state: typeof MessagesAnnotation.State) => {
 const app = new StateGraph(MessagesAnnotation)
   .addNode("agent", callModel)
   .addNode("tools", toolNode)
-  .addEdge("__start__", "agent")
+  .addEdge(START, "agent")
   .addConditionalEdges("agent", shouldContinue)
   .addEdge("tools", "agent")
   .compile();
@@ -297,7 +298,8 @@ const getWeather = tool(async ({ location }) => {
 Next, set up a graph implementation of the ReAct agent. This agent takes some query as input, then repeatedly call tools until it has enough information to resolve the query. We'll use the prebuilt ToolNode to execute called tools, and a small, fast model powered by Anthropic:
 
 ```typescript
-import { StateGraph, MessagesAnnotation } from "@langchain/langgraph";
+import { END, START, StateGraph } from "@langchain/langgraph";
+import { MessagesAnnotation } from "@langchain/langgraph";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { ChatAnthropic } from "@langchain/anthropic";
 import { BaseMessage, isAIMessage } from "@langchain/core/messages";
@@ -315,7 +317,7 @@ const shouldContinue = async (state: typeof MessagesAnnotation.State) => {
   if (isAIMessage(lastMessage) && lastMessage.tool_calls?.length) {
     return "tools";
   }
-  return "__end__";
+  return END;
 };
 
 const callModel = async (state: typeof MessagesAnnotation.State) => {
@@ -327,13 +329,13 @@ const callModel = async (state: typeof MessagesAnnotation.State) => {
 const app = new StateGraph(MessagesAnnotation)
   .addNode("agent", callModel)
   .addNode("tools", toolNode)
-  .addEdge("__start__", "agent")
+  .addEdge(START, "agent")
   .addEdge("tools", "agent")
   .addConditionalEdges("agent", shouldContinue, {
     // Explicitly list possible destinations so that
     // we can automatically draw the graph below.
     tools: "tools",
-    __end__: "__end__",
+    [END]: END,
   })
   .compile();
 ```
@@ -372,6 +374,8 @@ const masterHaikuGenerator = tool(async ({ topic }) => {
 A better strategy might be to trim the failed attempt to reduce distraction, then fall back to a more advanced model. Here's an example - note the custom-built tool calling node instead of the prebuilt `ToolNode`:
 
 ```typescript
+import { END, START, StateGraph } from "@langchain/langgraph";
+import { MessagesAnnotation } from "@langchain/langgraph";
 import { AIMessage, ToolMessage, RemoveMessage } from "@langchain/core/messages";
 
 const callTool = async (state: typeof MessagesAnnotation.State) => {
@@ -418,7 +422,7 @@ const shouldContinue = async (state: typeof MessagesAnnotation.State) => {
   if (isAIMessage(lastMessage) && lastMessage.tool_calls?.length) {
     return "tools";
   }
-  return "__end__";
+  return END;
 };
 
 const shouldFallback = async (state: typeof MessagesAnnotation.State) => {
@@ -461,12 +465,12 @@ const app = new StateGraph(MessagesAnnotation)
   .addNode("agent", callModel)
   .addNode("remove_failed_tool_call_attempt", removeFailedToolCallAttempt)
   .addNode("fallback_agent", callFallbackModel)
-  .addEdge("__start__", "agent")
+  .addEdge(START, "agent")
   .addConditionalEdges("agent", shouldContinue, {
     // Explicitly list possible destinations so that
     // we can automatically draw the graph below.
     tools: "tools",
-    __end__: "__end__",
+    [END]: END,
   })
   .addConditionalEdges("tools", shouldFallback, {
     remove_failed_tool_call_attempt: "remove_failed_tool_call_attempt",

@@ -91,6 +91,15 @@ export const SessionDetailPageClient: FC<Props> = ({
     }
   }, [])
 
+  // Handler for navigating to specific tabs from tool calls
+  const handleNavigateToTab = useCallback((tab: 'erd' | 'artifact') => {
+    if (tab === 'erd') {
+      setActiveTab(OUTPUT_TABS.ERD)
+    } else if (tab === 'artifact') {
+      setActiveTab(OUTPUT_TABS.ARTIFACT)
+    }
+  }, [])
+
   const { artifact } = useRealtimeArtifact(
     designSessionId,
     handleArtifactChange,
@@ -148,6 +157,7 @@ export const SessionDetailPageClient: FC<Props> = ({
             messages={messages}
             isWorkflowRunning={isStreaming}
             onMessageSend={addOrUpdateTimelineItem}
+            onNavigate={handleNavigateToTab}
             error={combinedError}
           />
         </div>

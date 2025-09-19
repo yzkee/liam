@@ -83,7 +83,6 @@ export const Output: FC<Props> = ({
         schema={schema}
         tabValue={tabValue}
         artifactDoc={artifactDoc}
-        hasArtifact={!!artifact}
         designSessionId={designSessionId}
         initialIsPublic={initialIsPublic}
         {...propsForVersionDropdown}

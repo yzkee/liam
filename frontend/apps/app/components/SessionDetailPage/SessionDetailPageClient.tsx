@@ -11,7 +11,7 @@ import { type FC, useCallback, useEffect, useRef, useState } from 'react'
 import { Chat } from './components/Chat'
 import { Output } from './components/Output'
 import { useRealtimeArtifact } from './components/Output/components/Artifact/hooks/useRealtimeArtifact'
-import { OutputPlaceholder } from './components/OutputPlaceholder'
+import { OUTPUT_TABS } from './components/Output/constants'
 import { useRealtimeTimelineItems } from './hooks/useRealtimeTimelineItems'
 import { useRealtimeVersionsWithSchema } from './hooks/useRealtimeVersionsWithSchema'
 import { useStream } from './hooks/useStream'
@@ -43,6 +43,12 @@ export const SessionDetailPageClient: FC<Props> = ({
 }) => {
   const designSessionId = designSessionWithTimelineItems.id
 
+  const handleSelectedVersionChange = useCallback((version: Version | null) => {
+    if (version !== null) {
+      setActiveTab(OUTPUT_TABS.ERD)
+    }
+  }, [])
+
   const {
     versions,
     selectedVersion,
@@ -54,22 +60,21 @@ export const SessionDetailPageClient: FC<Props> = ({
     initialVersions,
     initialDisplayedSchema,
     initialPrevSchema,
+    onChangeSelectedVersion: handleSelectedVersionChange,
   })
+
+  const [activeTab, setActiveTab] = useState<string | undefined>(undefined)
 
   const handleChangeSelectedVersion = useCallback(
     (version: Version) => {
       setSelectedVersion(version)
+
+      if (activeTab === OUTPUT_TABS.ARTIFACT) {
+        setActiveTab(OUTPUT_TABS.ERD)
+      }
     },
-    [setSelectedVersion],
+    [setSelectedVersion, activeTab],
   )
-
-  // TODO: Connect to Messages component once migration path from TimelineItems to Messages is established
-  // const handleViewVersion = useCallback((versionId: string) => {
-  //   const version = versions.find((version) => version.id === versionId)
-  //   if (!version) return
-
-  //   setSelectedVersion(version)
-  // }, [])
 
   const { addOrUpdateTimelineItem } = useRealtimeTimelineItems(
     designSessionId,
@@ -78,17 +83,17 @@ export const SessionDetailPageClient: FC<Props> = ({
     ),
   )
 
-  const [activeTab, setActiveTab] = useState<string | undefined>(undefined)
+  const handleArtifactChange = useCallback((newArtifact: unknown) => {
+    if (newArtifact !== null) {
+      setActiveTab(OUTPUT_TABS.ARTIFACT)
+    }
+  }, [])
 
-  // TODO: Connect to Messages component once migration path from TimelineItems to Messages is established
-  // const handleArtifactLinkClick = useCallback(() => {
-  //   setActiveTab(OUTPUT_TABS.ARTIFACT)
-  // }, [])
-
-  const hasSelectedVersion = selectedVersion !== null
-
-  // Use realtime artifact hook to monitor artifact changes
-  const { artifact } = useRealtimeArtifact(designSessionId)
+  const { artifact } = useRealtimeArtifact(
+    designSessionId,
+    handleArtifactChange,
+  )
+  const shouldShowOutputSection = artifact !== null || selectedVersion !== null
 
   const chatMessages = mapStoredMessagesToChatMessages(initialMessages)
   const { isStreaming, messages, start } = useStream({
@@ -124,14 +129,12 @@ export const SessionDetailPageClient: FC<Props> = ({
     triggerInitialWorkflow()
   }, [messages, designSessionId, isDeepModelingEnabled, start])
 
-  const shouldShowOutput = artifact !== null
-
   return (
     <div className={styles.container}>
       <div
         className={clsx(
           styles.columns,
-          hasSelectedVersion ? styles.twoColumns : styles.oneColumn,
+          shouldShowOutputSection ? styles.twoColumns : styles.oneColumn,
         )}
       >
         <div className={styles.chatSection}>
@@ -142,36 +145,32 @@ export const SessionDetailPageClient: FC<Props> = ({
             onMessageSend={addOrUpdateTimelineItem}
           />
         </div>
-        {hasSelectedVersion && (
+        {shouldShowOutputSection && (
           <div className={styles.outputSection}>
-            {shouldShowOutput ? (
-              activeTab !== undefined ? (
-                <Output
-                  designSessionId={designSessionId}
-                  schema={displayedSchema}
-                  prevSchema={prevSchema}
-                  sqlReviewComments={SQL_REVIEW_COMMENTS}
-                  versions={versions}
-                  selectedVersion={selectedVersion}
-                  onSelectedVersionChange={handleChangeSelectedVersion}
-                  activeTab={activeTab}
-                  onTabChange={setActiveTab}
-                  initialIsPublic={initialIsPublic}
-                />
-              ) : (
-                <Output
-                  designSessionId={designSessionId}
-                  schema={displayedSchema}
-                  prevSchema={prevSchema}
-                  sqlReviewComments={SQL_REVIEW_COMMENTS}
-                  versions={versions}
-                  selectedVersion={selectedVersion}
-                  onSelectedVersionChange={handleChangeSelectedVersion}
-                  initialIsPublic={initialIsPublic}
-                />
-              )
+            {activeTab !== undefined ? (
+              <Output
+                designSessionId={designSessionId}
+                schema={displayedSchema}
+                prevSchema={prevSchema}
+                sqlReviewComments={SQL_REVIEW_COMMENTS}
+                versions={versions}
+                selectedVersion={selectedVersion}
+                onSelectedVersionChange={handleChangeSelectedVersion}
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+                initialIsPublic={initialIsPublic}
+              />
             ) : (
-              <OutputPlaceholder />
+              <Output
+                designSessionId={designSessionId}
+                schema={displayedSchema}
+                prevSchema={prevSchema}
+                sqlReviewComments={SQL_REVIEW_COMMENTS}
+                versions={versions}
+                selectedVersion={selectedVersion}
+                onSelectedVersionChange={handleChangeSelectedVersion}
+                initialIsPublic={initialIsPublic}
+              />
             )}
           </div>
         )}

@@ -9,6 +9,7 @@ import { entrypoint, task } from "@langchain/langgraph";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { tool } from "@langchain/core/tools";
 import * as v from "valibot";
+import { toJsonSchema } from "@valibot/to-json-schema";
 
 // Define a tool to signal intent to hand off to a different agent
 const transferToHotelAdvisor = tool(
@@ -18,7 +19,7 @@ const transferToHotelAdvisor = tool(
   {
     name: "transferToHotelAdvisor",
     description: "Ask hotel advisor agent for help.",
-    schema: v.object({}),
+    schema: toJsonSchema(v.object({})),
     returnDirect: true,
   }
 );
@@ -30,7 +31,7 @@ const transferToRestaurantAdvisor = tool(
   {
     name: "transferToRestaurantAdvisor", 
     description: "Ask restaurant advisor agent for help.",
-    schema: v.object({}),
+    schema: toJsonSchema(v.object({})),
     returnDirect: true,
   }
 );

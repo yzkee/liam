@@ -33,6 +33,7 @@ import { ChatOpenAI } from "@langchain/openai";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import * as v from "valibot";
 import { tool } from "@langchain/core/tools";
+import { toJsonSchema } from "@valibot/to-json-schema";
 import { AIMessage, HumanMessage } from "@langchain/core/messages";
 
 const getWeather = tool(
@@ -48,9 +49,9 @@ const getWeather = tool(
   {
     name: "get_weather",
     description: "Use this to get weather information",
-    schema: v.object({
+    schema: toJsonSchema(v.object({
       city: v.picklist(["nyc", "sf"]),
-    }),
+    })),
   }
 );
 
@@ -132,6 +133,7 @@ import { ChatOpenAI } from "@langchain/openai";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import * as v from "valibot";
 import { tool } from "@langchain/core/tools";
+import { toJsonSchema } from "@valibot/to-json-schema";
 import { AIMessage, HumanMessage } from "@langchain/core/messages";
 
 const getWeather = tool(
@@ -147,9 +149,9 @@ const getWeather = tool(
   {
     name: "get_weather",
     description: "Use this to get weather information",
-    schema: v.object({
+    schema: toJsonSchema(v.object({
       city: v.picklist(["nyc", "sf"]),
-    }),
+    })),
   }
 );
 
@@ -314,6 +316,7 @@ If your LangGraph graph needs to use tools that call LLMs (or any other LangChai
 ```typescript
 import * as v from "valibot";
 import { tool } from "@langchain/core/tools";
+import { toJsonSchema } from "@valibot/to-json-schema";
 import { ChatAnthropic } from "@langchain/anthropic";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
@@ -341,9 +344,9 @@ const getItems = tool(
   {
     name: "get_items",
     description: "Get items from the database",
-    schema: v.object({
+    schema: toJsonSchema(v.object({
       input: v.string(),
-    }),
+    })),
   }
 );
 
@@ -380,6 +383,7 @@ One common pattern for graphs is to stream LLM tokens from inside the final node
 ```typescript
 import * as v from "valibot";
 import { tool } from "@langchain/core/tools";
+import { toJsonSchema } from "@valibot/to-json-schema";
 import { ChatAnthropic } from "@langchain/anthropic";
 
 const getWeather = tool(async ({ city }) => {
@@ -392,9 +396,9 @@ const getWeather = tool(async ({ city }) => {
   }
 }, {
   name: "get_weather",
-  schema: v.object({
+  schema: toJsonSchema(v.object({
     city: v.picklist(["nyc", "sf"]),
-  }),
+  })),
   description: "Use this to get weather information",
 });
 

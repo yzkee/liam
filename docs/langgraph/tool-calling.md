@@ -13,6 +13,7 @@ This guide covers how to use LangGraph's prebuilt ToolNode for tool calling.
 ```typescript
 import { tool } from "@langchain/core/tools";
 import * as v from "valibot";
+import { toJsonSchema } from "@valibot/to-json-schema";
 
 const getWeather = tool((input) => {
   if (["sf", "san francisco"].includes(input.location.toLowerCase())) {
@@ -23,9 +24,9 @@ const getWeather = tool((input) => {
 }, {
   name: "get_weather",
   description: "Call to get the current weather.",
-  schema: v.object({
+  schema: toJsonSchema(v.object({
     location: v.pipe(v.string(), v.description("Location to get the weather for.")),
-  }),
+  })),
 });
 ```
 
@@ -115,14 +116,15 @@ In this example we will build a ReAct agent that **always** calls a certain tool
 ```typescript
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import * as v from "valibot";
+import { toJsonSchema } from "@valibot/to-json-schema";
 
 const searchTool = new DynamicStructuredTool({
   name: "search",
   description:
     "Use to surf the web, fetch current information, check the weather, and retrieve other information.",
-  schema: v.object({
+  schema: toJsonSchema(v.object({
     query: v.pipe(v.string(), v.description("The query to use in your search.")),
-  }),
+  })),
   func: async ({ }: { query: string }) => {
     // This is a placeholder for the actual implementation
     return "Cold, with a low of 13 ℃";
@@ -276,6 +278,7 @@ To start, define a mock weather tool that has some hidden restrictions on input 
 
 ```typescript
 import * as v from "valibot";
+import { toJsonSchema } from "@valibot/to-json-schema";
 import { tool } from "@langchain/core/tools";
 
 const getWeather = tool(async ({ location }) => {
@@ -289,9 +292,9 @@ const getWeather = tool(async ({ location }) => {
 }, {
   name: "get_weather",
   description: "Call to get the current weather",
-  schema: v.object({
+  schema: toJsonSchema(v.object({
     location: v.string(),
-  }),
+  })),
 });
 ```
 
@@ -358,6 +361,8 @@ const haikuRequestSchema = v.pipe(
   v.check(input => input.topic.length === 3, "Topic array must have exactly 3 elements")
 );
 
+const haikuRequestJsonSchema = toJsonSchema(haikuRequestSchema);
+
 const masterHaikuGenerator = tool(async ({ topic }) => {
   const model = new ChatAnthropic({
     model: "claude-3-haiku-20240307",
@@ -370,7 +375,7 @@ const masterHaikuGenerator = tool(async ({ topic }) => {
 }, {
   name: "master_haiku_generator",
   description: "Generates a haiku based on the provided topics.",
-  schema: haikuRequestSchema,
+  schema: haikuRequestJsonSchema,
 });
 ```
 
@@ -524,6 +529,7 @@ It will then use LangGraph's cross-thread persistence to save preferences:
 
 ```typescript
 import * as v from "valibot";
+import { toJsonSchema } from "@valibot/to-json-schema";
 import { tool } from "@langchain/core/tools";
 import {
   getCurrentTaskInput,
@@ -551,9 +557,9 @@ const updateFavoritePets = tool(async (input, config: LangGraphRunnableConfig) =
   // The LLM "sees" the following schema:
   name: "update_favorite_pets",
   description: "add to the list of favorite pets.",
-  schema: v.object({
+  schema: toJsonSchema(v.object({
     pets: v.array(v.string()),
-  }),
+  })),
 });
 ```
 
@@ -592,7 +598,7 @@ const getFavoritePets = tool(
     // The LLM "sees" the following schema:
     name: "get_favorite_pets",
     description: "retrieve the list of favorite pets for the given user.",
-    schema: v.object({}),
+    schema: toJsonSchema(v.object({})),
   }
 );
 ```
@@ -766,9 +772,9 @@ function generateTools(state: typeof MessagesAnnotation.State) {
       // The LLM "sees" the following schema:
       name: "update_favorite_pets",
       description: "add to the list of favorite pets.",
-      schema: v.object({
+      schema: toJsonSchema(v.object({
         pets: v.array(v.string()),
-      }),
+      })),
     }
   );
   return [updateFavoritePets];
@@ -813,9 +819,9 @@ const lookupUserInfo = tool(async (input, config) => {
 }, {
   name: "lookup_user_info",
   description: "Use this to look up user information to better assist them with their questions.",
-  schema: v.object({
+  schema: toJsonSchema(v.object({
     // Define your schema here
-  }),
+  })),
 });
 ```
 
@@ -825,6 +831,7 @@ This guide shows how you can do this using LangGraph's prebuilt components (crea
 import { Annotation, Command, MessagesAnnotation } from "@langchain/langgraph";
 import { tool } from "@langchain/core/tools";
 import * as v from "valibot";
+import { toJsonSchema } from "@valibot/to-json-schema";
 
 const StateAnnotation = Annotation.Root({
   ...MessagesAnnotation.spec,
@@ -874,7 +881,7 @@ const lookupUserInfo = tool(async (_, config) => {
 }, {
   name: "lookup_user_info",
   description: "Always use this to look up information about the user to better assist them with their questions.",
-  schema: v.object({}),
+  schema: toJsonSchema(v.object({})),
 });
 ```
 

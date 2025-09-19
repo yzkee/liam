@@ -587,14 +587,18 @@ Structured output ensures that your agent responses follow a specific format, ma
 ```typescript
 import { StateGraph, Annotation, START, END } from "@langchain/langgraph";
 import { tool } from "@langchain/core/tools";
-import { z } from "zod";
+import * as v from "valibot";
+import { toJsonSchema } from "../../utils/jsonSchema";
 import { ChatAnthropic } from "@langchain/anthropic";
 
-// Define response schema
-const Response = z.object({
-  temperature: z.number().describe("the temperature"),
-  other_notes: z.string().describe("any other notes about the weather")
+// Define response schema using valibot
+const responseSchema = v.object({
+  temperature: v.pipe(v.number(), v.description("the temperature")),
+  other_notes: v.pipe(v.string(), v.description("any other notes about the weather"))
 });
+
+// Convert to JSON Schema for LangChain compatibility
+const toolSchema = toJsonSchema(responseSchema);
 
 // Initialize model
 const model = new ChatAnthropic({ model: "claude-3-sonnet-20240229" });
@@ -607,7 +611,7 @@ const finalResponseTool = tool(
   {
     name: "Response",
     description: "The final response",
-    schema: Response
+    schema: toolSchema
   }
 );
 
@@ -660,25 +664,28 @@ const structuredGraph = new StateGraph(StructuredState)
 #### Response Formatting and Validation
 
 ```typescript
-// Enhanced response schema with validation
-const DetailedResponse = z.object({
-  answer: z.string().min(1, "Answer cannot be empty"),
-  confidence: z.number().min(0).max(1),
-  category: z.enum(["factual", "opinion", "analysis"]),
-  sources: z.array(z.string()).min(1, "At least one source required")
+// Enhanced response schema with validation using valibot
+const detailedResponseSchema = v.object({
+  answer: v.pipe(v.string(), v.minLength(1, "Answer cannot be empty")),
+  confidence: v.pipe(v.number(), v.minValue(0), v.maxValue(1)),
+  category: v.picklist(["factual", "opinion", "analysis"]),
+  sources: v.pipe(v.array(v.string()), v.minLength(1, "At least one source required"))
 });
+
+// Convert to JSON Schema for LangChain compatibility
+const detailedToolSchema = toJsonSchema(detailedResponseSchema);
 
 // Create detailed response tool
 const detailedResponseTool = tool(
   async (input) => {
     // Validate the input matches our schema
-    const validated = DetailedResponse.parse(input);
+    const validated = v.parse(detailedResponseSchema, input);
     return validated;
   },
   {
     name: "DetailedResponse",
     description: "Provide a detailed structured response",
-    schema: DetailedResponse
+    schema: detailedToolSchema
   }
 );
 
@@ -699,16 +706,20 @@ const detailedGraph = new StateGraph(StructuredState)
 #### Multiple Response Formats
 
 ```typescript
-// Multiple response format schemas
-const TextResponse = z.object({
-  format: z.literal("text"),
-  content: z.string()
+// Multiple response format schemas using valibot
+const textResponseSchema = v.object({
+  format: v.literal("text"),
+  content: v.string()
 });
 
-const JsonResponse = z.object({
-  format: z.literal("json"),
-  data: z.record(z.any())
+const jsonResponseSchema = v.object({
+  format: v.literal("json"),
+  data: v.record(v.string(), v.any())
 });
+
+// Convert to JSON Schema for LangChain compatibility
+const textToolSchema = toJsonSchema(textResponseSchema);
+const jsonToolSchema = toJsonSchema(jsonResponseSchema);
 
 // Create tools for different formats
 const textResponseTool = tool(
@@ -716,16 +727,16 @@ const textResponseTool = tool(
   {
     name: "TextResponse",
     description: "Respond in text format",
-    schema: TextResponse
+    schema: textToolSchema
   }
 );
 
 const jsonResponseTool = tool(
   async (input) => input,
   {
-    name: "JsonResponse", 
+    name: "JsonResponse",
     description: "Respond in JSON format",
-    schema: JsonResponse
+    schema: jsonToolSchema
   }
 );
 
@@ -881,20 +892,23 @@ This pattern allows agents to return tool results directly as the final answer, 
 ```typescript
 import { StateGraph, Annotation, START, END } from "@langchain/langgraph";
 import { DynamicStructuredTool } from "@langchain/core/tools";
-import { z } from "zod";
+import * as v from "valibot";
+import { toJsonSchema } from "../../utils/jsonSchema";
 import { ChatAnthropic } from "@langchain/anthropic";
 
 // Initialize model
 const model = new ChatAnthropic({ model: "claude-3-sonnet-20240229" });
 
-// Tool schema with return_direct field
+// Tool schema with return_direct field using valibot
+const weatherToolSchema = v.object({
+  location: v.pipe(v.string(), v.description("The location to get weather for")),
+  return_direct: v.optional(v.pipe(v.boolean(), v.description("Whether to return the result directly")))
+});
+
 const directReturnTool = new DynamicStructuredTool({
   name: "get_weather",
   description: "Get weather information",
-  schema: z.object({
-    location: z.string().describe("The location to get weather for"),
-    return_direct: z.boolean().describe("Whether to return the result directly").optional()
-  }),
+  schema: toJsonSchema(weatherToolSchema),
   func: async ({ location, return_direct }) => {
     const weather = `Weather in ${location}: Sunny, 72°F`;
     return weather;
@@ -969,14 +983,21 @@ const directReturnGraph = new StateGraph(DirectReturnState)
 #### Advanced Direct Return with Multiple Tools
 
 ```typescript
-// Multiple tools with different return behaviors
+// Multiple tools with different return behaviors using valibot
+const calculatorToolSchema = v.object({
+  expression: v.string(),
+  return_direct: v.optional(v.pipe(v.boolean(), v.fallback(true)))
+});
+
+const searchToolSchema = v.object({
+  query: v.string(),
+  return_direct: v.optional(v.pipe(v.boolean(), v.fallback(false)))
+});
+
 const calculatorTool = new DynamicStructuredTool({
   name: "calculator",
   description: "Perform calculations",
-  schema: z.object({
-    expression: z.string(),
-    return_direct: z.boolean().default(true).optional()
-  }),
+  schema: toJsonSchema(calculatorToolSchema),
   func: async ({ expression }) => {
     return `Result: ${expression} = 42`;
   }
@@ -985,10 +1006,7 @@ const calculatorTool = new DynamicStructuredTool({
 const searchTool = new DynamicStructuredTool({
   name: "search",
   description: "Search for information",
-  schema: z.object({
-    query: z.string(),
-    return_direct: z.boolean().default(false).optional()
-  }),
+  schema: toJsonSchema(searchToolSchema),
   func: async ({ query }) => {
     return `Search results for: ${query}`;
   }

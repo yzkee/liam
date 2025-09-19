@@ -20,7 +20,8 @@ export default [
             {
               name: '@langchain/langgraph/prebuilt',
               importNames: ['createReactAgent'],
-              message: 'createReactAgent is not allowed. Use LangGraph core primitives (nodes, edges, state management) instead to maintain control over prompts and agent behavior.',
+              message:
+                'createReactAgent is not allowed. Use LangGraph core primitives (nodes, edges, state management) instead to maintain control over prompts and agent behavior.',
             },
           ],
         },

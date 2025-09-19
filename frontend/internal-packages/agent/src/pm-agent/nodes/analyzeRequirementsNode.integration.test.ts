@@ -53,6 +53,7 @@ describe('analyzeRequirementsNode Integration', () => {
         },
       }),
       analyzedRequirementsRetryCount: 0,
+      artifactSaveSuccessful: false,
     }
 
     // Act

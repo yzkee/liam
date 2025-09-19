@@ -6,4 +6,4 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 For LangGraph.js agent framework development guidance:
 
-- [`docs/langgraph/README.md`](docs/langgraph/README.md) - LangGraph.js complete guide
+- @../../../docs/langgraph/README.md - LangGraph.js complete guide

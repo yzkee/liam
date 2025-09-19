@@ -302,6 +302,7 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
         this.client.from('checkpoints').upsert(checkpointInsert, {
           onConflict: 'thread_id,checkpoint_ns,checkpoint_id,organization_id',
         }),
+        { allowNull: true },
       ),
     )
 
@@ -327,6 +328,7 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
             onConflict:
               'thread_id,checkpoint_ns,channel,version,organization_id',
           }),
+          { allowNull: true },
         ),
       )
 
@@ -374,6 +376,7 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
             onConflict:
               'thread_id,checkpoint_ns,checkpoint_id,task_id,idx,organization_id',
           }),
+          { allowNull: true },
         ),
       )
 
@@ -403,6 +406,7 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
           .delete()
           .eq('thread_id', threadId)
           .eq('organization_id', this.organizationId),
+        { allowNull: true },
       ),
     )
 
@@ -420,6 +424,7 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
           .delete()
           .eq('thread_id', threadId)
           .eq('organization_id', this.organizationId),
+        { allowNull: true },
       ),
     )
 
@@ -437,6 +442,7 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
           .delete()
           .eq('thread_id', threadId)
           .eq('organization_id', this.organizationId),
+        { allowNull: true },
       ),
     )
 

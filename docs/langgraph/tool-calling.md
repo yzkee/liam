@@ -12,7 +12,7 @@ This guide covers how to use LangGraph's prebuilt ToolNode for tool calling.
 
 ```typescript
 import { tool } from "@langchain/core/tools";
-import { z } from "zod";
+import * as v from "valibot";
 
 const getWeather = tool((input) => {
   if (["sf", "san francisco"].includes(input.location.toLowerCase())) {
@@ -23,8 +23,8 @@ const getWeather = tool((input) => {
 }, {
   name: "get_weather",
   description: "Call to get the current weather.",
-  schema: z.object({
-    location: z.string().describe("Location to get the weather for."),
+  schema: v.object({
+    location: v.pipe(v.string(), v.description("Location to get the weather for.")),
   }),
 });
 ```
@@ -114,14 +114,14 @@ In this example we will build a ReAct agent that **always** calls a certain tool
 
 ```typescript
 import { DynamicStructuredTool } from "@langchain/core/tools";
-import { z } from "zod";
+import * as v from "valibot";
 
 const searchTool = new DynamicStructuredTool({
   name: "search",
   description:
     "Use to surf the web, fetch current information, check the weather, and retrieve other information.",
-  schema: z.object({
-    query: z.string().describe("The query to use in your search."),
+  schema: v.object({
+    query: v.pipe(v.string(), v.description("The query to use in your search.")),
   }),
   func: async ({ }: { query: string }) => {
     // This is a placeholder for the actual implementation
@@ -275,7 +275,7 @@ This guide covers some ways to build error handling into your graphs to mitigate
 To start, define a mock weather tool that has some hidden restrictions on input queries. The intent here is to simulate a real-world case where a model fails to call a tool correctly:
 
 ```typescript
-import { z } from "zod";
+import * as v from "valibot";
 import { tool } from "@langchain/core/tools";
 
 const getWeather = tool(async ({ location }) => {
@@ -289,8 +289,8 @@ const getWeather = tool(async ({ location }) => {
 }, {
   name: "get_weather",
   description: "Call to get the current weather",
-  schema: z.object({
-    location: z.string(),
+  schema: v.object({
+    location: v.string(),
   }),
 });
 ```
@@ -351,9 +351,12 @@ For example, the below tool requires as input a list of elements of a specific l
 ```typescript
 import { StringOutputParser } from "@langchain/core/output_parsers";
 
-const haikuRequestSchema = z.object({
-  topic: z.array(z.string()).length(3),
-});
+const haikuRequestSchema = v.pipe(
+  v.object({
+    topic: v.array(v.string()),
+  }),
+  v.check(input => input.topic.length === 3, "Topic array must have exactly 3 elements")
+);
 
 const masterHaikuGenerator = tool(async ({ topic }) => {
   const model = new ChatAnthropic({
@@ -520,7 +523,7 @@ Now, declare a tool as shown below. The tool receives values in three different 
 It will then use LangGraph's cross-thread persistence to save preferences:
 
 ```typescript
-import { z } from "zod";
+import * as v from "valibot";
 import { tool } from "@langchain/core/tools";
 import {
   getCurrentTaskInput,
@@ -548,8 +551,8 @@ const updateFavoritePets = tool(async (input, config: LangGraphRunnableConfig) =
   // The LLM "sees" the following schema:
   name: "update_favorite_pets",
   description: "add to the list of favorite pets.",
-  schema: z.object({
-    pets: z.array(z.string()),
+  schema: v.object({
+    pets: v.array(v.string()),
   }),
 });
 ```
@@ -557,8 +560,8 @@ const updateFavoritePets = tool(async (input, config: LangGraphRunnableConfig) =
 If we look at the tool call schema, which is what is passed to the model for tool-calling, we can see that only pets is being passed:
 
 ```typescript
-import { zodToJsonSchema } from "zod-to-json-schema";
-console.log(zodToJsonSchema(updateFavoritePets.schema));
+// Schema inspection example (valibot schemas can be inspected directly)
+console.log(updateFavoritePets.schema);
 ```
 
 ```typescript
@@ -589,7 +592,7 @@ const getFavoritePets = tool(
     // The LLM "sees" the following schema:
     name: "get_favorite_pets",
     description: "retrieve the list of favorite pets for the given user.",
-    schema: z.object({}),
+    schema: v.object({}),
   }
 );
 ```
@@ -763,8 +766,8 @@ function generateTools(state: typeof MessagesAnnotation.State) {
       // The LLM "sees" the following schema:
       name: "update_favorite_pets",
       description: "add to the list of favorite pets.",
-      schema: z.object({
-        pets: z.array(z.string()),
+      schema: v.object({
+        pets: v.array(v.string()),
       }),
     }
   );
@@ -810,7 +813,9 @@ const lookupUserInfo = tool(async (input, config) => {
 }, {
   name: "lookup_user_info",
   description: "Use this to look up user information to better assist them with their questions.",
-  schema: z.object(...),
+  schema: v.object({
+    // Define your schema here
+  }),
 });
 ```
 
@@ -819,7 +824,7 @@ This guide shows how you can do this using LangGraph's prebuilt components (crea
 ```typescript
 import { Annotation, Command, MessagesAnnotation } from "@langchain/langgraph";
 import { tool } from "@langchain/core/tools";
-import { z } from "zod";
+import * as v from "valibot";
 
 const StateAnnotation = Annotation.Root({
   ...MessagesAnnotation.spec,
@@ -869,7 +874,7 @@ const lookupUserInfo = tool(async (_, config) => {
 }, {
   name: "lookup_user_info",
   description: "Always use this to look up information about the user to better assist them with their questions.",
-  schema: z.object({}),
+  schema: v.object({}),
 });
 ```
 

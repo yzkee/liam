@@ -31,7 +31,7 @@ This guide covers `streamMode="values"`.
 import { END, START, StateGraph, MessagesAnnotation } from "@langchain/langgraph";
 import { ChatOpenAI } from "@langchain/openai";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
-import { z } from "zod";
+import * as v from "valibot";
 import { tool } from "@langchain/core/tools";
 import { AIMessage, HumanMessage } from "@langchain/core/messages";
 
@@ -48,8 +48,8 @@ const getWeather = tool(
   {
     name: "get_weather",
     description: "Use this to get weather information",
-    schema: z.object({
-      city: z.enum(["nyc", "sf"]),
+    schema: v.object({
+      city: v.picklist(["nyc", "sf"]),
     }),
   }
 );
@@ -130,7 +130,7 @@ In this example, we will stream tokens from the language model powering an agent
 import { END, START, StateGraph, MessagesAnnotation } from "@langchain/langgraph";
 import { ChatOpenAI } from "@langchain/openai";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
-import { z } from "zod";
+import * as v from "valibot";
 import { tool } from "@langchain/core/tools";
 import { AIMessage, HumanMessage } from "@langchain/core/messages";
 
@@ -147,8 +147,8 @@ const getWeather = tool(
   {
     name: "get_weather",
     description: "Use this to get weather information",
-    schema: z.object({
-      city: z.enum(["nyc", "sf"]),
+    schema: v.object({
+      city: v.picklist(["nyc", "sf"]),
     }),
   }
 );
@@ -203,7 +203,7 @@ In this guide, we will stream tokens from the language model powering an agent w
 import OpenAI from "openai";
 import { END, StateGraph, MessagesAnnotation } from "@langchain/langgraph";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
-import { z } from "zod";
+import * as v from "valibot";
 import { tool } from "@langchain/core/tools";
 import { AIMessage, HumanMessage } from "@langchain/core/messages";
 import { dispatchCustomEvent } from "@langchain/core/callbacks/dispatch";
@@ -224,8 +224,8 @@ const getWeather = tool(
   {
     name: "get_weather",
     description: "Use this to get weather information",
-    schema: z.object({
-      city: z.enum(["nyc", "sf"]),
+    schema: v.object({
+      city: v.picklist(["nyc", "sf"]),
     }),
   }
 );
@@ -450,7 +450,7 @@ for await (const { event, data } of eventStream) {
 If your LangGraph graph needs to use tools that call LLMs (or any other LangChain Runnable objects - other graphs, LCEL chains, retrievers, etc.), you might want to stream events from the underlying Runnable. This guide shows how you can do that.
 
 ```typescript
-import { z } from "zod";
+import * as v from "valibot";
 import { tool } from "@langchain/core/tools";
 import { ChatAnthropic } from "@langchain/anthropic";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
@@ -479,8 +479,8 @@ const getItems = tool(
   {
     name: "get_items",
     description: "Get items from the database",
-    schema: z.object({
-      input: z.string(),
+    schema: v.object({
+      input: v.string(),
     }),
   }
 );
@@ -516,7 +516,7 @@ for await (const { event, data } of eventStream) {
 One common pattern for graphs is to stream LLM tokens from inside the final node only. This guide demonstrates how you can do this.
 
 ```typescript
-import { z } from "zod";
+import * as v from "valibot";
 import { tool } from "@langchain/core/tools";
 import { ChatAnthropic } from "@langchain/anthropic";
 
@@ -530,8 +530,8 @@ const getWeather = tool(async ({ city }) => {
   }
 }, {
   name: "get_weather",
-  schema: z.object({
-    city: z.enum(["nyc", "sf"]),
+  schema: v.object({
+    city: v.picklist(["nyc", "sf"]),
   }),
   description: "Use this to get weather information",
 });

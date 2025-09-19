@@ -8,7 +8,7 @@ In this how-to guide we will demonstrate how to implement a multi-agent network 
 import { entrypoint, task } from "@langchain/langgraph";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { tool } from "@langchain/core/tools";
-import { z } from "zod";
+import * as v from "valibot";
 
 // Define a tool to signal intent to hand off to a different agent
 const transferToHotelAdvisor = tool(
@@ -18,7 +18,7 @@ const transferToHotelAdvisor = tool(
   {
     name: "transferToHotelAdvisor",
     description: "Ask hotel advisor agent for help.",
-    schema: z.object({}),
+    schema: v.object({}),
     returnDirect: true,
   }
 );
@@ -30,7 +30,7 @@ const transferToRestaurantAdvisor = tool(
   {
     name: "transferToRestaurantAdvisor", 
     description: "Ask restaurant advisor agent for help.",
-    schema: z.object({}),
+    schema: v.object({}),
     returnDirect: true,
   }
 );

@@ -1,5 +1,9 @@
 import type { BaseMessage, StoredMessage } from '@langchain/core/messages'
-import { createSupabaseRepositories, getMessages } from '@liam-hq/agent'
+import {
+  createSupabaseRepositories,
+  getCheckpointErrors,
+  getMessages,
+} from '@liam-hq/agent'
 import type { Schema } from '@liam-hq/schema'
 import { schemaSchema } from '@liam-hq/schema'
 import { err, ok, type Result } from 'neverthrow'
@@ -33,6 +37,7 @@ async function loadSessionData(designSessionId: string): Promise<
       messages: StoredMessage[]
       buildingSchema: NonNullable<Awaited<ReturnType<typeof getBuildingSchema>>>
       initialSchema: Schema
+      workflowError: string | null
     },
     Error
   >
@@ -55,6 +60,13 @@ async function loadSessionData(designSessionId: string): Promise<
   const baseMessages = await getMessages(config)
   const messages = serializeMessages(baseMessages)
 
+  // Fetch checkpoint error from LangGraph memory
+  const checkpointErrors = await getCheckpointErrors(
+    repositories.schema.checkpointer,
+    designSessionId,
+  )
+  const workflowError = checkpointErrors[0] || null
+
   const buildingSchema = await getBuildingSchema(designSessionId)
   if (!buildingSchema) {
     return err(new Error('Building schema not found for design session'))
@@ -72,6 +84,7 @@ async function loadSessionData(designSessionId: string): Promise<
     messages,
     buildingSchema,
     initialSchema,
+    workflowError,
   })
 }
 
@@ -90,6 +103,7 @@ export const SessionDetailPage: FC<Props> = async ({
     messages,
     buildingSchema,
     initialSchema,
+    workflowError,
   } = result.value
 
   const versions = await getVersions(buildingSchema.id)
@@ -116,6 +130,7 @@ export const SessionDetailPage: FC<Props> = async ({
         initialVersions={versions}
         isDeepModelingEnabled={isDeepModelingEnabled}
         initialIsPublic={initialIsPublic}
+        initialWorkflowError={workflowError}
       />
     </ViewModeProvider>
   )

@@ -29,6 +29,7 @@ type Props = {
   initialVersions: Version[]
   isDeepModelingEnabled: boolean
   initialIsPublic: boolean
+  initialWorkflowError?: string | null
 }
 
 export const SessionDetailPageClient: FC<Props> = ({
@@ -40,6 +41,7 @@ export const SessionDetailPageClient: FC<Props> = ({
   initialVersions,
   isDeepModelingEnabled,
   initialIsPublic,
+  initialWorkflowError,
 }) => {
   const designSessionId = designSessionWithTimelineItems.id
 
@@ -96,10 +98,13 @@ export const SessionDetailPageClient: FC<Props> = ({
   const shouldShowOutputSection = artifact !== null || selectedVersion !== null
 
   const chatMessages = mapStoredMessagesToChatMessages(initialMessages)
-  const { isStreaming, messages, start } = useStream({
+  const { isStreaming, messages, start, error } = useStream({
     initialMessages: chatMessages,
     designSessionId,
   })
+
+  // Combine streaming error with workflow errors
+  const combinedError = error || initialWorkflowError
   // Track if initial workflow has been triggered to prevent multiple executions
   const hasTriggeredInitialWorkflow = useRef(false)
 
@@ -143,6 +148,7 @@ export const SessionDetailPageClient: FC<Props> = ({
             messages={messages}
             isWorkflowRunning={isStreaming}
             onMessageSend={addOrUpdateTimelineItem}
+            error={combinedError}
           />
         </div>
         {shouldShowOutputSection && (

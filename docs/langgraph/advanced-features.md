@@ -684,12 +684,12 @@ Structured output ensures that your agent responses follow a specific format, ma
 ```typescript
 import { StateGraph, Annotation, START, END } from "@langchain/langgraph";
 import { tool } from "@langchain/core/tools";
-import { z } from "zod";
+import * as v from "valibot";
 
 // Define response schema
-const Response = z.object({
-  temperature: z.number(),
-  other_notes: z.string()
+const Response = v.object({
+  temperature: v.number(),
+  other_notes: v.string()
 });
 
 // Create a final response tool
@@ -974,15 +974,15 @@ This pattern allows agents to return tool results directly as the final answer, 
 ```typescript
 import { StateGraph, Annotation, START, END } from "@langchain/langgraph";
 import { DynamicStructuredTool } from "@langchain/core/tools";
-import { z } from "zod";
+import * as v from "valibot";
 
 // Tool schema with return_direct field
 const directReturnTool = new DynamicStructuredTool({
   name: "get_weather",
   description: "Get weather information",
-  schema: z.object({
-    location: z.string().describe("The location to get weather for"),
-    return_direct: z.boolean().describe("Whether to return the result directly").default(false)
+  schema: v.object({
+    location: v.pipe(v.string(), v.description("The location to get weather for")),
+    return_direct: v.pipe(v.boolean(), v.description("Whether to return the result directly"), v.optional(v.literal(false)))
   }),
   func: async ({ location, return_direct }) => {
     const weather = `Weather in ${location}: Sunny, 72°F`;
@@ -1062,9 +1062,9 @@ const directReturnGraph = new StateGraph(DirectReturnState)
 const calculatorTool = new DynamicStructuredTool({
   name: "calculator",
   description: "Perform calculations",
-  schema: z.object({
-    expression: z.string(),
-    return_direct: z.boolean().default(true)
+  schema: v.object({
+    expression: v.string(),
+    return_direct: v.pipe(v.boolean(), v.optional(v.literal(true)))
   }),
   func: async ({ expression }) => {
     return `Result: ${expression} = 42`;
@@ -1074,9 +1074,9 @@ const calculatorTool = new DynamicStructuredTool({
 const searchTool = new DynamicStructuredTool({
   name: "search",
   description: "Search for information", 
-  schema: z.object({
-    query: z.string(),
-    return_direct: z.boolean().default(false)
+  schema: v.object({
+    query: v.string(),
+    return_direct: v.pipe(v.boolean(), v.optional(v.literal(false)))
   }),
   func: async ({ query }) => {
     return `Search results for: ${query}`;

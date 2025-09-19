@@ -20,6 +20,8 @@ export const parseHeading = (
   const level = levelMatch.length
   const baseSlug = generateHeadingId(text)
 
+  if (!baseSlug) return null
+
   // Handle duplicate slugs
   const count = slugCountMap.get(baseSlug) ?? 0
   slugCountMap.set(baseSlug, count + 1)

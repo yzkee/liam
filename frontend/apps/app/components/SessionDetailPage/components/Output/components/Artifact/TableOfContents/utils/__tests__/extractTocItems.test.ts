@@ -54,6 +54,11 @@ describe('parseHeading', () => {
     expect(parseHeading('#NoSpace', slugCountMap)).toBeNull()
   })
 
+  it('returns null for heading with only whitespace', () => {
+    const slugCountMap = new Map<string, number>()
+    expect(parseHeading('#    ', slugCountMap)).toBeNull()
+  })
+
   it('handles heading with special characters', () => {
     const slugCountMap = new Map<string, number>()
     expect(

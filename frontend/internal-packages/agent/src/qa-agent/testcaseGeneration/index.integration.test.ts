@@ -11,13 +11,12 @@ import { testcaseAnnotation } from './testcaseAnnotation'
 describe('testcaseGeneration Integration', () => {
   it('executes testcaseGeneration subgraph with real APIs', async () => {
     // Arrange
+    const { config, checkpointer } = await getTestConfig()
     const graph = new StateGraph(testcaseAnnotation)
       .addNode('testcaseGeneration', testcaseGeneration)
       .addEdge(START, 'testcaseGeneration')
       .addEdge('testcaseGeneration', END)
-      .compile()
-
-    const { config } = await getTestConfig()
+      .compile({ checkpointer })
 
     type TestcaseState = typeof testcaseAnnotation.State
 

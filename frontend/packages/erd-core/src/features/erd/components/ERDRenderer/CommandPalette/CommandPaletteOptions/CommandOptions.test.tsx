@@ -36,12 +36,12 @@ it('renders options with descriptions', async () => {
     screen.getByRole('option', { name: 'Tidy Up ⇧ T' }),
   ).toBeInTheDocument()
   expect(
-    screen.getByRole('option', { name: 'Show All Fields ⌘ 2' }),
+    screen.getByRole('option', { name: 'Show All Fields ⇧ 2' }),
   ).toBeInTheDocument()
   expect(
-    screen.getByRole('option', { name: 'Show Table Name ⌘ 3' }),
+    screen.getByRole('option', { name: 'Show Table Name ⇧ 3' }),
   ).toBeInTheDocument()
   expect(
-    screen.getByRole('option', { name: 'Show Key Only ⌘ 4' }),
+    screen.getByRole('option', { name: 'Show Key Only ⇧ 4' }),
   ).toBeInTheDocument()
 })

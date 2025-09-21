@@ -74,7 +74,7 @@ export const CommandPaletteCommandOptions: FC = () => {
       >
         <PanelTop className={styles.itemIcon} />
         <span className={styles.itemText}>Show All Fields</span>
-        <span className={styles.keyIcon}>⌘</span>
+        <span className={styles.keyIcon}>⇧</span>
         <span className={styles.keyIcon}>2</span>
       </Command.Item>
       <Command.Item
@@ -87,7 +87,7 @@ export const CommandPaletteCommandOptions: FC = () => {
       >
         <RectangleHorizontal className={styles.itemIcon} />
         <span className={styles.itemText}>Show Table Name</span>
-        <span className={styles.keyIcon}>⌘</span>
+        <span className={styles.keyIcon}>⇧</span>
         <span className={styles.keyIcon}>3</span>
       </Command.Item>
       <Command.Item
@@ -100,7 +100,7 @@ export const CommandPaletteCommandOptions: FC = () => {
       >
         <KeyRound className={styles.itemIcon} />
         <span className={styles.itemText}>Show Key Only</span>
-        <span className={styles.keyIcon}>⌘</span>
+        <span className={styles.keyIcon}>⇧</span>
         <span className={styles.keyIcon}>4</span>
       </Command.Item>
     </Command.Group>

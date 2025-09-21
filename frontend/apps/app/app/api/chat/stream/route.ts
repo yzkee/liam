@@ -5,6 +5,7 @@ import {
   invokeDbAgentStream,
 } from '@liam-hq/agent'
 import { SSE_EVENTS } from '@liam-hq/agent/client'
+import * as Sentry from '@sentry/nextjs'
 import { NextResponse } from 'next/server'
 import * as v from 'valibot'
 import { createClient } from '../../../../libs/db/server'
@@ -128,6 +129,10 @@ export async function POST(request: Request) {
         }
         controller.enqueue(enc.encode(line(SSE_EVENTS.END, null)))
       } catch (err) {
+        Sentry.captureException(err, {
+          tags: { designSchemaId: designSessionId },
+        })
+
         const message = err instanceof Error ? err.message : String(err)
         controller.enqueue(enc.encode(line(SSE_EVENTS.ERROR, { message })))
       } finally {

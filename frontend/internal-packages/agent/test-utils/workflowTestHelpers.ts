@@ -3,8 +3,10 @@ import {
   isBaseMessage,
 } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
+import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
 import {
   createLogger,
+  getLogLevel,
   setupDatabaseAndUser,
   validateEnvironment,
 } from '../scripts/shared/scriptUtils'
@@ -61,6 +63,7 @@ export const getTestConfig = async (options?: {
     userId: string
     organizationId: string
   }
+  checkpointer: BaseCheckpointSaver
 }> => {
   // Store original API key value to restore later
   const originalApiKey = process.env['OPENAI_API_KEY']
@@ -70,7 +73,7 @@ export const getTestConfig = async (options?: {
     process.env['OPENAI_API_KEY'] = 'dummy-key-for-testing'
   }
 
-  const logger = createLogger('ERROR') // Only show errors during test setup
+  const logger = createLogger(getLogLevel(process.env['LOG_LEVEL']))
 
   const setupResult = await validateEnvironment()
     .andThen(setupDatabaseAndUser(logger))
@@ -110,6 +113,7 @@ export const getTestConfig = async (options?: {
       userId: user.id,
       organizationId: organization.id,
     },
+    checkpointer: repositories.schema.checkpointer,
   }
 }
 

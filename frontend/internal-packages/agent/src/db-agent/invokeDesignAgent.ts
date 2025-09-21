@@ -24,11 +24,12 @@ import { schemaDesignTool } from './tools/schemaDesignTool'
 const AGENT_NAME = 'db' as const
 
 const model = new ChatOpenAI({
-  model: 'gpt-5',
-  reasoning: { effort: 'medium', summary: 'detailed' },
+  model: 'gpt-5-mini',
+  reasoning: { effort: 'low', summary: 'detailed' },
   useResponsesApi: true,
 }).bindTools([schemaDesignTool], {
   strict: true,
+  tool_choice: schemaDesignTool.name,
 })
 
 type DesignAgentResult = {

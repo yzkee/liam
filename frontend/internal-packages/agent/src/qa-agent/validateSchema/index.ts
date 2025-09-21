@@ -8,6 +8,7 @@ export async function validateSchemaNode(
   const toolCallId = uuidv4()
   const aiMessage = new AIMessage({
     content: `Running ${state.testcases.length} test cases to validate the database schema.`,
+    name: 'qa',
     tool_calls: [
       {
         id: toolCallId,

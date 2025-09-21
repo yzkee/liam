@@ -1,7 +1,6 @@
 import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
 import type { Artifact } from '@liam-hq/artifact'
 import type { Database, Tables } from '@liam-hq/db/supabase/database.types'
-import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import type { Schema } from '@liam-hq/schema'
 import type { Operation } from 'fast-json-patch'
 import type { ResultAsync } from 'neverthrow'
@@ -100,26 +99,6 @@ export type ArtifactResult =
       error: string
     }
 
-export type CreateWorkflowRunParams = {
-  designSessionId: string
-  workflowRunId: string
-}
-
-export type WorkflowRunResult =
-  | {
-      success: true
-      workflowRun: Tables<'workflow_runs'>
-    }
-  | {
-      success: false
-      error: string
-    }
-
-export type UpdateWorkflowRunStatusParams = {
-  workflowRunId: string
-  status: Database['public']['Enums']['workflow_run_status']
-}
-
 export type UserInfo = {
   id: string
   email?: string | null
@@ -183,34 +162,12 @@ export type SchemaRepository = {
   getArtifact(designSessionId: string): Promise<ArtifactResult>
 
   /**
-   * Create a validation query record
-   */
-  createValidationQuery(params: {
-    designSessionId: string
-    queryString: string
-  }): Promise<
-    { success: true; queryId: string } | { success: false; error: string }
-  >
-
-  /**
-   * Create validation results for a query
-   */
-  createValidationResults(params: {
-    validationQueryId: string
-    results: SqlResult[]
-  }): Promise<{ success: true } | { success: false; error: string }>
-
-  /**
    * Create a new workflow run record
    */
-  createWorkflowRun(params: CreateWorkflowRunParams): Promise<WorkflowRunResult>
 
   /**
    * Update workflow run status
    */
-  updateWorkflowRunStatus(
-    params: UpdateWorkflowRunStatusParams,
-  ): Promise<WorkflowRunResult>
 
   /**
    * Get user information by user ID

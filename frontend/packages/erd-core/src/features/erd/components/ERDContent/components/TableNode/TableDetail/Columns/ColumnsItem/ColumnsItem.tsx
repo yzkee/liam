@@ -1,5 +1,5 @@
 import type { Column, Constraints } from '@liam-hq/schema'
-import { GridTableRoot } from '@liam-hq/ui'
+import { GridTableRoot, Link } from '@liam-hq/ui'
 import clsx from 'clsx'
 import { type FC, useMemo } from 'react'
 import {
@@ -55,8 +55,9 @@ export const ColumnsItem: FC<Props> = ({ tableId, column, constraints }) => {
     <div id={elementId} className={clsx(styles.wrapper, diffStyle)}>
       <h3 className={styles.heading}>
         <a className={styles.link} href={`#${elementId}`}>
-          {column.name} #
+          {column.name}
         </a>
+        <Link className={styles.linkIcon} />
       </h3>
       {column.comment && <Comment tableId={tableId} column={column} />}
       <GridTableRoot>

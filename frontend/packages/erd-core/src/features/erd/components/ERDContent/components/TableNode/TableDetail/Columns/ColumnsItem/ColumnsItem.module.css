@@ -13,6 +13,14 @@
   line-height: normal;
 }
 
-.link:hover {
-  text-decoration: underline;
+.linkIcon {
+  width: 12px;
+  height: 12px;
+  margin-left: var(--spacing-1);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.link:hover + .linkIcon {
+  opacity: 1;
 }

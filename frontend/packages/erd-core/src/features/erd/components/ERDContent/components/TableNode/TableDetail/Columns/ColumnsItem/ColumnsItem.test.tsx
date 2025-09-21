@@ -29,9 +29,9 @@ describe('id', () => {
     )
 
     expect(
-      screen.getByRole('heading', { name: 'id #', level: 3 }),
+      screen.getByRole('heading', { name: 'id', level: 3 }),
     ).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'id #' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'id' })).toHaveAttribute(
       'href',
       '#users__columns__id',
     )

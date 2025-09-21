@@ -58,7 +58,8 @@ export const CommandPaletteCommandOptions: FC = () => {
         }}
         className={styles.item}
       >
-        <TidyUpIcon className={styles.itemIcon} />
+        {/* The option has explicit text description, so that the icon does not have to have an aria-label */}
+        <TidyUpIcon className={styles.itemIcon} aria-label={undefined} />
         <span className={styles.itemText}>Tidy Up</span>
         <span className={styles.keyIcon}>⇧</span>
         <span className={styles.keyIcon}>T</span>

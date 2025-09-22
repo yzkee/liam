@@ -6,7 +6,8 @@ import {
 } from '@langchain/core/messages'
 import { MessageTupleManager, SSE_EVENTS } from '@liam-hq/agent/client'
 import { err, ok } from 'neverthrow'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
+import { useNavigationGuard } from '../../../../hooks/useNavigationGuard'
 import { ERROR_MESSAGES } from '../../components/Chat/constants/chatConstants'
 import { parseSse } from './parseSse'
 import { useSessionStorageOnce } from './useSessionStorageOnce'
@@ -54,17 +55,9 @@ export const useStream = ({ designSessionId, initialMessages }: Props) => {
     setError(null)
   }, [])
 
-  useEffect(() => {
-    const handleBeforeUnload = () => {
-      abortRef.current?.abort()
-    }
-
-    window.addEventListener('beforeunload', handleBeforeUnload)
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload)
-    }
-  }, [])
+  useNavigationGuard(() => {
+    abortRef.current?.abort()
+  })
 
   // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
   const start = useCallback(async (params: ChatRequest) => {

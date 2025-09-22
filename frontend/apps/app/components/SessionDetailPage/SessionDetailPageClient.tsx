@@ -12,12 +12,10 @@ import { Chat } from './components/Chat'
 import { Output } from './components/Output'
 import { useRealtimeArtifact } from './components/Output/components/Artifact/hooks/useRealtimeArtifact'
 import { OUTPUT_TABS } from './components/Output/constants'
-import { useRealtimeTimelineItems } from './hooks/useRealtimeTimelineItems'
 import { useRealtimeVersionsWithSchema } from './hooks/useRealtimeVersionsWithSchema'
 import { useStream } from './hooks/useStream'
 import { SQL_REVIEW_COMMENTS } from './mock'
 import styles from './SessionDetailPage.module.css'
-import { convertTimelineItemToTimelineItemEntry } from './services/convertTimelineItemToTimelineItemEntry'
 import type { DesignSessionWithTimelineItems, Version } from './types'
 
 type Props = {
@@ -70,13 +68,6 @@ export const SessionDetailPageClient: FC<Props> = ({
       setActiveTab(OUTPUT_TABS.ERD)
     },
     [setSelectedVersion],
-  )
-
-  const { addOrUpdateTimelineItem } = useRealtimeTimelineItems(
-    designSessionId,
-    designSessionWithTimelineItems.timeline_items.map((timelineItem) =>
-      convertTimelineItemToTimelineItemEntry(timelineItem),
-    ),
   )
 
   const handleArtifactChange = useCallback((newArtifact: unknown) => {
@@ -150,7 +141,13 @@ export const SessionDetailPageClient: FC<Props> = ({
             schemaData={displayedSchema}
             messages={messages}
             isWorkflowRunning={isStreaming}
-            onMessageSend={addOrUpdateTimelineItem}
+            onSendMessage={(content: string) =>
+              start({
+                userInput: content,
+                designSessionId,
+                isDeepModelingEnabled,
+              })
+            }
             onNavigate={handleNavigateToTab}
             error={combinedError}
           />

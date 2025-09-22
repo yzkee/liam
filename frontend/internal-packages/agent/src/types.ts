@@ -29,6 +29,7 @@ export type AgentWorkflowParams = {
   latestVersionNumber: number
   designSessionId: string
   userId: string
+  signal: AbortSignal
   recursionLimit?: number
 }
 

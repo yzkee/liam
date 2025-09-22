@@ -6,7 +6,7 @@ import {
 } from '@langchain/core/messages'
 import { MessageTupleManager, SSE_EVENTS } from '@liam-hq/agent/client'
 import { err, ok } from 'neverthrow'
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ERROR_MESSAGES } from '../../components/Chat/constants/chatConstants'
 import { parseSse } from './parseSse'
 import { useSessionStorageOnce } from './useSessionStorageOnce'
@@ -52,6 +52,18 @@ export const useStream = ({ designSessionId, initialMessages }: Props) => {
 
   const clearError = useCallback(() => {
     setError(null)
+  }, [])
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      abortRef.current?.abort()
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+    }
   }, [])
 
   // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity

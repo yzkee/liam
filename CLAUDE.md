@@ -24,10 +24,6 @@ pnpm --filter @liam-hq/agent fmt
 pnpm --filter @liam-hq/agent test
 ```
 
-### Database Operations
-
-For database migration and type generation workflows, see @docs/migrationOpsContext.md.
-
 ## Architecture
 
 ### Monorepo Structure

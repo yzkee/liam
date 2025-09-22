@@ -43,12 +43,6 @@ export const SessionDetailPageClient: FC<Props> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<string | undefined>(undefined)
 
-  const handleSelectedVersionChange = useCallback((version: Version | null) => {
-    if (version !== null) {
-      setActiveTab(OUTPUT_TABS.ERD)
-    }
-  }, [])
-
   const {
     versions,
     selectedVersion,

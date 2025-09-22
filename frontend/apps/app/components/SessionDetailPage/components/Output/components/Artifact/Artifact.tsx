@@ -1,7 +1,7 @@
 'use client'
 
 import { syntaxCodeTagProps, syntaxCustomStyle, syntaxTheme } from '@liam-hq/ui'
-import { type FC, type HTMLAttributes, type ReactNode, useRef } from 'react'
+import type { FC, HTMLAttributes, ReactNode } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import rehypeRaw from 'rehype-raw'
@@ -28,11 +28,6 @@ type Props = {
 }
 
 export const Artifact: FC<Props> = ({ doc }) => {
-  const headingIndexRef = useRef(0)
-
-  // Reset the heading index whenever the document changes
-  headingIndexRef.current = 0
-
   return (
     <div className={styles.container}>
       <div className={styles.head}>

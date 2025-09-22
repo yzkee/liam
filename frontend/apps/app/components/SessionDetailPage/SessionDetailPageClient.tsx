@@ -45,11 +45,7 @@ export const SessionDetailPageClient: FC<Props> = ({
 }) => {
   const designSessionId = designSessionWithTimelineItems.id
 
-  const handleSelectedVersionChange = useCallback((version: Version | null) => {
-    if (version !== null) {
-      setActiveTab(OUTPUT_TABS.ERD)
-    }
-  }, [])
+  const [activeTab, setActiveTab] = useState<string | undefined>(undefined)
 
   const {
     versions,
@@ -62,20 +58,18 @@ export const SessionDetailPageClient: FC<Props> = ({
     initialVersions,
     initialDisplayedSchema,
     initialPrevSchema,
-    onChangeSelectedVersion: handleSelectedVersionChange,
+    onChangeSelectedVersion: (version: Version) => {
+      setSelectedVersion(version)
+      setActiveTab(OUTPUT_TABS.ERD)
+    },
   })
 
-  const [activeTab, setActiveTab] = useState<string | undefined>(undefined)
-
-  const handleChangeSelectedVersion = useCallback(
+  const handleVersionChange = useCallback(
     (version: Version) => {
       setSelectedVersion(version)
-
-      if (activeTab === OUTPUT_TABS.ARTIFACT) {
-        setActiveTab(OUTPUT_TABS.ERD)
-      }
+      setActiveTab(OUTPUT_TABS.ERD)
     },
-    [setSelectedVersion, activeTab],
+    [setSelectedVersion],
   )
 
   const { addOrUpdateTimelineItem } = useRealtimeTimelineItems(
@@ -171,7 +165,7 @@ export const SessionDetailPageClient: FC<Props> = ({
                 sqlReviewComments={SQL_REVIEW_COMMENTS}
                 versions={versions}
                 selectedVersion={selectedVersion}
-                onSelectedVersionChange={handleChangeSelectedVersion}
+                onSelectedVersionChange={handleVersionChange}
                 activeTab={activeTab}
                 onTabChange={setActiveTab}
                 initialIsPublic={initialIsPublic}
@@ -184,7 +178,7 @@ export const SessionDetailPageClient: FC<Props> = ({
                 sqlReviewComments={SQL_REVIEW_COMMENTS}
                 versions={versions}
                 selectedVersion={selectedVersion}
-                onSelectedVersionChange={handleChangeSelectedVersion}
+                onSelectedVersionChange={handleVersionChange}
                 initialIsPublic={initialIsPublic}
               />
             )}

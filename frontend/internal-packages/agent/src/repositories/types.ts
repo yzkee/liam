@@ -1,6 +1,6 @@
 import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
 import type { Artifact } from '@liam-hq/artifact'
-import type { Database, Tables } from '@liam-hq/db/supabase/database.types'
+import type { Tables } from '@liam-hq/db/supabase/database.types'
 import type { Schema } from '@liam-hq/schema'
 import type { Operation } from 'fast-json-patch'
 import type { ResultAsync } from 'neverthrow'
@@ -9,21 +9,6 @@ export type SchemaData = {
   id: string
   schema: Schema
   latestVersionNumber: number
-}
-
-export type DesignSessionData = {
-  organization_id: string
-  timeline_items: Array<{
-    id: string
-    content: string
-    type: Database['public']['Enums']['timeline_item_type_enum']
-    user_id: string | null
-    created_at: string
-    updated_at: string
-    organization_id: string
-    design_session_id: string
-    building_schema_version_id: string | null
-  }>
 }
 
 export type CreateVersionParams = {
@@ -35,49 +20,6 @@ export type CreateVersionParams = {
 export type VersionResult =
   | { success: true; newSchema: Schema }
   | { success: false; error?: string | null }
-
-export type CreateTimelineItemParams = {
-  designSessionId: string
-  content: string
-} & (
-  | {
-      type: 'user'
-      userId: string
-    }
-  | {
-      type: 'assistant'
-      role: Database['public']['Enums']['assistant_role_enum']
-    }
-  | {
-      type: 'schema_version'
-      buildingSchemaVersionId: string
-    }
-  | {
-      type: 'error'
-    }
-  | {
-      type: 'assistant_log'
-      role: Database['public']['Enums']['assistant_role_enum']
-    }
-  | {
-      type: 'query_result'
-      queryResultId: string
-    }
-)
-
-export type UpdateTimelineItemParams = {
-  content?: string
-}
-
-export type TimelineItemResult =
-  | {
-      success: true
-      timelineItem: Tables<'timeline_items'>
-    }
-  | {
-      success: false
-      error: string
-    }
 
 export type CreateArtifactParams = {
   designSessionId: string
@@ -115,29 +57,9 @@ export type SchemaRepository = {
   getSchema(designSessionId: string): ResultAsync<SchemaData, Error>
 
   /**
-   * Fetch design session data including organization_id and timeline_items
-   */
-  getDesignSession(designSessionId: string): Promise<DesignSessionData | null>
-
-  /**
    * Create a new schema version with optimistic locking (atomic operation)
    */
   createVersion(params: CreateVersionParams): Promise<VersionResult>
-
-  /**
-   * Create a new timeline item in the design session
-   */
-  createTimelineItem(
-    params: CreateTimelineItemParams,
-  ): Promise<TimelineItemResult>
-
-  /**
-   * Update an existing timeline item
-   */
-  updateTimelineItem(
-    id: string,
-    updates: UpdateTimelineItemParams,
-  ): Promise<TimelineItemResult>
 
   /**
    * Create a new artifact for a design session

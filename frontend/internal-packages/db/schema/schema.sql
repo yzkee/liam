@@ -125,19 +125,6 @@ CREATE TYPE "public"."severity_enum" AS ENUM (
 ALTER TYPE "public"."severity_enum" OWNER TO "postgres";
 
 
-CREATE TYPE "public"."timeline_item_type_enum" AS ENUM (
-    'user',
-    'assistant',
-    'schema_version',
-    'error',
-    'assistant_log',
-    'query_result'
-);
-
-
-ALTER TYPE "public"."timeline_item_type_enum" OWNER TO "postgres";
-
-
 CREATE TYPE "public"."workflow_run_status" AS ENUM (
     'pending',
     'success',
@@ -858,23 +845,6 @@ $$;
 ALTER FUNCTION "public"."set_schema_file_paths_organization_id"() OWNER TO "postgres";
 
 
-CREATE OR REPLACE FUNCTION "public"."set_timeline_items_organization_id"() RETURNS "trigger"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$
-BEGIN
-  NEW.organization_id := (
-    SELECT "organization_id" 
-    FROM "public"."design_sessions" 
-    WHERE "id" = NEW.design_session_id
-  );
-  RETURN NEW;
-END;
-$$;
-
-
-ALTER FUNCTION "public"."set_timeline_items_organization_id"() OWNER TO "postgres";
-
-
 CREATE OR REPLACE FUNCTION "public"."sync_existing_users"() RETURNS "void"
     LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$
@@ -910,87 +880,69 @@ ALTER FUNCTION "public"."update_artifacts_updated_at"() OWNER TO "postgres";
 CREATE OR REPLACE FUNCTION "public"."update_building_schema"("p_schema_id" "uuid", "p_schema_schema" "jsonb", "p_schema_version_patch" "jsonb", "p_schema_version_reverse_patch" "jsonb", "p_latest_schema_version_number" integer, "p_message_content" "text") RETURNS "jsonb"
     LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$
-DECLARE
+declare
   v_new_version_id uuid;
-  v_new_message_id uuid;
   v_design_session_id uuid;
   v_organization_id uuid;
   v_new_version_number integer;
   v_actual_latest_version_number integer;
-BEGIN
+begin
   -- Get the latest version number
-  SELECT COALESCE(MAX(number), 0) INTO v_actual_latest_version_number
-  FROM building_schema_versions
-  WHERE building_schema_id = p_schema_id;
+  select coalesce(max(number), 0) into v_actual_latest_version_number
+  from building_schema_versions
+  where building_schema_id = p_schema_id;
 
   -- Check for version conflict
-  IF v_actual_latest_version_number != p_latest_schema_version_number THEN
-    RETURN jsonb_build_object(
+  if v_actual_latest_version_number != p_latest_schema_version_number then
+    return jsonb_build_object(
       'success', false,
       'error', 'VERSION_CONFLICT',
-      'message', format('Version conflict: expected version %s but current version is %s', 
+      'message', format('Version conflict: expected version %s but current version is %s',
                        p_latest_schema_version_number, v_actual_latest_version_number)
     );
-  END IF;
+  end if;
 
   -- Get design_session_id and organization_id
-  SELECT design_session_id, organization_id 
-  INTO v_design_session_id, v_organization_id
-  FROM building_schemas
-  WHERE id = p_schema_id;
+  select design_session_id, organization_id
+  into v_design_session_id, v_organization_id
+  from building_schemas
+  where id = p_schema_id;
 
-  IF v_design_session_id IS NULL THEN
-    RETURN jsonb_build_object(
+  if v_design_session_id is null then
+    return jsonb_build_object(
       'success', false,
       'error', 'SCHEMA_NOT_FOUND',
       'message', 'Building schema not found'
     );
-  END IF;
+  end if;
 
   -- Update the schema
-  UPDATE building_schemas
-  SET schema = p_schema_schema
-  WHERE id = p_schema_id;
+  update building_schemas
+  set schema = p_schema_schema
+  where id = p_schema_id;
 
   -- Create new version
   v_new_version_number := v_actual_latest_version_number + 1;
-  INSERT INTO building_schema_versions (
+  insert into building_schema_versions (
     building_schema_id,
     number,
     patch,
     reverse_patch,
     organization_id
-  ) VALUES (
+  ) values (
     p_schema_id,
     v_new_version_number,
     p_schema_version_patch,
     p_schema_version_reverse_patch,
     v_organization_id
-  ) RETURNING id INTO v_new_version_id;
+  ) returning id into v_new_version_id;
 
-  -- Create schema_version message in timeline_items
-  INSERT INTO timeline_items (
-    design_session_id,
-    type,
-    content,
-    building_schema_version_id,
-    organization_id,
-    updated_at
-  ) VALUES (
-    v_design_session_id,
-    'schema_version',
-    p_message_content,
-    v_new_version_id,
-    v_organization_id,
-    CURRENT_TIMESTAMP
-  ) RETURNING id INTO v_new_message_id;
-
-  RETURN jsonb_build_object(
+  -- Return success with version ID
+  return jsonb_build_object(
     'success', true,
-    'versionId', v_new_version_id,
-    'messageId', v_new_message_id
+    'versionId', v_new_version_id
   );
-END;
+end;
 $$;
 
 
@@ -1498,23 +1450,6 @@ CREATE TABLE IF NOT EXISTS "public"."schema_file_paths" (
 ALTER TABLE "public"."schema_file_paths" OWNER TO "postgres";
 
 
-CREATE TABLE IF NOT EXISTS "public"."timeline_items" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "design_session_id" "uuid" NOT NULL,
-    "user_id" "uuid",
-    "content" "text" NOT NULL,
-    "created_at" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    "updated_at" timestamp(3) with time zone NOT NULL,
-    "organization_id" "uuid" NOT NULL,
-    "building_schema_version_id" "uuid",
-    "type" "public"."timeline_item_type_enum" NOT NULL,
-    "assistant_role" "public"."assistant_role_enum"
-);
-
-
-ALTER TABLE "public"."timeline_items" OWNER TO "postgres";
-
-
 CREATE TABLE IF NOT EXISTS "public"."users" (
     "id" "uuid" NOT NULL,
     "name" "text" NOT NULL,
@@ -1726,11 +1661,6 @@ ALTER TABLE ONLY "public"."review_suggestion_snippets"
 
 
 
-ALTER TABLE ONLY "public"."timeline_items"
-    ADD CONSTRAINT "timeline_items_pkey" PRIMARY KEY ("id");
-
-
-
 ALTER TABLE ONLY "public"."users"
     ADD CONSTRAINT "user_email_key" UNIQUE ("email");
 
@@ -1809,14 +1739,6 @@ CREATE INDEX "idx_checkpoints_thread_id" ON "public"."checkpoints" USING "btree"
 
 
 
-CREATE INDEX "idx_messages_design_session_created_at" ON "public"."timeline_items" USING "btree" ("design_session_id", "created_at" DESC);
-
-
-
-CREATE INDEX "idx_messages_user_id_created_at" ON "public"."timeline_items" USING "btree" ("user_id", "created_at" DESC) WHERE ("user_id" IS NOT NULL);
-
-
-
 CREATE INDEX "idx_project_organization_id" ON "public"."projects" USING "btree" ("organization_id");
 
 
@@ -1862,10 +1784,6 @@ CREATE UNIQUE INDEX "schema_file_path_path_project_id_key" ON "public"."schema_f
 
 
 CREATE UNIQUE INDEX "schema_file_path_project_id_key" ON "public"."schema_file_paths" USING "btree" ("project_id");
-
-
-
-CREATE INDEX "timeline_items_building_schema_version_id_idx" ON "public"."timeline_items" USING "btree" ("building_schema_version_id");
 
 
 
@@ -1950,10 +1868,6 @@ CREATE OR REPLACE TRIGGER "set_review_suggestion_snippets_organization_id_trigge
 
 
 CREATE OR REPLACE TRIGGER "set_schema_file_paths_organization_id_trigger" BEFORE INSERT OR UPDATE ON "public"."schema_file_paths" FOR EACH ROW EXECUTE FUNCTION "public"."set_schema_file_paths_organization_id"();
-
-
-
-CREATE OR REPLACE TRIGGER "set_timeline_items_organization_id_trigger" BEFORE INSERT OR UPDATE ON "public"."timeline_items" FOR EACH ROW EXECUTE FUNCTION "public"."set_timeline_items_organization_id"();
 
 
 
@@ -2250,26 +2164,6 @@ ALTER TABLE ONLY "public"."schema_file_paths"
 
 
 
-ALTER TABLE ONLY "public"."timeline_items"
-    ADD CONSTRAINT "timeline_items_building_schema_version_id_fkey" FOREIGN KEY ("building_schema_version_id") REFERENCES "public"."building_schema_versions"("id") ON DELETE CASCADE;
-
-
-
-ALTER TABLE ONLY "public"."timeline_items"
-    ADD CONSTRAINT "timeline_items_design_session_id_fkey" FOREIGN KEY ("design_session_id") REFERENCES "public"."design_sessions"("id") ON UPDATE CASCADE ON DELETE CASCADE;
-
-
-
-ALTER TABLE ONLY "public"."timeline_items"
-    ADD CONSTRAINT "timeline_items_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON UPDATE CASCADE ON DELETE RESTRICT;
-
-
-
-ALTER TABLE ONLY "public"."timeline_items"
-    ADD CONSTRAINT "timeline_items_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON UPDATE CASCADE ON DELETE RESTRICT;
-
-
-
 ALTER TABLE "public"."artifacts" ENABLE ROW LEVEL SECURITY;
 
 
@@ -2559,16 +2453,6 @@ COMMENT ON POLICY "authenticated_users_can_insert_org_schema_file_paths" ON "pub
 
 
 
-CREATE POLICY "authenticated_users_can_insert_org_timeline_items" ON "public"."timeline_items" FOR INSERT TO "authenticated" WITH CHECK (("organization_id" IN ( SELECT "organization_members"."organization_id"
-   FROM "public"."organization_members"
-  WHERE ("organization_members"."user_id" = "auth"."uid"()))));
-
-
-
-COMMENT ON POLICY "authenticated_users_can_insert_org_timeline_items" ON "public"."timeline_items" IS 'Authenticated users can only create timeline items in organizations they are members of';
-
-
-
 CREATE POLICY "authenticated_users_can_insert_organizations" ON "public"."organizations" FOR INSERT TO "authenticated" WITH CHECK (true);
 
 
@@ -2849,16 +2733,6 @@ COMMENT ON POLICY "authenticated_users_can_select_org_schema_file_paths" ON "pub
 
 
 
-CREATE POLICY "authenticated_users_can_select_org_timeline_items" ON "public"."timeline_items" FOR SELECT TO "authenticated" USING (("organization_id" IN ( SELECT "organization_members"."organization_id"
-   FROM "public"."organization_members"
-  WHERE ("organization_members"."user_id" = "auth"."uid"()))));
-
-
-
-COMMENT ON POLICY "authenticated_users_can_select_org_timeline_items" ON "public"."timeline_items" IS 'Authenticated users can only view timeline items belonging to organizations they are members of';
-
-
-
 CREATE POLICY "authenticated_users_can_update_org_artifacts" ON "public"."artifacts" FOR UPDATE TO "authenticated" USING (("organization_id" IN ( SELECT "organization_members"."organization_id"
    FROM "public"."organization_members"
   WHERE ("organization_members"."user_id" = "auth"."uid"())))) WITH CHECK (("organization_id" IN ( SELECT "organization_members"."organization_id"
@@ -3017,18 +2891,6 @@ COMMENT ON POLICY "authenticated_users_can_update_org_schema_file_paths" ON "pub
 
 
 
-CREATE POLICY "authenticated_users_can_update_org_timeline_items" ON "public"."timeline_items" FOR UPDATE TO "authenticated" USING (("organization_id" IN ( SELECT "organization_members"."organization_id"
-   FROM "public"."organization_members"
-  WHERE ("organization_members"."user_id" = "auth"."uid"())))) WITH CHECK (("organization_id" IN ( SELECT "organization_members"."organization_id"
-   FROM "public"."organization_members"
-  WHERE ("organization_members"."user_id" = "auth"."uid"()))));
-
-
-
-COMMENT ON POLICY "authenticated_users_can_update_org_timeline_items" ON "public"."timeline_items" IS 'Authenticated users can only update timeline items in organizations they are members of';
-
-
-
 ALTER TABLE "public"."building_schema_versions" ENABLE ROW LEVEL SECURITY;
 
 
@@ -3121,11 +2983,6 @@ ALTER TABLE "public"."public_share_settings" ENABLE ROW LEVEL SECURITY;
 
 
 CREATE POLICY "public_share_settings_read" ON "public"."public_share_settings" FOR SELECT TO "anon" USING (true);
-
-
-
-CREATE POLICY "public_timeline_items_read" ON "public"."timeline_items" FOR SELECT TO "anon" USING (("design_session_id" IN ( SELECT "public_share_settings"."design_session_id"
-   FROM "public"."public_share_settings")));
 
 
 
@@ -3276,10 +3133,6 @@ CREATE POLICY "service_role_can_insert_all_review_suggestion_snippets" ON "publi
 
 
 
-CREATE POLICY "service_role_can_insert_all_timeline_items" ON "public"."timeline_items" FOR INSERT TO "service_role" WITH CHECK (true);
-
-
-
 CREATE POLICY "service_role_can_select_all_artifacts" ON "public"."artifacts" FOR SELECT TO "service_role" USING (true);
 
 
@@ -3368,10 +3221,6 @@ CREATE POLICY "service_role_can_select_all_schema_file_paths" ON "public"."schem
 
 
 
-CREATE POLICY "service_role_can_select_all_timeline_items" ON "public"."timeline_items" FOR SELECT TO "service_role" USING (true);
-
-
-
 CREATE POLICY "service_role_can_update_all_artifacts" ON "public"."artifacts" FOR UPDATE TO "service_role" USING (true) WITH CHECK (true);
 
 
@@ -3424,13 +3273,6 @@ COMMENT ON POLICY "service_role_can_update_all_projects" ON "public"."projects" 
 
 
 
-CREATE POLICY "service_role_can_update_all_timeline_items" ON "public"."timeline_items" FOR UPDATE TO "service_role" USING (true) WITH CHECK (true);
-
-
-
-ALTER TABLE "public"."timeline_items" ENABLE ROW LEVEL SECURITY;
-
-
 ALTER TABLE "public"."users" ENABLE ROW LEVEL SECURITY;
 
 
@@ -3455,10 +3297,6 @@ ALTER PUBLICATION "supabase_realtime" ADD TABLE ONLY "public"."building_schema_v
 
 
 ALTER PUBLICATION "supabase_realtime" ADD TABLE ONLY "public"."building_schemas";
-
-
-
-ALTER PUBLICATION "supabase_realtime" ADD TABLE ONLY "public"."timeline_items";
 
 
 
@@ -4362,11 +4200,6 @@ GRANT ALL ON FUNCTION "public"."set_schema_file_paths_organization_id"() TO "ser
 
 
 
-GRANT ALL ON FUNCTION "public"."set_timeline_items_organization_id"() TO "authenticated";
-GRANT ALL ON FUNCTION "public"."set_timeline_items_organization_id"() TO "service_role";
-
-
-
 GRANT ALL ON FUNCTION "public"."sparsevec_cmp"("public"."sparsevec", "public"."sparsevec") TO "postgres";
 GRANT ALL ON FUNCTION "public"."sparsevec_cmp"("public"."sparsevec", "public"."sparsevec") TO "anon";
 GRANT ALL ON FUNCTION "public"."sparsevec_cmp"("public"."sparsevec", "public"."sparsevec") TO "authenticated";
@@ -4878,43 +4711,6 @@ GRANT ALL ON TABLE "public"."review_suggestion_snippets" TO "service_role";
 
 GRANT ALL ON TABLE "public"."schema_file_paths" TO "authenticated";
 GRANT ALL ON TABLE "public"."schema_file_paths" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."timeline_items" TO "authenticated";
-GRANT ALL ON TABLE "public"."timeline_items" TO "service_role";
-
-
-
-GRANT SELECT("id") ON TABLE "public"."timeline_items" TO "anon";
-
-
-
-GRANT SELECT("design_session_id") ON TABLE "public"."timeline_items" TO "anon";
-
-
-
-GRANT SELECT("content") ON TABLE "public"."timeline_items" TO "anon";
-
-
-
-GRANT SELECT("created_at") ON TABLE "public"."timeline_items" TO "anon";
-
-
-
-GRANT SELECT("updated_at") ON TABLE "public"."timeline_items" TO "anon";
-
-
-
-GRANT SELECT("building_schema_version_id") ON TABLE "public"."timeline_items" TO "anon";
-
-
-
-GRANT SELECT("type") ON TABLE "public"."timeline_items" TO "anon";
-
-
-
-GRANT SELECT("assistant_role") ON TABLE "public"."timeline_items" TO "anon";
 
 
 

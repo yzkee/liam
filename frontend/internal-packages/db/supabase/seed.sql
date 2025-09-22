@@ -504,29 +504,7 @@ begin
       '[]'::jsonb
     );
 
-    -- 11. create a timeline item
-    insert into public.timeline_items (
-      design_session_id,
-      user_id,
-      content,
-      created_at,
-      updated_at,
-      organization_id,
-      type,
-      assistant_role
-    )
-    values (
-      v_design_session_id,
-      v_user_id,
-      'Welcome to your design session!',
-      current_timestamp,
-      current_timestamp,
-      v_org_id,
-      'user',
-      null
-    );
-
-    -- 12. create artifact data for the design session
+    -- 11. create artifact data for the design session
     insert into public.artifacts (
       design_session_id,
       organization_id,
@@ -563,7 +541,7 @@ begin
               ]
             },
             {
-              "type": "functional", 
+              "type": "functional",
               "name": "Post Management",
               "description": [
                 "Users can create blog posts",
@@ -605,5 +583,5 @@ begin
     case when is_local then 'local' else 'preview' end;
   raise notice 'test users created: test@example.com, test2@example.com with password: liampassword1234';
   raise notice 'using installation_id: %', v_installation_id;
-  raise notice 'created sample design session with building schema, version, and timeline item';
+  raise notice 'created sample design session with building schema and version';
 end $$;

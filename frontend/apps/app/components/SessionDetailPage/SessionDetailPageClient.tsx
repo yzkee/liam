@@ -16,11 +16,11 @@ import { useRealtimeVersionsWithSchema } from './hooks/useRealtimeVersionsWithSc
 import { useStream } from './hooks/useStream'
 import { SQL_REVIEW_COMMENTS } from './mock'
 import styles from './SessionDetailPage.module.css'
-import type { DesignSessionWithTimelineItems, Version } from './types'
+import type { Version } from './types'
 
 type Props = {
   buildingSchemaId: string
-  designSessionWithTimelineItems: DesignSessionWithTimelineItems
+  designSessionId: string
   initialMessages: StoredMessage[]
   initialDisplayedSchema: Schema
   initialPrevSchema: Schema
@@ -32,7 +32,7 @@ type Props = {
 
 export const SessionDetailPageClient: FC<Props> = ({
   buildingSchemaId,
-  designSessionWithTimelineItems,
+  designSessionId,
   initialMessages,
   initialDisplayedSchema,
   initialPrevSchema,
@@ -41,9 +41,13 @@ export const SessionDetailPageClient: FC<Props> = ({
   initialIsPublic,
   initialWorkflowError,
 }) => {
-  const designSessionId = designSessionWithTimelineItems.id
-
   const [activeTab, setActiveTab] = useState<string | undefined>(undefined)
+
+  const handleSelectedVersionChange = useCallback((version: Version | null) => {
+    if (version !== null) {
+      setActiveTab(OUTPUT_TABS.ERD)
+    }
+  }, [])
 
   const {
     versions,

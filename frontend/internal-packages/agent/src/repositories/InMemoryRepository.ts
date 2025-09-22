@@ -10,22 +10,16 @@ import * as v from 'valibot'
 import type {
   ArtifactResult,
   CreateArtifactParams,
-  CreateTimelineItemParams,
   CreateVersionParams,
-  DesignSessionData,
   SchemaData,
   SchemaRepository,
-  TimelineItemResult,
   UpdateArtifactParams,
-  UpdateTimelineItemParams,
   UserInfo,
   VersionResult,
 } from './types'
 
 type InMemoryRepositoryState = {
   schemas: Map<string, SchemaData>
-  designSessions: Map<string, DesignSessionData>
-  timelineItems: Map<string, Tables<'timeline_items'>>
   artifacts: Map<string, Tables<'artifacts'>>
   versions: Map<string, { id: string; schema: Schema; versionNumber: number }>
   buildingSchemas: Map<
@@ -43,7 +37,6 @@ type InMemoryRepositoryState = {
 
 type InMemoryRepositoryOptions = {
   schemas?: Record<string, Schema>
-  designSessions?: Record<string, Partial<DesignSessionData>>
   artifacts?: Record<string, Artifact>
 }
 
@@ -56,8 +49,6 @@ export class InMemoryRepository implements SchemaRepository {
     this.checkpointer = new MemorySaver()
     this.state = {
       schemas: new Map(),
-      designSessions: new Map(),
-      timelineItems: new Map(),
       artifacts: new Map(),
       versions: new Map(),
       buildingSchemas: new Map(),
@@ -78,13 +69,6 @@ export class InMemoryRepository implements SchemaRepository {
         schema,
         latestVersionNumber: 1,
         updatedAt: new Date().toISOString(),
-      })
-    })
-
-    Object.entries(options.designSessions || {}).forEach(([id, session]) => {
-      this.state.designSessions.set(id, {
-        organization_id: session.organization_id || 'test-org-id',
-        timeline_items: session.timeline_items || [],
       })
     })
 
@@ -122,12 +106,6 @@ export class InMemoryRepository implements SchemaRepository {
       )
     }
     return okAsync(schema)
-  }
-
-  async getDesignSession(
-    designSessionId: string,
-  ): Promise<DesignSessionData | null> {
-    return this.state.designSessions.get(designSessionId) || null
   }
 
   async createVersion(params: CreateVersionParams): Promise<VersionResult> {
@@ -192,115 +170,6 @@ export class InMemoryRepository implements SchemaRepository {
     })
 
     return { success: true, versionId }
-  }
-
-  async createTimelineItem(
-    params: CreateTimelineItemParams,
-  ): Promise<TimelineItemResult> {
-    const id = this.generateId()
-    const now = new Date().toISOString()
-
-    const baseItem = {
-      id,
-      content: params.content,
-      user_id: null,
-      created_at: now,
-      updated_at: now,
-      organization_id: 'test-org-id',
-      design_session_id: params.designSessionId,
-      building_schema_version_id: null,
-      assistant_role: null,
-      type: 'user',
-    }
-
-    let timelineItem: Tables<'timeline_items'>
-
-    if (params.type === 'user') {
-      timelineItem = {
-        ...baseItem,
-        type: 'user',
-        assistant_role: null,
-        user_id: params.userId,
-      }
-    } else if (params.type === 'assistant') {
-      timelineItem = {
-        ...baseItem,
-        type: 'assistant',
-        assistant_role: params.role,
-        user_id: null,
-      }
-    } else if (params.type === 'schema_version') {
-      timelineItem = {
-        ...baseItem,
-        type: 'schema_version',
-        assistant_role: null,
-        user_id: null,
-        building_schema_version_id: params.buildingSchemaVersionId,
-      }
-    } else if (params.type === 'query_result') {
-      timelineItem = {
-        ...baseItem,
-        type: 'query_result',
-        assistant_role: null,
-        user_id: null,
-      }
-    } else if (params.type === 'error') {
-      timelineItem = {
-        ...baseItem,
-        type: 'error',
-        assistant_role: null,
-        user_id: null,
-      }
-    } else if (params.type === 'assistant_log') {
-      timelineItem = {
-        ...baseItem,
-        type: 'assistant_log',
-        assistant_role: params.role,
-        user_id: null,
-      }
-    } else {
-      return { success: false, error: 'Unknown timeline item type' }
-    }
-
-    this.state.timelineItems.set(id, timelineItem)
-
-    const designSession = this.state.designSessions.get(params.designSessionId)
-    if (designSession) {
-      designSession.timeline_items.push({
-        id: timelineItem.id,
-        content: timelineItem.content,
-        type: timelineItem.type,
-        user_id: timelineItem.user_id,
-        created_at: timelineItem.created_at,
-        updated_at: timelineItem.updated_at,
-        organization_id: timelineItem.organization_id,
-        design_session_id: timelineItem.design_session_id,
-        building_schema_version_id: timelineItem.building_schema_version_id,
-      })
-    }
-
-    return { success: true, timelineItem }
-  }
-
-  async updateTimelineItem(
-    id: string,
-    updates: UpdateTimelineItemParams,
-  ): Promise<TimelineItemResult> {
-    const timelineItem = this.state.timelineItems.get(id)
-
-    if (!timelineItem) {
-      return { success: false, error: 'Timeline item not found' }
-    }
-
-    const updatedItem = {
-      ...timelineItem,
-      ...updates,
-      updated_at: new Date().toISOString(),
-    }
-
-    this.state.timelineItems.set(id, updatedItem)
-
-    return { success: true, timelineItem: updatedItem }
   }
 
   async createArtifact(params: CreateArtifactParams): Promise<ArtifactResult> {
@@ -384,12 +253,6 @@ export class InMemoryRepository implements SchemaRepository {
   getCurrentSchema(designSessionId: string): Schema | null {
     const schemaData = this.state.schemas.get(designSessionId)
     return schemaData?.schema || null
-  }
-
-  getTimelineItems(designSessionId: string): Tables<'timeline_items'>[] {
-    return Array.from(this.state.timelineItems.values()).filter(
-      (item) => item.design_session_id === designSessionId,
-    )
   }
 
   /**

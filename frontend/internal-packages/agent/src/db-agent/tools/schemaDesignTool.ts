@@ -111,22 +111,6 @@ export const schemaDesignTool: StructuredTool = tool(
       (result) => result.success,
     ).length
     const totalStatements = results.length
-    const summary = `DDL validation successful: ${successfulStatements}/${totalStatements} statements executed successfully`
-
-    const result = await repositories.schema.createTimelineItem({
-      designSessionId,
-      content: summary,
-      type: 'assistant_log',
-      role: 'db',
-    })
-
-    if (!result.success) {
-      // LangGraph tool nodes require throwing errors to trigger retry mechanism
-      // eslint-disable-next-line no-throw-error/no-throw-error
-      throw new Error(
-        `Failed to create timeline item for DDL execution results: ${result.error}. Please try again.`,
-      )
-    }
 
     const versionResult = await repositories.schema.createVersion({
       buildingSchemaId,

@@ -93,7 +93,7 @@ function generateColumnDefinition(
 function formatDefaultValue(value: string | number | boolean): string {
   if (typeof value === 'string') {
     // Check if it's a PostgreSQL function call (e.g., gen_random_uuid(), now(), current_timestamp())
-    if (isPostgreSQLFunction(value)) {
+    if (isPostgreSQLFunctionForDefaultValue(value)) {
       return value // Don't quote function calls
     }
 
@@ -132,7 +132,7 @@ function formatDefaultValue(value: string | number | boolean): string {
 /**
  * Check if a string represents a PostgreSQL function call
  */
-function isPostgreSQLFunction(value: string): boolean {
+function isPostgreSQLFunctionForDefaultValue(value: string): boolean {
   const trimmedValue = value.trim()
 
   // Match PostgreSQL function patterns:

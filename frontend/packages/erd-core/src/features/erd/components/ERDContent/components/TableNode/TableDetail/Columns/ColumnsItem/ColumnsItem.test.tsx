@@ -137,3 +137,35 @@ describe('not null', () => {
     expect(screen.getByText('Nullable')).toBeInTheDocument()
   })
 })
+
+describe('blink circle indicator', () => {
+  it('renders a blink circle indicator when the "focusedElementId" is same with its element id', () => {
+    render(
+      <ColumnsItem
+        tableId="users"
+        column={aColumn({ name: 'id', type: 'bigserial' })}
+        constraints={{}}
+        focusedElementId={'users__columns__id'}
+      />,
+      { wrapper },
+    )
+
+    expect(screen.getByTestId('blink-circle-indicator')).toBeInTheDocument()
+  })
+
+  it('does not render a blink circle indicator when the "focusedElementId" is different than its element id', () => {
+    render(
+      <ColumnsItem
+        tableId="users"
+        column={aColumn({ name: 'id', type: 'bigserial' })}
+        constraints={{}}
+        focusedElementId={'users__columns__created_at'}
+      />,
+      { wrapper },
+    )
+
+    expect(
+      screen.queryByTestId('blink-circle-indicator'),
+    ).not.toBeInTheDocument()
+  })
+})

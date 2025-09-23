@@ -61,7 +61,10 @@ export const ColumnsItem: FC<Props> = ({
   return (
     <>
       {elementId === focusedElementId && (
-        <div className={styles.blinkCircleWrapper}>
+        <div
+          className={styles.blinkCircleWrapper}
+          data-testid="blink-circle-indicator"
+        >
           <BlinkCircle />
         </div>
       )}

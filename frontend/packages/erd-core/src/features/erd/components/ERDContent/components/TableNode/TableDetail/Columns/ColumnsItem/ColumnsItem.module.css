@@ -5,6 +5,12 @@
   scroll-margin-top: 40px;
 }
 
+.blinkCircleWrapper {
+  position: relative;
+  top: var(--spacing-6);
+  left: var(--spacing-2);
+}
+
 .heading {
   color: var(--global-foreground);
   font-size: var(--font-size-2);

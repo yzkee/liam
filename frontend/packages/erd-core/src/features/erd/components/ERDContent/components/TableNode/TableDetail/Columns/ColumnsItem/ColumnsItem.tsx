@@ -7,6 +7,7 @@ import {
   useUserEditingOrThrow,
 } from '../../../../../../../../../stores'
 import { useDiffStyle } from '../../../../../../../../diff/hooks/useDiffStyle'
+import { BlinkCircle } from '../../BlinkCircle/BlinkCircle'
 import styles from './ColumnsItem.module.css'
 import { Comment } from './Comment'
 import { Default } from './Default'
@@ -58,27 +59,33 @@ export const ColumnsItem: FC<Props> = ({
   )
 
   return (
-    <div id={elementId} className={clsx(styles.wrapper, diffStyle)}>
-      {elementId === focusedElementId && <span>blink circle</span>}
-      <h3 className={styles.heading}>
-        <a className={styles.link} href={`#${elementId}`}>
-          {column.name}
-        </a>
-        <Link className={styles.linkIcon} />
-      </h3>
-      {column.comment && <Comment tableId={tableId} column={column} />}
-      <GridTableRoot>
-        <Type tableId={tableId} column={column} />
-        <Default tableId={tableId} column={column} />
-        {constraint && (
-          <PrimaryKey
-            tableId={tableId}
-            columnName={column.name}
-            constraintName={constraint.name}
-          />
-        )}
-        <NotNull tableId={tableId} column={column} />
-      </GridTableRoot>
-    </div>
+    <>
+      {elementId === focusedElementId && (
+        <div className={styles.blinkCircleWrapper}>
+          <BlinkCircle />
+        </div>
+      )}
+      <div id={elementId} className={clsx(styles.wrapper, diffStyle)}>
+        <h3 className={styles.heading}>
+          <a className={styles.link} href={`#${elementId}`}>
+            {column.name}
+          </a>
+          <Link className={styles.linkIcon} />
+        </h3>
+        {column.comment && <Comment tableId={tableId} column={column} />}
+        <GridTableRoot>
+          <Type tableId={tableId} column={column} />
+          <Default tableId={tableId} column={column} />
+          {constraint && (
+            <PrimaryKey
+              tableId={tableId}
+              columnName={column.name}
+              constraintName={constraint.name}
+            />
+          )}
+          <NotNull tableId={tableId} column={column} />
+        </GridTableRoot>
+      </div>
+    </>
   )
 }

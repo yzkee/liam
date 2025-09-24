@@ -1,5 +1,5 @@
 import { executeQuery } from '@liam-hq/pglite-server'
-import { isEmptySchema, postgresqlSchemaDeparser } from '@liam-hq/schema'
+import { postgresqlSchemaDeparser } from '@liam-hq/schema'
 import type { WorkflowState } from '../../types'
 import { WorkflowTerminationError } from '../../utils/errorHandling'
 
@@ -20,11 +20,6 @@ const createValidationError = (
 export async function validateInitialSchemaNode(
   state: WorkflowState,
 ): Promise<WorkflowState> {
-  if (isEmptySchema(state.schemaData)) {
-    // TODO: Add message creation in next PR
-    return state
-  }
-
   const ddlResult = postgresqlSchemaDeparser(state.schemaData)
 
   if (ddlResult.errors.length > 0) {

@@ -2,6 +2,7 @@ import { AIMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { END, START, StateGraph } from '@langchain/langgraph'
 import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
+import { isEmptySchema } from '@liam-hq/schema'
 import { createDbAgentGraph } from './db-agent/createDbAgentGraph'
 import { convertRequirementsToPrompt } from './db-agent/utils/convertAnalyzedRequirementsToPrompt'
 import { createLeadAgentGraph } from './lead-agent/createLeadAgentGraph'
@@ -70,7 +71,12 @@ export const createGraph = (checkpointer?: BaseCheckpointSaver) => {
         const isFirstExecution = !state.messages.some(
           (msg) => msg instanceof AIMessage,
         )
-        return isFirstExecution ? 'validateInitialSchema' : 'leadAgent'
+
+        if (isFirstExecution && !isEmptySchema(state.schemaData)) {
+          return 'validateInitialSchema'
+        }
+
+        return 'leadAgent'
       },
       {
         validateInitialSchema: 'validateInitialSchema',

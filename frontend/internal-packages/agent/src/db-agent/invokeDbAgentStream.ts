@@ -46,6 +46,7 @@ export async function invokeDbAgentStream(
     streamMode: 'messages',
     version: 'v2',
     subgraphs: true,
+    signal: params.signal,
   })
 
   async function* iter() {

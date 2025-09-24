@@ -109,6 +109,7 @@ export async function POST(request: Request) {
     latestVersionNumber,
     designSessionId,
     userId,
+    signal: request.signal,
   }
   const config = {
     configurable: {
@@ -118,16 +119,33 @@ export async function POST(request: Request) {
   }
 
   const enc = new TextEncoder()
+
+  const processEvents = async (
+    controller: ReadableStreamDefaultController<Uint8Array>,
+  ) => {
+    const events = validationResult.output.isDeepModelingEnabled
+      ? await deepModelingStream(params, config)
+      : await invokeDbAgentStream(params, config)
+
+    for await (const ev of events) {
+      // Check if request was aborted during iteration
+      if (request.signal.aborted) {
+        controller.enqueue(
+          enc.encode(
+            line(SSE_EVENTS.ERROR, { message: 'Request was aborted' }),
+          ),
+        )
+        break
+      }
+      controller.enqueue(enc.encode(line(ev.event, ev.data)))
+    }
+    controller.enqueue(enc.encode(line(SSE_EVENTS.END, null)))
+  }
+
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       try {
-        const events = validationResult.output.isDeepModelingEnabled
-          ? await deepModelingStream(params, config)
-          : await invokeDbAgentStream(params, config)
-        for await (const ev of events) {
-          controller.enqueue(enc.encode(line(ev.event, ev.data)))
-        }
-        controller.enqueue(enc.encode(line(SSE_EVENTS.END, null)))
+        await processEvents(controller)
       } catch (err) {
         Sentry.captureException(err, {
           tags: { designSchemaId: designSessionId },

@@ -37,6 +37,7 @@ export async function deepModelingStream(
     metadata: traceEnhancement.metadata,
     streamMode: 'messages',
     version: 'v2',
+    signal: params.signal,
   })
 
   async function* iter() {

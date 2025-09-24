@@ -26,6 +26,13 @@ export const RETRY_POLICY = {
     if (error instanceof WorkflowTerminationError) {
       return false
     }
+
+    if (error instanceof Error) {
+      if (error.name === 'AbortError' || error.message.includes('Abort')) {
+        return false
+      }
+    }
+
     // Retry all other errors
     return true
   },

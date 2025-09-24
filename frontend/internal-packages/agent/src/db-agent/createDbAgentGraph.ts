@@ -1,17 +1,11 @@
 import { END, START, StateGraph } from '@langchain/langgraph'
 import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
+import { RETRY_POLICY } from '../utils/errorHandling'
 import { designSchemaNode } from './nodes/designSchemaNode'
 import { invokeSchemaDesignToolNode } from './nodes/invokeSchemaDesignToolNode'
 import { routeAfterDesignSchema } from './routing/routeAfterDesignSchema'
 import type { DbAgentState } from './shared/dbAgentAnnotation'
 import { dbAgentAnnotation } from './shared/dbAgentAnnotation'
-
-/**
- * Retry policy configuration for DB Agent nodes
- */
-const RETRY_POLICY = {
-  maxAttempts: process.env['NODE_ENV'] === 'test' ? 1 : 3,
-}
 
 /**
  * Create and configure the DB Agent subgraph for database schema design

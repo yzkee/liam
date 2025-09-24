@@ -8,10 +8,7 @@ import { MessageTupleManager, SSE_EVENTS } from '@liam-hq/agent/client'
 import { err, ok } from 'neverthrow'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { useNavigationGuard } from '../../../../hooks/useNavigationGuard'
-import {
-  ERROR_MESSAGES,
-  NAVIGATION_MESSAGES,
-} from '../../components/Chat/constants/chatConstants'
+import { ERROR_MESSAGES } from '../../components/Chat/constants/chatConstants'
 import { parseSse } from './parseSse'
 import { useSessionStorageOnce } from './useSessionStorageOnce'
 
@@ -61,7 +58,9 @@ export const useStream = ({ designSessionId, initialMessages }: Props) => {
   useNavigationGuard(() => {
     if (
       isStreaming &&
-      window.confirm(NAVIGATION_MESSAGES.SESSION_CANCEL_CONFIRM)
+      window.confirm(
+        'A session is in progress. Leaving this page will cancel the session. Do you want to continue?',
+      )
     ) {
       abortRef.current?.abort()
     }

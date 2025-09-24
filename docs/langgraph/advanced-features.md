@@ -133,9 +133,24 @@ You can manage and inspect state at different levels of nested subgraphs, includ
 #### Resuming from Breakpoints
 
 ```typescript
-import { MemorySaver } from "@langchain/langgraph";
+// Note: In the Liam project, we use a custom SupabaseCheckpointSaver
+// instead of the built-in MemorySaver for persistent storage.
+// The checkpointer is typically created through the SupabaseSchemaRepository:
 
-const checkpointer = new MemorySaver();
+import { createSupabaseRepositories } from "@liam-hq/agent/src/repositories/factory";
+import { createClient } from "@supabase/supabase-js";
+
+// Create Supabase client
+const supabaseClient = createClient(supabaseUrl, supabaseKey);
+
+// Create repositories with embedded checkpointer
+const repositories = createSupabaseRepositories(
+  supabaseClient,
+  organizationId
+);
+
+// Access the checkpointer from the schema repository
+const checkpointer = repositories.schema.checkpointer;
 
 // Create parent and subgraph with checkpointer
 const parentGraph = new StateGraph(ParentState)

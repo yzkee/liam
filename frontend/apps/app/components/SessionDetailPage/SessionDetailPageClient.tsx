@@ -58,7 +58,9 @@ export const SessionDetailPageClient: FC<Props> = ({
     initialPrevSchema,
     onChangeSelectedVersion: (version: Version) => {
       setSelectedVersion(version)
-      setActiveTab(OUTPUT_TABS.ERD)
+      if (activeTab === undefined) {
+        setActiveTab(OUTPUT_TABS.ERD)
+      }
     },
   })
 
@@ -76,7 +78,6 @@ export const SessionDetailPageClient: FC<Props> = ({
     }
   }, [])
 
-  // Handler for navigating to specific tabs from tool calls
   const handleNavigateToTab = useCallback((tab: 'erd' | 'artifact') => {
     if (tab === 'erd') {
       setActiveTab(OUTPUT_TABS.ERD)

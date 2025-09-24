@@ -13,20 +13,20 @@ import { StateGraph, Annotation, START, END } from "@langchain/langgraph";
 
 // Define the parent graph state
 const ParentState = Annotation.Root({
-  user_input: Annotation<string>,
-  final_response: Annotation<string>
+  userInput: Annotation<string>,
+  finalResponse: Annotation<string>
 });
 
 // Define the subgraph state (can share keys with parent)
 const SubgraphState = Annotation.Root({
-  user_input: Annotation<string>,
-  processed_data: Annotation<string>
+  userInput: Annotation<string>,
+  processedData: Annotation<string>
 });
 
 // Create subgraph nodes
 function processInput(state: typeof SubgraphState.State) {
   return {
-    processed_data: `Processed: ${state.user_input}`
+    processedData: `Processed: ${state.userInput}`
   };
 }
 
@@ -38,10 +38,10 @@ const subgraph = new StateGraph(SubgraphState)
   .compile();
 
 // Parent graph node that uses the subgraph
-async function callSubgraph(state: typeof ParentState.State) {
-  const result = await subgraph.invoke({ user_input: state.user_input });
+function callSubgraph(state: typeof ParentState.State) {
+  const result = await subgraph.invoke({ userInput: state.userInput });
   return {
-    final_response: result.processed_data
+    finalResponse: result.processedData
   };
 }
 
@@ -147,7 +147,7 @@ const parentGraph = new StateGraph(ParentState)
 // Stream with subgraph visibility
 const config = { configurable: { thread_id: "1" } };
 const stream = parentGraph.stream(
-  { user_input: "test input" },
+  { userInput: "test input" },
   { ...config, subgraphs: true }
 );
 
@@ -187,14 +187,14 @@ await parentGraph.updateState(
       checkpoint_ns: "subgraph_node:subgraph"
     }
   },
-  { processed_data: "updated value" },
+  { processedData: "updated value" },
   "process" // Update as if coming from this subgraph node
 );
 
 // Acting as a subgraph node
 await parentGraph.updateState(
   config,
-  { final_response: "direct update" },
+  { finalResponse: "direct update" },
   "subgraph_node"
 );
 
@@ -206,7 +206,7 @@ await parentGraph.updateState(
       checkpoint_ns: "subgraph_node:subgraph"
     }
   },
-  { processed_data: "subgraph update" }
+  { processedData: "subgraph update" }
 );
 ```
 
@@ -219,8 +219,8 @@ When you need to transform data between parent and child graphs with different s
 ```typescript
 // Parent state
 const ParentState = Annotation.Root({
-  user_request: Annotation<string>,
-  final_answer: Annotation<string>
+  userRequest: Annotation<string>,
+  finalAnswer: Annotation<string>
 });
 
 // Child state (different schema)
@@ -246,7 +246,7 @@ const childGraph = new StateGraph(ChildState)
 async function transformAndCall(state: typeof ParentState.State) {
   // Transform parent state to child state format
   const childInput = {
-    query: state.user_request.toUpperCase() // Transform input
+    query: state.userRequest.toUpperCase() // Transform input
   };
 
   // Call child graph
@@ -254,7 +254,7 @@ async function transformAndCall(state: typeof ParentState.State) {
 
   // Transform child result back to parent state format
   return {
-    final_answer: `Final: ${childResult.response}` // Transform output
+    finalAnswer: `Final: ${childResult.response}` // Transform output
   };
 }
 
@@ -272,8 +272,8 @@ const parentGraph = new StateGraph(ParentState)
 async function complexTransform(state: typeof ParentState.State) {
   // Extract and transform multiple fields
   const transformedInput = {
-    query: extractQuery(state.user_request),
-    context: extractContext(state.user_request),
+    query: extractQuery(state.userRequest),
+    context: extractContext(state.userRequest),
     metadata: {
       timestamp: Date.now(),
       source: "parent_graph"
@@ -284,7 +284,7 @@ async function complexTransform(state: typeof ParentState.State) {
 
   // Combine results with existing state
   return {
-    final_answer: combineResults(state.final_answer, result.response),
+    finalAnswer: combineResults(state.finalAnswer, result.response),
     metadata: result.metadata
   };
 }

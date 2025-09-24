@@ -1,4 +1,4 @@
-import { HumanMessage } from '@langchain/core/messages'
+import { AIMessage, HumanMessage } from '@langchain/core/messages'
 import { END, START, StateGraph } from '@langchain/langgraph'
 import { aColumn, aSchema, aTable } from '@liam-hq/schema'
 import { describe, expect, it } from 'vitest'
@@ -63,8 +63,59 @@ describe('validateInitialSchemaNode Integration', () => {
     }, 30000) // 30 second timeout for CI/preview environments
   })
 
-  // NOTE: Non-first execution scenarios are now handled at the graph level (createGraph.ts)
-  // and the validateInitialSchemaNode is skipped entirely, so these tests are no longer applicable.
+  describe('Non-first execution scenarios', () => {
+    it('should skip validation when AI messages already exist', async () => {
+      const { config, context, checkpointer } = await getTestConfig({
+        useOpenAI: false,
+      })
+      const graph = new StateGraph(workflowAnnotation)
+        .addNode('validateInitialSchema', validateInitialSchemaNode)
+        .addEdge(START, 'validateInitialSchema')
+        .addEdge('validateInitialSchema', END)
+        .compile({ checkpointer })
+
+      const state: WorkflowState = {
+        messages: [
+          new HumanMessage('First message'),
+          new AIMessage('AI response'), // This indicates non-first execution
+          new HumanMessage('Follow-up message'),
+        ],
+        designSessionId: context.designSessionId,
+        organizationId: context.organizationId,
+        userId: context.userId,
+        schemaData: aSchema({
+          tables: {
+            users: aTable({
+              name: 'users',
+              columns: {
+                id: aColumn({
+                  name: 'id',
+                  type: 'uuid',
+                  notNull: true,
+                }),
+              },
+            }),
+          },
+          enums: {},
+          extensions: {},
+        }),
+        analyzedRequirements: {
+          businessRequirement: '',
+          functionalRequirements: {},
+          nonFunctionalRequirements: {},
+        },
+        testcases: [],
+        schemaIssues: [],
+        buildingSchemaId: 'test-building-schema-id',
+        latestVersionNumber: 1,
+        next: 'leadAgent',
+      }
+
+      const result = await graph.invoke(state, config)
+
+      expect(result).toEqual(state)
+    }, 30000) // 30 second timeout for CI/preview environments
+  })
 
   describe('Error handling scenarios', () => {
     it('should fail when schema contains invalid column type', async () => {

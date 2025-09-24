@@ -107,7 +107,6 @@ export const SessionDetailPageClient: FC<Props> = ({
       // Skip if already triggered
       if (hasTriggeredInitialWorkflow.current) return
 
-      // Check if there's exactly one timeline item and it's a user message
       if (messages.length !== 1) return
 
       const firstItem = messages[0]

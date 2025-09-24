@@ -13,9 +13,9 @@ type StreamLLMOptions = {
 }
 
 /**
- * Process PM Agent streaming with separate text and tool_calls handling
+ * Process streaming with deferred tool_calls - text sent immediately, complete tool_calls sent after streaming finishes
  */
-async function processPmAgentStream(
+async function processStreamWithDeferredToolCalls(
   stream: AsyncIterable<AIMessageChunk>,
   id: string,
   agentName: string,
@@ -45,17 +45,6 @@ async function processPmAgentStream(
       name: agentName,
     })
 
-    console.info('[streamLLMResponse] Sending final tool_calls chunk:', {
-      toolCallsLength: finalChunk.tool_calls?.length || 0,
-      toolCallsData:
-        finalChunk.tool_calls?.map((tc) => ({
-          id: tc.id,
-          name: tc.name,
-          argsKeys: Object.keys(tc.args || {}),
-          argsLength: Object.keys(tc.args || {}).length,
-        })) || [],
-    })
-
     await dispatchCustomEvent(eventType, finalChunk)
   }
 
@@ -63,9 +52,9 @@ async function processPmAgentStream(
 }
 
 /**
- * Process legacy streaming for other agents (DB/QA)
+ * Process streaming with immediate dispatch - all chunks sent immediately as they arrive
  */
-async function processLegacyStream(
+async function processStreamWithImmediateDispatch(
   stream: AsyncIterable<AIMessageChunk>,
   id: string,
   agentName: string,
@@ -97,10 +86,22 @@ export async function streamLLMResponse(
   // so we overwrite with a UUID to unify chunk ids for consistent handling.
   const id = crypto.randomUUID()
 
+  // PM Agent needs special handling due to GPT-5's chunked tool_calls response pattern
+  // that sends empty tool arguments during streaming. Other agents work fine with immediate dispatch.
   const accumulatedChunk =
     agentName === 'pm'
-      ? await processPmAgentStream(stream, id, agentName, eventType)
-      : await processLegacyStream(stream, id, agentName, eventType)
+      ? await processStreamWithDeferredToolCalls(
+          stream,
+          id,
+          agentName,
+          eventType,
+        )
+      : await processStreamWithImmediateDispatch(
+          stream,
+          id,
+          agentName,
+          eventType,
+        )
 
   const response = accumulatedChunk
     ? new AIMessage({

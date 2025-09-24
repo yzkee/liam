@@ -14,43 +14,8 @@ export type Version = Pick<
 
 export type BuildingSchema = Pick<
   Tables<'building_schemas'>,
-  'id' | 'schema' | 'initial_schema_snapshot'
+  'id' | 'schema' | 'initial_schema_snapshot' | 'organization_id'
 >
-
-type TimelineItem = Pick<
-  Tables<'timeline_items'>,
-  | 'id'
-  | 'content'
-  | 'type'
-  | 'user_id'
-  | 'created_at'
-  | 'organization_id'
-  | 'design_session_id'
-  | 'building_schema_version_id'
-  | 'assistant_role'
-> & {
-  users?: {
-    id: string
-    name: string
-    email: string
-  } | null
-  building_schema_versions?: {
-    id: string
-    number: number
-    patch: Database['public']['Tables']['building_schema_versions']['Row']['patch']
-  } | null
-  // TODO: Backend needs to add artifact_action field to timeline_items table
-  // This field should be set to 'created' when PM agent creates requirements artifact
-  // and 'updated' when QA agent adds use cases to the artifact
-  artifact_action?: 'created' | 'updated' | null
-}
-
-export type DesignSessionWithTimelineItems = Pick<
-  Tables<'design_sessions'>,
-  'id' | 'organization_id'
-> & {
-  timeline_items: TimelineItem[]
-}
 
 type AssistantRole = Database['public']['Enums']['assistant_role_enum']
 

@@ -40,15 +40,6 @@ export const PublicSessionDetailPage = async ({
     notFound()
   }
 
-  // Fetch timeline items
-  const { data: timelineItems } = await supabase
-    .from('timeline_items')
-    .select(
-      'id, design_session_id, content, created_at, updated_at, building_schema_version_id, type, assistant_role',
-    )
-    .eq('design_session_id', designSessionId)
-    .order('created_at', { ascending: true })
-
   // Fetch building schema
   const { data: buildingSchemas } = await supabase
     .from('building_schemas')
@@ -97,33 +88,12 @@ export const PublicSessionDetailPage = async ({
       currentVersionId: latestVersion.id,
     })) ?? initialSchema
 
-  // Add required fields for timeline items and design session
-  const designSessionWithTimelineItems = {
-    id: designSession.id ?? '',
-    organization_id: 'public', // Dummy value for public access
-    timeline_items: (timelineItems || []).map((item) => ({
-      ...item,
-      id: item.id ?? '',
-      content: item.content ?? '',
-      type: item.type ?? 'user',
-      created_at: item.created_at ?? new Date().toISOString(),
-      design_session_id: item.design_session_id ?? designSessionId,
-      organization_id: 'public', // Dummy value for public access
-      user_id: null, // Public access doesn't have user info
-      updated_at: item.updated_at ?? new Date().toISOString(),
-      building_schema_version_id: null,
-      assistant_role: null,
-    })),
-  }
-
   return (
     <PublicLayout>
       <ViewModeProvider mode="public">
         <SessionDetailPageClient
           buildingSchemaId={buildingSchemaId}
-          designSessionWithTimelineItems={designSessionWithTimelineItems}
-          // TODO: Fetch actual messages using getMessages() once organizationId becomes optional in createSupabaseRepositories
-          // Currently blocked: Public sessions don't have organizationId, but createSupabaseRepositories requires it
+          designSessionId={designSessionId}
           initialMessages={[]}
           initialDisplayedSchema={initialSchema}
           initialPrevSchema={initialPrevSchema}

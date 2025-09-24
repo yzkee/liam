@@ -17,9 +17,6 @@ export async function execute(
           tables: {},
         }),
       },
-      designSessions: {
-        'demo-design-session': {},
-      },
     }),
   }
 

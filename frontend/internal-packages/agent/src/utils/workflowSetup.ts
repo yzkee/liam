@@ -2,7 +2,7 @@ import { HumanMessage } from '@langchain/core/messages'
 import { RunCollectorCallbackHandler } from '@langchain/core/tracers/run_collector'
 import type { CompiledStateGraph } from '@langchain/langgraph'
 import { END } from '@langchain/langgraph'
-import { err, errAsync, ok, okAsync, ResultAsync } from 'neverthrow'
+import { errAsync, ok, okAsync, ResultAsync } from 'neverthrow'
 import { v4 as uuidv4 } from 'uuid'
 import { DEFAULT_RECURSION_LIMIT } from '../constants'
 import type {
@@ -148,14 +148,12 @@ export const executeWorkflowWithTracking = <
     configurable,
     traceEnhancement,
   } = setupResult
-  const { repositories } = configurable
 
   // Type guard for safe type checking
   const isWorkflowState = (obj: unknown): obj is WorkflowState => {
     return typeof obj === 'object' && obj !== null
   }
 
-  // 1. Execute the workflow with enhanced tracing
   const executeWorkflow = ResultAsync.fromPromise(
     compiled.invoke(workflowState, {
       recursionLimit,
@@ -179,28 +177,5 @@ export const executeWorkflowWithTracking = <
       ? okAsync(result)
       : errAsync(new Error('Invalid workflow result'))
 
-  // 4. Handle WorkflowTerminationError - save timeline item and update status
-  const saveTimelineItem = (error: WorkflowTerminationError) =>
-    ResultAsync.fromPromise(
-      repositories.schema.createTimelineItem({
-        designSessionId: workflowState.designSessionId,
-        content: error.message,
-        type: 'error',
-      }),
-      (timelineError) => new Error(String(timelineError)),
-    )
-
-  const handleWorkflowTermination = (
-    error: WorkflowTerminationError,
-  ): AgentWorkflowResult => saveTimelineItem(error).map(() => workflowState)
-
-  // 5. Chain everything together
-  return executeWorkflow.andThen(validateAndReturnResult).orElse((error) => {
-    // Handle WorkflowTerminationError - these are expected errors
-    if (error instanceof WorkflowTerminationError) {
-      return handleWorkflowTermination(error)
-    }
-    // All other errors are unexpected
-    return err(error)
-  })
+  return executeWorkflow.andThen(validateAndReturnResult)
 }

@@ -17,14 +17,10 @@ import { ensurePathStructure } from '../utils/pathPreparation'
 import type {
   ArtifactResult,
   CreateArtifactParams,
-  CreateTimelineItemParams,
   CreateVersionParams,
-  DesignSessionData,
   SchemaData,
   SchemaRepository,
-  TimelineItemResult,
   UpdateArtifactParams,
-  UpdateTimelineItemParams,
   UserInfo,
   VersionResult,
 } from './types'
@@ -49,50 +45,6 @@ export class SupabaseSchemaRepository implements SchemaRepository {
       client: this.client,
       options: { organizationId },
     })
-  }
-
-  async getDesignSession(
-    designSessionId: string,
-  ): Promise<DesignSessionData | null> {
-    // Fetch design session with timeline items
-    const { data, error } = await this.client
-      .from('design_sessions')
-      .select(
-        `
-        organization_id,
-        timeline_items (
-          id,
-          content,
-          type,
-          user_id,
-          created_at,
-          updated_at,
-          organization_id,
-          design_session_id,
-          building_schema_version_id,
-          assistant_role
-        )
-      `,
-      )
-      .eq('id', designSessionId)
-      .order('created_at', {
-        ascending: true,
-        referencedTable: 'timeline_items',
-      })
-      .single()
-
-    if (error || !data) {
-      console.error(
-        `Could not fetch design session data for ${designSessionId}:`,
-        error,
-      )
-      return null
-    }
-
-    return {
-      organization_id: data.organization_id,
-      timeline_items: data.timeline_items || [],
-    }
   }
 
   getSchema(designSessionId: string): ResultAsync<SchemaData, Error> {
@@ -215,15 +167,8 @@ export class SupabaseSchemaRepository implements SchemaRepository {
     return versions.length > 0 ? Math.max(...versions.map((v) => v.number)) : 0
   }
 
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
   async createVersion(params: CreateVersionParams): Promise<VersionResult> {
     const { buildingSchemaId, latestVersionNumber, patch } = params
-
-    const patchCount = patch.length
-    const messageContent =
-      patchCount === 1
-        ? 'Schema updated with 1 change'
-        : `Schema updated with ${patchCount} changes`
 
     const { data: buildingSchema, error } = await this.client
       .from('building_schemas')
@@ -342,7 +287,7 @@ export class SupabaseSchemaRepository implements SchemaRepository {
 
     const newVersionNumber = actualLatestVersionNumber + 1
 
-    const { data: newVersion, error: createVersionError } = await this.client
+    const { error: createVersionError } = await this.client
       .from('building_schema_versions')
       .insert({
         building_schema_id: buildingSchemaId,
@@ -351,8 +296,6 @@ export class SupabaseSchemaRepository implements SchemaRepository {
         patch: JSON.parse(JSON.stringify(patch)),
         reverse_patch: JSON.parse(JSON.stringify(reversePatch)),
       })
-      .select('id')
-      .single()
 
     if (createVersionError) {
       return {
@@ -375,99 +318,9 @@ export class SupabaseSchemaRepository implements SchemaRepository {
       }
     }
 
-    const timelineResult = await this.createTimelineItem({
-      designSessionId: buildingSchema.design_session_id,
-      content: messageContent,
-      type: 'schema_version',
-      buildingSchemaVersionId: newVersion.id,
-    })
-
-    if (!timelineResult.success) {
-      return {
-        success: false,
-        error: `Failed to create timeline item: ${timelineResult.error}`,
-      }
-    }
-
     return {
       success: true,
       newSchema: newSchemaValidationResult.output,
-    }
-  }
-
-  async createTimelineItem(
-    params: CreateTimelineItemParams,
-  ): Promise<TimelineItemResult> {
-    const { designSessionId, content, type } = params
-    const userId = 'userId' in params ? params.userId : null
-    const assistantRole = 'role' in params ? params.role : null
-    const buildingSchemaVersionId =
-      'buildingSchemaVersionId' in params
-        ? params.buildingSchemaVersionId
-        : null
-    const now = new Date().toISOString()
-
-    const { data: timelineItem, error } = await this.client
-      .from('timeline_items')
-      .insert({
-        design_session_id: designSessionId,
-        content,
-        type,
-        user_id: userId,
-        building_schema_version_id: buildingSchemaVersionId,
-        updated_at: now,
-        assistant_role: assistantRole,
-      })
-      .select()
-      .single()
-
-    if (error) {
-      console.error(
-        'Failed to save timeline item:',
-        JSON.stringify(error, null, 2),
-      )
-      return {
-        success: false,
-        error: error.message,
-      }
-    }
-
-    return {
-      success: true,
-      timelineItem,
-    }
-  }
-
-  async updateTimelineItem(
-    id: string,
-    updates: UpdateTimelineItemParams,
-  ): Promise<TimelineItemResult> {
-    const now = new Date().toISOString()
-
-    const { data: timelineItem, error } = await this.client
-      .from('timeline_items')
-      .update({
-        ...updates,
-        updated_at: now,
-      })
-      .eq('id', id)
-      .select()
-      .single()
-
-    if (error) {
-      console.error(
-        'Failed to update timeline item:',
-        JSON.stringify(error, null, 2),
-      )
-      return {
-        success: false,
-        error: error.message,
-      }
-    }
-
-    return {
-      success: true,
-      timelineItem,
     }
   }
 

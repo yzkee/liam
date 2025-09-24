@@ -1322,80 +1322,6 @@ export type Database = {
           },
         ]
       }
-      timeline_items: {
-        Row: {
-          assistant_role:
-            | Database['public']['Enums']['assistant_role_enum']
-            | null
-          building_schema_version_id: string | null
-          content: string
-          created_at: string
-          design_session_id: string
-          id: string
-          organization_id: string
-          type: Database['public']['Enums']['timeline_item_type_enum']
-          updated_at: string
-          user_id: string | null
-        }
-        Insert: {
-          assistant_role?:
-            | Database['public']['Enums']['assistant_role_enum']
-            | null
-          building_schema_version_id?: string | null
-          content: string
-          created_at?: string
-          design_session_id: string
-          id?: string
-          organization_id: string
-          type: Database['public']['Enums']['timeline_item_type_enum']
-          updated_at: string
-          user_id?: string | null
-        }
-        Update: {
-          assistant_role?:
-            | Database['public']['Enums']['assistant_role_enum']
-            | null
-          building_schema_version_id?: string | null
-          content?: string
-          created_at?: string
-          design_session_id?: string
-          id?: string
-          organization_id?: string
-          type?: Database['public']['Enums']['timeline_item_type_enum']
-          updated_at?: string
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'timeline_items_building_schema_version_id_fkey'
-            columns: ['building_schema_version_id']
-            isOneToOne: false
-            referencedRelation: 'building_schema_versions'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'timeline_items_design_session_id_fkey'
-            columns: ['design_session_id']
-            isOneToOne: false
-            referencedRelation: 'design_sessions'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'timeline_items_organization_id_fkey'
-            columns: ['organization_id']
-            isOneToOne: false
-            referencedRelation: 'organizations'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'timeline_items_user_id_fkey'
-            columns: ['user_id']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          },
-        ]
-      }
       users: {
         Row: {
           avatar_url: string | null
@@ -1568,13 +1494,6 @@ export type Database = {
       knowledge_type: 'SCHEMA' | 'DOCS'
       schema_format_enum: 'schemarb' | 'postgres' | 'prisma' | 'tbls'
       severity_enum: 'CRITICAL' | 'WARNING' | 'POSITIVE' | 'QUESTION'
-      timeline_item_type_enum:
-        | 'user'
-        | 'assistant'
-        | 'schema_version'
-        | 'error'
-        | 'assistant_log'
-        | 'query_result'
       workflow_run_status: 'pending' | 'success' | 'error'
     }
     CompositeTypes: {
@@ -1717,14 +1636,6 @@ export const Constants = {
       knowledge_type: ['SCHEMA', 'DOCS'],
       schema_format_enum: ['schemarb', 'postgres', 'prisma', 'tbls'],
       severity_enum: ['CRITICAL', 'WARNING', 'POSITIVE', 'QUESTION'],
-      timeline_item_type_enum: [
-        'user',
-        'assistant',
-        'schema_version',
-        'error',
-        'assistant_log',
-        'query_result',
-      ],
       workflow_run_status: ['pending', 'success', 'error'],
     },
   },

@@ -15,9 +15,8 @@ import { ViewModeProvider } from './contexts/ViewModeContext'
 import { SessionDetailPageClient } from './SessionDetailPageClient'
 import { getBuildingSchema } from './services/buildingSchema/server/getBuildingSchema'
 import { buildPrevSchema } from './services/buildPrevSchema/server/buildPrevSchema'
-import { getDesignSessionWithTimelineItems } from './services/designSessionWithTimelineItems/server/getDesignSessionWithTimelineItems'
 import { getVersions } from './services/getVersions'
-import type { DesignSessionWithTimelineItems, Version } from './types'
+import type { Version } from './types'
 
 type Props = {
   designSessionId: string
@@ -33,7 +32,6 @@ const serializeMessages = (messages: BaseMessage[]): StoredMessage[] => {
 async function loadSessionData(designSessionId: string): Promise<
   Result<
     {
-      designSessionWithTimelineItems: DesignSessionWithTimelineItems
       messages: StoredMessage[]
       buildingSchema: NonNullable<Awaited<ReturnType<typeof getBuildingSchema>>>
       initialSchema: Schema
@@ -42,14 +40,13 @@ async function loadSessionData(designSessionId: string): Promise<
     Error
   >
 > {
-  const sessionResult = await getDesignSessionWithTimelineItems(designSessionId)
-  if (sessionResult.isErr()) {
-    return err(sessionResult.error)
+  const buildingSchema = await getBuildingSchema(designSessionId)
+  if (!buildingSchema) {
+    return err(new Error('Building schema not found for design session'))
   }
 
-  const designSessionWithTimelineItems = sessionResult.value
   const supabase = await createClient()
-  const organizationId = designSessionWithTimelineItems.organization_id
+  const organizationId = buildingSchema.organization_id
   const repositories = createSupabaseRepositories(supabase, organizationId)
   const config = {
     configurable: {
@@ -67,11 +64,6 @@ async function loadSessionData(designSessionId: string): Promise<
   )
   const workflowError = checkpointErrors[0] || null
 
-  const buildingSchema = await getBuildingSchema(designSessionId)
-  if (!buildingSchema) {
-    return err(new Error('Building schema not found for design session'))
-  }
-
   const parsedSchema = safeParse(schemaSchema, buildingSchema.schema)
   const initialSchema = parsedSchema.success ? parsedSchema.output : null
 
@@ -80,7 +72,6 @@ async function loadSessionData(designSessionId: string): Promise<
   }
 
   return ok({
-    designSessionWithTimelineItems,
     messages,
     buildingSchema,
     initialSchema,
@@ -98,13 +89,8 @@ export const SessionDetailPage: FC<Props> = async ({
     throw result.error
   }
 
-  const {
-    designSessionWithTimelineItems,
-    messages,
-    buildingSchema,
-    initialSchema,
-    workflowError,
-  } = result.value
+  const { messages, buildingSchema, initialSchema, workflowError } =
+    result.value
 
   const versions = await getVersions(buildingSchema.id)
   const latestVersion: Version | undefined = versions[0]
@@ -123,7 +109,7 @@ export const SessionDetailPage: FC<Props> = async ({
     <ViewModeProvider mode="private">
       <SessionDetailPageClient
         buildingSchemaId={buildingSchema.id}
-        designSessionWithTimelineItems={designSessionWithTimelineItems}
+        designSessionId={designSessionId}
         initialMessages={messages}
         initialDisplayedSchema={initialSchema}
         initialPrevSchema={initialPrevSchema}

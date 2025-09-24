@@ -379,9 +379,4 @@ const result = await deepModeling(
     },
   }
 );
-
-// Result is { success: true } on success, or Error on failure
-// All user and AI messages are automatically synchronized to timeline_items table
-// Frontend receives real-time updates as workflow progresses
-// The workflow is typically run as a background job via Trigger.dev
 ```

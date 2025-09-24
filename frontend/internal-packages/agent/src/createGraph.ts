@@ -72,7 +72,9 @@ export const createGraph = (checkpointer?: BaseCheckpointSaver) => {
           (msg) => msg instanceof AIMessage,
         )
 
-        if (isFirstExecution && !isEmptySchema(state.schemaData)) {
+        const shouldValidateSchema =
+          isFirstExecution && !isEmptySchema(state.schemaData)
+        if (shouldValidateSchema) {
           return 'validateInitialSchema'
         }
 

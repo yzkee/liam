@@ -1,18 +1,28 @@
 import { useEffect } from 'react'
 
-export const useNavigationGuard = (beforeNavigate: () => void) => {
+export const useNavigationGuard = (
+  beforeNavigate: (event: Event) => boolean,
+) => {
   useEffect(() => {
     const handleClick = (event: MouseEvent) => {
       if (
         event.target instanceof Element &&
         event.target.closest('a:not([target="_blank"])')
       ) {
-        beforeNavigate()
+        const shouldContinue = beforeNavigate(event)
+        if (!shouldContinue) {
+          event.preventDefault()
+          event.stopPropagation()
+        }
       }
     }
 
-    const handleBeforeUnload = () => {
-      beforeNavigate()
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      const shouldContinue = beforeNavigate(event)
+      if (!shouldContinue) {
+        event.preventDefault()
+        event.returnValue = ''
+      }
     }
 
     window.addEventListener('beforeunload', handleBeforeUnload)

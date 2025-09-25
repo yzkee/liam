@@ -55,15 +55,18 @@ export const useStream = ({ designSessionId, initialMessages }: Props) => {
     setError(null)
   }, [])
 
-  useNavigationGuard(() => {
-    if (
-      isStreaming &&
-      window.confirm(
+  useNavigationGuard((_event) => {
+    if (isStreaming) {
+      const shouldContinue = window.confirm(
         "Design session is currently running. If you leave now, you'll lose your session progress. Continue anyway?",
       )
-    ) {
-      abortRef.current?.abort()
+      if (shouldContinue) {
+        abortRef.current?.abort()
+        return true
+      }
+      return false
     }
+    return true
   })
 
   // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity

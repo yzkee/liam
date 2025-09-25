@@ -3,7 +3,6 @@ import { RunCollectorCallbackHandler } from '@langchain/core/tracers/run_collect
 import type { CompiledStateGraph } from '@langchain/langgraph'
 import { END } from '@langchain/langgraph'
 import { errAsync, ok, okAsync, ResultAsync } from 'neverthrow'
-import { v4 as uuidv4 } from 'uuid'
 import { DEFAULT_RECURSION_LIMIT } from '../constants'
 import type {
   AgentWorkflowParams,
@@ -26,7 +25,6 @@ type WorkflowSetupConfig = {
  */
 type WorkflowSetupResult = {
   workflowState: WorkflowState
-  workflowRunId: string
   runCollector: RunCollectorCallbackHandler
   configurable: WorkflowConfigurable & {
     buildingSchemaId: string
@@ -58,8 +56,6 @@ export const setupWorkflowState = (
 
   const { repositories, thread_id } = config.configurable
 
-  const workflowRunId = uuidv4()
-
   // Fetch user info to get userName
   const getUserInfo = ResultAsync.fromPromise(
     repositories.schema.getUserInfo(userId),
@@ -81,7 +77,6 @@ export const setupWorkflowState = (
 
     // Enhanced tracing with environment and developer context
     const traceEnhancement = createEnhancedTraceData(
-      workflowRunId,
       'agent-workflow',
       [`organization:${organizationId}`, `session:${designSessionId}`],
       {
@@ -113,7 +108,6 @@ export const setupWorkflowState = (
         userId,
         next: END,
       },
-      workflowRunId,
       runCollector,
       configurable: {
         repositories,
@@ -141,13 +135,8 @@ export const executeWorkflowWithTracking = <
   setupResult: WorkflowSetupResult,
   recursionLimit: number = DEFAULT_RECURSION_LIMIT,
 ): AgentWorkflowResult => {
-  const {
-    workflowState,
-    workflowRunId,
-    runCollector,
-    configurable,
-    traceEnhancement,
-  } = setupResult
+  const { workflowState, runCollector, configurable, traceEnhancement } =
+    setupResult
 
   // Type guard for safe type checking
   const isWorkflowState = (obj: unknown): obj is WorkflowState => {
@@ -158,7 +147,6 @@ export const executeWorkflowWithTracking = <
     compiled.invoke(workflowState, {
       recursionLimit,
       configurable,
-      runId: workflowRunId,
       callbacks: [runCollector],
       tags: traceEnhancement.tags,
       metadata: traceEnhancement.metadata,

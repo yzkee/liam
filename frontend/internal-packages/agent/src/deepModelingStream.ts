@@ -20,18 +20,12 @@ export async function deepModelingStream(
     throw setupResult.error
   }
 
-  const {
-    workflowState,
-    workflowRunId,
-    runCollector,
-    configurable,
-    traceEnhancement,
-  } = setupResult.value
+  const { workflowState, runCollector, configurable, traceEnhancement } =
+    setupResult.value
 
   const stream = compiled.streamEvents(workflowState, {
     recursionLimit,
     configurable,
-    runId: workflowRunId,
     callbacks: [runCollector],
     tags: traceEnhancement.tags,
     metadata: traceEnhancement.metadata,

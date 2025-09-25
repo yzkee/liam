@@ -19,6 +19,7 @@ import {
 } from '@liam-hq/ui'
 import clsx from 'clsx'
 import type { FC } from 'react'
+import type { OutputTabValue } from '../../../../../../Output/constants'
 import { ArgumentsDisplay } from './ArgumentsDisplay'
 import { useAnimationState } from './hooks/useAnimationState'
 import { useEventHandlers } from './hooks/useEventHandlers'
@@ -34,7 +35,7 @@ type Props = {
   status?: 'pending' | 'running' | 'completed' | 'error'
   error?: string
   toolMessage?: ToolMessageType | undefined
-  onNavigate: (tab: 'erd' | 'artifact') => void
+  onNavigate: (tab: OutputTabValue) => void
 }
 
 // Component for expand/collapse button with tooltip

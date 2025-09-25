@@ -9,6 +9,7 @@ import { match } from 'ts-pattern'
 import * as v from 'valibot'
 import { MarkdownContent } from '../../../../../../MarkdownContent'
 import { CopyButton } from '../../../../CopyButton'
+import type { OutputTabValue } from '../../../../Output/constants'
 import { DBAgent, LeadAgent, PMAgent, QAAgent } from './AgentAvatar'
 import styles from './AiMessage.module.css'
 import { ReasoningMessage } from './ReasoningMessage'
@@ -36,7 +37,7 @@ const getAgentInfo = (name: string | undefined) => {
 type Props = {
   message: AIMessage
   toolMessages: ToolMessage[]
-  onNavigate: (tab: 'erd' | 'artifact') => void
+  onNavigate: (tab: OutputTabValue) => void
   isWorkflowRunning: boolean
 }
 

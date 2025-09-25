@@ -95,10 +95,7 @@ export const Output: FC<Props> = ({
         />
       </TabsContent>
       <TabsContent value={OUTPUT_TABS.ARTIFACT} className={styles.tabsContent}>
-        <ArtifactContainer
-          artifact={artifact}
-          error={artifactError}
-        />
+        <ArtifactContainer artifact={artifact} error={artifactError} />
       </TabsContent>
     </TabsRoot>
   )

@@ -5,19 +5,19 @@ import {
   mapStoredMessagesToChatMessages,
   type StoredMessage,
 } from '@langchain/core/messages'
+import type { Artifact } from '@liam-hq/artifact'
 import type { Schema } from '@liam-hq/schema'
 import clsx from 'clsx'
 import { type FC, useCallback, useEffect, useRef, useState } from 'react'
 import { Chat } from './components/Chat'
 import { Output } from './components/Output'
 import { useRealtimeArtifact } from './components/Output/components/Artifact/hooks/useRealtimeArtifact'
-import { OUTPUT_TABS } from './components/Output/constants'
+import { OUTPUT_TABS, type OutputTabValue } from './components/Output/constants'
 import { useRealtimeVersionsWithSchema } from './hooks/useRealtimeVersionsWithSchema'
 import { useStream } from './hooks/useStream'
 import { SQL_REVIEW_COMMENTS } from './mock'
 import styles from './SessionDetailPage.module.css'
 import type { Version } from './types'
-import { Artifact } from '@liam-hq/artifact'
 
 type Props = {
   buildingSchemaId: string
@@ -42,9 +42,11 @@ export const SessionDetailPageClient: FC<Props> = ({
   isDeepModelingEnabled,
   initialIsPublic,
   initialWorkflowError,
-  initialArtifact
+  initialArtifact,
 }) => {
-  const [activeTab, setActiveTab] = useState<string | undefined>(undefined)
+  const [activeTab, setActiveTab] = useState<OutputTabValue | undefined>(
+    undefined,
+  )
 
   const {
     versions,
@@ -77,20 +79,11 @@ export const SessionDetailPageClient: FC<Props> = ({
     }
   }, [])
 
-  const handleNavigateToTab = useCallback((tab: 'erd' | 'artifact') => {
-    if (tab === 'erd') {
-      setActiveTab(OUTPUT_TABS.ERD)
-    } else if (tab === 'artifact') {
-      setActiveTab(OUTPUT_TABS.ARTIFACT)
-    }
-  }, [])
-
   const { artifact, error: artifactError } = useRealtimeArtifact({
     designSessionId,
     initialArtifact,
     onChangeArtifact: handleArtifactChange,
-  }
-  )
+  })
   const shouldShowOutputSection =
     (artifact !== null || selectedVersion !== null) && activeTab
 
@@ -150,41 +143,26 @@ export const SessionDetailPageClient: FC<Props> = ({
                 isDeepModelingEnabled,
               })
             }
-            onNavigate={handleNavigateToTab}
+            onNavigate={setActiveTab}
             error={combinedError}
           />
         </div>
         {shouldShowOutputSection && (
           <div className={styles.outputSection}>
-            {activeTab !== undefined ? (
-              <Output
-                designSessionId={designSessionId}
-                schema={displayedSchema}
-                prevSchema={prevSchema}
-                sqlReviewComments={SQL_REVIEW_COMMENTS}
-                versions={versions}
-                selectedVersion={selectedVersion}
-                onSelectedVersionChange={handleVersionChange}
-                activeTab={activeTab}
-                onTabChange={setActiveTab}
-                initialIsPublic={initialIsPublic}
-                artifact={artifact}
-                artifactError={artifactError}
-              />
-            ) : (
-              <Output
-                designSessionId={designSessionId}
-                schema={displayedSchema}
-                prevSchema={prevSchema}
-                sqlReviewComments={SQL_REVIEW_COMMENTS}
-                versions={versions}
-                selectedVersion={selectedVersion}
-                onSelectedVersionChange={handleVersionChange}
-                initialIsPublic={initialIsPublic}
-                artifact={artifact}
-                artifactError={artifactError}
-              />
-            )}
+            <Output
+              designSessionId={designSessionId}
+              schema={displayedSchema}
+              prevSchema={prevSchema}
+              sqlReviewComments={SQL_REVIEW_COMMENTS}
+              versions={versions}
+              selectedVersion={selectedVersion}
+              onSelectedVersionChange={handleVersionChange}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              initialIsPublic={initialIsPublic}
+              artifact={artifact}
+              artifactError={artifactError}
+            />
           </div>
         )}
       </div>

@@ -6,6 +6,7 @@ import {
   type ToolMessage,
 } from '@langchain/core/messages'
 import type { FC } from 'react'
+import type { OutputTabValue } from '../../../Output/constants'
 import { AiMessage } from './AiMessage'
 import { HumanMessage } from './HumanMessage'
 
@@ -80,7 +81,7 @@ const collectFollowingToolMessages = (
 
 type Props = {
   messages: BaseMessage[]
-  onNavigate: (tab: 'erd' | 'artifact') => void
+  onNavigate: (tab: OutputTabValue) => void
   isWorkflowRunning?: boolean
 }
 

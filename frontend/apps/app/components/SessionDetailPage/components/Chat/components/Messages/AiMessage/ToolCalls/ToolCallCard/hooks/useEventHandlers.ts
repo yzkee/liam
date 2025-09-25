@@ -1,3 +1,4 @@
+import type { OutputTabValue } from '../../../../../../../Output/constants'
 import type { useAnimationState } from './useAnimationState'
 import type { useExpandState } from './useExpandState'
 import type { useToolData } from './useToolData'
@@ -5,7 +6,7 @@ import type { useToolData } from './useToolData'
 export const useEventHandlers = (
   animationState: ReturnType<typeof useAnimationState>,
   expandState: ReturnType<typeof useExpandState>,
-  onNavigate: (tab: 'erd' | 'artifact') => void,
+  onNavigate: (tab: OutputTabValue) => void,
   toolInfo?: ReturnType<typeof useToolData>['toolInfo'],
 ) => {
   const handleArgumentsReady = () => {

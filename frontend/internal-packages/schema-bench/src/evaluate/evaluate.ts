@@ -258,6 +258,10 @@ const calculateForeignKeyMetrics = (
   return { foreignKeyF1, foreignKeyRecall, foreignKeyAllCorrect }
 }
 
+// NOTE: Tests for this function were removed due to flaky ONNX runtime protobuf parsing errors
+// See: https://github.com/route06/liam-internal/issues/5716 (important-comment)
+// The evaluate function uses nameSimilarity which relies on @huggingface/transformers
+// and ONNX runtime, causing intermittent CI failures with "Failed to load model because protobuf parsing failed"
 export const evaluate = async (
   reference: Schema,
   predict: Schema,

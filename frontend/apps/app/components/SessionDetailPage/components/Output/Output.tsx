@@ -1,3 +1,5 @@
+'use client'
+
 import type { Artifact } from '@liam-hq/artifact'
 import type { Schema } from '@liam-hq/schema'
 import { TabsContent, TabsRoot } from '@liam-hq/ui'

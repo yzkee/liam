@@ -43,7 +43,6 @@ type LangGraphTraceMetadata = {
   langgraph: {
     version: string
     execution_id: string
-    workflow_run_id?: string | undefined
     graph_name?: string | undefined
   }
 }
@@ -149,7 +148,6 @@ const generateEnvironmentTags = (): string[] => {
  * Create enhanced trace data with environment context
  */
 export const createEnhancedTraceData = (
-  workflowRunId?: string,
   graphName?: string,
   additionalTags: string[] = [],
   additionalMetadata: Record<string, unknown> = {},
@@ -161,7 +159,6 @@ export const createEnhancedTraceData = (
     langgraph: {
       version: getLangGraphVersion().unwrapOr('unknown'),
       execution_id: randomUUID(),
-      workflow_run_id: workflowRunId,
       graph_name: graphName,
     },
   }

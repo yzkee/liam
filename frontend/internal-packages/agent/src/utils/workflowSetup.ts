@@ -77,7 +77,6 @@ export const setupWorkflowState = (
 
     // Enhanced tracing with environment and developer context
     const traceEnhancement = createEnhancedTraceData(
-      undefined,
       'agent-workflow',
       [`organization:${organizationId}`, `session:${designSessionId}`],
       {

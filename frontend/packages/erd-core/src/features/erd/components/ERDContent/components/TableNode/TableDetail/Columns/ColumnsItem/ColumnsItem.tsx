@@ -58,9 +58,11 @@ export const ColumnsItem: FC<Props> = ({
     [constraints, column.name],
   )
 
+  const isFocused = focusedElementId === elementId
+
   return (
     <>
-      {elementId === focusedElementId && (
+      {isFocused && (
         <div
           className={styles.blinkCircleWrapper}
           data-testid="blink-circle-indicator"
@@ -68,7 +70,10 @@ export const ColumnsItem: FC<Props> = ({
           <BlinkCircle />
         </div>
       )}
-      <div id={elementId} className={clsx(styles.wrapper, diffStyle)}>
+      <div
+        id={elementId}
+        className={clsx(styles.wrapper, diffStyle, isFocused && styles.focused)}
+      >
         <h3 className={styles.heading}>
           <a className={styles.link} href={`#${elementId}`}>
             {column.name}

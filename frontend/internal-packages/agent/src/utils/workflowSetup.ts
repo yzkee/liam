@@ -102,7 +102,6 @@ export const setupWorkflowState = (
         analyzedRequirements: {
           businessRequirement: '',
           functionalRequirements: {},
-          nonFunctionalRequirements: {},
         },
         testcases: [],
         schemaIssues: [],

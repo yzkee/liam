@@ -49,14 +49,6 @@ function prepareRequirements(
     businessContext,
   )
 
-  // Process non-functional requirements
-  processRequirementsByType(
-    allRequirements,
-    analyzedRequirements.nonFunctionalRequirements,
-    'non_functional',
-    businessContext,
-  )
-
   // If no requirements found, return error
   if (allRequirements.length === 0) {
     return err(

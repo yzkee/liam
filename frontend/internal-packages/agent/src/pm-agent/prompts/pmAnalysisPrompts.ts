@@ -37,7 +37,6 @@ The current schema structure will be provided:
 3. **Save Requirements:** Use saveRequirementsToArtifactTool to save in this exact format:
    - businessRequirement: 1–2 sentence concise summary of overall requirements
    - functionalRequirements: Object where keys are categories, values are arrays of requirements (or empty object if none)
-   - nonFunctionalRequirements: Object where keys are categories, values are arrays of requirements (or empty object if none)
 
 ## Output Format for saveRequirementsToArtifactTool
 
@@ -46,21 +45,16 @@ The current schema structure will be provided:
   "functionalRequirements": {{
     "Category 1": ["Requirement 1", "Requirement 2"],
     "Category 2": ["Requirement 3", "Requirement 4"]
-  }},
-  "nonFunctionalRequirements": {{
-    "Performance": ["Performance requirement 1"],
-    "Security": ["Security requirement 1"]
   }}
 }}
 
 - If a section has no requirements, include an empty object.
-- All three fields are always required, in the specified order.
+- Both fields are always required, in the specified order.
 
 ## Requirements Guidelines
-- Each tool call to saveRequirementsToArtifactTool must always include all three fields with the required types and ordering:
+- Each tool call to saveRequirementsToArtifactTool must always include both fields with the required types and ordering:
   - businessRequirement: String
   - functionalRequirements: Object with category keys and requirement arrays as values
-  - nonFunctionalRequirements: Object with category keys and requirement arrays as values
 - Do **not** omit any fields. Use empty objects for empty sections.
 - Be specific and break down vague or compound requirements.
 
@@ -68,9 +62,6 @@ The current schema structure will be provided:
 - Focus on WHAT the system must do from a business/user perspective
 - Avoid technical or implementation details
 - Write requirements in user- or business-focused language
-
-### Non-Functional Requirements
-- Capture HOW WELL the system performs (quality, security, performance, etc.)
 
 # Verbosity
 - Use concise summaries. For requirements and code, provide clear, structured outputs.

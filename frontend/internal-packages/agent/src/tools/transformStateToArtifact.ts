@@ -39,17 +39,6 @@ const convertAnalyzedRequirementsToArtifact = (
     requirements.push(functionalRequirement)
   }
 
-  for (const [category, items] of Object.entries(
-    analyzedRequirements.nonFunctionalRequirements,
-  )) {
-    const nonFunctionalRequirement: NonFunctionalRequirement = {
-      type: 'non_functional',
-      name: category,
-      description: items.map((item) => item.desc), // Extract descriptions from RequirementItems
-    }
-    requirements.push(nonFunctionalRequirement)
-  }
-
   return requirements
 }
 
@@ -100,17 +89,6 @@ const mergeTestCasesIntoRequirements = (
           test_cases: groupedTestcases.map(mapTestCasesToRequirements),
         }
         requirements.push(functionalRequirement)
-      } else {
-        const nonFunctionalRequirement: NonFunctionalRequirement = {
-          type: 'non_functional',
-          name: category,
-          description: wrapDescription(
-            description,
-            'Non-functional requirement: ',
-            category,
-          ),
-        }
-        requirements.push(nonFunctionalRequirement)
       }
     }
   }

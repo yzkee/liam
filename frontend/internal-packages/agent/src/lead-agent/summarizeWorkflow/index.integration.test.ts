@@ -42,7 +42,6 @@ describe('summarizeWorkflow Integration', () => {
       analyzedRequirements: {
         businessRequirement: '',
         functionalRequirements: {},
-        nonFunctionalRequirements: {},
       },
       testcases: [],
       schemaIssues: [],

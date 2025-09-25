@@ -45,16 +45,6 @@ describe('invokeSaveArtifactToolNode Integration', () => {
                 'Users can track task progress and status',
               ],
             },
-            nonFunctionalRequirements: {
-              Performance: [
-                'System should handle up to 1000 concurrent users',
-                'Page load times should be under 2 seconds',
-              ],
-              Security: [
-                'User data should be encrypted',
-                'Authentication should use secure tokens',
-              ],
-            },
           },
         },
       ],
@@ -65,7 +55,6 @@ describe('invokeSaveArtifactToolNode Integration', () => {
       analyzedRequirements: {
         businessRequirement: '',
         functionalRequirements: {},
-        nonFunctionalRequirements: {},
       },
       designSessionId: context.designSessionId,
       schemaData: aSchema({

@@ -25,7 +25,6 @@ import type {
 const analyzedRequirementsWithoutIdSchema = v.object({
   businessRequirement: v.string(),
   functionalRequirements: v.record(v.string(), v.array(v.string())),
-  nonFunctionalRequirements: v.record(v.string(), v.array(v.string())),
 })
 
 const toolSchema = toJsonSchema(analyzedRequirementsWithoutIdSchema)
@@ -77,9 +76,6 @@ const convertLlmAnalyzedRequirements = (
   functionalRequirements: convertToRequirementItems(
     input.functionalRequirements,
   ),
-  nonFunctionalRequirements: convertToRequirementItems(
-    input.nonFunctionalRequirements,
-  ),
 })
 
 /**
@@ -102,17 +98,6 @@ const createArtifactFromRequirements = (
       test_cases: [], // Empty array as test cases don't exist at this point
     }
     requirements.push(functionalRequirement)
-  }
-
-  for (const [category, items] of Object.entries(
-    analyzedRequirements.nonFunctionalRequirements,
-  )) {
-    const nonFunctionalRequirement: NonFunctionalRequirement = {
-      type: 'non_functional',
-      name: category,
-      description: items.map((item) => item.desc), // Extract descriptions from RequirementItems
-    }
-    requirements.push(nonFunctionalRequirement)
   }
 
   return {
@@ -192,7 +177,7 @@ export const saveRequirementsToArtifactTool: StructuredTool = tool(
   {
     name: 'saveRequirementsToArtifactTool',
     description:
-      'Save the analyzed requirements to the database as an artifact. Accepts business requirements, functional requirements, and non-functional requirements.',
+      'Save the analyzed requirements to the database as an artifact. Accepts business requirements and functional requirements.',
     schema: toolSchema,
   },
 )

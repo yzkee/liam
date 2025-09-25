@@ -89,19 +89,6 @@ INSERT INTO user_roles (user_id, role_id, assigned_at)
 VALUES (123, 456, NOW());
 \`\`\`
 
-## 📊 Non-Functional Requirements
-
-### 1. Performance
-
-The system should handle up to 10,000 concurrent users with response times under 200ms for standard operations.
-
-### 2. Security
-
-All user data must be encrypted at rest and in transit, with multi-factor authentication available for sensitive operations.
-
-### 3. Scalability
-
-The architecture should support horizontal scaling to accommodate growing user base without significant refactoring.
 `
 
 export const Default: Story = {

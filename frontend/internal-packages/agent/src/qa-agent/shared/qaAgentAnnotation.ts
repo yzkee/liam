@@ -21,7 +21,6 @@ export const qaAgentAnnotation = Annotation.Root({
     default: () => ({
       businessRequirement: '',
       functionalRequirements: {},
-      nonFunctionalRequirements: {},
     }),
   }),
   testcases: Annotation<Testcase[]>({

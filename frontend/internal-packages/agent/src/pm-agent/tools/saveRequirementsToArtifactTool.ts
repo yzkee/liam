@@ -3,11 +3,7 @@ import { ToolMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { type StructuredTool, tool } from '@langchain/core/tools'
 import { Command } from '@langchain/langgraph'
-import type {
-  Artifact,
-  FunctionalRequirement,
-  NonFunctionalRequirement,
-} from '@liam-hq/artifact'
+import type { Artifact } from '@liam-hq/artifact'
 import { fromValibotSafeParse } from '@liam-hq/neverthrow'
 import { err, ok, type Result } from 'neverthrow'
 import { v4 as uuidv4 } from 'uuid'
@@ -25,7 +21,6 @@ import type {
 const analyzedRequirementsWithoutIdSchema = v.object({
   businessRequirement: v.string(),
   functionalRequirements: v.record(v.string(), v.array(v.string())),
-  nonFunctionalRequirements: v.record(v.string(), v.array(v.string())),
 })
 
 const toolSchema = toJsonSchema(analyzedRequirementsWithoutIdSchema)
@@ -77,9 +72,6 @@ const convertLlmAnalyzedRequirements = (
   functionalRequirements: convertToRequirementItems(
     input.functionalRequirements,
   ),
-  nonFunctionalRequirements: convertToRequirementItems(
-    input.nonFunctionalRequirements,
-  ),
 })
 
 /**
@@ -90,29 +82,18 @@ const convertLlmAnalyzedRequirements = (
 const createArtifactFromRequirements = (
   analyzedRequirements: AnalyzedRequirements,
 ): Artifact => {
-  const requirements: (FunctionalRequirement | NonFunctionalRequirement)[] = []
+  const requirements: Artifact['requirement_analysis']['requirements'] = []
 
   for (const [category, items] of Object.entries(
     analyzedRequirements.functionalRequirements,
   )) {
-    const functionalRequirement: FunctionalRequirement = {
-      type: 'functional',
-      name: category,
-      description: items.map((item) => item.desc), // Extract descriptions from RequirementItems
-      test_cases: [], // Empty array as test cases don't exist at this point
-    }
-    requirements.push(functionalRequirement)
-  }
-
-  for (const [category, items] of Object.entries(
-    analyzedRequirements.nonFunctionalRequirements,
-  )) {
-    const nonFunctionalRequirement: NonFunctionalRequirement = {
-      type: 'non_functional',
-      name: category,
-      description: items.map((item) => item.desc), // Extract descriptions from RequirementItems
-    }
-    requirements.push(nonFunctionalRequirement)
+    const requirement: Artifact['requirement_analysis']['requirements'][number] =
+      {
+        name: category,
+        description: items.map((item) => item.desc), // Extract descriptions from RequirementItems
+        test_cases: [], // Empty array as test cases don't exist at this point
+      }
+    requirements.push(requirement)
   }
 
   return {
@@ -192,7 +173,7 @@ export const saveRequirementsToArtifactTool: StructuredTool = tool(
   {
     name: 'saveRequirementsToArtifactTool',
     description:
-      'Save the analyzed requirements to the database as an artifact. Accepts business requirements, functional requirements, and non-functional requirements.',
+      'Save the analyzed requirements to the database as an artifact. Accepts business requirements and functional requirements.',
     schema: toolSchema,
   },
 )

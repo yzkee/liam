@@ -12,10 +12,6 @@ const requirementItemSchema = v.object({
 export const analyzedRequirementsSchema = v.object({
   businessRequirement: v.string(),
   functionalRequirements: v.record(v.string(), v.array(requirementItemSchema)),
-  nonFunctionalRequirements: v.record(
-    v.string(),
-    v.array(requirementItemSchema),
-  ),
 })
 
 export type RequirementItem = v.InferOutput<typeof requirementItemSchema>

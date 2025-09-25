@@ -30,7 +30,6 @@ describe('analyzeRequirementsNode Integration', () => {
       analyzedRequirements: {
         businessRequirement: '',
         functionalRequirements: {},
-        nonFunctionalRequirements: {},
       },
       designSessionId: context.designSessionId,
       schemaData: aSchema({

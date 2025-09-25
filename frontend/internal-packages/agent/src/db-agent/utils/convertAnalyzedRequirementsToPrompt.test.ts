@@ -17,13 +17,6 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
         { id: '6', desc: 'Delete user' },
       ],
     },
-    nonFunctionalRequirements: {
-      security: [
-        { id: '7', desc: 'Password encryption' },
-        { id: '8', desc: 'Session management' },
-      ],
-      performance: [{ id: '9', desc: 'Fast response times' }],
-    },
   }
 
   it('should convert analyzed requirements to formatted text prompt', () => {
@@ -34,11 +27,7 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
 
       Functional Requirements:
       - authentication: Login, Logout, Password reset
-      - userManagement: Create user, Update user, Delete user
-
-      Non-Functional Requirements:
-      - security: Password encryption, Session management
-      - performance: Fast response times"
+      - userManagement: Create user, Update user, Delete user"
     `)
   })
 
@@ -46,7 +35,6 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
     const analyzedRequirements: AnalyzedRequirements = {
       businessRequirement: 'Simple system',
       functionalRequirements: {},
-      nonFunctionalRequirements: {},
     }
 
     const result = convertRequirementsToPrompt(analyzedRequirements)
@@ -54,10 +42,7 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
     expect(result).toMatchInlineSnapshot(`
       "Business Requirement: Simple system
 
-      Functional Requirements:
-
-
-      Non-Functional Requirements:"
+      Functional Requirements:"
     `)
   })
 
@@ -67,9 +52,6 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
       functionalRequirements: {
         basic: [{ id: '1', desc: 'feature1' }],
       },
-      nonFunctionalRequirements: {
-        quality: [{ id: '2', desc: 'reliable' }],
-      },
     }
 
     const result = convertRequirementsToPrompt(analyzedRequirements)
@@ -78,10 +60,7 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
       "Business Requirement: 
 
       Functional Requirements:
-      - basic: feature1
-
-      Non-Functional Requirements:
-      - quality: reliable"
+      - basic: feature1"
     `)
   })
 
@@ -89,7 +68,6 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
     it('should filter requirements based on schemaIssues without showing issue details', () => {
       const schemaIssues = [
         { requirementId: '2', description: 'Missing logout table' },
-        { requirementId: '7', description: 'Encryption field missing' },
       ]
 
       const result = convertRequirementsToPrompt(
@@ -101,10 +79,7 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
         "Business Requirement: Build a user management system
 
         Functional Requirements:
-        - authentication: Logout
-
-        Non-Functional Requirements:
-        - security: Password encryption"
+        - authentication: Logout"
       `)
     })
 
@@ -125,11 +100,7 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
 
         Functional Requirements:
         - authentication: Login, Logout, Password reset
-        - userManagement: Create user, Update user, Delete user
-
-        Non-Functional Requirements:
-        - security: Password encryption, Session management
-        - performance: Fast response times"
+        - userManagement: Create user, Update user, Delete user"
       `)
     })
 
@@ -147,9 +118,7 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
         "Business Requirement: Build a user management system
 
         Functional Requirements:
-        - authentication: Login
-
-        Non-Functional Requirements:"
+        - authentication: Login"
       `)
     })
 
@@ -169,17 +138,13 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
       expect(result).toMatchInlineSnapshot(`
         "Business Requirement: Build a user management system
 
-        Functional Requirements:
-
-
-        Non-Functional Requirements:"
+        Functional Requirements:"
       `)
     })
 
     it('should filter requirements without showing IDs or issue details', () => {
       const schemaIssues = [
         { requirementId: '4', description: 'User table structure issue' },
-        { requirementId: '9', description: 'Performance index missing' },
       ]
 
       const result = convertRequirementsToPrompt(
@@ -188,11 +153,8 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
       )
 
       expect(result).toContain('Create user')
-      expect(result).toContain('Fast response times')
       expect(result).not.toContain('[4]')
-      expect(result).not.toContain('[9]')
       expect(result).not.toContain('User table structure issue')
-      expect(result).not.toContain('Performance index missing')
     })
   })
 })

@@ -14,9 +14,6 @@ const meta = {
       const functionalRequirementsId = useId()
       const orderProcessingId = useId()
       const inventoryManagementId = useId()
-      const nonFunctionalRequirementsId = useId()
-      const performanceId = useId()
-      const securityId = useId()
 
       return (
         <div style={{ display: 'flex', gap: '32px', height: '800px' }}>
@@ -57,16 +54,6 @@ const meta = {
             >
               <p>Content placeholder for scrolling demo</p>
             </div>
-
-            <h3 id={nonFunctionalRequirementsId}>
-              Non-Functional Requirements
-            </h3>
-
-            <h4 id={performanceId}>1. Performance</h4>
-            <p>Maintain response time within 1 second even under high load</p>
-
-            <h4 id={securityId}>2. Security</h4>
-            <p>Customer data encryption, implementation of access control</p>
           </div>
           <div>
             <Story />
@@ -94,17 +81,7 @@ Overall order processing including order creation, updates, cancellation, and st
 
 #### 2. Inventory Management
 
-Product inventory tracking, updates, and alert functions
-
-### Non-Functional Requirements
-
-#### 1. Performance
-
-Maintain response time within 1 second even under high load
-
-#### 2. Security
-
-Customer data encryption, implementation of access control`
+Product inventory tracking, updates, and alert functions`
 
 export const Default: Story = {
   name: 'Default TOC',

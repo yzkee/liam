@@ -27,7 +27,6 @@ const createTestStateAndConfig = async (
     analyzedRequirements: {
       businessRequirement: '',
       functionalRequirements: {},
-      nonFunctionalRequirements: {},
     },
     testcases: [],
     schemaIssues: [],

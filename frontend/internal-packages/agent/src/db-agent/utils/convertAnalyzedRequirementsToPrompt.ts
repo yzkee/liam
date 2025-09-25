@@ -24,33 +24,11 @@ export const convertRequirementsToPrompt = (
       }
     }
 
-    // Filter non-functional requirements
-    const filteredNonFunctionalRequirements: Record<
-      string,
-      Array<{ id: string; desc: string }>
-    > = {}
-    for (const [category, reqs] of Object.entries(
-      requirements.nonFunctionalRequirements,
-    )) {
-      const filteredReqs = reqs.filter((req) => issueRequirementIds.has(req.id))
-      if (filteredReqs.length > 0) {
-        filteredNonFunctionalRequirements[category] = filteredReqs
-      }
-    }
-
     // Return filtered requirements without schema issues information
     return `Business Requirement: ${requirements.businessRequirement}
 
 Functional Requirements:
 ${Object.entries(filteredFunctionalRequirements)
-  .map(
-    ([category, requirements]) =>
-      `- ${category}: ${requirements.map((req) => req.desc).join(', ')}`,
-  )
-  .join('\n')}
-
-Non-Functional Requirements:
-${Object.entries(filteredNonFunctionalRequirements)
   .map(
     ([category, requirements]) =>
       `- ${category}: ${requirements.map((req) => req.desc).join(', ')}`,
@@ -63,14 +41,6 @@ ${Object.entries(filteredNonFunctionalRequirements)
 
 Functional Requirements:
 ${Object.entries(requirements.functionalRequirements)
-  .map(
-    ([category, requirements]) =>
-      `- ${category}: ${requirements.map((req) => req.desc).join(', ')}`,
-  )
-  .join('\n')}
-
-Non-Functional Requirements:
-${Object.entries(requirements.nonFunctionalRequirements)
   .map(
     ([category, requirements]) =>
       `- ${category}: ${requirements.map((req) => req.desc).join(', ')}`,

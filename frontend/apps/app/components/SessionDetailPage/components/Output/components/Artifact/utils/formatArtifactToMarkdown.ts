@@ -84,12 +84,11 @@ export function formatArtifactToMarkdown(artifact: Artifact): string {
   sections.push('')
 
   // Functional requirements
-  const functionalReqs = requirements.filter((req) => req.type === 'functional')
-  if (functionalReqs.length > 0) {
+  if (requirements.length > 0) {
     sections.push('## 🔧 Functional Requirements')
     sections.push('')
 
-    functionalReqs.forEach((req, reqIndex) => {
+    requirements.forEach((req, reqIndex) => {
       sections.push(`### ${reqIndex + 1}. ${req.name}`)
       sections.push('')
 
@@ -98,7 +97,7 @@ export function formatArtifactToMarkdown(artifact: Artifact): string {
       })
       sections.push('')
 
-      if (req.type === 'functional' && req.test_cases.length > 0) {
+      if (req.test_cases.length > 0) {
         sections.push('')
         sections.push('**Test Cases:**')
         sections.push('')
@@ -109,33 +108,7 @@ export function formatArtifactToMarkdown(artifact: Artifact): string {
         })
       }
 
-      if (reqIndex < functionalReqs.length - 1) {
-        sections.push('---')
-        sections.push('')
-      }
-    })
-  }
-
-  // Non-functional requirements
-  const nonFunctionalReqs = requirements.filter(
-    (req) => req.type === 'non_functional',
-  )
-  if (nonFunctionalReqs.length > 0) {
-    sections.push('')
-    sections.push('## 📊 Non-Functional Requirements')
-    sections.push('')
-
-    nonFunctionalReqs.forEach((req, reqIndex) => {
-      sections.push(`### ${reqIndex + 1}. ${req.name}`)
-      sections.push('')
-
-      req.description.forEach((item) => {
-        sections.push(`- ${item}`)
-      })
-      sections.push('')
-
-      if (reqIndex < nonFunctionalReqs.length - 1) {
-        sections.push('')
+      if (reqIndex < requirements.length - 1) {
         sections.push('---')
         sections.push('')
       }

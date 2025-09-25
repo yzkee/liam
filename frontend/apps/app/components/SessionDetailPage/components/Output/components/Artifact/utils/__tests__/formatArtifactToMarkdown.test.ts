@@ -171,20 +171,6 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
                 },
               ],
             },
-            {
-              name: 'Performance',
-              description: [
-                'The system must be able to search 1000 flight records within 3 seconds and support concurrent access from 50 users.',
-              ],
-              test_cases: [],
-            },
-            {
-              name: 'Security',
-              description: [
-                'Pilot personal information must be encrypted for storage and access logs must be recorded. Database access must be restricted to authenticated users only.',
-              ],
-              test_cases: [],
-            },
           ],
         },
       }
@@ -349,18 +335,6 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
         ❌ **06/03/2024, 11:00:00 AM**
         > ERROR: update or delete on table "airplanes" violates foreign key constraint "fk_flights_airplane"
 
-
-        ---
-
-        ### 5. Performance
-
-        - The system must be able to search 1000 flight records within 3 seconds and support concurrent access from 50 users.
-
-        ---
-
-        ### 6. Security
-
-        - Pilot personal information must be encrypted for storage and access logs must be recorded. Database access must be restricted to authenticated users only.
         "
       `)
     })

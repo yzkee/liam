@@ -218,19 +218,7 @@ Extraction of Functional Requirements:
   • Search by characteristics
 * Data Management:
   • Manage classification systems
-  • Version control (to handle changes in classification)
-
-System Requirements:
-
-* Performance:
-  • Fast search across large volumes of animal data
-  • Efficient delivery of images
-* Scalability:
-  • Support for new classification systems
-  • Easy addition of new attributes
-* Data Integrity:
-  • Ensuring consistency within the classification hierarchy
-  • Maintaining referential integrity`,
+  • Version control (to handle changes in classification)`,
     timestamp: getTimestamp(22),
   }),
 ]

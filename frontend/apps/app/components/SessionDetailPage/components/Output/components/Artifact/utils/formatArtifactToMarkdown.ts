@@ -83,7 +83,7 @@ export function formatArtifactToMarkdown(artifact: Artifact): string {
   sections.push(business_requirement)
   sections.push('')
 
-  // Requirements
+  // Functional requirements
   if (requirements.length > 0) {
     sections.push('## 🔧 Functional Requirements')
     sections.push('')

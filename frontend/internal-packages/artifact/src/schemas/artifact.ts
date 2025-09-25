@@ -22,7 +22,7 @@ export const testCaseSchema = v.object({
   dmlOperation: dmlOperationSchema,
 })
 
-// Requirement schema (simplified without type discrimination)
+// Functional requirement schema
 export const requirementSchema = v.object({
   name: v.string(),
   description: v.array(v.string()),

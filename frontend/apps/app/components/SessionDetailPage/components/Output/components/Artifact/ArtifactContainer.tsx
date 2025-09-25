@@ -7,15 +7,10 @@ import { formatArtifactToMarkdown } from './utils'
 
 type Props = {
   artifact: ArtifactType | null
-  loading: boolean
   error: Error | null
 }
 
-export const ArtifactContainer: FC<Props> = ({ artifact, loading, error }) => {
-  if (loading) {
-    return <div>Loading artifact...</div>
-  }
-
+export const ArtifactContainer: FC<Props> = ({ artifact, error }) => {
   if (error) {
     return <div>Error loading artifact: {error.message}</div>
   }

@@ -5,13 +5,14 @@ import {
   mapStoredMessagesToChatMessages,
   type StoredMessage,
 } from '@langchain/core/messages'
+import type { Artifact } from '@liam-hq/artifact'
 import type { Schema } from '@liam-hq/schema'
 import clsx from 'clsx'
 import { type FC, useCallback, useEffect, useRef, useState } from 'react'
 import { Chat } from './components/Chat'
 import { Output } from './components/Output'
 import { useRealtimeArtifact } from './components/Output/components/Artifact/hooks/useRealtimeArtifact'
-import { OUTPUT_TABS } from './components/Output/constants'
+import { OUTPUT_TABS, type OutputTabValue } from './components/Output/constants'
 import { useRealtimeVersionsWithSchema } from './hooks/useRealtimeVersionsWithSchema'
 import { useStream } from './hooks/useStream'
 import { SQL_REVIEW_COMMENTS } from './mock'
@@ -28,6 +29,32 @@ type Props = {
   isDeepModelingEnabled: boolean
   initialIsPublic: boolean
   initialWorkflowError?: string | null
+  initialArtifact: Artifact | null
+}
+
+// Determine the initial active tab based on available data
+const determineInitialTab = (
+  artifact: Artifact | null,
+  versions: Version[],
+): OutputTabValue | undefined => {
+  const hasArtifact = artifact !== null
+  const hasVersions = versions.length > 0
+
+  if (!hasArtifact && !hasVersions) {
+    return undefined
+  }
+
+  // Prioritize ERD tab when versions exist
+  if (hasVersions) {
+    return OUTPUT_TABS.ERD
+  }
+
+  // Show artifact tab when only artifact exists
+  if (hasArtifact) {
+    return OUTPUT_TABS.ARTIFACT
+  }
+
+  return undefined
 }
 
 export const SessionDetailPageClient: FC<Props> = ({
@@ -40,8 +67,11 @@ export const SessionDetailPageClient: FC<Props> = ({
   isDeepModelingEnabled,
   initialIsPublic,
   initialWorkflowError,
+  initialArtifact,
 }) => {
-  const [activeTab, setActiveTab] = useState<string | undefined>(undefined)
+  const [activeTab, setActiveTab] = useState<OutputTabValue | undefined>(
+    determineInitialTab(initialArtifact, initialVersions),
+  )
 
   const {
     versions,
@@ -74,19 +104,14 @@ export const SessionDetailPageClient: FC<Props> = ({
     }
   }, [])
 
-  const handleNavigateToTab = useCallback((tab: 'erd' | 'artifact') => {
-    if (tab === 'erd') {
-      setActiveTab(OUTPUT_TABS.ERD)
-    } else if (tab === 'artifact') {
-      setActiveTab(OUTPUT_TABS.ARTIFACT)
-    }
-  }, [])
-
-  const { artifact } = useRealtimeArtifact(
+  const { artifact, error: artifactError } = useRealtimeArtifact({
     designSessionId,
-    handleArtifactChange,
-  )
-  const shouldShowOutputSection = artifact !== null || selectedVersion !== null
+    initialArtifact,
+    onChangeArtifact: handleArtifactChange,
+  })
+
+  const shouldShowOutputSection =
+    (artifact !== null || selectedVersion !== null) && activeTab
 
   const chatMessages = mapStoredMessagesToChatMessages(initialMessages)
   const { isStreaming, messages, start, error } = useStream({
@@ -144,37 +169,26 @@ export const SessionDetailPageClient: FC<Props> = ({
                 isDeepModelingEnabled,
               })
             }
-            onNavigate={handleNavigateToTab}
+            onNavigate={setActiveTab}
             error={combinedError}
           />
         </div>
         {shouldShowOutputSection && (
           <div className={styles.outputSection}>
-            {activeTab !== undefined ? (
-              <Output
-                designSessionId={designSessionId}
-                schema={displayedSchema}
-                prevSchema={prevSchema}
-                sqlReviewComments={SQL_REVIEW_COMMENTS}
-                versions={versions}
-                selectedVersion={selectedVersion}
-                onSelectedVersionChange={handleVersionChange}
-                activeTab={activeTab}
-                onTabChange={setActiveTab}
-                initialIsPublic={initialIsPublic}
-              />
-            ) : (
-              <Output
-                designSessionId={designSessionId}
-                schema={displayedSchema}
-                prevSchema={prevSchema}
-                sqlReviewComments={SQL_REVIEW_COMMENTS}
-                versions={versions}
-                selectedVersion={selectedVersion}
-                onSelectedVersionChange={handleVersionChange}
-                initialIsPublic={initialIsPublic}
-              />
-            )}
+            <Output
+              designSessionId={designSessionId}
+              schema={displayedSchema}
+              prevSchema={prevSchema}
+              sqlReviewComments={SQL_REVIEW_COMMENTS}
+              versions={versions}
+              selectedVersion={selectedVersion}
+              onSelectedVersionChange={handleVersionChange}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              initialIsPublic={initialIsPublic}
+              artifact={artifact}
+              artifactError={artifactError}
+            />
           </div>
         )}
       </div>

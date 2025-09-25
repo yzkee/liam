@@ -3,6 +3,7 @@
 import type { BaseMessage } from '@langchain/core/messages'
 import type { Schema } from '@liam-hq/schema'
 import type { FC } from 'react'
+import type { OutputTabValue } from '../Output/constants'
 import styles from './Chat.module.css'
 import { ChatInput } from './components/ChatInput'
 import { ErrorDisplay } from './components/ErrorDisplay'
@@ -16,7 +17,7 @@ type Props = {
   onSendMessage: (content: string) => void
   isWorkflowRunning?: boolean
   error?: string | null
-  onNavigate: (tab: 'erd' | 'artifact') => void
+  onNavigate: (tab: OutputTabValue) => void
 }
 
 export const Chat: FC<Props> = ({

@@ -1,4 +1,4 @@
-import { join, resolve } from 'node:path'
+import { resolve } from 'node:path'
 
 /**
  * Get the workspace base path
@@ -13,11 +13,4 @@ const getWorkspaceBasePath = (): string => {
  */
 export const getWorkspacePath = (): string => {
   return resolve(getWorkspaceBasePath(), 'benchmark-workspace')
-}
-
-/**
- * Get a path relative to the workspace
- */
-export const getWorkspaceSubPath = (...paths: string[]): string => {
-  return join(getWorkspacePath(), ...paths)
 }

@@ -70,8 +70,7 @@
         "Validate that dates are valid (start_date <= end_date) and monetary amounts are numeric and >= 0.",
         "Deduplication rule: prevent insertion of records with codes/names that would violate uniqueness ignoring leading/trailing whitespace."
       ]
-    },
-    "nonFunctionalRequirements": {}
+    }
   },
   "schemaData": {
     "tables": {

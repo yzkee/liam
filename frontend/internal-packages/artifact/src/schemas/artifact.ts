@@ -22,30 +22,12 @@ export const testCaseSchema = v.object({
   dmlOperation: dmlOperationSchema,
 })
 
-// Base requirement schema properties
-const baseRequirementProperties = {
+// Requirement schema (simplified without type discrimination)
+export const requirementSchema = v.object({
   name: v.string(),
   description: v.array(v.string()),
-}
-
-// Functional requirement schema
-export const functionalRequirementSchema = v.object({
-  ...baseRequirementProperties,
-  type: v.literal('functional'),
   test_cases: v.array(testCaseSchema),
 })
-
-// Non-functional requirement schema
-export const nonFunctionalRequirementSchema = v.object({
-  ...baseRequirementProperties,
-  type: v.literal('non_functional'),
-})
-
-// Union of requirement types
-export const requirementSchema = v.union([
-  functionalRequirementSchema,
-  nonFunctionalRequirementSchema,
-])
 
 // Requirement analysis schema
 export const requirementAnalysisSchema = v.object({
@@ -62,12 +44,6 @@ export const artifactSchema = v.object({
 export type DmlExecutionLog = v.InferOutput<typeof dmlExecutionLogSchema>
 export type DmlOperation = v.InferOutput<typeof dmlOperationSchema>
 export type TestCase = v.InferOutput<typeof testCaseSchema>
-export type FunctionalRequirement = v.InferOutput<
-  typeof functionalRequirementSchema
->
-export type NonFunctionalRequirement = v.InferOutput<
-  typeof nonFunctionalRequirementSchema
->
 export type Requirement = v.InferOutput<typeof requirementSchema>
 export type RequirementAnalysis = v.InferOutput<
   typeof requirementAnalysisSchema

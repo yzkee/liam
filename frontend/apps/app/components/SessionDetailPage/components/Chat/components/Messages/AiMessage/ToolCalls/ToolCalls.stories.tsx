@@ -396,41 +396,6 @@ const saveRequirementsCall: ToolCallsType[number] = {
         'User impersonation for support',
       ],
     },
-    nonFunctionalRequirements: {
-      Security: [
-        'Enforce HTTPS communication',
-        'SQL injection prevention',
-        'XSS prevention',
-        'CSRF protection',
-        'Rate limiting implementation',
-        'Security headers configuration',
-        'Content Security Policy',
-        'Regular security audits',
-      ],
-      Performance: [
-        'Login process within 1 second',
-        '1000 concurrent users support',
-        'Page load time under 3 seconds',
-        'API response time under 500ms',
-        'Database query optimization',
-        'CDN implementation for static assets',
-        'Caching strategy implementation',
-      ],
-      Scalability: [
-        'Horizontal scaling capability',
-        'Database sharding support',
-        'Microservices architecture',
-        'Message queue integration',
-        'Load balancing configuration',
-      ],
-      Reliability: [
-        '99.9% uptime SLA',
-        'Automated backup system',
-        'Disaster recovery plan',
-        'Graceful degradation',
-        'Circuit breaker pattern',
-      ],
-    },
   },
 }
 

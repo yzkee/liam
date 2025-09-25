@@ -220,7 +220,7 @@ Extraction of Functional Requirements:
   • Manage classification systems
   • Version control (to handle changes in classification)
 
-Consideration of Non-Functional Requirements:
+System Requirements:
 
 * Performance:
   • Fast search across large volumes of animal data

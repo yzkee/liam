@@ -1,9 +1,4 @@
-import type {
-  Artifact,
-  DmlOperation,
-  FunctionalRequirement,
-  NonFunctionalRequirement,
-} from '@liam-hq/artifact'
+import type { Artifact, DmlOperation, Requirement } from '@liam-hq/artifact'
 import type { Testcase } from '../qa-agent/types'
 import type { WorkflowState } from '../types'
 import type { AnalyzedRequirements } from '../utils/schema/analyzedRequirements'
@@ -24,19 +19,18 @@ const wrapDescription = (
  */
 const convertAnalyzedRequirementsToArtifact = (
   analyzedRequirements: NonNullable<WorkflowState['analyzedRequirements']>,
-): (FunctionalRequirement | NonFunctionalRequirement)[] => {
-  const requirements: (FunctionalRequirement | NonFunctionalRequirement)[] = []
+): Requirement[] => {
+  const requirements: Requirement[] = []
 
   for (const [category, items] of Object.entries(
     analyzedRequirements.functionalRequirements,
   )) {
-    const functionalRequirement: FunctionalRequirement = {
-      type: 'functional',
+    const requirement: Requirement = {
       name: category,
       description: items.map((item) => item.desc), // Extract descriptions from RequirementItems
       test_cases: [], // Will be populated later if testcases exist
     }
-    requirements.push(functionalRequirement)
+    requirements.push(requirement)
   }
 
   return requirements
@@ -61,7 +55,7 @@ const mapTestCasesToRequirements = (
  * Merge use cases into existing requirements
  */
 const mergeTestCasesIntoRequirements = (
-  requirements: (FunctionalRequirement | NonFunctionalRequirement)[],
+  requirements: Requirement[],
   testcases: Testcase[],
 ): void => {
   const requirementGroups = groupTestcasesByRequirement(testcases)
@@ -70,26 +64,19 @@ const mergeTestCasesIntoRequirements = (
     const { type, testcases: groupedTestcases, description } = data
     const existingReq = requirements.find((req) => req.name === category)
 
-    if (
-      existingReq &&
-      existingReq.type === 'functional' &&
-      type === 'functional'
-    ) {
+    if (existingReq && type === 'functional') {
       existingReq.test_cases = groupedTestcases.map(mapTestCasesToRequirements)
-    } else if (!existingReq) {
-      if (type === 'functional') {
-        const functionalRequirement: FunctionalRequirement = {
-          type: 'functional',
-          name: category,
-          description: wrapDescription(
-            description,
-            'Functional requirement: ',
-            category,
-          ),
-          test_cases: groupedTestcases.map(mapTestCasesToRequirements),
-        }
-        requirements.push(functionalRequirement)
+    } else if (!existingReq && type === 'functional') {
+      const requirement: Requirement = {
+        name: category,
+        description: wrapDescription(
+          description,
+          'Functional requirement: ',
+          category,
+        ),
+        test_cases: groupedTestcases.map(mapTestCasesToRequirements),
       }
+      requirements.push(requirement)
     }
   }
 }

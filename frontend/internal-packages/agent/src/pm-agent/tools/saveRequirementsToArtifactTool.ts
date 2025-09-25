@@ -3,11 +3,7 @@ import { ToolMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { type StructuredTool, tool } from '@langchain/core/tools'
 import { Command } from '@langchain/langgraph'
-import type {
-  Artifact,
-  FunctionalRequirement,
-  NonFunctionalRequirement,
-} from '@liam-hq/artifact'
+import type { Artifact } from '@liam-hq/artifact'
 import { fromValibotSafeParse } from '@liam-hq/neverthrow'
 import { err, ok, type Result } from 'neverthrow'
 import { v4 as uuidv4 } from 'uuid'
@@ -86,18 +82,18 @@ const convertLlmAnalyzedRequirements = (
 const createArtifactFromRequirements = (
   analyzedRequirements: AnalyzedRequirements,
 ): Artifact => {
-  const requirements: (FunctionalRequirement | NonFunctionalRequirement)[] = []
+  const requirements: Artifact['requirement_analysis']['requirements'] = []
 
   for (const [category, items] of Object.entries(
     analyzedRequirements.functionalRequirements,
   )) {
-    const functionalRequirement: FunctionalRequirement = {
-      type: 'functional',
-      name: category,
-      description: items.map((item) => item.desc), // Extract descriptions from RequirementItems
-      test_cases: [], // Empty array as test cases don't exist at this point
-    }
-    requirements.push(functionalRequirement)
+    const requirement: Artifact['requirement_analysis']['requirements'][number] =
+      {
+        name: category,
+        description: items.map((item) => item.desc), // Extract descriptions from RequirementItems
+        test_cases: [], // Empty array as test cases don't exist at this point
+      }
+    requirements.push(requirement)
   }
 
   return {

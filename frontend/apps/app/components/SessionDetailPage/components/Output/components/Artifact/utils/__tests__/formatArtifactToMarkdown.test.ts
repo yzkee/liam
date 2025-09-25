@@ -15,7 +15,6 @@ describe('formatArtifactToMarkdown', () => {
               description: [
                 'The company owns multiple aircraft, each with an aircraft number, model, and seating capacity. The aircraft number must be unique, and seating capacity must be an integer greater than 0.',
               ],
-              type: 'functional',
               test_cases: [
                 {
                   title: 'Aircraft Registration and Update',
@@ -70,7 +69,6 @@ ORDER BY f.scheduled_departure;`,
               description: [
                 'Flight information includes flight name, departure time, arrival time, origin, destination, aircraft number, captain ID, first officer ID, start time, and end time. Origin and destination cannot be the same, and scheduled times must satisfy departure time < arrival time.',
               ],
-              type: 'functional',
               test_cases: [
                 {
                   title: 'Flight Schedule Creation',
@@ -117,7 +115,6 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
               description: [
                 'Each flight is operated by a captain and first officer, each with an ID, name, and phone number. Pilot IDs must be unique, and for flights, the captain ID and first officer ID cannot be the same person.',
               ],
-              type: 'functional',
               test_cases: [
                 {
                   title: 'Pilot (Captain/First Officer) Registration',
@@ -152,7 +149,6 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
               description: [
                 'Enforce referential integrity through foreign keys and implement various business rules through CHECK constraints. Protect related data with ON DELETE RESTRICT during deletions.',
               ],
-              type: 'functional',
               test_cases: [
                 {
                   title: 'Referential Integrity Verification',
@@ -180,14 +176,14 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
               description: [
                 'The system must be able to search 1000 flight records within 3 seconds and support concurrent access from 50 users.',
               ],
-              type: 'non_functional',
+              test_cases: [],
             },
             {
               name: 'Security',
               description: [
                 'Pilot personal information must be encrypted for storage and access logs must be recorded. Database access must be restricted to authenticated users only.',
               ],
-              type: 'non_functional',
+              test_cases: [],
             },
           ],
         },
@@ -354,17 +350,15 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
         > ERROR: update or delete on table "airplanes" violates foreign key constraint "fk_flights_airplane"
 
 
+        ---
 
-        ## 📊 Non-Functional Requirements
-
-        ### 1. Performance
+        ### 5. Performance
 
         - The system must be able to search 1000 flight records within 3 seconds and support concurrent access from 50 users.
 
-
         ---
 
-        ### 2. Security
+        ### 6. Security
 
         - Pilot personal information must be encrypted for storage and access logs must be recorded. Database access must be restricted to authenticated users only.
         "
@@ -379,7 +373,6 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
             {
               name: 'Task CRUD',
               description: ['Create, read, update, delete tasks'],
-              type: 'functional',
               test_cases: [],
             },
           ],
@@ -389,27 +382,6 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
       const result = formatArtifactToMarkdown(artifact)
 
       expect(result).toContain('## 🔧 Functional Requirements')
-      expect(result).not.toContain('## 📊 Non-Functional Requirements')
-    })
-
-    it('should handle artifact with only non-functional requirements', () => {
-      const artifact: Artifact = {
-        requirement_analysis: {
-          business_requirement: 'System optimization',
-          requirements: [
-            {
-              name: 'Security',
-              description: ['All data must be encrypted'],
-              type: 'non_functional',
-            },
-          ],
-        },
-      }
-
-      const result = formatArtifactToMarkdown(artifact)
-
-      expect(result).not.toContain('## 🔧 Functional Requirements')
-      expect(result).toContain('## 📊 Non-Functional Requirements')
     })
 
     it('should handle empty requirements array', () => {
@@ -425,7 +397,6 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
       expect(result).toContain('## 📋 Business Requirements')
       expect(result).toContain('Empty project')
       expect(result).not.toContain('## 🔧 Functional Requirements')
-      expect(result).not.toContain('## 📊 Non-Functional Requirements')
     })
 
     it('should format multiple requirements with proper numbering', () => {
@@ -436,24 +407,22 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
             {
               name: 'Feature A',
               description: ['Description A'],
-              type: 'functional',
               test_cases: [],
             },
             {
               name: 'Feature B',
               description: ['Description B'],
-              type: 'functional',
               test_cases: [],
             },
             {
               name: 'Requirement X',
               description: ['Description X'],
-              type: 'non_functional',
+              test_cases: [],
             },
             {
               name: 'Requirement Y',
               description: ['Description Y'],
-              type: 'non_functional',
+              test_cases: [],
             },
           ],
         },
@@ -463,7 +432,7 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
 
       expect(result).toMatch(/### 1\. Feature A[\s\S]*### 2\. Feature B/)
       expect(result).toMatch(
-        /### 1\. Requirement X[\s\S]*### 2\. Requirement Y/,
+        /### 3\. Requirement X[\s\S]*### 4\. Requirement Y/,
       )
     })
 
@@ -475,13 +444,11 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
             {
               name: 'First',
               description: ['First desc'],
-              type: 'functional',
               test_cases: [],
             },
             {
               name: 'Second',
               description: ['Second desc'],
-              type: 'functional',
               test_cases: [],
             },
           ],
@@ -512,7 +479,6 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
             {
               name: 'Test Feature',
               description: ['Test description'],
-              type: 'functional',
               test_cases: [
                 {
                   title: 'Test Use Case',
@@ -544,7 +510,6 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
             {
               name: 'Test Feature',
               description: ['Test description'],
-              type: 'functional',
               test_cases: [
                 {
                   title: 'Test Use Case',
@@ -583,7 +548,6 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
             {
               name: 'Test Feature',
               description: ['Test description'],
-              type: 'functional',
               test_cases: [
                 {
                   title: 'Test Use Case',
@@ -621,7 +585,6 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
             {
               name: 'Test Feature',
               description: ['Test description'],
-              type: 'functional',
               test_cases: [
                 {
                   title: 'Test Use Case',
@@ -666,7 +629,6 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
             {
               name: 'Test Feature',
               description: ['Test description'],
-              type: 'functional',
               test_cases: [
                 {
                   title: 'Test Use Case',
@@ -697,7 +659,6 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
             {
               name: 'Test Feature',
               description: ['Test description'],
-              type: 'functional',
               test_cases: [
                 {
                   title: 'Test Use Case',
@@ -731,7 +692,6 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
             {
               name: 'Test Feature',
               description: ['Test description'],
-              type: 'functional',
               test_cases: [
                 {
                   title: 'Single Operation Use Case',
@@ -765,7 +725,6 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
             {
               name: 'Test Feature',
               description: ['Test description'],
-              type: 'functional',
               test_cases: [
                 {
                   title: 'No Operations Use Case',
@@ -798,7 +757,6 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
             {
               name: 'User Management',
               description: ['User management features'],
-              type: 'functional',
               test_cases: [
                 {
                   title: 'User Registration',
@@ -851,7 +809,6 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
             {
               name: 'Feature 1',
               description: ['First feature'],
-              type: 'functional',
               test_cases: [
                 {
                   title: 'UC 1.1',
@@ -878,7 +835,6 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
             {
               name: 'Feature 2',
               description: ['Second feature'],
-              type: 'functional',
               test_cases: [
                 {
                   title: 'UC 2.1',
@@ -915,7 +871,6 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
             {
               name: 'Test Feature',
               description: ['Test all operation types'],
-              type: 'functional',
               test_cases: [
                 {
                   title: 'INSERT Operation',
@@ -982,7 +937,6 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
             {
               name: 'Long Feature',
               description: [longDescription],
-              type: 'functional',
               test_cases: [
                 {
                   title: 'Long Use Case',
@@ -1020,7 +974,6 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
             {
               name: 'Special & Characters',
               description: ['Description with **bold** and _italic_ text'],
-              type: 'functional',
               test_cases: [
                 {
                   title: 'Use Case [with brackets]',

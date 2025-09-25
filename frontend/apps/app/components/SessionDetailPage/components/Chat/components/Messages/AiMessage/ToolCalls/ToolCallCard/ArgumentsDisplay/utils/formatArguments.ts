@@ -29,7 +29,6 @@ const hasOperations = (obj: unknown): obj is { operations: unknown } => {
 type RequirementsArgs = {
   businessRequirement?: unknown
   functionalRequirements?: unknown
-  nonFunctionalRequirements?: unknown
 }
 
 const isRequirementsArgs = (args: unknown): args is RequirementsArgs => {
@@ -37,11 +36,7 @@ const isRequirementsArgs = (args: unknown): args is RequirementsArgs => {
     return false
   }
   // Check for at least one of the expected properties
-  return (
-    'businessRequirement' in args ||
-    'functionalRequirements' in args ||
-    'nonFunctionalRequirements' in args
-  )
+  return 'businessRequirement' in args || 'functionalRequirements' in args
 }
 
 const formatSaveRequirements = (args: unknown): string[] => {
@@ -67,30 +62,6 @@ const formatSaveRequirements = (args: unknown): string[] => {
   ) {
     lines.push('⚙️ Functional Requirements:')
     Object.entries(argsObj.functionalRequirements).forEach(
-      ([category, requirements]) => {
-        if (!Array.isArray(requirements)) {
-          return
-        }
-        lines.push(`  ${category}:`)
-        requirements.forEach((req: unknown, index: number) => {
-          if (typeof req === 'string') {
-            lines.push(`    ${index + 1}. ${req}`)
-          } else {
-            lines.push(`    ${index + 1}. ${String(req)}`)
-          }
-        })
-        lines.push(' ') // Minimal space for visual separation
-      },
-    )
-  }
-
-  // Non-Functional Requirements
-  if (
-    argsObj.nonFunctionalRequirements &&
-    typeof argsObj.nonFunctionalRequirements === 'object'
-  ) {
-    lines.push('🔧 Non-Functional Requirements:')
-    Object.entries(argsObj.nonFunctionalRequirements).forEach(
       ([category, requirements]) => {
         if (!Array.isArray(requirements)) {
           return
@@ -396,9 +367,7 @@ export const formatArguments = (args: unknown): string[] => {
   if (
     typeof args === 'object' &&
     args !== null &&
-    ('businessRequirement' in args ||
-      'functionalRequirements' in args ||
-      'nonFunctionalRequirements' in args)
+    ('businessRequirement' in args || 'functionalRequirements' in args)
   ) {
     const formatted = formatSaveRequirements(args)
     return formatted

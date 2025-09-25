@@ -121,11 +121,9 @@ const handleProcessingResults = (
   return ok(dataMap)
 }
 
-const loadOutputData = (
-  workspacePath: string,
+const loadOutputDataAt = (
+  outputDir: string,
 ): WorkspaceResult<Map<string, Schema>> => {
-  const outputDir = path.join(workspacePath, 'execution', 'output')
-
   if (!fs.existsSync(outputDir)) {
     return err({ type: 'DIRECTORY_NOT_FOUND', path: outputDir })
   }
@@ -299,12 +297,10 @@ const saveSummaryResult = (
   return ok(undefined)
 }
 
-const saveResults = (
+const saveResultsAt = (
   results: EvaluationResult[],
-  workspacePath: string,
+  evaluationDir: string,
 ): WorkspaceResult<void> => {
-  const evaluationDir = path.join(workspacePath, 'evaluation')
-
   if (!fs.existsSync(evaluationDir)) {
     const mkdirResult = Result.fromThrowable(
       () => fs.mkdirSync(evaluationDir, { recursive: true }),
@@ -435,7 +431,9 @@ export const evaluateSchema = async (
   }
 
   // Load data
-  const outputDataResult = loadOutputData(config.workspacePath)
+  const outputDataResult = loadOutputDataAt(
+    path.join(config.workspacePath, 'execution', 'output'),
+  )
   if (outputDataResult.isErr()) {
     return err(outputDataResult.error)
   }
@@ -496,6 +494,91 @@ export const evaluateSchema = async (
   }
 
   // Log warnings for failed cases but continue with successful ones
+  for (const failed of failedCases) {
+    console.warn(
+      `⚠️  Failed evaluation - ${failed.caseId}: ${formatError(failed.error)}`,
+    )
+  }
+
+  const results = successfulResults
+
+  // Save results
+  const saveResult = saveResultsAt(
+    results,
+    path.join(config.workspacePath, 'evaluation'),
+  )
+  if (saveResult.isErr()) {
+    return err(saveResult.error)
+  }
+
+  displaySummary(results)
+  return ok(results)
+}
+
+export const evaluateSchemaAtOutputDir = async (
+  config: EvaluationConfig,
+  outputDir: string,
+  scopeSubdir?: string, // e.g. runs/<RUN_ID>--<executor>
+): Promise<WorkspaceResult<EvaluationResult[]>> => {
+  // Validate reference directory only; outputDir is custom
+  const referenceDir = path.join(config.workspacePath, 'execution', 'reference')
+  if (!fs.existsSync(referenceDir)) {
+    return err({ type: 'DIRECTORY_NOT_FOUND', path: referenceDir })
+  }
+  if (!fs.existsSync(outputDir)) {
+    return err({ type: 'DIRECTORY_NOT_FOUND', path: outputDir })
+  }
+
+  const outputDataResult = loadOutputDataAt(outputDir)
+  if (outputDataResult.isErr()) {
+    return err(outputDataResult.error)
+  }
+
+  const referenceDataResult = loadReferenceData(config.workspacePath)
+  if (referenceDataResult.isErr()) {
+    return err(referenceDataResult.error)
+  }
+
+  const casesResult = prepareCasesToEvaluate(
+    config,
+    outputDataResult.value,
+    referenceDataResult.value,
+  )
+  if (casesResult.isErr()) {
+    return err(casesResult.error)
+  }
+
+  const casesToEvaluate = casesResult.value
+
+  const evaluationPromises = casesToEvaluate.map(async (caseData) => {
+    const result = await runEvaluation(caseData)
+    return { caseData, result }
+  })
+
+  const evaluationOutcomes = await Promise.all(evaluationPromises)
+
+  const successfulResults: EvaluationResult[] = []
+  const failedCases: Array<{ caseId: string; error: WorkspaceError }> = []
+
+  for (const outcome of evaluationOutcomes) {
+    if (outcome.result.isOk()) {
+      successfulResults.push(outcome.result.value)
+    } else {
+      failedCases.push({
+        caseId: outcome.caseData.caseId,
+        error: outcome.result.error,
+      })
+    }
+  }
+
+  if (successfulResults.length === 0) {
+    return err({
+      type: 'EVALUATION_ERROR',
+      caseId: failedCases.map((failed) => failed.caseId).join(', '),
+      cause: `All ${failedCases.length} evaluation(s) failed`,
+    })
+  }
+
   if (failedCases.length > 0) {
     console.warn(`⚠️  ${failedCases.length} case(s) failed evaluation:`)
     for (const failed of failedCases) {
@@ -503,14 +586,14 @@ export const evaluateSchema = async (
     }
   }
 
-  const results = successfulResults
-
-  // Save results
-  const saveResult = saveResults(results, config.workspacePath)
+  const evaluationDir = scopeSubdir
+    ? path.join(config.workspacePath, 'evaluation', scopeSubdir)
+    : path.join(config.workspacePath, 'evaluation')
+  const saveResult = saveResultsAt(successfulResults, evaluationDir)
   if (saveResult.isErr()) {
     return err(saveResult.error)
   }
 
-  displaySummary(results)
-  return ok(results)
+  displaySummary(successfulResults)
+  return ok(successfulResults)
 }

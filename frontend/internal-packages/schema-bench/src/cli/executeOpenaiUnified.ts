@@ -19,6 +19,9 @@ import {
 
 // parseArgs moved to ./utils
 
+// Outputs: write latest and archive by RUN_ID per execution (with executor label)
+const RUN_ID = new Date().toISOString().replace(/[:.]/g, '-')
+
 type DatasetResult = { datasetName: string; success: number; failure: number }
 
 const InputSchema = v.object({
@@ -42,7 +45,10 @@ async function executeCase(
     )
   }
 
-  const saveResult = await saveOutputFile(datasetPath, caseId, result.value)
+  const saveResult = await saveOutputFile(datasetPath, caseId, result.value, {
+    archiveRunId: RUN_ID,
+    executor: 'openai',
+  })
   if (saveResult.isErr()) {
     return saveResult
   }

@@ -37,8 +37,14 @@ pnpm --filter @liam-hq/schema-bench executeLiamDB -default -entity-extraction -l
 
 OpenAI:
 ```bash
-# OpenAI currently targets the default dataset
-pnpm --filter @liam-hq/schema-bench executeOpenai
+# Run on all datasets in the workspace
+pnpm --filter @liam-hq/schema-bench executeOpenai -all
+
+# Run on a specific dataset
+pnpm --filter @liam-hq/schema-bench executeOpenai -entity-extraction
+
+# Run on multiple datasets
+pnpm --filter @liam-hq/schema-bench executeOpenai -default -entity-extraction -logical-deletion
 ```
 
 ### 3) Evaluate results (all datasets)
@@ -55,7 +61,7 @@ pnpm --filter @liam-hq/schema-bench evaluateSchemaMulti
 
 - setupWorkspace: Initialize benchmark workspace with datasets
 - executeLiamDB: Unified executor with dataset flags (`-all`, `-default`, `-entity-extraction`)
-- executeOpenai: Execute on default dataset
+- executeOpenai: Unified executor with dataset flags (`-all`, `-default`, `-entity-extraction`)
 - evaluateSchemaMulti: Evaluate all available datasets
 
 Note: Legacy dataset-specific scripts exist but the unified `executeLiamDB` is recommended.
@@ -169,7 +175,7 @@ export OPENAI_API_KEY="your-api-key"
 
 1) Clean and setup: `rm -rf benchmark-workspace && pnpm --filter @liam-hq/schema-bench setupWorkspace`
 2) Execute (LiamDB): `pnpm --filter @liam-hq/schema-bench executeLiamDB -all`
-   or Execute (OpenAI): `pnpm --filter @liam-hq/schema-bench executeOpenai`
+   or Execute (OpenAI): `pnpm --filter @liam-hq/schema-bench executeOpenai -all`
 3) Evaluate: `pnpm --filter @liam-hq/schema-bench evaluateSchemaMulti`
 
 ## Use Cases

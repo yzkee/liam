@@ -26,7 +26,7 @@
     "executeLiamDB": "tsx src/cli/executeLiamDbUnified.ts",
     "executeLiamDB:default": "tsx src/cli/executeLiamDbDefault.ts",
     "executeLiamDB:entityExtraction": "tsx src/cli/executeLiamDbEntityExtraction.ts",
-    "executeOpenai": "tsx src/cli/executeOpenai.ts",
+    "executeOpenai": "tsx src/cli/executeOpenaiUnified.ts",
     "fmt": "concurrently \"pnpm:fmt:*\"",
     "fmt:biome": "biome check --write --unsafe .",
     "fmt:eslint": "eslint --fix .",

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import * as fs from 'node:fs'
+import { existsSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import {
   evaluateSchema,
@@ -30,9 +30,8 @@ async function evaluateDataset(datasetName: string, datasetPath: string) {
   // 2) Evaluate archived runs under execution/output/runs/<RUN_DIR>
   const runsRoot = join(datasetPath, 'execution', 'output', 'runs')
   const runEvaluations: Array<{ runDir: string; ok: boolean }> = []
-  if (fs.existsSync(runsRoot)) {
-    const runDirs = fs
-      .readdirSync(runsRoot, { withFileTypes: true })
+  if (existsSync(runsRoot)) {
+    const runDirs = readdirSync(runsRoot, { withFileTypes: true })
       .filter((d) => d.isDirectory())
       .map((d) => d.name)
 
@@ -93,7 +92,7 @@ async function main() {
 
   // Check which datasets exist
   const availableDatasets = datasets.filter((dataset) => {
-    const exists = fs.existsSync(dataset.path)
+    const exists = existsSync(dataset.path)
     if (!exists) {
       console.warn(`⚠️  Dataset "${dataset.name}" not found at ${dataset.path}`)
     }

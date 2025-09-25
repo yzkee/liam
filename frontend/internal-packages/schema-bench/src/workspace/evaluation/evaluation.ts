@@ -1,4 +1,10 @@
-import * as fs from 'node:fs'
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+} from 'node:fs'
 import * as path from 'node:path'
 import { type Schema, schemaSchema } from '@liam-hq/schema'
 import { err, ok, Result, ResultAsync } from 'neverthrow'
@@ -16,7 +22,7 @@ import type {
 // Safe wrapper functions using Result.fromThrowable
 const safeReadDirSync = (dirPath: string) =>
   Result.fromThrowable(
-    () => fs.readdirSync(dirPath, { encoding: 'utf8' }),
+    () => readdirSync(dirPath, { encoding: 'utf8' }),
     (error): WorkspaceError => ({
       type: 'FILE_READ_ERROR',
       path: dirPath,
@@ -26,7 +32,7 @@ const safeReadDirSync = (dirPath: string) =>
 
 const safeReadFileSync = (filePath: string, encoding: BufferEncoding) =>
   Result.fromThrowable(
-    () => fs.readFileSync(filePath, encoding),
+    () => readFileSync(filePath, encoding),
     (error): WorkspaceError => ({
       type: 'FILE_READ_ERROR',
       path: filePath,
@@ -124,7 +130,7 @@ const handleProcessingResults = (
 const loadOutputDataAt = (
   outputDir: string,
 ): WorkspaceResult<Map<string, Schema>> => {
-  if (!fs.existsSync(outputDir)) {
+  if (!existsSync(outputDir)) {
     return err({ type: 'DIRECTORY_NOT_FOUND', path: outputDir })
   }
 
@@ -148,7 +154,7 @@ const loadReferenceData = (
 ): WorkspaceResult<Map<string, Schema>> => {
   const referenceDir = path.join(workspacePath, 'execution', 'reference')
 
-  if (!fs.existsSync(referenceDir)) {
+  if (!existsSync(referenceDir)) {
     return err({ type: 'DIRECTORY_NOT_FOUND', path: referenceDir })
   }
 
@@ -249,7 +255,7 @@ const saveIndividualResults = (
     const filePath = path.join(evaluationDir, filename)
 
     const writeResult = Result.fromThrowable(
-      () => fs.writeFileSync(filePath, JSON.stringify(result, null, 2)),
+      () => writeFileSync(filePath, JSON.stringify(result, null, 2)),
       (error): WorkspaceError => ({
         type: 'FILE_WRITE_ERROR',
         path: filePath,
@@ -283,7 +289,7 @@ const saveSummaryResult = (
 
   const writeResult = Result.fromThrowable(
     () =>
-      fs.writeFileSync(summaryFilePath, JSON.stringify(summaryResult, null, 2)),
+      writeFileSync(summaryFilePath, JSON.stringify(summaryResult, null, 2)),
     (error): WorkspaceError => ({
       type: 'FILE_WRITE_ERROR',
       path: summaryFilePath,
@@ -301,9 +307,9 @@ const saveResultsAt = (
   results: EvaluationResult[],
   evaluationDir: string,
 ): WorkspaceResult<void> => {
-  if (!fs.existsSync(evaluationDir)) {
+  if (!existsSync(evaluationDir)) {
     const mkdirResult = Result.fromThrowable(
-      () => fs.mkdirSync(evaluationDir, { recursive: true }),
+      () => mkdirSync(evaluationDir, { recursive: true }),
       (error): WorkspaceError => ({
         type: 'FILE_WRITE_ERROR',
         path: evaluationDir,
@@ -345,11 +351,11 @@ const validateDirectories = (
   const outputDir = path.join(config.workspacePath, 'execution', 'output')
   const referenceDir = path.join(config.workspacePath, 'execution', 'reference')
 
-  if (!fs.existsSync(outputDir)) {
+  if (!existsSync(outputDir)) {
     return err({ type: 'DIRECTORY_NOT_FOUND', path: outputDir })
   }
 
-  if (!fs.existsSync(referenceDir)) {
+  if (!existsSync(referenceDir)) {
     return err({ type: 'DIRECTORY_NOT_FOUND', path: referenceDir })
   }
 
@@ -522,10 +528,10 @@ export const evaluateSchemaAtOutputDir = async (
 ): Promise<WorkspaceResult<EvaluationResult[]>> => {
   // Validate reference directory only; outputDir is custom
   const referenceDir = path.join(config.workspacePath, 'execution', 'reference')
-  if (!fs.existsSync(referenceDir)) {
+  if (!existsSync(referenceDir)) {
     return err({ type: 'DIRECTORY_NOT_FOUND', path: referenceDir })
   }
-  if (!fs.existsSync(outputDir)) {
+  if (!existsSync(outputDir)) {
     return err({ type: 'DIRECTORY_NOT_FOUND', path: outputDir })
   }
 

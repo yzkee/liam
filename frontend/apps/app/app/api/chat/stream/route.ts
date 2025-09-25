@@ -120,6 +120,12 @@ export async function POST(request: Request) {
     controller: ReadableStreamDefaultController<Uint8Array>,
     signal: AbortSignal,
   ) => {
+    console.log('[PROCESS] Starting processEvents with signal', { aborted: signal.aborted })
+
+    signal.addEventListener('abort', () => {
+      console.log('[PROCESS] Abort signal received in processEvents')
+    })
+
     const params: AgentWorkflowParams = {
       userInput: validationResult.output.userInput,
       schemaData: result.value.schema,
@@ -130,13 +136,17 @@ export async function POST(request: Request) {
       userId,
       signal,
     }
+
+    console.log('[PROCESS] Creating agent stream')
     const events = validationResult.output.isDeepModelingEnabled
       ? await deepModelingStream(params, config)
       : await invokeDbAgentStream(params, config)
 
+    console.log('[PROCESS] Starting event iteration')
     for await (const ev of events) {
       // Check if request was aborted during iteration
       if (signal.aborted) {
+        console.log('[PROCESS] Signal aborted during event iteration')
         controller.enqueue(
           enc.encode(
             line(SSE_EVENTS.ERROR, { message: 'Request was aborted' }),
@@ -146,6 +156,7 @@ export async function POST(request: Request) {
       }
       controller.enqueue(enc.encode(line(ev.event, ev.data)))
     }
+    console.log('[PROCESS] Event iteration completed, sending END event')
     controller.enqueue(enc.encode(line(SSE_EVENTS.END, null)))
   }
 

@@ -30,6 +30,7 @@ const chatRequestSchema = v.object({
 })
 
 export async function POST(request: Request) {
+  console.log('[STREAM] Starting POST request processing')
   const requestBody = await request.json()
   const validationResult = v.safeParse(chatRequestSchema, requestBody)
 
@@ -148,8 +149,10 @@ export async function POST(request: Request) {
     controller.enqueue(enc.encode(line(SSE_EVENTS.END, null)))
   }
 
+  console.log('[STREAM] Creating ReadableStream')
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
+      console.log('[STREAM] Stream started, processing events with graceful shutdown')
       const result = await withTimeoutAndAbort(
         withGracefulShutdown(
           (signal: AbortSignal) => processEvents(controller, signal),
@@ -170,12 +173,15 @@ export async function POST(request: Request) {
         )
       }
 
+      console.log('[STREAM] Controller closed')
       controller.close()
     },
   })
 
+  console.log('[STREAM] Awaiting all callbacks cleanup')
   after(awaitAllCallbacks())
 
+  console.log('[STREAM] Returning response with stream')
   return new Response(stream, {
     headers: {
       'Content-Type': 'text/event-stream',

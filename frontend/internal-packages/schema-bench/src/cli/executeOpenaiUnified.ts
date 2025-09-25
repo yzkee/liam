@@ -20,8 +20,6 @@ import {
   handleUnexpectedError,
 } from './utils'
 
-// Single run identifier to archive outputs without overwriting
-const RUN_ID = new Date().toISOString().replace(/[:.]/g, '-')
 type CliOptions = {
   datasets?: string[]
   useAll?: boolean
@@ -154,24 +152,7 @@ async function saveOutputFile(
     mkdirSync(outputDir, { recursive: true })
   }
 
-  // 1) Archive into a per-run folder to avoid overwriting
-  const archiveDir = join(outputDir, 'runs', RUN_ID)
-  if (!existsSync(archiveDir)) {
-    mkdirSync(archiveDir, { recursive: true })
-  }
-  const archivePath = join(archiveDir, `${caseId}.json`)
-  const archiveResult = await fromPromise(
-    writeFile(archivePath, JSON.stringify(output, null, 2)),
-    (error) =>
-      error instanceof Error
-        ? error
-        : new Error(`Failed to archive output for ${caseId}`),
-  )
-  if (archiveResult.isErr()) {
-    return archiveResult
-  }
-
-  // 2) Also write/refresh the latest flat file for evaluation compatibility
+  // Write/refresh the latest flat file only (no per-run archiving)
   const latestPath = join(outputDir, `${caseId}.json`)
   const latestResult = await fromPromise(
     writeFile(latestPath, JSON.stringify(output, null, 2)),
@@ -292,11 +273,9 @@ async function main() {
   // Load env from repo root for convenience (align with LiamDB executor)
   loadEnv({ path: resolve(__dirname, '../../../../../.env') })
   // Check API key
-  const apiKeyEnv = process.env['OPENAI_API_KEY']
-  if (!apiKeyEnv) {
+  const apiKey =
+    process.env['OPENAI_API_KEY'] ??
     handleCliError('OPENAI_API_KEY environment variable is required')
-  }
-  const apiKey = apiKeyEnv
 
   const options = parseArgs(process.argv)
   const workspacePath = getWorkspacePath()

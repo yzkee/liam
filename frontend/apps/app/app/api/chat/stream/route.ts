@@ -20,7 +20,7 @@ function line(event: string, data: unknown) {
 
 // https://vercel.com/docs/functions/configuring-functions/duration#maximum-duration-for-different-runtimes
 export const maxDuration = 800
-const TIMEOUT_MS = 50000 // 50 seconds (debug)
+const TIMEOUT_MS = 300000 // 300 seconds (debug)
 const GRACE_PERIOD_MS = 200000 // 200 seconds (debug)
 
 const chatRequestSchema = v.object({

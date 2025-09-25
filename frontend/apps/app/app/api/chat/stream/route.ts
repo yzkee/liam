@@ -1,3 +1,4 @@
+import { awaitAllCallbacks } from '@langchain/core/callbacks/promises'
 import {
   type AgentWorkflowParams,
   createSupabaseRepositories,
@@ -6,7 +7,7 @@ import {
 } from '@liam-hq/agent'
 import { SSE_EVENTS } from '@liam-hq/agent/client'
 import * as Sentry from '@sentry/nextjs'
-import { NextResponse } from 'next/server'
+import { after, NextResponse } from 'next/server'
 import * as v from 'valibot'
 import { withGracefulShutdown } from '../../../../features/stream/utils/withGracefulShutdown'
 import { withTimeoutAndAbort } from '../../../../features/stream/utils/withTimeoutAndAbort'
@@ -172,6 +173,8 @@ export async function POST(request: Request) {
       controller.close()
     },
   })
+
+  after(awaitAllCallbacks())
 
   return new Response(stream, {
     headers: {

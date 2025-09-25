@@ -1,5 +1,11 @@
 # @liam-hq/cli
 
+## 0.7.16
+
+### Patch Changes
+
+- [#3566](https://github.com/liam-hq/liam/pull/3566) - Remove direct npm dependencies on `@liam-hq/*` packages from the CLI package to enable standalone distribution / Thanks [@devin-ai-integration](https://github.com/apps/devin-ai-integration)!
+
 ## 0.7.15
 
 ### Patch Changes

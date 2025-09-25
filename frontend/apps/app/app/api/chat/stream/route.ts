@@ -178,8 +178,11 @@ export async function POST(request: Request) {
     },
   })
 
-  console.log('[STREAM] Awaiting all callbacks cleanup')
-  after(awaitAllCallbacks())
+  after(async () => {
+    console.log('[STREAM] Awaiting all callbacks cleanup')
+    await awaitAllCallbacks()
+    console.log('[STREAM] All callbacks cleanup completed')
+  })
 
   console.log('[STREAM] Returning response with stream')
   return new Response(stream, {

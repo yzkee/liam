@@ -11,6 +11,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ReviewComment } from '../../../../../../types'
 import { commentStateField, setCommentsEffect } from './commentExtension'
 import { customTheme, sqlHighlightStyle } from './editorTheme'
+import { selectionHighlightExtension } from './selectionHighlight'
 
 // Function to create fold gutter marker DOM elements
 const createFoldMarkerElement = (isOpen: boolean): HTMLElement => {
@@ -29,6 +30,7 @@ const baseExtensions: Extension[] = [
     },
   }),
   drawSelection(),
+  selectionHighlightExtension,
   sql(),
   lintGutter(),
   syntaxHighlighting(sqlHighlightStyle),

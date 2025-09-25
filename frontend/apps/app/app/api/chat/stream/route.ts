@@ -9,7 +9,6 @@ import { SSE_EVENTS } from '@liam-hq/agent/client'
 import * as Sentry from '@sentry/nextjs'
 import { after, NextResponse } from 'next/server'
 import * as v from 'valibot'
-// import { withGracefulShutdown } from '../../../../features/stream/utils/withGracefulShutdown'
 import { withTimeoutAndAbort } from '../../../../features/stream/utils/withTimeoutAndAbort'
 import { createClient } from '../../../../libs/db/server'
 
@@ -20,8 +19,7 @@ function line(event: string, data: unknown) {
 
 // https://vercel.com/docs/functions/configuring-functions/duration#maximum-duration-for-different-runtimes
 export const maxDuration = 800
-const TIMEOUT_MS = 300000 // 300 seconds (debug)
-// const GRACE_PERIOD_MS = 200000 // 200 seconds (debug)
+const TIMEOUT_MS = 700000
 
 const chatRequestSchema = v.object({
   userInput: v.pipe(v.string(), v.minLength(1, 'Message is required')),
@@ -30,7 +28,6 @@ const chatRequestSchema = v.object({
 })
 
 export async function POST(request: Request) {
-  console.log('[STREAM] Starting POST request processing')
   const requestBody = await request.json()
   const validationResult = v.safeParse(chatRequestSchema, requestBody)
 
@@ -120,12 +117,6 @@ export async function POST(request: Request) {
     controller: ReadableStreamDefaultController<Uint8Array>,
     signal: AbortSignal,
   ) => {
-    console.log('[PROCESS] Starting processEvents with signal', { aborted: signal.aborted })
-
-    signal.addEventListener('abort', () => {
-      console.log('[PROCESS] Abort signal received in processEvents')
-    })
-
     const params: AgentWorkflowParams = {
       userInput: validationResult.output.userInput,
       schemaData: result.value.schema,
@@ -137,16 +128,13 @@ export async function POST(request: Request) {
       signal,
     }
 
-    console.log('[PROCESS] Creating agent stream')
     const events = validationResult.output.isDeepModelingEnabled
       ? await deepModelingStream(params, config)
       : await invokeDbAgentStream(params, config)
 
-    console.log('[PROCESS] Starting event iteration')
     for await (const ev of events) {
       // Check if request was aborted during iteration
       if (signal.aborted) {
-        console.log('[PROCESS] Signal aborted during event iteration')
         controller.enqueue(
           enc.encode(
             line(SSE_EVENTS.ERROR, { message: 'Request was aborted' }),
@@ -156,15 +144,11 @@ export async function POST(request: Request) {
       }
       controller.enqueue(enc.encode(line(ev.event, ev.data)))
     }
-    console.log('[PROCESS] Event iteration completed, sending END event')
     controller.enqueue(enc.encode(line(SSE_EVENTS.END, null)))
   }
 
-  console.log('[STREAM] Creating ReadableStream')
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
-      console.log('[STREAM] Stream started, processing events with timeout only')
-
       const result = await withTimeoutAndAbort(
         (signal: AbortSignal) => processEvents(controller, signal),
         TIMEOUT_MS,
@@ -173,7 +157,6 @@ export async function POST(request: Request) {
 
       if (result.isErr()) {
         const err = result.error
-        console.log('[STREAM] Process events failed:', err.message)
         Sentry.captureException(err, {
           tags: { designSchemaId: designSessionId },
         })
@@ -183,18 +166,13 @@ export async function POST(request: Request) {
         )
       }
 
-      console.log('[STREAM] Controller closed')
       controller.close()
     },
   })
 
   after(async () => {
-    console.log('[STREAM] Awaiting all callbacks cleanup')
     await awaitAllCallbacks()
-    console.log('[STREAM] All callbacks cleanup completed')
   })
-
-  console.log('[STREAM] Returning response with stream')
   return new Response(stream, {
     headers: {
       'Content-Type': 'text/event-stream',

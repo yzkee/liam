@@ -3,5 +3,10 @@
   "buildCommand": "cd ../../../ && pnpm build --force --filter @liam-hq/app",
   "installCommand": "pnpm install",
   "devCommand": "next",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "functions": {
+    "api/*": {
+      "supportsCancellation": true
+    }
+  }
 }

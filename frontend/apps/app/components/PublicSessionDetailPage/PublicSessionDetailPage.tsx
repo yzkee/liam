@@ -96,9 +96,9 @@ export const PublicSessionDetailPage = async ({
     .maybeSingle()
 
   if (error) {
-    notFound()
+    // Degrade gracefully: continue without artifact
+    // Optionally log error server-side if desired
   }
-
   let initialArtifact: Artifact | null = null
   const parsedArtifact = safeParse(artifactSchema, artifactData?.artifact)
   if (parsedArtifact.success) {

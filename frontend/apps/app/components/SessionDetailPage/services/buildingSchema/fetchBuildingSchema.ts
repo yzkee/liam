@@ -7,7 +7,7 @@ export async function fetchBuildingSchema(
 ): Promise<BuildingSchema | null> {
   const { data } = await supabase
     .from('building_schemas')
-    .select('id, schema, initial_schema_snapshot')
+    .select('id, schema, initial_schema_snapshot, organization_id')
     .eq('design_session_id', designSessionId)
     .single()
 

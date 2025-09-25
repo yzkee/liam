@@ -14,13 +14,19 @@ const artifactDataSchema = v.object({
   updated_at: v.string(),
 })
 
-export function useRealtimeArtifact(
-  designSessionId: string,
-  onChangeArtifact?: (artifact: Artifact | null) => void,
-) {
+type Params = {
+  designSessionId: string
+  initialArtifact: Artifact | null
+  onChangeArtifact?: (artifact: Artifact) => void
+}
+
+export function useRealtimeArtifact({
+  designSessionId,
+  initialArtifact,
+  onChangeArtifact,
+}: Params) {
   const { isPublic } = useViewMode()
-  const [artifact, setArtifact] = useState<Artifact | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [artifact, setArtifact] = useState<Artifact | null>(initialArtifact)
   const [error, setError] = useState<Error | null>(null)
 
   const handleError = useCallback((err: unknown) => {
@@ -28,53 +34,6 @@ export function useRealtimeArtifact(
       err instanceof Error ? err : new Error('Artifact processing failed'),
     )
   }, [])
-
-  // Fetch artifact data
-  const fetchArtifact = useCallback(async () => {
-    setError(null) // Clear previous errors
-    const supabase = createClient()
-    const { data, error: fetchError } = await supabase
-      .from('artifacts')
-      // Explicitly specify columns as anon user has grants on individual columns, not all columns
-      .select('id, design_session_id, artifact, created_at, updated_at')
-      .eq('design_session_id', designSessionId)
-      .maybeSingle()
-
-    if (fetchError) {
-      if (fetchError.code) {
-        console.error(
-          'Error fetching artifact:',
-          fetchError.message || fetchError,
-        )
-        handleError(fetchError)
-      }
-
-      setLoading(false)
-      return
-    }
-
-    if (!data) {
-      setArtifact(null)
-      setLoading(false)
-      return
-    }
-
-    // Validate artifact data
-    const artifactData = v.safeParse(artifactDataSchema, data)
-    if (artifactData.success) {
-      setArtifact(artifactData.output.artifact)
-    } else {
-      console.error('Invalid artifact data schema:', artifactData.issues)
-      handleError(new Error('Invalid artifact data schema'))
-    }
-
-    setLoading(false)
-  }, [designSessionId, handleError])
-
-  // Initial fetch
-  useEffect(() => {
-    fetchArtifact()
-  }, [fetchArtifact])
 
   // Set up realtime subscription
   useEffect(() => {
@@ -121,8 +80,6 @@ export function useRealtimeArtifact(
 
   return {
     artifact,
-    loading,
     error,
-    onChangeArtifact,
   }
 }

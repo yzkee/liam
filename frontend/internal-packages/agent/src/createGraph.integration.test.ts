@@ -22,7 +22,6 @@ describe('createGraph Integration', () => {
       analyzedRequirements: {
         businessRequirement: '',
         functionalRequirements: {},
-        nonFunctionalRequirements: {},
       },
       testcases: [],
       schemaData: aSchema({ tables: {} }),

@@ -17,24 +17,19 @@ export async function execute(
           tables: {},
         }),
       },
-      designSessions: {
-        'demo-design-session': {},
-      },
     }),
   }
 
-  // Create workflow state
-  const workflowState = {
+  // Create workflow params
+  const workflowParams = {
     userInput: input.input,
-    messages: [],
     schemaData: aSchema({ tables: {} }),
-    history: [] satisfies [string, string][],
     organizationId: 'demo-org-id',
     buildingSchemaId: 'demo-design-session',
     latestVersionNumber: 1,
     designSessionId: 'demo-design-session',
     userId: 'demo-user-id',
-    retryCount: {},
+    signal: new AbortController().signal,
   }
 
   const config = {
@@ -45,7 +40,7 @@ export async function execute(
   }
 
   // Execute deep modeling workflow
-  const result = await deepModeling(workflowState, config)
+  const result = await deepModeling(workflowParams, config)
   const handledResult = handleExecutionResult(result, 'Deep modeling failed')
 
   if (handledResult.isErr()) {

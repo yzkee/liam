@@ -15,7 +15,7 @@
   },
   "license": "Apache-2.0",
   "private": false,
-  "version": "0.7.14",
+  "version": "0.7.16",
   "type": "module",
   "publishConfig": {
     "access": "public"
@@ -40,17 +40,17 @@
     "yoctocolors": "2.1.2"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.2.2",
+    "@biomejs/biome": "2.2.3",
     "@liam-hq/configs": "workspace:*",
     "@rollup/plugin-commonjs": "28.0.6",
     "@rollup/plugin-node-resolve": "16.0.1",
     "@rollup/plugin-typescript": "12.1.4",
-    "@types/node": "22.18.0",
+    "@types/node": "22.18.1",
     "@types/react": "19.1.12",
     "@types/react-dom": "19.1.9",
     "@vitejs/plugin-react": "4.6.0",
-    "eslint": "9.34.0",
-    "rollup": "4.50.0",
+    "eslint": "9.35.0",
+    "rollup": "4.50.1",
     "rollup-plugin-execute": "1.1.1",
     "typed-css-modules": "0.9.1",
     "typescript": "5.9.2",
@@ -76,6 +76,8 @@
     "lint:biome": "biome check .",
     "lint:eslint": "echo 'ESLint disabled for cli package' || eslint .",
     "lint:tsc": "tsc --noEmit",
+    "postpack": "node scripts/pack-cli.js post",
+    "prepack": "node scripts/pack-cli.js pre",
     "test": "vitest run"
   },
   "files": [

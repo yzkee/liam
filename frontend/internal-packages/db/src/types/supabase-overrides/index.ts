@@ -22,7 +22,6 @@ import type { ReviewFeedbackKnowledgeSuggestionMappingsOverride } from './review
 import type { ReviewFeedbacksOverride } from './reviewFeedbacks'
 import type { ReviewSuggestionSnippetsOverride } from './reviewSuggestionSnippets'
 import type { SchemaFilePathsOverride } from './schemaFilePaths'
-import type { TimelineItemsOverride } from './timelineItems'
 
 export type AppDatabaseOverrides = MergeDeep<
   DatabaseGenerated,
@@ -45,7 +44,6 @@ export type AppDatabaseOverrides = MergeDeep<
     GithubPullRequestsOverride &
     DesignSessionsOverride &
     BuildingSchemasOverride &
-    TimelineItemsOverride &
     ArtifactsOverride &
     CheckpointsOverride &
     CheckpointBlobsOverride &

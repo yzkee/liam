@@ -5,24 +5,23 @@ import {
   mapStoredMessagesToChatMessages,
   type StoredMessage,
 } from '@langchain/core/messages'
+import type { Artifact } from '@liam-hq/artifact'
 import type { Schema } from '@liam-hq/schema'
 import clsx from 'clsx'
 import { type FC, useCallback, useEffect, useRef, useState } from 'react'
 import { Chat } from './components/Chat'
 import { Output } from './components/Output'
 import { useRealtimeArtifact } from './components/Output/components/Artifact/hooks/useRealtimeArtifact'
-import { OUTPUT_TABS } from './components/Output/constants'
-import { useRealtimeTimelineItems } from './hooks/useRealtimeTimelineItems'
+import { OUTPUT_TABS, type OutputTabValue } from './components/Output/constants'
 import { useRealtimeVersionsWithSchema } from './hooks/useRealtimeVersionsWithSchema'
 import { useStream } from './hooks/useStream'
 import { SQL_REVIEW_COMMENTS } from './mock'
 import styles from './SessionDetailPage.module.css'
-import { convertTimelineItemToTimelineItemEntry } from './services/convertTimelineItemToTimelineItemEntry'
-import type { DesignSessionWithTimelineItems, Version } from './types'
+import type { Version } from './types'
 
 type Props = {
   buildingSchemaId: string
-  designSessionWithTimelineItems: DesignSessionWithTimelineItems
+  designSessionId: string
   initialMessages: StoredMessage[]
   initialDisplayedSchema: Schema
   initialPrevSchema: Schema
@@ -30,11 +29,37 @@ type Props = {
   isDeepModelingEnabled: boolean
   initialIsPublic: boolean
   initialWorkflowError?: string | null
+  initialArtifact: Artifact | null
+}
+
+// Determine the initial active tab based on available data
+const determineInitialTab = (
+  artifact: Artifact | null,
+  versions: Version[],
+): OutputTabValue | undefined => {
+  const hasArtifact = artifact !== null
+  const hasVersions = versions.length > 0
+
+  if (!hasArtifact && !hasVersions) {
+    return undefined
+  }
+
+  // Prioritize ERD tab when versions exist
+  if (hasVersions) {
+    return OUTPUT_TABS.ERD
+  }
+
+  // Show artifact tab when only artifact exists
+  if (hasArtifact) {
+    return OUTPUT_TABS.ARTIFACT
+  }
+
+  return undefined
 }
 
 export const SessionDetailPageClient: FC<Props> = ({
   buildingSchemaId,
-  designSessionWithTimelineItems,
+  designSessionId,
   initialMessages,
   initialDisplayedSchema,
   initialPrevSchema,
@@ -42,14 +67,11 @@ export const SessionDetailPageClient: FC<Props> = ({
   isDeepModelingEnabled,
   initialIsPublic,
   initialWorkflowError,
+  initialArtifact,
 }) => {
-  const designSessionId = designSessionWithTimelineItems.id
-
-  const handleSelectedVersionChange = useCallback((version: Version | null) => {
-    if (version !== null) {
-      setActiveTab(OUTPUT_TABS.ERD)
-    }
-  }, [])
+  const [activeTab, setActiveTab] = useState<OutputTabValue | undefined>(
+    determineInitialTab(initialArtifact, initialVersions),
+  )
 
   const {
     versions,
@@ -62,27 +84,18 @@ export const SessionDetailPageClient: FC<Props> = ({
     initialVersions,
     initialDisplayedSchema,
     initialPrevSchema,
-    onChangeSelectedVersion: handleSelectedVersionChange,
+    onChangeSelectedVersion: (version: Version) => {
+      setSelectedVersion(version)
+      setActiveTab(OUTPUT_TABS.ERD)
+    },
   })
 
-  const [activeTab, setActiveTab] = useState<string | undefined>(undefined)
-
-  const handleChangeSelectedVersion = useCallback(
+  const handleVersionChange = useCallback(
     (version: Version) => {
       setSelectedVersion(version)
-
-      if (activeTab === OUTPUT_TABS.ARTIFACT) {
-        setActiveTab(OUTPUT_TABS.ERD)
-      }
+      setActiveTab(OUTPUT_TABS.ERD)
     },
-    [setSelectedVersion, activeTab],
-  )
-
-  const { addOrUpdateTimelineItem } = useRealtimeTimelineItems(
-    designSessionId,
-    designSessionWithTimelineItems.timeline_items.map((timelineItem) =>
-      convertTimelineItemToTimelineItemEntry(timelineItem),
-    ),
+    [setSelectedVersion],
   )
 
   const handleArtifactChange = useCallback((newArtifact: unknown) => {
@@ -91,20 +104,14 @@ export const SessionDetailPageClient: FC<Props> = ({
     }
   }, [])
 
-  // Handler for navigating to specific tabs from tool calls
-  const handleNavigateToTab = useCallback((tab: 'erd' | 'artifact') => {
-    if (tab === 'erd') {
-      setActiveTab(OUTPUT_TABS.ERD)
-    } else if (tab === 'artifact') {
-      setActiveTab(OUTPUT_TABS.ARTIFACT)
-    }
-  }, [])
-
-  const { artifact } = useRealtimeArtifact(
+  const { artifact, error: artifactError } = useRealtimeArtifact({
     designSessionId,
-    handleArtifactChange,
-  )
-  const shouldShowOutputSection = artifact !== null || selectedVersion !== null
+    initialArtifact,
+    onChangeArtifact: handleArtifactChange,
+  })
+
+  const shouldShowOutputSection =
+    (artifact !== null || selectedVersion !== null) && activeTab
 
   const chatMessages = mapStoredMessagesToChatMessages(initialMessages)
   const { isStreaming, messages, start, error } = useStream({
@@ -123,7 +130,6 @@ export const SessionDetailPageClient: FC<Props> = ({
       // Skip if already triggered
       if (hasTriggeredInitialWorkflow.current) return
 
-      // Check if there's exactly one timeline item and it's a user message
       if (messages.length !== 1) return
 
       const firstItem = messages[0]
@@ -156,38 +162,33 @@ export const SessionDetailPageClient: FC<Props> = ({
             schemaData={displayedSchema}
             messages={messages}
             isWorkflowRunning={isStreaming}
-            onMessageSend={addOrUpdateTimelineItem}
-            onNavigate={handleNavigateToTab}
+            onSendMessage={(content: string) =>
+              start({
+                userInput: content,
+                designSessionId,
+                isDeepModelingEnabled,
+              })
+            }
+            onNavigate={setActiveTab}
             error={combinedError}
           />
         </div>
         {shouldShowOutputSection && (
           <div className={styles.outputSection}>
-            {activeTab !== undefined ? (
-              <Output
-                designSessionId={designSessionId}
-                schema={displayedSchema}
-                prevSchema={prevSchema}
-                sqlReviewComments={SQL_REVIEW_COMMENTS}
-                versions={versions}
-                selectedVersion={selectedVersion}
-                onSelectedVersionChange={handleChangeSelectedVersion}
-                activeTab={activeTab}
-                onTabChange={setActiveTab}
-                initialIsPublic={initialIsPublic}
-              />
-            ) : (
-              <Output
-                designSessionId={designSessionId}
-                schema={displayedSchema}
-                prevSchema={prevSchema}
-                sqlReviewComments={SQL_REVIEW_COMMENTS}
-                versions={versions}
-                selectedVersion={selectedVersion}
-                onSelectedVersionChange={handleChangeSelectedVersion}
-                initialIsPublic={initialIsPublic}
-              />
-            )}
+            <Output
+              designSessionId={designSessionId}
+              schema={displayedSchema}
+              prevSchema={prevSchema}
+              sqlReviewComments={SQL_REVIEW_COMMENTS}
+              versions={versions}
+              selectedVersion={selectedVersion}
+              onSelectedVersionChange={handleVersionChange}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              initialIsPublic={initialIsPublic}
+              artifact={artifact}
+              artifactError={artifactError}
+            />
           </div>
         )}
       </div>

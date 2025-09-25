@@ -102,10 +102,10 @@ describe('createPmAgentGraph Integration', () => {
       analyzedRequirements: {
         businessRequirement: '',
         functionalRequirements: {},
-        nonFunctionalRequirements: {},
       },
       designSessionId: context.designSessionId,
       analyzedRequirementsRetryCount: 0,
+      artifactSaveSuccessful: false,
     }
 
     // Act

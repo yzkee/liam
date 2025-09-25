@@ -9,52 +9,15 @@ import { validateInitialSchemaNode } from './validateInitialSchemaNode'
 
 describe('validateInitialSchemaNode Integration', () => {
   describe('First execution scenarios', () => {
-    it('should display fresh database message when schema is empty', async () => {
-      const graph = new StateGraph(workflowAnnotation)
-        .addNode('validateInitialSchema', validateInitialSchemaNode)
-        .addEdge(START, 'validateInitialSchema')
-        .addEdge('validateInitialSchema', END)
-        .compile()
-
-      const { config, context } = await getTestConfig({ useOpenAI: false })
-
-      const state: WorkflowState = {
-        messages: [new HumanMessage('Create a new database schema')],
-        designSessionId: context.designSessionId,
-        organizationId: context.organizationId,
-        userId: context.userId,
-        schemaData: aSchema({
-          tables: {},
-          enums: {},
-          extensions: {},
-        }),
-        analyzedRequirements: {
-          businessRequirement: '',
-          functionalRequirements: {},
-          nonFunctionalRequirements: {},
-        },
-        testcases: [],
-        schemaIssues: [],
-        buildingSchemaId: 'test-building-schema-id',
-        latestVersionNumber: 1,
-        next: 'leadAgent',
-      }
-
-      const result = await graph.invoke(state, config)
-
-      // Assert
-      // Empty schema should return unchanged state
-      expect(result).toEqual(state)
-    })
-
     it('should validate existing schema successfully', async () => {
+      const { config, context, checkpointer } = await getTestConfig({
+        useOpenAI: false,
+      })
       const graph = new StateGraph(workflowAnnotation)
         .addNode('validateInitialSchema', validateInitialSchemaNode)
         .addEdge(START, 'validateInitialSchema')
         .addEdge('validateInitialSchema', END)
-        .compile()
-
-      const { config, context } = await getTestConfig({ useOpenAI: false })
+        .compile({ checkpointer })
 
       const state: WorkflowState = {
         messages: [new HumanMessage('Update my existing schema')],
@@ -85,7 +48,6 @@ describe('validateInitialSchemaNode Integration', () => {
         analyzedRequirements: {
           businessRequirement: '',
           functionalRequirements: {},
-          nonFunctionalRequirements: {},
         },
         testcases: [],
         schemaIssues: [],
@@ -102,13 +64,14 @@ describe('validateInitialSchemaNode Integration', () => {
 
   describe('Non-first execution scenarios', () => {
     it('should skip validation when AI messages already exist', async () => {
+      const { config, context, checkpointer } = await getTestConfig({
+        useOpenAI: false,
+      })
       const graph = new StateGraph(workflowAnnotation)
         .addNode('validateInitialSchema', validateInitialSchemaNode)
         .addEdge(START, 'validateInitialSchema')
         .addEdge('validateInitialSchema', END)
-        .compile()
-
-      const { config, context } = await getTestConfig({ useOpenAI: false })
+        .compile({ checkpointer })
 
       const state: WorkflowState = {
         messages: [
@@ -138,7 +101,6 @@ describe('validateInitialSchemaNode Integration', () => {
         analyzedRequirements: {
           businessRequirement: '',
           functionalRequirements: {},
-          nonFunctionalRequirements: {},
         },
         testcases: [],
         schemaIssues: [],
@@ -181,7 +143,6 @@ describe('validateInitialSchemaNode Integration', () => {
         analyzedRequirements: {
           businessRequirement: '',
           functionalRequirements: {},
-          nonFunctionalRequirements: {},
         },
         testcases: [],
         schemaIssues: [],

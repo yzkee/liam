@@ -121,7 +121,7 @@
   padding-bottom: var(--spacing-2);
 }
 
-/* Functional/Non-Functional Requirements Categories (h3) */
+/* Requirements Categories (h3) */
 .body :global(h3) {
   margin-top: 1.5em;
   margin-bottom: 0.5em;
@@ -492,7 +492,7 @@
   font-size: var(--font-size-4);
 }
 
-/* Non-functional requirements section */
+/* Requirements section */
 .body :global(h3) {
   position: relative;
 }

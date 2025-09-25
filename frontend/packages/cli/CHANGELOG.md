@@ -1,5 +1,20 @@
 # @liam-hq/cli
 
+## 0.7.16
+
+### Patch Changes
+
+- [#3566](https://github.com/liam-hq/liam/pull/3566) - Remove direct npm dependencies on `@liam-hq/*` packages from the CLI package to enable standalone distribution / Thanks [@devin-ai-integration](https://github.com/apps/devin-ai-integration)!
+
+## 0.7.15
+
+### Patch Changes
+
+- [#3560](https://github.com/liam-hq/liam/pull/3560) - - 🐛 fix CommandPalette Show Mode commands descriptions, ⌘ -> ⇧ / Thanks [@tnyo43](https://github.com/tnyo43)!
+- [#3479](https://github.com/liam-hq/liam/pull/3479) - - ✨ add column detail links in TableDetail / Thanks [@tnyo43](https://github.com/tnyo43)!
+  - selecting a column scrolls it into view
+  - opening a page with a hash scrolls to the corresponding column element
+
 ## 0.7.14
 
 ### Patch Changes

@@ -7,6 +7,7 @@ import {
 import { MessageTupleManager, SSE_EVENTS } from '@liam-hq/agent/client'
 import { err, ok } from 'neverthrow'
 import { useCallback, useMemo, useRef, useState } from 'react'
+import { useNavigationGuard } from '../../../../hooks/useNavigationGuard'
 import { ERROR_MESSAGES } from '../../components/Chat/constants/chatConstants'
 import { parseSse } from './parseSse'
 import { useSessionStorageOnce } from './useSessionStorageOnce'
@@ -53,6 +54,20 @@ export const useStream = ({ designSessionId, initialMessages }: Props) => {
   const clearError = useCallback(() => {
     setError(null)
   }, [])
+
+  useNavigationGuard((_event) => {
+    if (isStreaming) {
+      const shouldContinue = window.confirm(
+        "Design session is currently running. If you leave now, you'll lose your session progress. Continue anyway?",
+      )
+      if (shouldContinue) {
+        abortRef.current?.abort()
+        return true
+      }
+      return false
+    }
+    return true
+  })
 
   // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
   const start = useCallback(async (params: ChatRequest) => {

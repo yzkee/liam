@@ -14,9 +14,9 @@ const createPmAgentState = (
   analyzedRequirements: {
     businessRequirement: '',
     functionalRequirements: {},
-    nonFunctionalRequirements: {},
   },
   schemaData: { tables: {}, enums: {}, extensions: {} },
+  artifactSaveSuccessful: false,
   ...overrides,
 })
 
@@ -28,9 +28,6 @@ describe('routeAfterAnalyzeRequirements', () => {
           businessRequirement: 'Test business requirement',
           functionalRequirements: {
             feature1: [{ id: uuidv4(), desc: 'req1' }],
-          },
-          nonFunctionalRequirements: {
-            performance: [{ id: uuidv4(), desc: 'req2' }],
           },
         },
       })
@@ -57,9 +54,6 @@ describe('routeAfterAnalyzeRequirements', () => {
           businessRequirement: 'Test business requirement',
           functionalRequirements: {
             feature1: [{ id: uuidv4(), desc: 'req1' }],
-          },
-          nonFunctionalRequirements: {
-            performance: [{ id: uuidv4(), desc: 'req2' }],
           },
         },
       })
@@ -104,7 +98,6 @@ describe('routeAfterAnalyzeRequirements', () => {
             args: {
               businessRequirement: 'Test',
               functionalRequirements: {},
-              nonFunctionalRequirements: {},
             },
             id: 'test-id',
           },
@@ -232,7 +225,6 @@ describe('routeAfterAnalyzeRequirements', () => {
         analyzedRequirements: {
           businessRequirement: 'Test',
           functionalRequirements: {},
-          nonFunctionalRequirements: {},
         },
         analyzedRequirementsRetryCount: 10, // Even with high retry count
       })

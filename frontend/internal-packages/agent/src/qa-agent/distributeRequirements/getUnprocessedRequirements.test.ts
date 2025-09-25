@@ -6,14 +6,12 @@ import { getUnprocessedRequirements } from './getUnprocessedRequirements'
 // Test helper to create mock state
 const createMockState = (
   functionalReqs: Record<string, Array<{ id: string; desc: string }>>,
-  nonFunctionalReqs: Record<string, Array<{ id: string; desc: string }>>,
   testcases: Testcase[] = [],
   businessRequirement = 'Test business context',
 ): QaAgentState => ({
   analyzedRequirements: {
     businessRequirement,
     functionalRequirements: functionalReqs,
-    nonFunctionalRequirements: nonFunctionalReqs,
   },
   testcases,
   schemaData: { tables: {}, enums: {}, extensions: {} },
@@ -37,6 +35,7 @@ const createMockTestcase = (requirementId: string): Testcase => ({
   dmlOperation: {
     operation_type: 'SELECT',
     sql: 'SELECT * FROM users',
+    description: 'Test DML operation',
     dml_execution_logs: [],
   },
 })
@@ -49,9 +48,6 @@ describe('getUnprocessedRequirements', () => {
           { id: 'req-1', desc: 'User login functionality' },
           { id: 'req-2', desc: 'User profile management' },
         ],
-      },
-      {
-        performance: [{ id: 'nf-req-1', desc: 'Performance requirement' }],
       },
       [], // No existing testcases
     )
@@ -73,13 +69,6 @@ describe('getUnprocessedRequirements', () => {
         businessContext: 'Test business context',
         requirementId: 'req-2',
       },
-      {
-        type: 'non_functional',
-        category: 'performance',
-        requirement: 'Performance requirement',
-        businessContext: 'Test business context',
-        requirementId: 'nf-req-1',
-      },
     ])
   })
 
@@ -92,7 +81,6 @@ describe('getUnprocessedRequirements', () => {
           { id: 'req-3', desc: 'User settings' },
         ],
       },
-      {},
       [
         createMockTestcase('req-1'), // req-1 already has testcase
         createMockTestcase('req-3'), // req-3 already has testcase
@@ -120,7 +108,6 @@ describe('getUnprocessedRequirements', () => {
           { id: 'req-2', desc: 'User profile management' },
         ],
       },
-      {},
       [createMockTestcase('req-1'), createMockTestcase('req-2')],
     )
 
@@ -134,9 +121,6 @@ describe('getUnprocessedRequirements', () => {
       {
         user: [{ id: 'req-1', desc: 'User functionality' }],
         admin: [{ id: 'req-2', desc: 'Admin functionality' }],
-      },
-      {
-        security: [{ id: 'nf-req-1', desc: 'Security requirement' }],
       },
       [
         createMockTestcase('req-1'), // Only req-1 is processed
@@ -153,18 +137,11 @@ describe('getUnprocessedRequirements', () => {
         businessContext: 'Test business context',
         requirementId: 'req-2',
       },
-      {
-        type: 'non_functional',
-        category: 'security',
-        requirement: 'Security requirement',
-        businessContext: 'Test business context',
-        requirementId: 'nf-req-1',
-      },
     ])
   })
 
   test('returns empty array when no requirements exist', () => {
-    const state = createMockState({}, {})
+    const state = createMockState({})
 
     const result = getUnprocessedRequirements(state)
 

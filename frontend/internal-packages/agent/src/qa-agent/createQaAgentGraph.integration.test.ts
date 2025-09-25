@@ -107,29 +107,6 @@ describe('createQaAgentGraph Integration', () => {
             },
           ],
         },
-        nonFunctionalRequirements: {
-          Security: [
-            { id: uuidv4(), desc: 'Passwords must be hashed using bcrypt' },
-            {
-              id: uuidv4(),
-              desc: 'Session tokens should expire after inactivity',
-            },
-            {
-              id: uuidv4(),
-              desc: 'Failed login attempts should be rate limited',
-            },
-          ],
-          Performance: [
-            {
-              id: uuidv4(),
-              desc: 'Authentication should complete within 200ms',
-            },
-            {
-              id: uuidv4(),
-              desc: 'Role validation should be cached for 5 minutes',
-            },
-          ],
-        },
       },
       testcases: [],
       designSessionId: context.designSessionId,

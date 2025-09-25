@@ -70,40 +70,6 @@
         "Validate that dates are valid (start_date <= end_date) and monetary amounts are numeric and >= 0.",
         "Deduplication rule: prevent insertion of records with codes/names that would violate uniqueness ignoring leading/trailing whitespace."
       ]
-    },
-    "nonFunctionalRequirements": {
-      "Normalization": [
-        "Logical model must be normalized to at least 3rd Normal Form (3NF) to reduce redundancy and update anomalies."
-      ],
-      "Performance": [
-        "Key lookups (by code, MPN, or PK) should return within 300 ms at P95 under expected load.",
-        "Complex joins across up to 1M rows (e.g., supplier-brand handling with item/brand/category) should complete within 2 seconds at P95."
-      ],
-      "Scalability": [
-        "Target data volumes: up to 10,000 organizations, 100,000 employees, 100,000 business partners, 50,000 brands/categories combined, and 1,000,000 items.",
-        "Design must support horizontal read scalability via indexing on codes, names, FK columns, and effectivity date ranges."
-      ],
-      "Security": [
-        "Enforce least-privilege access; encrypt data in transit (TLS) and at rest per organizational standards.",
-        "Audit tables/columns must not expose sensitive data to unauthorized roles."
-      ],
-      "Reliability & Backup": [
-        "Backups daily with RPO <= 24 hours and RTO <= 4 hours for the database.",
-        "Referential integrity must prevent orphaned records in all relationships (0 tolerance)."
-      ],
-      "Availability": [
-        "Planned maintenance windows must not exceed 4 hours per month; unplanned downtime <= 99.5% monthly availability target."
-      ],
-      "Auditability & Compliance": [
-        "All create/update/delete operations must be traceable via audit columns and history strategy for effectivity tables.",
-        "Retain historical data for at least 7 years or per organizational policy, whichever is greater."
-      ],
-      "Usability (Data Consumers)": [
-        "Provide clear, human-readable codes/names and reference data lookups for all enumerations to simplify reporting and integration."
-      ],
-      "Operability": [
-        "Provide seed/reference data scripts for enumerations (e.g., partner_category, employment_status, org_type) and validation routines for effectivity overlaps."
-      ]
     }
   },
   "schemaData": {

@@ -5,7 +5,7 @@
   "dependencies": {
     "@liam-hq/ui": "workspace:*",
     "@next/third-parties": "15.3.5",
-    "@rive-app/react-canvas": "4.23.1",
+    "@rive-app/react-canvas": "4.23.3",
     "@sentry/nextjs": "9",
     "clsx": "2.1.1",
     "date-fns": "4.1.0",
@@ -20,15 +20,15 @@
     "ts-pattern": "5.7.1"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.2.2",
+    "@biomejs/biome": "2.2.3",
     "@liam-hq/configs": "workspace:*",
-    "@tailwindcss/postcss": "4.1.12",
-    "@types/node": "22.18.0",
+    "@tailwindcss/postcss": "4.1.13",
+    "@types/node": "22.18.1",
     "@types/react": "19.1.12",
     "@types/react-dom": "19.1.9",
-    "eslint": "9.34.0",
+    "eslint": "9.35.0",
     "postcss": "8.5.6",
-    "tailwindcss": "4.1.12",
+    "tailwindcss": "4.1.13",
     "typescript": "5.9.2"
   },
   "scripts": {

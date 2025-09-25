@@ -3,6 +3,7 @@
 import type { ToolMessage as ToolMessageType } from '@langchain/core/messages'
 import type { ToolCalls as ToolCallsType } from '@liam-hq/agent/client'
 import { type FC, useEffect, useState } from 'react'
+import type { OutputTabValue } from '../../../../../Output/constants'
 import { ToolCallCard } from './ToolCallCard'
 import styles from './ToolCalls.module.css'
 
@@ -16,7 +17,7 @@ type ToolCallWithMessage = {
 type Props = {
   toolCallsWithMessages: ToolCallWithMessage[]
   isStreaming?: boolean
-  onNavigate: (tab: 'erd' | 'artifact') => void
+  onNavigate: (tab: OutputTabValue) => void
 }
 
 type ToolCallStatus = 'pending' | 'running' | 'completed' | 'error'

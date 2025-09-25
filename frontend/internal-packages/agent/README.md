@@ -131,9 +131,10 @@ graph TD;
 	invokeSaveArtifactTool(invokeSaveArtifactTool)
 	__end__([<p>__end__</p>]):::last
 	__start__ --> analyzeRequirements;
-	invokeSaveArtifactTool --> analyzeRequirements;
 	analyzeRequirements -.-> invokeSaveArtifactTool;
 	analyzeRequirements -. &nbsp;END&nbsp; .-> __end__;
+	invokeSaveArtifactTool -. &nbsp;END&nbsp; .-> __end__;
+	invokeSaveArtifactTool -.-> analyzeRequirements;
 	analyzeRequirements -.-> analyzeRequirements;
 	classDef default fill:#f2f0ff,line-height:1.2;
 	classDef first fill-opacity:0;
@@ -378,9 +379,4 @@ const result = await deepModeling(
     },
   }
 );
-
-// Result is { success: true } on success, or Error on failure
-// All user and AI messages are automatically synchronized to timeline_items table
-// Frontend receives real-time updates as workflow progresses
-// The workflow is typically run as a background job via Trigger.dev
 ```

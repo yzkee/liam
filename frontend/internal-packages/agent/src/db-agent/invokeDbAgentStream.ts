@@ -20,13 +20,8 @@ export async function invokeDbAgentStream(
     throw setupResult.error
   }
 
-  const {
-    workflowState,
-    workflowRunId,
-    runCollector,
-    configurable,
-    traceEnhancement,
-  } = setupResult.value
+  const { workflowState, runCollector, configurable, traceEnhancement } =
+    setupResult.value
 
   // Convert workflow state to DB agent state format
   const prompt = params.userInput
@@ -39,13 +34,13 @@ export async function invokeDbAgentStream(
   const stream = compiled.streamEvents(dbAgentState, {
     recursionLimit,
     configurable,
-    runId: workflowRunId,
     callbacks: [runCollector],
     tags: traceEnhancement.tags,
     metadata: traceEnhancement.metadata,
     streamMode: 'messages',
     version: 'v2',
     subgraphs: true,
+    signal: params.signal,
   })
 
   async function* iter() {

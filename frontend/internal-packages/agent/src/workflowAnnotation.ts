@@ -11,7 +11,6 @@ export const workflowAnnotation = Annotation.Root({
     default: () => ({
       businessRequirement: '',
       functionalRequirements: {},
-      nonFunctionalRequirements: {},
     }),
   }),
   testcases: Annotation<Testcase[]>({

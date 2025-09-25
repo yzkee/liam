@@ -2,7 +2,7 @@
 
 import { buildingSchemaVersionsSchema } from '@liam-hq/db'
 import { type Schema, schemaSchema } from '@liam-hq/schema'
-import { useCallback, useEffect, useState, useTransition } from 'react'
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import * as v from 'valibot'
 import { createClient } from '../../../../libs/db/client'
 import { useViewMode } from '../../hooks/viewMode'
@@ -15,7 +15,7 @@ type Params = {
   initialVersions: Version[]
   initialDisplayedSchema: Schema
   initialPrevSchema: Schema
-  onChangeSelectedVersion?: (version: Version | null) => void
+  onChangeSelectedVersion: (version: Version) => void
 }
 
 export function useRealtimeVersionsWithSchema({
@@ -31,6 +31,7 @@ export function useRealtimeVersionsWithSchema({
   const [selectedVersion, setSelectedVersion] = useState<Version | null>(
     initialVersions[0] ?? null,
   )
+  const prevVersionsLengthRef = useRef(initialVersions.length)
 
   const [displayedSchema, setDisplayedSchema] = useState<Schema>(
     initialDisplayedSchema,
@@ -91,7 +92,13 @@ export function useRealtimeVersionsWithSchema({
   useEffect(() => {
     const targetVersion = versions[0] ?? null
     setSelectedVersion(targetVersion)
-    onChangeSelectedVersion?.(targetVersion)
+
+    // Call onChangeSelectedVersion only when a new version is added
+    if (versions.length > prevVersionsLengthRef.current && targetVersion) {
+      onChangeSelectedVersion(targetVersion)
+    }
+
+    prevVersionsLengthRef.current = versions.length
   }, [versions, onChangeSelectedVersion])
 
   useEffect(() => {

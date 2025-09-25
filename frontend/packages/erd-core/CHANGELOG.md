@@ -1,5 +1,14 @@
 # @liam-hq/erd-core
 
+## 0.6.11
+
+### Patch Changes
+
+- [#3560](https://github.com/liam-hq/liam/pull/3560) - - 🐛 fix CommandPalette Show Mode commands descriptions, ⌘ -> ⇧ / Thanks [@tnyo43](https://github.com/tnyo43)!
+- [#3479](https://github.com/liam-hq/liam/pull/3479) - - ✨ add column detail links in TableDetail / Thanks [@tnyo43](https://github.com/tnyo43)!
+  - selecting a column scrolls it into view
+  - opening a page with a hash scrolls to the corresponding column element
+
 ## 0.6.10
 
 ### Patch Changes

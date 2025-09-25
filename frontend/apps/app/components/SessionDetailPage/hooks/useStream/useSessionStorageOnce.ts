@@ -5,7 +5,7 @@ import {
   coerceMessageLikeToMessage,
   isHumanMessage,
 } from '@langchain/core/messages'
-import { useEffect, useRef, useSyncExternalStore } from 'react'
+import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react'
 import { LG_INITIAL_MESSAGE_PREFIX } from '../../../../constants/storageKeys'
 
 /**
@@ -17,12 +17,12 @@ export function useSessionStorageOnce(
 ): BaseMessage | null {
   const key = `${LG_INITIAL_MESSAGE_PREFIX}:${designSessionId}`
 
-  const subscribe = (_callback: () => void) => {
+  const subscribe = useCallback((_callback: () => void) => {
     // sessionStorage does not fire events within the same tab
     return () => {}
-  }
+  }, [])
 
-  const getSnapshot = () => {
+  const getSnapshot = useCallback(() => {
     if (typeof window === 'undefined') return null
     const stored = sessionStorage.getItem(key)
     if (!stored) return null
@@ -34,9 +34,9 @@ export function useSessionStorageOnce(
     } catch {
       return null
     }
-  }
+  }, [key])
 
-  const getServerSnapshot = () => null
+  const getServerSnapshot = useCallback(() => null, [])
 
   const message = useSyncExternalStore(
     subscribe,

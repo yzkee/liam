@@ -2,6 +2,19 @@
 
 This directory contains a comprehensive guide for LangGraph.js - a low-level orchestration framework for building controllable agents.
 
+## ⚠️ Important Guidelines
+
+### Avoid createReactAgent
+**Do not use `createReactAgent` from `@langchain/langgraph/prebuilt`.** This function abstracts away prompt engineering and violates [Factor 2: Own Your Prompts](https://github.com/humanlayer/12-factor-agents/blob/main/content/factor-02-own-your-prompts.md) from the 12-factor-agents methodology.
+
+**Why this matters:**
+- `createReactAgent` is a "black box" that hides the prompt engineering from you
+- You lose control over how your agent behaves and makes decisions
+- Following the 12-factor principle, you should own and control your prompts directly
+- Use LangGraph's low-level APIs instead to build agents with full transparency
+
+**Instead of createReactAgent:** Build your agents using LangGraph's core primitives (nodes, edges, state management) as shown in the documentation below.
+
 ## 📁 Documentation Structure
 
 ### Core Concepts

@@ -61,7 +61,7 @@ async function processDataset(
   const inputsResult = await loadInputFiles<
     typeof InputSchema,
     OpenAIExecutorInput
-  >(datasetPath, InputSchema, (value) => value as OpenAIExecutorInput)
+  >(datasetPath, InputSchema, (value) => ({ input: value.input }))
   if (inputsResult.isErr()) {
     console.warn(`⚠️  ${datasetName}: ${inputsResult.error.message}`)
     return { datasetName, success: 0, failure: 1 }

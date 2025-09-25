@@ -55,11 +55,9 @@ export async function processDataset(
   const inputsResult = await loadInputFiles<
     typeof InputSchema,
     LiamDbExecutorInput
-  >(datasetPath, InputSchema, (value) =>
-    typeof value === 'string'
-      ? { input: value }
-      : (value as LiamDbExecutorInput),
-  )
+  >(datasetPath, InputSchema, (value) => ({
+    input: typeof value === 'string' ? value : value.input,
+  }))
   if (inputsResult.isErr()) {
     console.warn(`⚠️  ${datasetName}: ${inputsResult.error.message}`)
     return { datasetName, success: 0, failure: 1 }

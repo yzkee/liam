@@ -5,7 +5,7 @@
   "devCommand": "next",
   "framework": "nextjs",
   "functions": {
-    "api/*": {
+    "app/**/*": {
       "supportsCancellation": true
     }
   }

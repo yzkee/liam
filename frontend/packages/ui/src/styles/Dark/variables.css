@@ -168,6 +168,9 @@
   --spacing-half: 2px;
   --spacing-1half: 6px;
   --spacing-2half: 10px;
+
+  /* Component heights */
+  --app-bar-height: 52px;
   --spacing-3half: 14px;
   --global-background: #141616;
   --global-muted-background: #232526;

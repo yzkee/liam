@@ -9,8 +9,9 @@ import { SSE_EVENTS } from '@liam-hq/agent/client'
 import * as Sentry from '@sentry/nextjs'
 import { after, NextResponse } from 'next/server'
 import * as v from 'valibot'
-import { withGracefulShutdown } from '../../../../features/stream/utils/withGracefulShutdown'
-import { withTimeoutAndAbort } from '../../../../features/stream/utils/withTimeoutAndAbort'
+// Temporarily removed for testing after() only approach
+// import { withGracefulShutdown } from '../../../../features/stream/utils/withGracefulShutdown'
+// import { withTimeoutAndAbort } from '../../../../features/stream/utils/withTimeoutAndAbort'
 import { createClient } from '../../../../libs/db/server'
 
 function line(event: string, data: unknown) {
@@ -20,8 +21,9 @@ function line(event: string, data: unknown) {
 
 // https://vercel.com/docs/functions/configuring-functions/duration#maximum-duration-for-different-runtimes
 export const maxDuration = 800
-const TIMEOUT_MS = 300000 // 300 seconds (debug)
-const GRACE_PERIOD_MS = 200000 // 200 seconds (debug)
+// Temporarily removed for testing after() only approach
+// const TIMEOUT_MS = 300000 // 300 seconds (debug)
+// const GRACE_PERIOD_MS = 200000 // 200 seconds (debug)
 
 const chatRequestSchema = v.object({
   userInput: v.pipe(v.string(), v.minLength(1, 'Message is required')),
@@ -163,18 +165,12 @@ export async function POST(request: Request) {
   console.log('[STREAM] Creating ReadableStream')
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
-      console.log('[STREAM] Stream started, processing events with graceful shutdown')
-      const result = await withTimeoutAndAbort(
-        withGracefulShutdown(
-          (signal: AbortSignal) => processEvents(controller, signal),
-          GRACE_PERIOD_MS,
-        ),
-        TIMEOUT_MS,
-        request.signal,
-      )
+      console.log('[STREAM] Stream started, processing events directly (no graceful shutdown wrapper)')
 
-      if (result.isErr()) {
-        const err = result.error
+      try {
+        await processEvents(controller, request.signal)
+      } catch (err) {
+        console.log('[STREAM] Process events failed:', err.message)
         Sentry.captureException(err, {
           tags: { designSchemaId: designSessionId },
         })

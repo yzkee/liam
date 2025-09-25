@@ -8,6 +8,7 @@ import { SSE_EVENTS } from '@liam-hq/agent/client'
 import * as Sentry from '@sentry/nextjs'
 import { NextResponse } from 'next/server'
 import * as v from 'valibot'
+import { withTimeoutAndAbort } from '../../../../features/stream/utils/withTimeoutAndAbort'
 import { createClient } from '../../../../libs/db/server'
 
 function line(event: string, data: unknown) {
@@ -17,6 +18,7 @@ function line(event: string, data: unknown) {
 
 // https://vercel.com/docs/functions/configuring-functions/duration#maximum-duration-for-different-runtimes
 export const maxDuration = 800
+const TIMEOUT_MS = 750000 // 750 seconds
 
 const chatRequestSchema = v.object({
   userInput: v.pipe(v.string(), v.minLength(1, 'Message is required')),
@@ -101,16 +103,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: result.error.message }, { status: 500 })
   }
 
-  const params: AgentWorkflowParams = {
-    userInput: validationResult.output.userInput,
-    schemaData: result.value.schema,
-    organizationId,
-    buildingSchemaId: buildingSchema.id,
-    latestVersionNumber,
-    designSessionId,
-    userId,
-    signal: request.signal,
-  }
   const config = {
     configurable: {
       repositories,
@@ -122,14 +114,25 @@ export async function POST(request: Request) {
 
   const processEvents = async (
     controller: ReadableStreamDefaultController<Uint8Array>,
+    signal: AbortSignal,
   ) => {
+    const params: AgentWorkflowParams = {
+      userInput: validationResult.output.userInput,
+      schemaData: result.value.schema,
+      organizationId,
+      buildingSchemaId: buildingSchema.id,
+      latestVersionNumber,
+      designSessionId,
+      userId,
+      signal,
+    }
     const events = validationResult.output.isDeepModelingEnabled
       ? await deepModelingStream(params, config)
       : await invokeDbAgentStream(params, config)
 
     for await (const ev of events) {
       // Check if request was aborted during iteration
-      if (request.signal.aborted) {
+      if (signal.aborted) {
         controller.enqueue(
           enc.encode(
             line(SSE_EVENTS.ERROR, { message: 'Request was aborted' }),
@@ -144,18 +147,24 @@ export async function POST(request: Request) {
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
-      try {
-        await processEvents(controller)
-      } catch (err) {
+      const result = await withTimeoutAndAbort(
+        (signal: AbortSignal) => processEvents(controller, signal),
+        TIMEOUT_MS,
+        request.signal,
+      )
+
+      if (result.isErr()) {
+        const err = result.error
         Sentry.captureException(err, {
           tags: { designSchemaId: designSessionId },
         })
 
-        const message = err instanceof Error ? err.message : String(err)
-        controller.enqueue(enc.encode(line(SSE_EVENTS.ERROR, { message })))
-      } finally {
-        controller.close()
+        controller.enqueue(
+          enc.encode(line(SSE_EVENTS.ERROR, { message: err.message })),
+        )
       }
+
+      controller.close()
     },
   })
 

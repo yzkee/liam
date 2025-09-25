@@ -1,7 +1,4 @@
 .wrapper {
   height: 100%;
-}
-
-.wrapper :global(.tablesMenu) {
-  padding-bottom: var(--spacing-16);
+  --tables-menu-padding-bottom: calc(var(--spacing-4) + 52px);
 }

@@ -82,11 +82,12 @@ export const SessionDetailPageClient: FC<Props> = ({
     }
   }, [])
 
-  const { artifact } = useRealtimeArtifact(
+  const { artifact, error: artifactError } = useRealtimeArtifact(
     designSessionId,
-    handleArtifactChange,
+    onChangeArtifact: handleArtifactChange,
   )
-  const shouldShowOutputSection = artifact !== null || selectedVersion !== null
+  const shouldShowOutputSection =
+    (artifact !== null || selectedVersion !== null) && activeTab
 
   const chatMessages = mapStoredMessagesToChatMessages(initialMessages)
   const { isStreaming, messages, start, error } = useStream({
@@ -162,6 +163,8 @@ export const SessionDetailPageClient: FC<Props> = ({
                 activeTab={activeTab}
                 onTabChange={setActiveTab}
                 initialIsPublic={initialIsPublic}
+                artifact={artifact}
+                artifactError={artifactError}
               />
             ) : (
               <Output
@@ -173,6 +176,8 @@ export const SessionDetailPageClient: FC<Props> = ({
                 selectedVersion={selectedVersion}
                 onSelectedVersionChange={handleVersionChange}
                 initialIsPublic={initialIsPublic}
+                artifact={artifact}
+                artifactError={artifactError}
               />
             )}
           </div>

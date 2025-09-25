@@ -1,9 +1,9 @@
+import type { Artifact } from '@liam-hq/artifact'
 import type { Schema } from '@liam-hq/schema'
 import { TabsContent, TabsRoot } from '@liam-hq/ui'
 import { type ComponentProps, type FC, useCallback, useState } from 'react'
 import type { ReviewComment } from '../../types'
 import { ArtifactContainer } from './components/Artifact/ArtifactContainer'
-import { useRealtimeArtifact } from './components/Artifact/hooks/useRealtimeArtifact'
 import { formatArtifactToMarkdown } from './components/Artifact/utils'
 import { ERD } from './components/ERD'
 import { Header } from './components/Header'
@@ -16,25 +16,17 @@ import {
 } from './constants'
 import styles from './Output.module.css'
 
-type BaseProps = ComponentProps<typeof VersionDropdown> & {
+type Props = ComponentProps<typeof VersionDropdown> & {
   designSessionId: string
   schema: Schema
   prevSchema: Schema
   sqlReviewComments: ReviewComment[]
   initialIsPublic: boolean
+  activeTab: OutputTabValue
+  onTabChange: (value: OutputTabValue) => void
+  artifact: Artifact | null
+  artifactError: Error | null
 }
-
-type ControlledProps = BaseProps & {
-  activeTab: string
-  onTabChange: (value: string) => void
-}
-
-type UncontrolledProps = BaseProps & {
-  activeTab?: never
-  onTabChange?: never
-}
-
-type Props = ControlledProps | UncontrolledProps
 
 export const Output: FC<Props> = ({
   designSessionId,
@@ -44,12 +36,12 @@ export const Output: FC<Props> = ({
   activeTab,
   onTabChange,
   initialIsPublic = false,
+  artifact,
+  artifactError,
   ...propsForVersionDropdown
 }) => {
   const [internalTabValue, setInternalTabValue] =
     useState<OutputTabValue>(DEFAULT_OUTPUT_TAB)
-
-  const { artifact, loading, error } = useRealtimeArtifact(designSessionId)
 
   const isTabValue = useCallback((value: string): value is OutputTabValue => {
     return Object.values(OUTPUT_TABS).some((tabValue) => tabValue === value)
@@ -66,9 +58,14 @@ export const Output: FC<Props> = ({
 
   // Use external control if provided, otherwise use internal state
   const isControlled = activeTab !== undefined
-  const tabValue =
-    isControlled && isTabValue(activeTab) ? activeTab : internalTabValue
-  const handleTabChange = isControlled ? onTabChange : handleChangeValue
+  const tabValue = isControlled ? activeTab : internalTabValue
+  const handleTabChange = isControlled
+    ? (value: string) => {
+        if (isTabValue(value)) {
+          onTabChange(value)
+        }
+      }
+    : handleChangeValue
 
   // Convert artifact data to markdown format
   const artifactDoc = artifact ? formatArtifactToMarkdown(artifact) : undefined
@@ -100,8 +97,7 @@ export const Output: FC<Props> = ({
       <TabsContent value={OUTPUT_TABS.ARTIFACT} className={styles.tabsContent}>
         <ArtifactContainer
           artifact={artifact}
-          loading={loading}
-          error={error}
+          error={artifactError}
         />
       </TabsContent>
     </TabsRoot>

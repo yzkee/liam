@@ -4,6 +4,7 @@ import {
   getCheckpointErrors,
   getMessages,
 } from '@liam-hq/agent'
+import { type Artifact, artifactSchema } from '@liam-hq/artifact'
 import type { Schema } from '@liam-hq/schema'
 import { schemaSchema } from '@liam-hq/schema'
 import { err, ok, type Result } from 'neverthrow'
@@ -35,6 +36,7 @@ async function loadSessionData(designSessionId: string): Promise<
       messages: StoredMessage[]
       buildingSchema: NonNullable<Awaited<ReturnType<typeof getBuildingSchema>>>
       initialSchema: Schema
+      initialArtifact: Artifact | null
       workflowError: string | null
     },
     Error
@@ -71,10 +73,28 @@ async function loadSessionData(designSessionId: string): Promise<
     return err(new Error('Invalid schema format'))
   }
 
+  const { data: artifactData, error } = await supabase
+    .from('artifacts')
+    // Explicitly specify columns as anon user has grants on individual columns, not all columns
+    .select('id, design_session_id, artifact, created_at, updated_at')
+    .eq('design_session_id', designSessionId)
+    .maybeSingle()
+
+  if (error) {
+    return err(new Error(`Error fetching artifact: ${error.message}`))
+  }
+
+  let initialArtifact: Artifact | null = null
+  const parsedArtifact = safeParse(artifactSchema, artifactData?.artifact)
+  if (parsedArtifact.success) {
+    initialArtifact = parsedArtifact.output
+  }
+
   return ok({
     messages,
     buildingSchema,
     initialSchema,
+    initialArtifact,
     workflowError,
   })
 }
@@ -89,8 +109,13 @@ export const SessionDetailPage: FC<Props> = async ({
     throw result.error
   }
 
-  const { messages, buildingSchema, initialSchema, workflowError } =
-    result.value
+  const {
+    messages,
+    buildingSchema,
+    initialSchema,
+    workflowError,
+    initialArtifact,
+  } = result.value
 
   const versions = await getVersions(buildingSchema.id)
   const latestVersion: Version | undefined = versions[0]
@@ -114,6 +139,7 @@ export const SessionDetailPage: FC<Props> = async ({
         initialDisplayedSchema={initialSchema}
         initialPrevSchema={initialPrevSchema}
         initialVersions={versions}
+        initialArtifact={initialArtifact}
         isDeepModelingEnabled={isDeepModelingEnabled}
         initialIsPublic={initialIsPublic}
         initialWorkflowError={workflowError}

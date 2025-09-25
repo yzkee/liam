@@ -17,6 +17,7 @@ import { useStream } from './hooks/useStream'
 import { SQL_REVIEW_COMMENTS } from './mock'
 import styles from './SessionDetailPage.module.css'
 import type { Version } from './types'
+import { Artifact } from '@liam-hq/artifact'
 
 type Props = {
   buildingSchemaId: string
@@ -28,6 +29,7 @@ type Props = {
   isDeepModelingEnabled: boolean
   initialIsPublic: boolean
   initialWorkflowError?: string | null
+  initialArtifact: Artifact | null
 }
 
 export const SessionDetailPageClient: FC<Props> = ({
@@ -40,6 +42,7 @@ export const SessionDetailPageClient: FC<Props> = ({
   isDeepModelingEnabled,
   initialIsPublic,
   initialWorkflowError,
+  initialArtifact
 }) => {
   const [activeTab, setActiveTab] = useState<string | undefined>(undefined)
 
@@ -82,9 +85,11 @@ export const SessionDetailPageClient: FC<Props> = ({
     }
   }, [])
 
-  const { artifact, error: artifactError } = useRealtimeArtifact(
+  const { artifact, error: artifactError } = useRealtimeArtifact({
     designSessionId,
+    initialArtifact,
     onChangeArtifact: handleArtifactChange,
+  }
   )
   const shouldShowOutputSection =
     (artifact !== null || selectedVersion !== null) && activeTab

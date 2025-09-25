@@ -1,3 +1,4 @@
+import { type Artifact, artifactSchema } from '@liam-hq/artifact'
 import { schemaSchema } from '@liam-hq/schema'
 import { notFound } from 'next/navigation'
 import type { ReactElement } from 'react'
@@ -88,6 +89,22 @@ export const PublicSessionDetailPage = async ({
       currentVersionId: latestVersion.id,
     })) ?? initialSchema
 
+  const { data: artifactData, error } = await supabase
+    .from('artifacts') // Explicitly specify columns as anon user has grants on individual columns, not all columns
+    .select('id, design_session_id, artifact, created_at, updated_at')
+    .eq('design_session_id', designSessionId)
+    .maybeSingle()
+
+  if (error) {
+    notFound()
+  }
+
+  let initialArtifact: Artifact | null = null
+  const parsedArtifact = safeParse(artifactSchema, artifactData?.artifact)
+  if (parsedArtifact.success) {
+    initialArtifact = parsedArtifact.output
+  }
+
   return (
     <PublicLayout>
       <ViewModeProvider mode="public">
@@ -117,6 +134,7 @@ export const PublicSessionDetailPage = async ({
             }))}
           isDeepModelingEnabled={false}
           initialIsPublic={true}
+          initialArtifact={initialArtifact}
         />
       </ViewModeProvider>
     </PublicLayout>

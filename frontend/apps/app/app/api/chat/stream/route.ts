@@ -170,13 +170,14 @@ export async function POST(request: Request) {
       try {
         await processEvents(controller, request.signal)
       } catch (err) {
-        console.log('[STREAM] Process events failed:', err.message)
-        Sentry.captureException(err, {
+        const error = err instanceof Error ? err : new Error(String(err))
+        console.log('[STREAM] Process events failed:', error.message)
+        Sentry.captureException(error, {
           tags: { designSchemaId: designSessionId },
         })
 
         controller.enqueue(
-          enc.encode(line(SSE_EVENTS.ERROR, { message: err.message })),
+          enc.encode(line(SSE_EVENTS.ERROR, { message: error.message })),
         )
       }
 

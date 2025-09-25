@@ -76,6 +76,8 @@
     "lint:biome": "biome check .",
     "lint:eslint": "echo 'ESLint disabled for cli package' || eslint .",
     "lint:tsc": "tsc --noEmit",
+    "postpack": "node scripts/pack-cli.js post",
+    "prepack": "node scripts/pack-cli.js pre",
     "test": "vitest run"
   },
   "files": [

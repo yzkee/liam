@@ -56,9 +56,7 @@ export const SessionDetailPageClient: FC<Props> = ({
     initialPrevSchema,
     onChangeSelectedVersion: (version: Version) => {
       setSelectedVersion(version)
-      if (activeTab === undefined) {
-        setActiveTab(OUTPUT_TABS.ERD)
-      }
+      setActiveTab(OUTPUT_TABS.ERD)
     },
   })
 

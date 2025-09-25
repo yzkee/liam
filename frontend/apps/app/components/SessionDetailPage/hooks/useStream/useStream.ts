@@ -59,7 +59,7 @@ export const useStream = ({ designSessionId, initialMessages }: Props) => {
     if (
       isStreaming &&
       window.confirm(
-        'A session is in progress. Leaving this page will cancel the session. Do you want to continue?',
+        "Design session is currently running. If you leave now, you'll lose your session progress. Continue anyway?",
       )
     ) {
       abortRef.current?.abort()

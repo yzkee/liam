@@ -24,10 +24,6 @@ type DatasetResult = {
   failure: number
 }
 
-// loadInputFiles moved to ./utils and used with schema + normalizer
-
-// saveOutputFile moved to ./utils with optional archive
-
 async function executeCase(
   datasetPath: string,
   caseId: string,

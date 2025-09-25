@@ -17,17 +17,11 @@ import {
   selectTargetDatasets,
 } from './utils'
 
-// parseArgs moved to ./utils
-
 type DatasetResult = { datasetName: string; success: number; failure: number }
 
 const InputSchema = v.object({
   input: v.string(),
 })
-
-// loadInputFiles moved to ./utils and used with schema + normalizer
-
-// saveOutputFile moved to ./utils
 
 async function executeCase(
   executor: OpenAIExecutor,
@@ -48,10 +42,6 @@ async function executeCase(
   }
   return ok(undefined)
 }
-
-// selectTargetDatasets moved to ./utils
-
-// filterAndResolveDatasets moved to ./utils
 
 async function processDataset(
   executor: OpenAIExecutor,

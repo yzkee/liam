@@ -11,13 +11,7 @@ import {
   selectTargetDatasets,
 } from './utils'
 
-// parseArgs moved to ./utils
-
 type DatasetResult = { datasetName: string; success: number; failure: number }
-
-// selectTargetDatasets moved to ./utils
-
-// filterAndResolveDatasets moved to ./utils
 
 const runDatasets = async (
   datasets: Array<{ name: string; path: string }>,

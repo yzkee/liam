@@ -19,8 +19,8 @@ function line(event: string, data: unknown) {
 
 // https://vercel.com/docs/functions/configuring-functions/duration#maximum-duration-for-different-runtimes
 export const maxDuration = 800
-const TIMEOUT_MS = 700000 // 700 seconds
-const GRACE_PERIOD_MS = 30000 // 30 seconds
+const TIMEOUT_MS = 10000 // 10 seconds (debug)
+const GRACE_PERIOD_MS = 200000 // 200 seconds (debug)
 
 const chatRequestSchema = v.object({
   userInput: v.pipe(v.string(), v.minLength(1, 'Message is required')),

@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { withGracefulShutdown } from './withGracefulShutdown'
 import { withTimeoutAndAbort } from './withTimeoutAndAbort'
 
 const expectSignalAborted = (signal: AbortSignal | null, expected: boolean) => {
@@ -140,5 +141,96 @@ describe('withTimeoutAndAbort', () => {
     expect(result.isOk()).toBe(true)
     expect(receivedSignal).not.toBe(controller.signal)
     expect(receivedSignal).toBeInstanceOf(AbortSignal)
+  })
+})
+
+describe('Integration: withTimeoutAndAbort + withGracefulShutdown', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('works together for normal function completion', async () => {
+    const controller = new AbortController()
+    const mockFn = vi.fn().mockResolvedValue(undefined)
+
+    const result = await withTimeoutAndAbort(
+      withGracefulShutdown(mockFn, 5000),
+      10000,
+      controller.signal,
+    )
+
+    expect(result.isOk()).toBe(true)
+    expect(mockFn).toHaveBeenCalledTimes(1)
+  })
+
+  it('applies grace period after timeout triggers', async () => {
+    const controller = new AbortController()
+    let receivedSignal: AbortSignal | null = null
+
+    const mockFn = vi.fn().mockImplementation((signal: AbortSignal) => {
+      receivedSignal = signal
+      return new Promise<void>((resolve) => {
+        // Simulate function that responds to abort within grace period
+        const checkAndResolve = () => {
+          if (signal.aborted) {
+            resolve()
+          }
+        }
+        signal.addEventListener('abort', () => {
+          setTimeout(checkAndResolve, 2000)
+        })
+      })
+    })
+
+    const resultPromise = withTimeoutAndAbort(
+      withGracefulShutdown(mockFn, 5000), // 5 second grace period
+      3000, // 3 second timeout
+      controller.signal,
+    )
+
+    // Advance to timeout (triggers abort signal)
+    vi.advanceTimersByTime(3000)
+
+    // Advance to function completion (2 seconds after abort)
+    vi.advanceTimersByTime(2000)
+
+    const result = await resultPromise
+
+    expect(result.isOk()).toBe(true)
+    expect(mockFn).toHaveBeenCalledTimes(1)
+    expectSignalAborted(receivedSignal, true)
+  })
+
+  it('fails when grace period is exceeded', async () => {
+    const controller = new AbortController()
+
+    const mockFn = vi.fn().mockImplementation(() => {
+      // Function never completes, even after abort signal
+      return new Promise<void>(() => {})
+    })
+
+    const resultPromise = withTimeoutAndAbort(
+      withGracefulShutdown(mockFn, 2000), // 2 second grace period
+      3000, // 3 second timeout
+      controller.signal,
+    )
+
+    // Trigger timeout (sends abort signal)
+    vi.advanceTimersByTime(3000)
+
+    // Exceed grace period
+    vi.advanceTimersByTime(2001) // Just over the grace period
+
+    const result = await resultPromise
+
+    expect(result.isErr()).toBe(true)
+    if (result.isErr()) {
+      expect(result.error.message).toBe('Grace period exceeded')
+    }
+    expect(mockFn).toHaveBeenCalledTimes(1)
   })
 })

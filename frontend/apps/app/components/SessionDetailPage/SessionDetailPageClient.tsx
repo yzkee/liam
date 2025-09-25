@@ -32,6 +32,31 @@ type Props = {
   initialArtifact: Artifact | null
 }
 
+// Determine the initial active tab based on available data
+const determineInitialTab = (
+  artifact: Artifact | null,
+  versions: Version[],
+): OutputTabValue | undefined => {
+  const hasArtifact = artifact !== null
+  const hasVersions = versions.length > 0
+
+  if (!hasArtifact && !hasVersions) {
+    return undefined
+  }
+
+  // Prioritize ERD tab when versions exist
+  if (hasVersions) {
+    return OUTPUT_TABS.ERD
+  }
+
+  // Show artifact tab when only artifact exists
+  if (hasArtifact) {
+    return OUTPUT_TABS.ARTIFACT
+  }
+
+  return undefined
+}
+
 export const SessionDetailPageClient: FC<Props> = ({
   buildingSchemaId,
   designSessionId,
@@ -45,7 +70,7 @@ export const SessionDetailPageClient: FC<Props> = ({
   initialArtifact,
 }) => {
   const [activeTab, setActiveTab] = useState<OutputTabValue | undefined>(
-    undefined,
+    determineInitialTab(initialArtifact, initialVersions),
   )
 
   const {
@@ -84,6 +109,7 @@ export const SessionDetailPageClient: FC<Props> = ({
     initialArtifact,
     onChangeArtifact: handleArtifactChange,
   })
+
   const shouldShowOutputSection =
     (artifact !== null || selectedVersion !== null) && activeTab
 

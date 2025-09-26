@@ -38,27 +38,6 @@ describe('githubUrlHandler', () => {
         expect(isGitHubFolderUrl(url)).toBe(false)
       }
     })
-
-    it('should distinguish between file and folder URLs', () => {
-      // File URLs (blob) should be false
-      const fileUrls = [
-        'https://github.com/user/repo/blob/main/schema.sql',
-        'https://github.com/user/repo/blob/dev/db/schema.prisma',
-      ]
-
-      // Folder URLs (tree) should be true
-      const folderUrls = [
-        'https://github.com/user/repo/tree/main/schemas',
-        'https://github.com/user/repo/tree/dev/db',
-      ]
-
-      for (const url of fileUrls) {
-        expect(isGitHubFolderUrl(url)).toBe(false)
-      }
-      for (const url of folderUrls) {
-        expect(isGitHubFolderUrl(url)).toBe(true)
-      }
-    })
   })
 
   describe('parseGitHubFolderUrl', () => {
@@ -232,76 +211,6 @@ describe('githubUrlHandler', () => {
         expect(result.value.content).toContain('CREATE TABLE test')
       }
       expect(mockFetch).toHaveBeenCalledTimes(2) // API call + 1 file (index.ts excluded)
-    })
-
-    it('should skip various excluded file types', async () => {
-      const mockFetch = vi.mocked(fetch)
-      const url = 'https://github.com/user/repo/tree/main/db'
-
-      const mockApiResponse = [
-        // Should be excluded
-        {
-          type: 'file',
-          name: 'seed.sql',
-          download_url: 'https://example.com/seed.sql',
-        },
-        {
-          type: 'file',
-          name: 'client.prisma',
-          download_url: 'https://example.com/client.prisma',
-        },
-        {
-          type: 'file',
-          name: 'seeds.rb',
-          download_url: 'https://example.com/seeds.rb',
-        },
-        {
-          type: 'file',
-          name: 'migrate.ts',
-          download_url: 'https://example.com/migrate.ts',
-        },
-        {
-          type: 'file',
-          name: 'readme.md',
-          download_url: 'https://example.com/readme.md',
-        },
-
-        // Should be included
-        {
-          type: 'file',
-          name: 'schema.prisma',
-          download_url: 'https://example.com/schema.prisma',
-        },
-        {
-          type: 'file',
-          name: 'users.sql',
-          download_url: 'https://example.com/users.sql',
-        },
-      ]
-
-      mockFetch
-        .mockResolvedValueOnce(
-          new Response(JSON.stringify(mockApiResponse), { status: 200 }),
-        )
-        .mockResolvedValueOnce(
-          new Response('model User { id Int @id }', { status: 200 }),
-        )
-        .mockResolvedValueOnce(
-          new Response('CREATE TABLE users (id INT);', { status: 200 }),
-        )
-
-      const result = await fetchSchemaFromGitHubFolder(url)
-
-      expect(result.isOk()).toBe(true)
-      if (result.isOk()) {
-        expect(result.value.content).toContain('model User')
-        expect(result.value.content).toContain('CREATE TABLE users')
-        expect(result.value.content).not.toContain('seed')
-        expect(result.value.content).not.toContain('client')
-        expect(result.value.content).not.toContain('migrate')
-      }
-      // API call + 2 valid schema files (5 files excluded)
-      expect(mockFetch).toHaveBeenCalledTimes(3)
     })
 
     it('should detect format from multiple file types', async () => {

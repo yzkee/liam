@@ -1,4 +1,3 @@
-// GitHub URL handling utilities for ERD viewer page
 import { err, ok, type Result } from 'neverthrow'
 
 type GitHubRepoInfo = {
@@ -15,7 +14,6 @@ type GitHubContentItem = {
   download_url?: string
 }
 
-// Check if URL is a GitHub folder URL
 export const isGitHubFolderUrl = (url: string): boolean => {
   try {
     const parsedUrl = new URL(url)
@@ -25,12 +23,11 @@ export const isGitHubFolderUrl = (url: string): boolean => {
   }
 }
 
-// Check if a file is a schema file based on extension and exclude common non-schema files
 const isSchemaFile = (filename: string): boolean => {
   const lowerFilename = filename.toLowerCase()
 
-  // Common non-schema file patterns to exclude
   const excludedFilenames = [
+    // JS/TS utilities
     'index.ts',
     'index.js',
     'config.ts',
@@ -49,27 +46,39 @@ const isSchemaFile = (filename: string): boolean => {
     'common.js',
     'shared.ts',
     'shared.js',
+    'validation.ts',
+    'validation.js',
+    // Tests
     'test.ts',
     'test.js',
     'spec.ts',
     'spec.js',
     'mock.ts',
     'mock.js',
-    'validation.ts', // Add validation files to exclusion list
-    'validation.js',
+    // Prisma non-schema files
+    'client.prisma',
+    'migrations.prisma',
+    'seed.prisma',
+    // SQL non-schema files
+    'seed.sql',
+    'functions.sql',
+    'triggers.sql',
+    'views.sql',
+    'indexes.sql',
+    'permissions.sql',
+    // SchemaRB non-schema files
+    'seeds.rb',
+    'application_record.rb',
+    // Drizzle non-schema files
+    'migrate.ts',
+    // Documentation
+    'readme.md',
+    'readme.sql',
+    'readme.prisma',
   ]
 
-  // Extensions that are actually supported schema formats
-  const schemaExtensions = [
-    '.sql', // postgres
-    '.prisma', // prisma
-    '.rb', // schemarb
-    '.json', // tbls
-    '.js', // drizzle
-    '.ts', // drizzle
-  ]
+  const schemaExtensions = ['.sql', '.prisma', '.rb', '.json', '.js', '.ts']
 
-  // First check if it has a schema-compatible extension
   const hasValidExtension = schemaExtensions.some((ext) =>
     lowerFilename.endsWith(ext),
   )
@@ -77,7 +86,6 @@ const isSchemaFile = (filename: string): boolean => {
     return false
   }
 
-  // Then exclude common non-schema files
   if (excludedFilenames.includes(lowerFilename)) {
     return false
   }
@@ -85,7 +93,6 @@ const isSchemaFile = (filename: string): boolean => {
   return true
 }
 
-// Parse GitHub folder URL to extract repo info
 export const parseGitHubFolderUrl = (url: string): GitHubRepoInfo | null => {
   try {
     const parsedUrl = new URL(url)
@@ -111,7 +118,6 @@ export const parseGitHubFolderUrl = (url: string): GitHubRepoInfo | null => {
   }
 }
 
-// Fetch GitHub folder contents using GitHub API
 const fetchGitHubFolderContents = async (
   repoInfo: GitHubRepoInfo,
 ): Promise<Result<GitHubContentItem[], Error>> => {
@@ -139,7 +145,6 @@ const fetchGitHubFolderContents = async (
   }
 }
 
-// Recursively collect schema files from GitHub folder
 const collectSchemaFilesFromFolder = async (
   repoInfo: GitHubRepoInfo,
 ): Promise<Result<string[], Error>> => {
@@ -156,7 +161,6 @@ const collectSchemaFilesFromFolder = async (
       schemaFileUrls.push(item.download_url)
     } else if (item.type === 'file' && !isSchemaFile(item.name)) {
     } else if (item.type === 'dir') {
-      // Recursively process subdirectories
       const subfolderInfo: GitHubRepoInfo = {
         ...repoInfo,
         path: item.path,
@@ -171,7 +175,6 @@ const collectSchemaFilesFromFolder = async (
   return ok(schemaFileUrls)
 }
 
-// Download and combine multiple schema files
 const downloadAndCombineFiles = async (
   urls: string[],
 ): Promise<Result<string, Error>> => {
@@ -192,11 +195,8 @@ const downloadAndCombineFiles = async (
       return err(new Error('Failed to download any schema files'))
     }
 
-    // Better file combination for Drizzle schemas
-    // Add proper spacing and comments for file boundaries
     const combinedContent = validContents
       .map((content, index) => {
-        // Add file boundary comment and ensure proper spacing
         return `\n// --- File ${index + 1} ---\n${content}`
       })
       .join('\n\n')
@@ -207,14 +207,12 @@ const downloadAndCombineFiles = async (
   }
 }
 
-// Helper to detect format from file extensions
 const detectFormatFromFileNames = (fileNames: string[]): string | null => {
   const extensions = fileNames.map((name) => {
     const parts = name.toLowerCase().split('.')
     return parts.length > 1 ? `.${parts[parts.length - 1]}` : ''
   })
 
-  // Priority order for format detection
   if (extensions.some((ext) => ext === '.prisma')) {
     return 'prisma'
   }
@@ -222,7 +220,7 @@ const detectFormatFromFileNames = (fileNames: string[]): string | null => {
     return 'schemarb'
   }
   if (extensions.some((ext) => ['.ts', '.js'].includes(ext))) {
-    return 'drizzle' // Assume TypeScript/JavaScript files are Drizzle
+    return 'drizzle'
   }
   if (extensions.some((ext) => ext === '.sql')) {
     return 'postgres'
@@ -233,7 +231,6 @@ const detectFormatFromFileNames = (fileNames: string[]): string | null => {
   return null
 }
 
-// Enhanced function that returns both content and detected format
 export const fetchSchemaFromGitHubFolder = async (
   url: string,
 ): Promise<Result<{ content: string; detectedFormat?: string }, Error>> => {
@@ -253,7 +250,6 @@ export const fetchSchemaFromGitHubFolder = async (
     return err(new Error('No schema files found in the specified folder'))
   }
 
-  // Extract file names for format detection
   const fileNames = schemaFileUrls
     .map((url) => {
       const parts = url.split('/')

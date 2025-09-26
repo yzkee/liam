@@ -157,15 +157,12 @@ async function determineSchemaFormat(
 
 // Helper function to render error view
 function renderErrorView(
-  blankSchema: {
-    tables: Record<string, never>
-    enums: Record<string, never>
-    extensions: Record<string, never>
-  },
   errors: Array<{ name: string; message: string; instruction?: string }>,
   fallbackMessage: string,
   fallbackInstruction: string,
 ) {
+  const blankSchema = { tables: {}, enums: {}, extensions: {} }
+
   return (
     <ERDViewer
       schema={blankSchema}
@@ -233,7 +230,6 @@ export default async function Page({
 
   const joinedPath = parsedParams.output.slug.join('/')
   const url = `https://${joinedPath}`
-  const blankSchema = { tables: {}, enums: {}, extensions: {} }
   const weCannotAccess = `Our signal's lost in the void! No access at this time..`
   const pleaseCheck = `Double-check the transmission link ${url} and initiate contact again.`
 
@@ -244,12 +240,7 @@ export default async function Page({
 
   // Handle errors or missing input
   if (!result.input || result.errors.length > 0) {
-    return renderErrorView(
-      blankSchema,
-      result.errors,
-      weCannotAccess,
-      pleaseCheck,
-    )
+    return renderErrorView(result.errors, weCannotAccess, pleaseCheck)
   }
 
   setPrismWasmUrl(path.resolve(process.cwd(), 'prism.wasm'))
@@ -266,7 +257,6 @@ export default async function Page({
     // Strictly speaking, this is not always a network error, but the error name is temporarily set as "NetworkError" for display purposes.
     // TODO: Update the error name to something more appropriate.
     return renderErrorView(
-      blankSchema,
       [],
       weCannotAccess,
       'Please specify the format in the URL query parameter `format`',

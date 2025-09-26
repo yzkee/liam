@@ -14,13 +14,60 @@ type GitHubContentItem = {
   download_url?: string
 }
 
+const safeParseUrl = (url: string): Result<URL, Error> => {
+  // Basic URL validation without throwing
+  if (!url || typeof url !== 'string') {
+    return err(new Error('Invalid URL: must be a non-empty string'))
+  }
+
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    return err(new Error('Invalid URL: must start with http:// or https://'))
+  }
+
+  // Check for basic URL structure
+  const urlPattern = /^https?:\/\/[^\s/$.?#].[^\s]*$/i
+  if (!urlPattern.test(url)) {
+    return err(new Error('Invalid URL format'))
+  }
+
+  // If basic validation passes, construct URL manually
+  const match = url.match(/^(https?):\/\/([^\/]+)(.*)$/)
+  if (!match) {
+    return err(new Error('Failed to parse URL components'))
+  }
+
+  const [, protocol, host, pathname = ''] = match
+
+  if (!host) {
+    return err(new Error('Invalid URL: missing host'))
+  }
+
+  const urlObj: URL = {
+    protocol: `${protocol}:`,
+    hostname: host.split(':')[0] || host,
+    host,
+    pathname: pathname || '/',
+    href: url,
+    origin: `${protocol}://${host.split('/')[0]}`,
+    search: '',
+    hash: '',
+    port: '',
+    username: '',
+    password: '',
+    searchParams: new URLSearchParams(),
+    toString: () => url,
+    toJSON: () => url,
+  }
+
+  return ok(urlObj)
+}
+
 export const isGitHubFolderUrl = (url: string): boolean => {
-  try {
-    const parsedUrl = new URL(url)
-    return parsedUrl.hostname === 'github.com' && url.includes('/tree/')
-  } catch {
+  const urlResult = safeParseUrl(url)
+  if (urlResult.isErr()) {
     return false
   }
+  return urlResult.value.hostname === 'github.com' && url.includes('/tree/')
 }
 
 const isSchemaFile = (filename: string): boolean => {
@@ -94,28 +141,47 @@ const isSchemaFile = (filename: string): boolean => {
 }
 
 export const parseGitHubFolderUrl = (url: string): GitHubRepoInfo | null => {
-  try {
-    const parsedUrl = new URL(url)
-    const pathSegments = parsedUrl.pathname.split('/').filter(Boolean)
-
-    if (pathSegments.length < 4 || pathSegments[2] !== 'tree') {
-      return null
-    }
-
-    const owner = pathSegments[0]
-    const repo = pathSegments[1]
-    const branch = pathSegments[3]
-
-    if (!owner || !repo || !branch) {
-      return null
-    }
-
-    const path = pathSegments.slice(4).join('/')
-
-    return { owner, repo, branch, path }
-  } catch {
+  const urlResult = safeParseUrl(url)
+  if (urlResult.isErr()) {
     return null
   }
+
+  const pathSegments = urlResult.value.pathname.split('/').filter(Boolean)
+
+  if (pathSegments.length < 4 || pathSegments[2] !== 'tree') {
+    return null
+  }
+
+  const owner = pathSegments[0]
+  const repo = pathSegments[1]
+  const branch = pathSegments[3]
+
+  if (!owner || !repo || !branch) {
+    return null
+  }
+
+  const path = pathSegments.slice(4).join('/')
+
+  return { owner, repo, branch, path }
+}
+
+const safeFetch = async (url: string): Promise<Result<Response, Error>> => {
+  return fetch(url, { cache: 'no-store' })
+    .then((response) => ok(response))
+    .catch((error) =>
+      err(error instanceof Error ? error : new Error('Network error')),
+    )
+}
+
+const safeResponseJson = async (
+  response: Response,
+): Promise<Result<unknown, Error>> => {
+  return response
+    .json()
+    .then((data) => ok(data))
+    .catch((error) =>
+      err(error instanceof Error ? error : new Error('JSON parse error')),
+    )
 }
 
 const fetchGitHubFolderContents = async (
@@ -123,26 +189,32 @@ const fetchGitHubFolderContents = async (
 ): Promise<Result<GitHubContentItem[], Error>> => {
   const apiUrl = `https://api.github.com/repos/${repoInfo.owner}/${repoInfo.repo}/contents/${repoInfo.path}?ref=${repoInfo.branch}`
 
-  try {
-    const response = await fetch(apiUrl, { cache: 'no-store' })
-    if (!response.ok) {
-      return err(
-        new Error(
-          `Failed to fetch GitHub folder contents: ${response.statusText}`,
-        ),
-      )
-    }
-
-    const data: unknown = await response.json()
-    if (!Array.isArray(data)) {
-      return err(new Error('Invalid response format from GitHub API'))
-    }
-
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return ok(data as GitHubContentItem[])
-  } catch (error) {
-    return err(error instanceof Error ? error : new Error('Unknown error'))
+  const responseResult = await safeFetch(apiUrl)
+  if (responseResult.isErr()) {
+    return err(responseResult.error)
   }
+
+  const response = responseResult.value
+  if (!response.ok) {
+    return err(
+      new Error(
+        `Failed to fetch GitHub folder contents: ${response.statusText}`,
+      ),
+    )
+  }
+
+  const dataResult = await safeResponseJson(response)
+  if (dataResult.isErr()) {
+    return err(dataResult.error)
+  }
+
+  const data = dataResult.value
+  if (!Array.isArray(data)) {
+    return err(new Error('Invalid response format from GitHub API'))
+  }
+
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  return ok(data as GitHubContentItem[])
 }
 
 const collectSchemaFilesFromFolder = async (
@@ -175,36 +247,71 @@ const collectSchemaFilesFromFolder = async (
   return ok(schemaFileUrls)
 }
 
+const safeResponseText = async (
+  response: Response,
+): Promise<Result<string, Error>> => {
+  return response
+    .text()
+    .then((text) => ok(text))
+    .catch((error) =>
+      err(
+        error instanceof Error
+          ? error
+          : new Error('Failed to read response text'),
+      ),
+    )
+}
+
+const downloadFile = async (url: string): Promise<Result<string, Error>> => {
+  const responseResult = await safeFetch(url)
+  if (responseResult.isErr()) {
+    return err(responseResult.error)
+  }
+
+  const response = responseResult.value
+  if (!response.ok) {
+    return err(
+      new Error(`Failed to download file from ${url}: ${response.statusText}`),
+    )
+  }
+
+  const contentResult = await safeResponseText(response)
+  if (contentResult.isErr()) {
+    return err(contentResult.error)
+  }
+
+  return ok(contentResult.value)
+}
+
 const downloadAndCombineFiles = async (
   urls: string[],
 ): Promise<Result<string, Error>> => {
-  try {
-    const downloadPromises = urls.map(async (url) => {
-      const response = await fetch(url, { cache: 'no-store' })
-      if (!response.ok) {
-        console.warn(`Failed to download file from ${url}`)
+  const downloadResults = await Promise.all(
+    urls.map(async (url) => {
+      const result = await downloadFile(url)
+      if (result.isErr()) {
+        console.warn(
+          `Failed to download file from ${url}: ${result.error.message}`,
+        )
         return null
       }
-      return await response.text()
-    })
+      return result.value
+    }),
+  )
 
-    const contents = await Promise.all(downloadPromises)
-    const validContents = contents.filter((c): c is string => c !== null)
+  const validContents = downloadResults.filter((c): c is string => c !== null)
 
-    if (validContents.length === 0) {
-      return err(new Error('Failed to download any schema files'))
-    }
-
-    const combinedContent = validContents
-      .map((content, index) => {
-        return `\n// --- File ${index + 1} ---\n${content}`
-      })
-      .join('\n\n')
-
-    return ok(combinedContent)
-  } catch (error) {
-    return err(error instanceof Error ? error : new Error('Unknown error'))
+  if (validContents.length === 0) {
+    return err(new Error('Failed to download any schema files'))
   }
+
+  const combinedContent = validContents
+    .map((content, index) => {
+      return `\n// --- File ${index + 1} ---\n${content}`
+    })
+    .join('\n\n')
+
+  return ok(combinedContent)
 }
 
 const detectFormatFromFileNames = (fileNames: string[]): string | null => {

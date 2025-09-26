@@ -157,7 +157,11 @@ async function determineSchemaFormat(
 
 // Helper function to render error view
 function renderErrorView(
-  blankSchema: { tables: {}; enums: {}; extensions: {} },
+  blankSchema: {
+    tables: Record<string, never>
+    enums: Record<string, never>
+    extensions: Record<string, never>
+  },
   errors: Array<{ name: string; message: string; instruction?: string }>,
   fallbackMessage: string,
   fallbackInstruction: string,

@@ -38,6 +38,27 @@ describe('githubUrlHandler', () => {
         expect(isGitHubFolderUrl(url)).toBe(false)
       }
     })
+
+    it('should distinguish between file and folder URLs', () => {
+      // File URLs (blob) should be false
+      const fileUrls = [
+        'https://github.com/user/repo/blob/main/schema.sql',
+        'https://github.com/user/repo/blob/dev/db/schema.prisma',
+      ]
+
+      // Folder URLs (tree) should be true
+      const folderUrls = [
+        'https://github.com/user/repo/tree/main/schemas',
+        'https://github.com/user/repo/tree/dev/db',
+      ]
+
+      for (const url of fileUrls) {
+        expect(isGitHubFolderUrl(url)).toBe(false)
+      }
+      for (const url of folderUrls) {
+        expect(isGitHubFolderUrl(url)).toBe(true)
+      }
+    })
   })
 
   describe('parseGitHubFolderUrl', () => {
@@ -110,7 +131,9 @@ describe('githubUrlHandler', () => {
 
       expect(result.isOk()).toBe(true)
       if (result.isOk()) {
-        expect(result.value.content).toBe(`${mockUsersSql}\n${mockPostsSql}`)
+        expect(result.value.content).toBe(
+          `\n// --- File 1 ---\n${mockUsersSql}\n\n\n// --- File 2 ---\n${mockPostsSql}`,
+        )
         expect(result.value.detectedFormat).toBe('postgres')
       }
 
@@ -170,6 +193,126 @@ describe('githubUrlHandler', () => {
           'No schema files found in the specified folder',
         )
       }
+    })
+
+    it('should skip excluded files like index.ts', async () => {
+      const mockFetch = vi.mocked(fetch)
+      const url = 'https://github.com/user/repo/tree/main/schemas'
+
+      const mockApiResponse = [
+        {
+          type: 'file',
+          name: 'index.ts',
+          path: 'schemas/index.ts',
+          download_url:
+            'https://raw.githubusercontent.com/user/repo/main/schemas/index.ts',
+        },
+        {
+          type: 'file',
+          name: 'schema.sql',
+          path: 'schemas/schema.sql',
+          download_url:
+            'https://raw.githubusercontent.com/user/repo/main/schemas/schema.sql',
+        },
+      ]
+
+      const mockSchemaSql = 'CREATE TABLE test (id INT);'
+
+      mockFetch
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify(mockApiResponse), { status: 200 }),
+        )
+        .mockResolvedValueOnce(new Response(mockSchemaSql, { status: 200 }))
+
+      const result = await fetchSchemaFromGitHubFolder(url)
+
+      expect(result.isOk()).toBe(true)
+      if (result.isOk()) {
+        expect(result.value.content).not.toContain('export')
+        expect(result.value.content).toContain('CREATE TABLE test')
+      }
+      expect(mockFetch).toHaveBeenCalledTimes(2) // API call + 1 file (index.ts excluded)
+    })
+
+    it('should detect format from multiple file types', async () => {
+      const mockFetch = vi.mocked(fetch)
+      const url = 'https://github.com/user/repo/tree/main/schemas'
+
+      const mockApiResponse = [
+        {
+          type: 'file',
+          name: 'user.prisma',
+          download_url: 'https://example.com/user.prisma',
+        },
+        {
+          type: 'file',
+          name: 'post.sql',
+          download_url: 'https://example.com/post.sql',
+        },
+      ]
+
+      mockFetch
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify(mockApiResponse), { status: 200 }),
+        )
+        .mockResolvedValueOnce(new Response('model User {}', { status: 200 }))
+        .mockResolvedValueOnce(
+          new Response('CREATE TABLE posts', { status: 200 }),
+        )
+
+      const result = await fetchSchemaFromGitHubFolder(url)
+
+      expect(result.isOk()).toBe(true)
+      if (result.isOk()) {
+        expect(result.value.detectedFormat).toBe('prisma') // Prisma has higher priority
+      }
+    })
+
+    it('should recursively process subdirectories', async () => {
+      const mockFetch = vi.mocked(fetch)
+      const url = 'https://github.com/user/repo/tree/main/db'
+
+      // Mock parent folder response
+      const mockParentResponse = [
+        {
+          type: 'file',
+          name: 'schema.sql',
+          download_url: 'https://example.com/schema.sql',
+        },
+        { type: 'dir', name: 'migrations', path: 'db/migrations' },
+      ]
+
+      // Mock subdirectory response
+      const mockSubdirResponse = [
+        {
+          type: 'file',
+          name: '001_init.sql',
+          download_url: 'https://example.com/001_init.sql',
+        },
+      ]
+
+      mockFetch
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify(mockParentResponse), { status: 200 }),
+        )
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify(mockSubdirResponse), { status: 200 }),
+        )
+        .mockResolvedValueOnce(
+          new Response('CREATE TABLE users', { status: 200 }),
+        )
+        .mockResolvedValueOnce(
+          new Response('CREATE TABLE migrations', { status: 200 }),
+        )
+
+      const result = await fetchSchemaFromGitHubFolder(url)
+
+      expect(result.isOk()).toBe(true)
+      if (result.isOk()) {
+        expect(result.value.content).toContain('CREATE TABLE users')
+        expect(result.value.content).toContain('CREATE TABLE migrations')
+      }
+      expect(mockFetch).toHaveBeenCalledTimes(4) // 2 API calls + 2 file downloads
     })
   })
 })

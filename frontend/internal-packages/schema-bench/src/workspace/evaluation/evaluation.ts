@@ -193,11 +193,8 @@ const runEvaluation = (
       columnF1ScoreAverage: result.columnF1ScoreAverage,
       columnRecallAverage: result.columnRecallAverage,
       columnAllCorrectRateAverage: result.columnAllCorrectRateAverage,
-      primaryKeyAccuracyAverage: result.primaryKeyAccuracyAverage,
-      constraintAccuracy: result.constraintAccuracy,
       foreignKeyF1Score: result.foreignKeyF1Score,
       foreignKeyRecall: result.foreignKeyRecall,
-      overallSchemaAccuracy: result.overallSchemaAccuracy,
     },
     tableMapping: result.tableMapping,
     columnMappings: result.columnMappings,
@@ -222,19 +219,10 @@ const calculateAverageMetrics = (results: EvaluationResult[]) => {
         (sum, r) => sum + r.metrics.columnAllCorrectRateAverage,
         0,
       ) / length,
-    primaryKeyAccuracyAverage:
-      results.reduce((sum, r) => sum + r.metrics.primaryKeyAccuracyAverage, 0) /
-      length,
-    constraintAccuracy:
-      results.reduce((sum, r) => sum + r.metrics.constraintAccuracy, 0) /
-      length,
     foreignKeyF1Score:
       results.reduce((sum, r) => sum + r.metrics.foreignKeyF1Score, 0) / length,
     foreignKeyRecall:
       results.reduce((sum, r) => sum + r.metrics.foreignKeyRecall, 0) / length,
-    overallSchemaAccuracy:
-      results.reduce((sum, r) => sum + r.metrics.overallSchemaAccuracy, 0) /
-      length,
   }
 }
 
@@ -272,7 +260,6 @@ const saveSummaryResult = (
     averageMetrics: calculateAverageMetrics(results),
     cases: results.map((r) => ({
       caseId: r.caseId,
-      overallSchemaAccuracy: r.metrics.overallSchemaAccuracy,
     })),
   }
 

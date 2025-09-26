@@ -1,4 +1,12 @@
-import * as fs from 'node:fs'
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import * as path from 'node:path'
 import { err, ok } from 'neverthrow'
 import type { SetupResult, WorkspaceConfig } from '../types'
@@ -15,8 +23,8 @@ const createWorkspaceDirectories = (workspacePath: string): SetupResult => {
 
   try {
     for (const dir of directories) {
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true })
+      if (!existsSync(dir)) {
+        mkdirSync(dir, { recursive: true })
       }
     }
     return ok(undefined)
@@ -38,12 +46,12 @@ const processJsonFile = (
     const parsed = JSON.parse(content)
     if (typeof parsed === 'string') {
       const normalized = { input: parsed }
-      fs.writeFileSync(targetPath, JSON.stringify(normalized, null, 2))
+      writeFileSync(targetPath, JSON.stringify(normalized, null, 2))
     } else {
-      fs.writeFileSync(targetPath, JSON.stringify(parsed, null, 2))
+      writeFileSync(targetPath, JSON.stringify(parsed, null, 2))
     }
   } catch {
-    fs.copyFileSync(sourcePath, targetPath)
+    copyFileSync(sourcePath, targetPath)
   }
 }
 
@@ -52,25 +60,25 @@ const copyInputFilesWithNormalization = (
   dst: string,
 ): SetupResult => {
   try {
-    if (!fs.existsSync(src)) {
+    if (!existsSync(src)) {
       return ok(undefined)
     }
 
-    const files = fs.readdirSync(src)
+    const files = readdirSync(src)
     for (const file of files) {
       const sourcePath = path.join(src, file)
       const targetPath = path.join(dst, file)
 
-      if (fs.existsSync(targetPath)) {
+      if (existsSync(targetPath)) {
         continue
       }
 
-      const content = fs.readFileSync(sourcePath, 'utf-8')
+      const content = readFileSync(sourcePath, 'utf-8')
 
       if (path.extname(file).toLowerCase() === '.json') {
         processJsonFile(content, targetPath, sourcePath)
       } else {
-        fs.copyFileSync(sourcePath, targetPath)
+        copyFileSync(sourcePath, targetPath)
       }
     }
 
@@ -86,17 +94,17 @@ const copyInputFilesWithNormalization = (
 
 const copyReferenceFiles = (src: string, dst: string): SetupResult => {
   try {
-    if (!fs.existsSync(src)) {
+    if (!existsSync(src)) {
       return ok(undefined)
     }
 
-    const files = fs.readdirSync(src)
+    const files = readdirSync(src)
     for (const file of files) {
       const sourcePath = path.join(src, file)
       const targetPath = path.join(dst, file)
 
-      if (!fs.existsSync(targetPath)) {
-        fs.copyFileSync(sourcePath, targetPath)
+      if (!existsSync(targetPath)) {
+        copyFileSync(sourcePath, targetPath)
       }
     }
 
@@ -151,7 +159,7 @@ const validateWorkspace = (workspacePath: string): SetupResult => {
   ]
 
   for (const dir of requiredDirectories) {
-    if (!fs.existsSync(dir)) {
+    if (!existsSync(dir)) {
       return err({ type: 'DIRECTORY_NOT_FOUND', path: dir })
     }
   }
@@ -163,8 +171,8 @@ export const setupWorkspace = async (
   config: WorkspaceConfig,
 ): Promise<SetupResult> => {
   try {
-    if (fs.existsSync(config.workspacePath)) {
-      fs.rmSync(config.workspacePath, { recursive: true, force: true })
+    if (existsSync(config.workspacePath)) {
+      rmSync(config.workspacePath, { recursive: true, force: true })
     }
   } catch (error) {
     return err({

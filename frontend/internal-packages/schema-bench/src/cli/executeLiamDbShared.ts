@@ -9,7 +9,8 @@ import { loadInputFiles, saveOutputFile } from './utils'
 
 config({ path: resolve(__dirname, '../../../../../.env') })
 
-// Outputs overwrite the latest files (no per-run archiving)
+// Outputs: write latest and archive by RUN_ID per execution (with executor label)
+const RUN_ID = new Date().toISOString().replace(/[:.]/g, '-')
 
 const InputSchema = v.union([
   v.object({
@@ -36,7 +37,10 @@ async function executeCase(
     )
   }
 
-  const saveResult = await saveOutputFile(datasetPath, caseId, result.value)
+  const saveResult = await saveOutputFile(datasetPath, caseId, result.value, {
+    archiveRunId: RUN_ID,
+    executor: 'liamdb',
+  })
   if (saveResult.isErr()) {
     return saveResult
   }

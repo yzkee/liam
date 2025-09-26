@@ -1,8 +1,11 @@
 #!/usr/bin/env node
 
-import { existsSync } from 'node:fs'
+import { existsSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
-import { evaluateSchema } from '../workspace/evaluation/evaluation.ts'
+import {
+  evaluateSchema,
+  evaluateSchemaAtOutputDir,
+} from '../workspace/evaluation/evaluation.ts'
 import type { EvaluationConfig } from '../workspace/types'
 import {
   getWorkspacePath,
@@ -16,18 +19,44 @@ async function evaluateDataset(datasetName: string, datasetPath: string) {
     outputFormat: 'json',
   }
 
-  const result = await evaluateSchema(config)
-
-  if (result.isErr()) {
+  // 1) Evaluate latest outputs
+  const latestResult = await evaluateSchema(config)
+  if (latestResult.isErr()) {
     console.error(
-      `   ❌ Failed to evaluate dataset: ${JSON.stringify(result.error, null, 2)}`,
+      `   ❌ Failed to evaluate latest outputs for ${datasetName}: ${JSON.stringify(latestResult.error, null, 2)}`,
     )
-    return { datasetName, success: false, results: null, error: result.error }
   }
 
-  // Note: Aggregate/printing of dataset-level metrics can be added here when needed
+  // 2) Evaluate archived runs under execution/output/runs/<RUN_DIR>
+  const runsRoot = join(datasetPath, 'execution', 'output', 'runs')
+  const runEvaluations: Array<{ runDir: string; ok: boolean }> = []
+  if (existsSync(runsRoot)) {
+    const runDirs = readdirSync(runsRoot, { withFileTypes: true })
+      .filter((d) => d.isDirectory())
+      .map((d) => d.name)
 
-  return { datasetName, success: true, results: result.value, error: null }
+    for (const runDirName of runDirs) {
+      const outputDir = join(runsRoot, runDirName)
+      const scopeSubdir = join('runs', runDirName)
+      const runResult = await evaluateSchemaAtOutputDir(
+        config,
+        outputDir,
+        scopeSubdir,
+      )
+      if (runResult.isErr()) {
+        console.warn(
+          `   ⚠️  Failed to evaluate run ${runDirName} for ${datasetName}: ${JSON.stringify(runResult.error, null, 2)}`,
+        )
+        runEvaluations.push({ runDir: runDirName, ok: false })
+      } else {
+        runEvaluations.push({ runDir: runDirName, ok: true })
+      }
+    }
+  }
+
+  const allOk = latestResult.isOk() && runEvaluations.every((r) => r.ok)
+  const combined = latestResult.isOk() ? latestResult.value : []
+  return { datasetName, success: allOk, results: combined, error: null }
 }
 
 async function main() {

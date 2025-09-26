@@ -3,7 +3,7 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  height: var(--app-bar-height);
+  height: var(--layout-app-bar-height);
   padding: var(--spacing-3) var(--spacing-3half) var(--spacing-3)
     var(--spacing-2);
   background-color: var(--global-muted-background);

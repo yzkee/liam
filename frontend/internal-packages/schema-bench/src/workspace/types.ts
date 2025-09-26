@@ -21,11 +21,8 @@ export type EvaluationResult = {
     columnF1ScoreAverage: number
     columnRecallAverage: number
     columnAllCorrectRateAverage: number
-    primaryKeyAccuracyAverage: number
-    constraintAccuracy: number
     foreignKeyF1Score: number
     foreignKeyRecall: number
-    overallSchemaAccuracy: number
   }
   tableMapping: Record<string, string>
   columnMappings: Record<string, Record<string, string>>

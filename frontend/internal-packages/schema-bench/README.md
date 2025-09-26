@@ -86,12 +86,9 @@ The evaluation computes comprehensive metrics for each dataset:
 - Column F1 Score Average: Average F1 across table columns
 - Column Recall Average: Fraction of reference columns recovered
 - Column All Correct Rate Average: Percentage of perfectly matched columns
-- Primary Key Accuracy Average: Accuracy of primary key detection
-- Constraint Accuracy: Accuracy of constraint detection
 - Foreign Key F1 Score: F1 score for foreign key relationships
 - Foreign Key Recall: Fraction of reference foreign keys recovered
 - Foreign Key All Correct Rate: Percentage of perfectly matched foreign keys
-- Overall Schema Accuracy: Aggregated metric across dimensions
 
 ## Schema Format
 

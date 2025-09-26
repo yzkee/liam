@@ -11,11 +11,7 @@
  * The evaluation produces metrics including F1 scores, precision/recall, and all-correct rates
  * to assess the quality of schema prediction models or tools.
  */
-import type {
-  ForeignKeyConstraint,
-  PrimaryKeyConstraint,
-  Schema,
-} from '@liam-hq/schema'
+import type { ForeignKeyConstraint, Schema } from '@liam-hq/schema'
 import { foreignKeyConstraintSchema } from '@liam-hq/schema'
 import * as v from 'valibot'
 import { nameSimilarity } from '../nameSimilarity/nameSimilarity.ts'
@@ -23,14 +19,6 @@ import { wordOverlapMatch } from '../wordOverlapMatch/wordOverlapMatch.ts'
 
 // Small epsilon value for numerical comparisons
 const EPSILON = 1e-5
-
-// Threshold for determining if all components are correct (table + column + primary key)
-// The value 2.9 represents the sum of perfect scores across three dimensions:
-// - Table name matching (1.0)
-// - Column name matching (1.0)
-// - Primary key validation (0.9)
-// This threshold ensures that all components must achieve near-perfect accuracy to be considered "all correct."
-const ALL_CORRECT_THRESHOLD = 2.9
 
 type Mapping = Record<string, string>
 
@@ -42,11 +30,8 @@ type EvaluateResult = {
   columnF1ScoreAverage: number
   columnRecallAverage: number
   columnAllCorrectRateAverage: number
-  primaryKeyAccuracyAverage: number
-  constraintAccuracy: number
   foreignKeyF1Score: number
   foreignKeyRecall: number
-  overallSchemaAccuracy: number
 }
 
 const createTableMapping = async (
@@ -130,39 +115,6 @@ const calculateColumnMetrics = (
     columnRecall,
     columnAllcorrect: Math.abs(columnF1 - 1) < EPSILON ? 1 : 0,
   }
-}
-
-const validatePrimaryKeys = (
-  referenceTable: Schema['tables'][string],
-  predictTable: Schema['tables'][string],
-  columnMapping: Mapping,
-): boolean => {
-  const referencePKs = Object.values(referenceTable.constraints)
-    .filter((c): c is PrimaryKeyConstraint => c.type === 'PRIMARY KEY')
-    .flatMap((c) => c.columnNames)
-  const predictPKs = Object.values(predictTable.constraints)
-    .filter((c): c is PrimaryKeyConstraint => c.type === 'PRIMARY KEY')
-    .flatMap((c) => c.columnNames)
-
-  if (referencePKs.length !== predictPKs.length) {
-    return false
-  }
-
-  return referencePKs.every(
-    (k: string) => columnMapping[k] && predictPKs.includes(columnMapping[k]),
-  )
-}
-
-// TODO: Implement constraint validation logic. Now it only checks if the number of constraints matches.
-const validateConstraints = (
-  referenceTable: Schema['tables'][string],
-  predictTable: Schema['tables'][string],
-): boolean => {
-  const referenceConstraintCount = Object.keys(
-    referenceTable.constraints,
-  ).length
-  const predictConstraintCount = Object.keys(predictTable.constraints).length
-  return referenceConstraintCount === predictConstraintCount
 }
 
 type ForeignKeyInfo = {
@@ -276,7 +228,7 @@ export const evaluate = async (
   )
 
   // 2. Table-level Precision/Recall/F1/Allcorrect
-  const { tableF1, tableRecall, tableAllcorrect } = calculateTableMetrics(
+  const { tableF1, tableRecall } = calculateTableMetrics(
     referenceTableNames,
     predictTableNames,
     tableMapping,
@@ -288,8 +240,6 @@ export const evaluate = async (
       totalColumnF1Score,
       totalColumnRecall,
       totalColumnAllCorrectCount,
-      totalPrimaryKeyCorrectCount,
-      totalConstraintCorrectCount,
     },
     allColumnMappings,
   } = await aggregateTableEvaluations(reference, predict, tableMapping)
@@ -316,18 +266,6 @@ export const evaluate = async (
   const columnAllCorrectRateAverage = totalTableCount
     ? totalColumnAllCorrectCount / totalTableCount
     : 0
-  const primaryKeyAccuracyAverage = totalTableCount
-    ? totalPrimaryKeyCorrectCount / totalTableCount
-    : 0
-  const constraintAccuracy = totalTableCount
-    ? totalConstraintCorrectCount / totalTableCount
-    : 0
-
-  const overallSchemaAccuracy =
-    primaryKeyAccuracyAverage + columnAllCorrectRateAverage + tableAllcorrect >
-    ALL_CORRECT_THRESHOLD - EPSILON
-      ? 1
-      : 0
 
   return {
     tableMapping,
@@ -337,11 +275,8 @@ export const evaluate = async (
     columnF1ScoreAverage,
     columnRecallAverage,
     columnAllCorrectRateAverage,
-    primaryKeyAccuracyAverage,
-    constraintAccuracy,
     foreignKeyF1Score: foreignKeyF1,
     foreignKeyRecall,
-    overallSchemaAccuracy,
   }
 }
 
@@ -349,8 +284,6 @@ type AggregationTotals = {
   totalColumnF1Score: number
   totalColumnRecall: number
   totalColumnAllCorrectCount: number
-  totalPrimaryKeyCorrectCount: number
-  totalConstraintCorrectCount: number
 }
 
 const aggregateTableEvaluations = async (
@@ -362,8 +295,6 @@ const aggregateTableEvaluations = async (
     totalColumnF1Score: 0,
     totalColumnRecall: 0,
     totalColumnAllCorrectCount: 0,
-    totalPrimaryKeyCorrectCount: 0,
-    totalConstraintCorrectCount: 0,
   }
   const allColumnMappings: Record<string, Mapping> = {}
 
@@ -392,21 +323,6 @@ const aggregateTableEvaluations = async (
     totals.totalColumnF1Score += columnF1
     totals.totalColumnRecall += columnRecall
     totals.totalColumnAllCorrectCount += columnAllcorrect
-
-    // Primary key validation
-    const isPrimaryKeyCorrect = validatePrimaryKeys(
-      referenceTable,
-      predictTable,
-      columnMapping,
-    )
-    totals.totalPrimaryKeyCorrectCount += isPrimaryKeyCorrect ? 1 : 0
-
-    // Constraint validation
-    const isConstraintCorrect = validateConstraints(
-      referenceTable,
-      predictTable,
-    )
-    totals.totalConstraintCorrectCount += isConstraintCorrect ? 1 : 0
   }
 
   return { totals, allColumnMappings }

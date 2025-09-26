@@ -6,7 +6,9 @@ import {
   type CheckpointListOptions,
   type CheckpointMetadata,
   type CheckpointTuple,
+  maxChannelVersion,
   type PendingWrite,
+  TASKS,
   WRITES_IDX_MAP,
 } from '@langchain/langgraph-checkpoint'
 import type { Database, Json, SupabaseClientType } from '@liam-hq/db'
@@ -91,6 +93,7 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
       .select('*')
       .eq('thread_id', thread_id)
       .eq('checkpoint_ns', checkpoint_ns)
+      .eq('organization_id', this.organizationId)
 
     const query = checkpoint_id
       ? baseQuery.eq('checkpoint_id', checkpoint_id).single()
@@ -118,11 +121,20 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
       .eq('checkpoint_ns', checkpoint_ns)
       .eq('checkpoint_id', checkpointData.checkpoint_id)
       .eq('organization_id', this.organizationId)
+      .order('task_id', { ascending: true })
+      .order('idx', { ascending: true })
 
     const checkpoint = await this._loadCheckpoint(
       checkpointData,
       blobsData || [],
     )
+
+    await this._maybeMigratePendingSends({
+      checkpoint,
+      threadId: thread_id,
+      checkpointNs: checkpoint_ns,
+      parentCheckpointId: checkpointData.parent_checkpoint_id,
+    })
 
     const metadata = await this._loadMetadata(checkpointData.metadata)
 
@@ -166,18 +178,27 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
     options?: CheckpointListOptions,
   ): AsyncGenerator<CheckpointTuple> {
     const { filter, before, limit } = options ?? {}
-    const { thread_id, checkpoint_ns = '' } = config.configurable ?? {}
-
-    if (!thread_id) {
-      return
-    }
+    const configurable = config.configurable ?? {}
+    const threadId = configurable?.['thread_id']
+    const checkpointNs = configurable?.['checkpoint_ns']
+    const checkpointId = configurable?.['checkpoint_id']
 
     let query = this.client
       .from('checkpoints')
       .select('*')
-      .eq('thread_id', thread_id)
-      .eq('checkpoint_ns', checkpoint_ns)
       .eq('organization_id', this.organizationId)
+
+    if (threadId !== undefined) {
+      query = query.eq('thread_id', threadId)
+    }
+
+    if (checkpointNs !== undefined && checkpointNs !== null) {
+      query = query.eq('checkpoint_ns', checkpointNs)
+    }
+
+    if (checkpointId !== undefined) {
+      query = query.eq('checkpoint_id', checkpointId)
+    }
 
     // Apply filter
     if (filter && Object.keys(filter).length > 0) {
@@ -186,13 +207,14 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
     }
 
     // Apply before cursor
-    if (before?.configurable?.['checkpoint_id']) {
-      query = query.lt('checkpoint_id', before.configurable['checkpoint_id'])
+    const beforeConfigurable = before?.configurable
+    if (beforeConfigurable?.['checkpoint_id'] !== undefined) {
+      query = query.lt('checkpoint_id', beforeConfigurable['checkpoint_id'])
     }
 
     // Order and limit
     query = query.order('checkpoint_id', { ascending: false })
-    if (limit) {
+    if (limit !== undefined) {
       query = query.limit(Number.parseInt(limit.toString(), 10))
     }
 
@@ -220,8 +242,17 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
         .eq('checkpoint_ns', row.checkpoint_ns)
         .eq('checkpoint_id', row.checkpoint_id)
         .eq('organization_id', this.organizationId)
+        .order('task_id', { ascending: true })
+        .order('idx', { ascending: true })
 
       const checkpoint = await this._loadCheckpoint(row, blobsData || [])
+
+      await this._maybeMigratePendingSends({
+        checkpoint,
+        threadId: row.thread_id,
+        checkpointNs: row.checkpoint_ns,
+        parentCheckpointId: row.parent_checkpoint_id,
+      })
 
       const metadata = await this._loadMetadata(row.metadata)
 
@@ -462,9 +493,11 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
     blobs: Database['public']['Tables']['checkpoint_blobs']['Row'][],
   ): Promise<Checkpoint> {
     const checkpointData = parseSerializedCheckpoint(row.checkpoint)
-    const channelValues = await this._loadBlobs(blobs)
     const channelVersions = this._convertVersionsToNumbers(
       checkpointData.channel_versions,
+    )
+    const channelValues = await this._loadBlobs(
+      this._selectLatestBlobs(blobs, channelVersions),
     )
     const versionsSeen = this._convertVersionsSeenToNumbers(
       checkpointData.versions_seen,
@@ -478,6 +511,45 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
       channel_versions: channelVersions,
       versions_seen: versionsSeen,
     }
+  }
+
+  private _selectLatestBlobs(
+    blobs: Database['public']['Tables']['checkpoint_blobs']['Row'][],
+    channelVersions: Record<string, number>,
+  ): Database['public']['Tables']['checkpoint_blobs']['Row'][] {
+    if (!blobs.length) {
+      return []
+    }
+
+    const selected: Record<
+      string,
+      Database['public']['Tables']['checkpoint_blobs']['Row']
+    > = {}
+
+    for (const blob of blobs) {
+      const targetVersion = channelVersions[blob.channel]
+      if (targetVersion === undefined) {
+        continue
+      }
+
+      const parsedVersion = Number.parseInt(blob.version, 10)
+      if (Number.isNaN(parsedVersion) || parsedVersion > targetVersion) {
+        continue
+      }
+
+      const current = selected[blob.channel]
+      if (!current) {
+        selected[blob.channel] = blob
+        continue
+      }
+
+      const currentVersion = Number.parseInt(current.version, 10)
+      if (Number.isNaN(currentVersion) || parsedVersion >= currentVersion) {
+        selected[blob.channel] = blob
+      }
+    }
+
+    return Object.values(selected)
   }
 
   /**
@@ -595,6 +667,70 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
     }
 
     return pendingWrites
+  }
+
+  private async _maybeMigratePendingSends(params: {
+    checkpoint: Checkpoint
+    threadId?: string
+    checkpointNs?: string
+    parentCheckpointId: string | null
+  }): Promise<void> {
+    const { checkpoint, threadId, checkpointNs, parentCheckpointId } = params
+
+    if (
+      checkpoint.v >= 4 ||
+      !threadId ||
+      checkpointNs === undefined ||
+      !parentCheckpointId ||
+      checkpoint.channel_values[TASKS] !== undefined
+    ) {
+      return
+    }
+
+    const { data: pendingSendsRows } = await this.client
+      .from('checkpoint_writes')
+      .select('*')
+      .eq('thread_id', threadId)
+      .eq('checkpoint_ns', checkpointNs)
+      .eq('checkpoint_id', parentCheckpointId)
+      .eq('channel', TASKS)
+      .eq('organization_id', this.organizationId)
+      .order('task_id', { ascending: true })
+      .order('idx', { ascending: true })
+
+    if (!pendingSendsRows || pendingSendsRows.length === 0) {
+      return
+    }
+
+    const pendingSends = await this._loadWrites(pendingSendsRows)
+    if (pendingSends.length === 0) {
+      return
+    }
+
+    const pendingValues = pendingSends.map(([, , value]) => value)
+
+    checkpoint.channel_values[TASKS] = pendingValues
+
+    if (checkpoint.channel_versions[TASKS] !== undefined) {
+      return
+    }
+
+    const versionValues = Object.values(checkpoint.channel_versions)
+    if (versionValues.length === 0) {
+      checkpoint.channel_versions[TASKS] = this.getNextVersion(undefined)
+      return
+    }
+
+    const maxVersion = maxChannelVersion(...versionValues)
+    if (typeof maxVersion === 'number') {
+      checkpoint.channel_versions[TASKS] = maxVersion
+      return
+    }
+
+    const parsedVersion = Number.parseInt(maxVersion, 10)
+    checkpoint.channel_versions[TASKS] = Number.isFinite(parsedVersion)
+      ? parsedVersion
+      : this.getNextVersion(undefined)
   }
 
   /**

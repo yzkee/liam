@@ -11,6 +11,26 @@ const SUPABASE_SERVICE_KEY = process.env['SUPABASE_SERVICE_ROLE_KEY'] || ''
 
 const createTestClient = () => createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
+const clearOrganizationData = async (
+  client: ReturnType<typeof createTestClient>,
+  organizationId: string,
+) => {
+  await client
+    .from('checkpoint_writes')
+    .delete()
+    .eq('organization_id', organizationId)
+
+  await client
+    .from('checkpoint_blobs')
+    .delete()
+    .eq('organization_id', organizationId)
+
+  await client
+    .from('checkpoints')
+    .delete()
+    .eq('organization_id', organizationId)
+}
+
 const getOrganizationId = async () => {
   const client = createTestClient()
   const { data, error } = await client
@@ -30,13 +50,18 @@ const supabaseCheckpointerInitializer: CheckpointSaverTestInitializer<SupabaseCh
   {
     checkpointerName: 'SupabaseCheckpointSaver',
 
-    async beforeAll() {},
+    async beforeAll() {
+      const client = createTestClient()
+      const organizationId = await getOrganizationId()
+      await clearOrganizationData(client, organizationId)
+    },
 
     async afterAll() {},
 
     async createCheckpointer() {
       const organizationId = await getOrganizationId()
       const client = createTestClient()
+      await clearOrganizationData(client, organizationId)
       return new SupabaseCheckpointSaver({
         client,
         options: { organizationId },

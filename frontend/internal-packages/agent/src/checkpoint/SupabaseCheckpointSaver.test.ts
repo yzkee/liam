@@ -148,6 +148,7 @@ describe('SupabaseCheckpointSaver', () => {
         {
           channel: 'messages',
           type: 'json',
+          version: '1',
           // Convert to hex format like Supabase does (Base64 string -> Hex)
           blob: `\\x${Array.from(Buffer.from(messageBase64))
             .map((b) => b.toString(16).padStart(2, '0'))
@@ -156,6 +157,7 @@ describe('SupabaseCheckpointSaver', () => {
         {
           channel: 'state',
           type: 'json',
+          version: '1',
           // Convert to hex format like Supabase does (Base64 string -> Hex)
           blob: `\\x${Array.from(Buffer.from(stateBase64))
             .map((b) => b.toString(16).padStart(2, '0'))

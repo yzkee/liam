@@ -7,16 +7,21 @@ import {
   useMemo,
   useState,
 } from 'react'
-import type { CommandPaletteInputMode } from '../types'
+import type {
+  CommandPaletteInputMode,
+  CommandPaletteSuggestion,
+} from '../types'
 import styles from './CommandPaletteSearchInput.module.css'
 
 type Props = ComponentProps<typeof Command.Input> & {
   mode: CommandPaletteInputMode
+  suggestion: CommandPaletteSuggestion | null
   setMode: (mode: CommandPaletteInputMode) => void
 }
 
 export const CommandPaletteSearchInput: FC<Props> = ({
   mode,
+  suggestion,
   setMode,
   ...inputProps
 }) => {
@@ -28,6 +33,8 @@ export const CommandPaletteSearchInput: FC<Props> = ({
         return null
       case 'command':
         return '>'
+      case 'column':
+        return `${mode.tableName} /`
     }
   }, [mode])
 

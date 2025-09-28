@@ -22,6 +22,7 @@ describe('in case input mode is "default"', () => {
       render(
         <CommandPaletteSearchInput
           mode={{ type: 'default' }}
+          suggestion={null}
           setMode={mockSetMode}
         />,
         { wrapper },
@@ -39,6 +40,7 @@ describe('in case input mode is "default"', () => {
     render(
       <CommandPaletteSearchInput
         mode={{ type: 'default' }}
+        suggestion={null}
         setMode={mockSetMode}
       />,
       { wrapper },
@@ -61,6 +63,7 @@ describe('in case input mode is "command"', () => {
       render(
         <CommandPaletteSearchInput
           mode={{ type: 'command' }}
+          suggestion={null}
           setMode={mockSetMode}
         />,
         { wrapper },
@@ -78,6 +81,7 @@ describe('in case input mode is "command"', () => {
     render(
       <CommandPaletteSearchInput
         mode={{ type: 'command' }}
+        suggestion={null}
         setMode={mockSetMode}
       />,
       { wrapper },

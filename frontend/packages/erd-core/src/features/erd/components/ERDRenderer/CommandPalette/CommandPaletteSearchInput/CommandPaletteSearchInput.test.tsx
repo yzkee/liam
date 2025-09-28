@@ -33,26 +33,26 @@ describe('in case input mode is "default"', () => {
 
       expect(mockSetMode).toHaveBeenCalledWith({ type: 'command' })
     })
-  })
 
-  it('should not switch input mode when value is not empty', async () => {
-    const user = userEvent.setup()
-    render(
-      <CommandPaletteSearchInput
-        mode={{ type: 'default' }}
-        suggestion={null}
-        setMode={mockSetMode}
-      />,
-      { wrapper },
-    )
-    screen.getByRole('combobox').focus()
+    it('should not switch input mode when value is not empty', async () => {
+      const user = userEvent.setup()
+      render(
+        <CommandPaletteSearchInput
+          mode={{ type: 'default' }}
+          suggestion={null}
+          setMode={mockSetMode}
+        />,
+        { wrapper },
+      )
+      screen.getByRole('combobox').focus()
 
-    // make the input not empty
-    await user.keyboard('hello')
+      // make the input not empty
+      await user.keyboard('hello')
 
-    await user.keyboard('>')
+      await user.keyboard('>')
 
-    expect(mockSetMode).not.toHaveBeenCalled()
+      expect(mockSetMode).not.toHaveBeenCalled()
+    })
   })
 })
 

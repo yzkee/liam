@@ -3,7 +3,8 @@ import { Command } from 'cmdk'
 import {
   type ComponentProps,
   type FC,
-  useEffect,
+  type KeyboardEventHandler,
+  useCallback,
   useMemo,
   useState,
 } from 'react'
@@ -38,35 +39,34 @@ export const CommandPaletteSearchInput: FC<Props> = ({
     }
   }, [mode])
 
-  useEffect(() => {
-    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Complex logic for handling CommandPalette input mode with user keyboard interactions
-    const down = (event: KeyboardEvent) => {
-      if (mode.type === 'default') {
-        // switch to "command" mode if value is empty and `>` is pressed
-        if (event.key === '>' && value === '') {
-          event.preventDefault()
-          setMode({ type: 'command' })
-          return
+  const handleKeydown: KeyboardEventHandler<HTMLInputElement> = useCallback(
+    (event) => {
+      switch (mode.type) {
+        case 'default': {
+          // switch to "command" mode if value is empty and `>` is pressed
+          if (event.key === '>' && value === '') {
+            event.preventDefault()
+            setMode({ type: 'command' })
+            return
+          }
+
+          break
         }
 
-        return
-      }
+        case 'command': {
+          // switch to "default" mode if value is empty and delete key is pressed
+          if (event.key === 'Backspace' && value === '') {
+            event.preventDefault()
+            setMode({ type: 'default' })
+            return
+          }
 
-      if (mode.type === 'command') {
-        // switch to "default" mode if value is empty and delete key is pressed
-        if (event.key === 'Backspace' && value === '') {
-          event.preventDefault()
-          setMode({ type: 'default' })
-          return
+          break
         }
-
-        return
       }
-    }
-
-    document.addEventListener('keydown', down)
-    return () => document.removeEventListener('keydown', down)
-  }, [value, mode, setMode])
+    },
+    [mode.type, value, setMode],
+  )
 
   return (
     <div className={styles.container}>
@@ -79,6 +79,7 @@ export const CommandPaletteSearchInput: FC<Props> = ({
           onValueChange={setValue}
           className={styles.input}
           placeholder="Search"
+          onKeyDown={handleKeydown}
         />
       </div>
     </div>

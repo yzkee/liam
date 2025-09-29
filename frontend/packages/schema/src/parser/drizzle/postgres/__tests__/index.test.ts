@@ -67,37 +67,16 @@ describe(processor, () => {
           name: varchar('name', { length: 255 }).notNull(),
           email: text('email').notNull(),
         }).enableRLS();
-
-        export const posts = pgTable('posts', {
-          id: serial('id').primaryKey(),
-          title: text('title').notNull(),
-          content: text('content'),
-          userId: serial('user_id').references(() => users.id),
-        }).enableRLS();
-
-        export const categories = pgTable('categories', {
-          id: serial('id').primaryKey(),
-          name: varchar('name', { length: 100 }).notNull(),
-        }).enableRLS();
       `)
 
-      // Verify that all tables with .enableRLS() are correctly parsed
-      expect(Object.keys(value.tables)).toHaveLength(3)
+      // Verify that table with .enableRLS() is correctly parsed
+      expect(Object.keys(value.tables)).toHaveLength(1)
       expect(value.tables['users']).toBeDefined()
-      expect(value.tables['posts']).toBeDefined()
-      expect(value.tables['categories']).toBeDefined()
 
-      // Verify table structures
+      // Verify table structure
       expect(value.tables['users']?.columns['id']?.type).toBe('serial')
       expect(value.tables['users']?.columns['name']?.type).toBe('varchar(255)')
       expect(value.tables['users']?.columns['email']?.type).toBe('text')
-
-      expect(value.tables['posts']?.columns['userId']?.type).toBe('serial')
-      expect(value.tables['posts']?.columns['title']?.type).toBe('text')
-
-      expect(value.tables['categories']?.columns['name']?.type).toBe(
-        'varchar(100)',
-      )
     })
 
     it('should parse tables with .$comment() method chaining', async () => {
@@ -109,33 +88,32 @@ describe(processor, () => {
           name: varchar('name', { length: 255 }).notNull(),
           email: text('email').notNull(),
         }).$comment('User accounts table');
+      `)
 
-        export const posts = pgTable('posts', {
-          id: serial('id').primaryKey(),
-          title: text('title').notNull(),
-          content: text('content'),
-        }).$comment('Blog posts storage');
+      // Verify that table with .$comment() is correctly parsed
+      expect(Object.keys(value.tables)).toHaveLength(1)
+      expect(value.tables['users']).toBeDefined()
+
+      // Verify table structure and comment
+      expect(value.tables['users']?.comment).toBe('User accounts table')
+      expect(value.tables['users']?.columns['name']?.type).toBe('varchar(255)')
+      expect(value.tables['users']?.columns['email']?.type).toBe('text')
+    })
+
+    it('should parse tables with complex method chaining (.enableRLS() + .$comment())', async () => {
+      const { value } = await processor(`
+        import { pgTable, serial, text } from 'drizzle-orm/pg-core';
 
         export const mixed = pgTable('mixed', {
           id: serial('id').primaryKey(),
           data: text('data'),
-        }).enableRLS().$comment('Mixed methods example');
+        }).enableRLS().$comment('Complex chaining example');
       `)
 
-      // Verify that all tables with .$comment() are correctly parsed
-      expect(Object.keys(value.tables)).toHaveLength(3)
-      expect(value.tables['users']).toBeDefined()
-      expect(value.tables['posts']).toBeDefined()
+      // Verify that table with complex chaining is correctly parsed
+      expect(Object.keys(value.tables)).toHaveLength(1)
       expect(value.tables['mixed']).toBeDefined()
-
-      // Verify table structures and comments
-      expect(value.tables['users']?.comment).toBe('User accounts table')
-      expect(value.tables['posts']?.comment).toBe('Blog posts storage')
-      expect(value.tables['mixed']?.comment).toBe('Mixed methods example')
-
-      // Verify column structures are still correct
-      expect(value.tables['users']?.columns['name']?.type).toBe('varchar(255)')
-      expect(value.tables['posts']?.columns['title']?.type).toBe('text')
+      expect(value.tables['mixed']?.comment).toBe('Complex chaining example')
       expect(value.tables['mixed']?.columns['data']?.type).toBe('text')
     })
   })

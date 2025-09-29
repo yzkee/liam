@@ -11,6 +11,50 @@
     {
       "id": "user_profile",
       "aliases": ["user_profiles", "account_info"]
+    },
+    {
+      "id": "customer_account",
+      "aliases": [
+        "customers",
+        "accounts",
+        "customer_surrogates",
+        "user_accounts"
+      ]
+    },
+    {
+      "id": "customer_pii",
+      "aliases": ["customer_pii", "account_pii", "user_pii"]
+    },
+    {
+      "id": "closure_reason",
+      "aliases": [
+        "closure_reason_master",
+        "withdrawal_reason_dim",
+        "withdrawal_reasons"
+      ]
+    },
+    {
+      "id": "account_closure",
+      "aliases": [
+        "account_closure",
+        "withdrawal_requests",
+        "withdrawal_events"
+      ]
+    },
+    {
+      "id": "data_erasure_request",
+      "aliases": [
+        "data_erasure_request",
+        "deletion_job_run",
+        "deletion_job_item",
+        "legal_holds",
+        "erasure_jobs",
+        "pii_transformations"
+      ]
+    },
+    {
+      "id": "audit_log",
+      "aliases": ["audit_log"]
     }
   ],
   "generic_tokens": ["info", "data", "table", "record", "list"]

@@ -194,3 +194,126 @@ export const getOrganizationInfo = async (
     return null
   }
 }
+/**
+ * Gets folder contents from a GitHub repository
+ */
+export const getFolderContents = async (
+  owner: string,
+  repo: string,
+  path: string,
+  ref: string,
+): Promise<
+  Array<{
+    type: 'file' | 'dir'
+    name: string
+    path: string
+    download_url?: string
+  }>
+> => {
+  // For public repositories, we can use unauthenticated requests
+  const octokit = new Octokit()
+
+  try {
+    const { data } = await octokit.repos.getContent({
+      owner,
+      repo,
+      path,
+      ref,
+    })
+
+    if (Array.isArray(data)) {
+      return data.map((item) => {
+        const result: {
+          type: 'file' | 'dir'
+          name: string
+          path: string
+          download_url?: string
+        } = {
+          type: item.type === 'file' ? 'file' : 'dir',
+          name: item.name,
+          path: item.path,
+        }
+
+        if ('download_url' in item && item.download_url) {
+          result.download_url = item.download_url
+        }
+
+        return result
+      })
+    }
+
+    // Single file case
+    if ('type' in data) {
+      const result: {
+        type: 'file' | 'dir'
+        name: string
+        path: string
+        download_url?: string
+      } = {
+        type: data.type === 'file' ? 'file' : 'dir',
+        name: data.name,
+        path: data.path,
+      }
+
+      if ('download_url' in data && data.download_url) {
+        result.download_url = data.download_url
+      }
+
+      return [result]
+    }
+
+    return []
+  } catch (error) {
+    console.error(
+      `Error fetching folder contents for ${owner}/${repo}/${path}:`,
+      error,
+    )
+    return []
+  }
+}
+
+/**
+ * Downloads file content from a GitHub raw URL with timeout protection
+ */
+export const downloadFileContent = async (
+  url: string,
+  timeoutMs = 10000, // 10 second default timeout
+): Promise<string | null> => {
+  const controller = new AbortController()
+  let timeoutId: NodeJS.Timeout | undefined
+
+  try {
+    // Set up timeout
+    timeoutId = setTimeout(() => {
+      controller.abort()
+    }, timeoutMs)
+
+    const response = await fetch(url, {
+      signal: controller.signal,
+    })
+
+    // Clear timeout on successful response
+    clearTimeout(timeoutId)
+    timeoutId = undefined
+
+    if (!response.ok) {
+      console.error(`Failed to download file: ${response.statusText}`)
+      return null
+    }
+    return await response.text()
+  } catch (error) {
+    // Clear timeout in error case
+    if (timeoutId) {
+      clearTimeout(timeoutId)
+    }
+
+    // Handle abort/timeout errors
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.error(`Request timeout downloading file from ${url}`)
+      return null
+    }
+
+    console.error(`Error downloading file from ${url}:`, error)
+    return null
+  }
+}

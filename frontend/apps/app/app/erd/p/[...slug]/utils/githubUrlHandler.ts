@@ -1,26 +1,72 @@
+import {
+  downloadFileContent,
+  type GitHubContentItem,
+  type GitHubRepoInfo,
+  getFolderContents,
+} from '@liam-hq/github'
+import { detectFormat } from '@liam-hq/schema/parser'
 import { err, ok, type Result } from 'neverthrow'
 
-type GitHubRepoInfo = {
-  owner: string
-  repo: string
-  branch: string
-  path: string
+const SECURITY_LIMITS = {
+  MAX_RECURSION_DEPTH: 5,
+  MAX_FILES_PER_FOLDER: 50,
+  MAX_TOTAL_FILES: 100,
 }
 
-type GitHubContentItem = {
-  type: 'file' | 'dir'
-  name: string
-  path: string
-  download_url?: string
+const safeParseUrl = (url: string): Result<URL, Error> => {
+  // Basic URL validation without throwing
+  if (!url || typeof url !== 'string') {
+    return err(new Error('Invalid URL: must be a non-empty string'))
+  }
+
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    return err(new Error('Invalid URL: must start with http:// or https://'))
+  }
+
+  // Check for basic URL structure
+  const urlPattern = /^https?:\/\/[^\s/$.?#].[^\s]*$/i
+  if (!urlPattern.test(url)) {
+    return err(new Error('Invalid URL format'))
+  }
+
+  // Parse URL components manually to handle pathname and search properly
+  const match = url.match(/^(https?):\/\/([^\/]+)(\/[^?#]*)?(\?[^#]*)?(#.*)?$/)
+  if (!match) {
+    return err(new Error('Failed to parse URL components'))
+  }
+
+  const [, protocol, host, pathname = '/', search = '', hash = ''] = match
+
+  if (!host) {
+    return err(new Error('Invalid URL: missing host'))
+  }
+
+  const urlObj: URL = {
+    protocol: `${protocol}:`,
+    hostname: host.split(':')[0] || host,
+    host,
+    pathname,
+    href: url,
+    origin: `${protocol}://${host.split('/')[0]}`,
+    search,
+    hash,
+    port: '',
+    username: '',
+    password: '',
+    searchParams: new URLSearchParams(search),
+    toString: () => url,
+    toJSON: () => url,
+  }
+
+  return ok(urlObj)
 }
 
 export const isGitHubFolderUrl = (url: string): boolean => {
-  try {
-    const parsedUrl = new URL(url)
-    return parsedUrl.hostname === 'github.com' && url.includes('/tree/')
-  } catch {
+  const urlResult = safeParseUrl(url)
+  if (urlResult.isErr()) {
     return false
   }
+  return urlResult.value.hostname === 'github.com' && url.includes('/tree/')
 }
 
 const isSchemaFile = (filename: string): boolean => {
@@ -71,10 +117,6 @@ const isSchemaFile = (filename: string): boolean => {
     'application_record.rb',
     // Drizzle non-schema files
     'migrate.ts',
-    // Documentation
-    'readme.md',
-    'readme.sql',
-    'readme.prisma',
   ]
 
   const schemaExtensions = ['.sql', '.prisma', '.rb', '.json', '.js', '.ts']
@@ -94,59 +136,149 @@ const isSchemaFile = (filename: string): boolean => {
 }
 
 export const parseGitHubFolderUrl = (url: string): GitHubRepoInfo | null => {
-  try {
-    const parsedUrl = new URL(url)
-    const pathSegments = parsedUrl.pathname.split('/').filter(Boolean)
-
-    if (pathSegments.length < 4 || pathSegments[2] !== 'tree') {
-      return null
-    }
-
-    const owner = pathSegments[0]
-    const repo = pathSegments[1]
-    const branch = pathSegments[3]
-
-    if (!owner || !repo || !branch) {
-      return null
-    }
-
-    const path = pathSegments.slice(4).join('/')
-
-    return { owner, repo, branch, path }
-  } catch {
+  const urlResult = safeParseUrl(url)
+  if (urlResult.isErr()) {
     return null
   }
+
+  const pathSegments = urlResult.value.pathname.split('/').filter(Boolean)
+
+  if (pathSegments.length < 4 || pathSegments[2] !== 'tree') {
+    return null
+  }
+
+  const owner = pathSegments[0]
+  const repo = pathSegments[1]
+  const branch = pathSegments[3]
+
+  if (!owner || !repo || !branch) {
+    return null
+  }
+
+  const path = pathSegments.slice(4).join('/')
+
+  return { owner, repo, branch, path }
 }
 
 const fetchGitHubFolderContents = async (
   repoInfo: GitHubRepoInfo,
 ): Promise<Result<GitHubContentItem[], Error>> => {
-  const apiUrl = `https://api.github.com/repos/${repoInfo.owner}/${repoInfo.repo}/contents/${repoInfo.path}?ref=${repoInfo.branch}`
+  const contents = await getFolderContents(
+    repoInfo.owner,
+    repoInfo.repo,
+    repoInfo.path,
+    repoInfo.branch,
+  )
+  return ok(contents)
+}
 
-  try {
-    const response = await fetch(apiUrl, { cache: 'no-store' })
-    if (!response.ok) {
-      return err(
-        new Error(
-          `Failed to fetch GitHub folder contents: ${response.statusText}`,
-        ),
-      )
-    }
-
-    const data: unknown = await response.json()
-    if (!Array.isArray(data)) {
-      return err(new Error('Invalid response format from GitHub API'))
-    }
-
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return ok(data as GitHubContentItem[])
-  } catch (error) {
-    return err(error instanceof Error ? error : new Error('Unknown error'))
+const checkSecurityLimits = (
+  depth: number,
+  totalFilesCollected: { count: number },
+  filesInFolder: number,
+): Result<void, Error> => {
+  if (depth >= SECURITY_LIMITS.MAX_RECURSION_DEPTH) {
+    return err(
+      new Error(
+        `Maximum recursion depth (${SECURITY_LIMITS.MAX_RECURSION_DEPTH}) exceeded`,
+      ),
+    )
   }
+
+  if (totalFilesCollected.count >= SECURITY_LIMITS.MAX_TOTAL_FILES) {
+    return err(
+      new Error(
+        `Maximum total files limit (${SECURITY_LIMITS.MAX_TOTAL_FILES}) exceeded`,
+      ),
+    )
+  }
+
+  if (filesInFolder > SECURITY_LIMITS.MAX_FILES_PER_FOLDER) {
+    return err(
+      new Error(
+        `Too many files in folder (${filesInFolder}). Maximum allowed: ${SECURITY_LIMITS.MAX_FILES_PER_FOLDER}`,
+      ),
+    )
+  }
+
+  return ok(undefined)
+}
+
+const processSchemaFile = (
+  item: GitHubContentItem,
+  totalFilesCollected: { count: number },
+): Result<string | null, Error> => {
+  if (item.type !== 'file' || !isSchemaFile(item.name) || !item.download_url) {
+    return ok(null)
+  }
+
+  if (totalFilesCollected.count >= SECURITY_LIMITS.MAX_TOTAL_FILES) {
+    return err(
+      new Error(
+        `Maximum total files limit (${SECURITY_LIMITS.MAX_TOTAL_FILES}) exceeded`,
+      ),
+    )
+  }
+
+  totalFilesCollected.count++
+  return ok(item.download_url)
+}
+
+const processDirectoryItem = async (
+  item: GitHubContentItem,
+  repoInfo: GitHubRepoInfo,
+  depth: number,
+  totalFilesCollected: { count: number },
+): Promise<Result<string[], Error>> => {
+  const subfolderInfo: GitHubRepoInfo = {
+    ...repoInfo,
+    path: item.path,
+  }
+  return collectSchemaFilesFromFolder(
+    subfolderInfo,
+    depth + 1,
+    totalFilesCollected,
+  )
+}
+
+const processContentItems = async (
+  contents: GitHubContentItem[],
+  repoInfo: GitHubRepoInfo,
+  depth: number,
+  totalFilesCollected: { count: number },
+): Promise<Result<string[], Error>> => {
+  const schemaFileUrls: string[] = []
+
+  for (const item of contents) {
+    if (item.type === 'file') {
+      const fileResult = processSchemaFile(item, totalFilesCollected)
+      if (fileResult.isErr()) {
+        return err(fileResult.error)
+      }
+      if (fileResult.value) {
+        schemaFileUrls.push(fileResult.value)
+      }
+    } else if (item.type === 'dir') {
+      const subfolderResult = await processDirectoryItem(
+        item,
+        repoInfo,
+        depth,
+        totalFilesCollected,
+      )
+      if (subfolderResult.isErr()) {
+        return subfolderResult
+      }
+      schemaFileUrls.push(...subfolderResult.value)
+    }
+  }
+
+  return ok(schemaFileUrls)
 }
 
 const collectSchemaFilesFromFolder = async (
   repoInfo: GitHubRepoInfo,
+  depth = 0,
+  totalFilesCollected = { count: 0 },
 ): Promise<Result<string[], Error>> => {
   const contentsResult = await fetchGitHubFolderContents(repoInfo)
   if (contentsResult.isErr()) {
@@ -154,80 +286,68 @@ const collectSchemaFilesFromFolder = async (
   }
 
   const contents = contentsResult.value
-  const schemaFileUrls: string[] = []
+  const filesInFolder = contents.filter((item) => item.type === 'file').length
 
-  for (const item of contents) {
-    if (item.type === 'file' && isSchemaFile(item.name) && item.download_url) {
-      schemaFileUrls.push(item.download_url)
-    } else if (item.type === 'file' && !isSchemaFile(item.name)) {
-    } else if (item.type === 'dir') {
-      const subfolderInfo: GitHubRepoInfo = {
-        ...repoInfo,
-        path: item.path,
-      }
-      const subfolderResult = await collectSchemaFilesFromFolder(subfolderInfo)
-      if (subfolderResult.isOk()) {
-        schemaFileUrls.push(...subfolderResult.value)
-      }
-    }
+  const limitsResult = checkSecurityLimits(
+    depth,
+    totalFilesCollected,
+    filesInFolder,
+  )
+  if (limitsResult.isErr()) {
+    return err(limitsResult.error)
   }
 
-  return ok(schemaFileUrls)
+  return processContentItems(contents, repoInfo, depth, totalFilesCollected)
+}
+
+const downloadFile = async (url: string): Promise<Result<string, Error>> => {
+  const content = await downloadFileContent(url)
+  if (content === null) {
+    return err(new Error(`Failed to download file from ${url}`))
+  }
+  return ok(content)
 }
 
 const downloadAndCombineFiles = async (
   urls: string[],
 ): Promise<Result<string, Error>> => {
-  try {
-    const downloadPromises = urls.map(async (url) => {
-      const response = await fetch(url, { cache: 'no-store' })
-      if (!response.ok) {
-        console.warn(`Failed to download file from ${url}`)
+  const downloadResults = await Promise.all(
+    urls.map(async (url) => {
+      const result = await downloadFile(url)
+      if (result.isErr()) {
+        console.warn(
+          `Failed to download file from ${url}: ${result.error.message}`,
+        )
         return null
       }
-      return await response.text()
-    })
+      return result.value
+    }),
+  )
 
-    const contents = await Promise.all(downloadPromises)
-    const validContents = contents.filter((c): c is string => c !== null)
+  const validContents = downloadResults.filter((c): c is string => c !== null)
 
-    if (validContents.length === 0) {
-      return err(new Error('Failed to download any schema files'))
-    }
-
-    const combinedContent = validContents
-      .map((content, index) => {
-        return `\n// --- File ${index + 1} ---\n${content}`
-      })
-      .join('\n\n')
-
-    return ok(combinedContent)
-  } catch (error) {
-    return err(error instanceof Error ? error : new Error('Unknown error'))
+  if (validContents.length === 0) {
+    return err(new Error('Failed to download any schema files'))
   }
+
+  const combinedContent = validContents
+    .map((content, index) => {
+      return `\n// --- File ${index + 1} ---\n${content}`
+    })
+    .join('\n\n')
+
+  return ok(combinedContent)
 }
 
 const detectFormatFromFileNames = (fileNames: string[]): string | null => {
-  const extensions = fileNames.map((name) => {
-    const parts = name.toLowerCase().split('.')
-    return parts.length > 1 ? `.${parts[parts.length - 1]}` : ''
-  })
+  // Use existing detectFormat function - return the first detected format
+  for (const fileName of fileNames) {
+    const format = detectFormat(fileName)
+    if (format) {
+      return format
+    }
+  }
 
-  if (extensions.some((ext) => ext === '.prisma')) {
-    return 'prisma'
-  }
-  if (extensions.some((ext) => ext === '.rb')) {
-    return 'schemarb'
-  }
-  if (extensions.some((ext) => ['.ts', '.js'].includes(ext))) {
-    return 'drizzle'
-  }
-  if (extensions.some((ext) => ext === '.sql')) {
-    return 'postgres'
-  }
-  if (extensions.some((ext) => ext === '.json')) {
-    return 'tbls'
-  }
   return null
 }
 

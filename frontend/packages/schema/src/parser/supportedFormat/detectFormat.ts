@@ -18,6 +18,9 @@ const extensionToFormatMap: Record<string, SupportedFormat> = {
   rb: 'schemarb',
   sql: 'postgres',
   prisma: 'prisma',
+  ts: 'drizzle',
+  js: 'drizzle',
+  json: 'tbls',
 }
 
 export const detectFormat = (

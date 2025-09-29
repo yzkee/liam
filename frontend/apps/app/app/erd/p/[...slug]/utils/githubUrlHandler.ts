@@ -1,3 +1,4 @@
+import { detectFormat } from '@liam-hq/schema/parser'
 import { err, ok, type Result } from 'neverthrow'
 
 type GitHubRepoInfo = {
@@ -315,26 +316,14 @@ const downloadAndCombineFiles = async (
 }
 
 const detectFormatFromFileNames = (fileNames: string[]): string | null => {
-  const extensions = fileNames.map((name) => {
-    const parts = name.toLowerCase().split('.')
-    return parts.length > 1 ? `.${parts[parts.length - 1]}` : ''
-  })
+  // Use existing detectFormat function - return the first detected format
+  for (const fileName of fileNames) {
+    const format = detectFormat(fileName)
+    if (format) {
+      return format
+    }
+  }
 
-  if (extensions.some((ext) => ext === '.prisma')) {
-    return 'prisma'
-  }
-  if (extensions.some((ext) => ext === '.rb')) {
-    return 'schemarb'
-  }
-  if (extensions.some((ext) => ['.ts', '.js'].includes(ext))) {
-    return 'drizzle'
-  }
-  if (extensions.some((ext) => ext === '.sql')) {
-    return 'postgres'
-  }
-  if (extensions.some((ext) => ext === '.json')) {
-    return 'tbls'
-  }
   return null
 }
 

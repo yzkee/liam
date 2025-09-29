@@ -12,6 +12,7 @@ const SECURITY_LIMITS = {
   MAX_FILES_PER_FOLDER: 50,
   MAX_TOTAL_FILES: 100,
   MAX_FILE_SIZE_BYTES: 5 * 1024 * 1024, // 5MB per file
+  MAX_DIRS_PER_FOLDER: 50,
 }
 
 const safeParseUrl = (url: string): Result<URL, Error> => {
@@ -177,6 +178,7 @@ const checkSecurityLimits = (
   depth: number,
   totalFilesCollected: { count: number },
   filesInFolder: number,
+  dirsInFolder: number,
 ): Result<void, Error> => {
   if (depth >= SECURITY_LIMITS.MAX_RECURSION_DEPTH) {
     return err(
@@ -198,6 +200,14 @@ const checkSecurityLimits = (
     return err(
       new Error(
         `Too many files in folder (${filesInFolder}). Maximum allowed: ${SECURITY_LIMITS.MAX_FILES_PER_FOLDER}`,
+      ),
+    )
+  }
+
+  if (dirsInFolder > SECURITY_LIMITS.MAX_DIRS_PER_FOLDER) {
+    return err(
+      new Error(
+        `Too many subdirectories in folder (${dirsInFolder}). Maximum allowed: ${SECURITY_LIMITS.MAX_DIRS_PER_FOLDER}`,
       ),
     )
   }
@@ -288,11 +298,13 @@ const collectSchemaFilesFromFolder = async (
 
   const contents = contentsResult.value
   const filesInFolder = contents.filter((item) => item.type === 'file').length
+  const dirsInFolder = contents.filter((item) => item.type === 'dir').length
 
   const limitsResult = checkSecurityLimits(
     depth,
     totalFilesCollected,
     filesInFolder,
+    dirsInFolder,
   )
   if (limitsResult.isErr()) {
     return err(limitsResult.error)

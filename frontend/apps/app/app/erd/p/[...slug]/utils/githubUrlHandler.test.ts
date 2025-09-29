@@ -630,6 +630,35 @@ describe('githubUrlHandler', () => {
           )
         }
       })
+
+      it('should handle folders with too many subdirectories', async () => {
+        const url = 'https://github.com/user/repo/tree/main/many-dirs'
+
+        // Create 51 subdirectories (exceeds MAX_DIRS_PER_FOLDER: 50)
+        const mockManyDirs = Array.from({ length: 51 }, (_, i) => ({
+          type: 'dir' as const,
+          name: `subdir${i}`,
+          path: `many-dirs/subdir${i}`,
+        }))
+
+        server.use(
+          http.get(
+            'https://api.github.com/repos/user/repo/contents/many-dirs',
+            () => {
+              return HttpResponse.json(mockManyDirs)
+            },
+          ),
+        )
+
+        const result = await fetchSchemaFromGitHubFolder(url)
+
+        expect(result.isErr()).toBe(true)
+        if (result.isErr()) {
+          expect(result.error.message).toContain(
+            'Too many subdirectories in folder (51). Maximum allowed: 50',
+          )
+        }
+      })
     })
   })
 })

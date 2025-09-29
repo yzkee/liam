@@ -1,19 +1,11 @@
+import {
+  downloadFileContent,
+  type GitHubContentItem,
+  type GitHubRepoInfo,
+  getFolderContents,
+} from '@liam-hq/github'
 import { detectFormat } from '@liam-hq/schema/parser'
 import { err, ok, type Result } from 'neverthrow'
-
-type GitHubRepoInfo = {
-  owner: string
-  repo: string
-  branch: string
-  path: string
-}
-
-type GitHubContentItem = {
-  type: 'file' | 'dir'
-  name: string
-  path: string
-  download_url?: string
-}
 
 const safeParseUrl = (url: string): Result<URL, Error> => {
   // Basic URL validation without throwing
@@ -166,56 +158,16 @@ export const parseGitHubFolderUrl = (url: string): GitHubRepoInfo | null => {
   return { owner, repo, branch, path }
 }
 
-const safeFetch = async (url: string): Promise<Result<Response, Error>> => {
-  return fetch(url, { cache: 'no-store' })
-    .then((response) => ok(response))
-    .catch((error) =>
-      err(error instanceof Error ? error : new Error('Network error')),
-    )
-}
-
-const safeResponseJson = async (
-  response: Response,
-): Promise<Result<unknown, Error>> => {
-  return response
-    .json()
-    .then((data) => ok(data))
-    .catch((error) =>
-      err(error instanceof Error ? error : new Error('JSON parse error')),
-    )
-}
-
 const fetchGitHubFolderContents = async (
   repoInfo: GitHubRepoInfo,
 ): Promise<Result<GitHubContentItem[], Error>> => {
-  const apiUrl = `https://api.github.com/repos/${repoInfo.owner}/${repoInfo.repo}/contents/${repoInfo.path}?ref=${repoInfo.branch}`
-
-  const responseResult = await safeFetch(apiUrl)
-  if (responseResult.isErr()) {
-    return err(responseResult.error)
-  }
-
-  const response = responseResult.value
-  if (!response.ok) {
-    return err(
-      new Error(
-        `Failed to fetch GitHub folder contents: ${response.statusText}`,
-      ),
-    )
-  }
-
-  const dataResult = await safeResponseJson(response)
-  if (dataResult.isErr()) {
-    return err(dataResult.error)
-  }
-
-  const data = dataResult.value
-  if (!Array.isArray(data)) {
-    return err(new Error('Invalid response format from GitHub API'))
-  }
-
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return ok(data as GitHubContentItem[])
+  const contents = await getFolderContents(
+    repoInfo.owner,
+    repoInfo.repo,
+    repoInfo.path,
+    repoInfo.branch,
+  )
+  return ok(contents)
 }
 
 const collectSchemaFilesFromFolder = async (
@@ -248,40 +200,12 @@ const collectSchemaFilesFromFolder = async (
   return ok(schemaFileUrls)
 }
 
-const safeResponseText = async (
-  response: Response,
-): Promise<Result<string, Error>> => {
-  return response
-    .text()
-    .then((text) => ok(text))
-    .catch((error) =>
-      err(
-        error instanceof Error
-          ? error
-          : new Error('Failed to read response text'),
-      ),
-    )
-}
-
 const downloadFile = async (url: string): Promise<Result<string, Error>> => {
-  const responseResult = await safeFetch(url)
-  if (responseResult.isErr()) {
-    return err(responseResult.error)
+  const content = await downloadFileContent(url)
+  if (content === null) {
+    return err(new Error(`Failed to download file from ${url}`))
   }
-
-  const response = responseResult.value
-  if (!response.ok) {
-    return err(
-      new Error(`Failed to download file from ${url}: ${response.statusText}`),
-    )
-  }
-
-  const contentResult = await safeResponseText(response)
-  if (contentResult.isErr()) {
-    return err(contentResult.error)
-  }
-
-  return ok(contentResult.value)
+  return ok(content)
 }
 
 const downloadAndCombineFiles = async (

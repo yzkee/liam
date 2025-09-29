@@ -35,11 +35,7 @@
     },
     {
       "id": "account_closure",
-      "aliases": [
-        "account_closure",
-        "withdrawal_requests",
-        "withdrawal_events"
-      ]
+      "aliases": ["account_closure", "withdrawal_requests", "withdrawal_events"]
     },
     {
       "id": "data_erasure_request",
@@ -56,6 +52,5 @@
       "id": "audit_log",
       "aliases": ["audit_log"]
     }
-  ],
-  "generic_tokens": ["info", "data", "table", "record", "list"]
+  ]
 }

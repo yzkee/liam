@@ -1,7 +1,7 @@
 /**
  * Dictionary (Concept) Matching
  *
- * Minimal Option B implementation: concept ID based matching using
+ * concept ID based matching using
  * a pre-registered dictionary of alias groups. If a reference and
  * a candidate resolve to the same concept, we map them with priority
  * over other strategies.
@@ -10,23 +10,41 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+/**
+ * Mapping from reference name to candidate name.
+ * Mutated in place by `dictionaryMatch` to assign matches.
+ */
 type Mapping = Record<string, string>
 
+/**
+ * A single concept entry defined in a dictionary.
+ * Represents a stable concept ID and its alias names.
+ */
 type Concept = {
+  /** Stable identifier used as the match key across aliases. */
   id: string
+  /** Names/aliases that refer to the same concept (before normalization). */
   aliases: string[]
+  /** Optional contextual scope labels (not used by matching currently). */
   scope?: string[]
 }
 
-type ConceptDictFile = {
+/**
+ * On-disk dictionary file shape as parsed from JSON.
+ */
+type ConceptDictionaryFile = {
+  /** List of concept definitions with their aliases. */
   concepts: Concept[]
-  generic_tokens?: string[]
 }
 
+/**
+ * In-memory index built from one or more dictionaries for fast lookup.
+ */
 export type ConceptIndex = {
+  /** Normalized alias → concept ID. */
   aliasToConcept: Map<string, string>
+  /** Concept ID → list of normalized aliases. */
   conceptToAliases: Map<string, string[]>
-  genericTokens: Set<string>
 }
 
 function normalizeAlias(s: string): string {
@@ -47,7 +65,7 @@ function jaccard(a: Set<string>, b: Set<string>): number {
   return uni === 0 ? 0 : inter / uni
 }
 
-function readJson(filePath: string): ConceptDictFile | null {
+function readJsonFile(filePath: string): ConceptDictionaryFile | null {
   try {
     const raw = fs.readFileSync(filePath, 'utf8')
     const parsed = JSON.parse(raw)
@@ -60,98 +78,98 @@ function readJson(filePath: string): ConceptDictFile | null {
 /**
  * Load default dictionary shipped with this package.
  */
-function loadDefaultConceptDict(): ConceptDictFile | null {
+function loadDefaultConceptDictionary(): ConceptDictionaryFile | null {
   // Resolve relative to this module file so tests/CLI can locate it reliably
   const __dirnameLocal = fileURLToPath(new URL('.', import.meta.url))
-  const dictPath = path.resolve(
+  const dictionaryFilePath = path.resolve(
     __dirnameLocal,
     '../dictionaries/global.concepts.json',
   )
-  return readJson(dictPath)
+  return readJsonFile(dictionaryFilePath)
 }
 
-// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
-export function buildConceptIndex(dicts?: ConceptDictFile[]): ConceptIndex {
+export function buildConceptIndex(): ConceptIndex {
   const aliasToConcept = new Map<string, string>()
   const conceptToAliases = new Map<string, string[]>()
-  const genericTokens = new Set<string>()
 
-  const loaded: ConceptDictFile[] = []
-  if (dicts && dicts.length > 0) {
-    loaded.push(...dicts)
+  const selectedDictionaries: ConceptDictionaryFile[] = []
+  const defaultDictionary = loadDefaultConceptDictionary()
+  if (defaultDictionary) {
+    selectedDictionaries.push(defaultDictionary)
   } else {
-    const def = loadDefaultConceptDict()
-    if (def) {
-      loaded.push(def)
-    } else {
-      // Warn so consumers notice dictionary-based matching is disabled
-      console.warn(
-        '[schema-bench] No concept dictionaries loaded; dictionaryMatch will be a no-op.',
-      )
-    }
+    // Warn so consumers notice dictionary-based matching is disabled
+    console.warn(
+      '[schema-bench] No concept dictionaries loaded; dictionaryMatch will be a no-op.',
+    )
   }
 
-  for (const dict of loaded) {
-    if (dict.generic_tokens) {
-      for (const t of dict.generic_tokens) genericTokens.add(normalizeAlias(t))
-    }
-    for (const c of dict.concepts) {
-      const normAliases = c.aliases.map((a) => normalizeAlias(a))
-      conceptToAliases.set(c.id, normAliases)
-      for (const a of normAliases) {
-        const prev = aliasToConcept.get(a)
-        if (prev && prev !== c.id) {
+  for (const dictionary of selectedDictionaries) {
+    for (const concept of dictionary.concepts) {
+      const normalizedAliases = concept.aliases.map((alias) =>
+        normalizeAlias(alias),
+      )
+      conceptToAliases.set(concept.id, normalizedAliases)
+      for (const normalizedAlias of normalizedAliases) {
+        const existingConceptId = aliasToConcept.get(normalizedAlias)
+        if (existingConceptId && existingConceptId !== concept.id) {
           // Keep the first mapping deterministically and warn for visibility
           console.warn(
-            `[schema-bench] Duplicate alias "${a}" for concepts "${prev}" and "${c.id}". Keeping "${prev}".`,
+            `[schema-bench] Duplicate alias "${normalizedAlias}" for concepts "${existingConceptId}" and "${concept.id}". Keeping "${existingConceptId}".`,
           )
           continue
         }
-        aliasToConcept.set(a, c.id)
+        aliasToConcept.set(normalizedAlias, concept.id)
       }
     }
   }
 
-  return { aliasToConcept, conceptToAliases, genericTokens }
-}
-
-export type DictionaryMatchOptions = {
-  // threshold for token-based concept inference (fallback when direct alias not found)
-  tokenJaccardThreshold?: number // default 0.8
+  return { aliasToConcept, conceptToAliases }
 }
 
 function inferConceptByTokens(
   name: string,
   index: ConceptIndex,
-  opts?: DictionaryMatchOptions,
 ): string | null {
-  const tokens = toTokens(name).filter((t) => !index.genericTokens.has(t))
+  const tokens = toTokens(name)
   const tokenSet = new Set(tokens)
   let best: { id: string; score: number } | null = null
   for (const [id, aliases] of index.conceptToAliases) {
-    for (const al of aliases) {
-      const alTokens = toTokens(al).filter((t) => !index.genericTokens.has(t))
-      const score = jaccard(tokenSet, new Set(alTokens))
+    for (const alias of aliases) {
+      const aliasTokens = toTokens(alias)
+      const score = jaccard(tokenSet, new Set(aliasTokens))
       if (!best || score > best.score) best = { id, score }
     }
   }
-  const threshold = opts?.tokenJaccardThreshold ?? 0.8
+  const threshold = 0.8
   return best && best.score >= threshold ? best.id : null
 }
 
-export function conceptOf(
-  name: string,
-  index: ConceptIndex,
-  opts?: DictionaryMatchOptions,
-): string | null {
+export function conceptOf(name: string, index: ConceptIndex): string | null {
   const normalized = normalizeAlias(name)
-  const byAlias = index.aliasToConcept.get(normalized)
-  if (byAlias) return byAlias
-  return inferConceptByTokens(name, index, opts)
+  const conceptByAlias = index.aliasToConcept.get(normalized)
+  if (conceptByAlias) return conceptByAlias
+  return inferConceptByTokens(name, index)
 }
 
 /**
- * dictionaryMatch: Assign mappings for pairs that share the same concept.
+ * Assign candidate names to reference names when they share the same concept.
+ *
+ * Behavior:
+ * - Resolves a concept for each name using a dictionary-backed index.
+ *   - First tries direct alias lookup (normalized).
+ *   - Falls back to token-based inference using Jaccard similarity.
+ * - Iterates references in order; for each unmapped reference, selects the first unused
+ *   candidate with the same concept. When multiple exist, prefers higher token overlap.
+ * - Mutates `mapping` in place as `mapping[reference] = candidate`.
+ *
+ * Parameters:
+ * - `references`: Reference names to be mapped.
+ * - `candidates`: Candidate names to map from.
+ * - `mapping`: Existing partial mapping; respected as-is and extended.
+ *
+ * Notes:
+ * - Each candidate is used at most once.
+ * - References with no resolvable concept remain unmapped.
  */
 
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
@@ -159,41 +177,41 @@ export function dictionaryMatch(
   references: string[],
   candidates: string[],
   mapping: Mapping,
-  options?: DictionaryMatchOptions,
-  index?: ConceptIndex,
 ): void {
-  const localIndex = index ?? buildConceptIndex()
+  const localIndex = buildConceptIndex()
 
   // Track used candidates to avoid duplicates
-  const used = new Set(Object.values(mapping))
+  const usedCandidates = new Set(Object.values(mapping))
 
   // Precompute candidate concepts
-  const candConcepts = new Map<string, string | null>()
-  for (const c of candidates) {
-    candConcepts.set(c, conceptOf(c, localIndex, options))
+  const candidateConceptMap = new Map<string, string | null>()
+  for (const candidate of candidates) {
+    candidateConceptMap.set(candidate, conceptOf(candidate, localIndex))
   }
 
-  for (const ref of references) {
-    if (mapping[ref] !== undefined) continue
-    const refConcept = conceptOf(ref, localIndex, options)
-    if (!refConcept) continue
+  for (const reference of references) {
+    if (mapping[reference] !== undefined) continue
+    const referenceConceptId = conceptOf(reference, localIndex)
+    if (!referenceConceptId) continue
 
     // Choose the first unused candidate with the same concept; if multiple, prefer higher token overlap
-    let bestCand: { name: string; score: number } | null = null
-    for (const cand of candidates) {
-      if (used.has(cand)) continue
-      const cConcept = candConcepts.get(cand)
-      if (!cConcept || cConcept !== refConcept) continue
-      // Score by token Jaccard (ignoring generic tokens)
-      const s = jaccard(
-        new Set(toTokens(ref).filter((t) => !localIndex.genericTokens.has(t))),
-        new Set(toTokens(cand).filter((t) => !localIndex.genericTokens.has(t))),
+    let bestCandidate: { name: string; score: number } | null = null
+    for (const candidate of candidates) {
+      if (usedCandidates.has(candidate)) continue
+      const candidateConceptId = candidateConceptMap.get(candidate)
+      if (!candidateConceptId || candidateConceptId !== referenceConceptId)
+        continue
+      // Score by token Jaccard
+      const similarityScore = jaccard(
+        new Set(toTokens(reference)),
+        new Set(toTokens(candidate)),
       )
-      if (!bestCand || s > bestCand.score) bestCand = { name: cand, score: s }
+      if (!bestCandidate || similarityScore > bestCandidate.score)
+        bestCandidate = { name: candidate, score: similarityScore }
     }
-    if (bestCand) {
-      mapping[ref] = bestCand.name
-      used.add(bestCand.name)
+    if (bestCandidate) {
+      mapping[reference] = bestCandidate.name
+      usedCandidates.add(bestCandidate.name)
     }
   }
 }

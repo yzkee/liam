@@ -1,13 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { buildConceptIndex, dictionaryMatch } from './dictionaryMatch'
+import { dictionaryMatch } from './dictionaryMatch'
 
 describe('dictionaryMatch (concept-based)', () => {
   it('matches domain synonyms via concept aliases (customer_info ↔ client_data)', () => {
     const reference = ['customer_info']
     const predict = ['client_data']
     const mapping: Record<string, string> = {}
-    const index = buildConceptIndex() // load default
-    dictionaryMatch(reference, predict, mapping, undefined, index)
+    dictionaryMatch(reference, predict, mapping)
     expect(mapping).toEqual({ customer_info: 'client_data' })
   })
 
@@ -15,8 +14,7 @@ describe('dictionaryMatch (concept-based)', () => {
     const reference = ['order_details']
     const predict = ['purchase_items']
     const mapping: Record<string, string> = {}
-    const index = buildConceptIndex()
-    dictionaryMatch(reference, predict, mapping, undefined, index)
+    dictionaryMatch(reference, predict, mapping)
     expect(mapping).toEqual({ order_details: 'purchase_items' })
   })
 
@@ -24,8 +22,7 @@ describe('dictionaryMatch (concept-based)', () => {
     const reference = ['user_profiles']
     const predict = ['account_info']
     const mapping: Record<string, string> = {}
-    const index = buildConceptIndex()
-    dictionaryMatch(reference, predict, mapping, undefined, index)
+    dictionaryMatch(reference, predict, mapping)
     expect(mapping).toEqual({ user_profiles: 'account_info' })
   })
 
@@ -33,8 +30,7 @@ describe('dictionaryMatch (concept-based)', () => {
     const reference = ['customer_info']
     const predict = ['client_log']
     const mapping: Record<string, string> = {}
-    const index = buildConceptIndex()
-    dictionaryMatch(reference, predict, mapping, undefined, index)
+    dictionaryMatch(reference, predict, mapping)
     expect(mapping).toEqual({})
   })
 })

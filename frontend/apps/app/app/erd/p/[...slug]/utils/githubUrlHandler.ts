@@ -23,13 +23,13 @@ const safeParseUrl = (url: string): Result<URL, Error> => {
     return err(new Error('Invalid URL format'))
   }
 
-  // If basic validation passes, construct URL manually
-  const match = url.match(/^(https?):\/\/([^\/]+)(.*)$/)
+  // Parse URL components manually to handle pathname and search properly
+  const match = url.match(/^(https?):\/\/([^\/]+)(\/[^?#]*)?(\?[^#]*)?(#.*)?$/)
   if (!match) {
     return err(new Error('Failed to parse URL components'))
   }
 
-  const [, protocol, host, pathname = ''] = match
+  const [, protocol, host, pathname = '/', search = '', hash = ''] = match
 
   if (!host) {
     return err(new Error('Invalid URL: missing host'))
@@ -39,15 +39,15 @@ const safeParseUrl = (url: string): Result<URL, Error> => {
     protocol: `${protocol}:`,
     hostname: host.split(':')[0] || host,
     host,
-    pathname: pathname || '/',
+    pathname,
     href: url,
     origin: `${protocol}://${host.split('/')[0]}`,
-    search: '',
-    hash: '',
+    search,
+    hash,
     port: '',
     username: '',
     password: '',
-    searchParams: new URLSearchParams(),
+    searchParams: new URLSearchParams(search),
     toString: () => url,
     toJSON: () => url,
   }

@@ -55,6 +55,31 @@ describe('githubUrlHandler', () => {
       })
     })
 
+    it('should handle URLs with query parameters', () => {
+      const url = 'https://github.com/org/repo/tree/main?tab=readme-ov-file'
+      const result = parseGitHubFolderUrl(url)
+
+      expect(result).toEqual({
+        owner: 'org',
+        repo: 'repo',
+        branch: 'main',
+        path: '',
+      })
+    })
+
+    it('should handle URLs with query parameters and paths', () => {
+      const url =
+        'https://github.com/org/repo/tree/main/schemas?tab=readme-ov-file'
+      const result = parseGitHubFolderUrl(url)
+
+      expect(result).toEqual({
+        owner: 'org',
+        repo: 'repo',
+        branch: 'main',
+        path: 'schemas',
+      })
+    })
+
     it('should return null for invalid URLs', () => {
       const invalidUrls = [
         'https://github.com/user/repo/blob/main/file.sql',

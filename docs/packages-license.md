@@ -2,9 +2,9 @@
 
 
 ## Summary
-* 1381 MIT
-* 129 Apache 2.0
-* 88 ISC
+* 1385 MIT
+* 130 Apache 2.0
+* 87 ISC
 * 39 New BSD
 * 25 Simplified BSD
 * 9 Mozilla Public License 2.0
@@ -1367,17 +1367,6 @@ Unknown manually approved
 
 
 
-<a name="@bundled-es-modules/tough-cookie"></a>
-### @bundled-es-modules/tough-cookie v0.1.6
-#### 
-
-##### Paths
-* /home/runner/work/liam/liam
-
-<a href="http://en.wikipedia.org/wiki/ISC_license">ISC</a> permitted
-
-
-
 <a name="@cfworker/json-schema"></a>
 ### @cfworker/json-schema v4.1.1
 #### 
@@ -1676,7 +1665,7 @@ Unknown manually approved
 
 
 <a name="@codemirror/view"></a>
-### @codemirror/view v6.38.1
+### @codemirror/view v6.38.2
 #### 
 
 ##### Paths
@@ -1995,7 +1984,7 @@ Unknown manually approved
 
 
 <a name="@grpc/grpc-js"></a>
-### @grpc/grpc-js v1.13.4
+### @grpc/grpc-js v1.14.0
 #### 
 
 ##### Paths
@@ -2006,7 +1995,7 @@ Unknown manually approved
 
 
 <a name="@grpc/proto-loader"></a>
-### @grpc/proto-loader v0.7.15
+### @grpc/proto-loader v0.8.0
 #### 
 
 ##### Paths
@@ -2083,13 +2072,24 @@ Unknown manually approved
 
 
 <a name="@ibm-cloud/watsonx-ai"></a>
-### @ibm-cloud/watsonx-ai v1.6.12
+### @ibm-cloud/watsonx-ai v1.6.13
 #### 
 
 ##### Paths
 * /home/runner/work/liam/liam
 
 <a href="http://www.apache.org/licenses/LICENSE-2.0.txt">Apache 2.0</a> permitted
+
+
+
+<a name="@img/colour"></a>
+### @img/colour v1.0.0
+#### 
+
+##### Paths
+* /home/runner/work/liam/liam
+
+<a href="http://opensource.org/licenses/mit-license">MIT</a> permitted
 
 
 
@@ -2479,7 +2479,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@jsonjoy.com/json-pack"></a>
-### @jsonjoy.com/json-pack v1.11.0
+### @jsonjoy.com/json-pack v1.14.0
 #### 
 
 ##### Paths
@@ -2523,7 +2523,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@langchain/core"></a>
-### @langchain/core v0.3.72
+### @langchain/core v0.3.75
 #### 
 
 ##### Paths
@@ -2546,6 +2546,17 @@ LGPL-3.0-or-later permitted
 
 <a name="@langchain/langgraph-checkpoint"></a>
 ### @langchain/langgraph-checkpoint v0.1.1
+#### 
+
+##### Paths
+* /home/runner/work/liam/liam
+
+<a href="http://opensource.org/licenses/mit-license">MIT</a> permitted
+
+
+
+<a name="@langchain/langgraph-checkpoint-validation"></a>
+### @langchain/langgraph-checkpoint-validation v0.1.1
 #### 
 
 ##### Paths
@@ -3303,6 +3314,17 @@ LGPL-3.0-or-later permitted
 
 
 
+<a name="@opentelemetry/instrumentation-redis"></a>
+### @opentelemetry/instrumentation-redis v0.53.0
+#### 
+
+##### Paths
+* /home/runner/work/liam/liam
+
+<a href="http://www.apache.org/licenses/LICENSE-2.0.txt">Apache 2.0</a> permitted
+
+
+
 <a name="@opentelemetry/instrumentation-redis-4"></a>
 ### @opentelemetry/instrumentation-redis-4 v0.46.1
 #### 
@@ -3392,7 +3414,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@orama/orama"></a>
-### @orama/orama v3.1.13
+### @orama/orama v3.1.14
 #### 
 
 ##### Paths
@@ -3403,7 +3425,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@oxc-resolver/binding-linux-x64-gnu"></a>
-### @oxc-resolver/binding-linux-x64-gnu v11.8.0
+### @oxc-resolver/binding-linux-x64-gnu v11.8.2
 #### 
 
 ##### Paths
@@ -3414,7 +3436,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@oxc-resolver/binding-linux-x64-musl"></a>
-### @oxc-resolver/binding-linux-x64-musl v11.8.0
+### @oxc-resolver/binding-linux-x64-musl v11.8.2
 #### 
 
 ##### Paths
@@ -4272,7 +4294,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@rive-app/canvas"></a>
-### @rive-app/canvas v2.31.2
+### @rive-app/canvas v2.31.5
 #### 
 
 ##### Paths
@@ -4283,7 +4305,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@rive-app/react-canvas"></a>
-### @rive-app/react-canvas v4.23.1
+### @rive-app/react-canvas v4.23.3
 #### 
 
 ##### Paths
@@ -4349,7 +4371,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@rollup/rollup-linux-x64-gnu"></a>
-### @rollup/rollup-linux-x64-gnu v4.50.0
+### @rollup/rollup-linux-x64-gnu v4.50.1
 #### 
 
 ##### Paths
@@ -4360,7 +4382,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@rollup/rollup-linux-x64-musl"></a>
-### @rollup/rollup-linux-x64-musl v4.50.0
+### @rollup/rollup-linux-x64-musl v4.50.1
 #### 
 
 ##### Paths
@@ -4470,7 +4492,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@sentry/cli"></a>
-### @sentry/cli v2.53.0
+### @sentry/cli v2.54.0
 #### 
 
 ##### Paths
@@ -4481,7 +4503,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@sentry/cli-linux-x64"></a>
-### @sentry/cli-linux-x64 v2.53.0
+### @sentry/cli-linux-x64 v2.54.0
 #### 
 
 ##### Paths
@@ -4580,7 +4602,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@shikijs/core"></a>
-### @shikijs/core v3.12.2
+### @shikijs/core v3.13.0
 #### 
 
 ##### Paths
@@ -4591,7 +4613,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@shikijs/engine-javascript"></a>
-### @shikijs/engine-javascript v3.12.2
+### @shikijs/engine-javascript v3.13.0
 #### 
 
 ##### Paths
@@ -4602,7 +4624,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@shikijs/engine-oniguruma"></a>
-### @shikijs/engine-oniguruma v3.12.2
+### @shikijs/engine-oniguruma v3.13.0
 #### 
 
 ##### Paths
@@ -4613,7 +4635,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@shikijs/langs"></a>
-### @shikijs/langs v3.12.2
+### @shikijs/langs v3.13.0
 #### 
 
 ##### Paths
@@ -4624,7 +4646,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@shikijs/rehype"></a>
-### @shikijs/rehype v3.12.2
+### @shikijs/rehype v3.13.0
 #### 
 
 ##### Paths
@@ -4635,7 +4657,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@shikijs/themes"></a>
-### @shikijs/themes v3.12.2
+### @shikijs/themes v3.13.0
 #### 
 
 ##### Paths
@@ -4646,7 +4668,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@shikijs/transformers"></a>
-### @shikijs/transformers v3.12.2
+### @shikijs/transformers v3.13.0
 #### 
 
 ##### Paths
@@ -4657,7 +4679,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@shikijs/types"></a>
-### @shikijs/types v3.12.2
+### @shikijs/types v3.13.0
 #### 
 
 ##### Paths
@@ -4778,7 +4800,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@storybook/icons"></a>
-### @storybook/icons v1.5.0
+### @storybook/icons v1.6.0
 #### 
 
 ##### Paths
@@ -4899,7 +4921,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@supabase/ssr"></a>
-### @supabase/ssr v0.6.1
+### @supabase/ssr v0.7.0
 #### 
 
 ##### Paths
@@ -7063,7 +7085,7 @@ Python-2.0 manually approved
 
 
 <a name="baseline-browser-mapping"></a>
-### baseline-browser-mapping v2.8.4
+### baseline-browser-mapping v2.8.6
 #### 
 
 ##### Paths
@@ -7283,7 +7305,7 @@ Python-2.0 manually approved
 
 
 <a name="browserify-sign"></a>
-### browserify-sign v4.2.3
+### browserify-sign v4.2.4
 #### 
 
 ##### Paths
@@ -7305,7 +7327,7 @@ Python-2.0 manually approved
 
 
 <a name="browserslist"></a>
-### browserslist v4.26.0
+### browserslist v4.26.2
 #### 
 
 ##### Paths
@@ -7481,7 +7503,7 @@ Python-2.0 manually approved
 
 
 <a name="caniuse-lite"></a>
-### caniuse-lite v1.0.30001741
+### caniuse-lite v1.0.30001743
 #### 
 
 ##### Paths
@@ -9043,7 +9065,7 @@ Artistic-2.0 permitted
 
 
 <a name="effect"></a>
-### effect v3.17.13
+### effect v3.17.14
 #### 
 
 ##### Paths
@@ -9054,7 +9076,7 @@ Artistic-2.0 permitted
 
 
 <a name="electron-to-chromium"></a>
-### electron-to-chromium v1.5.218
+### electron-to-chromium v1.5.222
 #### 
 
 ##### Paths
@@ -11100,7 +11122,7 @@ Artistic-2.0 permitted
 
 
 <a name="ibm-cloud-sdk-core"></a>
-### ibm-cloud-sdk-core v5.4.2
+### ibm-cloud-sdk-core v5.4.3
 #### 
 
 ##### Paths
@@ -12138,7 +12160,7 @@ Public Domain manually approved
 
 
 <a name="langsmith"></a>
-### langsmith v0.3.66
+### langsmith v0.3.67
 #### 
 
 ##### Paths
@@ -12831,7 +12853,7 @@ Public Domain manually approved
 
 
 <a name="memfs"></a>
-### memfs v4.39.0
+### memfs v4.43.0
 #### 
 
 ##### Paths
@@ -13491,7 +13513,7 @@ Public Domain manually approved
 
 
 <a name="msw"></a>
-### msw v2.10.5
+### msw v2.11.1
 #### 
 
 ##### Paths
@@ -14129,7 +14151,7 @@ Public Domain manually approved
 
 
 <a name="oxc-resolver"></a>
-### oxc-resolver v11.8.0
+### oxc-resolver v11.8.2
 #### 
 
 ##### Paths
@@ -15372,7 +15394,7 @@ BlueOak-1.0.0 permitted
 
 
 <a name="react-medium-image-zoom"></a>
-### react-medium-image-zoom v5.3.0
+### react-medium-image-zoom v5.4.0
 #### 
 
 ##### Paths
@@ -15702,7 +15724,7 @@ BlueOak-1.0.0 permitted
 
 
 <a name="regexpu-core"></a>
-### regexpu-core v6.3.1
+### regexpu-core v6.4.0
 #### 
 
 ##### Paths
@@ -16032,7 +16054,7 @@ BlueOak-1.0.0 permitted
 
 
 <a name="rollup"></a>
-### rollup v4.50.0
+### rollup v4.50.1
 #### 
 
 ##### Paths
@@ -16329,7 +16351,7 @@ BlueOak-1.0.0 permitted
 
 
 <a name="shiki"></a>
-### shiki v3.12.2
+### shiki v3.13.0
 #### 
 
 ##### Paths
@@ -17301,7 +17323,7 @@ CC-BY-3.0 permitted
 
 
 <a name="tinyspy"></a>
-### tinyspy v4.0.3
+### tinyspy v4.0.4
 #### 
 
 ##### Paths
@@ -17313,6 +17335,28 @@ CC-BY-3.0 permitted
 
 <a name="title-case"></a>
 ### title-case v2.1.1
+#### 
+
+##### Paths
+* /home/runner/work/liam/liam
+
+<a href="http://opensource.org/licenses/mit-license">MIT</a> permitted
+
+
+
+<a name="tldts"></a>
+### tldts v7.0.16
+#### 
+
+##### Paths
+* /home/runner/work/liam/liam
+
+<a href="http://opensource.org/licenses/mit-license">MIT</a> permitted
+
+
+
+<a name="tldts-core"></a>
+### tldts-core v7.0.16
 #### 
 
 ##### Paths

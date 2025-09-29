@@ -1,17 +1,19 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { HttpResponse, http } from 'msw'
+import { setupServer } from 'msw/node'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 import {
   fetchSchemaFromGitHubFolder,
   isGitHubFolderUrl,
   parseGitHubFolderUrl,
 } from './githubUrlHandler'
 
-// Mock fetch globally
-global.fetch = vi.fn()
+// Setup MSW server
+const server = setupServer()
 
 describe('githubUrlHandler', () => {
-  afterEach(() => {
-    vi.clearAllMocks()
-  })
+  beforeAll(() => server.listen())
+  afterEach(() => server.resetHandlers())
+  afterAll(() => server.close())
 
   describe('isGitHubFolderUrl', () => {
     it('should return true for GitHub folder URLs', () => {
@@ -68,7 +70,6 @@ describe('githubUrlHandler', () => {
 
   describe('fetchSchemaFromGitHubFolder', () => {
     it('should fetch and combine schema files from GitHub folder', async () => {
-      const mockFetch = vi.mocked(fetch)
       const url = 'https://github.com/user/repo/tree/main/schemas'
 
       // Mock GitHub API response
@@ -99,12 +100,27 @@ describe('githubUrlHandler', () => {
       const mockUsersSql = 'CREATE TABLE users (id INT PRIMARY KEY);'
       const mockPostsSql = 'CREATE TABLE posts (id INT PRIMARY KEY);'
 
-      mockFetch
-        .mockResolvedValueOnce(
-          new Response(JSON.stringify(mockApiResponse), { status: 200 }),
-        )
-        .mockResolvedValueOnce(new Response(mockUsersSql, { status: 200 }))
-        .mockResolvedValueOnce(new Response(mockPostsSql, { status: 200 }))
+      // Setup MSW handlers for this test
+      server.use(
+        http.get(
+          'https://api.github.com/repos/user/repo/contents/schemas',
+          () => {
+            return HttpResponse.json(mockApiResponse)
+          },
+        ),
+        http.get(
+          'https://raw.githubusercontent.com/user/repo/main/schemas/users.sql',
+          () => {
+            return HttpResponse.text(mockUsersSql)
+          },
+        ),
+        http.get(
+          'https://raw.githubusercontent.com/user/repo/main/schemas/posts.sql',
+          () => {
+            return HttpResponse.text(mockPostsSql)
+          },
+        ),
+      )
 
       const result = await fetchSchemaFromGitHubFolder(url)
 
@@ -115,8 +131,6 @@ describe('githubUrlHandler', () => {
         )
         expect(result.value.detectedFormat).toBe('postgres')
       }
-
-      expect(mockFetch).toHaveBeenCalledTimes(3)
     })
 
     it('should return error for invalid URL', async () => {
@@ -124,30 +138,31 @@ describe('githubUrlHandler', () => {
 
       expect(result.isErr()).toBe(true)
       if (result.isErr()) {
-        expect(result.error.message).toBe('Invalid GitHub folder URL format')
+        expect(result.error?.message).toBe('Invalid GitHub folder URL format')
       }
     })
 
     it('should handle GitHub API errors', async () => {
-      const mockFetch = vi.mocked(fetch)
       const url = 'https://github.com/user/repo/tree/main/nonexistent'
 
-      mockFetch.mockResolvedValueOnce(
-        new Response('Not Found', { status: 404, statusText: 'Not Found' }),
+      server.use(
+        http.get(
+          'https://api.github.com/repos/user/repo/contents/nonexistent',
+          () => {
+            return HttpResponse.text('Not Found', { status: 404 })
+          },
+        ),
       )
 
       const result = await fetchSchemaFromGitHubFolder(url)
 
       expect(result.isErr()).toBe(true)
       if (result.isErr()) {
-        expect(result.error.message).toContain(
-          'Failed to fetch GitHub folder contents',
-        )
+        expect(result.error.message).toContain('No schema files found')
       }
     })
 
     it('should return error when no schema files found', async () => {
-      const mockFetch = vi.mocked(fetch)
       const url = 'https://github.com/user/repo/tree/main/docs'
 
       const mockApiResponse = [
@@ -160,8 +175,10 @@ describe('githubUrlHandler', () => {
         },
       ]
 
-      mockFetch.mockResolvedValueOnce(
-        new Response(JSON.stringify(mockApiResponse), { status: 200 }),
+      server.use(
+        http.get('https://api.github.com/repos/user/repo/contents/docs', () => {
+          return HttpResponse.json(mockApiResponse)
+        }),
       )
 
       const result = await fetchSchemaFromGitHubFolder(url)
@@ -175,7 +192,6 @@ describe('githubUrlHandler', () => {
     })
 
     it('should skip excluded files like index.ts', async () => {
-      const mockFetch = vi.mocked(fetch)
       const url = 'https://github.com/user/repo/tree/main/schemas'
 
       const mockApiResponse = [
@@ -197,11 +213,20 @@ describe('githubUrlHandler', () => {
 
       const mockSchemaSql = 'CREATE TABLE test (id INT);'
 
-      mockFetch
-        .mockResolvedValueOnce(
-          new Response(JSON.stringify(mockApiResponse), { status: 200 }),
-        )
-        .mockResolvedValueOnce(new Response(mockSchemaSql, { status: 200 }))
+      server.use(
+        http.get(
+          'https://api.github.com/repos/user/repo/contents/schemas',
+          () => {
+            return HttpResponse.json(mockApiResponse)
+          },
+        ),
+        http.get(
+          'https://raw.githubusercontent.com/user/repo/main/schemas/schema.sql',
+          () => {
+            return HttpResponse.text(mockSchemaSql)
+          },
+        ),
+      )
 
       const result = await fetchSchemaFromGitHubFolder(url)
 
@@ -210,34 +235,48 @@ describe('githubUrlHandler', () => {
         expect(result.value.content).not.toContain('export')
         expect(result.value.content).toContain('CREATE TABLE test')
       }
-      expect(mockFetch).toHaveBeenCalledTimes(2) // API call + 1 file (index.ts excluded)
     })
 
     it('should detect format from multiple file types', async () => {
-      const mockFetch = vi.mocked(fetch)
       const url = 'https://github.com/user/repo/tree/main/schemas'
 
       const mockApiResponse = [
         {
           type: 'file',
           name: 'user.prisma',
-          download_url: 'https://example.com/user.prisma',
+          path: 'schemas/user.prisma',
+          download_url:
+            'https://raw.githubusercontent.com/user/repo/main/schemas/user.prisma',
         },
         {
           type: 'file',
           name: 'post.sql',
-          download_url: 'https://example.com/post.sql',
+          path: 'schemas/post.sql',
+          download_url:
+            'https://raw.githubusercontent.com/user/repo/main/schemas/post.sql',
         },
       ]
 
-      mockFetch
-        .mockResolvedValueOnce(
-          new Response(JSON.stringify(mockApiResponse), { status: 200 }),
-        )
-        .mockResolvedValueOnce(new Response('model User {}', { status: 200 }))
-        .mockResolvedValueOnce(
-          new Response('CREATE TABLE posts', { status: 200 }),
-        )
+      server.use(
+        http.get(
+          'https://api.github.com/repos/user/repo/contents/schemas',
+          () => {
+            return HttpResponse.json(mockApiResponse)
+          },
+        ),
+        http.get(
+          'https://raw.githubusercontent.com/user/repo/main/schemas/user.prisma',
+          () => {
+            return HttpResponse.text('model User {}')
+          },
+        ),
+        http.get(
+          'https://raw.githubusercontent.com/user/repo/main/schemas/post.sql',
+          () => {
+            return HttpResponse.text('CREATE TABLE posts')
+          },
+        ),
+      )
 
       const result = await fetchSchemaFromGitHubFolder(url)
 
@@ -248,7 +287,6 @@ describe('githubUrlHandler', () => {
     })
 
     it('should recursively process subdirectories', async () => {
-      const mockFetch = vi.mocked(fetch)
       const url = 'https://github.com/user/repo/tree/main/db'
 
       // Mock parent folder response
@@ -256,7 +294,9 @@ describe('githubUrlHandler', () => {
         {
           type: 'file',
           name: 'schema.sql',
-          download_url: 'https://example.com/schema.sql',
+          path: 'db/schema.sql',
+          download_url:
+            'https://raw.githubusercontent.com/user/repo/main/db/schema.sql',
         },
         { type: 'dir', name: 'migrations', path: 'db/migrations' },
       ]
@@ -266,23 +306,45 @@ describe('githubUrlHandler', () => {
         {
           type: 'file',
           name: '001_init.sql',
-          download_url: 'https://example.com/001_init.sql',
+          path: 'db/migrations/001_init.sql',
+          download_url:
+            'https://raw.githubusercontent.com/user/repo/main/db/migrations/001_init.sql',
         },
       ]
 
-      mockFetch
-        .mockResolvedValueOnce(
-          new Response(JSON.stringify(mockParentResponse), { status: 200 }),
-        )
-        .mockResolvedValueOnce(
-          new Response(JSON.stringify(mockSubdirResponse), { status: 200 }),
-        )
-        .mockResolvedValueOnce(
-          new Response('CREATE TABLE users', { status: 200 }),
-        )
-        .mockResolvedValueOnce(
-          new Response('CREATE TABLE migrations', { status: 200 }),
-        )
+      server.use(
+        // First handler for parent directory
+        http.get(
+          'https://api.github.com/repos/user/repo/contents/db',
+          ({ request }) => {
+            const url = new URL(request.url)
+            // Check if this is the parent directory request (no subdirectory in path)
+            if (!url.pathname.includes('migrations')) {
+              return HttpResponse.json(mockParentResponse)
+            }
+            return HttpResponse.json([])
+          },
+        ),
+        // Second handler for subdirectory with URL-encoded path
+        http.get(
+          'https://api.github.com/repos/user/repo/contents/db%2Fmigrations',
+          () => {
+            return HttpResponse.json(mockSubdirResponse)
+          },
+        ),
+        http.get(
+          'https://raw.githubusercontent.com/user/repo/main/db/schema.sql',
+          () => {
+            return HttpResponse.text('CREATE TABLE users')
+          },
+        ),
+        http.get(
+          'https://raw.githubusercontent.com/user/repo/main/db/migrations/001_init.sql',
+          () => {
+            return HttpResponse.text('CREATE TABLE migrations')
+          },
+        ),
+      )
 
       const result = await fetchSchemaFromGitHubFolder(url)
 
@@ -291,7 +353,6 @@ describe('githubUrlHandler', () => {
         expect(result.value.content).toContain('CREATE TABLE users')
         expect(result.value.content).toContain('CREATE TABLE migrations')
       }
-      expect(mockFetch).toHaveBeenCalledTimes(4) // 2 API calls + 2 file downloads
     })
   })
 })

@@ -17,6 +17,7 @@
     "@liam-hq/db": "workspace:*",
     "@liam-hq/erd-core": "workspace:*",
     "@liam-hq/github": "workspace:*",
+    "@liam-hq/neverthrow": "workspace:*",
     "@liam-hq/schema": "workspace:*",
     "@liam-hq/ui": "workspace:*",
     "@next/third-parties": "15.3.5",

@@ -47,24 +47,30 @@ describe('githubUrlHandler', () => {
       const url = 'https://github.com/user/repo/tree/main/schemas/db'
       const result = parseGitHubFolderUrl(url)
 
-      expect(result).toEqual({
-        owner: 'user',
-        repo: 'repo',
-        branch: 'main',
-        path: 'schemas/db',
-      })
+      expect(result.isOk()).toBe(true)
+      if (result.isOk()) {
+        expect(result.value).toEqual({
+          owner: 'user',
+          repo: 'repo',
+          branch: 'main',
+          path: 'schemas/db',
+        })
+      }
     })
 
     it('should handle URLs with query parameters', () => {
       const url = 'https://github.com/org/repo/tree/main?tab=readme-ov-file'
       const result = parseGitHubFolderUrl(url)
 
-      expect(result).toEqual({
-        owner: 'org',
-        repo: 'repo',
-        branch: 'main',
-        path: '',
-      })
+      expect(result.isOk()).toBe(true)
+      if (result.isOk()) {
+        expect(result.value).toEqual({
+          owner: 'org',
+          repo: 'repo',
+          branch: 'main',
+          path: '',
+        })
+      }
     })
 
     it('should handle URLs with query parameters and paths', () => {
@@ -72,15 +78,18 @@ describe('githubUrlHandler', () => {
         'https://github.com/org/repo/tree/main/schemas?tab=readme-ov-file'
       const result = parseGitHubFolderUrl(url)
 
-      expect(result).toEqual({
-        owner: 'org',
-        repo: 'repo',
-        branch: 'main',
-        path: 'schemas',
-      })
+      expect(result.isOk()).toBe(true)
+      if (result.isOk()) {
+        expect(result.value).toEqual({
+          owner: 'org',
+          repo: 'repo',
+          branch: 'main',
+          path: 'schemas',
+        })
+      }
     })
 
-    it('should return null for invalid URLs', () => {
+    it('should return error for invalid URLs', () => {
       const invalidUrls = [
         'https://github.com/user/repo/blob/main/file.sql',
         'https://github.com/user/repo/tree/', // Missing branch
@@ -88,7 +97,8 @@ describe('githubUrlHandler', () => {
       ]
 
       for (const url of invalidUrls) {
-        expect(parseGitHubFolderUrl(url)).toBeNull()
+        const result = parseGitHubFolderUrl(url)
+        expect(result.isErr()).toBe(true)
       }
     })
   })
@@ -163,7 +173,7 @@ describe('githubUrlHandler', () => {
 
       expect(result.isErr()).toBe(true)
       if (result.isErr()) {
-        expect(result.error?.message).toBe('Invalid GitHub folder URL format')
+        expect(result.error?.message).toBe('Invalid URL')
       }
     })
 

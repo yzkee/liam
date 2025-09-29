@@ -4,6 +4,7 @@ import {
   type GitHubRepoInfo,
   getFolderContents,
 } from '@liam-hq/github'
+import { fromThrowable } from '@liam-hq/neverthrow'
 import { detectFormat } from '@liam-hq/schema/parser'
 import { err, ok, type Result } from 'neverthrow'
 
@@ -16,51 +17,29 @@ const SECURITY_LIMITS = {
 }
 
 const safeParseUrl = (url: string): Result<URL, Error> => {
-  // Basic URL validation without throwing
-  if (!url || typeof url !== 'string') {
+  if (typeof url !== 'string' || url.trim() === '') {
     return err(new Error('Invalid URL: must be a non-empty string'))
   }
 
-  if (!url.startsWith('http://') && !url.startsWith('https://')) {
-    return err(new Error('Invalid URL: must start with http:// or https://'))
+  const parseUrl = fromThrowable(
+    () => new URL(url),
+    (cause: unknown) =>
+      cause instanceof Error ? cause : new Error('Invalid URL: parse failed'),
+  )
+
+  const urlResult = parseUrl()
+  if (urlResult.isErr()) {
+    return err(urlResult.error)
   }
 
-  // Check for basic URL structure
-  const urlPattern = /^https?:\/\/[^\s/$.?#].[^\s]*$/i
-  if (!urlPattern.test(url)) {
-    return err(new Error('Invalid URL format'))
+  const parsedUrl = urlResult.value
+
+  // Validate protocol
+  if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+    return err(new Error('Invalid URL: must use http or https protocol'))
   }
 
-  // Parse URL components manually to handle pathname and search properly
-  const match = url.match(/^(https?):\/\/([^\/]+)(\/[^?#]*)?(\?[^#]*)?(#.*)?$/)
-  if (!match) {
-    return err(new Error('Failed to parse URL components'))
-  }
-
-  const [, protocol, host, pathname = '/', search = '', hash = ''] = match
-
-  if (!host) {
-    return err(new Error('Invalid URL: missing host'))
-  }
-
-  const urlObj: URL = {
-    protocol: `${protocol}:`,
-    hostname: host.split(':')[0] || host,
-    host,
-    pathname,
-    href: url,
-    origin: `${protocol}://${host.split('/')[0]}`,
-    search,
-    hash,
-    port: '',
-    username: '',
-    password: '',
-    searchParams: new URLSearchParams(search),
-    toString: () => url,
-    toJSON: () => url,
-  }
-
-  return ok(urlObj)
+  return ok(parsedUrl)
 }
 
 export const isGitHubFolderUrl = (url: string): boolean => {

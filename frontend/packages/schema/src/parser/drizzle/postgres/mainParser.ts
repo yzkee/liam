@@ -143,10 +143,9 @@ const handlePgEnumCall = (
 ) => {
   const enumDef = parsePgEnumCall(callExpr)
   if (enumDef && declarator.id.type === 'Identifier') {
-    // Store enum by its actual name (e.g., 'user_role')
-    enums[enumDef.name] = enumDef
-    // Also store by variable name (e.g., 'userRoleEnum') for lookup
-    enums[declarator.id.value] = enumDef
+    const variableName = declarator.id.value
+    // Only store by variable name to avoid conflicts between actual name and variable name
+    enums[variableName] = enumDef
   }
 }
 

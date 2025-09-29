@@ -11,6 +11,7 @@ const SECURITY_LIMITS = {
   MAX_RECURSION_DEPTH: 5,
   MAX_FILES_PER_FOLDER: 50,
   MAX_TOTAL_FILES: 100,
+  MAX_FILE_SIZE_BYTES: 5 * 1024 * 1024, // 5MB per file
 }
 
 const safeParseUrl = (url: string): Result<URL, Error> => {
@@ -301,7 +302,11 @@ const collectSchemaFilesFromFolder = async (
 }
 
 const downloadFile = async (url: string): Promise<Result<string, Error>> => {
-  const content = await downloadFileContent(url)
+  const content = await downloadFileContent(
+    url,
+    10000,
+    SECURITY_LIMITS.MAX_FILE_SIZE_BYTES,
+  )
   if (content === null) {
     return err(new Error(`Failed to download file from ${url}`))
   }

@@ -277,12 +277,20 @@ export const getFolderContents = async (
  */
 export const downloadFileContent = async (
   url: string,
-  timeoutMs = 10000, // 10 second default timeout
+  timeoutMs = 10000, // 10s default timeout
+  maxBytes?: number, // optional per-file size cap
 ): Promise<string | null> => {
   const controller = new AbortController()
   let timeoutId: NodeJS.Timeout | undefined
 
   try {
+    // Allowlist host to prevent SSRF
+    const parsed = new URL(url)
+    if (parsed.hostname !== 'raw.githubusercontent.com') {
+      console.error(`Disallowed host for download: ${parsed.hostname}`)
+      return null
+    }
+
     // Set up timeout
     timeoutId = setTimeout(() => {
       controller.abort()
@@ -300,6 +308,18 @@ export const downloadFileContent = async (
       console.error(`Failed to download file: ${response.statusText}`)
       return null
     }
+
+    // Enforce size limit when possible
+    if (typeof maxBytes === 'number') {
+      const len = response.headers.get('content-length')
+      if (len && Number(len) > maxBytes) {
+        console.error(
+          `File too large (${len} bytes). Limit: ${maxBytes} bytes for ${url}`,
+        )
+        return null
+      }
+    }
+
     return await response.text()
   } catch (error) {
     // Clear timeout in error case

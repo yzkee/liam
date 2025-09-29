@@ -556,6 +556,80 @@ describe('githubUrlHandler', () => {
           )
         }
       }, 20000) // Set test timeout to 20s to allow for the timeout to occur
+
+      it('should reject non-GitHub raw URLs', async () => {
+        const url = 'https://github.com/user/repo/tree/main/malicious'
+
+        const mockApiResponse = [
+          {
+            type: 'file' as const,
+            name: 'schema.sql',
+            path: 'malicious/schema.sql',
+            download_url: 'https://malicious.example.com/evil.sql', // Non-GitHub host
+          },
+        ]
+
+        server.use(
+          http.get(
+            'https://api.github.com/repos/user/repo/contents/malicious',
+            () => {
+              return HttpResponse.json(mockApiResponse)
+            },
+          ),
+        )
+
+        const result = await fetchSchemaFromGitHubFolder(url)
+
+        expect(result.isErr()).toBe(true)
+        if (result.isErr()) {
+          expect(result.error.message).toBe(
+            'Failed to download any schema files',
+          )
+        }
+      })
+
+      it('should reject oversized files', async () => {
+        const url = 'https://github.com/user/repo/tree/main/large-file'
+
+        const mockApiResponse = [
+          {
+            type: 'file' as const,
+            name: 'large.sql',
+            path: 'large-file/large.sql',
+            download_url:
+              'https://raw.githubusercontent.com/user/repo/main/large-file/large.sql',
+          },
+        ]
+
+        server.use(
+          http.get(
+            'https://api.github.com/repos/user/repo/contents/large-file',
+            () => {
+              return HttpResponse.json(mockApiResponse)
+            },
+          ),
+          // Mock a response with Content-Length exceeding 5MB limit
+          http.get(
+            'https://raw.githubusercontent.com/user/repo/main/large-file/large.sql',
+            () => {
+              return HttpResponse.text('CREATE TABLE large (id INT);', {
+                headers: {
+                  'Content-Length': String(10 * 1024 * 1024), // 10MB (exceeds 5MB limit)
+                },
+              })
+            },
+          ),
+        )
+
+        const result = await fetchSchemaFromGitHubFolder(url)
+
+        expect(result.isErr()).toBe(true)
+        if (result.isErr()) {
+          expect(result.error.message).toBe(
+            'Failed to download any schema files',
+          )
+        }
+      })
     })
   })
 })

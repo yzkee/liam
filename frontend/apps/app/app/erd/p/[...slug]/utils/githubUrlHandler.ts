@@ -4,7 +4,7 @@ import {
   type GitHubRepoInfo,
   getFolderContents,
 } from '@liam-hq/github'
-import { fromThrowable } from '@liam-hq/neverthrow'
+import { fromAsyncThrowable, fromThrowable } from '@liam-hq/neverthrow'
 import { detectFormat } from '@liam-hq/schema/parser'
 import { err, ok, type Result } from 'neverthrow'
 
@@ -14,6 +14,7 @@ const SECURITY_LIMITS = {
   MAX_TOTAL_FILES: 100,
   MAX_FILE_SIZE_BYTES: 5 * 1024 * 1024, // 5MB per file
   MAX_DIRS_PER_FOLDER: 50,
+  MAX_BRANCH_SEGMENTS: 5, // Reasonable cap to prevent excessive API calls
 }
 
 const safeParseUrl = (url: string): Result<URL, Error> => {
@@ -116,41 +117,109 @@ const isSchemaFile = (filename: string): boolean => {
   return true
 }
 
-export const parseGitHubFolderUrl = (url: string): GitHubRepoInfo | null => {
+export const parseGitHubFolderUrl = async (
+  url: string,
+): Promise<Result<GitHubRepoInfo, Error>> => {
   const urlResult = safeParseUrl(url)
   if (urlResult.isErr()) {
-    return null
+    return err(urlResult.error)
   }
 
   const pathSegments = urlResult.value.pathname.split('/').filter(Boolean)
 
   if (pathSegments.length < 4 || pathSegments[2] !== 'tree') {
-    return null
+    return err(
+      new Error('Invalid GitHub folder URL: must contain /tree/ structure'),
+    )
   }
 
   const owner = pathSegments[0]
   const repo = pathSegments[1]
-  const branch = pathSegments[3]
 
-  if (!owner || !repo || !branch) {
-    return null
+  if (!owner || !repo) {
+    return err(new Error('Invalid GitHub folder URL: missing owner or repo'))
   }
 
-  const path = pathSegments.slice(4).join('/')
+  const remainingSegments = pathSegments.slice(3) // Everything after '/tree/'
 
-  return { owner, repo, branch, path }
+  if (remainingSegments.length === 0) {
+    return err(new Error('Invalid GitHub folder URL: missing branch name'))
+  }
+
+  // Try progressively longer branch names until we find valid contents
+  for (
+    let i = 1;
+    i <=
+    Math.min(remainingSegments.length, SECURITY_LIMITS.MAX_BRANCH_SEGMENTS);
+    i++
+  ) {
+    const candidateBranch = remainingSegments.slice(0, i).join('/')
+    const candidatePath = remainingSegments.slice(i).join('/')
+
+    const testRepoInfo: GitHubRepoInfo = {
+      owner,
+      repo,
+      branch: candidateBranch,
+      path: candidatePath,
+    }
+
+    const testGetFolderContents = fromAsyncThrowable(
+      () =>
+        getFolderContents(
+          testRepoInfo.owner,
+          testRepoInfo.repo,
+          testRepoInfo.path,
+          testRepoInfo.branch,
+        ),
+      (cause: unknown) =>
+        cause instanceof Error ? cause : new Error('Unknown error'),
+    )
+
+    const contentsResult = await testGetFolderContents()
+
+    if (contentsResult.isOk()) {
+      // If we get contents (even empty array), this branch/path combination is valid
+      return ok(testRepoInfo)
+    }
+
+    // If this is a 404 or similar error, continue trying with longer branch name
+    // Only break on non-404 errors that might indicate real problems
+    if (!contentsResult.error.message.includes('Not Found')) {
+      return err(
+        new Error(
+          `Failed to resolve branch/path: ${contentsResult.error.message}`,
+        ),
+      )
+    }
+    // Continue to next iteration for 404 errors
+  }
+
+  // If no valid combination found, return the original simple parsing as fallback
+  return err(
+    new Error(
+      `Could not resolve valid branch/path combination for URL: ${url}`,
+    ),
+  )
 }
 
 const fetchGitHubFolderContents = async (
   repoInfo: GitHubRepoInfo,
 ): Promise<Result<GitHubContentItem[], Error>> => {
-  const contents = await getFolderContents(
-    repoInfo.owner,
-    repoInfo.repo,
-    repoInfo.path,
-    repoInfo.branch,
+  const getFolderContentsAsync = fromAsyncThrowable(
+    () =>
+      getFolderContents(
+        repoInfo.owner,
+        repoInfo.repo,
+        repoInfo.path,
+        repoInfo.branch,
+      ),
+    (cause: unknown) =>
+      cause instanceof Error
+        ? new Error(`Failed to fetch folder contents: ${cause.message}`)
+        : new Error('Failed to fetch folder contents: Unknown error'),
   )
-  return ok(contents)
+
+  return await getFolderContentsAsync()
 }
 
 const checkSecurityLimits = (
@@ -350,10 +419,12 @@ const detectFormatFromFileNames = (fileNames: string[]): string | null => {
 export const fetchSchemaFromGitHubFolder = async (
   url: string,
 ): Promise<Result<{ content: string; detectedFormat?: string }, Error>> => {
-  const repoInfo = parseGitHubFolderUrl(url)
-  if (!repoInfo) {
-    return err(new Error('Invalid GitHub folder URL format'))
+  const repoInfoResult = await parseGitHubFolderUrl(url)
+  if (repoInfoResult.isErr()) {
+    return err(repoInfoResult.error)
   }
+
+  const repoInfo = repoInfoResult.value
 
   const schemaFilesResult = await collectSchemaFilesFromFolder(repoInfo)
   if (schemaFilesResult.isErr()) {

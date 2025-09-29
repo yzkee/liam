@@ -43,9 +43,35 @@ describe('githubUrlHandler', () => {
   })
 
   describe('parseGitHubFolderUrl', () => {
-    it('should parse valid GitHub folder URLs', () => {
+    it('should parse valid GitHub folder URLs', async () => {
       const url = 'https://github.com/user/repo/tree/main/schemas/db'
-      const result = parseGitHubFolderUrl(url)
+
+      // Add MSW handler to see if this test makes API calls
+      server.use(
+        http.get(
+          'https://api.github.com/repos/user/repo/contents/schemas%2Fdb',
+          ({ request }) => {
+            const url = new URL(request.url)
+            const ref = url.searchParams.get('ref')
+
+            if (ref === 'main') {
+              return HttpResponse.json([
+                {
+                  type: 'file',
+                  name: 'users.sql',
+                  path: 'schemas/db/users.sql',
+                  download_url:
+                    'https://raw.githubusercontent.com/user/repo/main/schemas/db/users.sql',
+                },
+              ])
+            }
+
+            return HttpResponse.json({ message: 'Not Found' }, { status: 404 })
+          },
+        ),
+      )
+
+      const result = await parseGitHubFolderUrl(url)
 
       expect(result.isOk()).toBe(true)
       if (result.isOk()) {
@@ -58,9 +84,35 @@ describe('githubUrlHandler', () => {
       }
     })
 
-    it('should handle URLs with query parameters', () => {
+    it('should handle URLs with query parameters', async () => {
       const url = 'https://github.com/org/repo/tree/main?tab=readme-ov-file'
-      const result = parseGitHubFolderUrl(url)
+
+      // Add MSW handler
+      server.use(
+        http.get(
+          'https://api.github.com/repos/org/repo/contents',
+          ({ request }) => {
+            const url = new URL(request.url)
+            const ref = url.searchParams.get('ref')
+
+            if (ref === 'main') {
+              return HttpResponse.json([
+                {
+                  type: 'file',
+                  name: 'README.md',
+                  path: 'README.md',
+                  download_url:
+                    'https://raw.githubusercontent.com/org/repo/main/README.md',
+                },
+              ])
+            }
+
+            return HttpResponse.json({ message: 'Not Found' }, { status: 404 })
+          },
+        ),
+      )
+
+      const result = await parseGitHubFolderUrl(url)
 
       expect(result.isOk()).toBe(true)
       if (result.isOk()) {
@@ -73,10 +125,36 @@ describe('githubUrlHandler', () => {
       }
     })
 
-    it('should handle URLs with query parameters and paths', () => {
+    it('should handle URLs with query parameters and paths', async () => {
       const url =
         'https://github.com/org/repo/tree/main/schemas?tab=readme-ov-file'
-      const result = parseGitHubFolderUrl(url)
+
+      // Add MSW handler
+      server.use(
+        http.get(
+          'https://api.github.com/repos/org/repo/contents/schemas',
+          ({ request }) => {
+            const url = new URL(request.url)
+            const ref = url.searchParams.get('ref')
+
+            if (ref === 'main') {
+              return HttpResponse.json([
+                {
+                  type: 'file',
+                  name: 'schema.sql',
+                  path: 'schemas/schema.sql',
+                  download_url:
+                    'https://raw.githubusercontent.com/org/repo/main/schemas/schema.sql',
+                },
+              ])
+            }
+
+            return HttpResponse.json({ message: 'Not Found' }, { status: 404 })
+          },
+        ),
+      )
+
+      const result = await parseGitHubFolderUrl(url)
 
       expect(result.isOk()).toBe(true)
       if (result.isOk()) {
@@ -89,7 +167,7 @@ describe('githubUrlHandler', () => {
       }
     })
 
-    it('should return error for invalid URLs', () => {
+    it('should return error for invalid URLs', async () => {
       const invalidUrls = [
         'https://github.com/user/repo/blob/main/file.sql',
         'https://github.com/user/repo/tree/', // Missing branch
@@ -97,8 +175,174 @@ describe('githubUrlHandler', () => {
       ]
 
       for (const url of invalidUrls) {
-        const result = parseGitHubFolderUrl(url)
+        const result = await parseGitHubFolderUrl(url)
         expect(result.isErr()).toBe(true)
+      }
+    })
+
+    it('should handle branch names with slashes', async () => {
+      const url = 'https://github.com/user/repo/tree/feature/new-auth/schemas'
+
+      // Mock the progressive API calls
+      server.use(
+        // First try: ref=feature, path=new-auth/schemas -> 404
+        http.get(
+          'https://api.github.com/repos/user/repo/contents/new-auth%2Fschemas',
+          ({ request }) => {
+            const url = new URL(request.url)
+            const ref = url.searchParams.get('ref')
+
+            if (ref === 'feature') {
+              return HttpResponse.json(
+                { message: 'Not Found' },
+                { status: 404 },
+              )
+            }
+
+            return HttpResponse.json({ message: 'Not Found' }, { status: 404 })
+          },
+        ),
+        // Second try: ref=feature/new-auth, path=schemas -> success
+        http.get(
+          'https://api.github.com/repos/user/repo/contents/schemas',
+          ({ request }) => {
+            const url = new URL(request.url)
+            const ref = url.searchParams.get('ref')
+
+            if (ref === 'feature/new-auth') {
+              return HttpResponse.json([
+                {
+                  type: 'file',
+                  name: 'users.sql',
+                  path: 'schemas/users.sql',
+                  download_url:
+                    'https://raw.githubusercontent.com/user/repo/feature/new-auth/schemas/users.sql',
+                },
+              ])
+            }
+
+            return HttpResponse.json({ message: 'Not Found' }, { status: 404 })
+          },
+        ),
+      )
+
+      const result = await parseGitHubFolderUrl(url)
+
+      expect(result.isOk()).toBe(true)
+      if (result.isOk()) {
+        expect(result.value).toEqual({
+          owner: 'user',
+          repo: 'repo',
+          branch: 'feature/new-auth',
+          path: 'schemas',
+        })
+      }
+    })
+
+    it('should handle branch names with multiple slashes', async () => {
+      const url =
+        'https://github.com/org/project/tree/feature/auth/oauth2/database'
+
+      // Mock the progressive API calls
+      server.use(
+        // First try: ref=feature, path=auth/oauth2/database -> 404
+        http.get(
+          'https://api.github.com/repos/org/project/contents/auth%2Foauth2%2Fdatabase',
+          ({ request }) => {
+            const url = new URL(request.url)
+            const ref = url.searchParams.get('ref')
+
+            if (ref === 'feature') {
+              return HttpResponse.json(
+                { message: 'Not Found' },
+                { status: 404 },
+              )
+            }
+
+            return HttpResponse.json({ message: 'Not Found' }, { status: 404 })
+          },
+        ),
+        // Second try: ref=feature/auth, path=oauth2/database -> 404
+        http.get(
+          'https://api.github.com/repos/org/project/contents/oauth2%2Fdatabase',
+          ({ request }) => {
+            const url = new URL(request.url)
+            const ref = url.searchParams.get('ref')
+
+            if (ref === 'feature/auth') {
+              return HttpResponse.json(
+                { message: 'Not Found' },
+                { status: 404 },
+              )
+            }
+
+            return HttpResponse.json({ message: 'Not Found' }, { status: 404 })
+          },
+        ),
+        // Third try: ref=feature/auth/oauth2, path=database -> success
+        http.get(
+          'https://api.github.com/repos/org/project/contents/database',
+          ({ request }) => {
+            const url = new URL(request.url)
+            const ref = url.searchParams.get('ref')
+
+            if (ref === 'feature/auth/oauth2') {
+              return HttpResponse.json([
+                {
+                  type: 'dir',
+                  name: 'migrations',
+                  path: 'database/migrations',
+                },
+              ])
+            }
+
+            return HttpResponse.json({ message: 'Not Found' }, { status: 404 })
+          },
+        ),
+      )
+
+      const result = await parseGitHubFolderUrl(url)
+
+      expect(result.isOk()).toBe(true)
+      if (result.isOk()) {
+        expect(result.value).toEqual({
+          owner: 'org',
+          repo: 'project',
+          branch: 'feature/auth/oauth2',
+          path: 'database',
+        })
+      }
+    })
+
+    it('should return error when no valid branch/path combination is found', async () => {
+      const url = 'https://github.com/user/repo/tree/nonexistent/branch/path'
+
+      // Mock all attempts to return 404
+      server.use(
+        // First try: ref=nonexistent, path=branch/path -> 404
+        http.get(
+          'https://api.github.com/repos/user/repo/contents/branch%2Fpath',
+          () => {
+            return HttpResponse.json({ message: 'Not Found' }, { status: 404 })
+          },
+        ),
+        // Second try: ref=nonexistent/branch, path=path -> 404
+        http.get('https://api.github.com/repos/user/repo/contents/path', () => {
+          return HttpResponse.json({ message: 'Not Found' }, { status: 404 })
+        }),
+        // Third try: ref=nonexistent/branch/path, path= -> 404
+        http.get('https://api.github.com/repos/user/repo/contents', () => {
+          return HttpResponse.json({ message: 'Not Found' }, { status: 404 })
+        }),
+      )
+
+      const result = await parseGitHubFolderUrl(url)
+
+      expect(result.isErr()).toBe(true)
+      if (result.isErr()) {
+        expect(result.error.message).toContain(
+          'Could not resolve valid branch/path combination',
+        )
       }
     })
   })
@@ -178,13 +422,15 @@ describe('githubUrlHandler', () => {
     })
 
     it('should handle GitHub API errors', async () => {
-      const url = 'https://github.com/user/repo/tree/main/nonexistent'
+      const url = 'https://github.com/user/repo/tree/main/empty-folder'
 
       server.use(
+        // First allow the URL parsing to succeed by returning an empty folder
         http.get(
-          'https://api.github.com/repos/user/repo/contents/nonexistent',
+          'https://api.github.com/repos/user/repo/contents/empty-folder',
           () => {
-            return HttpResponse.text('Not Found', { status: 404 })
+            // Return empty array to indicate folder exists but has no files
+            return HttpResponse.json([])
           },
         ),
       )

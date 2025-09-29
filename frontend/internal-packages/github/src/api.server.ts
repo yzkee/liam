@@ -268,7 +268,8 @@ export const getFolderContents = async (
       `Error fetching folder contents for ${owner}/${repo}/${path}:`,
       error,
     )
-    return []
+    // Re-throw the error so that fromAsyncThrowable can catch it for progressive resolution
+    throw error
   }
 }
 

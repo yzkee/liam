@@ -50,6 +50,14 @@ export const CommandPaletteSearchInput: FC<Props> = ({
             return
           }
 
+          // switch to "column" mode if a table is suggested and Tab key is pressed
+          if (event.key === 'Tab' && suggestion?.type === 'table') {
+            event.preventDefault()
+            setMode({ type: 'column', tableName: suggestion.name })
+            setValue('')
+            return
+          }
+
           break
         }
 
@@ -65,7 +73,7 @@ export const CommandPaletteSearchInput: FC<Props> = ({
         }
       }
     },
-    [mode.type, value, setMode],
+    [mode.type, value, setMode, suggestion],
   )
 
   return (

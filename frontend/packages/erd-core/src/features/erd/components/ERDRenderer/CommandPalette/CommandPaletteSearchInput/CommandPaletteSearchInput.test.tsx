@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { Command } from 'cmdk'
 import type { PropsWithChildren } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import type { CommandPaletteSuggestion } from '../types'
 import { CommandPaletteSearchInput } from './CommandPaletteSearchInput'
 
 const mockSetMode = vi.fn()
@@ -53,6 +54,61 @@ describe('in case input mode is "default"', () => {
 
       expect(mockSetMode).not.toHaveBeenCalled()
     })
+  })
+
+  describe('when the user pressed Tab key', () => {
+    it('should switch to "column" mode and make the input empty when a table is suggested', async () => {
+      const user = userEvent.setup()
+      render(
+        <CommandPaletteSearchInput
+          mode={{ type: 'default' }}
+          suggestion={{ type: 'table', name: 'users' }}
+          setMode={mockSetMode}
+        />,
+        { wrapper },
+      )
+      const input = screen.getByRole('combobox')
+      input.focus()
+
+      // make the input not empty
+      await user.keyboard('user')
+
+      await user.keyboard('{Tab}')
+
+      expect(mockSetMode).toHaveBeenCalledWith({
+        type: 'column',
+        tableName: 'users',
+      })
+      expect(input).toHaveValue('')
+    })
+
+    it.each<CommandPaletteSuggestion | null>([
+      { type: 'command', name: 'Copy Link' },
+      null,
+    ])(
+      'should not switch input mode and do not modify input value whe suggestion is %o',
+      async (suggestion) => {
+        const user = userEvent.setup()
+        render(
+          <CommandPaletteSearchInput
+            mode={{ type: 'default' }}
+            suggestion={suggestion}
+            setMode={mockSetMode}
+          />,
+          { wrapper },
+        )
+        const input = screen.getByRole('combobox')
+        input.focus()
+
+        // make the input not empty
+        await user.keyboard('user')
+
+        await user.keyboard('{Tab}')
+
+        expect(mockSetMode).not.toHaveBeenCalled()
+        expect(input).toHaveValue('user')
+      },
+    )
   })
 })
 

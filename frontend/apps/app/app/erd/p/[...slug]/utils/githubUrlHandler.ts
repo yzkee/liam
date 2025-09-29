@@ -7,6 +7,12 @@ import {
 import { detectFormat } from '@liam-hq/schema/parser'
 import { err, ok, type Result } from 'neverthrow'
 
+const SECURITY_LIMITS = {
+  MAX_RECURSION_DEPTH: 5,
+  MAX_FILES_PER_FOLDER: 50,
+  MAX_TOTAL_FILES: 100,
+}
+
 const safeParseUrl = (url: string): Result<URL, Error> => {
   // Basic URL validation without throwing
   if (!url || typeof url !== 'string') {
@@ -166,8 +172,113 @@ const fetchGitHubFolderContents = async (
   return ok(contents)
 }
 
+const checkSecurityLimits = (
+  depth: number,
+  totalFilesCollected: { count: number },
+  filesInFolder: number,
+): Result<void, Error> => {
+  if (depth >= SECURITY_LIMITS.MAX_RECURSION_DEPTH) {
+    return err(
+      new Error(
+        `Maximum recursion depth (${SECURITY_LIMITS.MAX_RECURSION_DEPTH}) exceeded`,
+      ),
+    )
+  }
+
+  if (totalFilesCollected.count >= SECURITY_LIMITS.MAX_TOTAL_FILES) {
+    return err(
+      new Error(
+        `Maximum total files limit (${SECURITY_LIMITS.MAX_TOTAL_FILES}) exceeded`,
+      ),
+    )
+  }
+
+  if (filesInFolder > SECURITY_LIMITS.MAX_FILES_PER_FOLDER) {
+    return err(
+      new Error(
+        `Too many files in folder (${filesInFolder}). Maximum allowed: ${SECURITY_LIMITS.MAX_FILES_PER_FOLDER}`,
+      ),
+    )
+  }
+
+  return ok(undefined)
+}
+
+const processSchemaFile = (
+  item: GitHubContentItem,
+  totalFilesCollected: { count: number },
+): Result<string | null, Error> => {
+  if (item.type !== 'file' || !isSchemaFile(item.name) || !item.download_url) {
+    return ok(null)
+  }
+
+  if (totalFilesCollected.count >= SECURITY_LIMITS.MAX_TOTAL_FILES) {
+    return err(
+      new Error(
+        `Maximum total files limit (${SECURITY_LIMITS.MAX_TOTAL_FILES}) exceeded`,
+      ),
+    )
+  }
+
+  totalFilesCollected.count++
+  return ok(item.download_url)
+}
+
+const processDirectoryItem = async (
+  item: GitHubContentItem,
+  repoInfo: GitHubRepoInfo,
+  depth: number,
+  totalFilesCollected: { count: number },
+): Promise<Result<string[], Error>> => {
+  const subfolderInfo: GitHubRepoInfo = {
+    ...repoInfo,
+    path: item.path,
+  }
+  return collectSchemaFilesFromFolder(
+    subfolderInfo,
+    depth + 1,
+    totalFilesCollected,
+  )
+}
+
+const processContentItems = async (
+  contents: GitHubContentItem[],
+  repoInfo: GitHubRepoInfo,
+  depth: number,
+  totalFilesCollected: { count: number },
+): Promise<Result<string[], Error>> => {
+  const schemaFileUrls: string[] = []
+
+  for (const item of contents) {
+    if (item.type === 'file') {
+      const fileResult = processSchemaFile(item, totalFilesCollected)
+      if (fileResult.isErr()) {
+        return err(fileResult.error)
+      }
+      if (fileResult.value) {
+        schemaFileUrls.push(fileResult.value)
+      }
+    } else if (item.type === 'dir') {
+      const subfolderResult = await processDirectoryItem(
+        item,
+        repoInfo,
+        depth,
+        totalFilesCollected,
+      )
+      if (subfolderResult.isErr()) {
+        return subfolderResult
+      }
+      schemaFileUrls.push(...subfolderResult.value)
+    }
+  }
+
+  return ok(schemaFileUrls)
+}
+
 const collectSchemaFilesFromFolder = async (
   repoInfo: GitHubRepoInfo,
+  depth = 0,
+  totalFilesCollected = { count: 0 },
 ): Promise<Result<string[], Error>> => {
   const contentsResult = await fetchGitHubFolderContents(repoInfo)
   if (contentsResult.isErr()) {
@@ -175,25 +286,18 @@ const collectSchemaFilesFromFolder = async (
   }
 
   const contents = contentsResult.value
-  const schemaFileUrls: string[] = []
+  const filesInFolder = contents.filter((item) => item.type === 'file').length
 
-  for (const item of contents) {
-    if (item.type === 'file' && isSchemaFile(item.name) && item.download_url) {
-      schemaFileUrls.push(item.download_url)
-    } else if (item.type === 'file' && !isSchemaFile(item.name)) {
-    } else if (item.type === 'dir') {
-      const subfolderInfo: GitHubRepoInfo = {
-        ...repoInfo,
-        path: item.path,
-      }
-      const subfolderResult = await collectSchemaFilesFromFolder(subfolderInfo)
-      if (subfolderResult.isOk()) {
-        schemaFileUrls.push(...subfolderResult.value)
-      }
-    }
+  const limitsResult = checkSecurityLimits(
+    depth,
+    totalFilesCollected,
+    filesInFolder,
+  )
+  if (limitsResult.isErr()) {
+    return err(limitsResult.error)
   }
 
-  return ok(schemaFileUrls)
+  return processContentItems(contents, repoInfo, depth, totalFilesCollected)
 }
 
 const downloadFile = async (url: string): Promise<Result<string, Error>> => {

@@ -379,5 +379,141 @@ describe('githubUrlHandler', () => {
         expect(result.value.content).toContain('CREATE TABLE migrations')
       }
     })
+
+    describe('Security limits', () => {
+      it('should handle folders with too many files', async () => {
+        const url = 'https://github.com/user/repo/tree/main/large-folder'
+
+        // Create 51 files (exceeds MAX_FILES_PER_FOLDER: 50)
+        const mockLargeResponse = Array.from({ length: 51 }, (_, i) => ({
+          type: 'file' as const,
+          name: `schema${i}.sql`,
+          path: `large-folder/schema${i}.sql`,
+          download_url: `https://raw.githubusercontent.com/user/repo/main/large-folder/schema${i}.sql`,
+        }))
+
+        server.use(
+          http.get(
+            'https://api.github.com/repos/user/repo/contents/large-folder',
+            () => {
+              return HttpResponse.json(mockLargeResponse)
+            },
+          ),
+        )
+
+        const result = await fetchSchemaFromGitHubFolder(url)
+
+        expect(result.isErr()).toBe(true)
+        if (result.isErr()) {
+          expect(result.error.message).toContain(
+            'Too many files in folder (51). Maximum allowed: 50',
+          )
+        }
+      })
+
+      it('should handle maximum recursion depth', async () => {
+        const url = 'https://github.com/user/repo/tree/main/deep'
+
+        // Create deeply nested folder structure
+        const createDeepResponse = (depth: number) => [
+          {
+            type: 'dir' as const,
+            name: `level${depth + 1}`,
+            path: `deep/${'level'.repeat(depth + 1)}`,
+          },
+        ]
+
+        // Setup handlers for each level (0-6, where 6 should exceed limit of 5)
+        for (let i = 0; i <= 6; i++) {
+          const pathSegment = i === 0 ? 'deep' : `deep/${'level'.repeat(i)}`
+          server.use(
+            http.get(
+              `https://api.github.com/repos/user/repo/contents/${encodeURIComponent(pathSegment)}`,
+              () => {
+                return HttpResponse.json(createDeepResponse(i))
+              },
+            ),
+          )
+        }
+
+        const result = await fetchSchemaFromGitHubFolder(url)
+
+        expect(result.isErr()).toBe(true)
+        if (result.isErr()) {
+          expect(result.error.message).toContain(
+            'Maximum recursion depth (5) exceeded',
+          )
+        }
+      })
+
+      it('should handle maximum total files limit', async () => {
+        const url = 'https://github.com/user/repo/tree/main/many-files'
+
+        // Create multiple folders that collectively exceed MAX_TOTAL_FILES: 100
+        // Use 40 files per folder to avoid hitting MAX_FILES_PER_FOLDER: 50
+        const mockFolder1 = Array.from({ length: 40 }, (_, i) => ({
+          type: 'file' as const,
+          name: `schema${i}.sql`,
+          path: `many-files/folder1/schema${i}.sql`,
+          download_url: `https://raw.githubusercontent.com/user/repo/main/many-files/folder1/schema${i}.sql`,
+        }))
+
+        const mockFolder2 = Array.from({ length: 40 }, (_, i) => ({
+          type: 'file' as const,
+          name: `schema${i}.sql`,
+          path: `many-files/folder2/schema${i}.sql`,
+          download_url: `https://raw.githubusercontent.com/user/repo/main/many-files/folder2/schema${i}.sql`,
+        }))
+
+        const mockFolder3 = Array.from({ length: 40 }, (_, i) => ({
+          type: 'file' as const,
+          name: `schema${i}.sql`,
+          path: `many-files/folder3/schema${i}.sql`,
+          download_url: `https://raw.githubusercontent.com/user/repo/main/many-files/folder3/schema${i}.sql`,
+        }))
+
+        const mockParent = [
+          { type: 'dir' as const, name: 'folder1', path: 'many-files/folder1' },
+          { type: 'dir' as const, name: 'folder2', path: 'many-files/folder2' },
+          { type: 'dir' as const, name: 'folder3', path: 'many-files/folder3' },
+        ]
+
+        server.use(
+          http.get(
+            'https://api.github.com/repos/user/repo/contents/many-files',
+            () => {
+              return HttpResponse.json(mockParent)
+            },
+          ),
+          http.get(
+            'https://api.github.com/repos/user/repo/contents/many-files%2Ffolder1',
+            () => {
+              return HttpResponse.json(mockFolder1)
+            },
+          ),
+          http.get(
+            'https://api.github.com/repos/user/repo/contents/many-files%2Ffolder2',
+            () => {
+              return HttpResponse.json(mockFolder2)
+            },
+          ),
+          http.get(
+            'https://api.github.com/repos/user/repo/contents/many-files%2Ffolder3',
+            () => {
+              return HttpResponse.json(mockFolder3)
+            },
+          ),
+        )
+
+        const result = await fetchSchemaFromGitHubFolder(url)
+
+        expect(result.isErr()).toBe(true)
+        if (result.isErr()) {
+          expect(result.error.message).toContain(
+            'Maximum total files limit (100) exceeded',
+          )
+        }
+      })
+    })
   })
 })

@@ -14,6 +14,7 @@
 import type { ForeignKeyConstraint, Schema } from '@liam-hq/schema'
 import { foreignKeyConstraintSchema } from '@liam-hq/schema'
 import * as v from 'valibot'
+import { dictionaryMatch } from '../dictionaryMatch/dictionaryMatch.ts'
 import { nameSimilarity } from '../nameSimilarity/nameSimilarity.ts'
 import { wordOverlapMatch } from '../wordOverlapMatch/wordOverlapMatch.ts'
 
@@ -42,6 +43,7 @@ const createTableMapping = async (
 
   // NOTE: Implement synonym matching if needed
   // --- (0) synonym matching
+  dictionaryMatch(referenceTableNames, predictTableNames, tableMapping)
 
   // --- (1) name similarity matching
   await nameSimilarity(referenceTableNames, predictTableNames, tableMapping)
@@ -82,6 +84,7 @@ const createColumnMapping = async (
 
   // NOTE: Implement synonym matching if needed
   // --- (0) synonym matching
+  dictionaryMatch(referenceColumnNames, predictColumnNames, columnMapping)
 
   // --- (1) name similarity matching
   await nameSimilarity(referenceColumnNames, predictColumnNames, columnMapping)

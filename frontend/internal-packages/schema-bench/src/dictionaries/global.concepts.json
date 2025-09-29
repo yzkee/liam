@@ -1,0 +1,17 @@
+{
+  "concepts": [
+    {
+      "id": "customer_info",
+      "aliases": ["customer_info", "client_data"]
+    },
+    {
+      "id": "order_detail",
+      "aliases": ["order_details", "order_items", "purchase_items"]
+    },
+    {
+      "id": "user_profile",
+      "aliases": ["user_profiles", "account_info"]
+    }
+  ],
+  "generic_tokens": ["info", "data", "table", "record", "list"]
+}

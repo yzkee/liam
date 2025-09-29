@@ -405,9 +405,7 @@ describe('githubUrlHandler', () => {
 
       expect(result.isOk()).toBe(true)
       if (result.isOk()) {
-        expect(result.value.content).toBe(
-          `\n// --- File 1 ---\n${mockUsersSql}\n\n\n// --- File 2 ---\n${mockPostsSql}`,
-        )
+        expect(result.value.content).toBe(`${mockUsersSql}\n\n${mockPostsSql}`)
         expect(result.value.detectedFormat).toBe('postgres')
       }
     })

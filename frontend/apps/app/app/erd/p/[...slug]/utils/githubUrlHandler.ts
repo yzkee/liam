@@ -395,11 +395,8 @@ const downloadAndCombineFiles = async (
     return err(new Error('Failed to download any schema files'))
   }
 
-  const combinedContent = validContents
-    .map((content, index) => {
-      return `\n// --- File ${index + 1} ---\n${content}`
-    })
-    .join('\n\n')
+  // Simply join files with double newline separator
+  const combinedContent = validContents.join('\n\n')
 
   return ok(combinedContent)
 }

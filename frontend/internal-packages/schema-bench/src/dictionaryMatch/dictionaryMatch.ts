@@ -81,7 +81,14 @@ export function buildConceptIndex(dicts?: ConceptDictFile[]): ConceptIndex {
     loaded.push(...dicts)
   } else {
     const def = loadDefaultConceptDict()
-    if (def) loaded.push(def)
+    if (def) {
+      loaded.push(def)
+    } else {
+      // Warn so consumers notice dictionary-based matching is disabled
+      console.warn(
+        '[schema-bench] No concept dictionaries loaded; dictionaryMatch will be a no-op.',
+      )
+    }
   }
 
   for (const dict of loaded) {
@@ -91,7 +98,17 @@ export function buildConceptIndex(dicts?: ConceptDictFile[]): ConceptIndex {
     for (const c of dict.concepts) {
       const normAliases = c.aliases.map((a) => normalizeAlias(a))
       conceptToAliases.set(c.id, normAliases)
-      for (const a of normAliases) aliasToConcept.set(a, c.id)
+      for (const a of normAliases) {
+        const prev = aliasToConcept.get(a)
+        if (prev && prev !== c.id) {
+          // Keep the first mapping deterministically and warn for visibility
+          console.warn(
+            `[schema-bench] Duplicate alias "${a}" for concepts "${prev}" and "${c.id}". Keeping "${prev}".`,
+          )
+          continue
+        }
+        aliasToConcept.set(a, c.id)
+      }
     }
   }
 

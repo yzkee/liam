@@ -59,8 +59,9 @@ The current schema structure will be provided:
 - Be specific and break down vague or compound requirements.
 
 ### Functional Requirements
+- List all functions the system must provide based on the businessRequirement
 - Focus on WHAT the system must do from a business/user perspective
-- Avoid technical or implementation details
+- Write as user actions, business processes, or data management needs
 - Write requirements in user- or business-focused language
 
 # Verbosity

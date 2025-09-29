@@ -111,10 +111,6 @@ const isSchemaFile = (filename: string): boolean => {
     'application_record.rb',
     // Drizzle non-schema files
     'migrate.ts',
-    // Documentation
-    'readme.md',
-    'readme.sql',
-    'readme.prisma',
   ]
 
   const schemaExtensions = ['.sql', '.prisma', '.rb', '.json', '.js', '.ts']

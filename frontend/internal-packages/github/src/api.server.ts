@@ -273,19 +273,46 @@ export const getFolderContents = async (
 }
 
 /**
- * Downloads file content from a GitHub raw URL
+ * Downloads file content from a GitHub raw URL with timeout protection
  */
 export const downloadFileContent = async (
   url: string,
+  timeoutMs = 10000, // 10 second default timeout
 ): Promise<string | null> => {
+  const controller = new AbortController()
+  let timeoutId: NodeJS.Timeout | undefined
+
   try {
-    const response = await fetch(url)
+    // Set up timeout
+    timeoutId = setTimeout(() => {
+      controller.abort()
+    }, timeoutMs)
+
+    const response = await fetch(url, {
+      signal: controller.signal,
+    })
+
+    // Clear timeout on successful response
+    clearTimeout(timeoutId)
+    timeoutId = undefined
+
     if (!response.ok) {
       console.error(`Failed to download file: ${response.statusText}`)
       return null
     }
     return await response.text()
   } catch (error) {
+    // Clear timeout in error case
+    if (timeoutId) {
+      clearTimeout(timeoutId)
+    }
+
+    // Handle abort/timeout errors
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.error(`Request timeout downloading file from ${url}`)
+      return null
+    }
+
     console.error(`Error downloading file from ${url}:`, error)
     return null
   }

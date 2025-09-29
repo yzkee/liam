@@ -514,6 +514,48 @@ describe('githubUrlHandler', () => {
           )
         }
       })
+
+      it('should handle download timeout', async () => {
+        const url = 'https://github.com/user/repo/tree/main/timeout-test'
+
+        const mockApiResponse = [
+          {
+            type: 'file' as const,
+            name: 'slow.sql',
+            path: 'timeout-test/slow.sql',
+            download_url:
+              'https://raw.githubusercontent.com/user/repo/main/timeout-test/slow.sql',
+          },
+        ]
+
+        server.use(
+          http.get(
+            'https://api.github.com/repos/user/repo/contents/timeout-test',
+            () => {
+              return HttpResponse.json(mockApiResponse)
+            },
+          ),
+          // Mock a slow response that exceeds timeout
+          http.get(
+            'https://raw.githubusercontent.com/user/repo/main/timeout-test/slow.sql',
+            async () => {
+              // Wait longer than the default 10s timeout
+              await new Promise((resolve) => setTimeout(resolve, 15000))
+              return HttpResponse.text('CREATE TABLE slow (id INT);')
+            },
+          ),
+        )
+
+        const result = await fetchSchemaFromGitHubFolder(url)
+
+        // Should fail due to timeout, resulting in no schema files found
+        expect(result.isErr()).toBe(true)
+        if (result.isErr()) {
+          expect(result.error.message).toBe(
+            'Failed to download any schema files',
+          )
+        }
+      }, 20000) // Set test timeout to 20s to allow for the timeout to occur
     })
   })
 })

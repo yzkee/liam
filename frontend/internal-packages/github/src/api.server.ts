@@ -1,5 +1,12 @@
+import {
+  fromAsyncThrowable,
+  fromPromise,
+  fromThrowable,
+} from '@liam-hq/neverthrow'
 import { createAppAuth } from '@octokit/auth-app'
 import { Octokit } from '@octokit/rest'
+import { err, type Result, type ResultAsync } from 'neverthrow'
+import type { GitHubContentItem } from './types'
 
 const createOctokit = async (installationId: number) => {
   const octokit = new Octokit({
@@ -193,4 +200,98 @@ export const getOrganizationInfo = async (
     )
     return null
   }
+}
+/**
+ * Gets folder contents from a GitHub repository
+ */
+const getFolderContentsAsync = async (
+  owner: string,
+  repo: string,
+  path: string,
+  ref: string,
+): Promise<GitHubContentItem[]> => {
+  // For public repositories, we can use unauthenticated requests
+  const octokit = new Octokit()
+
+  const { data } = await octokit.repos.getContent({
+    owner,
+    repo,
+    path,
+    ref,
+  })
+
+  return Array.isArray(data) ? data : [data]
+}
+
+export const getFolderContents = (
+  owner: string,
+  repo: string,
+  path: string,
+  ref: string,
+): ResultAsync<GitHubContentItem[], Error> =>
+  fromAsyncThrowable(getFolderContentsAsync)(owner, repo, path, ref)
+
+/**
+ * Downloads file content from a GitHub raw URL with timeout protection
+ */
+export const downloadFileContent = async (
+  url: string,
+  timeoutMs = 10000, // 10s default timeout
+  maxBytes?: number, // optional per-file size cap
+): Promise<Result<string, Error>> => {
+  // Validate URL hostname
+  const parseResult = fromThrowable(() => new URL(url))()
+  if (parseResult.isErr()) {
+    console.error('Invalid URL:', url)
+    return err(parseResult.error)
+  }
+
+  const parsed = parseResult.value
+  if (parsed.hostname !== 'raw.githubusercontent.com') {
+    console.error(`Disallowed host for download: ${parsed.hostname}`)
+    return err(new Error(`Disallowed host: ${parsed.hostname}`))
+  }
+
+  // Set up timeout and fetch
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
+
+  const fetchResult = await fromPromise(
+    fetch(url, { signal: controller.signal }),
+    (error) => {
+      clearTimeout(timeoutId)
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.error(`Request timeout downloading file from ${url}`)
+        return new Error('Request timeout')
+      }
+      console.error(`Error downloading file from ${url}:`, error)
+      return error instanceof Error ? error : new Error('Unknown error')
+    },
+  )
+
+  if (fetchResult.isErr()) {
+    return err(fetchResult.error)
+  }
+
+  clearTimeout(timeoutId)
+  const response = fetchResult.value
+
+  // Validate response
+  if (!response.ok) {
+    console.error(`Failed to download file: ${response.statusText}`)
+    return err(new Error(`Failed to download file: ${response.statusText}`))
+  }
+
+  // Enforce size limit
+  if (typeof maxBytes === 'number') {
+    const len = response.headers.get('content-length')
+    if (len && Number(len) > maxBytes) {
+      console.error(
+        `File too large (${len} bytes). Limit: ${maxBytes} bytes for ${url}`,
+      )
+      return err(new Error(`File too large: ${len} bytes`))
+    }
+  }
+
+  return await fromPromise(response.text())
 }

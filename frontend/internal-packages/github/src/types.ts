@@ -22,3 +22,16 @@ export type GitHubWebhookPayload = {
     }
   }
 }
+export type GitHubRepoInfo = {
+  owner: string
+  repo: string
+  branch: string
+  path: string
+}
+
+export type GitHubContentItem = {
+  type: 'file' | 'dir' | 'symlink' | 'submodule'
+  name: string
+  path: string
+  download_url?: string | null
+}

@@ -41,4 +41,16 @@ describe('detectFormat', () => {
   it('should return "tbls" for schema.json', () => {
     expect(detectFormat('path/to/schema.json')).toBe('tbls')
   })
+
+  it('should return "drizzle" for file with .ts extension', () => {
+    expect(detectFormat('path/to/file.ts')).toBe('drizzle')
+  })
+
+  it('should return "drizzle" for file with .js extension', () => {
+    expect(detectFormat('path/to/file.js')).toBe('drizzle')
+  })
+
+  it('should return "tbls" for file with .json extension', () => {
+    expect(detectFormat('path/to/file.json')).toBe('tbls')
+  })
 })

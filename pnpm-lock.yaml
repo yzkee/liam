@@ -545,6 +545,9 @@ importers:
 
   frontend/internal-packages/github:
     dependencies:
+      '@liam-hq/neverthrow':
+        specifier: workspace:*
+        version: link:../neverthrow
       '@octokit/auth-app':
         specifier: 7.2.2
         version: 7.2.2
@@ -557,6 +560,9 @@ importers:
       '@supabase/supabase-js':
         specifier: 2.49.8
         version: 2.49.8
+      neverthrow:
+        specifier: 8.2.0
+        version: 8.2.0
     devDependencies:
       '@biomejs/biome':
         specifier: 2.2.4

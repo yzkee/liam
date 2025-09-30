@@ -18,6 +18,18 @@ npx @liam-hq/cli erd build --format drizzle --input src/db/schema.ts
 
 If the above command runs without issue, you should see an ER diagram generated.
 
+### Handling Multiple Drizzle Schema Files
+
+If your Drizzle schema is split across multiple TypeScript files, you can generate the ER diagram by specifying a glob pattern to include all schema files in the directory.
+
+For example, if you have multiple schema files in the `src/db/schema/` directory, use the following command:
+
+```npm
+npx @liam-hq/cli erd build --format drizzle --input "src/db/schema/*.ts"
+```
+
+This allows you to generate the ER diagram from all schema files in the specified directory.
+
 ## Database Type Support
 
 Drizzle support in Liam ERD automatically detects whether you're using PostgreSQL or MySQL based on your imports:

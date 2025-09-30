@@ -38,12 +38,6 @@ Use the saveTestcase tool with this structure:
 }
 `
 
-const STOP_CONDITIONS = `
-# Stop Conditions
-- When test case generation succeeds, report success briefly and stop.
-- Make reasonable assumptions and complete autonomously without prompting for clarification.
-`
-
 /**
  * System prompt for generating test cases
  */
@@ -55,8 +49,6 @@ ${CRITICAL_INSTRUCTIONS}
 ${TEST_REQUIREMENTS}
 
 ${EXAMPLES}
-
-${STOP_CONDITIONS}
 `
 
 /**

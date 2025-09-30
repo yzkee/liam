@@ -1,4 +1,10 @@
-import * as fs from 'node:fs'
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+} from 'node:fs'
 import * as path from 'node:path'
 import { type Schema, schemaSchema } from '@liam-hq/schema'
 import { err, ok, Result, ResultAsync } from 'neverthrow'
@@ -16,7 +22,7 @@ import type {
 // Safe wrapper functions using Result.fromThrowable
 const safeReadDirSync = (dirPath: string) =>
   Result.fromThrowable(
-    () => fs.readdirSync(dirPath, { encoding: 'utf8' }),
+    () => readdirSync(dirPath, { encoding: 'utf8' }),
     (error): WorkspaceError => ({
       type: 'FILE_READ_ERROR',
       path: dirPath,
@@ -26,7 +32,7 @@ const safeReadDirSync = (dirPath: string) =>
 
 const safeReadFileSync = (filePath: string, encoding: BufferEncoding) =>
   Result.fromThrowable(
-    () => fs.readFileSync(filePath, encoding),
+    () => readFileSync(filePath, encoding),
     (error): WorkspaceError => ({
       type: 'FILE_READ_ERROR',
       path: filePath,
@@ -121,12 +127,10 @@ const handleProcessingResults = (
   return ok(dataMap)
 }
 
-const loadOutputData = (
-  workspacePath: string,
+const loadOutputDataAt = (
+  outputDir: string,
 ): WorkspaceResult<Map<string, Schema>> => {
-  const outputDir = path.join(workspacePath, 'execution', 'output')
-
-  if (!fs.existsSync(outputDir)) {
+  if (!existsSync(outputDir)) {
     return err({ type: 'DIRECTORY_NOT_FOUND', path: outputDir })
   }
 
@@ -150,7 +154,7 @@ const loadReferenceData = (
 ): WorkspaceResult<Map<string, Schema>> => {
   const referenceDir = path.join(workspacePath, 'execution', 'reference')
 
-  if (!fs.existsSync(referenceDir)) {
+  if (!existsSync(referenceDir)) {
     return err({ type: 'DIRECTORY_NOT_FOUND', path: referenceDir })
   }
 
@@ -189,11 +193,8 @@ const runEvaluation = (
       columnF1ScoreAverage: result.columnF1ScoreAverage,
       columnRecallAverage: result.columnRecallAverage,
       columnAllCorrectRateAverage: result.columnAllCorrectRateAverage,
-      primaryKeyAccuracyAverage: result.primaryKeyAccuracyAverage,
-      constraintAccuracy: result.constraintAccuracy,
       foreignKeyF1Score: result.foreignKeyF1Score,
       foreignKeyRecall: result.foreignKeyRecall,
-      overallSchemaAccuracy: result.overallSchemaAccuracy,
     },
     tableMapping: result.tableMapping,
     columnMappings: result.columnMappings,
@@ -218,19 +219,10 @@ const calculateAverageMetrics = (results: EvaluationResult[]) => {
         (sum, r) => sum + r.metrics.columnAllCorrectRateAverage,
         0,
       ) / length,
-    primaryKeyAccuracyAverage:
-      results.reduce((sum, r) => sum + r.metrics.primaryKeyAccuracyAverage, 0) /
-      length,
-    constraintAccuracy:
-      results.reduce((sum, r) => sum + r.metrics.constraintAccuracy, 0) /
-      length,
     foreignKeyF1Score:
       results.reduce((sum, r) => sum + r.metrics.foreignKeyF1Score, 0) / length,
     foreignKeyRecall:
       results.reduce((sum, r) => sum + r.metrics.foreignKeyRecall, 0) / length,
-    overallSchemaAccuracy:
-      results.reduce((sum, r) => sum + r.metrics.overallSchemaAccuracy, 0) /
-      length,
   }
 }
 
@@ -243,7 +235,7 @@ const saveIndividualResults = (
     const filePath = path.join(evaluationDir, filename)
 
     const writeResult = Result.fromThrowable(
-      () => fs.writeFileSync(filePath, JSON.stringify(result, null, 2)),
+      () => writeFileSync(filePath, JSON.stringify(result, null, 2)),
       (error): WorkspaceError => ({
         type: 'FILE_WRITE_ERROR',
         path: filePath,
@@ -268,7 +260,6 @@ const saveSummaryResult = (
     averageMetrics: calculateAverageMetrics(results),
     cases: results.map((r) => ({
       caseId: r.caseId,
-      overallSchemaAccuracy: r.metrics.overallSchemaAccuracy,
     })),
   }
 
@@ -277,7 +268,7 @@ const saveSummaryResult = (
 
   const writeResult = Result.fromThrowable(
     () =>
-      fs.writeFileSync(summaryFilePath, JSON.stringify(summaryResult, null, 2)),
+      writeFileSync(summaryFilePath, JSON.stringify(summaryResult, null, 2)),
     (error): WorkspaceError => ({
       type: 'FILE_WRITE_ERROR',
       path: summaryFilePath,
@@ -291,15 +282,13 @@ const saveSummaryResult = (
   return ok(undefined)
 }
 
-const saveResults = (
+const saveResultsAt = (
   results: EvaluationResult[],
-  workspacePath: string,
+  evaluationDir: string,
 ): WorkspaceResult<void> => {
-  const evaluationDir = path.join(workspacePath, 'evaluation')
-
-  if (!fs.existsSync(evaluationDir)) {
+  if (!existsSync(evaluationDir)) {
     const mkdirResult = Result.fromThrowable(
-      () => fs.mkdirSync(evaluationDir, { recursive: true }),
+      () => mkdirSync(evaluationDir, { recursive: true }),
       (error): WorkspaceError => ({
         type: 'FILE_WRITE_ERROR',
         path: evaluationDir,
@@ -341,11 +330,11 @@ const validateDirectories = (
   const outputDir = path.join(config.workspacePath, 'execution', 'output')
   const referenceDir = path.join(config.workspacePath, 'execution', 'reference')
 
-  if (!fs.existsSync(outputDir)) {
+  if (!existsSync(outputDir)) {
     return err({ type: 'DIRECTORY_NOT_FOUND', path: outputDir })
   }
 
-  if (!fs.existsSync(referenceDir)) {
+  if (!existsSync(referenceDir)) {
     return err({ type: 'DIRECTORY_NOT_FOUND', path: referenceDir })
   }
 
@@ -427,7 +416,9 @@ export const evaluateSchema = async (
   }
 
   // Load data
-  const outputDataResult = loadOutputData(config.workspacePath)
+  const outputDataResult = loadOutputDataAt(
+    path.join(config.workspacePath, 'execution', 'output'),
+  )
   if (outputDataResult.isErr()) {
     return err(outputDataResult.error)
   }
@@ -488,6 +479,91 @@ export const evaluateSchema = async (
   }
 
   // Log warnings for failed cases but continue with successful ones
+  for (const failed of failedCases) {
+    console.warn(
+      `⚠️  Failed evaluation - ${failed.caseId}: ${formatError(failed.error)}`,
+    )
+  }
+
+  const results = successfulResults
+
+  // Save results
+  const saveResult = saveResultsAt(
+    results,
+    path.join(config.workspacePath, 'evaluation'),
+  )
+  if (saveResult.isErr()) {
+    return err(saveResult.error)
+  }
+
+  displaySummary(results)
+  return ok(results)
+}
+
+export const evaluateSchemaAtOutputDir = async (
+  config: EvaluationConfig,
+  outputDir: string,
+  scopeSubdir?: string, // e.g. runs/<RUN_ID>--<executor>
+): Promise<WorkspaceResult<EvaluationResult[]>> => {
+  // Validate reference directory only; outputDir is custom
+  const referenceDir = path.join(config.workspacePath, 'execution', 'reference')
+  if (!existsSync(referenceDir)) {
+    return err({ type: 'DIRECTORY_NOT_FOUND', path: referenceDir })
+  }
+  if (!existsSync(outputDir)) {
+    return err({ type: 'DIRECTORY_NOT_FOUND', path: outputDir })
+  }
+
+  const outputDataResult = loadOutputDataAt(outputDir)
+  if (outputDataResult.isErr()) {
+    return err(outputDataResult.error)
+  }
+
+  const referenceDataResult = loadReferenceData(config.workspacePath)
+  if (referenceDataResult.isErr()) {
+    return err(referenceDataResult.error)
+  }
+
+  const casesResult = prepareCasesToEvaluate(
+    config,
+    outputDataResult.value,
+    referenceDataResult.value,
+  )
+  if (casesResult.isErr()) {
+    return err(casesResult.error)
+  }
+
+  const casesToEvaluate = casesResult.value
+
+  const evaluationPromises = casesToEvaluate.map(async (caseData) => {
+    const result = await runEvaluation(caseData)
+    return { caseData, result }
+  })
+
+  const evaluationOutcomes = await Promise.all(evaluationPromises)
+
+  const successfulResults: EvaluationResult[] = []
+  const failedCases: Array<{ caseId: string; error: WorkspaceError }> = []
+
+  for (const outcome of evaluationOutcomes) {
+    if (outcome.result.isOk()) {
+      successfulResults.push(outcome.result.value)
+    } else {
+      failedCases.push({
+        caseId: outcome.caseData.caseId,
+        error: outcome.result.error,
+      })
+    }
+  }
+
+  if (successfulResults.length === 0) {
+    return err({
+      type: 'EVALUATION_ERROR',
+      caseId: failedCases.map((failed) => failed.caseId).join(', '),
+      cause: `All ${failedCases.length} evaluation(s) failed`,
+    })
+  }
+
   if (failedCases.length > 0) {
     console.warn(`⚠️  ${failedCases.length} case(s) failed evaluation:`)
     for (const failed of failedCases) {
@@ -495,14 +571,14 @@ export const evaluateSchema = async (
     }
   }
 
-  const results = successfulResults
-
-  // Save results
-  const saveResult = saveResults(results, config.workspacePath)
+  const evaluationDir = scopeSubdir
+    ? path.join(config.workspacePath, 'evaluation', scopeSubdir)
+    : path.join(config.workspacePath, 'evaluation')
+  const saveResult = saveResultsAt(successfulResults, evaluationDir)
   if (saveResult.isErr()) {
     return err(saveResult.error)
   }
 
-  displaySummary(results)
-  return ok(results)
+  displaySummary(successfulResults)
+  return ok(successfulResults)
 }

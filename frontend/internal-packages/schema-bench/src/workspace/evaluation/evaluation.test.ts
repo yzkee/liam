@@ -61,11 +61,8 @@ describe('evaluateSchema', () => {
     columnF1ScoreAverage: 0.85,
     columnRecallAverage: 0.83,
     columnAllCorrectRateAverage: 0.75,
-    primaryKeyAccuracyAverage: 0.95,
-    constraintAccuracy: 0.88,
     foreignKeyF1Score: 0.92,
     foreignKeyRecall: 0.9,
-    overallSchemaAccuracy: 0.89,
     tableMapping: { users: 'users' },
     columnMappings: { users: { id: 'id', name: 'name' } },
   }

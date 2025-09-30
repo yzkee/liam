@@ -25,6 +25,7 @@ export const TableDetailDrawerRoot: FC<PropsWithChildren> = ({ children }) => {
       open={open}
       onClose={handleClose}
       modal={false}
+      autoFocus
     >
       {children}
     </DrawerRoot>

@@ -13,7 +13,8 @@ rm -rf benchmark-workspace && pnpm --filter @liam-hq/schema-bench setupWorkspace
 This creates a benchmark workspace with multiple datasets:
 - default: Standard schema generation (3 complex cases)
 - entity-extraction: Checks whether specified table/column names appear (5 cases)
-- ambiguous-recall: Stress test for ambiguous inputs and recall
+- ambiguous-recall: Tests recall/search over ambiguous instructions
+- relational-inference: Evaluates implicit relationship inference (1:N, M:N, entity separation)
 - logical-deletion: Evaluates designs that avoid naive is_deleted and separate PII from business references
 
 System features:
@@ -32,7 +33,7 @@ pnpm --filter @liam-hq/schema-bench executeLiamDB -all
 pnpm --filter @liam-hq/schema-bench executeLiamDB -entity-extraction
 
 # Run on multiple datasets
-pnpm --filter @liam-hq/schema-bench executeLiamDB -default -entity-extraction -logical-deletion
+pnpm --filter @liam-hq/schema-bench executeLiamDB -default -entity-extraction -relational-inference -logical-deletion
 ```
 
 OpenAI:
@@ -86,12 +87,9 @@ The evaluation computes comprehensive metrics for each dataset:
 - Column F1 Score Average: Average F1 across table columns
 - Column Recall Average: Fraction of reference columns recovered
 - Column All Correct Rate Average: Percentage of perfectly matched columns
-- Primary Key Accuracy Average: Accuracy of primary key detection
-- Constraint Accuracy: Accuracy of constraint detection
 - Foreign Key F1 Score: F1 score for foreign key relationships
 - Foreign Key Recall: Fraction of reference foreign keys recovered
 - Foreign Key All Correct Rate: Percentage of perfectly matched foreign keys
-- Overall Schema Accuracy: Aggregated metric across dimensions
 
 ## Schema Format
 
@@ -156,7 +154,13 @@ benchmark-workspace/
 │   │   ├── output/     # Generated schemas
 │   │   └── reference/  # Reference schemas for comparison
 │   └── evaluation/     # Evaluation results (per-case + summary)
-└── entity-extraction/
+├── entity-extraction/
+    ├── execution/
+    │   ├── input/
+    │   ├── output/
+    │   └── reference/
+    └── evaluation/
+└── relational-inference/
     ├── execution/
     │   ├── input/
     │   ├── output/

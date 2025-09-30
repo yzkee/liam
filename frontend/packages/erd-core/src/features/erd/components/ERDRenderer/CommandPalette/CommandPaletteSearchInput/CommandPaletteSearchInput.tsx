@@ -18,12 +18,16 @@ type Props = ComponentProps<typeof Command.Input> & {
   mode: CommandPaletteInputMode
   suggestion: CommandPaletteSuggestion | null
   setMode: (mode: CommandPaletteInputMode) => void
+
+  // TODO: remove this prop and always activate table mode when releasing the feature
+  isTableModeActivatable?: boolean
 }
 
 export const CommandPaletteSearchInput: FC<Props> = ({
   mode,
   suggestion,
   setMode,
+  isTableModeActivatable = false,
   ...inputProps
 }) => {
   const [value, setValue] = useState('')
@@ -40,6 +44,7 @@ export const CommandPaletteSearchInput: FC<Props> = ({
   }, [mode])
 
   const handleKeydown: KeyboardEventHandler<HTMLInputElement> = useCallback(
+    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: refactor this function to reduce cognitive complexity
     (event) => {
       switch (mode.type) {
         case 'default': {
@@ -50,12 +55,15 @@ export const CommandPaletteSearchInput: FC<Props> = ({
             return
           }
 
-          // switch to "table" mode if a table is suggested and Tab key is pressed
-          if (event.key === 'Tab' && suggestion?.type === 'table') {
-            event.preventDefault()
-            setMode({ type: 'table', tableName: suggestion.name })
-            setValue('')
-            return
+          // TODO: remove this condition and always activate table mode when releasing the feature
+          if (isTableModeActivatable) {
+            if (event.key === 'Tab' && suggestion?.type === 'table') {
+              // switch to "table" mode if a table is suggested and Tab key is pressed
+              event.preventDefault()
+              setMode({ type: 'table', tableName: suggestion.name })
+              setValue('')
+              return
+            }
           }
 
           break
@@ -74,7 +82,7 @@ export const CommandPaletteSearchInput: FC<Props> = ({
         }
       }
     },
-    [mode.type, value, setMode, suggestion],
+    [mode.type, value, setMode, suggestion, isTableModeActivatable],
   )
 
   return (

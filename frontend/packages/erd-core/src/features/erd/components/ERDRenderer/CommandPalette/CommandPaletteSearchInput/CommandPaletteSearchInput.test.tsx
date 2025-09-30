@@ -60,43 +60,36 @@ describe('in case input mode is "default"', () => {
   })
 
   describe('when the user pressed Tab key', () => {
-    it('should switch to "table" mode and make the input empty when a table is suggested', async () => {
-      const user = userEvent.setup()
-      render(
-        <CommandPaletteSearchInput
-          mode={{ type: 'default' }}
-          suggestion={{ type: 'table', name: 'users' }}
-          setMode={mockSetMode}
-        />,
-        { wrapper },
-      )
-      const input = screen.getByRole('combobox')
-      input.focus()
-
-      // make the input not empty
-      await user.keyboard('user')
-
-      await user.keyboard('{Tab}')
-
-      expect(mockSetMode).toHaveBeenCalledWith({
-        type: 'table',
-        tableName: 'users',
-      })
-      expect(input).toHaveValue('')
-    })
-
-    it.each<CommandPaletteSuggestion | null>([
-      { type: 'command', name: 'Copy Link' },
-      null,
-    ])(
-      'should not switch input mode and do not modify input value when suggestion is %o',
-      async (suggestion) => {
+    // TODO: remove this describe block and always activate table mode when releasing the feature
+    describe('when table mode is not activatable (default)', () => {
+      it('should not switch to "table" mode when a table is suggested', async () => {
         const user = userEvent.setup()
         render(
           <CommandPaletteSearchInput
             mode={{ type: 'default' }}
-            suggestion={suggestion}
+            suggestion={{ type: 'table', name: 'users' }}
             setMode={mockSetMode}
+          />,
+          { wrapper },
+        )
+        const input = screen.getByRole('combobox')
+        input.focus()
+
+        await user.keyboard('{Tab}')
+
+        expect(mockSetMode).not.toHaveBeenCalled()
+      })
+    })
+
+    describe('when table mode is activatable', () => {
+      it('should switch to "table" mode and make the input empty when a table is suggested', async () => {
+        const user = userEvent.setup()
+        render(
+          <CommandPaletteSearchInput
+            mode={{ type: 'default' }}
+            suggestion={{ type: 'table', name: 'users' }}
+            setMode={mockSetMode}
+            isTableModeActivatable
           />,
           { wrapper },
         )
@@ -108,10 +101,41 @@ describe('in case input mode is "default"', () => {
 
         await user.keyboard('{Tab}')
 
-        expect(mockSetMode).not.toHaveBeenCalled()
-        expect(input).toHaveValue('user')
-      },
-    )
+        expect(mockSetMode).toHaveBeenCalledWith({
+          type: 'table',
+          tableName: 'users',
+        })
+        expect(input).toHaveValue('')
+      })
+
+      it.each<CommandPaletteSuggestion | null>([
+        { type: 'command', name: 'Copy Link' },
+        null,
+      ])(
+        'should not switch input mode and do not modify input value when suggestion is %o',
+        async (suggestion) => {
+          const user = userEvent.setup()
+          render(
+            <CommandPaletteSearchInput
+              mode={{ type: 'default' }}
+              suggestion={suggestion}
+              setMode={mockSetMode}
+            />,
+            { wrapper },
+          )
+          const input = screen.getByRole('combobox')
+          input.focus()
+
+          // make the input not empty
+          await user.keyboard('user')
+
+          await user.keyboard('{Tab}')
+
+          expect(mockSetMode).not.toHaveBeenCalled()
+          expect(input).toHaveValue('user')
+        },
+      )
+    })
   })
 })
 

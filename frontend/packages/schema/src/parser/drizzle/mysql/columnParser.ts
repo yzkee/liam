@@ -120,8 +120,12 @@ export const parseColumnFromProperty = (
       }
     }
   } else if (current.type === 'Identifier') {
-    // Handle enum variable references (e.g., userRoleEnum)
-    baseType = current.value
+    // Handle enum variable references (e.g., statusEnum)
+    const enumVarName = current.value
+    const enumDef = extractedEnums?.[enumVarName]
+    if (enumDef) {
+      baseType = enumDef.name
+    }
   }
 
   if (!baseType) return null
@@ -134,10 +138,6 @@ export const parseColumnFromProperty = (
     if (firstArgExpr && isStringLiteral(firstArgExpr)) {
       actualColumnName = firstArgExpr.value
     }
-  } else if (current.type === 'Identifier') {
-    // For enum variable references, use the JS property name as the column name
-    // since we can't extract it from the identifier itself
-    actualColumnName = columnName
   }
 
   const column: DrizzleColumnDefinition = {

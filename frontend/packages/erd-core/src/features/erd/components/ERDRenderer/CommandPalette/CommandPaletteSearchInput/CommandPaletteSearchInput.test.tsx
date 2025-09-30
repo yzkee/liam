@@ -31,7 +31,6 @@ describe('in case input mode is "default"', () => {
         />,
         { wrapper },
       )
-      screen.getByRole('combobox').focus()
 
       await user.keyboard('>')
 
@@ -48,7 +47,6 @@ describe('in case input mode is "default"', () => {
         />,
         { wrapper },
       )
-      screen.getByRole('combobox').focus()
 
       // make the input not empty
       await user.keyboard('hello')
@@ -72,8 +70,6 @@ describe('in case input mode is "default"', () => {
           />,
           { wrapper },
         )
-        const input = screen.getByRole('combobox')
-        input.focus()
 
         await user.keyboard('{Tab}')
 
@@ -94,7 +90,6 @@ describe('in case input mode is "default"', () => {
           { wrapper },
         )
         const input = screen.getByRole('combobox')
-        input.focus()
 
         // make the input not empty
         await user.keyboard('user')
@@ -124,7 +119,6 @@ describe('in case input mode is "default"', () => {
             { wrapper },
           )
           const input = screen.getByRole('combobox')
-          input.focus()
 
           // make the input not empty
           await user.keyboard('user')
@@ -154,7 +148,6 @@ describe.each<CommandPaletteInputMode>([
         />,
         { wrapper },
       )
-      screen.getByRole('combobox').focus()
 
       await user.keyboard('{backspace}')
 
@@ -172,7 +165,6 @@ describe.each<CommandPaletteInputMode>([
       />,
       { wrapper },
     )
-    screen.getByRole('combobox').focus()
 
     // make the input not empty
     await user.keyboard('hello')

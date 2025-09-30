@@ -96,6 +96,7 @@ export const CommandPaletteSearchInput: FC<Props> = ({
           onValueChange={setValue}
           className={styles.input}
           placeholder="Search"
+          autoFocus
           onKeyDown={handleKeydown}
         />
       </div>

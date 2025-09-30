@@ -4,7 +4,7 @@ import {
   type GitHubRepoInfo,
   getFolderContents,
 } from '@liam-hq/github'
-import { fromAsyncThrowable, fromThrowable } from '@liam-hq/neverthrow'
+import { fromThrowable } from '@liam-hq/neverthrow'
 import { detectFormat } from '@liam-hq/schema/parser'
 import { err, ok, type Result } from 'neverthrow'
 
@@ -155,16 +155,12 @@ export const parseGitHubFolderUrl = async (
       path: candidatePath,
     }
 
-    const testGetFolderContents = fromAsyncThrowable(() =>
-      getFolderContents(
-        testRepoInfo.owner,
-        testRepoInfo.repo,
-        testRepoInfo.path,
-        testRepoInfo.branch,
-      ),
+    const contentsResult = await getFolderContents(
+      testRepoInfo.owner,
+      testRepoInfo.repo,
+      testRepoInfo.path,
+      testRepoInfo.branch,
     )
-
-    const contentsResult = await testGetFolderContents()
 
     if (contentsResult.isOk()) {
       // If we get contents (even empty array), this branch/path combination is valid
@@ -194,21 +190,12 @@ export const parseGitHubFolderUrl = async (
 const fetchGitHubFolderContents = async (
   repoInfo: GitHubRepoInfo,
 ): Promise<Result<GitHubContentItem[], Error>> => {
-  const getFolderContentsAsync = fromAsyncThrowable(
-    () =>
-      getFolderContents(
-        repoInfo.owner,
-        repoInfo.repo,
-        repoInfo.path,
-        repoInfo.branch,
-      ),
-    (cause: unknown) =>
-      cause instanceof Error
-        ? new Error(`Failed to fetch folder contents: ${cause.message}`)
-        : new Error('Failed to fetch folder contents: Unknown error'),
+  return await getFolderContents(
+    repoInfo.owner,
+    repoInfo.repo,
+    repoInfo.path,
+    repoInfo.branch,
   )
-
-  return await getFolderContentsAsync()
 }
 
 const checkSecurityLimits = (

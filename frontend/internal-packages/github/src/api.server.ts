@@ -1,5 +1,8 @@
+import { fromAsyncThrowable } from '@liam-hq/neverthrow'
 import { createAppAuth } from '@octokit/auth-app'
 import { Octokit } from '@octokit/rest'
+import type { ResultAsync } from 'neverthrow'
+import type { GitHubContentItem } from './types'
 
 const createOctokit = async (installationId: number) => {
   const octokit = new Octokit({
@@ -197,81 +200,32 @@ export const getOrganizationInfo = async (
 /**
  * Gets folder contents from a GitHub repository
  */
-export const getFolderContents = async (
+const getFolderContentsAsync = async (
   owner: string,
   repo: string,
   path: string,
   ref: string,
-): Promise<
-  Array<{
-    type: 'file' | 'dir'
-    name: string
-    path: string
-    download_url?: string
-  }>
-> => {
+): Promise<GitHubContentItem[]> => {
   // For public repositories, we can use unauthenticated requests
   const octokit = new Octokit()
 
-  try {
-    const { data } = await octokit.repos.getContent({
-      owner,
-      repo,
-      path,
-      ref,
-    })
+  const { data } = await octokit.repos.getContent({
+    owner,
+    repo,
+    path,
+    ref,
+  })
 
-    if (Array.isArray(data)) {
-      return data.map((item) => {
-        const result: {
-          type: 'file' | 'dir'
-          name: string
-          path: string
-          download_url?: string
-        } = {
-          type: item.type === 'file' ? 'file' : 'dir',
-          name: item.name,
-          path: item.path,
-        }
-
-        if ('download_url' in item && item.download_url) {
-          result.download_url = item.download_url
-        }
-
-        return result
-      })
-    }
-
-    // Single file case
-    if ('type' in data) {
-      const result: {
-        type: 'file' | 'dir'
-        name: string
-        path: string
-        download_url?: string
-      } = {
-        type: data.type === 'file' ? 'file' : 'dir',
-        name: data.name,
-        path: data.path,
-      }
-
-      if ('download_url' in data && data.download_url) {
-        result.download_url = data.download_url
-      }
-
-      return [result]
-    }
-
-    return []
-  } catch (error) {
-    console.error(
-      `Error fetching folder contents for ${owner}/${repo}/${path}:`,
-      error,
-    )
-    // Re-throw the error so that fromAsyncThrowable can catch it for progressive resolution
-    throw error
-  }
+  return Array.isArray(data) ? data : [data]
 }
+
+export const getFolderContents = (
+  owner: string,
+  repo: string,
+  path: string,
+  ref: string,
+): ResultAsync<GitHubContentItem[], Error> =>
+  fromAsyncThrowable(getFolderContentsAsync)(owner, repo, path, ref)
 
 /**
  * Downloads file content from a GitHub raw URL with timeout protection

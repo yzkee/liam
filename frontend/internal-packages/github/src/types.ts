@@ -30,8 +30,8 @@ export type GitHubRepoInfo = {
 }
 
 export type GitHubContentItem = {
-  type: 'file' | 'dir'
+  type: 'file' | 'dir' | 'symlink' | 'submodule'
   name: string
   path: string
-  download_url?: string
+  download_url?: string | null
 }

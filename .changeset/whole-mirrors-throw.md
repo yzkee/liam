@@ -2,4 +2,4 @@
 "@liam-hq/schema": patch
 ---
 
-🐛 fix(schema): support chained methods like pgTable().enableRLS().$comment()
+🐛 fix(Drizzle parser): support chained methods like pgTable().enableRLS().$comment()

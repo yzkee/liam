@@ -55,10 +55,10 @@ export const SyntaxHighlightedLine: FC<Props> = ({
 
   const renderRestOfLine = (text: string) => {
     // Handle quoted strings
-    const parts = text.split(/('([^']+)')/g)
+    const parts = text.split(/('[^']+')/g)
 
     return parts.map((part, i) => {
-      if (i % 3 === 1) {
+      if (i % 2 === 1) {
         // This is a quoted string
         return (
           <span key={`quote-${i}-${part}`} className={styles.syntaxIdentifier}>

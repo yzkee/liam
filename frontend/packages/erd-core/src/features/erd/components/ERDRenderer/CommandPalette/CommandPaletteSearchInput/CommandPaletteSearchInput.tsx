@@ -3,21 +3,31 @@ import { Command } from 'cmdk'
 import {
   type ComponentProps,
   type FC,
-  useEffect,
+  type KeyboardEventHandler,
+  useCallback,
   useMemo,
   useState,
 } from 'react'
-import type { CommandPaletteInputMode } from '../types'
+import type {
+  CommandPaletteInputMode,
+  CommandPaletteSuggestion,
+} from '../types'
 import styles from './CommandPaletteSearchInput.module.css'
 
 type Props = ComponentProps<typeof Command.Input> & {
   mode: CommandPaletteInputMode
+  suggestion: CommandPaletteSuggestion | null
   setMode: (mode: CommandPaletteInputMode) => void
+
+  // TODO: remove this prop and always activate table mode when releasing the feature
+  isTableModeActivatable?: boolean
 }
 
 export const CommandPaletteSearchInput: FC<Props> = ({
   mode,
+  suggestion,
   setMode,
+  isTableModeActivatable = false,
   ...inputProps
 }) => {
   const [value, setValue] = useState('')
@@ -28,38 +38,52 @@ export const CommandPaletteSearchInput: FC<Props> = ({
         return null
       case 'command':
         return '>'
+      case 'table':
+        return `${mode.tableName} /`
     }
   }, [mode])
 
-  useEffect(() => {
-    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Complex logic for handling CommandPalette input mode with user keyboard interactions
-    const down = (event: KeyboardEvent) => {
-      if (mode.type === 'default') {
-        // switch to "command" mode if value is empty and `>` is pressed
-        if (event.key === '>' && value === '') {
-          event.preventDefault()
-          setMode({ type: 'command' })
-          return
+  const handleKeydown: KeyboardEventHandler<HTMLInputElement> = useCallback(
+    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: refactor this function to reduce cognitive complexity
+    (event) => {
+      switch (mode.type) {
+        case 'default': {
+          // switch to "command" mode if value is empty and `>` is pressed
+          if (event.key === '>' && value === '') {
+            event.preventDefault()
+            setMode({ type: 'command' })
+            return
+          }
+
+          // TODO: remove this condition and always activate table mode when releasing the feature
+          if (isTableModeActivatable) {
+            if (event.key === 'Tab' && suggestion?.type === 'table') {
+              // switch to "table" mode if a table is suggested and Tab key is pressed
+              event.preventDefault()
+              setMode({ type: 'table', tableName: suggestion.name })
+              setValue('')
+              return
+            }
+          }
+
+          break
         }
 
-        return
-      }
+        case 'command':
+        case 'table': {
+          // switch to "default" mode if value is empty and delete key is pressed
+          if (event.key === 'Backspace' && value === '') {
+            event.preventDefault()
+            setMode({ type: 'default' })
+            return
+          }
 
-      if (mode.type === 'command') {
-        // switch to "default" mode if value is empty and delete key is pressed
-        if (event.key === 'Backspace' && value === '') {
-          event.preventDefault()
-          setMode({ type: 'default' })
-          return
+          break
         }
-
-        return
       }
-    }
-
-    document.addEventListener('keydown', down)
-    return () => document.removeEventListener('keydown', down)
-  }, [value, mode, setMode])
+    },
+    [mode.type, value, setMode, suggestion, isTableModeActivatable],
+  )
 
   return (
     <div className={styles.container}>
@@ -72,6 +96,8 @@ export const CommandPaletteSearchInput: FC<Props> = ({
           onValueChange={setValue}
           className={styles.input}
           placeholder="Search"
+          autoFocus
+          onKeyDown={handleKeydown}
         />
       </div>
     </div>

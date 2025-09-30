@@ -42,6 +42,7 @@ export const CommandPaletteContent: FC = () => {
       <div className={styles.searchContainer}>
         <CommandPaletteSearchInput
           mode={inputMode}
+          suggestion={suggestion}
           setMode={setInputMode}
           onBlur={(event) => event.target.focus()}
         />

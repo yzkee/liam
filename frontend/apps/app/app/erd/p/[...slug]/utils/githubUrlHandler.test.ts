@@ -1,3 +1,4 @@
+import type { GitHubContentItem } from '@liam-hq/github'
 import { HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
@@ -9,6 +10,38 @@ import {
 
 // Setup MSW server
 const server = setupServer()
+
+const mockGitHubContentsApi = (
+  owner: string,
+  repo: string,
+  path: string,
+  ref: string,
+  response: GitHubContentItem[],
+) => {
+  const encodedPath = path ? encodeURIComponent(path) : ''
+  const url = `https://api.github.com/repos/${owner}/${repo}/contents${encodedPath ? `/${encodedPath}` : ''}`
+
+  return http.get(url, ({ request }) => {
+    const requestUrl = new URL(request.url)
+    const requestRef = requestUrl.searchParams.get('ref')
+    if (requestRef === ref) {
+      return HttpResponse.json(response)
+    }
+    return HttpResponse.json({ message: 'Not Found' }, { status: 404 })
+  })
+}
+
+const mockGitHubRawContent = (
+  owner: string,
+  repo: string,
+  ref: string,
+  path: string,
+  content: string,
+) =>
+  http.get(
+    `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${path}`,
+    () => HttpResponse.text(content),
+  )
 
 describe('githubUrlHandler', () => {
   beforeAll(() => server.listen())
@@ -46,29 +79,16 @@ describe('githubUrlHandler', () => {
     it('should parse valid GitHub folder URLs', async () => {
       const url = 'https://github.com/user/repo/tree/main/schemas/db'
 
-      // Add MSW handler to see if this test makes API calls
       server.use(
-        http.get(
-          'https://api.github.com/repos/user/repo/contents/schemas%2Fdb',
-          ({ request }) => {
-            const url = new URL(request.url)
-            const ref = url.searchParams.get('ref')
-
-            if (ref === 'main') {
-              return HttpResponse.json([
-                {
-                  type: 'file',
-                  name: 'users.sql',
-                  path: 'schemas/db/users.sql',
-                  download_url:
-                    'https://raw.githubusercontent.com/user/repo/main/schemas/db/users.sql',
-                },
-              ])
-            }
-
-            return HttpResponse.json({ message: 'Not Found' }, { status: 404 })
+        mockGitHubContentsApi('user', 'repo', 'schemas/db', 'main', [
+          {
+            type: 'file',
+            name: 'users.sql',
+            path: 'schemas/db/users.sql',
+            download_url:
+              'https://raw.githubusercontent.com/user/repo/main/schemas/db/users.sql',
           },
-        ),
+        ]),
       )
 
       const result = await parseGitHubFolderUrl(url)
@@ -87,29 +107,16 @@ describe('githubUrlHandler', () => {
     it('should handle URLs with query parameters', async () => {
       const url = 'https://github.com/org/repo/tree/main?tab=readme-ov-file'
 
-      // Add MSW handler
       server.use(
-        http.get(
-          'https://api.github.com/repos/org/repo/contents',
-          ({ request }) => {
-            const url = new URL(request.url)
-            const ref = url.searchParams.get('ref')
-
-            if (ref === 'main') {
-              return HttpResponse.json([
-                {
-                  type: 'file',
-                  name: 'README.md',
-                  path: 'README.md',
-                  download_url:
-                    'https://raw.githubusercontent.com/org/repo/main/README.md',
-                },
-              ])
-            }
-
-            return HttpResponse.json({ message: 'Not Found' }, { status: 404 })
+        mockGitHubContentsApi('org', 'repo', '', 'main', [
+          {
+            type: 'file',
+            name: 'README.md',
+            path: 'README.md',
+            download_url:
+              'https://raw.githubusercontent.com/org/repo/main/README.md',
           },
-        ),
+        ]),
       )
 
       const result = await parseGitHubFolderUrl(url)
@@ -129,29 +136,16 @@ describe('githubUrlHandler', () => {
       const url =
         'https://github.com/org/repo/tree/main/schemas?tab=readme-ov-file'
 
-      // Add MSW handler
       server.use(
-        http.get(
-          'https://api.github.com/repos/org/repo/contents/schemas',
-          ({ request }) => {
-            const url = new URL(request.url)
-            const ref = url.searchParams.get('ref')
-
-            if (ref === 'main') {
-              return HttpResponse.json([
-                {
-                  type: 'file',
-                  name: 'schema.sql',
-                  path: 'schemas/schema.sql',
-                  download_url:
-                    'https://raw.githubusercontent.com/org/repo/main/schemas/schema.sql',
-                },
-              ])
-            }
-
-            return HttpResponse.json({ message: 'Not Found' }, { status: 404 })
+        mockGitHubContentsApi('org', 'repo', 'schemas', 'main', [
+          {
+            type: 'file',
+            name: 'schema.sql',
+            path: 'schemas/schema.sql',
+            download_url:
+              'https://raw.githubusercontent.com/org/repo/main/schemas/schema.sql',
           },
-        ),
+        ]),
       )
 
       const result = await parseGitHubFolderUrl(url)
@@ -351,53 +345,46 @@ describe('githubUrlHandler', () => {
     it('should fetch and combine schema files from GitHub folder', async () => {
       const url = 'https://github.com/user/repo/tree/main/schemas'
 
-      // Mock GitHub API response
-      const mockApiResponse = [
-        {
-          type: 'file',
-          name: 'users.sql',
-          path: 'schemas/users.sql',
-          download_url:
-            'https://raw.githubusercontent.com/user/repo/main/schemas/users.sql',
-        },
-        {
-          type: 'file',
-          name: 'posts.sql',
-          path: 'schemas/posts.sql',
-          download_url:
-            'https://raw.githubusercontent.com/user/repo/main/schemas/posts.sql',
-        },
-        {
-          type: 'file',
-          name: 'README.md',
-          path: 'schemas/README.md',
-          download_url:
-            'https://raw.githubusercontent.com/user/repo/main/schemas/README.md',
-        },
-      ]
-
       const mockUsersSql = 'CREATE TABLE users (id INT PRIMARY KEY);'
       const mockPostsSql = 'CREATE TABLE posts (id INT PRIMARY KEY);'
 
-      // Setup MSW handlers for this test
       server.use(
-        http.get(
-          'https://api.github.com/repos/user/repo/contents/schemas',
-          () => {
-            return HttpResponse.json(mockApiResponse)
+        mockGitHubContentsApi('user', 'repo', 'schemas', 'main', [
+          {
+            type: 'file',
+            name: 'users.sql',
+            path: 'schemas/users.sql',
+            download_url:
+              'https://raw.githubusercontent.com/user/repo/main/schemas/users.sql',
           },
+          {
+            type: 'file',
+            name: 'posts.sql',
+            path: 'schemas/posts.sql',
+            download_url:
+              'https://raw.githubusercontent.com/user/repo/main/schemas/posts.sql',
+          },
+          {
+            type: 'file',
+            name: 'README.md',
+            path: 'schemas/README.md',
+            download_url:
+              'https://raw.githubusercontent.com/user/repo/main/schemas/README.md',
+          },
+        ]),
+        mockGitHubRawContent(
+          'user',
+          'repo',
+          'main',
+          'schemas/users.sql',
+          mockUsersSql,
         ),
-        http.get(
-          'https://raw.githubusercontent.com/user/repo/main/schemas/users.sql',
-          () => {
-            return HttpResponse.text(mockUsersSql)
-          },
-        ),
-        http.get(
-          'https://raw.githubusercontent.com/user/repo/main/schemas/posts.sql',
-          () => {
-            return HttpResponse.text(mockPostsSql)
-          },
+        mockGitHubRawContent(
+          'user',
+          'repo',
+          'main',
+          'schemas/posts.sql',
+          mockPostsSql,
         ),
       )
 

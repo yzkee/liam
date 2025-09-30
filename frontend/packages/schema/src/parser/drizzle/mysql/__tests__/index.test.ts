@@ -41,6 +41,7 @@ describe(processor, () => {
           notes: longtext('notes'), // MySQL-specific text size
           is_active: boolean('is_active').default(true),
           status: mysqlEnum('status', ['active', 'inactive', 'pending']).default('active'),
+          role: statusEnum.default('pending').notNull(), // Test enum variable reference
         });
       `)
 
@@ -82,6 +83,12 @@ describe(processor, () => {
       expect(value.tables['users']?.columns['id']?.default).toBe(
         'autoincrement()',
       )
+
+      // Test enum variable reference (statusEnum.default())
+      expect(value.tables['users']?.columns['role']).toBeDefined()
+      expect(value.tables['users']?.columns['role']?.type).toBe('status')
+      expect(value.tables['users']?.columns['role']?.default).toBe('pending')
+      expect(value.tables['users']?.columns['role']?.notNull).toBe(true)
     })
   })
 })

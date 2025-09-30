@@ -60,7 +60,7 @@ describe('in case input mode is "default"', () => {
   })
 
   describe('when the user pressed Tab key', () => {
-    it('should switch to "column" mode and make the input empty when a table is suggested', async () => {
+    it('should switch to "table" mode and make the input empty when a table is suggested', async () => {
       const user = userEvent.setup()
       render(
         <CommandPaletteSearchInput
@@ -79,7 +79,7 @@ describe('in case input mode is "default"', () => {
       await user.keyboard('{Tab}')
 
       expect(mockSetMode).toHaveBeenCalledWith({
-        type: 'column',
+        type: 'table',
         tableName: 'users',
       })
       expect(input).toHaveValue('')
@@ -117,7 +117,7 @@ describe('in case input mode is "default"', () => {
 
 describe.each<CommandPaletteInputMode>([
   { type: 'command' },
-  { type: 'column', tableName: 'users' },
+  { type: 'table', tableName: 'users' },
 ])('in case input mode is $type', (inputMode) => {
   describe('when the user pressed Backspace key', () => {
     it('should switch to "default" mode when value is empty', async () => {

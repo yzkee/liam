@@ -34,7 +34,7 @@ export const CommandPaletteSearchInput: FC<Props> = ({
         return null
       case 'command':
         return '>'
-      case 'column':
+      case 'table':
         return `${mode.tableName} /`
     }
   }, [mode])
@@ -50,10 +50,10 @@ export const CommandPaletteSearchInput: FC<Props> = ({
             return
           }
 
-          // switch to "column" mode if a table is suggested and Tab key is pressed
+          // switch to "table" mode if a table is suggested and Tab key is pressed
           if (event.key === 'Tab' && suggestion?.type === 'table') {
             event.preventDefault()
-            setMode({ type: 'column', tableName: suggestion.name })
+            setMode({ type: 'table', tableName: suggestion.name })
             setValue('')
             return
           }
@@ -62,7 +62,7 @@ export const CommandPaletteSearchInput: FC<Props> = ({
         }
 
         case 'command':
-        case 'column': {
+        case 'table': {
           // switch to "default" mode if value is empty and delete key is pressed
           if (event.key === 'Backspace' && value === '') {
             event.preventDefault()

@@ -1,7 +1,7 @@
 export type CommandPaletteInputMode =
   | { type: 'default' }
   | { type: 'command' }
-  | { type: 'column'; tableName: string }
+  | { type: 'table'; tableName: string }
 
 export type CommandPaletteSuggestion =
   | { type: 'table'; name: string }

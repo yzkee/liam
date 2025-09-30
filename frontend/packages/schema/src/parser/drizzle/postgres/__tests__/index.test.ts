@@ -57,5 +57,64 @@ describe(processor, () => {
         'numeric(10,2)',
       )
     })
+
+    it('should parse tables with .enableRLS() method chaining', async () => {
+      const { value } = await processor(`
+        import { pgTable, serial, text, varchar } from 'drizzle-orm/pg-core';
+
+        export const users = pgTable('users', {
+          id: serial('id').primaryKey(),
+          name: varchar('name', { length: 255 }).notNull(),
+          email: text('email').notNull(),
+        }).enableRLS();
+      `)
+
+      // Verify that table with .enableRLS() is correctly parsed
+      expect(Object.keys(value.tables)).toHaveLength(1)
+      expect(value.tables['users']).toBeDefined()
+
+      // Verify table structure
+      expect(value.tables['users']?.columns['id']?.type).toBe('serial')
+      expect(value.tables['users']?.columns['name']?.type).toBe('varchar(255)')
+      expect(value.tables['users']?.columns['email']?.type).toBe('text')
+    })
+
+    it('should parse tables with .$comment() method chaining', async () => {
+      const { value } = await processor(`
+        import { pgTable, serial, text, varchar } from 'drizzle-orm/pg-core';
+
+        export const users = pgTable('users', {
+          id: serial('id').primaryKey(),
+          name: varchar('name', { length: 255 }).notNull(),
+          email: text('email').notNull(),
+        }).$comment('User accounts table');
+      `)
+
+      // Verify that table with .$comment() is correctly parsed
+      expect(Object.keys(value.tables)).toHaveLength(1)
+      expect(value.tables['users']).toBeDefined()
+
+      // Verify table structure and comment
+      expect(value.tables['users']?.comment).toBe('User accounts table')
+      expect(value.tables['users']?.columns['name']?.type).toBe('varchar(255)')
+      expect(value.tables['users']?.columns['email']?.type).toBe('text')
+    })
+
+    it('should parse tables with complex method chaining (.enableRLS() + .$comment())', async () => {
+      const { value } = await processor(`
+        import { pgTable, serial, text } from 'drizzle-orm/pg-core';
+
+        export const mixed = pgTable('mixed', {
+          id: serial('id').primaryKey(),
+          data: text('data'),
+        }).enableRLS().$comment('Complex chaining example');
+      `)
+
+      // Verify that table with complex chaining is correctly parsed
+      expect(Object.keys(value.tables)).toHaveLength(1)
+      expect(value.tables['mixed']).toBeDefined()
+      expect(value.tables['mixed']?.comment).toBe('Complex chaining example')
+      expect(value.tables['mixed']?.columns['data']?.type).toBe('text')
+    })
   })
 })

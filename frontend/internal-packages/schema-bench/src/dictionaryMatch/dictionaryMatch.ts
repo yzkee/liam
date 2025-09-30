@@ -40,7 +40,7 @@ type ConceptDictionaryFile = {
 /**
  * In-memory index built from one or more dictionaries for fast lookup.
  */
-export type ConceptIndex = {
+type ConceptIndex = {
   /** Normalized alias → concept ID. */
   aliasToConcept: Map<string, string>
   /** Concept ID → list of normalized aliases. */
@@ -88,7 +88,7 @@ function loadDefaultConceptDictionary(): ConceptDictionaryFile | null {
   return readJsonFile(dictionaryFilePath)
 }
 
-export function buildConceptIndex(): ConceptIndex {
+function buildConceptIndex(): ConceptIndex {
   const aliasToConcept = new Map<string, string>()
   const conceptToAliases = new Map<string, string[]>()
 
@@ -144,7 +144,7 @@ function inferConceptByTokens(
   return best && best.score >= threshold ? best.id : null
 }
 
-export function conceptOf(name: string, index: ConceptIndex): string | null {
+function resolveConceptId(name: string, index: ConceptIndex): string | null {
   const normalized = normalizeAlias(name)
   const conceptByAlias = index.aliasToConcept.get(normalized)
   if (conceptByAlias) return conceptByAlias
@@ -152,66 +152,60 @@ export function conceptOf(name: string, index: ConceptIndex): string | null {
 }
 
 /**
- * Assign candidate names to reference names when they share the same concept.
- *
- * Behavior:
- * - Resolves a concept for each name using a dictionary-backed index.
- *   - First tries direct alias lookup (normalized).
- *   - Falls back to token-based inference using Jaccard similarity.
- * - Iterates references in order; for each unmapped reference, selects the first unused
- *   candidate with the same concept. When multiple exist, prefers higher token overlap.
- * - Mutates `mapping` in place as `mapping[reference] = candidate`.
+ * Assign predicted names to reference names when they share the same concept.
  *
  * Parameters:
  * - `references`: Reference names to be mapped.
- * - `candidates`: Candidate names to map from.
+ * - `predictNames`: Predicted names to map from.
  * - `mapping`: Existing partial mapping; respected as-is and extended.
  *
  * Notes:
- * - Each candidate is used at most once.
+ * - Each predicted name is used at most once.
  * - References with no resolvable concept remain unmapped.
  */
 
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
 export function dictionaryMatch(
-  references: string[],
-  candidates: string[],
+  referenceNames: string[],
+  predictNames: string[],
   mapping: Mapping,
 ): void {
   const localIndex = buildConceptIndex()
 
   // Track used candidates to avoid duplicates
-  const usedCandidates = new Set(Object.values(mapping))
+  const usedPredictNames = new Set(Object.values(mapping))
 
   // Precompute candidate concepts
-  const candidateConceptMap = new Map<string, string | null>()
-  for (const candidate of candidates) {
-    candidateConceptMap.set(candidate, conceptOf(candidate, localIndex))
+  const predictConceptIdByName = new Map<string, string | null>()
+  for (const predictName of predictNames) {
+    predictConceptIdByName.set(
+      predictName,
+      resolveConceptId(predictName, localIndex),
+    )
   }
 
-  for (const reference of references) {
-    if (mapping[reference] !== undefined) continue
-    const referenceConceptId = conceptOf(reference, localIndex)
+  for (const referenceName of referenceNames) {
+    if (mapping[referenceName] !== undefined) continue
+    const referenceConceptId = resolveConceptId(referenceName, localIndex)
     if (!referenceConceptId) continue
 
     // Choose the first unused candidate with the same concept; if multiple, prefer higher token overlap
-    let bestCandidate: { name: string; score: number } | null = null
-    for (const candidate of candidates) {
-      if (usedCandidates.has(candidate)) continue
-      const candidateConceptId = candidateConceptMap.get(candidate)
-      if (!candidateConceptId || candidateConceptId !== referenceConceptId)
-        continue
+    let bestPredict: { name: string; score: number } | null = null
+    for (const predictName of predictNames) {
+      if (usedPredictNames.has(predictName)) continue
+      const predictConceptId = predictConceptIdByName.get(predictName)
+      if (!predictConceptId || predictConceptId !== referenceConceptId) continue
       // Score by token Jaccard
       const similarityScore = jaccard(
-        new Set(toTokens(reference)),
-        new Set(toTokens(candidate)),
+        new Set(toTokens(referenceName)),
+        new Set(toTokens(predictName)),
       )
-      if (!bestCandidate || similarityScore > bestCandidate.score)
-        bestCandidate = { name: candidate, score: similarityScore }
+      if (!bestPredict || similarityScore > bestPredict.score)
+        bestPredict = { name: predictName, score: similarityScore }
     }
-    if (bestCandidate) {
-      mapping[reference] = bestCandidate.name
-      usedCandidates.add(bestCandidate.name)
+    if (bestPredict) {
+      mapping[referenceName] = bestPredict.name
+      usedPredictNames.add(bestPredict.name)
     }
   }
 }

@@ -6,15 +6,21 @@
     },
     {
       "id": "order_detail",
-      "aliases": ["order_details", "order_items", "purchase_items"]
+      "aliases": [
+        "order_detail",
+        "order_details",
+        "order_items",
+        "purchase_items"
+      ]
     },
     {
       "id": "user_profile",
-      "aliases": ["user_profiles", "account_info"]
+      "aliases": ["user_profile", "user_profiles", "account_info"]
     },
     {
       "id": "customer_account",
       "aliases": [
+        "customer_account",
         "customers",
         "accounts",
         "customer_surrogates",
@@ -28,6 +34,7 @@
     {
       "id": "closure_reason",
       "aliases": [
+        "closure_reason",
         "closure_reason_master",
         "withdrawal_reason_dim",
         "withdrawal_reasons"

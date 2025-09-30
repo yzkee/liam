@@ -187,17 +187,6 @@ export const parseGitHubFolderUrl = async (
   )
 }
 
-const fetchGitHubFolderContents = async (
-  repoInfo: GitHubRepoInfo,
-): Promise<Result<GitHubContentItem[], Error>> => {
-  return await getFolderContents(
-    repoInfo.owner,
-    repoInfo.repo,
-    repoInfo.path,
-    repoInfo.branch,
-  )
-}
-
 const checkSecurityLimits = (
   depth: number,
   totalFilesCollected: { count: number },
@@ -315,7 +304,12 @@ const collectSchemaFilesFromFolder = async (
   depth = 0,
   totalFilesCollected = { count: 0 },
 ): Promise<Result<string[], Error>> => {
-  const contentsResult = await fetchGitHubFolderContents(repoInfo)
+  const contentsResult = await getFolderContents(
+    repoInfo.owner,
+    repoInfo.repo,
+    repoInfo.path,
+    repoInfo.branch,
+  )
   if (contentsResult.isErr()) {
     return err(contentsResult.error)
   }

@@ -61,7 +61,8 @@ export const CommandPaletteSearchInput: FC<Props> = ({
           break
         }
 
-        case 'command': {
+        case 'command':
+        case 'column': {
           // switch to "default" mode if value is empty and delete key is pressed
           if (event.key === 'Backspace' && value === '') {
             event.preventDefault()

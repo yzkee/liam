@@ -3,7 +3,10 @@ import userEvent from '@testing-library/user-event'
 import { Command } from 'cmdk'
 import type { PropsWithChildren } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { CommandPaletteSuggestion } from '../types'
+import type {
+  CommandPaletteInputMode,
+  CommandPaletteSuggestion,
+} from '../types'
 import { CommandPaletteSearchInput } from './CommandPaletteSearchInput'
 
 const mockSetMode = vi.fn()
@@ -86,7 +89,7 @@ describe('in case input mode is "default"', () => {
       { type: 'command', name: 'Copy Link' },
       null,
     ])(
-      'should not switch input mode and do not modify input value whe suggestion is %o',
+      'should not switch input mode and do not modify input value when suggestion is %o',
       async (suggestion) => {
         const user = userEvent.setup()
         render(
@@ -112,13 +115,16 @@ describe('in case input mode is "default"', () => {
   })
 })
 
-describe('in case input mode is "command"', () => {
+describe.each<CommandPaletteInputMode>([
+  { type: 'command' },
+  { type: 'column', tableName: 'users' },
+])('in case input mode is $type', (inputMode) => {
   describe('when the user pressed Backspace key', () => {
     it('should switch to "default" mode when value is empty', async () => {
       const user = userEvent.setup()
       render(
         <CommandPaletteSearchInput
-          mode={{ type: 'command' }}
+          mode={inputMode}
           suggestion={null}
           setMode={mockSetMode}
         />,
@@ -136,7 +142,7 @@ describe('in case input mode is "command"', () => {
     const user = userEvent.setup()
     render(
       <CommandPaletteSearchInput
-        mode={{ type: 'command' }}
+        mode={inputMode}
         suggestion={null}
         setMode={mockSetMode}
       />,

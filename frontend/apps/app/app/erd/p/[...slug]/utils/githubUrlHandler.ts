@@ -18,11 +18,7 @@ const SECURITY_LIMITS = {
 }
 
 const safeParseUrl = (url: string): Result<URL, Error> => {
-  const parseUrl = fromThrowable(
-    () => new URL(url),
-    (cause: unknown) =>
-      cause instanceof Error ? cause : new Error('Invalid URL: parse failed'),
-  )
+  const parseUrl = fromThrowable(() => new URL(url))
 
   const urlResult = parseUrl()
   if (urlResult.isErr()) {
@@ -159,16 +155,13 @@ export const parseGitHubFolderUrl = async (
       path: candidatePath,
     }
 
-    const testGetFolderContents = fromAsyncThrowable(
-      () =>
-        getFolderContents(
-          testRepoInfo.owner,
-          testRepoInfo.repo,
-          testRepoInfo.path,
-          testRepoInfo.branch,
-        ),
-      (cause: unknown) =>
-        cause instanceof Error ? cause : new Error('Unknown error'),
+    const testGetFolderContents = fromAsyncThrowable(() =>
+      getFolderContents(
+        testRepoInfo.owner,
+        testRepoInfo.repo,
+        testRepoInfo.path,
+        testRepoInfo.branch,
+      ),
     )
 
     const contentsResult = await testGetFolderContents()

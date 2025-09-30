@@ -119,6 +119,13 @@ export const parseColumnFromProperty = (
         extractedEnums[enumDef.name] = enumDef
       }
     }
+  } else if (current.type === 'Identifier') {
+    // Handle enum variable references (e.g., statusEnum)
+    const enumVarName = current.value
+    const enumDef = extractedEnums?.[enumVarName]
+    if (enumDef) {
+      baseType = enumDef.name
+    }
   }
 
   if (!baseType) return null

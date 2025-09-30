@@ -228,6 +228,13 @@ const checkSecurityLimits = (
   return ok(undefined)
 }
 
+// class NotSchemaFileError extends Error {
+//   constructor(message: string) {
+//     super(message)
+//     this.name = 'NotSchemaFileError'
+//   }
+// }
+
 const processSchemaFile = (
   item: GitHubContentItem,
   totalFilesCollected: { count: number },
@@ -332,15 +339,7 @@ const collectSchemaFilesFromFolder = async (
 }
 
 const downloadFile = async (url: string): Promise<Result<string, Error>> => {
-  const content = await downloadFileContent(
-    url,
-    10000,
-    SECURITY_LIMITS.MAX_FILE_SIZE_BYTES,
-  )
-  if (content === null) {
-    return err(new Error(`Failed to download file from ${url}`))
-  }
-  return ok(content)
+  return downloadFileContent(url, 10000, SECURITY_LIMITS.MAX_FILE_SIZE_BYTES)
 }
 
 const downloadAndCombineFiles = async (

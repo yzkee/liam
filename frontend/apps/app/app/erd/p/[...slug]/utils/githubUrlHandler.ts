@@ -18,10 +18,6 @@ const SECURITY_LIMITS = {
 }
 
 const safeParseUrl = (url: string): Result<URL, Error> => {
-  if (typeof url !== 'string' || url.trim() === '') {
-    return err(new Error('Invalid URL: must be a non-empty string'))
-  }
-
   const parseUrl = fromThrowable(
     () => new URL(url),
     (cause: unknown) =>

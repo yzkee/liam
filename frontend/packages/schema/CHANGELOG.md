@@ -1,5 +1,11 @@
 # @liam-hq/schema
 
+## 0.5.6
+
+### Patch Changes
+
+- [#3614](https://github.com/liam-hq/liam/pull/3614) - 🐛 fix(Drizzle parser): support chained methods like pgTable().enableRLS().$comment() / Thanks [@FunamaYukina](https://github.com/FunamaYukina)!
+
 ## 0.5.5
 
 ### Patch Changes

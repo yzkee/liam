@@ -146,17 +146,15 @@ describe('SupabaseCheckpointSaver', () => {
       )
       const stateBlobData = JSON.stringify(checkpoint.channel_values?.['state'])
 
-      // Simulate Supabase's double encoding: JSON -> Base64 -> Hex
-      const messageBase64 = Buffer.from(messageBlobData).toString('base64')
-      const stateBase64 = Buffer.from(stateBlobData).toString('base64')
-
+      // Convert binary data directly to hex format (single encoding, not double)
+      // Supabase JS client returns BYTEA as hex-encoded string
       const blobsData = [
         {
           channel: 'messages',
           type: 'json',
           version: '1',
-          // Convert to hex format like Supabase does (Base64 string -> Hex)
-          blob: `\\x${Array.from(Buffer.from(messageBase64))
+          // Convert JSON string directly to hex format
+          blob: `\\x${Array.from(Buffer.from(messageBlobData))
             .map((b) => b.toString(16).padStart(2, '0'))
             .join('')}`,
         },
@@ -164,8 +162,8 @@ describe('SupabaseCheckpointSaver', () => {
           channel: 'state',
           type: 'json',
           version: '1',
-          // Convert to hex format like Supabase does (Base64 string -> Hex)
-          blob: `\\x${Array.from(Buffer.from(stateBase64))
+          // Convert JSON string directly to hex format
+          blob: `\\x${Array.from(Buffer.from(stateBlobData))
             .map((b) => b.toString(16).padStart(2, '0'))
             .join('')}`,
         },

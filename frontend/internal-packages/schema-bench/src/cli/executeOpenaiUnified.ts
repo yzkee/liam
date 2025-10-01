@@ -19,6 +19,9 @@ import {
 
 type DatasetResult = { datasetName: string; success: number; failure: number }
 
+// Outputs: write latest and archive by RUN_ID per execution (with executor label)
+const RUN_ID = new Date().toISOString().replace(/[:.]/g, '-')
+
 const InputSchema = v.object({
   input: v.string(),
 })
@@ -36,7 +39,10 @@ async function executeCase(
     )
   }
 
-  const saveResult = await saveOutputFile(datasetPath, caseId, result.value)
+  const saveResult = await saveOutputFile(datasetPath, caseId, result.value, {
+    archiveRunId: RUN_ID,
+    executor: 'openai',
+  })
   if (saveResult.isErr()) {
     return saveResult
   }

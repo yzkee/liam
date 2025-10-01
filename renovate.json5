@@ -35,9 +35,7 @@
       "description": "Automerge dependencies only used by internal packages",
       "matchPackageNames": [
         "@modelcontextprotocol/sdk",
-        "style-dictionary",
-        "/^@langchain/",
-        "langsmith"
+        "style-dictionary"
       ],
       "matchFileNames": ["frontend/internal-packages/**"],
       "automerge": true

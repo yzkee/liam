@@ -87,23 +87,29 @@ describe('SupabaseCheckpointSaver', () => {
       return HttpResponse.json(data)
     })
 
-  const mockSaveCheckpointResponse = () =>
-    http.post(`${SUPABASE_URL}/rest/v1/checkpoints`, () => {
-      return HttpResponse.json({ success: true })
-    })
-
-  const mockSaveBlobsResponse = () =>
-    http.post(`${SUPABASE_URL}/rest/v1/checkpoint_blobs`, () => {
-      return HttpResponse.json({ success: true })
-    })
-
   const mockSaveWritesResponse = () =>
     http.post(`${SUPABASE_URL}/rest/v1/checkpoint_writes`, () => {
       return HttpResponse.json({ success: true })
     })
 
+  const mockPutCheckpointRpc = () =>
+    http.post(`${SUPABASE_URL}/rest/v1/rpc/put_checkpoint`, () => {
+      return new HttpResponse(null, { status: 204 })
+    })
+
+  const mockPutCheckpointRpcError = (errorMessage: string) =>
+    http.post(`${SUPABASE_URL}/rest/v1/rpc/put_checkpoint`, () => {
+      return HttpResponse.json(
+        {
+          error: errorMessage,
+          message: errorMessage,
+        },
+        { status: 500 },
+      )
+    })
+
   describe('Checkpoint persistence', () => {
-    it('should save and retrieve a checkpoint with state', async () => {
+    it('should save and retrieve a checkpoint with state using RPC transaction', async () => {
       // Arrange
       const checkpoint = createMinimalCheckpoint()
       const metadata: CheckpointMetadata = {
@@ -113,8 +119,8 @@ describe('SupabaseCheckpointSaver', () => {
       }
       const config = createMinimalConfig()
 
-      // Mock save operations
-      server.use(mockSaveCheckpointResponse(), mockSaveBlobsResponse())
+      // Mock RPC save operation
+      server.use(mockPutCheckpointRpc())
 
       // Mock retrieval
       const savedCheckpointData = {
@@ -140,17 +146,15 @@ describe('SupabaseCheckpointSaver', () => {
       )
       const stateBlobData = JSON.stringify(checkpoint.channel_values?.['state'])
 
-      // Simulate Supabase's double encoding: JSON -> Base64 -> Hex
-      const messageBase64 = Buffer.from(messageBlobData).toString('base64')
-      const stateBase64 = Buffer.from(stateBlobData).toString('base64')
-
+      // Convert binary data directly to hex format (single encoding, not double)
+      // Supabase JS client returns BYTEA as hex-encoded string
       const blobsData = [
         {
           channel: 'messages',
           type: 'json',
           version: '1',
-          // Convert to hex format like Supabase does (Base64 string -> Hex)
-          blob: `\\x${Array.from(Buffer.from(messageBase64))
+          // Convert JSON string directly to hex format
+          blob: `\\x${Array.from(Buffer.from(messageBlobData))
             .map((b) => b.toString(16).padStart(2, '0'))
             .join('')}`,
         },
@@ -158,8 +162,8 @@ describe('SupabaseCheckpointSaver', () => {
           channel: 'state',
           type: 'json',
           version: '1',
-          // Convert to hex format like Supabase does (Base64 string -> Hex)
-          blob: `\\x${Array.from(Buffer.from(stateBase64))
+          // Convert JSON string directly to hex format
+          blob: `\\x${Array.from(Buffer.from(stateBlobData))
             .map((b) => b.toString(16).padStart(2, '0'))
             .join('')}`,
         },
@@ -538,6 +542,26 @@ describe('SupabaseCheckpointSaver', () => {
         saver.putWrites(invalidConfig, [], 'task-1'),
       ).rejects.toThrow('Missing thread_id or checkpoint_id')
     })
+
+    it('should throw error when checkpoint save fails', async () => {
+      // Arrange
+      const checkpoint = createMinimalCheckpoint()
+      const metadata: CheckpointMetadata = {
+        source: 'input' as const,
+        step: -1,
+        parents: {},
+      }
+      const config = createMinimalConfig()
+
+      server.use(mockPutCheckpointRpcError('Database transaction failed'))
+
+      const saver = createTestSaver()
+
+      // Act & Assert
+      await expect(
+        saver.put(config, checkpoint, metadata, checkpoint.channel_versions),
+      ).rejects.toThrow('Failed to save checkpoint')
+    })
   })
 
   describe('deleteThread', () => {
@@ -608,13 +632,12 @@ describe('SupabaseCheckpointSaver', () => {
 
       server.use(
         http.post(
-          `${SUPABASE_URL}/rest/v1/checkpoints`,
+          `${SUPABASE_URL}/rest/v1/rpc/put_checkpoint`,
           async ({ request }) => {
             capturedSaveData = await request.json()
-            return HttpResponse.json({ success: true })
+            return new HttpResponse(null, { status: 204 })
           },
         ),
-        mockSaveBlobsResponse(),
         http.get(`${SUPABASE_URL}/rest/v1/checkpoints`, ({ request }) => {
           const url = new URL(request.url)
           capturedQueryParams = url.searchParams
@@ -636,12 +659,12 @@ describe('SupabaseCheckpointSaver', () => {
       await saver.put(config, checkpoint, metadata, checkpoint.channel_versions)
 
       // Assert
-      if (
-        capturedSaveData &&
-        typeof capturedSaveData === 'object' &&
-        'organization_id' in capturedSaveData
-      ) {
-        expect(capturedSaveData.organization_id).toBe(TEST_ORG_ID)
+      if (capturedSaveData && typeof capturedSaveData === 'object') {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        const data = capturedSaveData as {
+          p_checkpoint: { organization_id: string }
+        }
+        expect(data.p_checkpoint.organization_id).toBe(TEST_ORG_ID)
       }
 
       // Act

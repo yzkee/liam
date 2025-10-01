@@ -1431,6 +1431,10 @@ export type Database = {
         Args: { '': string } | { '': unknown } | { '': unknown }
         Returns: string
       }
+      put_checkpoint: {
+        Args: { p_blobs: Json; p_checkpoint: Json }
+        Returns: undefined
+      }
       sparsevec_out: {
         Args: { '': unknown }
         Returns: unknown

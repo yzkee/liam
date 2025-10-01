@@ -309,42 +309,24 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
       },
     }
 
-    // Serialize checkpoint
+    // Serialize checkpoint and metadata
     const serializedCheckpoint = this._dumpCheckpoint(checkpoint)
     const serializedMetadata = await this._dumpMetadata(metadata)
 
-    // Insert checkpoint
-    // NOTE: These tables must exist in Supabase database
-    const checkpointInsert: Database['public']['Tables']['checkpoints']['Insert'] =
-      {
-        thread_id,
-        checkpoint_ns,
-        checkpoint_id: checkpoint.id,
-        parent_checkpoint_id: checkpoint_id || null,
-        checkpoint: JSON.parse(JSON.stringify(serializedCheckpoint)),
-        metadata: JSON.parse(JSON.stringify(serializedMetadata)),
-        organization_id: this.organizationId,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }
-
-    const checkpointResult = await retry(() =>
-      toResultAsync(
-        this.client.from('checkpoints').upsert(checkpointInsert, {
-          onConflict: 'thread_id,checkpoint_ns,checkpoint_id,organization_id',
-        }),
-        { allowNull: true },
-      ),
-    )
-
-    if (checkpointResult.isErr()) {
-      // BaseCheckpointSaver expects exceptions to be thrown
-      // eslint-disable-next-line no-throw-error/no-throw-error
-      throw new Error(
-        `Failed to save checkpoint: ${checkpointResult.error.message}`,
-      )
+    // Prepare checkpoint data
+    const checkpointData = {
+      thread_id,
+      checkpoint_ns,
+      checkpoint_id: checkpoint.id,
+      parent_checkpoint_id: checkpoint_id || null,
+      checkpoint: JSON.parse(JSON.stringify(serializedCheckpoint)),
+      metadata: JSON.parse(JSON.stringify(serializedMetadata)),
+      organization_id: this.organizationId,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     }
 
+    // Prepare blobs data
     const blobs = await this._dumpBlobs(
       thread_id,
       checkpoint_ns,
@@ -352,24 +334,21 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
       newVersions,
     )
 
-    if (blobs.length > 0) {
-      const blobResult = await retry(() =>
-        toResultAsync(
-          this.client.from('checkpoint_blobs').upsert(blobs, {
-            onConflict:
-              'thread_id,checkpoint_ns,channel,version,organization_id',
-          }),
-          { allowNull: true },
-        ),
-      )
+    // Call RPC function to insert checkpoint and blobs atomically
+    const rpcResult = await retry(() =>
+      toResultAsync(
+        this.client.rpc('put_checkpoint', {
+          p_checkpoint: checkpointData,
+          p_blobs: blobs.length > 0 ? blobs : null,
+        }),
+        { allowNull: true },
+      ),
+    )
 
-      if (blobResult.isErr()) {
-        // BaseCheckpointSaver expects exceptions to be thrown
-        // eslint-disable-next-line no-throw-error/no-throw-error
-        throw new Error(
-          `Failed to save checkpoint blobs: ${blobResult.error.message}`,
-        )
-      }
+    if (rpcResult.isErr()) {
+      // BaseCheckpointSaver expects exceptions to be thrown
+      // eslint-disable-next-line no-throw-error/no-throw-error
+      throw new Error(`Failed to save checkpoint: ${rpcResult.error.message}`)
     }
 
     return nextConfig
@@ -611,13 +590,10 @@ export class SupabaseCheckpointSaver extends BaseCheckpointSaver<number> {
         continue
       }
 
-      // Convert BYTEA string from Supabase REST API
-      // Data flow: Hex (from Supabase) -> Base64 string -> Actual data
-      // All data is double-encoded through Supabase REST API
-      const hexDecoded = hexToUint8Array(blob.blob)
-      const base64String = uint8ArrayToString(hexDecoded)
-      const actualData = base64ToUint8Array(base64String)
-      const value = await this.serde.loadsTyped(blob.type, actualData)
+      // Convert BYTEA hex string from Supabase JS client to binary data
+      // Supabase returns BYTEA as hex-encoded string (e.g., "\\x48656c6c6f" becomes "48656c6c6f")
+      const binaryData = hexToUint8Array(blob.blob)
+      const value = await this.serde.loadsTyped(blob.type, binaryData)
 
       channelValues[blob.channel] = value
     }

@@ -1,5 +1,12 @@
 # @liam-hq/erd-core
 
+## 0.6.12
+
+### Patch Changes
+
+- [#3626](https://github.com/liam-hq/liam/pull/3626) - - ♿️ set autofocus on TableDetail to focus whenever the component opens / Thanks [@tnyo43](https://github.com/tnyo43)!
+- [#3640](https://github.com/liam-hq/liam/pull/3640) - 💄 Improve table and column comment text wrapping to break at word boundaries / Thanks [@FunamaYukina](https://github.com/FunamaYukina)!
+
 ## 0.6.11
 
 ### Patch Changes

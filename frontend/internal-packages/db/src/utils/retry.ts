@@ -38,7 +38,6 @@ function isRetryableError(error: unknown): boolean {
     'bad gateway',
     'service unavailable',
     'gateway timeout',
-    'cloudflare',
   ]
 
   return retryablePatterns.some(

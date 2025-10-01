@@ -55,6 +55,58 @@ describe('retry', () => {
       expect(result.isOk()).toBe(true)
       expect(mockFn).toHaveBeenCalledTimes(2)
     })
+
+    it('should retry on HTTP 5xx server errors', async () => {
+      const mockFn = vi
+        .fn()
+        .mockResolvedValueOnce(err(new Error('500 Internal Server Error')))
+        .mockResolvedValue(ok('success'))
+
+      const result = await retry(mockFn, { baseDelayMs: 10 })
+
+      expect(result.isOk()).toBe(true)
+      expect(mockFn).toHaveBeenCalledTimes(2)
+    })
+
+    it('should retry on Cloudflare server errors', async () => {
+      const cloudflareError = new Error(`<html>
+<head><title>500 Internal Server Error</title></head>
+<body>
+<center><h1>500 Internal Server Error</h1></center>
+<hr><center>cloudflare</center>
+</body>
+</html>`)
+
+      const mockFn = vi
+        .fn()
+        .mockResolvedValueOnce(err(cloudflareError))
+        .mockResolvedValue(ok('success'))
+
+      const result = await retry(mockFn, { baseDelayMs: 10 })
+
+      expect(result.isOk()).toBe(true)
+      expect(mockFn).toHaveBeenCalledTimes(2)
+    })
+
+    it('should retry on various 5xx status codes', async () => {
+      const testCases = [
+        '502 Bad Gateway',
+        '503 Service Unavailable',
+        '504 Gateway Timeout',
+      ]
+
+      for (const errorMessage of testCases) {
+        const mockFn = vi
+          .fn()
+          .mockResolvedValueOnce(err(new Error(errorMessage)))
+          .mockResolvedValue(ok('success'))
+
+        const result = await retry(mockFn, { baseDelayMs: 10 })
+
+        expect(result.isOk()).toBe(true)
+        expect(mockFn).toHaveBeenCalledTimes(2)
+      }
+    })
   })
 
   describe('non-retryable errors', () => {

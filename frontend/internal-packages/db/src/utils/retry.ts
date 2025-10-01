@@ -30,6 +30,14 @@ function isRetryableError(error: unknown): boolean {
     'enotfound',
     'econnreset',
     'etimedout',
+    'internal server error',
+    '500',
+    '502',
+    '503',
+    '504',
+    'bad gateway',
+    'service unavailable',
+    'gateway timeout',
   ]
 
   return retryablePatterns.some(

@@ -542,6 +542,26 @@ describe('SupabaseCheckpointSaver', () => {
         saver.putWrites(invalidConfig, [], 'task-1'),
       ).rejects.toThrow('Missing thread_id or checkpoint_id')
     })
+
+    it('should throw error when checkpoint save fails', async () => {
+      // Arrange
+      const checkpoint = createMinimalCheckpoint()
+      const metadata: CheckpointMetadata = {
+        source: 'input' as const,
+        step: -1,
+        parents: {},
+      }
+      const config = createMinimalConfig()
+
+      server.use(mockPutCheckpointRpcError('Database transaction failed'))
+
+      const saver = createTestSaver()
+
+      // Act & Assert
+      await expect(
+        saver.put(config, checkpoint, metadata, checkpoint.channel_versions),
+      ).rejects.toThrow('Failed to save checkpoint')
+    })
   })
 
   describe('deleteThread', () => {
@@ -654,108 +674,6 @@ describe('SupabaseCheckpointSaver', () => {
       // Assert
       expect(result).toBeUndefined() // No checkpoint found
       expect(capturedQueryParams).toBeDefined()
-    })
-  })
-
-  describe('Transactional behavior', () => {
-    it('should save checkpoint and blobs atomically using RPC', async () => {
-      // Arrange
-      const checkpoint = createMinimalCheckpoint()
-      const metadata: CheckpointMetadata = {
-        source: 'input' as const,
-        step: -1,
-        parents: {},
-      }
-      const config = createMinimalConfig()
-
-      let capturedRpcData: unknown = null
-
-      server.use(
-        http.post(
-          `${SUPABASE_URL}/rest/v1/rpc/put_checkpoint`,
-          async ({ request }) => {
-            capturedRpcData = await request.json()
-            return new HttpResponse(null, { status: 204 })
-          },
-        ),
-      )
-
-      const saver = createTestSaver()
-
-      // Act
-      const result = await saver.put(
-        config,
-        checkpoint,
-        metadata,
-        checkpoint.channel_versions,
-      )
-
-      // Assert
-      expect(result).toEqual({
-        configurable: {
-          thread_id: TEST_THREAD_ID,
-          checkpoint_ns: TEST_CHECKPOINT_NS,
-          checkpoint_id: TEST_CHECKPOINT_ID,
-        },
-      })
-
-      // Verify RPC was called with correct parameters
-      expect(capturedRpcData).toBeDefined()
-      if (capturedRpcData && typeof capturedRpcData === 'object') {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const data = capturedRpcData as {
-          p_checkpoint: {
-            thread_id: string
-            checkpoint_id: string
-            organization_id: string
-          }
-          p_blobs: unknown
-        }
-        expect(data.p_checkpoint.thread_id).toBe(TEST_THREAD_ID)
-        expect(data.p_checkpoint.checkpoint_id).toBe(TEST_CHECKPOINT_ID)
-        expect(data.p_checkpoint.organization_id).toBe(TEST_ORG_ID)
-        expect(data.p_blobs).toBeDefined()
-      }
-    })
-
-    it('should throw error when RPC returns error', async () => {
-      // Arrange
-      const checkpoint = createMinimalCheckpoint()
-      const metadata: CheckpointMetadata = {
-        source: 'input' as const,
-        step: -1,
-        parents: {},
-      }
-      const config = createMinimalConfig()
-
-      server.use(mockPutCheckpointRpcError('Database transaction failed'))
-
-      const saver = createTestSaver()
-
-      // Act & Assert
-      await expect(
-        saver.put(config, checkpoint, metadata, checkpoint.channel_versions),
-      ).rejects.toThrow('Failed to save checkpoint')
-    })
-
-    it('should handle database errors gracefully', async () => {
-      // Arrange
-      const checkpoint = createMinimalCheckpoint()
-      const metadata: CheckpointMetadata = {
-        source: 'input' as const,
-        step: -1,
-        parents: {},
-      }
-      const config = createMinimalConfig()
-
-      server.use(mockPutCheckpointRpcError('Connection timeout'))
-
-      const saver = createTestSaver()
-
-      // Act & Assert
-      await expect(
-        saver.put(config, checkpoint, metadata, checkpoint.channel_versions),
-      ).rejects.toThrow('Failed to save checkpoint')
     })
   })
 })

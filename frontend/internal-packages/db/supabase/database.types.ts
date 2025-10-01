@@ -1429,7 +1429,11 @@ export type Database = {
       }
       l2_normalize: {
         Args: { '': string } | { '': unknown } | { '': unknown }
-        Returns: string
+        Returns: unknown
+      }
+      put_checkpoint: {
+        Args: { p_blobs: Json; p_checkpoint: Json }
+        Returns: undefined
       }
       sparsevec_out: {
         Args: { '': unknown }

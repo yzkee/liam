@@ -1116,25 +1116,6 @@ COMMENT ON COLUMN "public"."checkpoint_blobs"."blob" IS 'Binary serialized data'
 
 
 
-CREATE TABLE IF NOT EXISTS "public"."checkpoint_migrations" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "v" integer NOT NULL,
-    "organization_id" "uuid" NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"()
-);
-
-
-ALTER TABLE "public"."checkpoint_migrations" OWNER TO "postgres";
-
-
-COMMENT ON TABLE "public"."checkpoint_migrations" IS 'Tracks applied checkpoint system migrations';
-
-
-
-COMMENT ON COLUMN "public"."checkpoint_migrations"."v" IS 'Migration version number';
-
-
-
 CREATE TABLE IF NOT EXISTS "public"."checkpoint_writes" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "thread_id" "text" NOT NULL,
@@ -1564,16 +1545,6 @@ ALTER TABLE ONLY "public"."checkpoint_blobs"
 
 
 
-ALTER TABLE ONLY "public"."checkpoint_migrations"
-    ADD CONSTRAINT "checkpoint_migrations_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."checkpoint_migrations"
-    ADD CONSTRAINT "checkpoint_migrations_v_organization_id_key" UNIQUE ("v", "organization_id");
-
-
-
 ALTER TABLE ONLY "public"."checkpoint_writes"
     ADD CONSTRAINT "checkpoint_writes_pkey" PRIMARY KEY ("id");
 
@@ -1772,10 +1743,6 @@ CREATE INDEX "idx_checkpoint_blobs_organization_id" ON "public"."checkpoint_blob
 
 
 CREATE INDEX "idx_checkpoint_blobs_thread_id" ON "public"."checkpoint_blobs" USING "btree" ("thread_id", "checkpoint_ns");
-
-
-
-CREATE INDEX "idx_checkpoint_migrations_organization_id" ON "public"."checkpoint_migrations" USING "btree" ("organization_id");
 
 
 
@@ -1979,11 +1946,6 @@ ALTER TABLE ONLY "public"."building_schemas"
 
 ALTER TABLE ONLY "public"."checkpoint_blobs"
     ADD CONSTRAINT "checkpoint_blobs_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON UPDATE CASCADE ON DELETE RESTRICT;
-
-
-
-ALTER TABLE ONLY "public"."checkpoint_migrations"
-    ADD CONSTRAINT "checkpoint_migrations_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON UPDATE CASCADE ON DELETE RESTRICT;
 
 
 
@@ -2271,16 +2233,6 @@ COMMENT ON POLICY "authenticated_users_can_delete_org_checkpoint_blobs" ON "publ
 
 
 
-CREATE POLICY "authenticated_users_can_delete_org_checkpoint_migrations" ON "public"."checkpoint_migrations" FOR DELETE TO "authenticated" USING (("organization_id" IN ( SELECT "organization_members"."organization_id"
-   FROM "public"."organization_members"
-  WHERE ("organization_members"."user_id" = "auth"."uid"()))));
-
-
-
-COMMENT ON POLICY "authenticated_users_can_delete_org_checkpoint_migrations" ON "public"."checkpoint_migrations" IS 'Authenticated users can only delete checkpoint migrations in organizations they are members of';
-
-
-
 CREATE POLICY "authenticated_users_can_delete_org_checkpoint_writes" ON "public"."checkpoint_writes" FOR DELETE TO "authenticated" USING (("organization_id" IN ( SELECT "organization_members"."organization_id"
    FROM "public"."organization_members"
   WHERE ("organization_members"."user_id" = "auth"."uid"()))));
@@ -2386,16 +2338,6 @@ CREATE POLICY "authenticated_users_can_insert_org_checkpoint_blobs" ON "public".
 
 
 COMMENT ON POLICY "authenticated_users_can_insert_org_checkpoint_blobs" ON "public"."checkpoint_blobs" IS 'Authenticated users can only create checkpoint blobs in organizations they are members of';
-
-
-
-CREATE POLICY "authenticated_users_can_insert_org_checkpoint_migrations" ON "public"."checkpoint_migrations" FOR INSERT TO "authenticated" WITH CHECK (("organization_id" IN ( SELECT "organization_members"."organization_id"
-   FROM "public"."organization_members"
-  WHERE ("organization_members"."user_id" = "auth"."uid"()))));
-
-
-
-COMMENT ON POLICY "authenticated_users_can_insert_org_checkpoint_migrations" ON "public"."checkpoint_migrations" IS 'Authenticated users can only create checkpoint migrations in organizations they are members of';
 
 
 
@@ -2572,16 +2514,6 @@ CREATE POLICY "authenticated_users_can_select_org_checkpoint_blobs" ON "public".
 
 
 COMMENT ON POLICY "authenticated_users_can_select_org_checkpoint_blobs" ON "public"."checkpoint_blobs" IS 'Authenticated users can only view checkpoint blobs belonging to organizations they are members of';
-
-
-
-CREATE POLICY "authenticated_users_can_select_org_checkpoint_migrations" ON "public"."checkpoint_migrations" FOR SELECT TO "authenticated" USING (("organization_id" IN ( SELECT "organization_members"."organization_id"
-   FROM "public"."organization_members"
-  WHERE ("organization_members"."user_id" = "auth"."uid"()))));
-
-
-
-COMMENT ON POLICY "authenticated_users_can_select_org_checkpoint_migrations" ON "public"."checkpoint_migrations" IS 'Authenticated users can only view checkpoint migrations belonging to organizations they are members of';
 
 
 
@@ -2845,18 +2777,6 @@ COMMENT ON POLICY "authenticated_users_can_update_org_checkpoint_blobs" ON "publ
 
 
 
-CREATE POLICY "authenticated_users_can_update_org_checkpoint_migrations" ON "public"."checkpoint_migrations" FOR UPDATE TO "authenticated" USING (("organization_id" IN ( SELECT "organization_members"."organization_id"
-   FROM "public"."organization_members"
-  WHERE ("organization_members"."user_id" = "auth"."uid"())))) WITH CHECK (("organization_id" IN ( SELECT "organization_members"."organization_id"
-   FROM "public"."organization_members"
-  WHERE ("organization_members"."user_id" = "auth"."uid"()))));
-
-
-
-COMMENT ON POLICY "authenticated_users_can_update_org_checkpoint_migrations" ON "public"."checkpoint_migrations" IS 'Authenticated users can only update checkpoint migrations in organizations they are members of';
-
-
-
 CREATE POLICY "authenticated_users_can_update_org_checkpoint_writes" ON "public"."checkpoint_writes" FOR UPDATE TO "authenticated" USING (("organization_id" IN ( SELECT "organization_members"."organization_id"
    FROM "public"."organization_members"
   WHERE ("organization_members"."user_id" = "auth"."uid"())))) WITH CHECK (("organization_id" IN ( SELECT "organization_members"."organization_id"
@@ -2966,9 +2886,6 @@ ALTER TABLE "public"."building_schemas" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."checkpoint_blobs" ENABLE ROW LEVEL SECURITY;
-
-
-ALTER TABLE "public"."checkpoint_migrations" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."checkpoint_writes" ENABLE ROW LEVEL SECURITY;
@@ -3081,10 +2998,6 @@ CREATE POLICY "service_role_can_delete_all_checkpoint_blobs" ON "public"."checkp
 
 
 
-CREATE POLICY "service_role_can_delete_all_checkpoint_migrations" ON "public"."checkpoint_migrations" FOR DELETE TO "service_role" USING (true);
-
-
-
 CREATE POLICY "service_role_can_delete_all_checkpoint_writes" ON "public"."checkpoint_writes" FOR DELETE TO "service_role" USING (true);
 
 
@@ -3122,10 +3035,6 @@ CREATE POLICY "service_role_can_insert_all_building_schemas" ON "public"."buildi
 
 
 CREATE POLICY "service_role_can_insert_all_checkpoint_blobs" ON "public"."checkpoint_blobs" FOR INSERT TO "service_role" WITH CHECK (true);
-
-
-
-CREATE POLICY "service_role_can_insert_all_checkpoint_migrations" ON "public"."checkpoint_migrations" FOR INSERT TO "service_role" WITH CHECK (true);
 
 
 
@@ -3213,10 +3122,6 @@ CREATE POLICY "service_role_can_select_all_checkpoint_blobs" ON "public"."checkp
 
 
 
-CREATE POLICY "service_role_can_select_all_checkpoint_migrations" ON "public"."checkpoint_migrations" FOR SELECT TO "service_role" USING (true);
-
-
-
 CREATE POLICY "service_role_can_select_all_checkpoint_writes" ON "public"."checkpoint_writes" FOR SELECT TO "service_role" USING (true);
 
 
@@ -3298,10 +3203,6 @@ CREATE POLICY "service_role_can_update_all_building_schemas" ON "public"."buildi
 
 
 CREATE POLICY "service_role_can_update_all_checkpoint_blobs" ON "public"."checkpoint_blobs" FOR UPDATE TO "service_role" USING (true) WITH CHECK (true);
-
-
-
-CREATE POLICY "service_role_can_update_all_checkpoint_migrations" ON "public"."checkpoint_migrations" FOR UPDATE TO "service_role" USING (true) WITH CHECK (true);
 
 
 
@@ -4642,11 +4543,6 @@ GRANT SELECT("schema_file_path") ON TABLE "public"."building_schemas" TO "anon";
 
 GRANT ALL ON TABLE "public"."checkpoint_blobs" TO "authenticated";
 GRANT ALL ON TABLE "public"."checkpoint_blobs" TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."checkpoint_migrations" TO "authenticated";
-GRANT ALL ON TABLE "public"."checkpoint_migrations" TO "service_role";
 
 
 

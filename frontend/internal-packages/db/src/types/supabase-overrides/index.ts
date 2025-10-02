@@ -3,7 +3,6 @@ import type { Database as DatabaseGenerated } from '../../../supabase/database.t
 import type { ArtifactsOverride } from './artifacts'
 import type { BuildingSchemasOverride } from './buildingSchemas'
 import type { CheckpointBlobsOverride } from './checkpointBlobs'
-import type { CheckpointMigrationsOverride } from './checkpointMigrations'
 import type { CheckpointsOverride } from './checkpoints'
 import type { CheckpointWritesOverride } from './checkpointWrites'
 import type { DesignSessionsOverride } from './designSessions'
@@ -47,6 +46,5 @@ export type AppDatabaseOverrides = MergeDeep<
     ArtifactsOverride &
     CheckpointsOverride &
     CheckpointBlobsOverride &
-    CheckpointWritesOverride &
-    CheckpointMigrationsOverride
+    CheckpointWritesOverride
 >

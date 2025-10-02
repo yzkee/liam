@@ -43,7 +43,7 @@ export function InvitationCard({
     <div className={styles.container}>
       <div className={styles.card}>
         <div className={styles.content}>
-          {organizationName && (
+          {organizationName ? (
             <>
               <div>
                 <LiamLogoMark width={40} height={40} />
@@ -59,6 +59,18 @@ export function InvitationCard({
                 organization on Liam DB.
                 <br />
                 Please accept the invitation below to join.
+              </div>
+            </>
+          ) : (
+            <>
+              <div>
+                <LiamLogoMark width={40} height={40} />
+              </div>
+              <div className={styles.description}>
+                This invitation link is invalid or has expired.
+                <br />
+                Please request a new invitation from your organization
+                administrator.
               </div>
             </>
           )}

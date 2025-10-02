@@ -213,35 +213,6 @@ export type Database = {
           },
         ]
       }
-      checkpoint_migrations: {
-        Row: {
-          created_at: string | null
-          id: string
-          organization_id: string
-          v: number
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          organization_id: string
-          v: number
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          organization_id?: string
-          v?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'checkpoint_migrations_organization_id_fkey'
-            columns: ['organization_id']
-            isOneToOne: false
-            referencedRelation: 'organizations'
-            referencedColumns: ['id']
-          },
-        ]
-      }
       checkpoint_writes: {
         Row: {
           blob: string

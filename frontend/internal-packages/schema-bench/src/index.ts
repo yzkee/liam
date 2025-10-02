@@ -1,3 +1,4 @@
+export * from './dictionaryMatch'
 export * from './evaluate'
 export type {
   OpenAIExecutorConfig,

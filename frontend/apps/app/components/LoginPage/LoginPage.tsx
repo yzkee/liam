@@ -1,18 +1,29 @@
 import { LiamLogoMark } from '@liam-hq/ui'
 import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
+import { createClient } from '../../libs/db/server'
 import { EmailForm } from './EmailForm'
 import styles from './LoginPage.module.css'
 import { LogoutToast } from './LogoutToast'
 import { SignInGithubButton } from './SignInGithubButton'
 
 export async function LoginPage() {
-  // Get the returnTo value from the cookie
+  const supabase = await createClient()
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser()
+
   let returnTo = '/design_sessions/new'
 
   const cookieStore = await cookies()
   const returnToCookie = cookieStore.get('returnTo')
   if (returnToCookie) {
     returnTo = returnToCookie.value
+  }
+
+  if (user && !error) {
+    redirect(returnTo)
   }
 
   return (

@@ -1,15 +1,20 @@
-import { createRequire } from "node:module";
-import path, { dirname, join } from 'node:path';
+import { createRequire } from 'node:module'
+import { dirname, join } from 'node:path'
 import type { StorybookConfig } from '@storybook/nextjs'
 
-const require = createRequire(import.meta.url);
+const require = createRequire(import.meta.url)
 
 const config: StorybookConfig = {
   stories: [
     {
-      directory: '../../../apps/app',
+      directory: '../../../apps/app/components',
       files: '**/*.stories.@(jsx|tsx|mdx)',
-      titlePrefix: 'app',
+      titlePrefix: 'app/components',
+    },
+    {
+      directory: '../../../apps/app/features',
+      files: '**/*.stories.@(jsx|tsx|mdx)',
+      titlePrefix: 'app/features',
     },
     {
       directory: '../../../packages/ui/src',
@@ -23,10 +28,13 @@ const config: StorybookConfig = {
     },
   ],
 
-  addons: [getAbsolutePath("@storybook/addon-links"), getAbsolutePath("@storybook/addon-docs")],
+  addons: [
+    getAbsolutePath('@storybook/addon-links'),
+    getAbsolutePath('@storybook/addon-docs'),
+  ],
 
   framework: {
-    name: getAbsolutePath("@storybook/nextjs"),
+    name: getAbsolutePath('@storybook/nextjs'),
     options: {},
   },
 
@@ -34,11 +42,11 @@ const config: StorybookConfig = {
 
   webpackFinal: async (config) => {
     return config
-  }
+  },
 }
 
 export default config
 
 function getAbsolutePath(value: string): any {
-  return dirname(require.resolve(join(value, "package.json")));
+  return dirname(require.resolve(join(value, 'package.json')))
 }

@@ -53,10 +53,7 @@ describe('testcaseGeneration Integration', () => {
           testResults: [],
         },
       },
-      analyzedRequirements: {
-        goal: 'A task management system where users create projects and tasks',
-        testcases: {},
-      },
+      goal: 'A task management system where users create projects and tasks',
       schemaData: mockSchema,
       testcases: [],
       schemaIssues: [],

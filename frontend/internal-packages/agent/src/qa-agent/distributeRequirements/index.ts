@@ -19,7 +19,7 @@ export function continueToRequirements(state: QaAgentState) {
         // Each subgraph gets its own isolated state
         currentTestcase: testcaseData,
         schemaData: state.schemaData,
-        analyzedRequirements: state.analyzedRequirements,
+        goal: state.analyzedRequirements.goal,
         messages: [], // Start with empty messages for isolation
         testcases: [], // Will be populated by the subgraph
       }),

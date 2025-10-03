@@ -45,7 +45,7 @@ Be decisive and focus on what is missing, not how to design it. Do not suggest s
 export async function validateSchemaRequirementsNode(
   state: typeof testcaseAnnotation.State,
 ): Promise<Command> {
-  const { currentRequirement, schemaData } = state
+  const { currentTestcase, schemaData } = state
 
   const schemaContext = convertSchemaToText(schemaData)
 
@@ -53,13 +53,13 @@ export async function validateSchemaRequirementsNode(
 # Database Schema Context
 ${schemaContext}
 
-# Requirement to Validate
-Type: ${currentRequirement.type}
-Category: ${currentRequirement.category}
-Requirement: ${currentRequirement.requirement}
-Business Context: ${currentRequirement.businessContext}
+# Test Case to Validate
+Type: ${currentTestcase.testcase.type}
+Category: ${currentTestcase.category}
+Title: ${currentTestcase.testcase.title}
+Business Goal: ${currentTestcase.goal}
 
-Can this schema fulfill this requirement for test case generation?
+Can this schema fulfill this test case for SQL generation?
 `
 
   const result = await fromPromise(
@@ -79,7 +79,7 @@ Can this schema fulfill this requirement for test case generation?
   }
 
   const schemaIssue = {
-    requirementId: currentRequirement.requirementId,
+    testcaseId: `${currentTestcase.category}:${currentTestcase.testcase.title}`,
     description: validationResult.issueDescription,
   }
 

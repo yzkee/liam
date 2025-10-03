@@ -2,38 +2,27 @@ import { dispatchCustomEvent } from '@langchain/core/callbacks/dispatch'
 import { ToolMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { type StructuredTool, tool } from '@langchain/core/tools'
-import { Command } from '@langchain/langgraph'
-import { dmlOperationSchema } from '@liam-hq/artifact'
+import { Command, getCurrentTaskInput } from '@langchain/langgraph'
 import { type PgParseResult, pgParse } from '@liam-hq/schema/parser'
-import { v4 as uuidv4 } from 'uuid'
 import * as v from 'valibot'
 import { SSE_EVENTS } from '../../streaming/constants'
 import { WorkflowTerminationError } from '../../utils/errorHandling'
 import { toJsonSchema } from '../../utils/jsonSchema'
+import type { AnalyzedRequirements } from '../../utils/schema/analyzedRequirements'
 import { withSentryCaptureException } from '../../utils/withSentryCaptureException'
-import { type Testcase, testcaseSchema } from '../types'
+import type { testcaseAnnotation } from '../testcaseGeneration/testcaseAnnotation'
 
-const dmlOperationWithoutLogsSchema = v.omit(dmlOperationSchema, [
-  'dml_execution_logs',
-])
-
-const testcaseWithDmlSchema = v.object({
-  ...v.omit(testcaseSchema, ['id', 'requirementId', 'dmlOperation']).entries,
-  dmlOperation: dmlOperationWithoutLogsSchema,
+const saveSqlToolSchema = v.object({
+  category: v.string(),
+  title: v.string(),
+  sql: v.string(),
 })
 
-const saveTestcaseToolSchema = v.object({
-  testcaseWithDml: testcaseWithDmlSchema,
-})
-
-const toolSchema = toJsonSchema(saveTestcaseToolSchema)
+const toolSchema = toJsonSchema(saveSqlToolSchema)
 
 const configSchema = v.object({
   toolCall: v.object({
     id: v.string(),
-  }),
-  configurable: v.object({
-    requirementId: v.pipe(v.string(), v.uuid()),
   }),
 })
 
@@ -53,28 +42,25 @@ const validateSqlSyntax = async (sql: string): Promise<void> => {
 }
 
 /**
- * Extract tool call ID and requirementId from config
+ * Extract tool call ID from config
  */
-const getConfigData = (
-  config: RunnableConfig,
-): { toolCallId: string; requirementId: string } => {
+const getConfigData = (config: RunnableConfig): { toolCallId: string } => {
   const configParseResult = v.safeParse(configSchema, config)
   if (!configParseResult.success) {
     throw new WorkflowTerminationError(
-      new Error('Tool call ID or requirementId not found in config'),
+      new Error('Tool call ID not found in config'),
       'saveTestcaseTool',
     )
   }
   return {
     toolCallId: configParseResult.output.toolCall.id,
-    requirementId: configParseResult.output.configurable.requirementId,
   }
 }
 
 export const saveTestcaseTool: StructuredTool = tool(
   async (input: unknown, config: RunnableConfig): Promise<Command> => {
     return withSentryCaptureException(async () => {
-      const parsed = v.safeParse(saveTestcaseToolSchema, input)
+      const parsed = v.safeParse(saveSqlToolSchema, input)
       if (!parsed.success) {
         throw new WorkflowTerminationError(
           new Error(
@@ -86,40 +72,90 @@ export const saveTestcaseTool: StructuredTool = tool(
         )
       }
 
-      const { testcaseWithDml } = parsed.output
+      const { category, title, sql } = parsed.output
 
       // Validate SQL syntax before saving
-      await validateSqlSyntax(testcaseWithDml.dmlOperation.sql)
+      await validateSqlSyntax(sql)
 
-      const { toolCallId, requirementId } = getConfigData(config)
+      const { toolCallId } = getConfigData(config)
 
-      const testcaseId = uuidv4()
+      // Get current state to update analyzedRequirements
+      const currentState = getCurrentTaskInput()
 
-      const dmlOperationWithId = {
-        ...testcaseWithDml.dmlOperation,
-        dml_execution_logs: [],
+      // Type guard to ensure we have the right state structure
+      if (
+        !currentState ||
+        typeof currentState !== 'object' ||
+        !('analyzedRequirements' in currentState) ||
+        !currentState.analyzedRequirements
+      ) {
+        throw new WorkflowTerminationError(
+          new Error('analyzedRequirements not found in current state'),
+          'saveTestcaseTool',
+        )
       }
 
-      const testcase: Testcase = {
-        id: testcaseId,
-        requirementId: requirementId,
-        requirementType: testcaseWithDml.requirementType,
-        requirementCategory: testcaseWithDml.requirementCategory,
-        requirement: testcaseWithDml.requirement,
-        title: testcaseWithDml.title,
-        description: testcaseWithDml.description,
-        dmlOperation: dmlOperationWithId,
+      // Safe to assert type after validation above
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      const state = currentState as typeof testcaseAnnotation.State
+
+      // Create updated analyzedRequirements with SQL
+      const updatedTestcases = {
+        ...state.analyzedRequirements.testcases,
+      }
+
+      if (!updatedTestcases[category]) {
+        throw new WorkflowTerminationError(
+          new Error(`Category "${category}" not found in analyzedRequirements`),
+          'saveTestcaseTool',
+        )
+      }
+
+      // Find and update the testcase with matching title
+      const testcaseIndex = updatedTestcases[category].findIndex(
+        (tc: { title: string }) => tc.title === title,
+      )
+
+      if (testcaseIndex === -1) {
+        throw new WorkflowTerminationError(
+          new Error(
+            `Test case with title "${title}" not found in category "${category}"`,
+          ),
+          'saveTestcaseTool',
+        )
+      }
+
+      const currentTestcase = updatedTestcases[category]?.[testcaseIndex]
+      if (!currentTestcase) {
+        throw new WorkflowTerminationError(
+          new Error(
+            `Test case at index ${testcaseIndex} not found in category "${category}"`,
+          ),
+          'saveTestcaseTool',
+        )
+      }
+
+      updatedTestcases[category][testcaseIndex] = {
+        title: currentTestcase.title,
+        type: currentTestcase.type,
+        testResults: currentTestcase.testResults,
+        sql,
+      }
+
+      const updatedAnalyzedRequirements: AnalyzedRequirements = {
+        ...state.analyzedRequirements,
+        testcases: updatedTestcases,
       }
 
       const toolMessage = new ToolMessage({
-        content: `Successfully saved test case "${testcase.title}" with DML operation`,
+        content: `Successfully saved SQL for test case "${title}" in category "${category}"`,
         tool_call_id: toolCallId,
       })
       await dispatchCustomEvent(SSE_EVENTS.MESSAGES, toolMessage)
 
       return new Command({
         update: {
-          testcases: [testcase],
+          analyzedRequirements: updatedAnalyzedRequirements,
           messages: [toolMessage],
         },
       })
@@ -128,8 +164,7 @@ export const saveTestcaseTool: StructuredTool = tool(
   {
     name: 'saveTestcase',
     description:
-      'Save a single test case with its corresponding DML operation for a requirement. ' +
-      'The test case includes its scenario description and the SQL operation needed to set up and validate the test.',
+      'Save SQL for a test case. Provide the category, title (exactly as shown in the input), and the generated SQL.',
     schema: toolSchema,
   },
 )

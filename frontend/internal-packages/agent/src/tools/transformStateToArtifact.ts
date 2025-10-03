@@ -22,13 +22,22 @@ const convertAnalyzedRequirementsToArtifact = (
 ): Requirement[] => {
   const requirements: Requirement[] = []
 
-  for (const [category, items] of Object.entries(
-    analyzedRequirements.functionalRequirements,
+  for (const [category, testcases] of Object.entries(
+    analyzedRequirements.testcases,
   )) {
     const requirement: Requirement = {
       name: category,
-      description: items.map((item) => item.desc), // Extract descriptions from RequirementItems
-      test_cases: [], // Will be populated later if testcases exist
+      description: [analyzedRequirements.goal],
+      test_cases: testcases.map((tc) => ({
+        title: tc.title,
+        description: `Test for ${tc.type} operation`,
+        dmlOperation: {
+          operation_type: tc.type,
+          sql: tc.sql,
+          description: tc.title,
+          dml_execution_logs: [],
+        },
+      })),
     }
     requirements.push(requirement)
   }
@@ -91,7 +100,7 @@ type State = {
  * This handles the conversion from the workflow's data structure to the artifact schema
  */
 export const transformStateToArtifact = (state: State): Artifact => {
-  const businessRequirement = state.analyzedRequirements.businessRequirement
+  const businessRequirement = state.analyzedRequirements.goal
 
   const requirements = convertAnalyzedRequirementsToArtifact(
     state.analyzedRequirements,

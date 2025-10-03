@@ -1,19 +1,29 @@
 import { describe, expect, test } from 'vitest'
 import type { QaAgentState } from '../shared/qaAgentAnnotation'
-import type { Testcase } from '../types'
 import { getUnprocessedRequirements } from './getUnprocessedRequirements'
 
 // Test helper to create mock state
 const createMockState = (
-  functionalReqs: Record<string, Array<{ id: string; desc: string }>>,
-  testcases: Testcase[] = [],
-  businessRequirement = 'Test business context',
+  testcases: Record<
+    string,
+    Array<{
+      title: string
+      type: 'INSERT' | 'UPDATE' | 'DELETE' | 'SELECT'
+      sql: string
+      testResults: Array<{
+        executedAt: string
+        success: boolean
+        resultSummary: string
+      }>
+    }>
+  >,
+  goal = 'Test business goal',
 ): QaAgentState => ({
   analyzedRequirements: {
-    businessRequirement,
-    functionalRequirements: functionalReqs,
+    goal,
+    testcases,
   },
-  testcases,
+  testcases: [],
   schemaData: { tables: {}, enums: {}, extensions: {} },
   messages: [],
   designSessionId: 'test-session',
@@ -22,124 +32,159 @@ const createMockState = (
   next: 'END',
 })
 
-// Test helper to create mock testcase
-const createMockTestcase = (requirementId: string): Testcase => ({
-  id: `testcase-${requirementId}`,
-  requirementId,
-  requirementType: 'functional',
-  requirementCategory: 'user',
-  requirement: 'Test requirement',
-  title: 'Test title',
-  description: 'Test description',
-  dmlOperation: {
-    operation_type: 'SELECT',
-    sql: 'SELECT * FROM users',
-    description: 'Test DML operation',
-    dml_execution_logs: [],
-  },
-})
-
 describe('getUnprocessedRequirements', () => {
-  test('returns all requirements when no existing testcases', () => {
-    const state = createMockState(
-      {
-        user: [
-          { id: 'req-1', desc: 'User login functionality' },
-          { id: 'req-2', desc: 'User profile management' },
-        ],
-      },
-      [], // No existing testcases
-    )
-
-    const result = getUnprocessedRequirements(state)
-
-    expect(result).toEqual([
-      {
-        type: 'functional',
-        category: 'user',
-        requirement: 'User login functionality',
-        businessContext: 'Test business context',
-        requirementId: 'req-1',
-      },
-      {
-        type: 'functional',
-        category: 'user',
-        requirement: 'User profile management',
-        businessContext: 'Test business context',
-        requirementId: 'req-2',
-      },
-    ])
-  })
-
-  test('filters out requirements with existing testcases', () => {
-    const state = createMockState(
-      {
-        user: [
-          { id: 'req-1', desc: 'User login functionality' },
-          { id: 'req-2', desc: 'User profile management' },
-          { id: 'req-3', desc: 'User settings' },
-        ],
-      },
-      [
-        createMockTestcase('req-1'), // req-1 already has testcase
-        createMockTestcase('req-3'), // req-3 already has testcase
+  test('returns all testcases when no SQL is present', () => {
+    const state = createMockState({
+      user: [
+        {
+          title: 'User login functionality',
+          type: 'SELECT',
+          sql: '',
+          testResults: [],
+        },
+        {
+          title: 'User profile management',
+          type: 'UPDATE',
+          sql: '',
+          testResults: [],
+        },
       ],
-    )
+    })
 
     const result = getUnprocessedRequirements(state)
 
     expect(result).toEqual([
       {
-        type: 'functional',
         category: 'user',
-        requirement: 'User profile management',
-        businessContext: 'Test business context',
-        requirementId: 'req-2',
+        testcase: {
+          title: 'User login functionality',
+          type: 'SELECT',
+        },
+        goal: 'Test business goal',
+      },
+      {
+        category: 'user',
+        testcase: {
+          title: 'User profile management',
+          type: 'UPDATE',
+        },
+        goal: 'Test business goal',
       },
     ])
   })
 
-  test('returns empty array when all requirements are already processed', () => {
-    const state = createMockState(
+  test('filters out testcases with SQL', () => {
+    const state = createMockState({
+      user: [
+        {
+          title: 'User login functionality',
+          type: 'SELECT',
+          sql: '',
+          testResults: [],
+        },
+        {
+          title: 'User profile management',
+          type: 'UPDATE',
+          sql: 'UPDATE users SET name = $1 WHERE id = $2',
+          testResults: [],
+        },
+        {
+          title: 'User settings',
+          type: 'SELECT',
+          sql: '',
+          testResults: [],
+        },
+      ],
+    })
+
+    const result = getUnprocessedRequirements(state)
+
+    expect(result).toEqual([
       {
-        user: [
-          { id: 'req-1', desc: 'User login functionality' },
-          { id: 'req-2', desc: 'User profile management' },
-        ],
+        category: 'user',
+        testcase: {
+          title: 'User login functionality',
+          type: 'SELECT',
+        },
+        goal: 'Test business goal',
       },
-      [createMockTestcase('req-1'), createMockTestcase('req-2')],
-    )
+      {
+        category: 'user',
+        testcase: {
+          title: 'User settings',
+          type: 'SELECT',
+        },
+        goal: 'Test business goal',
+      },
+    ])
+  })
+
+  test('returns empty array when all testcases have SQL', () => {
+    const state = createMockState({
+      user: [
+        {
+          title: 'User login functionality',
+          type: 'SELECT',
+          sql: 'SELECT * FROM users WHERE email = $1',
+          testResults: [],
+        },
+        {
+          title: 'User profile management',
+          type: 'UPDATE',
+          sql: 'UPDATE users SET name = $1',
+          testResults: [],
+        },
+      ],
+    })
 
     const result = getUnprocessedRequirements(state)
 
     expect(result).toEqual([])
   })
 
-  test('handles mixed processed and unprocessed requirements', () => {
-    const state = createMockState(
-      {
-        user: [{ id: 'req-1', desc: 'User functionality' }],
-        admin: [{ id: 'req-2', desc: 'Admin functionality' }],
-      },
-      [
-        createMockTestcase('req-1'), // Only req-1 is processed
+  test('handles multiple categories', () => {
+    const state = createMockState({
+      user: [
+        {
+          title: 'User functionality',
+          type: 'SELECT',
+          sql: '',
+          testResults: [],
+        },
       ],
-    )
+      admin: [
+        {
+          title: 'Admin functionality',
+          type: 'INSERT',
+          sql: '',
+          testResults: [],
+        },
+      ],
+    })
 
     const result = getUnprocessedRequirements(state)
 
     expect(result).toEqual([
       {
-        type: 'functional',
+        category: 'user',
+        testcase: {
+          title: 'User functionality',
+          type: 'SELECT',
+        },
+        goal: 'Test business goal',
+      },
+      {
         category: 'admin',
-        requirement: 'Admin functionality',
-        businessContext: 'Test business context',
-        requirementId: 'req-2',
+        testcase: {
+          title: 'Admin functionality',
+          type: 'INSERT',
+        },
+        goal: 'Test business goal',
       },
     ])
   })
 
-  test('returns empty array when no requirements exist', () => {
+  test('returns empty array when no testcases exist', () => {
     const state = createMockState({})
 
     const result = getUnprocessedRequirements(state)

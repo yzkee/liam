@@ -13,14 +13,24 @@ import { SSE_EVENTS } from '../../streaming/constants'
 import { WorkflowTerminationError } from '../../utils/errorHandling'
 import { getConfigurable } from '../../utils/getConfigurable'
 import { toJsonSchema } from '../../utils/jsonSchema'
-import type {
-  AnalyzedRequirements,
-  RequirementItem,
-} from '../../utils/schema/analyzedRequirements'
+import type { AnalyzedRequirements } from '../../utils/schema/analyzedRequirements'
+
+const testResultSchema = v.object({
+  executedAt: v.pipe(v.string(), v.isoDateTime()),
+  success: v.boolean(),
+  resultSummary: v.string(),
+})
+
+const testCaseSchemaWithoutId = v.object({
+  title: v.string(),
+  type: v.picklist(['INSERT', 'UPDATE', 'DELETE', 'SELECT']),
+  sql: v.string(),
+  testResults: v.array(testResultSchema),
+})
 
 const analyzedRequirementsWithoutIdSchema = v.object({
-  businessRequirement: v.string(),
-  functionalRequirements: v.record(v.string(), v.array(v.string())),
+  goal: v.string(),
+  testcases: v.record(v.string(), v.array(testCaseSchemaWithoutId)),
 })
 
 const toolSchema = toJsonSchema(analyzedRequirementsWithoutIdSchema)
@@ -40,40 +50,6 @@ type ToolConfigurable = {
   toolCallId: string
 }
 
-type AnalyzedRequirementsWithoutId = v.InferOutput<
-  typeof analyzedRequirementsWithoutIdSchema
->
-
-/**
- * Convert string[] format to RequirementItem[] format with generated UUIDs
- */
-const convertToRequirementItems = (
-  requirements: Record<string, string[]>,
-): Record<string, RequirementItem[]> => {
-  const result: Record<string, RequirementItem[]> = {}
-
-  for (const [category, items] of Object.entries(requirements)) {
-    result[category] = items.map((desc) => ({
-      id: uuidv4(),
-      desc,
-    }))
-  }
-
-  return result
-}
-
-/**
- * Convert LLM output format to RequirementItems format with generated UUIDs
- */
-const convertLlmAnalyzedRequirements = (
-  input: AnalyzedRequirementsWithoutId,
-): AnalyzedRequirements => ({
-  businessRequirement: input.businessRequirement,
-  functionalRequirements: convertToRequirementItems(
-    input.functionalRequirements,
-  ),
-})
-
 /**
  * Create an Artifact from analyzed requirements
  * @param analyzedRequirements - Validated analyzed requirements object
@@ -84,21 +60,33 @@ const createArtifactFromRequirements = (
 ): Artifact => {
   const requirements: Artifact['requirement_analysis']['requirements'] = []
 
-  for (const [category, items] of Object.entries(
-    analyzedRequirements.functionalRequirements,
+  for (const [category, testcases] of Object.entries(
+    analyzedRequirements.testcases,
   )) {
+    const testCases: Artifact['requirement_analysis']['requirements'][number]['test_cases'] =
+      testcases.map((tc) => ({
+        title: tc.title,
+        description: `Test for ${tc.type} operation`,
+        dmlOperation: {
+          operation_type: tc.type,
+          sql: tc.sql,
+          description: tc.title,
+          dml_execution_logs: [],
+        },
+      }))
+
     const requirement: Artifact['requirement_analysis']['requirements'][number] =
       {
         name: category,
-        description: items.map((item) => item.desc), // Extract descriptions from RequirementItems
-        test_cases: [], // Empty array as test cases don't exist at this point
+        description: [analyzedRequirements.goal],
+        test_cases: testCases,
       }
     requirements.push(requirement)
   }
 
   return {
     requirement_analysis: {
-      business_requirement: analyzedRequirements.businessRequirement,
+      business_requirement: analyzedRequirements.goal,
       requirements,
     },
   }
@@ -125,8 +113,10 @@ const getToolConfigurable = (
  */
 export const saveRequirementsToArtifactTool: StructuredTool = tool(
   async (input: unknown, config: RunnableConfig): Promise<Command> => {
-    const parseResult = v.parse(analyzedRequirementsWithoutIdSchema, input)
-    const analyzedRequirements = convertLlmAnalyzedRequirements(parseResult)
+    const analyzedRequirements: AnalyzedRequirements = v.parse(
+      analyzedRequirementsWithoutIdSchema,
+      input,
+    )
 
     const toolConfigurableResult = getToolConfigurable(config)
     if (toolConfigurableResult.isErr()) {

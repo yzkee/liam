@@ -1,6 +1,5 @@
 import { END } from '@langchain/langgraph'
 import type { Schema } from '@liam-hq/schema'
-import { v4 as uuidv4 } from 'uuid'
 import { describe, expect, it } from 'vitest'
 import type { testcaseAnnotation } from './testcaseAnnotation'
 import { validateSchemaRequirementsNode } from './validateSchemaRequirementsNode'
@@ -83,13 +82,17 @@ describe('validateSchemaRequirementsNode Integration', () => {
 
     const state: TestcaseState = {
       messages: [],
-      currentRequirement: {
-        type: 'functional',
+      currentTestcase: {
         category: 'tasks',
-        requirement: 'Users can create tasks with title and status',
-        businessContext:
-          'A task management system where users create projects and tasks',
-        requirementId: uuidv4(),
+        testcase: {
+          title: 'Users can create tasks with title and status',
+          type: 'INSERT',
+        },
+        goal: 'A task management system where users create projects and tasks',
+      },
+      analyzedRequirements: {
+        goal: 'A task management system where users create projects and tasks',
+        testcases: {},
       },
       schemaData: mockSchema,
       testcases: [],
@@ -182,14 +185,18 @@ describe('validateSchemaRequirementsNode Integration', () => {
 
     const state: TestcaseState = {
       messages: [],
-      currentRequirement: {
-        type: 'functional',
+      currentTestcase: {
         category: 'project-management',
-        requirement:
-          'Users can create projects with clients and assign tasks to specific projects with deadlines and priority levels',
-        businessContext:
-          'A comprehensive project management system where users manage multiple client projects with detailed task assignment',
-        requirementId: uuidv4(),
+        testcase: {
+          title:
+            'Users can create projects with clients and assign tasks to specific projects with deadlines and priority levels',
+          type: 'INSERT',
+        },
+        goal: 'A comprehensive project management system where users manage multiple client projects with detailed task assignment',
+      },
+      analyzedRequirements: {
+        goal: 'A comprehensive project management system where users manage multiple client projects with detailed task assignment',
+        testcases: {},
       },
       schemaData: mockSchema,
       testcases: [],

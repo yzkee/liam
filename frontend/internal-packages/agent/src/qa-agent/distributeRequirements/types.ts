@@ -1,10 +1,11 @@
 /**
- * Requirement data structure for parallel processing
+ * Test case data structure for parallel SQL generation
  */
-export type RequirementData = {
-  type: 'functional' | 'non_functional'
+export type TestCaseData = {
   category: string
-  requirement: string
-  businessContext: string
-  requirementId: string
+  testcase: {
+    title: string
+    type: 'INSERT' | 'UPDATE' | 'DELETE' | 'SELECT'
+  }
+  goal: string
 }

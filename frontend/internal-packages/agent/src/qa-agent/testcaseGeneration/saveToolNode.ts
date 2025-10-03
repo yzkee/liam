@@ -13,15 +13,7 @@ export const saveToolNode = async (
 ) => {
   const toolNode = new ToolNode([saveTestcaseTool])
 
-  const config = {
-    ..._config,
-    configurable: {
-      ..._config?.configurable,
-      requirementId: state.currentRequirement.requirementId,
-    },
-  }
-
-  const stream = await toolNode.stream(state, config)
+  const stream = await toolNode.stream(state, _config)
 
   let result = {}
 

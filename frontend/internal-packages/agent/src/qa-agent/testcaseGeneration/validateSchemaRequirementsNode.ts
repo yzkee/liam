@@ -57,7 +57,7 @@ ${schemaContext}
 Type: ${currentTestcase.testcase.type}
 Category: ${currentTestcase.category}
 Title: ${currentTestcase.testcase.title}
-Business Goal: ${currentTestcase.goal}
+Session Goal: ${currentTestcase.goal}
 
 Can this schema fulfill this test case for SQL generation?
 `

@@ -51,7 +51,7 @@ export const humanPromptTemplateForTestcaseGeneration =
 # Database Schema Context
 {schemaContext}
 
-# Business Goal
+# Session Goal
 {goal}
 
 # Test Case to Generate SQL For

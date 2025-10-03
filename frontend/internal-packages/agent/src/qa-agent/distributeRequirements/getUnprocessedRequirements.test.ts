@@ -17,7 +17,7 @@ const createMockState = (
       }>
     }>
   >,
-  goal = 'Test business goal',
+  goal = 'Test session goal',
 ): QaAgentState => ({
   analyzedRequirements: {
     goal,
@@ -60,7 +60,7 @@ describe('getUnprocessedRequirements', () => {
           title: 'User login functionality',
           type: 'SELECT',
         },
-        goal: 'Test business goal',
+        goal: 'Test session goal',
       },
       {
         category: 'user',
@@ -68,7 +68,7 @@ describe('getUnprocessedRequirements', () => {
           title: 'User profile management',
           type: 'UPDATE',
         },
-        goal: 'Test business goal',
+        goal: 'Test session goal',
       },
     ])
   })
@@ -106,7 +106,7 @@ describe('getUnprocessedRequirements', () => {
           title: 'User login functionality',
           type: 'SELECT',
         },
-        goal: 'Test business goal',
+        goal: 'Test session goal',
       },
       {
         category: 'user',
@@ -114,7 +114,7 @@ describe('getUnprocessedRequirements', () => {
           title: 'User settings',
           type: 'SELECT',
         },
-        goal: 'Test business goal',
+        goal: 'Test session goal',
       },
     ])
   })
@@ -171,7 +171,7 @@ describe('getUnprocessedRequirements', () => {
           title: 'User functionality',
           type: 'SELECT',
         },
-        goal: 'Test business goal',
+        goal: 'Test session goal',
       },
       {
         category: 'admin',
@@ -179,7 +179,7 @@ describe('getUnprocessedRequirements', () => {
           title: 'Admin functionality',
           type: 'INSERT',
         },
-        goal: 'Test business goal',
+        goal: 'Test session goal',
       },
     ])
   })

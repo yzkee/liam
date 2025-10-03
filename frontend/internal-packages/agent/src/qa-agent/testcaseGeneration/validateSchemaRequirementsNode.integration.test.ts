@@ -99,6 +99,7 @@ describe('validateSchemaRequirementsNode Integration', () => {
       schemaData: mockSchema,
       testcases: [],
       schemaIssues: [],
+      generatedSqls: [],
     }
 
     // Act
@@ -205,6 +206,7 @@ describe('validateSchemaRequirementsNode Integration', () => {
       schemaData: mockSchema,
       testcases: [],
       schemaIssues: [],
+      generatedSqls: [],
     }
 
     // Act

@@ -14,6 +14,16 @@ export const schemaIssuesAnnotation = Annotation<Array<SchemaIssue>>({
   default: () => [],
 })
 
+export type GeneratedSql = {
+  testcaseId: string
+  sql: string
+}
+
+export const generatedSqlsAnnotation = Annotation<Array<GeneratedSql>>({
+  reducer: (prev, next) => prev.concat(next),
+  default: () => [],
+})
+
 export const testcaseAnnotation = Annotation.Root({
   ...MessagesAnnotation.spec,
   currentTestcase: Annotation<TestCaseData>,
@@ -25,4 +35,5 @@ export const testcaseAnnotation = Annotation.Root({
     reducer: (prev, next) => prev.concat(next),
   }),
   schemaIssues: schemaIssuesAnnotation,
+  generatedSqls: generatedSqlsAnnotation,
 })

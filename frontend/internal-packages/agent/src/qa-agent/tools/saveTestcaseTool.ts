@@ -8,7 +8,6 @@ import * as v from 'valibot'
 import { SSE_EVENTS } from '../../streaming/constants'
 import { WorkflowTerminationError } from '../../utils/errorHandling'
 import { toJsonSchema } from '../../utils/jsonSchema'
-import type { AnalyzedRequirements } from '../../utils/schema/analyzedRequirements'
 import { withSentryCaptureException } from '../../utils/withSentryCaptureException'
 import type { testcaseAnnotation } from '../testcaseGeneration/testcaseAnnotation'
 
@@ -77,63 +76,13 @@ export const saveTestcaseTool: StructuredTool = tool(
 
       const { toolCallId } = getConfigData(config)
 
-      // Get current state to retrieve category and title
+      // Get current state to retrieve testcase info
       const state = getCurrentTaskInput<typeof testcaseAnnotation.State>()
 
-      // Get category and title from current testcase
       const {
         category,
-        testcase: { title },
+        testcase: { id: testcaseId, title },
       } = state.currentTestcase
-
-      // Create updated analyzedRequirements with SQL
-      const updatedTestcases = {
-        ...state.analyzedRequirements.testcases,
-      }
-
-      if (!updatedTestcases[category]) {
-        throw new WorkflowTerminationError(
-          new Error(`Category "${category}" not found in analyzedRequirements`),
-          'saveTestcaseTool',
-        )
-      }
-
-      // Find and update the testcase with matching title
-      const testcaseIndex = updatedTestcases[category].findIndex(
-        (tc: { title: string }) => tc.title === title,
-      )
-
-      if (testcaseIndex === -1) {
-        throw new WorkflowTerminationError(
-          new Error(
-            `Test case with title "${title}" not found in category "${category}"`,
-          ),
-          'saveTestcaseTool',
-        )
-      }
-
-      const currentTestcase = updatedTestcases[category]?.[testcaseIndex]
-      if (!currentTestcase) {
-        throw new WorkflowTerminationError(
-          new Error(
-            `Test case at index ${testcaseIndex} not found in category "${category}"`,
-          ),
-          'saveTestcaseTool',
-        )
-      }
-
-      updatedTestcases[category][testcaseIndex] = {
-        id: currentTestcase.id,
-        title: currentTestcase.title,
-        type: currentTestcase.type,
-        sql,
-        testResults: currentTestcase.testResults,
-      }
-
-      const updatedAnalyzedRequirements: AnalyzedRequirements = {
-        ...state.analyzedRequirements,
-        testcases: updatedTestcases,
-      }
 
       const toolMessage = new ToolMessage({
         content: `Successfully saved SQL for test case "${title}" in category "${category}"`,
@@ -143,7 +92,7 @@ export const saveTestcaseTool: StructuredTool = tool(
 
       return new Command({
         update: {
-          analyzedRequirements: updatedAnalyzedRequirements,
+          generatedSqls: [{ testcaseId, sql }],
           messages: [toolMessage],
         },
       })

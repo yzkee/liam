@@ -7,7 +7,7 @@ import { createDbAgentGraph } from './db-agent/createDbAgentGraph'
 import { convertRequirementsToPrompt } from './db-agent/utils/convertAnalyzedRequirementsToPrompt'
 import { createLeadAgentGraph } from './lead-agent/createLeadAgentGraph'
 import { createPmAgentGraph } from './pm-agent/createPmAgentGraph'
-import { createQaAgentGraph } from './qa-agent/createQaAgentGraph'
+import { callQaAgent } from './qa-agent/callQaAgent'
 import type { WorkflowState } from './types'
 import { validateInitialSchemaNode } from './workflow/nodes/validateInitialSchemaNode'
 import { workflowAnnotation } from './workflowAnnotation'
@@ -34,13 +34,8 @@ export const createGraph = (checkpointer?: BaseCheckpointSaver) => {
     return { ...state, ...output }
   }
 
-  const callQaAgent = async (state: WorkflowState, config: RunnableConfig) => {
-    const qaAgentSubgraph = createQaAgentGraph(checkpointer)
-    const modifiedState = { ...state, messages: [] }
-    const output = await qaAgentSubgraph.invoke(modifiedState, config)
-
-    return { ...state, ...output }
-  }
+  const qaAgentNode = (state: WorkflowState, config: RunnableConfig) =>
+    callQaAgent(state, config, checkpointer)
 
   const callPmAgent = async (state: WorkflowState, config: RunnableConfig) => {
     const pmAgentSubgraph = createPmAgentGraph(checkpointer)
@@ -63,7 +58,7 @@ export const createGraph = (checkpointer?: BaseCheckpointSaver) => {
     .addNode('leadAgent', leadAgentSubgraph)
     .addNode('pmAgent', callPmAgent)
     .addNode('dbAgent', callDbAgent)
-    .addNode('qaAgent', callQaAgent)
+    .addNode('qaAgent', qaAgentNode)
 
     .addConditionalEdges(
       START,

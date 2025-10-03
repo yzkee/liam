@@ -60,6 +60,7 @@ describe('testcaseGeneration Integration', () => {
       schemaData: mockSchema,
       testcases: [],
       schemaIssues: [],
+      generatedSqls: [],
     }
 
     // Act

@@ -2,6 +2,7 @@
 
 import {
   AlertTriangle,
+  Callout,
   syntaxCodeTagProps,
   syntaxCustomStyle,
   syntaxTheme,
@@ -37,10 +38,9 @@ export const Artifact: FC<Props> = ({ doc, error }) => {
   return (
     <div className={styles.container}>
       {error && (
-        <div className={styles.warningBanner}>
-          <AlertTriangle className={styles.warningIcon} size={20} />
-          <span className={styles.warningMessage}>{error.message}</span>
-        </div>
+        <Callout variant="warning" icon={<AlertTriangle size={20} />}>
+          {error.message}
+        </Callout>
       )}
       <div className={styles.head}>
         <CopyButton textToCopy={doc} tooltipLabel="Copy Markdown" />

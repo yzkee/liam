@@ -11,7 +11,6 @@ function prepareTestcases(
 ): Result<TestCaseData[], WorkflowTerminationError> {
   const { analyzedRequirements } = state
   const allTestcases: TestCaseData[] = []
-  const goal = analyzedRequirements.goal || ''
 
   // Process all testcases
   for (const [category, testcases] of Object.entries(
@@ -22,11 +21,7 @@ function prepareTestcases(
       if (!testcase.sql || testcase.sql === '') {
         allTestcases.push({
           category,
-          testcase: {
-            title: testcase.title,
-            type: testcase.type,
-          },
-          goal,
+          testcase,
         })
       }
     }

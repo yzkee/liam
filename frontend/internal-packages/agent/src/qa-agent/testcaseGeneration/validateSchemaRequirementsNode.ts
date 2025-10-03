@@ -45,7 +45,7 @@ Be decisive and focus on what is missing, not how to design it. Do not suggest s
 export async function validateSchemaRequirementsNode(
   state: typeof testcaseAnnotation.State,
 ): Promise<Command> {
-  const { currentTestcase, schemaData } = state
+  const { currentTestcase, schemaData, analyzedRequirements } = state
 
   const schemaContext = convertSchemaToText(schemaData)
 
@@ -57,7 +57,7 @@ ${schemaContext}
 Type: ${currentTestcase.testcase.type}
 Category: ${currentTestcase.category}
 Title: ${currentTestcase.testcase.title}
-Session Goal: ${currentTestcase.goal}
+Session Goal: ${analyzedRequirements.goal}
 
 Can this schema fulfill this test case for SQL generation?
 `

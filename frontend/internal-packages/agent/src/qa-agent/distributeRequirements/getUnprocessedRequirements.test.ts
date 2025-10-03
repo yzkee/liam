@@ -48,18 +48,22 @@ describe('getUnprocessedRequirements', () => {
       {
         category: 'user',
         testcase: {
+          id: '1',
           title: 'User login functionality',
           type: 'SELECT',
+          sql: '',
+          testResults: [],
         },
-        goal: 'Test session goal',
       },
       {
         category: 'user',
         testcase: {
+          id: '2',
           title: 'User profile management',
           type: 'UPDATE',
+          sql: '',
+          testResults: [],
         },
-        goal: 'Test session goal',
       },
     ])
   })
@@ -97,18 +101,22 @@ describe('getUnprocessedRequirements', () => {
       {
         category: 'user',
         testcase: {
+          id: '1',
           title: 'User login functionality',
           type: 'SELECT',
+          sql: '',
+          testResults: [],
         },
-        goal: 'Test session goal',
       },
       {
         category: 'user',
         testcase: {
+          id: '3',
           title: 'User settings',
           type: 'SELECT',
+          sql: '',
+          testResults: [],
         },
-        goal: 'Test session goal',
       },
     ])
   })
@@ -166,18 +174,22 @@ describe('getUnprocessedRequirements', () => {
       {
         category: 'user',
         testcase: {
+          id: '1',
           title: 'User functionality',
           type: 'SELECT',
+          sql: '',
+          testResults: [],
         },
-        goal: 'Test session goal',
       },
       {
         category: 'admin',
         testcase: {
+          id: '2',
           title: 'Admin functionality',
           type: 'INSERT',
+          sql: '',
+          testResults: [],
         },
-        goal: 'Test session goal',
       },
     ])
   })

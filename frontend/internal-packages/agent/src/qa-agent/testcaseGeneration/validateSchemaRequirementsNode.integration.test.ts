@@ -85,10 +85,12 @@ describe('validateSchemaRequirementsNode Integration', () => {
       currentTestcase: {
         category: 'tasks',
         testcase: {
+          id: '123',
           title: 'Users can create tasks with title and status',
           type: 'INSERT',
+          sql: '',
+          testResults: [],
         },
-        goal: 'A task management system where users create projects and tasks',
       },
       analyzedRequirements: {
         goal: 'A task management system where users create projects and tasks',
@@ -188,11 +190,13 @@ describe('validateSchemaRequirementsNode Integration', () => {
       currentTestcase: {
         category: 'project-management',
         testcase: {
+          id: '456',
           title:
             'Users can create projects with clients and assign tasks to specific projects with deadlines and priority levels',
           type: 'INSERT',
+          sql: '',
+          testResults: [],
         },
-        goal: 'A comprehensive project management system where users manage multiple client projects with detailed task assignment',
       },
       analyzedRequirements: {
         goal: 'A comprehensive project management system where users manage multiple client projects with detailed task assignment',

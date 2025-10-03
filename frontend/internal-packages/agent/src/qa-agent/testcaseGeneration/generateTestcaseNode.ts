@@ -34,13 +34,13 @@ const model = new ChatOpenAI({
 export async function generateTestcaseNode(
   state: typeof testcaseAnnotation.State,
 ): Promise<{ messages: BaseMessage[] }> {
-  const { currentTestcase, schemaData, messages } = state
+  const { currentTestcase, schemaData, analyzedRequirements, messages } = state
 
   const schemaContext = convertSchemaToText(schemaData)
 
   const contextMessage = await humanPromptTemplateForTestcaseGeneration.format({
     schemaContext,
-    goal: currentTestcase.goal,
+    goal: analyzedRequirements.goal,
     category: currentTestcase.category,
     title: currentTestcase.testcase.title,
     type: currentTestcase.testcase.type,

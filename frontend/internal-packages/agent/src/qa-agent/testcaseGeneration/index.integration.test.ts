@@ -46,10 +46,12 @@ describe('testcaseGeneration Integration', () => {
       currentTestcase: {
         category: 'tasks',
         testcase: {
+          id: '123',
           title: 'Users can create tasks with title and status',
           type: 'INSERT',
+          sql: '',
+          testResults: [],
         },
-        goal: 'A task management system where users create projects and tasks',
       },
       analyzedRequirements: {
         goal: 'A task management system where users create projects and tasks',

@@ -14,6 +14,8 @@ export const testCaseSchema = v.object({
   testResults: v.array(testResultSchema),
 })
 
+export type TestCase = v.InferOutput<typeof testCaseSchema>
+
 /**
  * Valibot schema for AnalyzedRequirements structure
  * Used across PM Agent, QA Agent, and workflow systems

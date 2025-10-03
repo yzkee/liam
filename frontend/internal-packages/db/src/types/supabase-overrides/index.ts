@@ -6,41 +6,13 @@ import type { CheckpointBlobsOverride } from './checkpointBlobs'
 import type { CheckpointsOverride } from './checkpoints'
 import type { CheckpointWritesOverride } from './checkpointWrites'
 import type { DesignSessionsOverride } from './designSessions'
-import type { DocFilePathsOverride } from './docFilePaths'
-import type { GithubPullRequestCommentsOverride } from './githubPullRequestComments'
-import type { GithubPullRequestsOverride } from './githubPullRequests'
-import type { KnowledgeSuggestionDocMappingsOverride } from './knowledgeSuggestionDocMappings'
-import type { KnowledgeSuggestionsOverride } from './knowledgeSuggestions'
-import type { MigrationPullRequestMappingsOverride } from './migrationPullRequestMappings'
-import type { MigrationsOverride } from './migrations'
-import type { OverallReviewKnowledgeSuggestionMappingsOverride } from './overallReviewKnowledgeSuggestionMappings'
-import type { OverallReviewsOverride } from './overallReviews'
 import type { ProjectRepositoryMappingsOverride } from './projectRepositoryMappings'
-import type { ReviewFeedbackCommentsOverride } from './reviewFeedbackComments'
-import type { ReviewFeedbackKnowledgeSuggestionMappingsOverride } from './reviewFeedbackKnowledgeSuggestionMappings'
-import type { ReviewFeedbacksOverride } from './reviewFeedbacks'
-import type { ReviewSuggestionSnippetsOverride } from './reviewSuggestionSnippets'
 import type { SchemaFilePathsOverride } from './schemaFilePaths'
 
 export type AppDatabaseOverrides = MergeDeep<
   DatabaseGenerated,
-  KnowledgeSuggestionsOverride &
-    KnowledgeSuggestionDocMappingsOverride &
-    ReviewFeedbackKnowledgeSuggestionMappingsOverride &
-    OverallReviewKnowledgeSuggestionMappingsOverride &
-    OverallReviewsOverride &
-    ReviewFeedbacksOverride &
-    ReviewFeedbackCommentsOverride &
-    ReviewSuggestionSnippetsOverride &
-    GithubPullRequestsOverride &
-    MigrationPullRequestMappingsOverride &
-    GithubPullRequestCommentsOverride &
-    OverallReviewKnowledgeSuggestionMappingsOverride &
-    SchemaFilePathsOverride &
-    DocFilePathsOverride &
+  SchemaFilePathsOverride &
     ProjectRepositoryMappingsOverride &
-    MigrationsOverride &
-    GithubPullRequestsOverride &
     DesignSessionsOverride &
     BuildingSchemasOverride &
     ArtifactsOverride &

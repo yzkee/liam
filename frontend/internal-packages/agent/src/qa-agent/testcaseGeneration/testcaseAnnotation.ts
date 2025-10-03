@@ -5,7 +5,7 @@ import type { TestCaseData } from '../distributeRequirements'
 import type { Testcase } from '../types'
 
 type SchemaIssue = {
-  requirementId: string
+  testcaseId: string
   description: string
 }
 

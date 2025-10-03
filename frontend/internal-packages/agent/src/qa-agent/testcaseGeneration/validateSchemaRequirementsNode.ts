@@ -79,7 +79,7 @@ Can this schema fulfill this test case for SQL generation?
   }
 
   const schemaIssue = {
-    testcaseId: `${currentTestcase.category}:${currentTestcase.testcase.title}`,
+    testcaseId: currentTestcase.testcase.id,
     description: validationResult.issueDescription,
   }
 

@@ -107,4 +107,53 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
       - basic: Basic feature test (INSERT)"
     `)
   })
+
+  it('should filter testcases when schemaIssues are provided', () => {
+    const schemaIssues = [
+      { testcaseId: '1', description: 'Missing users table' },
+      { testcaseId: '4', description: 'Missing email column' },
+    ]
+
+    const result = convertRequirementsToPrompt(
+      sampleAnalyzedRequirements,
+      schemaIssues,
+    )
+
+    expect(result).toMatchInlineSnapshot(`
+      "Session Goal: Build a user management system
+
+      Test Cases:
+      - authentication: User login (SELECT)
+      - userManagement: Create new user (INSERT)"
+    `)
+  })
+
+  it('should handle schemaIssues with no matching testcases', () => {
+    const schemaIssues = [
+      { testcaseId: 'non-existent-id', description: 'Some issue' },
+    ]
+
+    const result = convertRequirementsToPrompt(
+      sampleAnalyzedRequirements,
+      schemaIssues,
+    )
+
+    expect(result).toMatchInlineSnapshot(`
+      "Session Goal: Build a user management system
+
+      Test Cases:"
+    `)
+  })
+
+  it('should handle empty schemaIssues array', () => {
+    const result = convertRequirementsToPrompt(sampleAnalyzedRequirements, [])
+
+    expect(result).toMatchInlineSnapshot(`
+      "Session Goal: Build a user management system
+
+      Test Cases:
+      - authentication: User login (SELECT), User logout (UPDATE), Password reset (UPDATE)
+      - userManagement: Create new user (INSERT), Update user info (UPDATE), Delete user (DELETE)"
+    `)
+  })
 })

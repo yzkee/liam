@@ -26,6 +26,7 @@ function isRetryableError(error: unknown): boolean {
     'timeout',
     'connection refused',
     'connection reset',
+    'connection lost',
     'socket hang up',
     'enotfound',
     'econnreset',
@@ -36,6 +37,7 @@ function isRetryableError(error: unknown): boolean {
     '503',
     '504',
     'bad gateway',
+    'gateway error',
     'service unavailable',
     'gateway timeout',
   ]

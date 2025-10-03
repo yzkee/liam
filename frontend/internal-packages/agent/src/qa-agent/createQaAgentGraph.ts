@@ -2,6 +2,7 @@ import { END, START, StateGraph } from '@langchain/langgraph'
 import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
 import { RETRY_POLICY } from '../utils/errorHandling'
 import { continueToRequirements } from './distributeRequirements'
+import { applyGeneratedSqlsNode } from './nodes/applyGeneratedSqlsNode'
 import { invokeRunTestToolNode } from './nodes/invokeRunTestToolNode'
 import { qaAgentAnnotation } from './shared/qaAgentAnnotation'
 import { testcaseGeneration } from './testcaseGeneration'
@@ -13,6 +14,8 @@ export const createQaAgentGraph = (checkpointer?: BaseCheckpointSaver) => {
   qaAgentGraph
     // Add nodes for map-reduce pattern
     .addNode('testcaseGeneration', testcaseGeneration)
+
+    .addNode('applyGeneratedSqls', applyGeneratedSqlsNode)
 
     .addNode('validateSchema', validateSchemaNode, {
       retryPolicy: RETRY_POLICY,
@@ -26,8 +29,11 @@ export const createQaAgentGraph = (checkpointer?: BaseCheckpointSaver) => {
     // Send targets the testcaseGeneration
     .addConditionalEdges(START, continueToRequirements)
 
-    // After all parallel subgraph executions complete, validate
-    .addEdge('testcaseGeneration', 'validateSchema')
+    // After all parallel subgraph executions complete, apply generated SQLs
+    .addEdge('testcaseGeneration', 'applyGeneratedSqls')
+
+    // Then validate
+    .addEdge('applyGeneratedSqls', 'validateSchema')
 
     // Add new test execution step after validation
     .addEdge('validateSchema', 'invokeRunTestTool')

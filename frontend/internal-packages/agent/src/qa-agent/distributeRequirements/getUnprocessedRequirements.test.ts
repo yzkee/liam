@@ -1,22 +1,11 @@
 import { describe, expect, test } from 'vitest'
+import type { AnalyzedRequirements } from '../../utils/schema/analyzedRequirements'
 import type { QaAgentState } from '../shared/qaAgentAnnotation'
 import { getUnprocessedRequirements } from './getUnprocessedRequirements'
 
 // Test helper to create mock state
 const createMockState = (
-  testcases: Record<
-    string,
-    Array<{
-      title: string
-      type: 'INSERT' | 'UPDATE' | 'DELETE' | 'SELECT'
-      sql: string
-      testResults: Array<{
-        executedAt: string
-        success: boolean
-        resultSummary: string
-      }>
-    }>
-  >,
+  testcases: AnalyzedRequirements['testcases'],
   goal = 'Test session goal',
 ): QaAgentState => ({
   analyzedRequirements: {

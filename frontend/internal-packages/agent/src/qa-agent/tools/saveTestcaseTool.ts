@@ -78,28 +78,7 @@ export const saveTestcaseTool: StructuredTool = tool(
       const { toolCallId } = getConfigData(config)
 
       // Get current state to retrieve category and title
-      const currentState = getCurrentTaskInput()
-
-      // Type guard to ensure we have the right state structure
-      if (
-        !currentState ||
-        typeof currentState !== 'object' ||
-        !('currentTestcase' in currentState) ||
-        !currentState.currentTestcase ||
-        !('analyzedRequirements' in currentState) ||
-        !currentState.analyzedRequirements
-      ) {
-        throw new WorkflowTerminationError(
-          new Error(
-            'currentTestcase or analyzedRequirements not found in current state',
-          ),
-          'saveTestcaseTool',
-        )
-      }
-
-      // Safe to assert type after validation above
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const state = currentState as typeof testcaseAnnotation.State
+      const state = getCurrentTaskInput<typeof testcaseAnnotation.State>()
 
       // Get category and title from current testcase
       const {

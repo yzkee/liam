@@ -11,14 +11,10 @@ type Props = {
 }
 
 export const ArtifactContainer: FC<Props> = ({ artifact, error }) => {
-  if (error) {
-    return <div>Error loading artifact: {error.message}</div>
-  }
-
   if (!artifact) {
     return <div>No artifact available yet</div>
   }
 
   const markdownContent = formatArtifactToMarkdown(artifact)
-  return <Artifact doc={markdownContent} />
+  return <Artifact doc={markdownContent} error={error} />
 }

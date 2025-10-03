@@ -11,6 +11,29 @@
   overflow: hidden;
 }
 
+.warningBanner {
+  padding: var(--spacing-3);
+  margin-bottom: var(--spacing-4);
+  background-color: var(--callout-warning-background);
+  border: 1px solid var(--callout-warning-border);
+  border-radius: var(--border-radius-medium);
+  color: var(--callout-warning-text);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-4);
+  line-height: 1.5;
+}
+
+.warningIcon {
+  flex-shrink: 0;
+  color: var(--callout-warning-text);
+}
+
+.warningMessage {
+  flex: 1;
+}
+
 .head {
   display: flex;
   flex-direction: row;

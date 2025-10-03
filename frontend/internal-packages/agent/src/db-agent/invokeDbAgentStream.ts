@@ -39,7 +39,6 @@ export async function invokeDbAgentStream(
     metadata: traceEnhancement.metadata,
     streamMode: 'messages',
     version: 'v2',
-    subgraphs: true,
     signal: params.signal,
   })
 

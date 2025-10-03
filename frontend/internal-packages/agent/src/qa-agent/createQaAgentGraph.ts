@@ -1,5 +1,4 @@
 import { END, START, StateGraph } from '@langchain/langgraph'
-import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
 import { RETRY_POLICY } from '../utils/errorHandling'
 import { continueToRequirements } from './distributeRequirements'
 import { invokeRunTestToolNode } from './nodes/invokeRunTestToolNode'
@@ -7,7 +6,7 @@ import { qaAgentAnnotation } from './shared/qaAgentAnnotation'
 import { testcaseGeneration } from './testcaseGeneration'
 import { validateSchemaNode } from './validateSchema'
 
-export const createQaAgentGraph = (checkpointer?: BaseCheckpointSaver) => {
+export const createQaAgentGraph = () => {
   const qaAgentGraph = new StateGraph(qaAgentAnnotation)
 
   qaAgentGraph
@@ -33,7 +32,5 @@ export const createQaAgentGraph = (checkpointer?: BaseCheckpointSaver) => {
     .addEdge('validateSchema', 'invokeRunTestTool')
     .addEdge('invokeRunTestTool', END)
 
-  return checkpointer
-    ? qaAgentGraph.compile({ checkpointer })
-    : qaAgentGraph.compile()
+  return qaAgentGraph.compile()
 }

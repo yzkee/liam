@@ -1,5 +1,4 @@
 import { END, START, StateGraph } from '@langchain/langgraph'
-import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
 import { RETRY_POLICY } from '../utils/errorHandling'
 import { analyzeRequirementsNode } from './nodes/analyzeRequirementsNode'
 import { invokeSaveArtifactToolNode } from './nodes/invokeSaveArtifactToolNode'
@@ -13,10 +12,8 @@ import { routeAfterAnalyzeRequirements } from './routing/routeAfterAnalyzeRequir
  * 1. analyzeRequirements - Analyzes and structures user requirements
  * 2. invokeSaveArtifactTool - Saves requirements as artifacts using tools
  * 3. Loop between analysis and tool invocation until requirements are saved
- *
- * @param checkpointer - Optional checkpoint saver for persistent state management
  */
-export const createPmAgentGraph = (checkpointer?: BaseCheckpointSaver) => {
+export const createPmAgentGraph = () => {
   const pmAgentGraph = new StateGraph(pmAgentStateAnnotation)
 
   pmAgentGraph
@@ -44,7 +41,5 @@ export const createPmAgentGraph = (checkpointer?: BaseCheckpointSaver) => {
       },
     )
 
-  return checkpointer
-    ? pmAgentGraph.compile({ checkpointer })
-    : pmAgentGraph.compile()
+  return pmAgentGraph.compile()
 }

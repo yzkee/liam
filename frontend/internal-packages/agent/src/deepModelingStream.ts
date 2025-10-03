@@ -32,6 +32,7 @@ export async function deepModelingStream(
     streamMode: 'messages',
     version: 'v2',
     signal: params.signal,
+    subgraphs: true,
   })
 
   async function* iter() {

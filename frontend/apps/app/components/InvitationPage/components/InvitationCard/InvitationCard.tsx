@@ -76,25 +76,27 @@ export function InvitationCard({
           )}
         </div>
 
-        <div className={styles.actions}>
-          {organizationName && (
-            <form action={handleAccept}>
-              <input type="hidden" name="token" value={token} />
+        {(organizationName || error) && (
+          <div className={styles.actions}>
+            {organizationName && (
+              <form action={handleAccept}>
+                <input type="hidden" name="token" value={token} />
 
-              <Button
-                type="submit"
-                className={styles.button}
-                disabled={isLoading}
-                isLoading={isLoading}
-                loadingIndicatorType="content"
-              >
-                Accept Invite
-              </Button>
-            </form>
-          )}
+                <Button
+                  type="submit"
+                  className={styles.button}
+                  disabled={isLoading}
+                  isLoading={isLoading}
+                  loadingIndicatorType="content"
+                >
+                  Accept Invite
+                </Button>
+              </form>
+            )}
 
-          {error && <p className={styles.error}>{error}</p>}
-        </div>
+            {error && <p className={styles.error}>{error}</p>}
+          </div>
+        )}
       </div>
     </div>
   )

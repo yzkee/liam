@@ -4,7 +4,7 @@ export const convertRequirementsToPrompt = (
   requirements: AnalyzedRequirements,
 ): string => {
   // Convert testcases to prompt format
-  return `Business Goal: ${requirements.goal}
+  return `Business Goal:${requirements.goal ? ` ${requirements.goal}` : ''}
 
 Test Cases:
 ${Object.entries(requirements.testcases)

@@ -1,5 +1,5 @@
 import { HumanMessage } from '@langchain/core/messages'
-import { END } from '@langchain/langgraph'
+import { END, MemorySaver } from '@langchain/langgraph'
 import { aSchema } from '@liam-hq/schema'
 import { describe, it } from 'vitest'
 import {
@@ -12,7 +12,8 @@ import type { WorkflowState } from './types'
 describe('createGraph Integration', () => {
   it('should execute complete workflow', async () => {
     // Arrange
-    const graph = createGraph()
+    const checkpointer = new MemorySaver()
+    const graph = createGraph(checkpointer)
     const { config, context } = await getTestConfig()
 
     const userInput = 'Design a simple user management system'
@@ -38,6 +39,7 @@ describe('createGraph Integration', () => {
       ...config,
       streamMode: 'messages',
       version: 'v2',
+      subgraphs: true,
     })
 
     // Assert

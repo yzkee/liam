@@ -18,16 +18,16 @@ import { workflowAnnotation } from './workflowAnnotation'
  * @param checkpointer - Optional checkpoint saver for persistent state management
  */
 export const createGraph = (checkpointer?: BaseCheckpointSaver) => {
-  const graph = new StateGraph(workflowAnnotation)
-  const leadAgentSubgraph = createLeadAgentGraph(checkpointer)
+  const leadAgentSubgraph = createLeadAgentGraph()
+  const pmAgentSubgraph = createPmAgentGraph()
+  const dbAgentSubgraph = createDbAgentGraph()
+  const qaAgentSubgraph = createQaAgentGraph()
 
   const callDbAgent = async (state: WorkflowState, config: RunnableConfig) => {
-    const dbAgentSubgraph = createDbAgentGraph(checkpointer)
     const prompt = convertRequirementsToPrompt(
       state.analyzedRequirements,
       state.schemaIssues,
     )
-
     const modifiedState = { ...state, messages: [], prompt }
     const output = await dbAgentSubgraph.invoke(modifiedState, config)
 
@@ -35,7 +35,6 @@ export const createGraph = (checkpointer?: BaseCheckpointSaver) => {
   }
 
   const callQaAgent = async (state: WorkflowState, config: RunnableConfig) => {
-    const qaAgentSubgraph = createQaAgentGraph(checkpointer)
     const modifiedState = { ...state, messages: [] }
     const output = await qaAgentSubgraph.invoke(modifiedState, config)
 
@@ -43,8 +42,7 @@ export const createGraph = (checkpointer?: BaseCheckpointSaver) => {
   }
 
   const callPmAgent = async (state: WorkflowState, config: RunnableConfig) => {
-    const pmAgentSubgraph = createPmAgentGraph(checkpointer)
-    const pmAgentOutput = await pmAgentSubgraph.invoke(
+    const output = await pmAgentSubgraph.invoke(
       {
         messages: state.messages,
         analyzedRequirements: state.analyzedRequirements,
@@ -55,15 +53,15 @@ export const createGraph = (checkpointer?: BaseCheckpointSaver) => {
       config,
     )
 
-    return { ...state, ...pmAgentOutput }
+    return { ...state, ...output }
   }
 
-  graph
+  const graph = new StateGraph(workflowAnnotation)
     .addNode('validateInitialSchema', validateInitialSchemaNode)
     .addNode('leadAgent', leadAgentSubgraph)
-    .addNode('pmAgent', callPmAgent)
-    .addNode('dbAgent', callDbAgent)
-    .addNode('qaAgent', callQaAgent)
+    .addNode('pmAgent', callPmAgent, { subgraphs: [pmAgentSubgraph] })
+    .addNode('dbAgent', callDbAgent, { subgraphs: [dbAgentSubgraph] })
+    .addNode('qaAgent', callQaAgent, { subgraphs: [qaAgentSubgraph] })
 
     .addConditionalEdges(
       START,

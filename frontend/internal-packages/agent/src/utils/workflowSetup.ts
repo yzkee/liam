@@ -1,6 +1,6 @@
 import { HumanMessage } from '@langchain/core/messages'
+import type { RunnableConfig } from '@langchain/core/runnables'
 import { RunCollectorCallbackHandler } from '@langchain/core/tracers/run_collector'
-import type { CompiledStateGraph } from '@langchain/langgraph'
 import { END } from '@langchain/langgraph'
 import { errAsync, ok, okAsync, ResultAsync } from 'neverthrow'
 import { DEFAULT_RECURSION_LIMIT } from '../constants'
@@ -122,10 +122,12 @@ export const setupWorkflowState = (
  * @param setupResult - Workflow setup result containing state and configuration
  * @param recursionLimit - Maximum number of recursive calls allowed
  */
-export const executeWorkflowWithTracking = <
-  S extends CompiledStateGraph<unknown, unknown>,
->(
-  compiled: S,
+type InvokableGraph = {
+  invoke(input: WorkflowState, config?: RunnableConfig): Promise<unknown>
+}
+
+export const executeWorkflowWithTracking = (
+  compiled: InvokableGraph,
   setupResult: WorkflowSetupResult,
   recursionLimit: number = DEFAULT_RECURSION_LIMIT,
 ): AgentWorkflowResult => {

@@ -22,10 +22,8 @@ Generate SQL that:
 `
 
 const EXAMPLES = `
-Use the saveTestcase tool with this structure:
+Use the saveTestcase tool to save only the SQL:
 {
-  "category": "The category from input",
-  "title": "The test case title from input",
   "sql": "Your complete SQL statement for the test case"
 }
 `

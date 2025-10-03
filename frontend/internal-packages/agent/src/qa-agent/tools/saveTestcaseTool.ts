@@ -13,8 +13,6 @@ import { withSentryCaptureException } from '../../utils/withSentryCaptureExcepti
 import type { testcaseAnnotation } from '../testcaseGeneration/testcaseAnnotation'
 
 const saveSqlToolSchema = v.object({
-  category: v.string(),
-  title: v.string(),
   sql: v.string(),
 })
 
@@ -72,25 +70,29 @@ export const saveTestcaseTool: StructuredTool = tool(
         )
       }
 
-      const { category, title, sql } = parsed.output
+      const { sql } = parsed.output
 
       // Validate SQL syntax before saving
       await validateSqlSyntax(sql)
 
       const { toolCallId } = getConfigData(config)
 
-      // Get current state to update analyzedRequirements
+      // Get current state to retrieve category and title
       const currentState = getCurrentTaskInput()
 
       // Type guard to ensure we have the right state structure
       if (
         !currentState ||
         typeof currentState !== 'object' ||
+        !('currentTestcase' in currentState) ||
+        !currentState.currentTestcase ||
         !('analyzedRequirements' in currentState) ||
         !currentState.analyzedRequirements
       ) {
         throw new WorkflowTerminationError(
-          new Error('analyzedRequirements not found in current state'),
+          new Error(
+            'currentTestcase or analyzedRequirements not found in current state',
+          ),
           'saveTestcaseTool',
         )
       }
@@ -98,6 +100,12 @@ export const saveTestcaseTool: StructuredTool = tool(
       // Safe to assert type after validation above
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const state = currentState as typeof testcaseAnnotation.State
+
+      // Get category and title from current testcase
+      const {
+        category,
+        testcase: { title },
+      } = state.currentTestcase
 
       // Create updated analyzedRequirements with SQL
       const updatedTestcases = {
@@ -165,7 +173,7 @@ export const saveTestcaseTool: StructuredTool = tool(
   {
     name: 'saveTestcase',
     description:
-      'Save SQL for a test case. Provide the category, title (exactly as shown in the input), and the generated SQL.',
+      'Save SQL for the current test case. Only provide the generated SQL.',
     schema: toolSchema,
   },
 )

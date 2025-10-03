@@ -3,6 +3,11 @@ import type { Testcase } from '../qa-agent/types'
 import type { WorkflowState } from '../types'
 import type { AnalyzedRequirements } from '../utils/schema/analyzedRequirements'
 
+// TODO: Deprecate this transformation layer in the future.
+// Plan to use AnalyzedRequirements structure directly instead of converting to Artifact format.
+// This will eliminate redundant type conversions between AnalyzedRequirements and Artifact.
+// Related: frontend/internal-packages/artifact/src/schemas/artifact.ts
+
 /**
  * Wraps a description string in an array format with fallback
  */

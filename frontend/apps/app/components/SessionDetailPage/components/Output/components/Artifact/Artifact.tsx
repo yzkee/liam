@@ -1,6 +1,12 @@
 'use client'
 
-import { syntaxCodeTagProps, syntaxCustomStyle, syntaxTheme } from '@liam-hq/ui'
+import {
+  AlertTriangle,
+  Callout,
+  syntaxCodeTagProps,
+  syntaxCustomStyle,
+  syntaxTheme,
+} from '@liam-hq/ui'
 import type { FC, HTMLAttributes, ReactNode } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
@@ -25,11 +31,17 @@ type CodeProps = {
 
 type Props = {
   doc: string
+  error: Error | null
 }
 
-export const Artifact: FC<Props> = ({ doc }) => {
+export const Artifact: FC<Props> = ({ doc, error }) => {
   return (
     <div className={styles.container}>
+      {error && (
+        <Callout variant="warning" icon={<AlertTriangle size={20} />}>
+          {error.message}
+        </Callout>
+      )}
       <div className={styles.head}>
         <CopyButton textToCopy={doc} tooltipLabel="Copy Markdown" />
       </div>

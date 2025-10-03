@@ -68,8 +68,8 @@ VALUES ('john_doe', 'john@example.com', NOW());
 Users should be able to update their profile information including email, password, and display name.
 
 \`\`\`sql
-UPDATE users 
-SET email = 'newemail@example.com', 
+UPDATE users
+SET email = 'newemail@example.com',
     updated_at = NOW()
 WHERE user_id = 123;
 \`\`\`
@@ -95,6 +95,7 @@ export const Default: Story = {
   name: 'Default',
   args: {
     doc: sampleMarkdown,
+    error: null,
   },
 }
 
@@ -159,5 +160,14 @@ This is regular markdown text that should wrap normally without horizontal scrol
 SELECT * FROM users WHERE active = true;
 \`\`\`
 `,
+    error: null,
+  },
+}
+
+export const WithRealtimeError: Story = {
+  name: 'With Realtime Connection Error',
+  args: {
+    doc: sampleMarkdown,
+    error: new Error('Artifact realtime subscription failed'),
   },
 }

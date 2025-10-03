@@ -43,7 +43,7 @@ export function InvitationCard({
     <div className={styles.container}>
       <div className={styles.card}>
         <div className={styles.content}>
-          {organizationName && (
+          {organizationName ? (
             <>
               <div>
                 <LiamLogoMark width={40} height={40} />
@@ -61,28 +61,42 @@ export function InvitationCard({
                 Please accept the invitation below to join.
               </div>
             </>
+          ) : (
+            <>
+              <div>
+                <LiamLogoMark width={40} height={40} />
+              </div>
+              <div className={styles.description}>
+                This invitation link is invalid or has expired.
+                <br />
+                Please request a new invitation from your organization
+                administrator.
+              </div>
+            </>
           )}
         </div>
 
-        <div className={styles.actions}>
-          {organizationName && (
-            <form action={handleAccept}>
-              <input type="hidden" name="token" value={token} />
+        {(organizationName || error) && (
+          <div className={styles.actions}>
+            {organizationName && (
+              <form action={handleAccept}>
+                <input type="hidden" name="token" value={token} />
 
-              <Button
-                type="submit"
-                className={styles.button}
-                disabled={isLoading}
-                isLoading={isLoading}
-                loadingIndicatorType="content"
-              >
-                Accept Invite
-              </Button>
-            </form>
-          )}
+                <Button
+                  type="submit"
+                  className={styles.button}
+                  disabled={isLoading}
+                  isLoading={isLoading}
+                  loadingIndicatorType="content"
+                >
+                  Accept Invite
+                </Button>
+              </form>
+            )}
 
-          {error && <p className={styles.error}>{error}</p>}
-        </div>
+            {error && <p className={styles.error}>{error}</p>}
+          </div>
+        )}
       </div>
     </div>
   )

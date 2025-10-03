@@ -3,7 +3,7 @@ import * as v from 'valibot'
 const testResultSchema = v.object({
   executedAt: v.pipe(v.string(), v.isoDateTime()),
   success: v.boolean(),
-  resultSummary: v.string(),
+  message: v.string(),
 })
 
 export const testCaseSchema = v.object({

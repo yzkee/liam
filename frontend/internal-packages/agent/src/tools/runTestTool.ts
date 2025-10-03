@@ -64,14 +64,14 @@ const executeTestCase = async (
     return {
       executedAt: startTime.toISOString(),
       success: false as const,
-      resultSummary: `Test Case "${testcase.title}" failed: ${error}`,
+      message: error,
     }
   }
 
   return {
     executedAt: startTime.toISOString(),
     success: true as const,
-    resultSummary: `Test Case "${testcase.title}" operations completed successfully`,
+    message: 'Operations completed successfully',
   }
 }
 

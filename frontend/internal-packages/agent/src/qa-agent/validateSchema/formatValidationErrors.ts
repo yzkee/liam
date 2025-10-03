@@ -2,7 +2,8 @@ import type { AnalyzedRequirements } from '../../utils/schema/analyzedRequiremen
 
 type FailedTestCase = {
   title: string
-  resultSummary: string
+  sql: string
+  error: string
 }
 
 export function formatValidationErrors(
@@ -17,7 +18,8 @@ export function formatValidationErrors(
       if (latestResult && !latestResult.success) {
         failedTestCases.push({
           title: testcase.title,
-          resultSummary: latestResult.resultSummary,
+          sql: testcase.sql,
+          error: latestResult.message,
         })
       }
     }
@@ -29,7 +31,7 @@ export function formatValidationErrors(
 
   const errorDetails = failedTestCases
     .map((testCase) => {
-      return `### ❌ **Test Case:** ${testCase.title}\n${testCase.resultSummary}`
+      return `### ❌ **Test Case:** ${testCase.title}\n#### Error: \`${testCase.error}\`\n\`\`\`sql\n${testCase.sql}\n\`\`\``
     })
     .join('\n\n')
 

@@ -1,7 +1,6 @@
 import { Annotation, MessagesAnnotation } from '@langchain/langgraph'
 import type { Schema } from '@liam-hq/schema'
 import type { TestCaseData } from '../distributeRequirements'
-import type { Testcase } from '../types'
 
 type SchemaIssue = {
   testcaseId: string
@@ -13,7 +12,7 @@ export const schemaIssuesAnnotation = Annotation<Array<SchemaIssue>>({
   default: () => [],
 })
 
-export type GeneratedSql = {
+type GeneratedSql = {
   testcaseId: string
   sql: string
 }
@@ -28,9 +27,6 @@ export const testcaseAnnotation = Annotation.Root({
   currentTestcase: Annotation<TestCaseData>,
   schemaData: Annotation<Schema>,
   goal: Annotation<string>,
-  testcases: Annotation<Testcase[]>({
-    reducer: (prev, next) => prev.concat(next),
-  }),
   schemaIssues: schemaIssuesAnnotation,
   generatedSqls: generatedSqlsAnnotation,
 })

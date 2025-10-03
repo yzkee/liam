@@ -12,7 +12,6 @@ const createMockState = (
     goal,
     testcases,
   },
-  testcases: [],
   schemaData: { tables: {}, enums: {}, extensions: {} },
   messages: [],
   designSessionId: 'test-session',

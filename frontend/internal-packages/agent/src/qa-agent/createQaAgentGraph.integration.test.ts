@@ -127,7 +127,6 @@ describe('createQaAgentGraph Integration', () => {
           ],
         },
       },
-      testcases: [],
       designSessionId: context.designSessionId,
       buildingSchemaId: context.buildingSchemaId,
       schemaIssues: [],

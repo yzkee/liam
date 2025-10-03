@@ -94,7 +94,6 @@ describe('validateSchemaRequirementsNode Integration', () => {
       },
       goal: 'A task management system where users create projects and tasks',
       schemaData: mockSchema,
-      testcases: [],
       schemaIssues: [],
       generatedSqls: [],
     }
@@ -198,7 +197,6 @@ describe('validateSchemaRequirementsNode Integration', () => {
       },
       goal: 'A comprehensive project management system where users manage multiple client projects with detailed task assignment',
       schemaData: mockSchema,
-      testcases: [],
       schemaIssues: [],
       generatedSqls: [],
     }

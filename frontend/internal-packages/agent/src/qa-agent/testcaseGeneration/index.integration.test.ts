@@ -55,7 +55,6 @@ describe('testcaseGeneration Integration', () => {
       },
       goal: 'A task management system where users create projects and tasks',
       schemaData: mockSchema,
-      testcases: [],
       schemaIssues: [],
       generatedSqls: [],
     }

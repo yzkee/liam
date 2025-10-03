@@ -1,33 +1,35 @@
-import type { FailedOperation, TestcaseDmlExecutionResult } from './types'
+import type { AnalyzedRequirements } from '../../utils/schema/analyzedRequirements'
 
-function formatFailedOperation(failedOperation: FailedOperation): string {
-  let details = `#### 1. Error: \`${failedOperation.error}\`\n`
-  details += '```sql\n'
-  details += failedOperation.sql
-  details += '\n```'
-  return details
+type FailedTestCase = {
+  title: string
+  resultSummary: string
 }
 
 export function formatValidationErrors(
-  testcaseExecutionResults: TestcaseDmlExecutionResult[],
+  analyzedRequirements: AnalyzedRequirements,
 ): string {
-  const failedResults = testcaseExecutionResults.filter(
-    (result) => !result.success,
-  )
+  const failedTestCases: FailedTestCase[] = []
 
-  if (failedResults.length === 0) {
+  for (const testcases of Object.values(analyzedRequirements.testcases)) {
+    for (const testcase of testcases) {
+      // Check if the latest test result failed
+      const latestResult = testcase.testResults[testcase.testResults.length - 1]
+      if (latestResult && !latestResult.success) {
+        failedTestCases.push({
+          title: testcase.title,
+          resultSummary: latestResult.resultSummary,
+        })
+      }
+    }
+  }
+
+  if (failedTestCases.length === 0) {
     return 'Database validation complete: all checks passed successfully'
   }
 
-  const errorDetails = failedResults
-    .map((result) => {
-      let details = `### ❌ **Test Case:** ${result.testCaseTitle}`
-
-      if (result.failedOperation) {
-        details += `\n${formatFailedOperation(result.failedOperation)}`
-      }
-
-      return details
+  const errorDetails = failedTestCases
+    .map((testCase) => {
+      return `### ❌ **Test Case:** ${testCase.title}\n${testCase.resultSummary}`
     })
     .join('\n\n')
 

@@ -5,7 +5,6 @@ import {
   generatedSqlsAnnotation,
   schemaIssuesAnnotation,
 } from '../testcaseGeneration/testcaseAnnotation'
-import type { Testcase } from '../types'
 
 /**
  * QA Agent subgraph specific state annotation
@@ -25,9 +24,6 @@ export const qaAgentAnnotation = Annotation.Root({
       goal: '',
       testcases: {},
     }),
-  }),
-  testcases: Annotation<Testcase[]>({
-    reducer: (prev, next) => prev.concat(next),
   }),
   designSessionId: Annotation<string>,
   buildingSchemaId: Annotation<string>,

@@ -53,7 +53,7 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
     const result = convertRequirementsToPrompt(sampleAnalyzedRequirements)
 
     expect(result).toMatchInlineSnapshot(`
-      "Business Goal: Build a user management system
+      "Session Goal: Build a user management system
 
       Test Cases:
       - authentication: User login (SELECT), User logout (UPDATE), Password reset (UPDATE)
@@ -70,7 +70,7 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
     const result = convertRequirementsToPrompt(analyzedRequirements)
 
     expect(result).toMatchInlineSnapshot(`
-      "Business Goal: Simple system
+      "Session Goal: Simple system
 
       Test Cases:"
     `)
@@ -94,7 +94,7 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
     const result = convertRequirementsToPrompt(analyzedRequirements)
 
     expect(result).toMatchInlineSnapshot(`
-      "Business Goal:
+      "Session Goal:
 
       Test Cases:
       - basic: Basic feature test (INSERT)"

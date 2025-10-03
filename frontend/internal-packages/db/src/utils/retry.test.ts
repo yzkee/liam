@@ -107,6 +107,29 @@ describe('retry', () => {
         expect(mockFn).toHaveBeenCalledTimes(2)
       }
     })
+    it('should retry on gateway errors', async () => {
+      const mockFn = vi
+        .fn()
+        .mockResolvedValueOnce(err(new Error('gateway error')))
+        .mockResolvedValue(ok('success'))
+
+      const result = await retry(mockFn, { baseDelayMs: 10 })
+
+      expect(result.isOk()).toBe(true)
+      expect(mockFn).toHaveBeenCalledTimes(2)
+    })
+
+    it('should retry on connection lost errors', async () => {
+      const mockFn = vi
+        .fn()
+        .mockResolvedValueOnce(err(new Error('Network connection lost.')))
+        .mockResolvedValue(ok('success'))
+
+      const result = await retry(mockFn, { baseDelayMs: 10 })
+
+      expect(result.isOk()).toBe(true)
+      expect(mockFn).toHaveBeenCalledTimes(2)
+    })
   })
 
   describe('non-retryable errors', () => {

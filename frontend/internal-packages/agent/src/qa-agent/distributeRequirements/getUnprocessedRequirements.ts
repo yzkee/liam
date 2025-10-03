@@ -3,6 +3,9 @@ import { WorkflowTerminationError } from '../../utils/errorHandling'
 import type { QaAgentState } from '../shared/qaAgentAnnotation'
 import type { TestCaseData } from './types'
 
+// TODO: Remove unnecessary Result type wrapper
+// prepareTestcases returns an error, but getUnprocessedRequirements just converts it to an empty array.
+// We should simplify this by directly returning TestCaseData[] instead of Result<TestCaseData[], Error>
 /**
  * Prepare all testcases that need SQL generation
  */

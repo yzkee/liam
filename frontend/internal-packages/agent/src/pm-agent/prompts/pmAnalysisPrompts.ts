@@ -35,13 +35,13 @@ The current schema structure will be provided:
 1. **Information Gathering:** If relevant, use web_search_preview to collect up-to-date supporting information. Before any significant tool call, state in one line: purpose + minimal inputs.
 2. **Analysis:** Structure the requirements into testcases for the BRD.
 3. **Save Requirements:** Use saveRequirementsToArtifactTool to save in this exact format:
-   - goal: 1–2 sentence concise summary of the overall business goal
+   - goal: 1–2 sentence concise summary of the overall session goal
    - testcases: Object where keys are categories, values are arrays of testcases (or empty object if none). Each testcase must include title, type, sql (empty string), and testResults (empty array)
 
 ## Output Format for saveRequirementsToArtifactTool
 
 {{
-  "goal": "Brief summary of the overall business goal",
+  "goal": "Brief summary of the overall session goal",
   "testcases": {{
     "Category 1": [
       {{

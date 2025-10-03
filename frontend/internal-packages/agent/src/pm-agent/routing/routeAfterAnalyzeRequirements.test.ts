@@ -27,7 +27,13 @@ describe('routeAfterAnalyzeRequirements', () => {
           goal: 'Test business requirement',
           testcases: {
             feature1: [
-              { title: 'req1', type: 'INSERT', sql: '', testResults: [] },
+              {
+                id: '1',
+                title: 'req1',
+                type: 'INSERT',
+                sql: '',
+                testResults: [],
+              },
             ],
           },
         },
@@ -55,7 +61,13 @@ describe('routeAfterAnalyzeRequirements', () => {
           goal: 'Test business requirement',
           testcases: {
             feature1: [
-              { title: 'req1', type: 'INSERT', sql: '', testResults: [] },
+              {
+                id: '1',
+                title: 'req1',
+                type: 'INSERT',
+                sql: '',
+                testResults: [],
+              },
             ],
           },
         },

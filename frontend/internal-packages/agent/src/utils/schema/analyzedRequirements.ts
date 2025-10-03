@@ -6,7 +6,8 @@ const testResultSchema = v.object({
   resultSummary: v.string(),
 })
 
-const testCaseSchema = v.object({
+export const testCaseSchema = v.object({
+  id: v.string(),
   title: v.string(),
   type: v.picklist(['INSERT', 'UPDATE', 'DELETE', 'SELECT']),
   sql: v.string(),

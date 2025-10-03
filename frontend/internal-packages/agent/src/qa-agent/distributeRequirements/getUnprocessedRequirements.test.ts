@@ -26,12 +26,14 @@ describe('getUnprocessedRequirements', () => {
     const state = createMockState({
       user: [
         {
+          id: '1',
           title: 'User login functionality',
           type: 'SELECT',
           sql: '',
           testResults: [],
         },
         {
+          id: '2',
           title: 'User profile management',
           type: 'UPDATE',
           sql: '',
@@ -66,18 +68,21 @@ describe('getUnprocessedRequirements', () => {
     const state = createMockState({
       user: [
         {
+          id: '1',
           title: 'User login functionality',
           type: 'SELECT',
           sql: '',
           testResults: [],
         },
         {
+          id: '2',
           title: 'User profile management',
           type: 'UPDATE',
           sql: 'UPDATE users SET name = $1 WHERE id = $2',
           testResults: [],
         },
         {
+          id: '3',
           title: 'User settings',
           type: 'SELECT',
           sql: '',
@@ -112,12 +117,14 @@ describe('getUnprocessedRequirements', () => {
     const state = createMockState({
       user: [
         {
+          id: '1',
           title: 'User login functionality',
           type: 'SELECT',
           sql: 'SELECT * FROM users WHERE email = $1',
           testResults: [],
         },
         {
+          id: '2',
           title: 'User profile management',
           type: 'UPDATE',
           sql: 'UPDATE users SET name = $1',
@@ -135,6 +142,7 @@ describe('getUnprocessedRequirements', () => {
     const state = createMockState({
       user: [
         {
+          id: '1',
           title: 'User functionality',
           type: 'SELECT',
           sql: '',
@@ -143,6 +151,7 @@ describe('getUnprocessedRequirements', () => {
       ],
       admin: [
         {
+          id: '2',
           title: 'Admin functionality',
           type: 'INSERT',
           sql: '',

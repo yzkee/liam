@@ -13,27 +13,19 @@ import { SSE_EVENTS } from '../../streaming/constants'
 import { WorkflowTerminationError } from '../../utils/errorHandling'
 import { getConfigurable } from '../../utils/getConfigurable'
 import { toJsonSchema } from '../../utils/jsonSchema'
-import type { AnalyzedRequirements } from '../../utils/schema/analyzedRequirements'
+import {
+  type AnalyzedRequirements,
+  testCaseSchema,
+} from '../../utils/schema/analyzedRequirements'
 
-const testResultSchema = v.object({
-  executedAt: v.pipe(v.string(), v.isoDateTime()),
-  success: v.boolean(),
-  resultSummary: v.string(),
-})
+const testCaseInputSchema = v.omit(testCaseSchema, ['id', 'sql', 'testResults'])
 
-const testCaseSchemaWithoutId = v.object({
-  title: v.string(),
-  type: v.picklist(['INSERT', 'UPDATE', 'DELETE', 'SELECT']),
-  sql: v.string(),
-  testResults: v.array(testResultSchema),
-})
-
-const analyzedRequirementsWithoutIdSchema = v.object({
+const analyzedRequirementsInputSchema = v.object({
   goal: v.string(),
-  testcases: v.record(v.string(), v.array(testCaseSchemaWithoutId)),
+  testcases: v.record(v.string(), v.array(testCaseInputSchema)),
 })
 
-const toolSchema = toJsonSchema(analyzedRequirementsWithoutIdSchema)
+const toolSchema = toJsonSchema(analyzedRequirementsInputSchema)
 
 const configSchema = v.object({
   toolCall: v.object({
@@ -113,10 +105,23 @@ const getToolConfigurable = (
  */
 export const saveRequirementsToArtifactTool: StructuredTool = tool(
   async (input: unknown, config: RunnableConfig): Promise<Command> => {
-    const analyzedRequirements: AnalyzedRequirements = v.parse(
-      analyzedRequirementsWithoutIdSchema,
-      input,
-    )
+    // Parse input and add id, sql, testResults to each testcase
+    const inputData = v.parse(analyzedRequirementsInputSchema, input)
+    const analyzedRequirements: AnalyzedRequirements = {
+      goal: inputData.goal,
+      testcases: Object.fromEntries(
+        Object.entries(inputData.testcases).map(([category, testcases]) => [
+          category,
+          testcases.map((tc) => ({
+            id: uuidv4(),
+            title: tc.title,
+            type: tc.type,
+            sql: '',
+            testResults: [],
+          })),
+        ]),
+      ),
+    }
 
     const toolConfigurableResult = getToolConfigurable(config)
     if (toolConfigurableResult.isErr()) {

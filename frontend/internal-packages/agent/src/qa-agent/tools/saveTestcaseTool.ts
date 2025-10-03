@@ -136,10 +136,11 @@ export const saveTestcaseTool: StructuredTool = tool(
       }
 
       updatedTestcases[category][testcaseIndex] = {
+        id: currentTestcase.id,
         title: currentTestcase.title,
         type: currentTestcase.type,
-        testResults: currentTestcase.testResults,
         sql,
+        testResults: currentTestcase.testResults,
       }
 
       const updatedAnalyzedRequirements: AnalyzedRequirements = {

@@ -78,6 +78,7 @@ describe('createQaAgentGraph Integration', () => {
         testcases: {
           Authentication: [
             {
+              id: '1',
               title:
                 'Users should be able to register with valid email and password',
               type: 'INSERT',
@@ -85,12 +86,14 @@ describe('createQaAgentGraph Integration', () => {
               testResults: [],
             },
             {
+              id: '2',
               title: 'Users should be able to login with correct credentials',
               type: 'SELECT',
               sql: '',
               testResults: [],
             },
             {
+              id: '3',
               title:
                 'System should validate email format and password strength',
               type: 'SELECT',
@@ -100,18 +103,21 @@ describe('createQaAgentGraph Integration', () => {
           ],
           Authorization: [
             {
+              id: '4',
               title: 'Only admin users should be able to create new roles',
               type: 'INSERT',
               sql: '',
               testResults: [],
             },
             {
+              id: '5',
               title: 'Users should only access resources allowed by their role',
               type: 'SELECT',
               sql: '',
               testResults: [],
             },
             {
+              id: '6',
               title:
                 'System should enforce role-based permissions on all endpoints',
               type: 'SELECT',

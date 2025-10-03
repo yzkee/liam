@@ -8,18 +8,21 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
     testcases: {
       authentication: [
         {
+          id: '1',
           title: 'User login',
           type: 'SELECT',
           sql: '',
           testResults: [],
         },
         {
+          id: '2',
           title: 'User logout',
           type: 'UPDATE',
           sql: '',
           testResults: [],
         },
         {
+          id: '3',
           title: 'Password reset',
           type: 'UPDATE',
           sql: '',
@@ -28,18 +31,21 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
       ],
       userManagement: [
         {
+          id: '4',
           title: 'Create new user',
           type: 'INSERT',
           sql: '',
           testResults: [],
         },
         {
+          id: '5',
           title: 'Update user info',
           type: 'UPDATE',
           sql: '',
           testResults: [],
         },
         {
+          id: '6',
           title: 'Delete user',
           type: 'DELETE',
           sql: '',
@@ -82,6 +88,7 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
       testcases: {
         basic: [
           {
+            id: '1',
             title: 'Basic feature test',
             type: 'INSERT',
             sql: '',

@@ -46,6 +46,11 @@ type ToolConfigurable = {
  * Create an Artifact from analyzed requirements
  * @param analyzedRequirements - Validated analyzed requirements object
  * @returns Artifact object ready to be saved
+ *
+ * TODO: Remove this conversion function in the future.
+ * Plan to deprecate the Artifact type definition in artifact.ts and use
+ * AnalyzedRequirements structure directly as the Artifact.
+ * This will eliminate the need for this transformation between similar structures.
  */
 const createArtifactFromRequirements = (
   analyzedRequirements: AnalyzedRequirements,

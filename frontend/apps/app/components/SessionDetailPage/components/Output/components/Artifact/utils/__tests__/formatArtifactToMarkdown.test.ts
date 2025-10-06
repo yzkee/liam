@@ -471,6 +471,31 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
       expect(result).toContain('```sql\nSELECT * FROM users\n```')
       expect(result).not.toContain('  SELECT')
     })
+
+    it('should show placeholder message when SQL is empty', () => {
+      const artifact: Artifact = {
+        requirement: {
+          goal: 'Test',
+          testcases: {
+            'Test Feature': [
+              {
+                id: '1',
+                title: 'Test Case',
+                type: 'INSERT',
+                sql: '',
+                testResults: [],
+              },
+            ],
+          },
+        },
+      }
+
+      const result = formatArtifactToMarkdown(artifact)
+
+      expect(result).toContain(
+        '```sql\n-- SQL statement not yet generated\n```',
+      )
+    })
   })
 
   describe('edge cases', () => {

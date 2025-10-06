@@ -19,8 +19,9 @@ function formatTestCase(
   sections.push('')
 
   // SQL code block
+  const sqlContent = testCase.sql.trim()
   sections.push('```sql')
-  sections.push(testCase.sql.trim())
+  sections.push(sqlContent || '-- SQL statement not yet generated')
   sections.push('```')
 
   if (testCase.testResults.length > 0) {

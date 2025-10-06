@@ -1,8 +1,8 @@
 import type { Artifact, TestCase } from '@liam-hq/artifact'
 import {
-  EXECUTION_SECTION_TITLE,
   FAILURE_ICON,
   SUCCESS_ICON,
+  TEST_RESULTS_SECTION_TITLE,
 } from '../constants'
 
 function formatTestCase(
@@ -14,35 +14,23 @@ function formatTestCase(
 
   sections.push(`#### ${reqIndex + 1}.${index + 1}. ${testCase.title}`)
   sections.push('')
-  sections.push(testCase.description)
 
-  const operation = testCase.dmlOperation
-  sections.push('')
-
-  // Format as heading with operation type and description
-  if (operation.description) {
-    sections.push(
-      `##### **${operation.operation_type}** - ${operation.description}`,
-    )
-  } else {
-    sections.push(`##### **${operation.operation_type}**`)
-  }
+  sections.push(`##### **${testCase.type}** - ${testCase.title}`)
   sections.push('')
 
   // SQL code block
   sections.push('```sql')
-  sections.push(operation.sql.trim())
+  sections.push(testCase.sql.trim())
   sections.push('```')
 
-  // Execution logs
-  if (operation.dml_execution_logs.length > 0) {
+  if (testCase.testResults.length > 0) {
     sections.push('')
-    sections.push(`**${EXECUTION_SECTION_TITLE}:**`)
+    sections.push(`**${TEST_RESULTS_SECTION_TITLE}:**`)
     sections.push('')
 
-    operation.dml_execution_logs.forEach((log) => {
-      const statusIcon = log.success ? SUCCESS_ICON : FAILURE_ICON
-      const executedAt = new Date(log.executed_at).toLocaleString('en-US', {
+    testCase.testResults.forEach((result) => {
+      const statusIcon = result.success ? SUCCESS_ICON : FAILURE_ICON
+      const executedAt = new Date(result.executedAt).toLocaleString('en-US', {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
@@ -53,7 +41,7 @@ function formatTestCase(
       })
 
       sections.push(`${statusIcon} **${executedAt}**`)
-      sections.push(`> ${log.result_summary}`)
+      sections.push(`> ${result.message}`)
       sections.push('')
     })
   }
@@ -62,9 +50,7 @@ function formatTestCase(
 }
 
 export function formatArtifactToMarkdown(artifact: Artifact): string {
-  const { requirement_analysis } = artifact
-  const { business_requirement, requirements } = requirement_analysis
-
+  const { requirement } = artifact
   const sections: string[] = []
 
   // Header
@@ -77,38 +63,35 @@ export function formatArtifactToMarkdown(artifact: Artifact): string {
   sections.push('---')
   sections.push('')
 
-  // Business requirement
-  sections.push('## 📋 Business Requirements')
+  sections.push('## 📋 Goal')
   sections.push('')
-  sections.push(business_requirement)
+  sections.push(requirement.goal)
   sections.push('')
 
-  // Functional requirements
-  if (requirements.length > 0) {
-    sections.push('## 🔧 Functional Requirements')
+  const categories = Object.keys(requirement.testcases)
+  if (categories.length > 0) {
+    sections.push('## 🔧 Test cases')
     sections.push('')
 
-    requirements.forEach((req, reqIndex) => {
-      sections.push(`### ${reqIndex + 1}. ${req.name}`)
+    categories.forEach((category, reqIndex) => {
+      const testcases = requirement.testcases[category]
+
+      sections.push(`### ${reqIndex + 1}. ${category}`)
       sections.push('')
 
-      req.description.forEach((item) => {
-        sections.push(`- ${item}`)
-      })
+      sections.push(`- ${requirement.goal}`)
       sections.push('')
 
-      if (req.test_cases.length > 0) {
-        sections.push('')
-        sections.push('**Test Cases:**')
+      if (testcases && testcases.length > 0) {
         sections.push('')
 
-        req.test_cases.forEach((testCase, tcIndex) => {
+        testcases.forEach((testCase, tcIndex) => {
           sections.push(formatTestCase(testCase, tcIndex, reqIndex))
           sections.push('')
         })
       }
 
-      if (reqIndex < requirements.length - 1) {
+      if (reqIndex < categories.length - 1) {
         sections.push('---')
         sections.push('')
       }

@@ -15,11 +15,11 @@ import remarkGfm from 'remark-gfm'
 import { CopyButton } from '../../../CopyButton'
 import styles from './Artifact.module.css'
 import {
-  EXECUTION_SECTION_TITLE,
   FAILURE_ICON,
   FAILURE_STATUS,
   SUCCESS_ICON,
   SUCCESS_STATUS,
+  TEST_RESULTS_SECTION_TITLE,
 } from './constants'
 import { TableOfContents } from './TableOfContents/TableOfContents'
 import { generateHeadingId } from './utils'
@@ -75,7 +75,7 @@ export const Artifact: FC<Props> = ({ doc, error }) => {
                   const text = extractText(children)
 
                   // Check if this paragraph contains execution section title
-                  if (text.includes(`${EXECUTION_SECTION_TITLE}:`)) {
+                  if (text.includes(`${TEST_RESULTS_SECTION_TITLE}:`)) {
                     return (
                       <p className={styles.executionLogsHeading} {...rest}>
                         {children}

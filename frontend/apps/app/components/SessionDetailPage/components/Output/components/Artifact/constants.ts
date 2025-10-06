@@ -1,4 +1,4 @@
-export const EXECUTION_SECTION_TITLE = 'Execution History'
+export const TEST_RESULTS_SECTION_TITLE = 'Test Results'
 export const SUCCESS_ICON = '✅'
 export const FAILURE_ICON = '❌'
 export const SUCCESS_STATUS = 'Success'

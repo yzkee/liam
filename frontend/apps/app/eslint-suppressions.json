@@ -9,11 +9,6 @@
       "count": 2
     }
   },
-  "components/BranchDetailPage/BranchDetailPage.module.css": {
-    "css-modules-kit/no-unused-class-names": {
-      "count": 7
-    }
-  },
   "components/CommonLayout/AppBar/BranchDropdownMenu/BranchDropdownMenu.module.css": {
     "css-modules-kit/no-unused-class-names": {
       "count": 8

@@ -178,8 +178,7 @@ export const useStream = ({
   const runStreamAttempt = useCallback(
     async (
       endpoint: string,
-      payload: unknown,
-      sessionId: string,
+      params: StartParams | ReplayParams,
     ): Promise<Result<StreamAttemptStatus, StreamError>> => {
       abortRef.current?.abort()
 
@@ -192,12 +191,12 @@ export const useStream = ({
         const res = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(params),
           signal: controller.signal,
         })
 
         if (!res.body) {
-          finalizeStream(sessionId)
+          finalizeStream(params.designSessionId)
           return err({
             type: 'network',
             message: ERROR_MESSAGES.FETCH_FAILED,
@@ -209,7 +208,7 @@ export const useStream = ({
 
         if (!endEventReceived) {
           if (controller.signal.aborted) {
-            finalizeStream(sessionId)
+            finalizeStream(params.designSessionId)
             return err({
               type: 'abort',
               message: 'Request was aborted',
@@ -221,10 +220,10 @@ export const useStream = ({
           return ok('shouldRetry')
         }
 
-        finalizeStream(sessionId)
+        finalizeStream(params.designSessionId)
         return ok('complete')
       } catch (unknownError) {
-        finalizeStream(sessionId)
+        finalizeStream(params.designSessionId)
 
         if (
           unknownError instanceof Error &&
@@ -250,11 +249,7 @@ export const useStream = ({
       for (let attempt = 1; attempt <= MAX_RETRIES; attempt += 1) {
         retryCountRef.current = attempt
 
-        const result = await runStreamAttempt(
-          '/api/chat/replay',
-          params,
-          params.designSessionId,
-        )
+        const result = await runStreamAttempt('/api/chat/replay', params)
 
         if (result.isErr()) {
           return err(result.error)
@@ -299,11 +294,7 @@ export const useStream = ({
       // Set workflow in progress flag
       setWorkflowInProgress(params.designSessionId)
 
-      const result = await runStreamAttempt(
-        '/api/chat/stream',
-        params,
-        params.designSessionId,
-      )
+      const result = await runStreamAttempt('/api/chat/stream', params)
 
       if (result.isErr()) {
         if (tempId) {

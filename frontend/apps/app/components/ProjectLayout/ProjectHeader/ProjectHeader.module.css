@@ -29,13 +29,7 @@
 }
 
 .tabsTrigger:disabled,
-.tabsTrigger:disabled:hover,
-.tabsTrigger:disabled::before,
-.tabsTrigger:disabled::after,
-.tabsTrigger[aria-disabled='true'],
-.tabsTrigger[aria-disabled='true']:hover,
-.tabsTrigger[aria-disabled='true']::before,
-.tabsTrigger[aria-disabled='true']::after {
+.tabsTrigger[aria-disabled='true'] {
   color: var(--button-disabled-foreground);
   background-color: transparent;
 }

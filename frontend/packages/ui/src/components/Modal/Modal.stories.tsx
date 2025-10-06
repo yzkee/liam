@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { Button } from '../Button'
 import {
   ModalActions,
   ModalClose,
@@ -16,9 +15,7 @@ import {
 const ModalExample = () => {
   return (
     <ModalRoot>
-      <ModalTrigger asChild>
-        <Button>Open Modal</Button>
-      </ModalTrigger>
+      <ModalTrigger>Open Modal</ModalTrigger>
       <ModalPortal>
         <ModalOverlay />
         <ModalContent>
@@ -28,12 +25,8 @@ const ModalExample = () => {
             here.
           </ModalDescription>
           <ModalActions>
-            <ModalClose>
-              <Button variant="outline-secondary">Cancel</Button>
-            </ModalClose>
-            <ModalConfirm>
-              <Button variant="solid-primary">Confirm</Button>
-            </ModalConfirm>
+            <ModalClose>Cancel</ModalClose>
+            <ModalConfirm>Confirm</ModalConfirm>
           </ModalActions>
         </ModalContent>
       </ModalPortal>

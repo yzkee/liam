@@ -59,14 +59,6 @@ export const Warning: Story = {
   },
 }
 
-export const Mobile: Story = {
-  args: {
-    variant: 'info',
-    device: 'mobile',
-    children: 'This callout is optimized for mobile devices.',
-  },
-}
-
 export const LongContent: Story = {
   args: {
     variant: 'info',

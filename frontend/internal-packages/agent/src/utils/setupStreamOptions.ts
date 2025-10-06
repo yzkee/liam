@@ -52,8 +52,6 @@ export const setupStreamOptions = ({
     repositories,
     thread_id,
     buildingSchemaId,
-    // TODO: Remove this field because it's not used
-    latestVersionNumber: 0,
     ...(checkpointId ? { checkpoint_id: checkpointId } : {}),
   }
 

@@ -68,7 +68,12 @@ export const AiMessage: FC<Props> = ({
       </div>
       <div className={styles.contentContainer}>
         <div className={styles.messagesWrapper}>
-          {reasoningText && <ReasoningMessage content={reasoningText} />}
+          {reasoningText && (
+            <ReasoningMessage
+              content={reasoningText}
+              isWorkflowRunning={isWorkflowRunning}
+            />
+          )}
           {messageContentString !== '' && (
             <div className={styles.responseMessageWrapper}>
               <div className={styles.markdownWrapper}>

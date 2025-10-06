@@ -110,16 +110,13 @@ export const ProjectHeader: FC<ProjectHeaderProps> = async ({
             </TabsTrigger>
           )
 
-          if (isDisabled) {
-            return (
-              <div key={tab.value} aria-disabled="true">
-                {tabTrigger}
-              </div>
-            )
-          }
-
           return (
-            <Link href={href} key={tab.value}>
+            <Link
+              href={href}
+              key={tab.value}
+              aria-disabled={isDisabled}
+              tabIndex={isDisabled ? -1 : undefined}
+            >
               {tabTrigger}
             </Link>
           )

@@ -58,3 +58,7 @@
   height: 1px;
   background-color: var(--primary-accent);
 }
+
+.tabsList a[aria-disabled='true'] {
+  pointer-events: none;
+}

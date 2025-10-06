@@ -2,6 +2,7 @@ import { ChevronDown, ChevronRight } from '@liam-hq/ui'
 import type { FC } from 'react'
 import { useEffect, useState } from 'react'
 import { MarkdownContent } from '../../../../../../../MarkdownContent'
+import { WorkflowRunningIndicator } from '../../../WorkflowRunningIndicator'
 import styles from './ReasoningMessage.module.css'
 
 type Props = {
@@ -52,11 +53,7 @@ export const ReasoningMessage: FC<Props> = ({
           {isContentStreaming ? (
             <>
               <span className={styles.workedForText}>Reasoning</span>
-              <span className={styles.dots}>
-                <span className={styles.dot} />
-                <span className={styles.dot} />
-                <span className={styles.dot} />
-              </span>
+              <WorkflowRunningIndicator size={4} />
             </>
           ) : (
             <span className={styles.workedForText}>Reasoning finished</span>

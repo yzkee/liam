@@ -50,20 +50,6 @@ export async function saveSchemaFilePath(
 
   const supabase = await createClient()
 
-  const { data: project } = await supabase
-    .from('projects')
-    .select('organization_id')
-    .eq('id', projectId)
-    .single()
-
-  if (!project || project.organization_id !== organizationId) {
-    return {
-      success: false,
-      error: 'Unauthorized',
-      message: null,
-    }
-  }
-
   const { data: existing } = await supabase
     .from('schema_file_paths')
     .select('id')
@@ -84,7 +70,10 @@ export async function saveSchemaFilePath(
       console.error('Error updating schema file path:', error)
       return {
         success: false,
-        error: 'Failed to update schema file path',
+        error:
+          error.code === 'PGRST301'
+            ? 'Unauthorized: You do not have permission to update this project'
+            : 'Failed to update schema file path',
         message: null,
       }
     }
@@ -109,7 +98,10 @@ export async function saveSchemaFilePath(
     console.error('Error creating schema file path:', error)
     return {
       success: false,
-      error: 'Failed to save schema file path',
+      error:
+        error.code === 'PGRST301'
+          ? 'Unauthorized: You do not have permission to access this project'
+          : 'Failed to save schema file path',
       message: null,
     }
   }

@@ -10,7 +10,7 @@ import {
   SelectValue,
   useToast,
 } from '@liam-hq/ui'
-import { useActionState, useEffect, useId } from 'react'
+import { useActionState, useEffect, useId, useState } from 'react'
 import { saveSchemaFilePath } from '../../actions/saveSchemaFilePath'
 import styles from './SchemaFilePathForm.module.css'
 
@@ -33,6 +33,9 @@ export const SchemaFilePathForm = ({
 }: Props) => {
   const formId = useId()
   const toast = useToast()
+  const [formatValue, setFormatValue] = useState<string>(
+    existingFormat || 'postgres',
+  )
 
   const [state, action] = useActionState(saveSchemaFilePath, {
     success: false,
@@ -78,7 +81,7 @@ export const SchemaFilePathForm = ({
             <label htmlFor={`${formId}-format`} className={styles.label}>
               Format
             </label>
-            <Select name="format" defaultValue={existingFormat || 'postgres'}>
+            <Select value={formatValue} onValueChange={setFormatValue}>
               <SelectTrigger id={`${formId}-format`} className={styles.select}>
                 <SelectValue placeholder="Select format" />
               </SelectTrigger>
@@ -99,6 +102,7 @@ export const SchemaFilePathForm = ({
       <div className={styles.cardFooter}>
         <form id={formId} action={action}>
           <input type="hidden" name="projectId" value={projectId} />
+          <input type="hidden" name="format" value={formatValue} />
           <Button variant="solid-primary" type="submit">
             Save
           </Button>

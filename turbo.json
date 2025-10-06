@@ -4,7 +4,11 @@
   "tasks": {
     "@liam-hq/storybook#build": {
       "dependsOn": ["^build", "@liam-hq/schema#build"],
-      "outputs": ["storybook-static"]
+      "outputs": ["storybook-static"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/frontend/**/*.stories.{js,jsx,ts,tsx,mdx}"
+      ]
     },
     "build": {
       "dependsOn": ["^build", "gen"],

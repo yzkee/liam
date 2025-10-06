@@ -1,56 +1,42 @@
 import * as v from 'valibot'
 
-// TODO: Deprecate this Artifact type definition in the future.
-// Plan to use AnalyzedRequirements structure from the agent package directly
-// instead of maintaining this separate but similar structure.
-// This will eliminate redundant type conversions between Artifact and AnalyzedRequirements.
-
-// DML execution log schema
-export const dmlExecutionLogSchema = v.object({
-  executed_at: v.pipe(v.string(), v.isoDateTime()),
+// Test result schema
+const testResultSchema = v.object({
+  executedAt: v.pipe(v.string(), v.isoDateTime()),
   success: v.boolean(),
-  result_summary: v.string(),
-})
-
-// DML operation schema
-export const dmlOperationSchema = v.object({
-  operation_type: v.picklist(['INSERT', 'UPDATE', 'DELETE', 'SELECT']),
-  sql: v.string(),
-  description: v.string(),
-  dml_execution_logs: v.array(dmlExecutionLogSchema),
+  message: v.string(),
 })
 
 // Test case schema
 export const testCaseSchema = v.object({
+  id: v.string(),
   title: v.string(),
-  description: v.string(),
-  dmlOperation: dmlOperationSchema,
+  type: v.picklist(['INSERT', 'UPDATE', 'DELETE', 'SELECT']),
+  sql: v.string(),
+  testResults: v.array(testResultSchema),
 })
 
-// Functional requirement schema
-export const requirementSchema = v.object({
-  name: v.string(),
-  description: v.array(v.string()),
-  test_cases: v.array(testCaseSchema),
-})
-
-// Requirement analysis schema
-export const requirementAnalysisSchema = v.object({
-  business_requirement: v.string(),
-  requirements: v.array(requirementSchema),
-})
-
-// Main artifact schema
-export const artifactSchema = v.object({
-  requirement_analysis: requirementAnalysisSchema,
-})
-
-// Export TypeScript types
-export type DmlExecutionLog = v.InferOutput<typeof dmlExecutionLogSchema>
-export type DmlOperation = v.InferOutput<typeof dmlOperationSchema>
 export type TestCase = v.InferOutput<typeof testCaseSchema>
-export type Requirement = v.InferOutput<typeof requirementSchema>
-export type RequirementAnalysis = v.InferOutput<
-  typeof requirementAnalysisSchema
+
+/**
+ * Valibot schema for AnalyzedRequirements structure
+ * Used across PM Agent, QA Agent, and workflow systems
+ */
+export const analyzedRequirementsSchema = v.object({
+  goal: v.string(),
+  testcases: v.record(v.string(), v.array(testCaseSchema)),
+})
+
+export type AnalyzedRequirements = v.InferOutput<
+  typeof analyzedRequirementsSchema
 >
+
+/**
+ * Artifact schema - wraps AnalyzedRequirements in a structured format
+ * This is the format stored in the database
+ */
+export const artifactSchema = v.object({
+  requirement: analyzedRequirementsSchema,
+})
+
 export type Artifact = v.InferOutput<typeof artifactSchema>

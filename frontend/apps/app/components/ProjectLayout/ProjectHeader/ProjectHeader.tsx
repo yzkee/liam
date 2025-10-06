@@ -104,6 +104,7 @@ export const ProjectHeader: FC<ProjectHeaderProps> = async ({
               value={tab.value}
               className={styles.tabsTrigger}
               disabled={isDisabled}
+              aria-disabled={isDisabled}
             >
               <Icon size={16} />
               {tab.label}
@@ -111,7 +112,11 @@ export const ProjectHeader: FC<ProjectHeaderProps> = async ({
           )
 
           if (isDisabled) {
-            return <div key={tab.value}>{tabTrigger}</div>
+            return (
+              <div key={tab.value} aria-disabled="true">
+                {tabTrigger}
+              </div>
+            )
           }
 
           return (

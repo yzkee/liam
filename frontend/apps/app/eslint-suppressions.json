@@ -74,11 +74,6 @@
       "count": 2
     }
   },
-  "components/ProjectLayout/ProjectHeader/ProjectHeader.module.css": {
-    "css-modules-kit/no-unused-class-names": {
-      "count": 3
-    }
-  },
   "components/ProjectNewPage/components/InstallationSelector/InstallationSelector.module.css": {
     "css-modules-kit/no-unused-class-names": {
       "count": 1

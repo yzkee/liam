@@ -28,11 +28,7 @@
   gap: var(--spacing-1half);
 }
 
-.tabsTrigger:disabled {
-  color: var(--button-disabled-foreground);
-  background-color: transparent;
-}
-
+.tabsTrigger:disabled,
 .tabsTrigger:disabled:hover,
 .tabsTrigger:disabled::before,
 .tabsTrigger:disabled::after,
@@ -40,6 +36,7 @@
 .tabsTrigger[aria-disabled='true']:hover,
 .tabsTrigger[aria-disabled='true']::before,
 .tabsTrigger[aria-disabled='true']::after {
+  color: var(--button-disabled-foreground);
   background-color: transparent;
 }
 

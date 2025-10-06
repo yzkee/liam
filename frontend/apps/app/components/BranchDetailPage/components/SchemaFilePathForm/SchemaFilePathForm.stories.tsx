@@ -34,42 +34,10 @@ export const Empty: Story = {
   },
 }
 
-export const WithExistingPostgresPath: Story = {
-  args: {
-    projectId: 'project-123',
-    existingPath: 'schema.sql',
-    existingFormat: 'postgres',
-  },
-}
-
-export const WithExistingRailsPath: Story = {
+export const ExistingFilePath: Story = {
   args: {
     projectId: 'project-123',
     existingPath: 'db/schema.rb',
     existingFormat: 'schemarb',
-  },
-}
-
-export const WithExistingPrismaPath: Story = {
-  args: {
-    projectId: 'project-123',
-    existingPath: 'prisma/schema.prisma',
-    existingFormat: 'prisma',
-  },
-}
-
-export const WithExistingTblsPath: Story = {
-  args: {
-    projectId: 'project-123',
-    existingPath: 'tbls.yml',
-    existingFormat: 'tbls',
-  },
-}
-
-export const WithLongPath: Story = {
-  args: {
-    projectId: 'project-123',
-    existingPath: 'database/migrations/very/long/path/to/schema/file.sql',
-    existingFormat: 'postgres',
   },
 }

@@ -70,7 +70,6 @@ export const ProjectHeader: FC<ProjectHeaderProps> = async ({
           const isDisabled = isSchemaTab && !project.schemaPath
           let href: string
 
-          // For all tabs, use the ref/[branchOrCommit] routes (important-comment)
           switch (tab.value) {
             case 'project':
               href = urlgen('projects/[projectId]/ref/[branchOrCommit]', {

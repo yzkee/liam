@@ -95,7 +95,6 @@ export const setupWorkflowState = (
           goal: '',
           testcases: {},
         },
-        testcases: [],
         schemaIssues: [],
         organizationId,
         buildingSchemaId,

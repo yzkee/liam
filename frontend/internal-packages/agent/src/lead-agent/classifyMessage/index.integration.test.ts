@@ -28,7 +28,6 @@ const createTestStateAndConfig = async (
       goal: '',
       testcases: {},
     },
-    testcases: [],
     schemaIssues: [],
     buildingSchemaId: context.buildingSchemaId,
     designSessionId: context.designSessionId,

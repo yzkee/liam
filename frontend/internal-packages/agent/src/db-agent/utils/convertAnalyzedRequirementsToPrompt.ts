@@ -1,4 +1,4 @@
-import type { AnalyzedRequirements } from '../../utils/schema/analyzedRequirements'
+import type { AnalyzedRequirements } from '@liam-hq/artifact'
 
 type TestCases = AnalyzedRequirements['testcases']
 

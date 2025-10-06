@@ -43,7 +43,6 @@ describe('summarizeWorkflow Integration', () => {
         goal: '',
         testcases: {},
       },
-      testcases: [],
       schemaIssues: [],
       buildingSchemaId: context.buildingSchemaId,
       designSessionId: context.designSessionId,

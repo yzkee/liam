@@ -24,7 +24,6 @@ describe('createGraph Integration', () => {
         goal: '',
         testcases: {},
       },
-      testcases: [],
       schemaData: aSchema({ tables: {} }),
       schemaIssues: [],
       designSessionId: context.designSessionId,

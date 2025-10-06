@@ -21,7 +21,6 @@ export function continueToRequirements(state: QaAgentState) {
         schemaData: state.schemaData,
         goal: state.analyzedRequirements.goal,
         messages: [], // Start with empty messages for isolation
-        testcases: [], // Will be populated by the subgraph
       }),
   )
 }

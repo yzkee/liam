@@ -80,12 +80,7 @@ export function formatArtifactToMarkdown(artifact: Artifact): string {
       sections.push(`### ${reqIndex + 1}. ${category}`)
       sections.push('')
 
-      sections.push(`- ${requirement.goal}`)
-      sections.push('')
-
       if (testcases && testcases.length > 0) {
-        sections.push('')
-
         testcases.forEach((testCase, tcIndex) => {
           sections.push(formatTestCase(testCase, tcIndex, reqIndex))
           sections.push('')

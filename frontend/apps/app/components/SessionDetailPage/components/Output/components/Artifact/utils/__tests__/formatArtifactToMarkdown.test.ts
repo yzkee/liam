@@ -136,9 +136,6 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
 
         ### 1. Aircraft Management
 
-        - Define database requirements for consistently managing airline-owned aircraft, operated flights, and pilots (captains and first officers) involved in operations, while maintaining scheduled and actual times for flights. This enables consistent tracking of aircraft used and personnel assigned for each flight.
-
-
         #### 1.1. Aircraft Registration and Update
 
         ##### **INSERT** - Aircraft Registration and Update
@@ -181,9 +178,6 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
 
         ### 2. Flight Information Management
 
-        - Define database requirements for consistently managing airline-owned aircraft, operated flights, and pilots (captains and first officers) involved in operations, while maintaining scheduled and actual times for flights. This enables consistent tracking of aircraft used and personnel assigned for each flight.
-
-
         #### 2.1. Flight Schedule Creation
 
         ##### **INSERT** - Flight Schedule Creation
@@ -218,9 +212,6 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
 
         ### 3. Pilot Management
 
-        - Define database requirements for consistently managing airline-owned aircraft, operated flights, and pilots (captains and first officers) involved in operations, while maintaining scheduled and actual times for flights. This enables consistent tracking of aircraft used and personnel assigned for each flight.
-
-
         #### 3.1. Pilot (Captain/First Officer) Registration
 
         ##### **INSERT** - Pilot (Captain/First Officer) Registration
@@ -243,9 +234,6 @@ WHERE id = 'fc70279f-04d3-41ea-97e9-3a1bb7ee358f';`,
         ---
 
         ### 4. Data Integrity and Validation
-
-        - Define database requirements for consistently managing airline-owned aircraft, operated flights, and pilots (captains and first officers) involved in operations, while maintaining scheduled and actual times for flights. This enables consistent tracking of aircraft used and personnel assigned for each flight.
-
 
         #### 4.1. Referential Integrity Verification
 

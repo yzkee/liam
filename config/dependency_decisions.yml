@@ -108,12 +108,6 @@
     :versions: []
     :when: 2025-03-04 07:55:29.625648000 Z
 - - :approve
-  - "@electric-sql/client"
-  - :who: OSPO @masutaka
-    :why: The license is Apache-2.0.
-    :versions: []
-    :when: 2025-03-11 06:08:23.596952000 Z
-- - :approve
   - "@vercel/gatsby-plugin-vercel-builder"
   - :who: Liam @MH4GF
     :why: The license is Apache-2.0.

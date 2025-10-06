@@ -42,7 +42,6 @@
   font-style: italic;
 }
 
-/* ストリーミング中の3点アニメーション */
 .dots {
   display: inline-flex;
   align-items: center;
@@ -78,7 +77,6 @@
   }
 }
 
-/* コンテンツ部分 */
 .content {
   display: flex;
   flex-direction: column;

@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from '@storybook/nextjs'
 import { ReasoningMessage } from './ReasoningMessage'
 
 const meta = {
-  title: 'SessionDetail/Chat/Messages/AiMessage/ReasoningMessage',
   component: ReasoningMessage,
   parameters: {
     layout: 'padded',

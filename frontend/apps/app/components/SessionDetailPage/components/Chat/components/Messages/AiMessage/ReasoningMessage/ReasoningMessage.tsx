@@ -17,6 +17,7 @@ export const ReasoningMessage: FC<Props> = ({
   const [isContentStreaming, setIsContentStreaming] =
     useState(isWorkflowRunning)
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: content changes need to be tracked for streaming detection
   useEffect(() => {
     if (!isWorkflowRunning) {
       setIsContentStreaming(false)
@@ -30,7 +31,7 @@ export const ReasoningMessage: FC<Props> = ({
     }, 500)
 
     return () => clearTimeout(timer)
-  }, [isWorkflowRunning])
+  }, [content, isWorkflowRunning])
 
   const handleToggle = () => {
     setIsExpanded(!isExpanded)

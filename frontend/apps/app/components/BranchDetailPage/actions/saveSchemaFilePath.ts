@@ -50,6 +50,20 @@ export async function saveSchemaFilePath(
 
   const supabase = await createClient()
 
+  const { data: project } = await supabase
+    .from('projects')
+    .select('organization_id')
+    .eq('id', projectId)
+    .single()
+
+  if (!project || project.organization_id !== organizationId) {
+    return {
+      success: false,
+      error: 'Unauthorized',
+      message: null,
+    }
+  }
+
   const { data: existing } = await supabase
     .from('schema_file_paths')
     .select('id')

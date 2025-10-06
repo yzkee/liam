@@ -35,7 +35,7 @@ export const determineWorkflowAction = (
     if (firstMessage && isHumanMessage(firstMessage)) {
       return {
         type: 'start',
-        userInput: String(firstMessage.content),
+        userInput: firstMessage.text,
       }
     }
   }

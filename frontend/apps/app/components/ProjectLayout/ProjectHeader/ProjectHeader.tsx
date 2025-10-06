@@ -66,9 +66,10 @@ export const ProjectHeader: FC<ProjectHeaderProps> = async ({
       <TabsList className={styles.tabsList}>
         {PROJECT_TABS.map((tab) => {
           const Icon = tab.icon
+          const isSchemaTab = tab.value === 'schema'
+          const isDisabled = isSchemaTab && !project.schemaPath
           let href: string
 
-          // For all tabs, use the ref/[branchOrCommit] routes
           switch (tab.value) {
             case 'project':
               href = urlgen('projects/[projectId]/ref/[branchOrCommit]', {
@@ -97,12 +98,26 @@ export const ProjectHeader: FC<ProjectHeaderProps> = async ({
               break
           }
 
+          const tabTrigger = (
+            <TabsTrigger
+              value={tab.value}
+              className={styles.tabsTrigger}
+              disabled={isDisabled}
+              aria-disabled={isDisabled}
+            >
+              <Icon size={16} />
+              {tab.label}
+            </TabsTrigger>
+          )
+
           return (
-            <Link href={href} key={tab.value}>
-              <TabsTrigger value={tab.value} className={styles.tabsTrigger}>
-                <Icon size={16} />
-                {tab.label}
-              </TabsTrigger>
+            <Link
+              href={href}
+              key={tab.value}
+              aria-disabled={isDisabled}
+              tabIndex={isDisabled ? -1 : undefined}
+            >
+              {tabTrigger}
             </Link>
           )
         })}

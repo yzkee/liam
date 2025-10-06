@@ -28,6 +28,12 @@
   gap: var(--spacing-1half);
 }
 
+.tabsTrigger:disabled,
+.tabsTrigger[aria-disabled='true'] {
+  color: var(--button-disabled-foreground);
+  background-color: transparent;
+}
+
 .tabsTrigger:hover {
   color: var(--global-foreground);
   background-color: var(--global-muted-background);
@@ -47,17 +53,6 @@
   background-color: var(--primary-accent);
 }
 
-.knowledgeSuggestionButton {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-1half);
-  margin-left: auto;
-}
-
-.knowledgeSuggestionButton:hover {
-  background-color: var(--global-muted-background);
-}
-
-.knowledgeSuggestionBadge {
-  margin-left: var(--spacing-1);
+.tabsList a[aria-disabled='true'] {
+  pointer-events: none;
 }

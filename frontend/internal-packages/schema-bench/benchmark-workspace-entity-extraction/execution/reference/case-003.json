@@ -110,5 +110,6 @@
       "constraints": {}
     }
   },
-  "enums": {}
+  "enums": {},
+  "extensions": {}
 }

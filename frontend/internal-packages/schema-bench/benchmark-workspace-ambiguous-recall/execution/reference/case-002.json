@@ -76,5 +76,6 @@
       "constraints": {}
     }
   },
-  "enums": {}
+  "enums": {},
+  "extensions": {}
 }

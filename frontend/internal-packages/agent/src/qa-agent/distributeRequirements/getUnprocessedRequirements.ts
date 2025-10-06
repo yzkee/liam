@@ -1,17 +1,10 @@
-import { err, ok, type Result } from 'neverthrow'
-import { WorkflowTerminationError } from '../../utils/errorHandling'
 import type { QaAgentState } from '../shared/qaAgentAnnotation'
 import type { TestCaseData } from './types'
 
-// TODO: Remove unnecessary Result type wrapper
-// prepareTestcases returns an error, but getUnprocessedRequirements just converts it to an empty array.
-// We should simplify this by directly returning TestCaseData[] instead of Result<TestCaseData[], Error>
 /**
  * Prepare all testcases that need SQL generation
  */
-function prepareTestcases(
-  state: QaAgentState,
-): Result<TestCaseData[], WorkflowTerminationError> {
+function prepareTestcases(state: QaAgentState): TestCaseData[] {
   const { analyzedRequirements } = state
   const allTestcases: TestCaseData[] = []
 
@@ -30,17 +23,7 @@ function prepareTestcases(
     }
   }
 
-  // If no testcases found, return error
-  if (allTestcases.length === 0) {
-    return err(
-      new WorkflowTerminationError(
-        new Error('No testcases to process after distribution.'),
-        'continueToRequirements',
-      ),
-    )
-  }
-
-  return ok(allTestcases)
+  return allTestcases
 }
 
 /**
@@ -49,12 +32,5 @@ function prepareTestcases(
 export function getUnprocessedRequirements(
   state: QaAgentState,
 ): TestCaseData[] {
-  const testcasesResult = prepareTestcases(state)
-
-  if (testcasesResult.isErr()) {
-    // If prepareTestcases fails (no testcases), return empty array
-    return []
-  }
-
-  return testcasesResult.value
+  return prepareTestcases(state)
 }

@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { createClient } from '../../libs/db/server'
 import { urlgen } from '../../libs/routes'
 import styles from './BranchDetailPage.module.css'
+import { SchemaFilePathForm } from './components/SchemaFilePathForm'
 
 type Props = {
   projectId: string
@@ -33,7 +34,7 @@ async function getBranchDetails(projectId: string) {
 
   const { data: schemaPath, error: schemaPathError } = await supabase
     .from('schema_file_paths')
-    .select('path')
+    .select('path, format')
     .eq('project_id', projectId)
     .single()
 
@@ -43,7 +44,9 @@ async function getBranchDetails(projectId: string) {
     )
   }
 
-  const transformedSchemaPath = schemaPath ? { path: schemaPath.path } : null
+  const transformedSchemaPath = schemaPath
+    ? { path: schemaPath.path, format: schemaPath.format }
+    : null
 
   return {
     ...project,
@@ -73,11 +76,16 @@ export const BranchDetailPage = async ({
 
       <div className={styles.content}>
         <div className={styles.infoCard}>
-          <h2 className={styles.sectionTitle}>Project Resources</h2>
+          <h2 className={styles.sectionTitle}>Schema Configuration</h2>
           <div className={styles.resourceGrid}>
-            <div className={styles.resourceSection}>
-              <h3 className={styles.resourceTitle}>ERD Diagrams</h3>
-              {project.schemaPath && (
+            <SchemaFilePathForm
+              projectId={projectId}
+              existingPath={project.schemaPath?.path}
+              existingFormat={project.schemaPath?.format}
+            />
+            {project.schemaPath && (
+              <div className={styles.resourceSection}>
+                <h3 className={styles.resourceTitle}>ERD Diagrams</h3>
                 <Link
                   href={urlgen(
                     'projects/[projectId]/ref/[branchOrCommit]/schema/[...schemaFilePath]',
@@ -92,13 +100,8 @@ export const BranchDetailPage = async ({
                   View ERD for {project.schemaPath.path}
                   <span className={styles.linkArrow}>→</span>
                 </Link>
-              )}
-              {!project.schemaPath && (
-                <div className={styles.noPatterns}>
-                  No schema file path configured for this project
-                </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -110,14 +110,7 @@ export const useStream = ({
 
   useNavigationGuard((_event) => {
     if (isStreaming) {
-      const shouldContinue = window.confirm(
-        "Design session is currently running. If you leave now, you'll lose your session progress. Continue anyway?",
-      )
-      if (shouldContinue) {
-        abortRef.current?.abort()
-        return true
-      }
-      return false
+      abortRef.current?.abort()
     }
     return true
   })

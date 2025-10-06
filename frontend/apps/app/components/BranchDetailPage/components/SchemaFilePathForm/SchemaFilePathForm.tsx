@@ -1,29 +1,16 @@
 'use client'
 
-import {
-  Button,
-  Input,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  useToast,
-} from '@liam-hq/ui'
+import { Button, Input, useToast } from '@liam-hq/ui'
 import { useActionState, useEffect, useId, useState } from 'react'
+import { FormatSelectDropdown } from '../../../../features/sessions/components/shared/FormatSelectDropdown/FormatSelectDropdown'
+import type { FormatType } from '../../../FormatIcon/FormatIcon'
 import { saveSchemaFilePath } from '../../actions/saveSchemaFilePath'
 import styles from './SchemaFilePathForm.module.css'
 
 type Props = {
   projectId: string
   existingPath?: string | null
-  existingFormat?:
-    | 'schemarb'
-    | 'postgres'
-    | 'prisma'
-    | 'tbls'
-    | null
-    | undefined
+  existingFormat?: FormatType | null | undefined
 }
 
 export const SchemaFilePathForm = ({
@@ -33,7 +20,7 @@ export const SchemaFilePathForm = ({
 }: Props) => {
   const formId = useId()
   const toast = useToast()
-  const [formatValue, setFormatValue] = useState<string>(
+  const [formatValue, setFormatValue] = useState<FormatType>(
     existingFormat || 'postgres',
   )
 
@@ -81,17 +68,10 @@ export const SchemaFilePathForm = ({
             <label htmlFor={`${formId}-format`} className={styles.label}>
               Format
             </label>
-            <Select value={formatValue} onValueChange={setFormatValue}>
-              <SelectTrigger id={`${formId}-format`} className={styles.select}>
-                <SelectValue placeholder="Select format" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="postgres">PostgreSQL</SelectItem>
-                <SelectItem value="schemarb">Schema.rb (Rails)</SelectItem>
-                <SelectItem value="prisma">Prisma</SelectItem>
-                <SelectItem value="tbls">tbls</SelectItem>
-              </SelectContent>
-            </Select>
+            <FormatSelectDropdown
+              selectedFormat={formatValue}
+              onFormatChange={setFormatValue}
+            />
             <p className={styles.helperText}>
               Configure the path to your schema file in the repository.
             </p>

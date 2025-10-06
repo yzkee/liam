@@ -50,13 +50,22 @@ export async function saveSchemaFilePath(
 
   const supabase = await createClient()
 
-  const { error } = await supabase.from('schema_file_paths').upsert({
-    project_id: projectId,
-    path: path.trim(),
-    format,
-    organization_id: organizationId,
-    updated_at: new Date().toISOString(),
-  })
+  // Currently, each project can only have one schema file associated with it.
+  // We use onConflict: 'project_id' to update the existing record if it exists.
+  // TODO: If multiple schema files per project are needed in the future,
+  // this logic will need to be revised to handle multiple records.
+  const { error } = await supabase.from('schema_file_paths').upsert(
+    {
+      project_id: projectId,
+      path: path.trim(),
+      format,
+      organization_id: organizationId,
+      updated_at: new Date().toISOString(),
+    },
+    {
+      onConflict: 'project_id',
+    },
+  )
 
   if (error) {
     return {

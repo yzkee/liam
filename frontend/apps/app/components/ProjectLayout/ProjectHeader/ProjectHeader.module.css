@@ -28,6 +28,21 @@
   gap: var(--spacing-1half);
 }
 
+.tabsTrigger:disabled {
+  color: var(--button-disabled-foreground);
+  background-color: transparent;
+}
+
+.tabsTrigger:disabled:hover,
+.tabsTrigger:disabled::before,
+.tabsTrigger:disabled::after,
+.tabsTrigger[aria-disabled='true'],
+.tabsTrigger[aria-disabled='true']:hover,
+.tabsTrigger[aria-disabled='true']::before,
+.tabsTrigger[aria-disabled='true']::after {
+  background-color: transparent;
+}
+
 .tabsTrigger:hover {
   color: var(--global-foreground);
   background-color: var(--global-muted-background);
@@ -45,19 +60,4 @@
   width: 100%;
   height: 1px;
   background-color: var(--primary-accent);
-}
-
-.knowledgeSuggestionButton {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-1half);
-  margin-left: auto;
-}
-
-.knowledgeSuggestionButton:hover {
-  background-color: var(--global-muted-background);
-}
-
-.knowledgeSuggestionBadge {
-  margin-left: var(--spacing-1);
 }

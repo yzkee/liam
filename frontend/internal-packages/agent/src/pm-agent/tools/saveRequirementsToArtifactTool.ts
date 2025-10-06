@@ -3,7 +3,7 @@ import { ToolMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { type StructuredTool, tool } from '@langchain/core/tools'
 import { Command } from '@langchain/langgraph'
-import type { Artifact } from '@liam-hq/artifact'
+import { type AnalyzedRequirements, testCaseSchema } from '@liam-hq/artifact'
 import { fromValibotSafeParse } from '@liam-hq/neverthrow'
 import { err, ok, type Result } from 'neverthrow'
 import { v4 as uuidv4 } from 'uuid'
@@ -13,10 +13,6 @@ import { SSE_EVENTS } from '../../streaming/constants'
 import { WorkflowTerminationError } from '../../utils/errorHandling'
 import { getConfigurable } from '../../utils/getConfigurable'
 import { toJsonSchema } from '../../utils/jsonSchema'
-import {
-  type AnalyzedRequirements,
-  testCaseSchema,
-} from '../../utils/schema/analyzedRequirements'
 
 const testCaseInputSchema = v.omit(testCaseSchema, ['id', 'sql', 'testResults'])
 
@@ -40,53 +36,6 @@ type ToolConfigurable = {
   repositories: Repositories
   designSessionId: string
   toolCallId: string
-}
-
-/**
- * Create an Artifact from analyzed requirements
- * @param analyzedRequirements - Validated analyzed requirements object
- * @returns Artifact object ready to be saved
- *
- * TODO: Remove this conversion function in the future.
- * Plan to deprecate the Artifact type definition in artifact.ts and use
- * AnalyzedRequirements structure directly as the Artifact.
- * This will eliminate the need for this transformation between similar structures.
- */
-const createArtifactFromRequirements = (
-  analyzedRequirements: AnalyzedRequirements,
-): Artifact => {
-  const requirements: Artifact['requirement_analysis']['requirements'] = []
-
-  for (const [category, testcases] of Object.entries(
-    analyzedRequirements.testcases,
-  )) {
-    const testCases: Artifact['requirement_analysis']['requirements'][number]['test_cases'] =
-      testcases.map((tc) => ({
-        title: tc.title,
-        description: `Test for ${tc.type} operation`,
-        dmlOperation: {
-          operation_type: tc.type,
-          sql: tc.sql,
-          description: tc.title,
-          dml_execution_logs: [],
-        },
-      }))
-
-    const requirement: Artifact['requirement_analysis']['requirements'][number] =
-      {
-        name: category,
-        description: [analyzedRequirements.goal],
-        test_cases: testCases,
-      }
-    requirements.push(requirement)
-  }
-
-  return {
-    requirement_analysis: {
-      business_requirement: analyzedRequirements.goal,
-      requirements,
-    },
-  }
 }
 
 const getToolConfigurable = (
@@ -139,11 +88,9 @@ export const saveRequirementsToArtifactTool: StructuredTool = tool(
     const { repositories, designSessionId, toolCallId } =
       toolConfigurableResult.value
 
-    const artifact = createArtifactFromRequirements(analyzedRequirements)
-
     const result = await repositories.schema.upsertArtifact({
       designSessionId,
-      artifact,
+      artifact: { requirement: analyzedRequirements },
     })
 
     if (result.isErr()) {

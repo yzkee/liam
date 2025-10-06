@@ -1,13 +1,13 @@
 import type { RunnableConfig } from '@langchain/core/runnables'
+import {
+  type AnalyzedRequirements,
+  analyzedRequirementsSchema,
+} from '@liam-hq/artifact'
 import { fromValibotSafeParse } from '@liam-hq/neverthrow'
 import { ok, type Result } from 'neverthrow'
 import * as v from 'valibot'
 import type { Repositories } from '../repositories'
 import { getConfigurable } from '../utils/getConfigurable'
-import {
-  type AnalyzedRequirements,
-  analyzedRequirementsSchema,
-} from '../utils/schema/analyzedRequirements'
 
 const toolConfigurableSchema = v.object({
   toolCall: v.object({

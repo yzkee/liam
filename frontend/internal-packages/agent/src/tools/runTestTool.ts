@@ -4,18 +4,14 @@ import type { RunnableConfig } from '@langchain/core/runnables'
 import type { StructuredTool } from '@langchain/core/tools'
 import { tool } from '@langchain/core/tools'
 import { Command } from '@langchain/langgraph'
+import type { AnalyzedRequirements, TestCase } from '@liam-hq/artifact'
 import { executeQuery } from '@liam-hq/pglite-server'
 import { v4 as uuidv4 } from 'uuid'
 import * as v from 'valibot'
 import { formatValidationErrors } from '../qa-agent/validateSchema/formatValidationErrors'
 import { SSE_EVENTS } from '../streaming/constants'
 import { WorkflowTerminationError } from '../utils/errorHandling'
-import type {
-  AnalyzedRequirements,
-  TestCase,
-} from '../utils/schema/analyzedRequirements'
 import { getToolConfigurable } from './getToolConfigurable'
-import { transformStateToArtifact } from './transformStateToArtifact'
 
 /**
  * Build combined SQL for DDL and testcase
@@ -160,18 +156,9 @@ export const runTestTool: StructuredTool = tool(
     )
 
     // Save artifact with updated test results
-    // TODO: Remove testcases parameter in the future.
-    // All testcase data is now contained in analyzedRequirements.testcases.
-    // Plan to update transformStateToArtifact to accept only analyzedRequirements,
-    // eliminating the need for the separate testcases array parameter.
-    const artifactState = {
-      testcases: [],
-      analyzedRequirements: updatedAnalyzedRequirements,
-    }
-    const artifact = transformStateToArtifact(artifactState)
     await repositories.schema.upsertArtifact({
       designSessionId,
-      artifact,
+      artifact: { requirement: updatedAnalyzedRequirements },
     })
 
     // Count passed and failed tests from testResults

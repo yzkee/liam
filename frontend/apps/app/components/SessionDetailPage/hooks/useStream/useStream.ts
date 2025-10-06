@@ -110,7 +110,7 @@ export const useStream = ({
 
   useNavigationGuard((_event) => {
     if (isStreaming) {
-      abortRef.current?.abort()
+      stop()
     }
     return true
   })

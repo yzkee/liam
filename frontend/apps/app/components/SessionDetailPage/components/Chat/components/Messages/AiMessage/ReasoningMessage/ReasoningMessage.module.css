@@ -47,7 +47,7 @@
   flex-direction: column;
   gap: var(--spacing-2);
   padding: var(--spacing-2) var(--spacing-3);
-  padding-left: calc(16px + var(--spacing-2) + var(--spacing-3));
+  padding-left: calc(16px + var(--spacing-2));
   width: 100%;
   max-width: 100%;
   font-family: var(--main-font);

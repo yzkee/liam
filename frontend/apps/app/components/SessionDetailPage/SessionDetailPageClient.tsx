@@ -30,6 +30,7 @@ type Props = {
   initialIsPublic: boolean
   initialWorkflowError?: string | null
   initialArtifact: Artifact | null
+  userName: string
 }
 
 // Determine the initial active tab based on available data
@@ -68,6 +69,7 @@ export const SessionDetailPageClient: FC<Props> = ({
   initialIsPublic,
   initialWorkflowError,
   initialArtifact,
+  userName,
 }) => {
   const [activeTab, setActiveTab] = useState<OutputTabValue | undefined>(
     determineInitialTab(initialArtifact, initialVersions),
@@ -117,6 +119,7 @@ export const SessionDetailPageClient: FC<Props> = ({
   const { isStreaming, messages, start, error } = useStream({
     initialMessages: chatMessages,
     designSessionId,
+    userName,
   })
 
   // Combine streaming error with workflow errors

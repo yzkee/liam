@@ -59,8 +59,13 @@ const extractStreamErrorMessage = (rawData: unknown): string => {
 type Props = {
   designSessionId: string
   initialMessages: BaseMessage[]
+  userName: string
 }
-export const useStream = ({ designSessionId, initialMessages }: Props) => {
+export const useStream = ({
+  designSessionId,
+  initialMessages,
+  userName,
+}: Props) => {
   const messageManagerRef = useRef(new MessageTupleManager())
   const storedMessage = useSessionStorageOnce(designSessionId)
   const processedInitialMessages = useMemo(() => {
@@ -266,7 +271,7 @@ export const useStream = ({ designSessionId, initialMessages }: Props) => {
         content: params.userInput,
         id: tempId,
         additional_kwargs: {
-          userName: 'Dummy',
+          userName: userName,
         },
       })
       setMessages((prev) => [...prev, optimisticMessage])
@@ -287,7 +292,7 @@ export const useStream = ({ designSessionId, initialMessages }: Props) => {
         isDeepModelingEnabled: params.isDeepModelingEnabled,
       })
     },
-    [replay, runStreamAttempt],
+    [replay, runStreamAttempt, userName],
   )
 
   return {

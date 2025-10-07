@@ -135,6 +135,7 @@ export const PublicSessionDetailPage = async ({
           isDeepModelingEnabled={false}
           initialIsPublic={true}
           initialArtifact={initialArtifact}
+          userName="Guest"
         />
       </ViewModeProvider>
     </PublicLayout>

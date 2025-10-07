@@ -7,6 +7,7 @@ import {
   useUserEditingOrThrow,
 } from '../../../../../../../../../stores'
 import { useDiffStyle } from '../../../../../../../../diff/hooks/useDiffStyle'
+import { getTableColumnElementId } from '../../../../../../../utils/url/getTableColumnElementId'
 import { BlinkCircle } from '../../BlinkCircle/BlinkCircle'
 import styles from './ColumnsItem.module.css'
 import { Comment } from './Comment'
@@ -15,9 +16,6 @@ import { getChangeStatus } from './getChangeStatus'
 import { NotNull } from './NotNull'
 import { PrimaryKey } from './PrimaryKey'
 import { Type } from './Type'
-
-const columnElementId = (tableName: string, columnName: string) =>
-  `${tableName}__columns__${columnName}`
 
 type Props = {
   tableId: string
@@ -32,7 +30,7 @@ export const ColumnsItem: FC<Props> = ({
   constraints,
   focusedElementId,
 }) => {
-  const elementId = columnElementId(tableId, column.name)
+  const elementId = getTableColumnElementId(tableId, column.name)
 
   const { operations } = useSchemaOrThrow()
   const { showDiff } = useUserEditingOrThrow()

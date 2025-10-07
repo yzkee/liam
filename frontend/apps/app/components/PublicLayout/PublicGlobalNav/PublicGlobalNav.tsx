@@ -5,6 +5,7 @@ import styles from './PublicGlobalNav.module.css'
 export const PublicGlobalNav: FC = () => {
   return (
     <BaseGlobalNav
+      enableHover={false}
       logoSection={
         <>
           <div className={styles.iconContainer}>

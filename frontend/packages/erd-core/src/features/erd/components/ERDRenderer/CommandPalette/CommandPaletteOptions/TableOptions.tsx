@@ -3,16 +3,11 @@ import { Command } from 'cmdk'
 import { type FC, useCallback, useEffect } from 'react'
 import { useSchemaOrThrow } from '../../../../../../stores'
 import { useTableSelection } from '../../../../hooks'
+import { getTableLinkHref } from '../../../../utils/url/getTableLinkHref'
 import { useCommandPaletteOrThrow } from '../CommandPaletteProvider'
 import type { CommandPaletteSuggestion } from '../types'
 import { getSuggestionText } from '../utils'
 import styles from './CommandPaletteOptions.module.css'
-
-const getTableLinkHref = (activeTableName: string) => {
-  const searchParams = new URLSearchParams(window.location.search)
-  searchParams.set('active', activeTableName)
-  return `?${searchParams.toString()}`
-}
 
 type Props = {
   suggestion: CommandPaletteSuggestion | null

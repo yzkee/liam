@@ -43,7 +43,6 @@ pnpm --filter @liam-hq/agent test
 - **frontend/internal-packages/db** - Database utilities (`@liam-hq/db`)
 - **frontend/internal-packages/mcp-server** - MCP server implementation (`@liam-hq/mcp-server`)
 
-For LangGraph development, see @docs/langgraph/README.md
 
 ### Key Technologies
 

@@ -27,6 +27,7 @@ const model = new ChatOpenAI({
   model: 'gpt-5-mini',
   reasoning: { effort: 'low', summary: 'detailed' },
   useResponsesApi: true,
+  streaming: true,
 }).bindTools([schemaDesignTool], {
   strict: true,
   tool_choice: schemaDesignTool.name,
@@ -68,10 +69,15 @@ export const invokeDesignAgent = (
     .andThen(stream)
     .andThen(response)
     .andThen((response) => {
-      const reasoningPayload = response.additional_kwargs?.['reasoning']
-      const parsed = v.safeParse(reasoningSchema, reasoningPayload)
+      const parsed = v.safeParse(
+        reasoningSchema,
+        response.additional_kwargs['reasoning'],
+      )
       const reasoning = parsed.success ? parsed.output : null
 
-      return okAsync({ response, reasoning })
+      return okAsync({
+        response,
+        reasoning,
+      })
     })
 }

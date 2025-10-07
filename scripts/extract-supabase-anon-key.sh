@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# Execute the supabase status command and capture its output
-STATUS_OUTPUT=$(pnpm --filter @liam-hq/db exec supabase status)
+# Execute the supabase status command with env output format and capture its output
+STATUS_OUTPUT=$(pnpm --filter @liam-hq/db exec supabase status -o env)
 
-# Extract the first anon key from the output
-# Using a more precise grep pattern to match only the anon key line
-ANON_KEY_LINE=$(echo "$STATUS_OUTPUT" | grep -m 1 "anon key:")
+# Extract the anon key from the output
+# Using grep to match the ANON_KEY line
+ANON_KEY_LINE=$(echo "$STATUS_OUTPUT" | grep "^ANON_KEY=")
 
-# Clean up and extract just the key
-# Remove "anon key: " prefix
-ANON_KEY=$(echo "$ANON_KEY_LINE" | sed 's/.*anon key: \(.*\)/\1/' | tr -d ' ')
+# Clean up and extract just the key value
+# Remove ANON_KEY=" prefix and trailing "
+ANON_KEY=$(echo "$ANON_KEY_LINE" | sed 's/^ANON_KEY="\(.*\)"$/\1/')
 
 if [ -z "$ANON_KEY" ]; then
   echo "Failed to extract the anon key from Supabase status output"

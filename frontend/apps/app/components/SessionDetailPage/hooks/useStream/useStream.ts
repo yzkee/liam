@@ -3,6 +3,7 @@
 import {
   type BaseMessage,
   coerceMessageLikeToMessage,
+  HumanMessage,
 } from '@langchain/core/messages'
 import { MessageTupleManager, SSE_EVENTS } from '@liam-hq/agent/client'
 import { err, ok, type Result } from 'neverthrow'
@@ -260,9 +261,20 @@ export const useStream = ({ designSessionId, initialMessages }: Props) => {
       abortRef.current?.abort()
       retryCountRef.current = 0
 
+      const tempId = `optimistic-${crypto.randomUUID()}`
+      const optimisticMessage = new HumanMessage({
+        content: params.userInput,
+        id: tempId,
+        additional_kwargs: {
+          userName: 'Dummy',
+        },
+      })
+      setMessages((prev) => [...prev, optimisticMessage])
+
       const result = await runStreamAttempt('/api/chat/stream', params)
 
       if (result.isErr()) {
+        setMessages((prev) => prev.filter((msg) => msg.id !== tempId))
         return err(result.error)
       }
 

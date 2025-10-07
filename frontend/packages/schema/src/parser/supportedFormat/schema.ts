@@ -6,6 +6,7 @@ export const supportedFormatSchema = v.picklist([
   'prisma',
   'drizzle',
   'tbls',
+  'liam',
 ])
 
 export type SupportedFormat = v.InferOutput<typeof supportedFormatSchema>

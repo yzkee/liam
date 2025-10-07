@@ -1,33 +1,37 @@
+import { err, ok, Result } from 'neverthrow'
 import * as v from 'valibot'
 import { schemaSchema } from '../../schema/index.js'
 import type { ProcessResult } from '../types.js'
 
+const parseJson = Result.fromThrowable(
+  (s: string) => JSON.parse(s),
+  (error) =>
+    error instanceof Error ? error : new Error('Failed to parse JSON'),
+)
+
+const parseSchema = (
+  data: unknown,
+): Result<v.InferOutput<typeof schemaSchema>, Error> => {
+  const result = v.safeParse(schemaSchema, data)
+  if (result.success) {
+    return ok(result.output)
+  }
+  const errorMessage = result.issues.map((issue) => issue.message).join(', ')
+  return err(new Error(`Invalid Liam Schema format: ${errorMessage}`))
+}
+
 export const processor = async (str: string): Promise<ProcessResult> => {
-  try {
-    const parsed = JSON.parse(str)
-    const result = v.safeParse(schemaSchema, parsed)
+  const result = parseJson(str).andThen(parseSchema)
 
-    if (result.success) {
-      return {
-        value: result.output,
-        errors: [],
-      }
+  if (result.isOk()) {
+    return {
+      value: result.value,
+      errors: [],
     }
+  }
 
-    return {
-      value: { tables: {}, enums: {}, extensions: {} },
-      errors: [
-        new Error(
-          `Invalid Liam Schema format: ${JSON.stringify(result.issues)}`,
-        ),
-      ],
-    }
-  } catch (error) {
-    return {
-      value: { tables: {}, enums: {}, extensions: {} },
-      errors: [
-        error instanceof Error ? error : new Error('Failed to parse JSON'),
-      ],
-    }
+  return {
+    value: { tables: {}, enums: {}, extensions: {} },
+    errors: [result.error],
   }
 }

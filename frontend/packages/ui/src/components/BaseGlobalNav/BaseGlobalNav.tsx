@@ -7,7 +7,7 @@ export type BaseGlobalNavProps = {
   navContent?: ReactNode
   footerContent?: ReactNode
   className?: string
-  disableHover?: boolean
+  enableHover?: boolean
 }
 
 export const BaseGlobalNav: FC<BaseGlobalNavProps> = ({
@@ -15,13 +15,13 @@ export const BaseGlobalNav: FC<BaseGlobalNavProps> = ({
   navContent,
   footerContent,
   className,
-  disableHover = false,
+  enableHover = true,
 }) => {
   return (
     <div
       className={styles.globalNavContainer}
       data-global-nav-container
-      data-disable-hover={disableHover || undefined}
+      data-disable-hover={!enableHover || undefined}
     >
       <nav className={clsx(styles.globalNav, className)}>
         <div className={styles.logoContainer}>

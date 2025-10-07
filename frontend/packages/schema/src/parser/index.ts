@@ -34,5 +34,9 @@ export const parse = async (
       const { processor } = await import('./tbls/index.js')
       return processor(str)
     }
+    case 'liam': {
+      const { processor } = await import('./liam/index.js')
+      return processor(str)
+    }
   }
 }

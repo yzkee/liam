@@ -2,13 +2,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 4px;
-  min-height: 24px;
 }
 
 .dot {
-  width: 8px;
-  height: 8px;
   border-radius: var(--border-radius-full);
   background-color: var(--overlay-60);
   animation: pulse 1.5s infinite ease-in-out;

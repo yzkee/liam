@@ -2,7 +2,7 @@ import * as v from 'valibot'
 
 // Test result schema
 const testResultSchema = v.object({
-  executedAt: v.pipe(v.string(), v.isoDateTime()),
+  executedAt: v.pipe(v.string(), v.isoTimestamp()),
   success: v.boolean(),
   message: v.string(),
 })

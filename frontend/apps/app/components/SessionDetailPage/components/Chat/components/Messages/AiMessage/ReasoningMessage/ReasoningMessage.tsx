@@ -14,7 +14,7 @@ export const ReasoningMessage: FC<Props> = ({
   content,
   isWorkflowRunning = false,
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(isWorkflowRunning)
   const [isContentStreaming, setIsContentStreaming] =
     useState(isWorkflowRunning)
 
@@ -26,9 +26,11 @@ export const ReasoningMessage: FC<Props> = ({
     }
 
     setIsContentStreaming(true)
+    setIsExpanded(true)
 
     const timer = setTimeout(() => {
       setIsContentStreaming(false)
+      setIsExpanded(false)
     }, 500)
 
     return () => clearTimeout(timer)

@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# Execute the supabase status command and capture its output
-STATUS_OUTPUT=$(pnpm --filter @liam-hq/db exec supabase status)
+# Execute the supabase status command with env output format and capture its output
+STATUS_OUTPUT=$(pnpm --filter @liam-hq/db exec supabase status -o env)
 
 # Extract the service role key from the output
-# Using a precise grep pattern to match only the service role key line
-SERVICE_KEY_LINE=$(echo "$STATUS_OUTPUT" | grep -m 1 "service_role key:")
+# Using grep to match the SERVICE_ROLE_KEY line
+SERVICE_KEY_LINE=$(echo "$STATUS_OUTPUT" | grep "^SERVICE_ROLE_KEY=")
 
-# Clean up and extract just the key
-# Remove "service_role key: " prefix
-SERVICE_KEY=$(echo "$SERVICE_KEY_LINE" | sed 's/.*service_role key: \(.*\)/\1/' | tr -d ' ')
+# Clean up and extract just the key value
+# Remove SERVICE_ROLE_KEY=" prefix and trailing "
+SERVICE_KEY=$(echo "$SERVICE_KEY_LINE" | sed 's/^SERVICE_ROLE_KEY="\(.*\)"$/\1/')
 
 if [ -z "$SERVICE_KEY" ]; then
   echo "Failed to extract the service role key from Supabase status output"

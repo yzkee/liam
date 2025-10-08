@@ -494,8 +494,8 @@ importers:
         specifier: 9.36.0
         version: 9.36.0(jiti@2.6.0)
       supabase:
-        specifier: 2.40.6
-        version: 2.40.6
+        specifier: 2.45.4
+        version: 2.45.4
       type-fest:
         specifier: 4.41.0
         version: 4.41.0
@@ -10522,8 +10522,8 @@ packages:
       babel-plugin-macros:
         optional: true
 
-  supabase@2.40.6:
-    resolution: {integrity: sha512-62hDYEmYN9uTZ5TCtW6UM9MS7rBNLH+4eBrCt3zyTbsy8HizSuk1jY2tJjj/tx/SutIeUTU0gNGh7jeP5mBLdw==}
+  supabase@2.45.4:
+    resolution: {integrity: sha512-8vdSNARcY9c/Nj5oMSHGEHI4ayl8zY2znShUBx3m7BN5DyXHxuetNv552R9x1dRBgfHatwkohLW68fuu5TvOqw==}
     engines: {npm: '>=8'}
     hasBin: true
 
@@ -10579,8 +10579,8 @@ packages:
     resolution: {integrity: sha512-DZ4yORTwrbTj/7MZYq2w+/ZFdI6OZ/f9SFHR+71gIVUZhOQPHzVCLpvRnPgyaMpfWxxk/4ONva3GQSyNIKRv6A==}
     engines: {node: '>=10'}
 
-  tar@7.4.3:
-    resolution: {integrity: sha512-5S7Va8hKfV7W5U6g3aYxXmlPoZVAwUMy9AOKyF2fVuZa2UD3qZjg578OrLRt8PcNN1PleVaL/5/yYATNL0ICUw==}
+  tar@7.4.4:
+    resolution: {integrity: sha512-O1z7ajPkjTgEgmTGz0v9X4eqeEXTDREPTO77pVC1Nbs86feBU1Zhdg+edzavPmYW1olxkwsqA2v4uOw6E8LeDg==}
     engines: {node: '>=18'}
 
   tar@7.5.1:
@@ -22309,12 +22309,12 @@ snapshots:
     optionalDependencies:
       '@babel/core': 7.28.4
 
-  supabase@2.40.6:
+  supabase@2.45.4:
     dependencies:
       bin-links: 5.0.0
       https-proxy-agent: 7.0.6
       node-fetch: 3.3.2
-      tar: 7.4.3
+      tar: 7.4.4
     transitivePeerDependencies:
       - supports-color
 
@@ -22397,13 +22397,12 @@ snapshots:
       mkdirp: 1.0.4
       yallist: 4.0.0
 
-  tar@7.4.3:
+  tar@7.4.4:
     dependencies:
       '@isaacs/fs-minipass': 4.0.1
       chownr: 3.0.0
       minipass: 7.1.2
       minizlib: 3.1.0
-      mkdirp: 3.0.1
       yallist: 5.0.0
 
   tar@7.5.1:

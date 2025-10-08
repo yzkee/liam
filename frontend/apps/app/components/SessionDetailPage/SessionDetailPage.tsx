@@ -38,7 +38,7 @@ async function loadSessionData(designSessionId: string): Promise<
       initialSchema: Schema
       initialArtifact: Artifact | null
       workflowError: string | null
-      userName: string
+      senderName: string
     },
     Error
   >
@@ -63,7 +63,7 @@ async function loadSessionData(designSessionId: string): Promise<
   const { data: userData } = await supabase.auth.getUser()
   const userId = userData?.user?.id
 
-  const userName = await (async () => {
+  const senderName = await (async () => {
     if (!userId) return 'User'
 
     const { data: userInfo } = await supabase
@@ -112,7 +112,7 @@ async function loadSessionData(designSessionId: string): Promise<
     initialSchema,
     initialArtifact,
     workflowError,
-    userName,
+    senderName,
   })
 }
 
@@ -132,7 +132,7 @@ export const SessionDetailPage: FC<Props> = async ({
     initialSchema,
     workflowError,
     initialArtifact,
-    userName,
+    senderName,
   } = result.value
 
   const versions = await getVersions(buildingSchema.id)
@@ -161,7 +161,7 @@ export const SessionDetailPage: FC<Props> = async ({
         isDeepModelingEnabled={isDeepModelingEnabled}
         initialIsPublic={initialIsPublic}
         initialWorkflowError={workflowError}
-        userName={userName}
+        senderName={senderName}
       />
     </ViewModeProvider>
   )

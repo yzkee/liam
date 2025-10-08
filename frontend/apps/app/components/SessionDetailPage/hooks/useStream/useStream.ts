@@ -98,6 +98,7 @@ export const useStream = ({
   }, [])
 
   const abortWorkflow = useCallback(() => {
+    abortRef.current?.abort()
     setIsStreaming(false)
     abortRef.current = null
     retryCountRef.current = 0
@@ -115,7 +116,7 @@ export const useStream = ({
 
   useNavigationGuard((_event) => {
     if (isStreaming) {
-      stop()
+      abortWorkflow()
     }
     return true
   })

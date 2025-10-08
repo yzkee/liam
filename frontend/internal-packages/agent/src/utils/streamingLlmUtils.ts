@@ -2,57 +2,16 @@ import { dispatchCustomEvent } from '@langchain/core/callbacks/dispatch'
 import { AIMessage, AIMessageChunk } from '@langchain/core/messages'
 import { SSE_EVENTS } from '../streaming/constants'
 
-/**
- * Options for streaming LLM response processing
- */
 type StreamLLMOptions = {
-  /** Name to assign to the agent (e.g., 'lead', 'qa-agent', 'pm-agent') */
   agentName: string
-  /** Event type for dispatching chunks. Defaults to SSE_EVENTS.MESSAGES */
   eventType?: string
 }
 
 /**
- * Process streaming with deferred tool_calls - text sent immediately, complete tool_calls sent after streaming finishes
- */
-async function processStreamWithDeferredToolCalls(
-  stream: AsyncIterable<AIMessageChunk>,
-  id: string,
-  agentName: string,
-  eventType: string,
-): Promise<AIMessageChunk | null> {
-  let accumulatedChunk: AIMessageChunk | null = null
-
-  // Process streaming chunks
-  for await (const _chunk of stream) {
-    const chunk = new AIMessageChunk({ ..._chunk, id, name: agentName })
-
-    // Accumulate chunks
-    accumulatedChunk = accumulatedChunk ? accumulatedChunk.concat(chunk) : chunk
-
-    // Send text content immediately for real-time display
-    if (chunk.content && chunk.content.length > 0) {
-      await dispatchCustomEvent(eventType, chunk)
-    }
-  }
-
-  // Send final chunk with complete tool_calls after streaming completion
-  if (accumulatedChunk?.tool_calls && accumulatedChunk.tool_calls.length > 0) {
-    const finalChunk = new AIMessageChunk({
-      ...accumulatedChunk,
-      content: [], // Text content already sent
-      id,
-      name: agentName,
-    })
-
-    await dispatchCustomEvent(eventType, finalChunk)
-  }
-
-  return accumulatedChunk
-}
-
-/**
- * Process streaming with immediate dispatch - all chunks sent immediately as they arrive
+ * Dispatch each chunk as soon as it arrives while also accumulating
+ * the content into a single `AIMessageChunk` for final post-processing.
+ *
+ * Returns the accumulated chunk, or `null` if the stream yields no chunks.
  */
 async function processStreamWithImmediateDispatch(
   stream: AsyncIterable<AIMessageChunk>,
@@ -62,7 +21,6 @@ async function processStreamWithImmediateDispatch(
 ): Promise<AIMessageChunk | null> {
   let accumulatedChunk: AIMessageChunk | null = null
 
-  // Send all chunks immediately
   for await (const _chunk of stream) {
     const chunk = new AIMessageChunk({ ..._chunk, id, name: agentName })
     await dispatchCustomEvent(eventType, chunk)
@@ -86,22 +44,15 @@ export async function streamLLMResponse(
   // so we overwrite with a UUID to unify chunk ids for consistent handling.
   const id = crypto.randomUUID()
 
-  // PM Agent needs special handling due to GPT-5's chunked tool_calls response pattern
-  // that sends empty tool arguments during streaming. Other agents work fine with immediate dispatch.
-  const accumulatedChunk =
-    agentName === 'pm'
-      ? await processStreamWithDeferredToolCalls(
-          stream,
-          id,
-          agentName,
-          eventType,
-        )
-      : await processStreamWithImmediateDispatch(
-          stream,
-          id,
-          agentName,
-          eventType,
-        )
+  // All agents currently use immediate dispatch. If a provider streams
+  // tool_calls incrementally, the final message is reconstructed from
+  // the accumulated chunk below.
+  const accumulatedChunk = await processStreamWithImmediateDispatch(
+    stream,
+    id,
+    agentName,
+    eventType,
+  )
 
   const response = accumulatedChunk
     ? new AIMessage({

@@ -158,7 +158,11 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
 
         ## Requirements
 
-        - authentication: User logout (UPDATE)"
+        - authentication: User logout (UPDATE)
+
+        ## Schema Issues to Fix
+
+        1. Missing logout table"
       `)
     })
 
@@ -215,7 +219,11 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
 
         ## Requirements
 
-        - authentication: User login (SELECT)"
+        - authentication: User login (SELECT)
+
+        ## Schema Issues to Fix
+
+        1. Login form missing"
       `)
     })
 
@@ -243,7 +251,12 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
 
         Design a user management system with authentication
 
-        ## Requirements"
+        ## Requirements
+
+
+        ## Schema Issues to Fix
+
+        1. Non-existent testcase issue"
       `)
     })
 

@@ -56,12 +56,23 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
   }
 
   it('should convert analyzed requirements to formatted text prompt', () => {
-    const result = convertRequirementsToPrompt(sampleAnalyzedRequirements)
+    const userInput = 'Design a user management system with authentication'
+    const result = convertRequirementsToPrompt(
+      sampleAnalyzedRequirements,
+      userInput,
+    )
 
     expect(result).toMatchInlineSnapshot(`
-      "Session Goal: Build a user management system
+      "## Session Goal
 
-      Test Cases:
+      Build a user management system
+
+      ## Original User Request
+
+      Design a user management system with authentication
+
+      ## Test Cases
+
       - authentication: User login (SELECT), User logout (UPDATE), Password reset (UPDATE)
       - userManagement: Create new user (INSERT), Update user info (UPDATE), Delete user (DELETE)"
     `)
@@ -72,13 +83,20 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
       goal: 'Simple system',
       testcases: {},
     }
+    const userInput = 'Build a simple system'
 
-    const result = convertRequirementsToPrompt(analyzedRequirements)
+    const result = convertRequirementsToPrompt(analyzedRequirements, userInput)
 
     expect(result).toMatchInlineSnapshot(`
-      "Session Goal: Simple system
+      "## Session Goal
 
-      Test Cases:"
+      Simple system
+
+      ## Original User Request
+
+      Build a simple system
+
+      ## Test Cases"
     `)
   })
 
@@ -97,37 +115,55 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
         ],
       },
     }
+    const userInput = 'Add a basic feature'
 
-    const result = convertRequirementsToPrompt(analyzedRequirements)
+    const result = convertRequirementsToPrompt(analyzedRequirements, userInput)
 
     expect(result).toMatchInlineSnapshot(`
-      "Session Goal:
+      "## Session Goal
 
-      Test Cases:
+
+
+      ## Original User Request
+
+      Add a basic feature
+
+      ## Test Cases
+
       - basic: Basic feature test (INSERT)"
     `)
   })
 
   describe('with schemaIssues filtering', () => {
     it('should filter testcases based on schemaIssues without showing issue details', () => {
+      const userInput = 'Design a user management system with authentication'
       const schemaIssues = [
         { testcaseId: '2', description: 'Missing logout table' },
       ]
 
       const result = convertRequirementsToPrompt(
         sampleAnalyzedRequirements,
+        userInput,
         schemaIssues,
       )
 
       expect(result).toMatchInlineSnapshot(`
-        "Session Goal: Build a user management system
+        "## Session Goal
 
-        Test Cases:
+        Build a user management system
+
+        ## Original User Request
+
+        Design a user management system with authentication
+
+        ## Test Cases
+
         - authentication: User logout (UPDATE)"
       `)
     })
 
     it('should handle empty schemaIssues array', () => {
+      const userInput = 'Design a user management system with authentication'
       const schemaIssues: Array<{
         testcaseId: string
         description: string
@@ -135,38 +171,56 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
 
       const result = convertRequirementsToPrompt(
         sampleAnalyzedRequirements,
+        userInput,
         schemaIssues,
       )
 
       // Should behave like no schemaIssues parameter
       expect(result).toMatchInlineSnapshot(`
-        "Session Goal: Build a user management system
+        "## Session Goal
 
-        Test Cases:
+        Build a user management system
+
+        ## Original User Request
+
+        Design a user management system with authentication
+
+        ## Test Cases
+
         - authentication: User login (SELECT), User logout (UPDATE), Password reset (UPDATE)
         - userManagement: Create new user (INSERT), Update user info (UPDATE), Delete user (DELETE)"
       `)
     })
 
     it('should filter out entire categories when no testcases match schemaIssues', () => {
+      const userInput = 'Design a user management system with authentication'
       const schemaIssues = [
         { testcaseId: '1', description: 'Login form missing' },
       ]
 
       const result = convertRequirementsToPrompt(
         sampleAnalyzedRequirements,
+        userInput,
         schemaIssues,
       )
 
       expect(result).toMatchInlineSnapshot(`
-        "Session Goal: Build a user management system
+        "## Session Goal
 
-        Test Cases:
+        Build a user management system
+
+        ## Original User Request
+
+        Design a user management system with authentication
+
+        ## Test Cases
+
         - authentication: User login (SELECT)"
       `)
     })
 
     it('should handle schemaIssues with no matching testcases', () => {
+      const userInput = 'Design a user management system with authentication'
       const schemaIssues = [
         {
           testcaseId: 'non-existent',
@@ -176,26 +230,39 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
 
       const result = convertRequirementsToPrompt(
         sampleAnalyzedRequirements,
+        userInput,
         schemaIssues,
       )
 
       expect(result).toMatchInlineSnapshot(`
-        "Session Goal: Build a user management system
+        "## Session Goal
 
-        Test Cases:"
+        Build a user management system
+
+        ## Original User Request
+
+        Design a user management system with authentication
+
+        ## Test Cases"
       `)
     })
 
     it('should filter testcases without showing IDs or issue details', () => {
+      const userInput = 'Design a user management system with authentication'
       const schemaIssues = [
         { testcaseId: '4', description: 'User table structure issue' },
       ]
 
       const result = convertRequirementsToPrompt(
         sampleAnalyzedRequirements,
+        userInput,
         schemaIssues,
       )
 
+      expect(result).toContain('## Original User Request')
+      expect(result).toContain(
+        'Design a user management system with authentication',
+      )
       expect(result).toContain('Create new user')
       expect(result).not.toContain('[4]')
       expect(result).not.toContain('User table structure issue')

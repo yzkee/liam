@@ -3,6 +3,7 @@
 import {
   type BaseMessage,
   coerceMessageLikeToMessage,
+  HumanMessage,
 } from '@langchain/core/messages'
 import { MessageTupleManager, SSE_EVENTS } from '@liam-hq/agent/client'
 import { err, ok, type Result } from 'neverthrow'
@@ -58,10 +59,18 @@ const extractStreamErrorMessage = (rawData: unknown): string => {
 type Props = {
   designSessionId: string
   initialMessages: BaseMessage[]
+  senderName: string
 }
-export const useStream = ({ designSessionId, initialMessages }: Props) => {
+export const useStream = ({
+  designSessionId,
+  initialMessages,
+  senderName,
+}: Props) => {
   const messageManagerRef = useRef(new MessageTupleManager())
   const storedMessage = useSessionStorageOnce(designSessionId)
+
+  const isFirstMessage = useRef(true)
+
   const processedInitialMessages = useMemo(() => {
     if (storedMessage) {
       return [storedMessage, ...initialMessages]
@@ -260,9 +269,27 @@ export const useStream = ({ designSessionId, initialMessages }: Props) => {
       abortRef.current?.abort()
       retryCountRef.current = 0
 
+      let tempId: string | undefined
+      if (!isFirstMessage.current) {
+        tempId = `optimistic-${crypto.randomUUID()}`
+        const optimisticMessage = new HumanMessage({
+          content: params.userInput,
+          id: tempId,
+          additional_kwargs: {
+            userName: senderName,
+          },
+        })
+        setMessages((prev) => [...prev, optimisticMessage])
+      } else {
+        isFirstMessage.current = false
+      }
+
       const result = await runStreamAttempt('/api/chat/stream', params)
 
       if (result.isErr()) {
+        if (tempId) {
+          setMessages((prev) => prev.filter((msg) => msg.id !== tempId))
+        }
         return err(result.error)
       }
 
@@ -275,7 +302,7 @@ export const useStream = ({ designSessionId, initialMessages }: Props) => {
         isDeepModelingEnabled: params.isDeepModelingEnabled,
       })
     },
-    [replay, runStreamAttempt],
+    [replay, runStreamAttempt, senderName],
   )
 
   return {

@@ -38,6 +38,7 @@ async function loadSessionData(designSessionId: string): Promise<
       initialSchema: Schema
       initialArtifact: Artifact | null
       workflowError: string | null
+      senderName: string
     },
     Error
   >
@@ -58,6 +59,21 @@ async function loadSessionData(designSessionId: string): Promise<
   }
   const baseMessages = await getMessages(config)
   const messages = serializeMessages(baseMessages)
+
+  const { data: userData } = await supabase.auth.getUser()
+  const userId = userData?.user?.id
+
+  const senderName = await (async () => {
+    if (!userId) return 'User'
+
+    const { data: userInfo } = await supabase
+      .from('users')
+      .select('name')
+      .eq('id', userId)
+      .single()
+
+    return userInfo?.name || 'User'
+  })()
 
   // Fetch checkpoint error from LangGraph memory
   const checkpointErrors = await getCheckpointErrors(
@@ -96,6 +112,7 @@ async function loadSessionData(designSessionId: string): Promise<
     initialSchema,
     initialArtifact,
     workflowError,
+    senderName,
   })
 }
 
@@ -115,6 +132,7 @@ export const SessionDetailPage: FC<Props> = async ({
     initialSchema,
     workflowError,
     initialArtifact,
+    senderName,
   } = result.value
 
   const versions = await getVersions(buildingSchema.id)
@@ -143,6 +161,7 @@ export const SessionDetailPage: FC<Props> = async ({
         isDeepModelingEnabled={isDeepModelingEnabled}
         initialIsPublic={initialIsPublic}
         initialWorkflowError={workflowError}
+        senderName={senderName}
       />
     </ViewModeProvider>
   )

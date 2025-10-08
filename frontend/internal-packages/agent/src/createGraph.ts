@@ -1,4 +1,4 @@
-import { AIMessage } from '@langchain/core/messages'
+import { AIMessage, isHumanMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { END, START, StateGraph } from '@langchain/langgraph'
 import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
@@ -24,8 +24,13 @@ export const createGraph = (checkpointer?: BaseCheckpointSaver) => {
   const qaAgentSubgraph = createQaAgentGraph()
 
   const callDbAgent = async (state: WorkflowState, config: RunnableConfig) => {
+    // Extract user input from the first HumanMessage
+    const userInput =
+      state.messages.find((msg) => isHumanMessage(msg))?.text || ''
+
     const prompt = convertRequirementsToPrompt(
       state.analyzedRequirements,
+      userInput,
       state.schemaIssues,
     )
     const modifiedState = { ...state, messages: [], prompt }

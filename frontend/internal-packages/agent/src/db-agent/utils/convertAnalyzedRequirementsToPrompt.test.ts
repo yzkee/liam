@@ -71,7 +71,7 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
 
       Design a user management system with authentication
 
-      ## Test Cases
+      ## Requirements
 
       - authentication: User login (SELECT), User logout (UPDATE), Password reset (UPDATE)
       - userManagement: Create new user (INSERT), Update user info (UPDATE), Delete user (DELETE)"
@@ -96,7 +96,7 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
 
       Build a simple system
 
-      ## Test Cases"
+      ## Requirements"
     `)
   })
 
@@ -128,7 +128,7 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
 
       Add a basic feature
 
-      ## Test Cases
+      ## Requirements
 
       - basic: Basic feature test (INSERT)"
     `)
@@ -156,7 +156,7 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
 
         Design a user management system with authentication
 
-        ## Test Cases
+        ## Requirements
 
         - authentication: User logout (UPDATE)"
       `)
@@ -185,7 +185,7 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
 
         Design a user management system with authentication
 
-        ## Test Cases
+        ## Requirements
 
         - authentication: User login (SELECT), User logout (UPDATE), Password reset (UPDATE)
         - userManagement: Create new user (INSERT), Update user info (UPDATE), Delete user (DELETE)"
@@ -213,7 +213,7 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
 
         Design a user management system with authentication
 
-        ## Test Cases
+        ## Requirements
 
         - authentication: User login (SELECT)"
       `)
@@ -243,7 +243,7 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
 
         Design a user management system with authentication
 
-        ## Test Cases"
+        ## Requirements"
       `)
     })
 

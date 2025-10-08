@@ -45,7 +45,7 @@ ${requirements.goal}
 
 ${userInput}
 
-## Test Cases
+## Requirements
 
 ${testCasesSection}`.trim()
 }

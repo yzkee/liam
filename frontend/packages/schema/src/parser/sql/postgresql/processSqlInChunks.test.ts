@@ -52,6 +52,21 @@ describe(processSQLInChunks, () => {
 
       expect(callback).not.toHaveBeenCalled()
     })
+
+    it('should interpret readOffset byte positions for multibyte characters', async () => {
+      // Using Japanese hiragana characters (3 bytes each in UTF-8)
+      const input = 'あいう\nかきく\n' // eslint-disable-line no-non-english/no-non-english-characters
+      const chunkSize = 2
+      const firstLineBytes = Buffer.from('あいう\n').length // eslint-disable-line no-non-english/no-non-english-characters
+      const callback = vi.fn()
+      callback
+        .mockResolvedValueOnce([null, firstLineBytes, []])
+        .mockResolvedValue([null, null, []])
+
+      await processSQLInChunks(input, chunkSize, callback)
+
+      expect(callback).toHaveBeenCalledTimes(2)
+    })
   })
 
   describe('processSQLInChunks, partially consuming chunk lines', () => {

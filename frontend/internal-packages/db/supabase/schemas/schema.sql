@@ -2205,10 +2205,6 @@ CREATE POLICY "users_same_organization_select_policy" ON "public"."users" FOR SE
 ALTER PUBLICATION "supabase_realtime" OWNER TO "postgres";
 
 
-
-
-
-
 ALTER PUBLICATION "supabase_realtime" ADD TABLE ONLY "public"."artifacts";
 
 

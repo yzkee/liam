@@ -29,7 +29,7 @@ export const GlobalNav: FC<Props> = ({
     <BaseGlobalNav
       className={styles.globalNav}
       logoSection={
-        <Link href="/" className={itemStyles.item} aria-label="Go to homepage">
+        <Link href="/design_sessions/new" className={itemStyles.item}>
           <div className={itemStyles.iconContainer}>
             <LiamLogoMark />
           </div>

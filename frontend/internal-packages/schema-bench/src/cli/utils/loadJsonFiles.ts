@@ -11,39 +11,33 @@ import {
 import * as v from 'valibot'
 
 /**
- * Load and validate input JSON files under `execution/input` for a dataset.
- * The schema and normalize function allow callers to adapt to per-executor needs.
+ * Load and validate JSON files from a specified directory.
+ * Generic function that can be used for both input and reference files.
  */
-export async function loadInputFiles<
+export async function loadJsonFiles<
   Schema extends v.BaseSchema<unknown, unknown, v.BaseIssue<unknown>>,
   T,
 >(
-  datasetPath: string,
+  directory: string,
   schema: Schema,
   normalize: (value: v.InferOutput<Schema>) => T,
-): Promise<Result<Array<{ caseId: string; input: T }>, Error>> {
-  const inputDir = join(datasetPath, 'execution/input')
-
-  if (!existsSync(inputDir)) {
-    return err(
-      new Error(
-        `Input directory not found: ${inputDir}. Please run setup-workspace first.`,
-      ),
-    )
+): Promise<Result<Array<{ caseId: string; data: T }>, Error>> {
+  if (!existsSync(directory)) {
+    return err(new Error(`Directory not found: ${directory}`))
   }
 
-  const filesResult = await fromPromise(readdir(inputDir), (error) =>
+  const filesResult = await fromPromise(readdir(directory), (error) =>
     error instanceof Error ? error : new Error('Failed to read directory'),
   )
   if (filesResult.isErr()) return err(filesResult.error)
 
   const jsonFiles = filesResult.value.filter((file) => file.endsWith('.json'))
-  const inputs: Array<{ caseId: string; input: T }> = []
+  const results: Array<{ caseId: string; data: T }> = []
 
   for (const file of jsonFiles) {
     const caseId = file.replace('.json', '')
     const contentResult = await fromPromise(
-      readFile(join(inputDir, file), 'utf-8'),
+      readFile(join(directory, file), 'utf-8'),
       (error) =>
         error instanceof Error
           ? error
@@ -64,14 +58,14 @@ export async function loadInputFiles<
     if (!validationResult.success) {
       return err(
         new Error(
-          `Invalid input format in ${file}: ${JSON.stringify(validationResult.issues)}`,
+          `Invalid format in ${file}: ${JSON.stringify(validationResult.issues)}`,
         ),
       )
     }
 
     const normalized: T = normalize(validationResult.output)
-    inputs.push({ caseId, input: normalized })
+    results.push({ caseId, data: normalized })
   }
 
-  return ok(inputs)
+  return ok(results)
 }

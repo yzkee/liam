@@ -8,15 +8,12 @@ const createMockState = (
 ): WorkflowState => ({
   messages: [],
   analyzedRequirements: {
-    businessRequirement: '',
-    functionalRequirements: {},
-    nonFunctionalRequirements: {},
+    goal: '',
+    testcases: {},
   },
-  testcases: [],
   schemaIssues: [],
   schemaData: { tables: {}, enums: {}, extensions: {} },
   buildingSchemaId: 'test-schema-id',
-  latestVersionNumber: 1,
   organizationId: 'test-org-id',
   userId: 'test-user-id',
   designSessionId: 'test-session-id',
@@ -29,7 +26,7 @@ describe('classifyMessage', () => {
     const state = createMockState({
       schemaIssues: [
         {
-          requirementId: 'req-1',
+          testcaseId: 'test-1',
           description: 'Missing foreign key constraint',
         },
       ],
@@ -45,10 +42,10 @@ describe('classifyMessage', () => {
     const state = createMockState({
       schemaIssues: [
         {
-          requirementId: 'req-1',
+          testcaseId: 'test-1',
           description: 'Missing foreign key constraint',
         },
-        { requirementId: 'req-2', description: 'Invalid table name' },
+        { testcaseId: 'test-2', description: 'Invalid table name' },
       ],
     })
 
@@ -61,24 +58,22 @@ describe('classifyMessage', () => {
   it('should prioritize schema issues over QA completion', async () => {
     const state = createMockState({
       schemaIssues: [
-        { requirementId: 'req-1', description: 'Schema issue found' },
+        { testcaseId: 'test-1', description: 'Schema issue found' },
       ],
-      testcases: [
-        {
-          id: 'test-1',
-          requirementId: 'req-1',
-          requirementType: 'functional',
-          requirementCategory: 'test',
-          requirement: 'Test requirement',
-          title: 'Test case',
-          description: 'Test case',
-          dmlOperation: {
-            operation_type: 'SELECT',
-            sql: 'SELECT 1',
-            dml_execution_logs: [],
-          },
+      analyzedRequirements: {
+        goal: 'Test goal',
+        testcases: {
+          functional: [
+            {
+              id: 'test-1',
+              title: 'Test case',
+              type: 'SELECT',
+              sql: 'SELECT 1',
+              testResults: [],
+            },
+          ],
         },
-      ],
+      },
     })
 
     const result = await classifyMessage(state)
@@ -90,22 +85,20 @@ describe('classifyMessage', () => {
   it('should route to summarizeWorkflow when QA completed and no schema issues', async () => {
     const state = createMockState({
       schemaIssues: [],
-      testcases: [
-        {
-          id: 'test-1',
-          requirementId: 'req-1',
-          requirementType: 'functional',
-          requirementCategory: 'test',
-          requirement: 'Test requirement',
-          title: 'Test case',
-          description: 'Test case',
-          dmlOperation: {
-            operation_type: 'SELECT',
-            sql: 'SELECT 1',
-            dml_execution_logs: [],
-          },
+      analyzedRequirements: {
+        goal: 'Test goal',
+        testcases: {
+          functional: [
+            {
+              id: 'test-1',
+              title: 'Test case',
+              type: 'SELECT',
+              sql: 'SELECT 1',
+              testResults: [],
+            },
+          ],
         },
-      ],
+      },
     })
 
     const result = await classifyMessage(state)
@@ -117,7 +110,10 @@ describe('classifyMessage', () => {
   it('should route to pmAgent when no schema issues and QA not completed', async () => {
     const state = createMockState({
       schemaIssues: [],
-      testcases: [],
+      analyzedRequirements: {
+        goal: 'Test goal',
+        testcases: {},
+      },
     })
 
     const result = await classifyMessage(state)

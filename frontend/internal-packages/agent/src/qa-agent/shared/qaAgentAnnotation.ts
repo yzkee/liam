@@ -3,7 +3,7 @@ import type { AnalyzedRequirements } from '@liam-hq/artifact'
 import type { Schema } from '@liam-hq/schema'
 import {
   generatedSqlsAnnotation,
-  schemaIssuesAnnotation,
+  qaSchemaIssuesAnnotation,
 } from '../testcaseGeneration/testcaseAnnotation'
 
 /**
@@ -27,7 +27,7 @@ export const qaAgentAnnotation = Annotation.Root({
   }),
   designSessionId: Annotation<string>,
   buildingSchemaId: Annotation<string>,
-  schemaIssues: schemaIssuesAnnotation,
+  schemaIssues: qaSchemaIssuesAnnotation,
   generatedSqls: generatedSqlsAnnotation,
   next: Annotation<string>({
     reducer: (x, y) => y ?? x ?? END,

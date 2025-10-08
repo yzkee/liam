@@ -1,7 +1,7 @@
 import { Annotation, END, MessagesAnnotation } from '@langchain/langgraph'
 import type { AnalyzedRequirements } from '@liam-hq/artifact'
 import type { Schema } from '@liam-hq/schema'
-import { schemaIssuesAnnotation } from './qa-agent/testcaseGeneration/testcaseAnnotation'
+import { workflowSchemaIssuesAnnotation } from './workflowSchemaIssuesAnnotation'
 
 export const workflowAnnotation = Annotation.Root({
   ...MessagesAnnotation.spec,
@@ -17,7 +17,7 @@ export const workflowAnnotation = Annotation.Root({
   organizationId: Annotation<string>,
   userId: Annotation<string>,
   designSessionId: Annotation<string>,
-  schemaIssues: schemaIssuesAnnotation,
+  schemaIssues: workflowSchemaIssuesAnnotation,
 
   next: Annotation<string>({
     reducer: (x, y) => y ?? x ?? END,

@@ -31,7 +31,7 @@
     "lint:eslint": "eslint .",
     "lint:tsc": "tsc --noEmit",
     "supabase:gen": "concurrently \"pnpm:supabase:gen:*\"",
-    "supabase:gen:schema_sql": "pnpm supabase db dump --local > ./schema/schema.sql",
+    "supabase:gen:schema_sql": "pnpm supabase db dump --local > ./supabase/schemas/schema.sql",
     "supabase:gen:types": "supabase gen types typescript --local > supabase/database.types.ts && biome check --write --unsafe supabase/database.types.ts",
     "supabase:migration": "supabase db diff -f",
     "supabase:migration:new": "supabase migration new",

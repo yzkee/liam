@@ -105,11 +105,6 @@ export const useStream = ({
     // Do NOT clear workflow flag - allow reconnection
   }, [])
 
-  const stop = useCallback(() => {
-    abortRef.current?.abort()
-    abortRef.current = null
-  }, [])
-
   const clearError = useCallback(() => {
     setError(null)
   }, [])
@@ -318,7 +313,6 @@ export const useStream = ({
     messages,
     isStreaming,
     error,
-    stop,
     start,
     replay,
     clearError,

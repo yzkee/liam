@@ -90,13 +90,18 @@ export const useStream = ({
   const abortRef = useRef<AbortController | null>(null)
   const retryCountRef = useRef(0)
 
-  const finalizeStream = useCallback((sessionId: string) => {
+  const completeWorkflow = useCallback((sessionId: string) => {
     setIsStreaming(false)
     abortRef.current = null
     retryCountRef.current = 0
-
-    // Clear workflow in progress flag
     clearWorkflowInProgress(sessionId)
+  }, [])
+
+  const abortWorkflow = useCallback(() => {
+    setIsStreaming(false)
+    abortRef.current = null
+    retryCountRef.current = 0
+    // Do NOT clear workflow flag - allow reconnection
   }, [])
 
   const stop = useCallback(() => {
@@ -189,7 +194,7 @@ export const useStream = ({
         })
 
         if (!res.body) {
-          finalizeStream(params.designSessionId)
+          abortWorkflow()
           return err({
             type: 'network',
             message: ERROR_MESSAGES.FETCH_FAILED,
@@ -201,7 +206,7 @@ export const useStream = ({
 
         if (!endEventReceived) {
           if (controller.signal.aborted) {
-            finalizeStream(params.designSessionId)
+            abortWorkflow()
             return err({
               type: 'abort',
               message: 'Request was aborted',
@@ -213,10 +218,10 @@ export const useStream = ({
           return ok('shouldRetry')
         }
 
-        finalizeStream(params.designSessionId)
+        completeWorkflow(params.designSessionId)
         return ok('complete')
       } catch (unknownError) {
-        finalizeStream(params.designSessionId)
+        abortWorkflow()
 
         if (
           unknownError instanceof Error &&
@@ -234,7 +239,7 @@ export const useStream = ({
         })
       }
     },
-    [finalizeStream, processStreamEvents],
+    [completeWorkflow, abortWorkflow, processStreamEvents],
   )
 
   const replay = useCallback(
@@ -254,14 +259,14 @@ export const useStream = ({
       }
 
       const timeoutMessage = ERROR_MESSAGES.CONNECTION_TIMEOUT
-      finalizeStream(params.designSessionId)
+      abortWorkflow()
       setError(timeoutMessage)
       return err({
         type: 'timeout',
         message: timeoutMessage,
       })
     },
-    [finalizeStream, runStreamAttempt],
+    [abortWorkflow, runStreamAttempt],
   )
 
   const start = useCallback(

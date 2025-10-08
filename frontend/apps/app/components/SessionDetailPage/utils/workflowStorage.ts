@@ -6,7 +6,8 @@ const WORKFLOW_KEY_PREFIX = 'liam:workflow:'
 export const getWorkflowInProgress = (designSessionId: string): boolean => {
   if (typeof window === 'undefined') return false
   const key = `${WORKFLOW_KEY_PREFIX}${designSessionId}`
-  return sessionStorage.getItem(key) === 'in_progress'
+  const value = sessionStorage.getItem(key)
+  return value === 'in_progress'
 }
 
 /**

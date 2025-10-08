@@ -1,5 +1,17 @@
 # @liam-hq/cli
 
+## 0.7.18
+
+### Patch Changes
+
+- [#3708](https://github.com/liam-hq/liam/pull/3708) - - Add support for Liam Schema format JSON files in ERD page parser / Thanks [@devin-ai-integration](https://github.com/apps/devin-ai-integration)!
+  - Liam format requires no conversion - just JSON parsing and validation against schemaSchema
+  - Users can specify format using `?format=liam` query parameter
+- [#3708](https://github.com/liam-hq/liam/pull/3708) - - Add support for Liam Schema format JSON files in ERD page parser / Thanks [@devin-ai-integration](https://github.com/apps/devin-ai-integration)!
+  - Liam format requires no conversion - just JSON parsing and validation against schemaSchema
+  - Users can specify format using `?format=liam` query parameter
+- [#3499](https://github.com/liam-hq/liam/pull/3499) - - 💄 show BlinkCircle indicator when column element is selected in TableDetail / Thanks [@tnyo43](https://github.com/tnyo43)!
+
 ## 0.7.17
 
 ### Patch Changes

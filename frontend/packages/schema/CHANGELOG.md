@@ -1,5 +1,13 @@
 # @liam-hq/schema
 
+## 0.6.0
+
+### Minor Changes
+
+- [#3708](https://github.com/liam-hq/liam/pull/3708) - - Add support for Liam Schema format JSON files in ERD page parser / Thanks [@devin-ai-integration](https://github.com/apps/devin-ai-integration)!
+  - Liam format requires no conversion - just JSON parsing and validation against schemaSchema
+  - Users can specify format using `?format=liam` query parameter
+
 ## 0.5.6
 
 ### Patch Changes

@@ -5,6 +5,7 @@ import {
   LiamLogoMark,
   Settings,
 } from '@liam-hq/ui'
+import Link from 'next/link'
 import type { FC } from 'react'
 import type { Organization } from '../services/getOrganization'
 import type { OrganizationsByUserId } from '../services/getOrganizationsByUserId'
@@ -28,14 +29,14 @@ export const GlobalNav: FC<Props> = ({
     <BaseGlobalNav
       className={styles.globalNav}
       logoSection={
-        <>
+        <Link href="/design_sessions/new" className={itemStyles.item}>
           <div className={itemStyles.iconContainer}>
             <LiamLogoMark />
           </div>
           <div className={itemStyles.labelArea}>
             <LiamDbLogo className={styles.liamMigrationLogo} />
           </div>
-        </>
+        </Link>
       }
       navContent={
         <>

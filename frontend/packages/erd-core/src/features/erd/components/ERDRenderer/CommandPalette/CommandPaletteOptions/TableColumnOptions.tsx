@@ -1,7 +1,19 @@
-import { Table2 } from '@liam-hq/ui'
+import {
+  DiamondFillIcon,
+  DiamondIcon,
+  KeyRound,
+  Link,
+  Table2,
+} from '@liam-hq/ui'
 import clsx from 'clsx'
 import { Command } from 'cmdk'
-import { type FC, useCallback, useEffect } from 'react'
+import {
+  type ComponentProps,
+  type FC,
+  useCallback,
+  useEffect,
+  useMemo,
+} from 'react'
 import {
   getTableColumnElementId,
   getTableColumnLinkHref,
@@ -13,10 +25,27 @@ import { useCommandPaletteOrThrow } from '../CommandPaletteProvider'
 import type { CommandPaletteSuggestion } from '../types'
 import { getSuggestionText } from '../utils'
 import styles from './CommandPaletteOptions.module.css'
+import { type ColumnType, getColumnTypeMap } from './utils/getColumnTypeMap'
 
 type Props = {
   tableName: string
   suggestion: CommandPaletteSuggestion | null
+}
+
+const ColumnIcon: FC<ComponentProps<'svg'> & { columnType: ColumnType }> = ({
+  columnType,
+  ...props
+}) => {
+  switch (columnType) {
+    case 'PRIMARY_KEY':
+      return <KeyRound {...props} />
+    case 'FOREIGN_KEY':
+      return <Link {...props} />
+    case 'NOT_NULL':
+      return <DiamondFillIcon aria-label={undefined} {...props} />
+    case 'NULLABLE':
+      return <DiamondIcon aria-label={undefined} {...props} />
+  }
 }
 
 export const TableColumnOptions: FC<Props> = ({ tableName, suggestion }) => {
@@ -82,6 +111,11 @@ export const TableColumnOptions: FC<Props> = ({ tableName, suggestion }) => {
   }, [suggestion, goToERD])
 
   const table = schema.current.tables[tableName]
+  const columnTypeMap = useMemo(
+    () => (table ? getColumnTypeMap(table) : {}),
+    [table],
+  )
+
   if (!table) {
     return null
   }
@@ -130,7 +164,13 @@ export const TableColumnOptions: FC<Props> = ({ tableName, suggestion }) => {
               goToERD(table.name, column.name)
             }}
           >
-            <Table2 className={styles.itemIcon} />
+            {columnTypeMap[column.name] && (
+              <ColumnIcon
+                // biome-ignore lint/style/noNonNullAssertion: it checks the column type exists above
+                columnType={columnTypeMap[column.name]!}
+                className={styles.itemIcon}
+              />
+            )}
             <span className={styles.itemText}>{column.name}</span>
           </a>
         </Command.Item>

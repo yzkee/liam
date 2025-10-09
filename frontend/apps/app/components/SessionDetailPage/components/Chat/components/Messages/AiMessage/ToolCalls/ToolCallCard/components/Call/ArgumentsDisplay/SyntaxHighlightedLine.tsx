@@ -4,15 +4,9 @@ import styles from './SyntaxHighlightedLine.module.css'
 
 type Props = {
   line: string
-  isAnimated: boolean
-  index: number
 }
 
-export const SyntaxHighlightedLine: FC<Props> = ({
-  line,
-  isAnimated,
-  index,
-}) => {
+export const SyntaxHighlightedLine: FC<Props> = ({ line }) => {
   // Simple parsing without dangerouslySetInnerHTML
   const renderLine = () => {
     // Check for action keywords at the start
@@ -93,21 +87,5 @@ export const SyntaxHighlightedLine: FC<Props> = ({
     })
   }
 
-  return (
-    <div
-      className={clsx(
-        styles.line,
-        isAnimated ? styles.animated : styles.static,
-      )}
-      style={
-        isAnimated
-          ? {
-              '--animation-delay': `${index * 0.05}s`,
-            }
-          : undefined
-      }
-    >
-      {renderLine()}
-    </div>
-  )
+  return <div className={clsx(styles.line, styles.static)}>{renderLine()}</div>
 }

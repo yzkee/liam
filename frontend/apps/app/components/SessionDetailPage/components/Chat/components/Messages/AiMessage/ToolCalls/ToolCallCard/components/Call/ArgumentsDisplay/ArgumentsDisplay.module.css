@@ -19,11 +19,15 @@
   box-sizing: border-box;
 }
 
-/* Gradient overlays */
-.wrapper {
-  position: relative;
+.wrapper[data-expanded='true'] .container {
+  max-height: 600px;
 }
 
+.wrapper[data-expanded='false'] .container {
+  max-height: 100px;
+}
+
+/* Gradient overlays */
 .gradientTop,
 .gradientBottom {
   position: absolute;
@@ -73,16 +77,4 @@
 
 .container::-webkit-scrollbar-thumb:hover {
   background: var(--color-gray-300);
-}
-
-/* Animation for fade in */
-@keyframes fadeInScale {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
 }

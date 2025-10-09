@@ -116,10 +116,8 @@ export const useStream = ({
     return true
   })
 
-  const handleMessageEvent = useCallback((ev: { data: string }) => {
-    const parsedData = JSON.parse(ev.data)
-    const [serialized, metadata] = parsedData
-    const messageId = messageManagerRef.current.add(serialized, metadata)
+  const handleMessageEvent = useCallback(async (ev: { data: string }) => {
+    const messageId = await messageManagerRef.current.add(ev.data)
     if (!messageId) return
 
     setMessages((prev) => {

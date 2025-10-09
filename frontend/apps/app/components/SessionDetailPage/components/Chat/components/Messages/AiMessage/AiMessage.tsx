@@ -53,10 +53,10 @@ export const AiMessage: FC<Props> = ({
   const toolCalls = extractToolCallsFromMessage(message)
 
   // Combine toolCalls with their corresponding toolMessages
-  const toolCallsWithMessages = useMemo(() => {
+  const toolCallAndResults = useMemo(() => {
     return toolCalls.map((toolCall, index) => ({
-      toolCall,
-      toolMessage: toolMessages[index],
+      call: toolCall,
+      result: toolMessages[index],
     }))
   }, [toolCalls, toolMessages])
 
@@ -89,9 +89,8 @@ export const AiMessage: FC<Props> = ({
             </div>
           )}
           <ToolCalls
-            toolCallsWithMessages={toolCallsWithMessages}
+            toolCallAndResults={toolCallAndResults}
             onNavigate={onNavigate}
-            isStreaming={isWorkflowRunning}
           />
         </div>
       </div>

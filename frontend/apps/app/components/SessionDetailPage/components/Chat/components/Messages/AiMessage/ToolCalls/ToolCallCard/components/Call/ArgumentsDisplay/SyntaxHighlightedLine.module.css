@@ -1,25 +1,8 @@
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 .line {
   padding: var(--spacing-1) 0;
   min-height: 1.5em;
   white-space: nowrap;
   overflow: visible;
-}
-
-.animated {
-  animation: fadeIn 0.3s ease forwards;
-  animation-delay: var(--animation-delay);
-  opacity: 0;
 }
 
 .static {

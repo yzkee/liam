@@ -50,9 +50,7 @@ export const GlobalNav: FC<Props> = ({
           <LinkItem href="/projects" icon={<LayoutGrid />} label="Projects" />
 
           <NewSessionButton />
-          {currentOrganization && (
-            <RecentsSection organizationId={currentOrganization.id} />
-          )}
+          <RecentsSection />
         </>
       }
       footerContent={

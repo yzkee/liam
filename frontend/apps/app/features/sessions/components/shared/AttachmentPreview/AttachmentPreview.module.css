@@ -44,9 +44,3 @@
 .removeButton:hover {
   background-color: var(--overlay-100);
 }
-
-.removeIcon {
-  width: 10px;
-  height: 10px;
-  color: var(--button-foreground);
-}

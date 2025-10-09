@@ -23,7 +23,13 @@ const commandPaletteFilter: typeof defaultFilter = (value, ...rest) => {
   return defaultFilter(suggestion.name, ...rest)
 }
 
-export const CommandPaletteContent: FC = () => {
+type Props = {
+  isTableModeActivatable?: boolean
+}
+
+export const CommandPaletteContent: FC<Props> = ({
+  isTableModeActivatable = false,
+}) => {
   const [inputMode, setInputMode] = useState<CommandPaletteInputMode>({
     type: 'default',
   })
@@ -46,7 +52,7 @@ export const CommandPaletteContent: FC = () => {
           suggestion={suggestion}
           setMode={setInputMode}
           onBlur={(event) => event.target.focus()}
-          isTableModeActivatable
+          isTableModeActivatable={isTableModeActivatable}
         />
         <DialogClose asChild>
           <Button

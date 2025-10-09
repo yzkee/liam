@@ -6,3 +6,4 @@ export type CommandPaletteInputMode =
 export type CommandPaletteSuggestion =
   | { type: 'table'; name: string }
   | { type: 'command'; name: string }
+  | { type: 'column'; tableName: string; columnName: string }

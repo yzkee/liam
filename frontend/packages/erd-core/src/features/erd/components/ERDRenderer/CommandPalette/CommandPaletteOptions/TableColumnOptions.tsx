@@ -1,7 +1,7 @@
 import { Table2 } from '@liam-hq/ui'
 import clsx from 'clsx'
 import { Command } from 'cmdk'
-import { type FC, useCallback } from 'react'
+import { type FC, useCallback, useEffect } from 'react'
 import {
   getTableColumnElementId,
   getTableColumnLinkHref,
@@ -19,7 +19,7 @@ type Props = {
   suggestion: CommandPaletteSuggestion | null
 }
 
-export const TableColumnOptions: FC<Props> = ({ tableName }) => {
+export const TableColumnOptions: FC<Props> = ({ tableName, suggestion }) => {
   const schema = useSchemaOrThrow()
   const { selectTable } = useTableSelection()
   const { setOpen } = useCommandPaletteOrThrow()
@@ -34,6 +34,52 @@ export const TableColumnOptions: FC<Props> = ({ tableName }) => {
     },
     [setOpen, selectTable],
   )
+
+  // Select option by pressing [Enter] key (with/without ⌘ key)
+  useEffect(() => {
+    // It doesn't subscribe a keydown event listener if the suggestion type is not "table"
+    if (suggestion?.type !== 'table') return
+
+    const down = (event: KeyboardEvent) => {
+      const suggestedTableName = suggestion.name
+
+      if (event.key === 'Enter') {
+        event.preventDefault()
+
+        if (event.metaKey || event.ctrlKey) {
+          window.open(getTableLinkHref(suggestedTableName))
+        } else {
+          goToERD(suggestedTableName)
+        }
+      }
+    }
+
+    document.addEventListener('keydown', down)
+    return () => document.removeEventListener('keydown', down)
+  }, [suggestion, goToERD])
+
+  // Select option by pressing [Enter] key (with/without ⌘ key)
+  useEffect(() => {
+    // It doesn't subscribe a keydown event listener if the suggestion type is not "column"
+    if (suggestion?.type !== 'column') return
+
+    const down = (event: KeyboardEvent) => {
+      const { tableName, columnName } = suggestion
+
+      if (event.key === 'Enter') {
+        event.preventDefault()
+
+        if (event.metaKey || event.ctrlKey) {
+          window.open(getTableColumnLinkHref(tableName, columnName))
+        } else {
+          goToERD(tableName, columnName)
+        }
+      }
+    }
+
+    document.addEventListener('keydown', down)
+    return () => document.removeEventListener('keydown', down)
+  }, [suggestion, goToERD])
 
   const table = schema.current.tables[tableName]
   if (!table) {

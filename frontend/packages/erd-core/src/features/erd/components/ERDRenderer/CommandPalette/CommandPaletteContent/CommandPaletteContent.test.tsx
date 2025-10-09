@@ -207,6 +207,41 @@ describe('input mode and filters', () => {
       ).toBeInTheDocument()
     })
   })
+
+  describe('table input mode', () => {
+    it('renders selected table option and its column options', async () => {
+      const user = userEvent.setup()
+      render(<CommandPaletteContent isTableModeActivatable />, { wrapper })
+
+      // switch to "table" input mode of the "users" table
+      await user.keyboard('users')
+      await user.keyboard('{Tab}')
+
+      // the "users" table option is always displayed on the top of the options list
+      expect(screen.getByRole('option', { name: 'users' })).toBeInTheDocument()
+      // column options of the "users" table
+      expect(screen.getByRole('option', { name: 'id' })).toBeInTheDocument()
+      expect(screen.getByRole('option', { name: 'name' })).toBeInTheDocument()
+    })
+
+    it('filters column options by user input in the combobox while keeping the selected table option visible', async () => {
+      const user = userEvent.setup()
+      render(<CommandPaletteContent isTableModeActivatable />, { wrapper })
+
+      // switch to "table" input mode of the "users" table
+      await user.keyboard('users')
+      await user.keyboard('{Tab}')
+      // filter the column options by typing "name"
+      await user.keyboard('name')
+
+      expect(screen.getByRole('option', { name: 'users' })).toBeInTheDocument()
+      expect(screen.getByRole('option', { name: 'name' })).toBeInTheDocument()
+      // the "id" column option is filtered out
+      expect(
+        screen.queryByRole('option', { name: 'id' }),
+      ).not.toBeInTheDocument()
+    })
+  })
 })
 
 describe('preview', () => {

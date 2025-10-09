@@ -30,7 +30,10 @@ export const GlobalNav: FC<Props> = ({
       className={styles.globalNav}
       logoSection={
         <>
-          <Link href="/design_sessions/new" className={itemStyles.iconContainer}>
+          <Link
+            href="/design_sessions/new"
+            className={itemStyles.iconContainer}
+          >
             <LiamLogoMark />
           </Link>
           <Link href="/design_sessions/new" className={itemStyles.labelArea}>

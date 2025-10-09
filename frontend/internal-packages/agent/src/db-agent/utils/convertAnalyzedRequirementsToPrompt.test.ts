@@ -254,13 +254,14 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
         ## Requirements
 
 
+
         ## Schema Issues to Fix
 
         1. Non-existent testcase issue"
       `)
     })
 
-    it('should filter testcases without showing IDs or issue details', () => {
+    it('should filter testcases and show issue details in Schema Issues section', () => {
       const userInput = 'Design a user management system with authentication'
       const schemaIssues = [
         { testcaseId: '4', description: 'User table structure issue' },
@@ -278,7 +279,8 @@ describe('convertAnalyzedRequirementsToPrompt', () => {
       )
       expect(result).toContain('Create new user')
       expect(result).not.toContain('[4]')
-      expect(result).not.toContain('User table structure issue')
+      expect(result).toContain('## Schema Issues to Fix')
+      expect(result).toContain('User table structure issue')
     })
   })
 })

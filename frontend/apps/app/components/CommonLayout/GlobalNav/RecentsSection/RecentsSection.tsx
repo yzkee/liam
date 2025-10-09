@@ -9,7 +9,7 @@ export const RecentsSection = async () => {
   }
 
   const organizationId = organizationIdResult.value
-  const sessions = await fetchRecentSessions(organizationId, 5)
+  const sessions = await fetchRecentSessions(organizationId)
 
   return <RecentsSectionClient sessions={sessions} />
 }

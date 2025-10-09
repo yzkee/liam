@@ -25,7 +25,6 @@ export type AgentWorkflowParams = {
   userInput: string
   schemaData: Schema
   organizationId: string
-  buildingSchemaId: string
   designSessionId: string
   userId: string
   signal: AbortSignal

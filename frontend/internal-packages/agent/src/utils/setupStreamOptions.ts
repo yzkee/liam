@@ -6,7 +6,6 @@ import { createEnhancedTraceData } from './traceEnhancer'
 
 type SetupStreamOptionsParams = {
   organizationId: string
-  buildingSchemaId: string
   designSessionId: string
   userId: string
   repositories: Repositories
@@ -23,7 +22,6 @@ export type ReplayStreamParams = SetupStreamOptionsParams & {
 
 export const setupStreamOptions = ({
   organizationId,
-  buildingSchemaId,
   designSessionId,
   userId,
   repositories,
@@ -40,7 +38,6 @@ export const setupStreamOptions = ({
     [`organization:${organizationId}`, `session:${designSessionId}`],
     {
       workflow: {
-        building_schema_id: buildingSchemaId,
         design_session_id: designSessionId,
         user_id: userId,
         organization_id: organizationId,
@@ -51,7 +48,6 @@ export const setupStreamOptions = ({
   const configurable = {
     repositories,
     thread_id,
-    buildingSchemaId,
     ...(checkpointId ? { checkpoint_id: checkpointId } : {}),
   }
 

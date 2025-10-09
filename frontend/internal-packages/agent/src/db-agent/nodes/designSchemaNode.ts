@@ -36,7 +36,6 @@ export async function designSchemaNode(
     },
     messages,
     {
-      buildingSchemaId: state.buildingSchemaId,
       designSessionId: state.designSessionId,
       repositories,
     },

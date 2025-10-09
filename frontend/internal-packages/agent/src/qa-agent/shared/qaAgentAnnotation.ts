@@ -26,7 +26,6 @@ export const qaAgentAnnotation = Annotation.Root({
     }),
   }),
   designSessionId: Annotation<string>,
-  buildingSchemaId: Annotation<string>,
   schemaIssues: schemaIssuesAnnotation,
   generatedSqls: generatedSqlsAnnotation,
   next: Annotation<string>({

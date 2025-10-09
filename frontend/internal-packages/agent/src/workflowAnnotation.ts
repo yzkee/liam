@@ -13,7 +13,6 @@ export const workflowAnnotation = Annotation.Root({
     }),
   }),
   schemaData: Annotation<Schema>,
-  buildingSchemaId: Annotation<string>,
   organizationId: Annotation<string>,
   userId: Annotation<string>,
   designSessionId: Annotation<string>,

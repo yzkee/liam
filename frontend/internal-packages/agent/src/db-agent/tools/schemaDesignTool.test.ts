@@ -111,7 +111,7 @@ describe('schemaDesignTool', () => {
 
     // Verify createVersion was called with correct arguments
     expect(createVersionSpy).toHaveBeenCalledWith({
-      buildingSchemaId: 'test-schema-id',
+      buildingSchemaId: 'test-session',
       latestVersionNumber: 1,
       patch: input.operations,
     })

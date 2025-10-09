@@ -45,6 +45,7 @@ export const CommandPaletteContent: FC = () => {
           suggestion={suggestion}
           setMode={setInputMode}
           onBlur={(event) => event.target.focus()}
+          isTableModeActivatable
         />
         <DialogClose asChild>
           <Button

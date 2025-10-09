@@ -4,6 +4,7 @@ type TestCases = AnalyzedRequirements['testcases']
 
 export const convertRequirementsToPrompt = (
   requirements: AnalyzedRequirements,
+  userInput: string,
   schemaIssues?: Array<{ testcaseId: string; description: string }>,
 ): string => {
   let testcasesToUse: TestCases = requirements.testcases
@@ -29,13 +30,22 @@ export const convertRequirementsToPrompt = (
     testcasesToUse = filteredTestcases
   }
 
-  return `Session Goal:${requirements.goal ? ` ${requirements.goal}` : ''}
+  const testCasesSection = Object.entries(testcasesToUse)
+    .map(
+      ([category, testcases]) =>
+        `- ${category}: ${testcases.map((tc) => `${tc.title} (${tc.type})`).join(', ')}`,
+    )
+    .join('\n')
 
-Test Cases:
-${Object.entries(testcasesToUse)
-  .map(
-    ([category, testcases]) =>
-      `- ${category}: ${testcases.map((tc) => `${tc.title} (${tc.type})`).join(', ')}`,
-  )
-  .join('\n')}`.trim()
+  return `## Session Goal
+
+${requirements.goal}
+
+## Original User Request
+
+${userInput}
+
+## Test Cases
+
+${testCasesSection}`.trim()
 }

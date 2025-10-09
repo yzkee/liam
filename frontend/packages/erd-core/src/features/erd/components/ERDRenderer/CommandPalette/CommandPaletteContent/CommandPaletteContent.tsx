@@ -6,6 +6,7 @@ import {
   CommandPaletteCommandOptions,
   TableOptions,
 } from '../CommandPaletteOptions'
+import { TableColumnOptions } from '../CommandPaletteOptions/TableColumnOptions'
 import { CommandPreview, TablePreview } from '../CommandPalettePreview'
 import { CommandPaletteSearchInput } from '../CommandPaletteSearchInput'
 import type { CommandPaletteInputMode } from '../types'
@@ -62,6 +63,12 @@ export const CommandPaletteContent: FC = () => {
           <Command.Empty>No results found.</Command.Empty>
           {inputMode.type === 'default' && (
             <TableOptions suggestion={suggestion} />
+          )}
+          {inputMode.type === 'table' && (
+            <TableColumnOptions
+              tableName={inputMode.tableName}
+              suggestion={suggestion}
+            />
           )}
           {(inputMode.type === 'default' || inputMode.type === 'command') && (
             <CommandPaletteCommandOptions />

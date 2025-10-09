@@ -42,10 +42,6 @@
   transition: transform 0.2s ease;
 }
 
-.chevronOpen {
-  transform: rotate(180deg);
-}
-
 .dropdown {
   min-width: 127px;
   background-color: var(--global-background);

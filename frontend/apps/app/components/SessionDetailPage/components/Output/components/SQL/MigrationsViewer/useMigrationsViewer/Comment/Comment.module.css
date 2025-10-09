@@ -16,12 +16,6 @@
   gap: var(--spacing-4);
 }
 
-.commenter {
-  font-size: var(--font-size-4);
-  font-weight: 700;
-  line-height: 1;
-}
-
 .badge {
   display: inline-flex;
   align-items: center;

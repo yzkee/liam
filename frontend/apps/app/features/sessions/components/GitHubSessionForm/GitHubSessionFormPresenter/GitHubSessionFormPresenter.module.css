@@ -38,13 +38,6 @@
   gap: var(--spacing-3);
 }
 
-.label {
-  font-size: var(--font-size-5);
-  font-weight: 500;
-  color: var(--global-foreground);
-  min-width: var(--spacing-30);
-}
-
 .inputWrapper {
   display: flex;
   flex-direction: column;
@@ -103,22 +96,9 @@
   padding: 2px;
 }
 
-.buttonCustom {
-  min-width: var(--spacing-40);
-  height: var(--spacing-9);
-  font-size: var(--font-size-4);
-  font-weight: 500;
-}
-
 .error {
   color: var(--danger-high-contrast-text);
   font-size: var(--font-size-5);
-  margin-top: var(--spacing-2);
-}
-
-.loading {
-  font-size: var(--font-size-3);
-  color: var(--global-mute-text);
   margin-top: var(--spacing-2);
 }
 

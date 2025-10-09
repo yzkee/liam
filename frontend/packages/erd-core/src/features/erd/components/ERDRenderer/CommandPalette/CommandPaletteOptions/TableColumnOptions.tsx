@@ -1,7 +1,12 @@
 import { Table2 } from '@liam-hq/ui'
+import clsx from 'clsx'
 import { Command } from 'cmdk'
 import { type FC, useCallback } from 'react'
-import { getTableLinkHref } from '../../../../../../features'
+import {
+  getTableColumnElementId,
+  getTableColumnLinkHref,
+  getTableLinkHref,
+} from '../../../../../../features'
 import { useSchemaOrThrow } from '../../../../../../stores'
 import { useTableSelection } from '../../../../hooks'
 import { useCommandPaletteOrThrow } from '../CommandPaletteProvider'
@@ -20,9 +25,12 @@ export const TableColumnOptions: FC<Props> = ({ tableName }) => {
   const { setOpen } = useCommandPaletteOrThrow()
 
   const goToERD = useCallback(
-    (tableName: string) => {
+    (tableName: string, columnName?: string) => {
       selectTable({ tableId: tableName, displayArea: 'main' })
       setOpen(false)
+      if (columnName) {
+        window.location.hash = getTableColumnElementId(tableName, columnName)
+      }
     },
     [setOpen, selectTable],
   )
@@ -54,6 +62,33 @@ export const TableColumnOptions: FC<Props> = ({ tableName }) => {
           <span className={styles.itemText}>{table.name}</span>
         </a>
       </Command.Item>
+      {Object.values(table.columns).map((column) => (
+        <Command.Item
+          key={column.name}
+          value={getSuggestionText({
+            type: 'column',
+            tableName: table.name,
+            columnName: column.name,
+          })}
+        >
+          <a
+            className={clsx(styles.item, styles.indent)}
+            href={getTableColumnLinkHref(table.name, column.name)}
+            onClick={(event) => {
+              // Do not call preventDefault to allow the default link behavior when ⌘ key is pressed
+              if (event.ctrlKey || event.metaKey) {
+                return
+              }
+
+              event.preventDefault()
+              goToERD(table.name, column.name)
+            }}
+          >
+            <Table2 className={styles.itemIcon} />
+            <span className={styles.itemText}>{column.name}</span>
+          </a>
+        </Command.Item>
+      ))}
     </Command.Group>
   )
 }

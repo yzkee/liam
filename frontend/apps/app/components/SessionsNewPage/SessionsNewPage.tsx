@@ -19,7 +19,7 @@ export const SessionsNewPage: FC = async () => {
   const projectsResponse = await getProjects(organizationId)
   const projects = projectsResponse.data || []
 
-  const recentSessions = await fetchRecentSessions(10)
+  const recentSessions = await fetchRecentSessions(organizationId, 10)
 
   return (
     <div className={styles.container}>

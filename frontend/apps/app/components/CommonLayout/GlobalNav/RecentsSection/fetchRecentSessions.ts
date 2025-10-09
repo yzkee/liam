@@ -2,6 +2,7 @@ import { createClient } from '../../../../libs/db/server'
 import type { RecentSession } from './types'
 
 export const fetchRecentSessions = async (
+  organizationId: string,
   limit = 5,
 ): Promise<RecentSession[]> => {
   const supabase = await createClient()
@@ -15,6 +16,7 @@ export const fetchRecentSessions = async (
     .from('design_sessions')
     .select('id, name, created_at, project_id')
     .eq('created_by_user_id', userData.user.id)
+    .eq('organization_id', organizationId)
     .order('created_at', { ascending: false })
     .limit(limit)
 

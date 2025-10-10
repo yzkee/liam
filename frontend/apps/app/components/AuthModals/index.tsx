@@ -1,7 +1,7 @@
 import type { FC } from 'react'
 import type { AuthModalType } from '../../hooks/useAuthModal'
-import { SignInModal } from '../SignInModal'
-import { SignUpModal } from '../SignUpModal'
+import { SignInModal } from './SignInModal'
+import { SignUpModal } from './SignUpModal'
 
 type Props = {
   authModalType: AuthModalType

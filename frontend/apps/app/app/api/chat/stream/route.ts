@@ -65,18 +65,6 @@ export async function POST(request: Request) {
 
   const organizationId = designSession.organization_id
 
-  const { data: buildingSchema, error: buildingSchemaError } = await supabase
-    .from('building_schemas')
-    .select('id')
-    .eq('design_session_id', designSessionId)
-    .single()
-  if (buildingSchemaError) {
-    return NextResponse.json(
-      { error: 'Building schema not found for design session' },
-      { status: 404 },
-    )
-  }
-
   const repositories = createSupabaseRepositories(supabase, organizationId)
   const result = await repositories.schema.getSchema(designSessionId)
 
@@ -101,7 +89,6 @@ export async function POST(request: Request) {
       userInput: validationResult.output.userInput,
       schemaData: result.value.schema,
       organizationId,
-      buildingSchemaId: buildingSchema.id,
       designSessionId,
       userId,
       signal,

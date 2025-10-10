@@ -20,7 +20,6 @@ describe('getToolConfigurable', () => {
   it('should successfully extract tool configuration', () => {
     const config: RunnableConfig = {
       configurable: {
-        buildingSchemaId: 'test-version-id',
         designSessionId: 'test-session-id',
         repositories,
         logger: mockLogger,
@@ -32,7 +31,7 @@ describe('getToolConfigurable', () => {
 
     expect(result.isOk()).toBe(true)
     if (result.isOk()) {
-      expect(result.value.buildingSchemaId).toBe('test-version-id')
+      expect(result.value.designSessionId).toBe('test-session-id')
       expect(result.value.repositories).toBe(repositories)
     }
   })
@@ -53,7 +52,6 @@ describe('getToolConfigurable', () => {
   it('should return error when repositories is missing', () => {
     const config: RunnableConfig = {
       configurable: {
-        buildingSchemaId: 'test-version-id',
         designSessionId: 'test-session-id',
         logger: mockLogger,
         thread_id: 'test-thread',
@@ -74,7 +72,6 @@ describe('getToolConfigurable', () => {
   it('should return error when thread_id is missing', () => {
     const config: RunnableConfig = {
       configurable: {
-        buildingSchemaId: 'test-version-id',
         designSessionId: 'test-session-id',
         repositories,
         logger: mockLogger,
@@ -92,33 +89,11 @@ describe('getToolConfigurable', () => {
     }
   })
 
-  it('should return error when buildingSchemaId is missing', () => {
-    const config: RunnableConfig = {
-      configurable: {
-        repositories,
-        logger: mockLogger,
-        designSessionId: 'test-session-id',
-        thread_id: 'test-thread',
-        // Missing buildingSchemaId
-      },
-    }
-
-    const result = getToolConfigurable(config)
-
-    expect(result.isErr()).toBe(true)
-    if (result.isErr()) {
-      expect(result.error.message).toContain(
-        'Invalid configurable object in RunnableConfig',
-      )
-    }
-  })
-
   it('should return error when designSessionId is missing', () => {
     const config: RunnableConfig = {
       configurable: {
         repositories,
         logger: mockLogger,
-        buildingSchemaId: 'test-version-id',
         thread_id: 'test-thread',
         // Missing designSessionId
       },
@@ -134,50 +109,9 @@ describe('getToolConfigurable', () => {
     }
   })
 
-  it('should return error when buildingSchemaId is not a string', () => {
-    const config: RunnableConfig = {
-      configurable: {
-        buildingSchemaId: 123, // Should be string
-        designSessionId: 'test-session-id',
-        repositories,
-        logger: mockLogger,
-        thread_id: 'test-thread',
-      },
-    }
-
-    const result = getToolConfigurable(config)
-
-    expect(result.isErr()).toBe(true)
-    if (result.isErr()) {
-      expect(result.error.message).toContain(
-        'Invalid configurable object in RunnableConfig',
-      )
-    }
-  })
-
-  it('should accept empty string for buildingSchemaId', () => {
-    const config: RunnableConfig = {
-      configurable: {
-        buildingSchemaId: '', // Empty string is valid for v.string()
-        designSessionId: 'test-session-id',
-        repositories,
-        logger: mockLogger,
-        thread_id: 'test-thread',
-      },
-    }
-
-    const result = getToolConfigurable(config)
-
-    expect(result.isOk()).toBe(true)
-    if (result.isOk()) {
-      expect(result.value.buildingSchemaId).toBe('')
-    }
-  })
-
   it('should handle additional properties in configurable object', () => {
     const config: RunnableConfig = {
       configurable: {
-        buildingSchemaId: 'test-version-id',
         designSessionId: 'test-session-id',
         repositories,
         logger: mockLogger,
@@ -190,7 +124,7 @@ describe('getToolConfigurable', () => {
 
     expect(result.isOk()).toBe(true)
     if (result.isOk()) {
-      expect(result.value.buildingSchemaId).toBe('test-version-id')
+      expect(result.value.designSessionId).toBe('test-session-id')
       expect(result.value.repositories).toBe(repositories)
       // Additional properties should not be included in the result
       expect('additionalProperty' in result.value).toBe(false)
@@ -200,7 +134,6 @@ describe('getToolConfigurable', () => {
   it('should accept string as repositories (truthy check)', () => {
     const config: RunnableConfig = {
       configurable: {
-        buildingSchemaId: 'test-version-id',
         designSessionId: 'test-session-id',
         repositories: 'not-an-object', // Truthy value passes basic check
         logger: mockLogger,
@@ -219,7 +152,6 @@ describe('getToolConfigurable', () => {
   it('should return error when repositories is null', () => {
     const config: RunnableConfig = {
       configurable: {
-        buildingSchemaId: 'test-version-id',
         designSessionId: 'test-session-id',
         repositories: null, // Falsy value
         logger: mockLogger,

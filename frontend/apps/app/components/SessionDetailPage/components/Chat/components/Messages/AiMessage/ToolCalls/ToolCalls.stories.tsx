@@ -1,4 +1,4 @@
-import type { ToolCalls as ToolCallsType } from '@liam-hq/agent/client'
+import type { ToolCall } from '@liam-hq/agent/client'
 import type { Meta, StoryObj } from '@storybook/nextjs'
 import { ToolCalls } from './ToolCalls'
 
@@ -6,12 +6,6 @@ const meta: Meta<typeof ToolCalls> = {
   component: ToolCalls,
   parameters: {
     layout: 'padded',
-  },
-  argTypes: {
-    isStreaming: {
-      control: 'boolean',
-      description: 'Whether the tool is currently executing',
-    },
   },
 }
 
@@ -21,7 +15,7 @@ type Story = StoryObj<typeof ToolCalls>
 // Note: We use undefined for toolMessage to test default message handling in ToolCallCard
 // This avoids type assertion issues while still properly testing the UI
 
-const schemaDesignCall: ToolCallsType[number] = {
+const schemaDesignCall: ToolCall = {
   id: 'call_1',
   name: 'schemaDesignTool',
   type: 'tool_call',
@@ -340,7 +334,7 @@ const schemaDesignCall: ToolCallsType[number] = {
   },
 }
 
-const saveRequirementsCall: ToolCallsType[number] = {
+const saveRequirementsCall: ToolCall = {
   id: 'call_2',
   name: 'saveRequirementsToArtifactTool',
   type: 'tool_call',
@@ -399,7 +393,7 @@ const saveRequirementsCall: ToolCallsType[number] = {
   },
 }
 
-const saveTestcaseCall: ToolCallsType[number] = {
+const saveTestcaseCall: ToolCall = {
   id: 'call_3',
   name: 'saveTestcase',
   type: 'tool_call',
@@ -413,7 +407,7 @@ const saveTestcaseCall: ToolCallsType[number] = {
   },
 }
 
-const runTestCall: ToolCallsType[number] = {
+const runTestCall: ToolCall = {
   id: 'call_4',
   name: 'runTestTool',
   type: 'tool_call',
@@ -426,93 +420,93 @@ const runTestCall: ToolCallsType[number] = {
 export const SchemaDesign: Story = {
   name: 'Schema Design Tool',
   args: {
-    toolCallsWithMessages: [
+    toolCallAndResults: [
       {
-        toolCall: schemaDesignCall,
-        toolMessage: undefined, // Use default message: "Tool execution completed."
+        call: schemaDesignCall,
+        result: undefined, // Use default message: "Tool execution completed."
       },
     ],
-    isStreaming: true,
+    onNavigate: (_tab) => {},
   },
 }
 
 export const SaveRequirements: Story = {
   name: 'Save Requirements Tool',
   args: {
-    toolCallsWithMessages: [
+    toolCallAndResults: [
       {
-        toolCall: saveRequirementsCall,
-        toolMessage: undefined, // Use default message: "Tool execution completed."
+        call: saveRequirementsCall,
+        result: undefined, // Use default message: "Tool execution completed."
       },
     ],
-    isStreaming: true,
+    onNavigate: (_tab) => {},
   },
 }
 
 export const SaveTestcase: Story = {
   name: 'Save Testcase Tool',
   args: {
-    toolCallsWithMessages: [
+    toolCallAndResults: [
       {
-        toolCall: saveTestcaseCall,
-        toolMessage: undefined, // Use default message: "Tool execution completed."
+        call: saveTestcaseCall,
+        result: undefined, // Use default message: "Tool execution completed."
       },
     ],
-    isStreaming: true,
+    onNavigate: (_tab) => {},
   },
 }
 
 export const RunTest: Story = {
   name: 'Run Test Tool',
   args: {
-    toolCallsWithMessages: [
+    toolCallAndResults: [
       {
-        toolCall: runTestCall,
-        toolMessage: undefined, // Use default message: "Tool execution completed."
+        call: runTestCall,
+        result: undefined, // Use default message: "Tool execution completed."
       },
     ],
-    isStreaming: true,
+    onNavigate: (_tab) => {},
   },
 }
 
 // Static/Completed versions for reload behavior testing
 export const LoadedSession: Story = {
   args: {
-    toolCallsWithMessages: [
+    toolCallAndResults: [
       {
-        toolCall: schemaDesignCall,
-        toolMessage: undefined,
+        call: schemaDesignCall,
+        result: undefined,
       },
       {
-        toolCall: saveRequirementsCall,
-        toolMessage: undefined,
+        call: saveRequirementsCall,
+        result: undefined,
       },
     ],
-    isStreaming: false, // This simulates loading an existing session
+    onNavigate: (_tab) => {},
   },
 }
 
 export const AllToolsCompleted: Story = {
   name: 'All Tools (Completed - Reload Behavior)',
   args: {
-    toolCallsWithMessages: [
+    toolCallAndResults: [
       {
-        toolCall: schemaDesignCall,
-        toolMessage: undefined, // Use default message: "Tool execution completed."
+        call: schemaDesignCall,
+        result: undefined, // Use default message: "Tool execution completed."
       },
       {
-        toolCall: saveRequirementsCall,
-        toolMessage: undefined, // Use default message: "Tool execution completed."
+        call: saveRequirementsCall,
+        result: undefined, // Use default message: "Tool execution completed."
       },
       {
-        toolCall: saveTestcaseCall,
-        toolMessage: undefined, // Use default message: "Tool execution completed."
+        call: saveTestcaseCall,
+        result: undefined, // Use default message: "Tool execution completed."
       },
       {
-        toolCall: runTestCall,
-        toolMessage: undefined, // Use default message: "Tool execution completed."
+        call: runTestCall,
+        result: undefined, // Use default message: "Tool execution completed."
       },
     ],
-    isStreaming: false,
+    onNavigate: (_tab) => {},
   },
 }

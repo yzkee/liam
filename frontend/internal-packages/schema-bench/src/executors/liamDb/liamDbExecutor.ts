@@ -25,7 +25,6 @@ export async function execute(
     userInput: input.input,
     schemaData: aSchema({ tables: {} }),
     organizationId: 'demo-org-id',
-    buildingSchemaId: 'demo-design-session',
     designSessionId: 'demo-design-session',
     userId: 'demo-user-id',
     signal: new AbortController().signal,
@@ -51,7 +50,7 @@ export async function execute(
   // Get the latest schema from repository
   let finalSchemaData = finalWorkflowState.schemaData
   const latestSchemaResult = await repositories.schema.getSchema(
-    finalWorkflowState.buildingSchemaId,
+    finalWorkflowState.designSessionId,
   )
 
   if (latestSchemaResult.isOk()) {

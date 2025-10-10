@@ -1,4 +1,8 @@
-import type { AIMessage, ToolMessage } from '@langchain/core/messages'
+import type {
+  AIMessage,
+  AIMessageChunk,
+  ToolMessage,
+} from '@langchain/core/messages'
 import {
   extractReasoningFromMessage,
   extractToolCallsFromMessage,
@@ -35,7 +39,7 @@ const getAgentInfo = (name: string | undefined) => {
 }
 
 type Props = {
-  message: AIMessage
+  message: AIMessage | AIMessageChunk
   toolMessages: ToolMessage[]
   onNavigate: (tab: OutputTabValue) => void
   isWorkflowRunning: boolean
@@ -53,10 +57,10 @@ export const AiMessage: FC<Props> = ({
   const toolCalls = extractToolCallsFromMessage(message)
 
   // Combine toolCalls with their corresponding toolMessages
-  const toolCallsWithMessages = useMemo(() => {
-    return toolCalls.map((toolCall, index) => ({
-      toolCall,
-      toolMessage: toolMessages[index],
+  const toolCallAndResults = useMemo(() => {
+    return toolCalls.map((toolCall) => ({
+      call: toolCall,
+      result: toolMessages.find((msg) => msg.tool_call_id === toolCall.id),
     }))
   }, [toolCalls, toolMessages])
 
@@ -89,9 +93,8 @@ export const AiMessage: FC<Props> = ({
             </div>
           )}
           <ToolCalls
-            toolCallsWithMessages={toolCallsWithMessages}
+            toolCallAndResults={toolCallAndResults}
             onNavigate={onNavigate}
-            isStreaming={isWorkflowRunning}
           />
         </div>
       </div>

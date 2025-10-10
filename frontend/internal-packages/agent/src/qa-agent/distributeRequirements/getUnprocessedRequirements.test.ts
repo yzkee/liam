@@ -15,7 +15,6 @@ const createMockState = (
   schemaData: { tables: {}, enums: {}, extensions: {} },
   messages: [],
   designSessionId: 'test-session',
-  buildingSchemaId: 'test-schema',
   schemaIssues: [],
   generatedSqls: [],
   next: 'END',

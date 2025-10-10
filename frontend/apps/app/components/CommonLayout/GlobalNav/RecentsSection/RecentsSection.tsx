@@ -1,8 +1,15 @@
+import { getOrganizationId } from '../../../../features/organizations/services/getOrganizationId'
 import { fetchRecentSessions } from './fetchRecentSessions'
 import { RecentsSectionClient } from './RecentsSectionClient'
 
 export const RecentsSection = async () => {
-  const sessions = await fetchRecentSessions(5)
+  const organizationIdResult = await getOrganizationId()
+  if (organizationIdResult.isErr()) {
+    return null
+  }
+
+  const organizationId = organizationIdResult.value
+  const sessions = await fetchRecentSessions(organizationId)
 
   return <RecentsSectionClient sessions={sessions} />
 }

@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
-import { resolve } from 'node:path'
+import { join, resolve } from 'node:path'
 import { config } from 'dotenv'
 import { err, ok, type Result } from 'neverthrow'
 import * as v from 'valibot'
 import { execute, type LiamDbExecutorInput } from '../executors/liamDb/index.ts'
-import { loadInputFiles, saveOutputFile } from './utils'
+import { loadJsonFiles, saveOutputFile } from './utils'
 
 config({ path: resolve(__dirname, '../../../../../.env') })
 
@@ -52,10 +52,10 @@ export async function processDataset(
   datasetPath: string,
 ): Promise<DatasetResult> {
   // Load input files
-  const inputsResult = await loadInputFiles<
+  const inputsResult = await loadJsonFiles<
     typeof InputSchema,
     LiamDbExecutorInput
-  >(datasetPath, InputSchema, (value) => ({
+  >(join(datasetPath, 'execution', 'input'), InputSchema, (value) => ({
     input: typeof value === 'string' ? value : value.input,
   }))
   if (inputsResult.isErr()) {
@@ -76,10 +76,10 @@ export async function processDataset(
   let failureCount = 0
 
   const processBatch = async (
-    batch: Array<{ caseId: string; input: LiamDbExecutorInput }>,
+    batch: Array<{ caseId: string; data: LiamDbExecutorInput }>,
   ) => {
-    const promises = batch.map(({ caseId, input }) =>
-      executeCase(datasetPath, caseId, input),
+    const promises = batch.map(({ caseId, data }) =>
+      executeCase(datasetPath, caseId, data),
     )
     const results = await Promise.allSettled(promises)
 

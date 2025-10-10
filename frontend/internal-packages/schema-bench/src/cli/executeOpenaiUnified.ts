@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { resolve } from 'node:path'
+import { join, resolve } from 'node:path'
 import { config as loadEnv } from 'dotenv'
 import { err, ok, type Result } from 'neverthrow'
 import * as v from 'valibot'
@@ -11,7 +11,7 @@ import {
   getWorkspacePath,
   handleCliError,
   handleUnexpectedError,
-  loadInputFiles,
+  loadJsonFiles,
   parseArgs,
   saveOutputFile,
   selectTargetDatasets,
@@ -53,10 +53,12 @@ async function processDataset(
   datasetName: string,
   datasetPath: string,
 ): Promise<DatasetResult> {
-  const inputsResult = await loadInputFiles<
+  const inputsResult = await loadJsonFiles<
     typeof InputSchema,
     OpenAIExecutorInput
-  >(datasetPath, InputSchema, (value) => ({ input: value.input }))
+  >(join(datasetPath, 'execution', 'input'), InputSchema, (value) => ({
+    input: value.input,
+  }))
   if (inputsResult.isErr()) {
     console.warn(`⚠️  ${datasetName}: ${inputsResult.error.message}`)
     return { datasetName, success: 0, failure: 1 }
@@ -73,10 +75,10 @@ async function processDataset(
   let failureCount = 0
 
   const processBatch = async (
-    batch: Array<{ caseId: string; input: OpenAIExecutorInput }>,
+    batch: Array<{ caseId: string; data: OpenAIExecutorInput }>,
   ) => {
-    const promises = batch.map(({ caseId, input }) =>
-      executeCase(executor, datasetPath, caseId, input),
+    const promises = batch.map(({ caseId, data }) =>
+      executeCase(executor, datasetPath, caseId, data),
     )
     const results = await Promise.allSettled(promises)
     results.forEach((result) => {

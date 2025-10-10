@@ -1,4 +1,8 @@
-import type { AIMessage, ToolMessage } from '@langchain/core/messages'
+import type {
+  AIMessage,
+  AIMessageChunk,
+  ToolMessage,
+} from '@langchain/core/messages'
 import {
   extractReasoningFromMessage,
   extractToolCallsFromMessage,
@@ -35,7 +39,7 @@ const getAgentInfo = (name: string | undefined) => {
 }
 
 type Props = {
-  message: AIMessage
+  message: AIMessage | AIMessageChunk
   toolMessages: ToolMessage[]
   onNavigate: (tab: OutputTabValue) => void
   isWorkflowRunning: boolean
@@ -54,9 +58,9 @@ export const AiMessage: FC<Props> = ({
 
   // Combine toolCalls with their corresponding toolMessages
   const toolCallAndResults = useMemo(() => {
-    return toolCalls.map((toolCall, index) => ({
+    return toolCalls.map((toolCall) => ({
       call: toolCall,
-      result: toolMessages[index],
+      result: toolMessages.find((msg) => msg.tool_call_id === toolCall.id),
     }))
   }, [toolCalls, toolMessages])
 

@@ -1,4 +1,8 @@
-export const formatToolCallArgs = (args: Record<string, unknown>): string => {
+export const formatToolCallArgs = (
+  args: Record<string, unknown> | string,
+): string => {
+  if (typeof args === 'string') return args
+
   const entries = Object.entries(args)
   if (entries.length === 0) return ''
 

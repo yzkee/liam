@@ -31,6 +31,11 @@ export async function loginByEmail(formData: FormData) {
 
   const parsedData = v.safeParse(loginFormSchema, formDataObject)
   if (!parsedData.success) {
+    console.error('Login validation failed:', {
+      errors: parsedData.issues,
+      email: formDataObject.email,
+      timestamp: new Date().toISOString(),
+    })
     redirect(urlgen('error'))
   }
 
@@ -39,6 +44,12 @@ export async function loginByEmail(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword(data)
 
   if (error) {
+    console.error('Login authentication failed:', {
+      error: error.message,
+      code: error.status,
+      email: data.email,
+      timestamp: new Date().toISOString(),
+    })
     redirect(urlgen('error'))
   }
 

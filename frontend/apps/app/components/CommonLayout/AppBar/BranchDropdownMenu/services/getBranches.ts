@@ -1,12 +1,7 @@
-import { getRepositoryBranches } from '@liam-hq/github'
+import { type GitHubBranch, getRepositoryBranches } from '@liam-hq/github'
 import { createClient } from '../../../../../libs/db/server'
 
-type Branch = {
-  name: string
-  isProduction: boolean
-}
-
-export async function getBranches(projectId: string): Promise<Branch[]> {
+export async function getBranches(projectId: string): Promise<GitHubBranch[]> {
   const supabase = await createClient()
   const { data: mapping, error } = await supabase
     .from('project_repository_mappings')

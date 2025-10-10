@@ -1,17 +1,11 @@
 'use server'
 
-import { getRepositoryBranches } from '@liam-hq/github'
+import { type GitHubBranch, getRepositoryBranches } from '@liam-hq/github'
 import * as v from 'valibot'
 import { createClient } from '../../../../../libs/db/server'
 
-type BranchWithSha = {
-  name: string
-  sha: string
-  isProduction: boolean
-}
-
 type GetBranchesState = {
-  branches: BranchWithSha[]
+  branches: GitHubBranch[]
   loading: boolean
   error?: string
 }
@@ -66,14 +60,12 @@ export async function getBranches(
     repository.name,
   )
 
-  const branchesWithSha: BranchWithSha[] = [...branches]
-
-  branchesWithSha.sort((a, b) => {
+  branches.sort((a, b) => {
     if (a.isProduction && !b.isProduction) return -1
     if (!a.isProduction && b.isProduction) return 1
 
     return a.name.localeCompare(b.name)
   })
 
-  return { branches: branchesWithSha, loading: false }
+  return { branches, loading: false }
 }

@@ -8,10 +8,12 @@ import { type Artifact, artifactSchema } from '@liam-hq/artifact'
 import type { Schema } from '@liam-hq/schema'
 import { schemaSchema } from '@liam-hq/schema'
 import { err, ok, type Result } from 'neverthrow'
+import { cookies } from 'next/headers'
 import type { FC } from 'react'
 import { safeParse } from 'valibot'
 import { checkPublicShareStatus } from '../../features/public-share/actions'
 import { createClient } from '../../libs/db/server'
+import { DEFAULT_PANEL_SIZES, PANEL_LAYOUT_COOKIE_NAME } from './constants'
 import { ViewModeProvider } from './contexts/ViewModeContext'
 import { SessionDetailPageClient } from './SessionDetailPageClient'
 import { getBuildingSchema } from './services/buildingSchema/server/getBuildingSchema'
@@ -148,6 +150,17 @@ export const SessionDetailPage: FC<Props> = async ({
   const { isPublic: initialIsPublic } =
     await checkPublicShareStatus(designSessionId)
 
+  const cookieStore = await cookies()
+  const layoutCookie = cookieStore.get(PANEL_LAYOUT_COOKIE_NAME)
+  const panelSizes = (() => {
+    if (!layoutCookie) return DEFAULT_PANEL_SIZES
+    try {
+      const sizes = JSON.parse(layoutCookie.value)
+      if (Array.isArray(sizes) && sizes.length >= 2) return sizes
+    } catch {}
+    return DEFAULT_PANEL_SIZES
+  })()
+
   return (
     <ViewModeProvider mode="private">
       <SessionDetailPageClient
@@ -162,6 +175,7 @@ export const SessionDetailPage: FC<Props> = async ({
         initialIsPublic={initialIsPublic}
         initialWorkflowError={workflowError}
         senderName={senderName}
+        panelSizes={panelSizes}
       />
     </ViewModeProvider>
   )

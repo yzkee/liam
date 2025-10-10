@@ -7,6 +7,7 @@ type Branch = {
   name: string
   sha: string
   protected: boolean
+  isDefault: boolean
 }
 
 const mockProjects: Projects = [
@@ -25,9 +26,14 @@ const mockProjects: Projects = [
 ]
 
 const mockBranches = [
-  { name: 'main', sha: 'abc123', protected: true },
-  { name: 'develop', sha: 'def456', protected: false },
-  { name: 'feature/user-auth', sha: 'ghi789', protected: false },
+  { name: 'main', sha: 'abc123', protected: true, isDefault: true },
+  { name: 'develop', sha: 'def456', protected: false, isDefault: false },
+  {
+    name: 'feature/user-auth',
+    sha: 'ghi789',
+    protected: false,
+    isDefault: false,
+  },
 ]
 
 const meta = {

@@ -4,6 +4,7 @@ import { createClient } from '../../../../../libs/db/server'
 type Branch = {
   name: string
   protected: boolean
+  isDefault: boolean
 }
 
 export async function getBranches(projectId: string): Promise<Branch[]> {
@@ -23,7 +24,7 @@ export async function getBranches(projectId: string): Promise<Branch[]> {
   }
 
   const repository = mapping.github_repositories
-  const branches = await getRepositoryBranches(
+  const { branches, defaultBranch } = await getRepositoryBranches(
     Number(repository.github_installation_identifier),
     repository.owner,
     repository.name,
@@ -32,5 +33,6 @@ export async function getBranches(projectId: string): Promise<Branch[]> {
   return branches.map((branch) => ({
     name: branch.name,
     protected: branch.protected,
+    isDefault: branch.name === defaultBranch,
   }))
 }

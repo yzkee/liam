@@ -112,13 +112,21 @@ export const getRepositoryBranches = async (
 ) => {
   const octokit = await createOctokit(installationId)
 
+  const { data: repoInfo } = await octokit.repos.get({
+    owner,
+    repo,
+  })
+
   const branches = await octokit.paginate(octokit.repos.listBranches, {
     owner,
     repo,
     per_page: 100,
   })
 
-  return branches
+  return {
+    branches,
+    defaultBranch: repoInfo.default_branch,
+  }
 }
 
 /**

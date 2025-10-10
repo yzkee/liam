@@ -8,6 +8,7 @@ type BranchWithSha = {
   name: string
   protected: boolean
   sha: string
+  isDefault: boolean
 }
 
 type GetBranchesState = {
@@ -60,7 +61,7 @@ export async function getBranches(
   }
 
   const repository = mapping.github_repositories
-  const branches = await getRepositoryBranches(
+  const { branches, defaultBranch } = await getRepositoryBranches(
     Number(repository.github_installation_identifier),
     repository.owner,
     repository.name,
@@ -70,9 +71,12 @@ export async function getBranches(
     name: branch.name,
     protected: branch.protected,
     sha: branch.commit.sha,
+    isDefault: branch.name === defaultBranch,
   }))
 
   branchesWithSha.sort((a, b) => {
+    if (a.isDefault && !b.isDefault) return -1
+    if (!a.isDefault && b.isDefault) return 1
     if (a.protected && !b.protected) return -1
     if (!a.protected && b.protected) return 1
 

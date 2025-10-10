@@ -7,7 +7,12 @@ import { BranchCombobox } from '../../../shared/BranchCombobox'
 import styles from './BranchDropdownMenu.module.css'
 
 type Props = {
-  branches: Array<{ name: string; sha: string; protected: boolean }>
+  branches: Array<{
+    name: string
+    sha: string
+    protected: boolean
+    isDefault: boolean
+  }>
   currentBranchName: string
   currentProjectId: string
 }

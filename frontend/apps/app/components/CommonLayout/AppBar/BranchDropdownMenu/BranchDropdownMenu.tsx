@@ -24,6 +24,7 @@ export const BranchDropdownMenu: FC<Props> = async ({
     name: branch.name,
     sha: branch.name,
     protected: branch.protected,
+    isDefault: branch.isDefault,
   }))
 
   return (

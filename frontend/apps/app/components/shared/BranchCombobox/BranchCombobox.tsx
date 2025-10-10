@@ -10,6 +10,7 @@ export type Branch = {
   name: string
   sha: string
   protected: boolean
+  isDefault: boolean
 }
 
 type Props = {
@@ -110,7 +111,7 @@ export const BranchCombobox: FC<Props> = ({
             <span className={styles.branchName}>
               {selectedBranch?.name || 'Select a branch...'}
             </span>
-            {selectedBranch?.protected && (
+            {(selectedBranch?.isDefault || selectedBranch?.protected) && (
               <Code size="sm" style="fill">
                 production
               </Code>
@@ -156,7 +157,7 @@ export const BranchCombobox: FC<Props> = ({
                   >
                     <GitBranch className={styles.itemIcon} />
                     <span className={styles.itemLabel}>{branch.name}</span>
-                    {branch.protected && (
+                    {(branch.isDefault || branch.protected) && (
                       <Code size="sm" style="fill">
                         production
                       </Code>

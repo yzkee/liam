@@ -68,6 +68,11 @@ export async function loginByGithub(formData: FormData) {
   })
 
   if (error) {
+    console.error('GitHub OAuth initialization failed:', {
+      error: error.message,
+      redirectTo,
+      timestamp: new Date().toISOString(),
+    })
     redirect(urlgen('error'))
   }
 

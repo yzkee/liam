@@ -87,6 +87,8 @@ export const SessionDetailPageClient: FC<Props> = ({
     determineInitialTab(initialArtifact, initialVersions),
   )
   const [isResizing, setIsResizing] = useState(false)
+  const [hasReceivedAnalyzedRequirements, setHasReceivedAnalyzedRequirements] =
+    useState(false)
 
   const {
     versions,
@@ -125,15 +127,25 @@ export const SessionDetailPageClient: FC<Props> = ({
     onChangeArtifact: handleArtifactChange,
   })
 
-  const shouldShowOutputSection =
-    (artifact !== null || selectedVersion !== null) && activeTab
-
   const chatMessages = mapStoredMessagesToChatMessages(initialMessages)
-  const { isStreaming, messages, setMessages, start, replay, error } =
+  const { isStreaming, messages, setMessages, analyzedRequirements, start, replay, error } =
     useStream({
       initialMessages: chatMessages,
       designSessionId,
     })
+
+  useEffect(() => {
+    if (analyzedRequirements !== null && !hasReceivedAnalyzedRequirements) {
+      setActiveTab(OUTPUT_TABS.ARTIFACT)
+      setHasReceivedAnalyzedRequirements(true)
+    }
+  }, [analyzedRequirements, hasReceivedAnalyzedRequirements])
+
+  const shouldShowOutputSection =
+    (artifact !== null ||
+      selectedVersion !== null ||
+      analyzedRequirements !== null) &&
+    activeTab
 
   const handleLayoutChange = useCallback((sizes: number[]) => {
     setCookieJson(PANEL_LAYOUT_COOKIE_NAME, sizes, {
@@ -257,6 +269,7 @@ export const SessionDetailPageClient: FC<Props> = ({
                   initialIsPublic={initialIsPublic}
                   artifact={artifact}
                   artifactError={artifactError}
+                  analyzedRequirements={analyzedRequirements}
                 />
               </div>
             </ResizablePanel>

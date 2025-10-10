@@ -11,6 +11,10 @@ import { useCallback, useMemo, useRef, useState } from 'react'
 import { object, safeParse, string } from 'valibot'
 import { useNavigationGuard } from '../../../../hooks/useNavigationGuard'
 import { ERROR_MESSAGES } from '../../components/Chat/constants/chatConstants'
+import {
+  clearWorkflowInProgress,
+  setWorkflowInProgress,
+} from '../../utils/workflowStorage'
 import { parseSse } from './parseSse'
 import { useSessionStorageOnce } from './useSessionStorageOnce'
 
@@ -86,15 +90,19 @@ export const useStream = ({
   const abortRef = useRef<AbortController | null>(null)
   const retryCountRef = useRef(0)
 
-  const finalizeStream = useCallback(() => {
+  const completeWorkflow = useCallback((sessionId: string) => {
     setIsStreaming(false)
     abortRef.current = null
     retryCountRef.current = 0
+    clearWorkflowInProgress(sessionId)
   }, [])
 
-  const stop = useCallback(() => {
+  const abortWorkflow = useCallback(() => {
     abortRef.current?.abort()
+    setIsStreaming(false)
     abortRef.current = null
+    retryCountRef.current = 0
+    // Do NOT clear workflow flag - allow reconnection
   }, [])
 
   const clearError = useCallback(() => {
@@ -103,22 +111,13 @@ export const useStream = ({
 
   useNavigationGuard((_event) => {
     if (isStreaming) {
-      const shouldContinue = window.confirm(
-        "Design session is currently running. If you leave now, you'll lose your session progress. Continue anyway?",
-      )
-      if (shouldContinue) {
-        abortRef.current?.abort()
-        return true
-      }
-      return false
+      abortWorkflow()
     }
     return true
   })
 
-  const handleMessageEvent = useCallback((ev: { data: string }) => {
-    const parsedData = JSON.parse(ev.data)
-    const [serialized, metadata] = parsedData
-    const messageId = messageManagerRef.current.add(serialized, metadata)
+  const handleMessageEvent = useCallback(async (ev: { data: string }) => {
+    const messageId = await messageManagerRef.current.add(ev.data)
     if (!messageId) return
 
     setMessages((prev) => {
@@ -171,7 +170,7 @@ export const useStream = ({
   const runStreamAttempt = useCallback(
     async (
       endpoint: string,
-      payload: unknown,
+      params: StartParams | ReplayParams,
     ): Promise<Result<StreamAttemptStatus, StreamError>> => {
       abortRef.current?.abort()
 
@@ -184,12 +183,12 @@ export const useStream = ({
         const res = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(params),
           signal: controller.signal,
         })
 
         if (!res.body) {
-          finalizeStream()
+          abortWorkflow()
           return err({
             type: 'network',
             message: ERROR_MESSAGES.FETCH_FAILED,
@@ -201,7 +200,7 @@ export const useStream = ({
 
         if (!endEventReceived) {
           if (controller.signal.aborted) {
-            finalizeStream()
+            abortWorkflow()
             return err({
               type: 'abort',
               message: 'Request was aborted',
@@ -213,10 +212,10 @@ export const useStream = ({
           return ok('shouldRetry')
         }
 
-        finalizeStream()
+        completeWorkflow(params.designSessionId)
         return ok('complete')
       } catch (unknownError) {
-        finalizeStream()
+        abortWorkflow()
 
         if (
           unknownError instanceof Error &&
@@ -234,7 +233,7 @@ export const useStream = ({
         })
       }
     },
-    [finalizeStream, processStreamEvents],
+    [completeWorkflow, abortWorkflow, processStreamEvents],
   )
 
   const replay = useCallback(
@@ -254,14 +253,14 @@ export const useStream = ({
       }
 
       const timeoutMessage = ERROR_MESSAGES.CONNECTION_TIMEOUT
-      finalizeStream()
+      abortWorkflow()
       setError(timeoutMessage)
       return err({
         type: 'timeout',
         message: timeoutMessage,
       })
     },
-    [finalizeStream, runStreamAttempt],
+    [abortWorkflow, runStreamAttempt],
   )
 
   const start = useCallback(
@@ -283,6 +282,9 @@ export const useStream = ({
       } else {
         isFirstMessage.current = false
       }
+
+      // Set workflow in progress flag
+      setWorkflowInProgress(params.designSessionId)
 
       const result = await runStreamAttempt('/api/chat/stream', params)
 
@@ -309,8 +311,8 @@ export const useStream = ({
     messages,
     isStreaming,
     error,
-    stop,
     start,
+    replay,
     clearError,
   }
 }

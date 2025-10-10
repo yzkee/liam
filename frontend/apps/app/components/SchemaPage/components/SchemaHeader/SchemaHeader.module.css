@@ -43,10 +43,3 @@
   font-weight: 500;
   line-height: normal;
 }
-
-.tabWithDiff {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: var(--spacing-2, 0.5rem);
-}

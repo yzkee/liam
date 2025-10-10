@@ -21,7 +21,6 @@ describe('createDbAgentGraph Integration', () => {
       messages: [new HumanMessage(userInput)],
       schemaData: aSchema({ tables: {} }),
       designSessionId: context.designSessionId,
-      buildingSchemaId: context.buildingSchemaId,
       organizationId: context.organizationId,
       userId: context.userId,
       prompt: userInput,

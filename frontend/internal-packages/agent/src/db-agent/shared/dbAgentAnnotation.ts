@@ -4,7 +4,6 @@ import type { Schema } from '@liam-hq/schema'
 export const dbAgentAnnotation = Annotation.Root({
   ...MessagesAnnotation.spec,
   schemaData: Annotation<Schema>,
-  buildingSchemaId: Annotation<string>,
   organizationId: Annotation<string>,
   userId: Annotation<string>,
   designSessionId: Annotation<string>,

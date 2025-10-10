@@ -31,7 +31,6 @@ describe('designSchemaNode Integration', () => {
         enums: {},
         extensions: {},
       },
-      buildingSchemaId: context.buildingSchemaId,
       organizationId: context.organizationId,
       userId: context.userId,
       designSessionId: context.designSessionId,

@@ -6,7 +6,7 @@ import {
 import { createAppAuth } from '@octokit/auth-app'
 import { Octokit } from '@octokit/rest'
 import { err, type Result, type ResultAsync } from 'neverthrow'
-import type { GitHubContentItem } from './types'
+import type { GitHubBranch, GitHubContentItem } from './types'
 
 const createOctokit = async (installationId: number) => {
   const octokit = new Octokit({
@@ -109,7 +109,7 @@ export const getRepositoryBranches = async (
   installationId: number,
   owner: string,
   repo: string,
-) => {
+): Promise<GitHubBranch[]> => {
   const octokit = await createOctokit(installationId)
 
   const { data: repoInfo } = await octokit.repos.get({
@@ -123,10 +123,11 @@ export const getRepositoryBranches = async (
     per_page: 100,
   })
 
-  return {
-    branches,
-    defaultBranch: repoInfo.default_branch,
-  }
+  return branches.map((branch) => ({
+    name: branch.name,
+    sha: branch.commit.sha,
+    isProduction: branch.name === repoInfo.default_branch || branch.protected,
+  }))
 }
 
 /**

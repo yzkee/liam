@@ -10,8 +10,7 @@ type Props = {
   branches: Array<{
     name: string
     sha: string
-    protected: boolean
-    isDefault: boolean
+    isProduction: boolean
   }>
   currentBranchName: string
   currentProjectId: string

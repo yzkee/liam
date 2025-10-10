@@ -23,8 +23,7 @@ export const BranchDropdownMenu: FC<Props> = async ({
   const comboboxBranches = branches.map((branch) => ({
     name: branch.name,
     sha: branch.name,
-    protected: branch.protected,
-    isDefault: branch.isDefault,
+    isProduction: branch.isProduction,
   }))
 
   return (

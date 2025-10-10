@@ -6,9 +6,8 @@ import { createClient } from '../../../../../libs/db/server'
 
 type BranchWithSha = {
   name: string
-  protected: boolean
   sha: string
-  isDefault: boolean
+  isProduction: boolean
 }
 
 type GetBranchesState = {
@@ -61,24 +60,17 @@ export async function getBranches(
   }
 
   const repository = mapping.github_repositories
-  const { branches, defaultBranch } = await getRepositoryBranches(
+  const branches = await getRepositoryBranches(
     Number(repository.github_installation_identifier),
     repository.owner,
     repository.name,
   )
 
-  const branchesWithSha: BranchWithSha[] = branches.map((branch) => ({
-    name: branch.name,
-    protected: branch.protected,
-    sha: branch.commit.sha,
-    isDefault: branch.name === defaultBranch,
-  }))
+  const branchesWithSha: BranchWithSha[] = [...branches]
 
   branchesWithSha.sort((a, b) => {
-    if (a.isDefault && !b.isDefault) return -1
-    if (!a.isDefault && b.isDefault) return 1
-    if (a.protected && !b.protected) return -1
-    if (!a.protected && b.protected) return 1
+    if (a.isProduction && !b.isProduction) return -1
+    if (!a.isProduction && b.isProduction) return 1
 
     return a.name.localeCompare(b.name)
   })

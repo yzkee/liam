@@ -38,7 +38,15 @@ const config: StorybookConfig = {
     options: {},
   },
 
-  staticDirs: ['../public', './public', '../../../apps/app/public'],
+  staticDirs: [
+    '../public',
+    './public',
+    '../../../apps/app/public',
+    {
+      from: '../../../packages/ui/src/styles',
+      to: 'styles',
+    },
+  ],
 
   webpackFinal: async (config) => {
     return config

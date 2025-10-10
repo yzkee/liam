@@ -148,7 +148,10 @@ export const ERDRenderer: FC<Props> = ({
               >
                 <LeftPane />
               </ResizablePanel>
-              <ResizableHandle onDragging={(e) => setIsResizing(e)} />
+              <ResizableHandle
+                disabled={!open}
+                onDragging={(e) => setIsResizing(e)}
+              />
               <ResizablePanel
                 collapsible
                 defaultSize={defaultPanelSizes[1]}

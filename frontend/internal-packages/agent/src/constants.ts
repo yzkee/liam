@@ -5,15 +5,18 @@
  * Important: Node retries do NOT count toward this limit. The limit only
  * applies to transitions between nodes.
  *
- * The workflow has 8 nodes:
- * - Normal execution: 9 transitions (START → 8 nodes → END)
- * - With error loops: May have additional transitions when errors occur
- *   (e.g., validateSchema → designSchema)
+ * TEMPORARY LIMITATION (set to 10):
+ * Due to issues with schemaDesignTool, the DB Agent cannot resolve schema issues
+ * on the second and subsequent attempts, causing infinite loops between:
+ * leadAgent → dbAgent → qaAgent → leadAgent (when schemaIssues exist)
  *
- * Setting this to 50 ensures:
- * - Complete workflow execution under normal conditions
- * - Ample headroom for complex error handling loops and retries
- * - Protection against infinite loops while allowing for complex workflows
- * - Sufficient capacity for finding optimal workflow patterns
+ * Current behavior with limit=10:
+ * - Allows multiple iterations of: PM Agent → DB Agent → QA Agent → Lead Agent → DB Agent
+ * - The workflow will fail after 10 loops if issues persist
+ * - Provides more opportunities for the DB Agent to refine the schema
+ *
+ * TODO: Increase this limit after fixing schemaDesignTool to properly handle
+ * schema modifications (e.g., unique constraint issues, JSON patch errors)
+ * See: route06/liam-internal#5642
  */
-export const DEFAULT_RECURSION_LIMIT = 50
+export const DEFAULT_RECURSION_LIMIT = 10

@@ -6,6 +6,7 @@ import {
   getTestConfig,
   outputStreamEvents,
 } from '../test-utils/workflowTestHelpers'
+import { DEFAULT_RECURSION_LIMIT } from './constants'
 import { createGraph } from './createGraph'
 import type { WorkflowState } from './types'
 
@@ -35,6 +36,7 @@ describe('createGraph Integration', () => {
     // Act
     const streamEvents = graph.streamEvents(initialState, {
       ...config,
+      recursionLimit: DEFAULT_RECURSION_LIMIT,
       streamMode: 'messages',
       version: 'v2',
       subgraphs: true,

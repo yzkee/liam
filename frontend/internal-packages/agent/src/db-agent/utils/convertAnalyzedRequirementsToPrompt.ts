@@ -37,6 +37,11 @@ export const convertRequirementsToPrompt = (
     )
     .join('\n')
 
+  const schemaIssuesSection =
+    schemaIssues && schemaIssues.length > 0
+      ? `\n\n## Schema Issues to Fix\n\n${schemaIssues.map((issue, index) => `${index + 1}. ${issue.description}`).join('\n')}`
+      : ''
+
   return `## Session Goal
 
 ${requirements.goal}
@@ -45,7 +50,7 @@ ${requirements.goal}
 
 ${userInput}
 
-## Test Cases
+## Requirements
 
-${testCasesSection}`.trim()
+${testCasesSection}${schemaIssuesSection}`.trim()
 }

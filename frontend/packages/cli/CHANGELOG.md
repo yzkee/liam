@@ -1,5 +1,13 @@
 # @liam-hq/cli
 
+## 0.7.19
+
+### Patch Changes
+
+- [#3716](https://github.com/liam-hq/liam/pull/3716) - - 🐛 Fix PostgreSQL parser to handle pg_dump meta-commands and UTF-8 byte offsets / Thanks [@MH4GF](https://github.com/MH4GF)!
+  - Sanitize `\restrict` and `\unrestrict` meta-commands from pg_dump 16.10+ by replacing with spaces to preserve byte offsets
+  - Fix UTF-8 byte offset to character index conversion for multibyte characters in chunked SQL processing
+
 ## 0.7.18
 
 ### Patch Changes

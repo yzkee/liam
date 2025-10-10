@@ -5,6 +5,7 @@ import type { ReactElement } from 'react'
 import { safeParse } from 'valibot'
 import { createPublicServerClient } from '../../libs/db/server'
 import { PublicLayout } from '../PublicLayout'
+import { DEFAULT_PANEL_SIZES } from '../SessionDetailPage/constants'
 import { ViewModeProvider } from '../SessionDetailPage/contexts/ViewModeContext'
 import { SessionDetailPageClient } from '../SessionDetailPage/SessionDetailPageClient'
 import { buildPrevSchema } from '../SessionDetailPage/services/buildPrevSchema/server/buildPrevSchema'
@@ -136,6 +137,7 @@ export const PublicSessionDetailPage = async ({
           initialIsPublic={true}
           initialArtifact={initialArtifact}
           senderName="Guest"
+          panelSizes={DEFAULT_PANEL_SIZES}
         />
       </ViewModeProvider>
     </PublicLayout>

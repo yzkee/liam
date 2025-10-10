@@ -6,19 +6,27 @@ import {
 } from '@langchain/core/messages'
 import type { Artifact } from '@liam-hq/artifact'
 import type { Schema } from '@liam-hq/schema'
-import clsx from 'clsx'
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from '@liam-hq/ui'
 import { type FC, useCallback, useEffect, useRef, useState } from 'react'
+import { setCookieJson } from '../../libs/utils/cookie'
 import { Chat } from './components/Chat'
 import { Output } from './components/Output'
 import { useRealtimeArtifact } from './components/Output/components/Artifact/hooks/useRealtimeArtifact'
 import { OUTPUT_TABS, type OutputTabValue } from './components/Output/constants'
+import { PANEL_LAYOUT_COOKIE_NAME } from './constants'
 import { useRealtimeVersionsWithSchema } from './hooks/useRealtimeVersionsWithSchema'
 import { useStream } from './hooks/useStream'
 import { SQL_REVIEW_COMMENTS } from './mock'
-import styles from './SessionDetailPage.module.css'
+import styles from './SessionDetailPageClient.module.css'
 import type { Version } from './types'
 import { determineWorkflowAction } from './utils/determineWorkflowAction'
 import { getWorkflowInProgress } from './utils/workflowStorage'
+
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 7
 
 type Props = {
   buildingSchemaId: string
@@ -32,6 +40,7 @@ type Props = {
   initialWorkflowError?: string | null
   initialArtifact: Artifact | null
   senderName: string
+  panelSizes: number[]
 }
 
 // Determine the initial active tab based on available data
@@ -71,10 +80,12 @@ export const SessionDetailPageClient: FC<Props> = ({
   initialWorkflowError,
   initialArtifact,
   senderName,
+  panelSizes,
 }) => {
   const [activeTab, setActiveTab] = useState<OutputTabValue | undefined>(
     determineInitialTab(initialArtifact, initialVersions),
   )
+  const [isResizing, setIsResizing] = useState(false)
 
   const {
     versions,
@@ -123,6 +134,13 @@ export const SessionDetailPageClient: FC<Props> = ({
     senderName,
   })
 
+  const handleLayoutChange = useCallback((sizes: number[]) => {
+    setCookieJson(PANEL_LAYOUT_COOKIE_NAME, sizes, {
+      path: '/',
+      maxAge: COOKIE_MAX_AGE,
+    })
+  }, [])
+
   // Combine streaming error with workflow errors
   const combinedError = error || initialWorkflowError
   // Track if initial workflow has been triggered to prevent multiple executions
@@ -165,47 +183,66 @@ export const SessionDetailPageClient: FC<Props> = ({
 
   return (
     <div className={styles.container}>
-      <div
-        className={clsx(
-          styles.columns,
-          shouldShowOutputSection ? styles.twoColumns : styles.oneColumn,
-        )}
+      <ResizablePanelGroup
+        direction="horizontal"
+        className={styles.columns}
+        data-layout={shouldShowOutputSection ? 'two-columns' : 'one-column'}
+        onLayout={handleLayoutChange}
       >
-        <div className={styles.chatSection}>
-          <Chat
-            schemaData={displayedSchema}
-            messages={messages}
-            isWorkflowRunning={isStreaming}
-            onSendMessage={(content: string) =>
-              start({
-                userInput: content,
-                designSessionId,
-                isDeepModelingEnabled,
-              })
-            }
-            onNavigate={setActiveTab}
-            error={combinedError}
-          />
-        </div>
-        {shouldShowOutputSection && (
-          <div className={styles.outputSection}>
-            <Output
-              designSessionId={designSessionId}
-              schema={displayedSchema}
-              prevSchema={prevSchema}
-              sqlReviewComments={SQL_REVIEW_COMMENTS}
-              versions={versions}
-              selectedVersion={selectedVersion}
-              onSelectedVersionChange={handleVersionChange}
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-              initialIsPublic={initialIsPublic}
-              artifact={artifact}
-              artifactError={artifactError}
-            />
+        <ResizablePanel
+          defaultSize={panelSizes[0]}
+          minSize={22}
+          maxSize={70}
+          isResizing={isResizing}
+        >
+          <div className={styles.chatSection}>
+            <div className={styles.chatWrapper}>
+              <Chat
+                schemaData={displayedSchema}
+                messages={messages}
+                isWorkflowRunning={isStreaming}
+                onSendMessage={(content: string) =>
+                  start({
+                    userInput: content,
+                    designSessionId,
+                    isDeepModelingEnabled,
+                  })
+                }
+                onNavigate={setActiveTab}
+                error={combinedError}
+              />
+            </div>
           </div>
+        </ResizablePanel>
+        {shouldShowOutputSection && (
+          <>
+            <ResizableHandle onDragging={(e) => setIsResizing(e)} />
+            <ResizablePanel
+              defaultSize={panelSizes[1]}
+              minSize={30}
+              maxSize={78}
+              isResizing={isResizing}
+            >
+              <div className={styles.outputSection}>
+                <Output
+                  designSessionId={designSessionId}
+                  schema={displayedSchema}
+                  prevSchema={prevSchema}
+                  sqlReviewComments={SQL_REVIEW_COMMENTS}
+                  versions={versions}
+                  selectedVersion={selectedVersion}
+                  onSelectedVersionChange={handleVersionChange}
+                  activeTab={activeTab}
+                  onTabChange={setActiveTab}
+                  initialIsPublic={initialIsPublic}
+                  artifact={artifact}
+                  artifactError={artifactError}
+                />
+              </div>
+            </ResizablePanel>
+          </>
         )}
-      </div>
+      </ResizablePanelGroup>
     </div>
   )
 }

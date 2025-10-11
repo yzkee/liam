@@ -25,6 +25,7 @@ import { useCommandPaletteOrThrow } from '../CommandPaletteProvider'
 import type { CommandPaletteSuggestion } from '../types'
 import { getSuggestionText } from '../utils'
 import styles from './CommandPaletteOptions.module.css'
+import { useTableOptionSelect } from './hooks/useTableOptionSelect'
 import { type ColumnType, getColumnTypeMap } from './utils/getColumnTypeMap'
 
 type Props = {
@@ -66,29 +67,6 @@ export const TableColumnOptions: FC<Props> = ({ tableName, suggestion }) => {
 
   // Select option by pressing [Enter] key (with/without ⌘ key)
   useEffect(() => {
-    // It doesn't subscribe a keydown event listener if the suggestion type is not "table"
-    if (suggestion?.type !== 'table') return
-
-    const down = (event: KeyboardEvent) => {
-      const suggestedTableName = suggestion.name
-
-      if (event.key === 'Enter') {
-        event.preventDefault()
-
-        if (event.metaKey || event.ctrlKey) {
-          window.open(getTableLinkHref(suggestedTableName))
-        } else {
-          goToERD(suggestedTableName)
-        }
-      }
-    }
-
-    document.addEventListener('keydown', down)
-    return () => document.removeEventListener('keydown', down)
-  }, [suggestion, goToERD])
-
-  // Select option by pressing [Enter] key (with/without ⌘ key)
-  useEffect(() => {
     // It doesn't subscribe a keydown event listener if the suggestion type is not "column"
     if (suggestion?.type !== 'column') return
 
@@ -110,6 +88,8 @@ export const TableColumnOptions: FC<Props> = ({ tableName, suggestion }) => {
     return () => document.removeEventListener('keydown', down)
   }, [suggestion, goToERD])
 
+  const { tableOptionSelectHandler } = useTableOptionSelect(suggestion)
+
   const table = schema.current.tables[tableName]
   const columnTypeMap = useMemo(
     () => (table ? getColumnTypeMap(table) : {}),
@@ -128,15 +108,7 @@ export const TableColumnOptions: FC<Props> = ({ tableName, suggestion }) => {
         <a
           className={styles.item}
           href={getTableLinkHref(table.name)}
-          onClick={(event) => {
-            // Do not call preventDefault to allow the default link behavior when ⌘ key is pressed
-            if (event.ctrlKey || event.metaKey) {
-              return
-            }
-
-            event.preventDefault()
-            goToERD(table.name)
-          }}
+          onClick={(event) => tableOptionSelectHandler(event, table.name)}
         >
           <Table2 className={styles.itemIcon} />
           <span className={styles.itemText}>{table.name}</span>

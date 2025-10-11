@@ -15,7 +15,7 @@ type Props = {
 export const TableOptions: FC<Props> = ({ suggestion }) => {
   const schema = useSchemaOrThrow()
 
-  const { tableOptionSelectHandler } = useTableOptionSelect(suggestion)
+  const { optionSelectHandler } = useTableOptionSelect(suggestion)
 
   return (
     <Command.Group heading="Tables">
@@ -27,7 +27,7 @@ export const TableOptions: FC<Props> = ({ suggestion }) => {
           <a
             className={styles.item}
             href={getTableLinkHref(table.name)}
-            onClick={(event) => tableOptionSelectHandler(event, table.name)}
+            onClick={(event) => optionSelectHandler(event, table.name)}
           >
             <Table2 className={styles.itemIcon} />
             <span className={styles.itemText}>{table.name}</span>

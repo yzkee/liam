@@ -1,6 +1,10 @@
 import { useCallback, useEffect } from 'react'
 import { useTableSelection } from '../../../../../../erd/hooks'
-import { getTableLinkHref } from '../../../../../utils'
+import {
+  getTableColumnElementId,
+  getTableColumnLinkHref,
+  getTableLinkHref,
+} from '../../../../../utils'
 import { useCommandPaletteOrThrow } from '../../CommandPaletteProvider'
 import type { CommandPaletteSuggestion } from '../../types'
 
@@ -11,27 +15,31 @@ export const useTableOptionSelect = (
 
   const { selectTable } = useTableSelection()
   const goToERD = useCallback(
-    (tableName: string) => {
+    (tableName: string, columnName?: string) => {
       selectTable({ tableId: tableName, displayArea: 'main' })
+      if (columnName) {
+        window.location.hash = getTableColumnElementId(tableName, columnName)
+      }
+
       setOpen(false)
     },
     [selectTable, setOpen],
   )
 
-  const tableOptionSelectHandler = useCallback(
-    (event: React.MouseEvent, tableName: string) => {
+  const optionSelectHandler = useCallback(
+    (event: React.MouseEvent, tableName: string, columnName?: string) => {
       // Do not call preventDefault to allow the default link behavior when ⌘ key is pressed
       if (event.ctrlKey || event.metaKey) {
         return
       }
 
       event.preventDefault()
-      goToERD(tableName)
+      goToERD(tableName, columnName)
     },
     [goToERD],
   )
 
-  // Select option by pressing [Enter] key (with/without ⌘ key)
+  // Select table option by pressing [Enter] key (with/without ⌘ key)
   useEffect(() => {
     // It doesn't subscribe a keydown event listener if the suggestion type is not "table"
     if (suggestion?.type !== 'table') return
@@ -54,5 +62,28 @@ export const useTableOptionSelect = (
     return () => document.removeEventListener('keydown', down)
   }, [suggestion, goToERD])
 
-  return { tableOptionSelectHandler }
+  // Select column option by pressing [Enter] key (with/without ⌘ key)
+  useEffect(() => {
+    // It doesn't subscribe a keydown event listener if the suggestion type is not "column"
+    if (suggestion?.type !== 'column') return
+
+    const down = (event: KeyboardEvent) => {
+      const { tableName, columnName } = suggestion
+
+      if (event.key === 'Enter') {
+        event.preventDefault()
+
+        if (event.metaKey || event.ctrlKey) {
+          window.open(getTableColumnLinkHref(tableName, columnName))
+        } else {
+          goToERD(tableName, columnName)
+        }
+      }
+    }
+
+    document.addEventListener('keydown', down)
+    return () => document.removeEventListener('keydown', down)
+  }, [suggestion, goToERD])
+
+  return { optionSelectHandler }
 }

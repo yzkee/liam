@@ -19,12 +19,20 @@ export const Content: FC<Props> = ({
   currentProjectId,
 }) => {
   const router = useRouter()
+  const currentBranch = branches.find(
+    (branch) => branch.name === currentBranchName,
+  )
 
-  const handleBranchChange = (branchName: string) => {
+  const handleBranchChange = (branchSha: string) => {
+    const nextBranch = branches.find((branch) => branch.sha === branchSha)
+    if (!nextBranch) {
+      return
+    }
+
     router.push(
       urlgen('projects/[projectId]/ref/[branchOrCommit]', {
         projectId: currentProjectId,
-        branchOrCommit: branchName,
+        branchOrCommit: nextBranch.name,
       }),
     )
   }
@@ -32,7 +40,7 @@ export const Content: FC<Props> = ({
   return (
     <BranchCombobox
       branches={branches}
-      selectedBranchSha={currentBranchName}
+      selectedBranchSha={currentBranch?.sha}
       onBranchChange={handleBranchChange}
       placeholder="Search branches..."
       className={styles.trigger}

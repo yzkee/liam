@@ -112,12 +112,19 @@ export const SessionDetailPageClient: FC<Props> = ({
   )
 
   const chatMessages = mapStoredMessagesToChatMessages(initialMessages)
-  const { isStreaming, messages, setMessages, analyzedRequirements, start, replay, error } =
-    useStream({
-      initialMessages: chatMessages,
-      initialAnalyzedRequirements,
-      designSessionId,
-    })
+  const {
+    isStreaming,
+    messages,
+    setMessages,
+    analyzedRequirements,
+    start,
+    replay,
+    error,
+  } = useStream({
+    initialMessages: chatMessages,
+    initialAnalyzedRequirements,
+    designSessionId,
+  })
 
   useEffect(() => {
     if (

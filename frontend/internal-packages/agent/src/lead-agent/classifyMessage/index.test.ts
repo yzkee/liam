@@ -13,7 +13,6 @@ const createMockState = (
   },
   schemaIssues: [],
   schemaData: { tables: {}, enums: {}, extensions: {} },
-  buildingSchemaId: 'test-schema-id',
   organizationId: 'test-org-id',
   userId: 'test-user-id',
   designSessionId: 'test-session-id',

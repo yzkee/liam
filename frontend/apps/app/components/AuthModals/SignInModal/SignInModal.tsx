@@ -11,9 +11,9 @@ import {
   XIcon,
 } from '@liam-hq/ui'
 import type { FC } from 'react'
+import { EmailForm } from '../../LoginPage/EmailForm'
+import { loginByGithub } from '../../LoginPage/services/loginByGithub'
 import authStyles from '../AuthModal.module.css'
-import { EmailForm } from '../LoginPage/EmailForm'
-import { loginByGithub } from '../LoginPage/services/loginByGithub'
 
 type Props = {
   isOpen: boolean

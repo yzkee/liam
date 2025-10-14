@@ -11,6 +11,53 @@ const retryDirectionValues = {
 
 type RetryDirection = -1 | 1
 
+// pg-query-emscripten returns offsets measured in UTF-8 bytes, whereas the
+// chunking code operates on JS string indices (UTF-16 code units). These
+// helpers bridge the two so multiline reads stay aligned even with multibyte
+// characters.
+function getUtf8ByteLength(codePoint: number): number {
+  if (codePoint <= 0x7f) return 1
+  if (codePoint <= 0x7ff) return 2
+  if (codePoint <= 0xffff) return 3
+  return 4
+}
+
+function utf8ByteOffsetToCharIndex(
+  input: string,
+  byteOffset: number,
+): number | null {
+  if (byteOffset < 0) return null
+
+  let bytesConsumed = 0
+  for (let i = 0; i < input.length; ) {
+    if (bytesConsumed === byteOffset) {
+      return i
+    }
+
+    const codePoint = input.codePointAt(i)
+    if (codePoint === undefined) return null
+
+    const utf8Length = getUtf8ByteLength(codePoint)
+    if (bytesConsumed + utf8Length > byteOffset) {
+      return null
+    }
+
+    bytesConsumed += utf8Length
+    const codeUnitLength = codePoint > 0xffff ? 2 : 1
+    i += codeUnitLength
+
+    if (bytesConsumed === byteOffset) {
+      return i
+    }
+  }
+
+  if (bytesConsumed === byteOffset) {
+    return input.length
+  }
+
+  return null
+}
+
 /**
  * Determines the line number in a string corresponding to a given character index.
  *
@@ -53,7 +100,12 @@ function handleSuccessfulProcessing(
   Error
 > {
   if (readOffset !== null) {
-    if (readOffset === chunk.length) {
+    const charIndex = utf8ByteOffsetToCharIndex(chunk, readOffset)
+    if (charIndex === null) {
+      return err(new Error('UnexpectedCondition. charIndex === null'))
+    }
+
+    if (charIndex === chunk.length) {
       return ok({
         newChunkSize: adjustedChunkSize,
         newRetryDirection: retryDirection,
@@ -63,7 +115,7 @@ function handleSuccessfulProcessing(
       })
     }
 
-    const lineNumber = getLineNumber(chunk, readOffset)
+    const lineNumber = getLineNumber(chunk, charIndex)
     if (lineNumber === null) {
       return err(new Error('UnexpectedCondition. lineNumber === null'))
     }

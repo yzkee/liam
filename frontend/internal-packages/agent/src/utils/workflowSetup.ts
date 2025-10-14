@@ -26,9 +26,7 @@ type WorkflowSetupConfig = {
 type WorkflowSetupResult = {
   workflowState: WorkflowState
   runCollector: RunCollectorCallbackHandler
-  configurable: WorkflowConfigurable & {
-    buildingSchemaId: string
-  }
+  configurable: WorkflowConfigurable
   traceEnhancement: {
     tags: string[]
     metadata: Record<string, unknown>
@@ -43,14 +41,8 @@ export const setupWorkflowState = (
   params: AgentWorkflowParams,
   config: WorkflowSetupConfig,
 ): ResultAsync<WorkflowSetupResult, Error> => {
-  const {
-    userInput,
-    schemaData,
-    organizationId,
-    buildingSchemaId,
-    designSessionId,
-    userId,
-  } = params
+  const { userInput, schemaData, organizationId, designSessionId, userId } =
+    params
 
   const { repositories, thread_id } = config.configurable
 
@@ -79,7 +71,6 @@ export const setupWorkflowState = (
       [`organization:${organizationId}`, `session:${designSessionId}`],
       {
         workflow: {
-          building_schema_id: buildingSchemaId,
           design_session_id: designSessionId,
           user_id: userId,
           organization_id: organizationId,
@@ -97,7 +88,6 @@ export const setupWorkflowState = (
         },
         schemaIssues: [],
         organizationId,
-        buildingSchemaId,
         designSessionId,
         userId,
         next: END,
@@ -106,7 +96,6 @@ export const setupWorkflowState = (
       configurable: {
         repositories,
         thread_id,
-        buildingSchemaId,
       },
       traceEnhancement,
     })

@@ -59,11 +59,6 @@
       "count": 3
     }
   },
-  "components/SessionDetailPage/SessionDetailPage.module.css": {
-    "css-modules-kit/no-unused-class-names": {
-      "count": 6
-    }
-  },
   "features/sessions/components/GitHubSessionForm/ProjectsDropdown/ProjectsDropdown.module.css": {
     "css-modules-kit/no-unused-class-names": {
       "count": 5

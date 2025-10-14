@@ -3,15 +3,31 @@ import type { RawStmt } from '@pgsql/types'
 // @ts-expect-error
 import Module from 'pg-query-emscripten'
 
-export const parse = async (str: string): Promise<PgParseResult> => {
-  // Filter out \restrict and \unrestrict lines from PostgreSQL 16.10+
-  // These lines are added by pg_dump but are not valid SQL statements for parsing
-  const filteredStr = str
+// pg_dump 16.10+ emits meta-commands like "\restrict"/"\unrestrict" that
+// are not valid SQL. We blank them out with spaces (instead of deleting them)
+// so downstream byte offsets reported by the parser remain unchanged.
+export const sanitizePgDumpMetaCommands = (sql: string): string =>
+  sql
     .split('\n')
-    .filter((line) => {
-      return !line.startsWith('\\restrict') && !line.startsWith('\\unrestrict')
+    .map((line) => {
+      if (!line.startsWith('\\restrict') && !line.startsWith('\\unrestrict')) {
+        return line
+      }
+
+      const endsWithCarriageReturn = line.endsWith('\r')
+      const contentLength = endsWithCarriageReturn
+        ? line.length - 1
+        : line.length
+      const padding = ' '.repeat(contentLength)
+
+      return endsWithCarriageReturn ? `${padding}\r` : padding
     })
     .join('\n')
+
+export const parse = async (str: string): Promise<PgParseResult> => {
+  // Sanitize \restrict and \unrestrict meta-commands emitted by pg_dump 16.10+
+  // by replacing their contents with spaces while preserving byte offsets.
+  const sanitizedStr = sanitizePgDumpMetaCommands(str)
 
   const pgQuery = await new Module({
     wasmMemory: new WebAssembly.Memory({
@@ -20,7 +36,7 @@ export const parse = async (str: string): Promise<PgParseResult> => {
     }),
   })
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  const result = pgQuery.parse(filteredStr)
+  const result = pgQuery.parse(sanitizedStr)
   return result
 }
 

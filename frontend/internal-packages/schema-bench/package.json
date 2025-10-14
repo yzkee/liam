@@ -6,6 +6,7 @@
   "dependencies": {
     "@huggingface/transformers": "3.3.3",
     "@liam-hq/agent": "workspace:*",
+    "@liam-hq/neverthrow": "workspace:*",
     "@liam-hq/schema": "workspace:*",
     "dotenv": "16.5.0",
     "langsmith": "0.3.69",
@@ -30,6 +31,8 @@
     "fmt": "concurrently \"pnpm:fmt:*\"",
     "fmt:biome": "biome check --write --unsafe .",
     "fmt:eslint": "eslint --fix .",
+    "langsmith": "tsx src/cli/evaluateWithLangsmith.ts",
+    "langsmith:upload": "tsx src/cli/uploadDatasetToLangsmith.ts",
     "lint": "concurrently \"pnpm:lint:*\"",
     "lint:biome": "biome check .",
     "lint:eslint": "eslint .",

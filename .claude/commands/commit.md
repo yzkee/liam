@@ -23,13 +23,65 @@ Examples of bad commit messages:
 - 🐛 Fixed a typo in the welcome message
 - 📝 Updated README.md with new installation instructions
 
-## Common Gitmoji Reference
+## Gitmoji Reference
 
-- ✨ New feature
-- 🐛 Bug fix
-- 💥 Breaking change
-- ⚡ Performance improvement
-- ♻️ Code improvement
-- 🔧 Configuration/options
+### Frequently Used
+- 🚸 `:children_crossing:` - Improve user experience / usability
+- ✨ `:sparkles:` - Introduce new features
+- 🐛 `:bug:` - Fix a bug
+- ♻️ `:recycle:` - Refactor code
+- ⚡ `:zap:` - Improve performance
+- 💄 `:lipstick:` - Add or update the UI and style files
+- 🎨 `:art:` - Improve structure / format of the code
+- 📝 `:memo:` - Add or update documentation
+- 🔧 `:wrench:` - Add or update configuration files
 
-For the complete list, visit [gitmoji.dev](https://gitmoji.dev/).
+### Testing & Quality
+- ✅ `:white_check_mark:` - Add, update, or pass tests
+- 🚨 `:rotating_light:` - Fix compiler / linter warnings
+- 🧪 `:test_tube:` - Add a failing test
+- 🥅 `:goal_net:` - Catch errors
+
+### Critical Changes
+- 🚑 `:ambulance:` - Critical hotfix
+- 💥 `:boom:` - Introduce breaking changes
+- 🔒 `:lock:` - Fix security or privacy issues
+
+### Dependencies & CI/CD
+- ➕ `:heavy_plus_sign:` - Add a dependency
+- ➖ `:heavy_minus_sign:` - Remove a dependency
+- ⬆️ `:arrow_up:` - Upgrade dependencies
+- ⬇️ `:arrow_down:` - Downgrade dependencies
+- 💚 `:green_heart:` - Fix CI Build
+- 👷 `:construction_worker:` - Add or update CI build system
+
+### Code Management
+- 🔥 `:fire:` - Remove code or files
+- ⚰️ `:coffin:` - Remove dead code
+- 🚚 `:truck:` - Move or rename resources (e.g.: files, paths, routes)
+- ⏪ `:rewind:` - Revert changes
+- 🔀 `:twisted_rightwards_arrows:` - Merge branches
+
+### Work in Progress
+- 🚧 `:construction:` - Work in progress
+- 🩹 `:adhesive_bandage:` - Simple fix for a non-critical issue
+
+### Types & Database
+- 🏷️ `:label:` - Add or update types
+- 🗃️ `:card_file_box:` - Perform database related changes
+
+### Accessibility & i18n
+- ♿ `:wheelchair:` - Improve accessibility
+- 🌐 `:globe_with_meridians:` - Internationalization and localization
+
+### Other Useful
+- 🚀 `:rocket:` - Deploy stuff
+- 🔖 `:bookmark:` - Release / Version tags
+- 📱 `:iphone:` - Work on responsive design
+- 💫 `:dizzy:` - Add or update animations and transitions
+- ✏️ `:pencil2:` - Fix typos
+- 🙈 `:see_no_evil:` - Add or update a .gitignore file
+- 🔊 `:loud_sound:` - Add or update logs
+- 🔇 `:mute:` - Remove logs
+
+For the complete list, run `gitmoji list` or visit [gitmoji.dev](https://gitmoji.dev/).

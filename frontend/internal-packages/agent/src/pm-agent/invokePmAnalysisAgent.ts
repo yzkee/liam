@@ -21,6 +21,17 @@ import { saveRequirementsToArtifactTool } from './tools/saveRequirementsToArtifa
 
 const AGENT_NAME = 'pm' as const
 
+const model = new ChatOpenAI({
+  model: 'gpt-5',
+  reasoning: { effort: 'medium', summary: 'detailed' },
+  useResponsesApi: true,
+  streaming: true,
+}).bindTools([saveRequirementsToArtifactTool], {
+  parallel_tool_calls: false,
+  strict: true,
+  tool_choice: 'required',
+})
+
 type AnalysisWithReasoning = {
   response: AIMessage
   reasoning: Reasoning | null
@@ -39,20 +50,6 @@ export const invokePmAnalysisAgent = (
 
   const formatPrompt = ResultAsync.fromSafePromise(
     pmAnalysisPrompt.format(variables),
-  )
-
-  const model = new ChatOpenAI({
-    model: 'gpt-5',
-    reasoning: { effort: 'medium', summary: 'detailed' },
-    useResponsesApi: true,
-    streaming: true,
-  }).bindTools(
-    [{ type: 'web_search_preview' }, saveRequirementsToArtifactTool],
-    {
-      parallel_tool_calls: false,
-      strict: true,
-      tool_choice: 'required',
-    },
   )
 
   const stream = fromAsyncThrowable((systemPrompt: string) =>

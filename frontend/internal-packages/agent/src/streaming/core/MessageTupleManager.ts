@@ -1,17 +1,13 @@
+import { load } from '@langchain/core/load'
 import {
+  AIMessageChunk,
   type BaseMessage,
   type BaseMessageChunk,
-  coerceMessageLikeToMessage,
-  convertToChunk,
+  isAIMessageChunk,
   isBaseMessageChunk,
-  isToolMessage,
+  isToolMessageChunk,
   ToolMessageChunk,
 } from '@langchain/core/messages'
-
-const tryConvertToChunk = (message: BaseMessage): BaseMessageChunk | null => {
-  const result = convertToChunk(message)
-  return result || null
-}
 
 type MessageTuple = {
   chunk?: BaseMessage | BaseMessageChunk
@@ -30,34 +26,35 @@ export class MessageTupleManager {
     this.chunks = {}
   }
 
-  add(serialized: BaseMessage, metadata: Record<string, unknown> | undefined) {
-    const message = coerceMessageLikeToMessage(serialized)
+  async add(data: string) {
+    const parsed = JSON.parse(data)
+    const [serialized, metadata] = parsed
 
-    // Handle ToolMessage separately since convertToChunk doesn't support it
-    let chunk: BaseMessageChunk | null
-    if (isToolMessage(message)) {
-      chunk = new ToolMessageChunk(message)
-    } else {
-      chunk = tryConvertToChunk(message)
+    let chunk: AIMessageChunk | ToolMessageChunk | null = null
+    const loaded = await load<BaseMessageChunk>(JSON.stringify(serialized))
+    if (isToolMessageChunk(loaded)) {
+      chunk = new ToolMessageChunk(loaded)
+    } else if (isAIMessageChunk(loaded)) {
+      chunk = new AIMessageChunk(loaded)
     }
 
-    const { id } = chunk ?? message
+    if (!chunk) return null
+
+    const { id } = chunk
     if (!id) return null
 
     this.chunks[id] ??= {}
     if (metadata) {
       this.chunks[id].metadata = metadata
     }
-    if (chunk) {
-      const prev = this.chunks[id].chunk
-      this.chunks[id].chunk =
-        (isBaseMessageChunk(prev) ? prev : null)?.concat(chunk) ?? chunk
-      // NOTE: chunk.concat() always makes name undefined, so override it separately
-      if (chunk.name !== undefined) {
-        this.chunks[id].chunk.name = chunk.name
-      }
-    } else {
-      this.chunks[id].chunk = message
+
+    const prev = this.chunks[id].chunk
+    this.chunks[id].chunk =
+      (isBaseMessageChunk(prev) ? prev : null)?.concat(chunk) ?? chunk
+
+    // NOTE: chunk.concat() always makes name undefined, so override it separately
+    if (chunk.name !== undefined) {
+      this.chunks[id].chunk.name = chunk.name
     }
 
     return id

@@ -25,8 +25,18 @@ export async function GET(request: Request) {
       }
       return NextResponse.redirect(`${origin}${next}`)
     }
+    console.error('OAuth callback code exchange failed:', {
+      error: error.message,
+      code: error.status,
+      provider: request.url.includes('/github') ? 'github' : 'unknown',
+      timestamp: new Date().toISOString(),
+    })
+  } else {
+    console.error('OAuth callback missing code parameter:', {
+      url: request.url,
+      timestamp: new Date().toISOString(),
+    })
   }
 
-  // On error, redirect to an error page with instructions
-  return NextResponse.redirect(`${origin}/auth/auth-code-error`)
+  return NextResponse.redirect(`${origin}/error`)
 }

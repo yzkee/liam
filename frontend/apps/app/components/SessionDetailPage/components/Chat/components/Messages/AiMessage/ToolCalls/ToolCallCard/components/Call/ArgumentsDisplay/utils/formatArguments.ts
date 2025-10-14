@@ -176,13 +176,31 @@ const formatAddOperation = (
 const formatRemoveOperation = (path: string | undefined): string => {
   if (!path) return 'Removing unknown'
 
-  if (path.includes('/tables/')) {
-    const tableName = path.match(/\/tables\/([^/]+)/)?.[1] ?? 'table'
-    return `Removing table '${tableName}'`
+  if (path.includes('/indexes/')) {
+    const indexName = path.match(/\/indexes\/([^/]+)/)?.[1] ?? 'index'
+    return `  Removing index '${indexName}'`
+  }
+  if (path.includes('/constraints/')) {
+    const constraintName =
+      path.match(/\/constraints\/([^/]+)/)?.[1] ?? 'constraint'
+    return `  Removing constraint '${constraintName}'`
   }
   if (path.includes('/columns/')) {
     const columnName = path.match(/\/columns\/([^/]+)/)?.[1] ?? 'column'
     return `  Removing column '${columnName}'`
+  }
+  if (path.match(/\/tables\/[^/]+$/)) {
+    const tableName = path.match(/\/tables\/([^/]+)$/)?.[1] ?? 'table'
+    return `Removing table '${tableName}'`
+  }
+  if (path.includes('/enums/')) {
+    const enumName = path.match(/\/enums\/([^/]+)/)?.[1] ?? 'enum'
+    return `Removing enum '${enumName}'`
+  }
+  if (path.includes('/extensions/')) {
+    const extensionName =
+      path.match(/\/extensions\/([^/]+)/)?.[1] ?? 'extension'
+    return `Removing extension '${extensionName}'`
   }
 
   return `Removing ${path}`
@@ -192,6 +210,15 @@ const formatRemoveOperation = (path: string | undefined): string => {
 const formatReplaceOperation = (path: string | undefined): string => {
   if (!path) return 'Updating unknown'
 
+  if (path.includes('/indexes/')) {
+    const indexName = path.match(/\/indexes\/([^/]+)/)?.[1] ?? 'index'
+    return `  Updating index '${indexName}'`
+  }
+  if (path.includes('/constraints/')) {
+    const constraintName =
+      path.match(/\/constraints\/([^/]+)/)?.[1] ?? 'constraint'
+    return `  Updating constraint '${constraintName}'`
+  }
   if (path.includes('/columns/')) {
     const columnName = path.match(/\/columns\/([^/]+)/)?.[1] ?? 'column'
     return `  Updating column '${columnName}'`

@@ -22,6 +22,17 @@ export async function GET(request: NextRequest) {
       // redirect user to specified redirect URL or root of app
       redirect(next)
     }
+    console.error('Email confirmation OTP verification failed:', {
+      error: error.message,
+      type,
+      timestamp: new Date().toISOString(),
+    })
+  } else {
+    console.error('Email confirmation missing parameters:', {
+      hasToken: !!token_hash,
+      hasType: !!type,
+      timestamp: new Date().toISOString(),
+    })
   }
 
   // redirect the user to an error page with some instructions

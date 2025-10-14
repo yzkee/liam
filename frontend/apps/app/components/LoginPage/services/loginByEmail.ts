@@ -7,6 +7,22 @@ import { urlgen } from '../../../libs/routes/urlgen'
 import { ensureUserHasOrganization } from './ensureUserHasOrganization'
 import { sanitizeReturnPath } from './validateReturnPath'
 
+function maskEmail(email: string | undefined): string {
+  if (!email || typeof email !== 'string') return '[invalid-email]'
+
+  const atIndex = email.indexOf('@')
+  if (atIndex <= 0) return '[invalid-email]'
+
+  const localPart = email.substring(0, atIndex)
+  const domain = email.substring(atIndex)
+
+  if (localPart.length <= 2) {
+    return `${localPart[0]}*${domain}`
+  }
+
+  return `${localPart[0]}${'*'.repeat(localPart.length - 2)}${localPart[localPart.length - 1]}${domain}`
+}
+
 export async function loginByEmail(formData: FormData) {
   const supabase = await createClient()
 
@@ -31,6 +47,11 @@ export async function loginByEmail(formData: FormData) {
 
   const parsedData = v.safeParse(loginFormSchema, formDataObject)
   if (!parsedData.success) {
+    console.error('Login validation failed:', {
+      errors: parsedData.issues,
+      emailMasked: maskEmail(formDataObject.email?.toString()),
+      timestamp: new Date().toISOString(),
+    })
     redirect(urlgen('error'))
   }
 
@@ -39,6 +60,12 @@ export async function loginByEmail(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword(data)
 
   if (error) {
+    console.error('Login authentication failed:', {
+      error: error.message,
+      code: error.status,
+      emailMasked: maskEmail(data.email),
+      timestamp: new Date().toISOString(),
+    })
     redirect(urlgen('error'))
   }
 

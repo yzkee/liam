@@ -187,3 +187,58 @@ export OPENAI_API_KEY="your-api-key"
 - Model comparison across datasets
 - Quality assurance for schema generation
 - Repeatable benchmarking with standardized metrics
+
+## LangSmith Integration
+
+Schema-bench integrates with [LangSmith](https://smith.langchain.com) for advanced evaluation tracking, visualization, and experiment comparison.
+
+### Setup
+
+1. Set your LangSmith API key:
+```bash
+export LANGSMITH_API_KEY="your-api-key"
+```
+
+2. Upload datasets to LangSmith (one-time setup):
+```bash
+# Upload all datasets
+pnpm --filter @liam-hq/schema-bench langsmith:upload -all
+
+# Upload specific datasets
+pnpm --filter @liam-hq/schema-bench langsmith:upload -default
+pnpm --filter @liam-hq/schema-bench langsmith:upload -entity-extraction
+```
+
+This creates LangSmith datasets from your local benchmark workspace files.
+
+### Running Evaluations
+
+LangSmith combines execution and evaluation in a single command. Use the same dataset flags as the regular executors:
+
+```bash
+# LiamDB: Run on all datasets
+pnpm --filter @liam-hq/schema-bench langsmith -all --liamdb
+
+# LiamDB: Run on specific datasets
+pnpm --filter @liam-hq/schema-bench langsmith -default --liamdb
+pnpm --filter @liam-hq/schema-bench langsmith -default -entity-extraction --liamdb
+
+# OpenAI: Run on all datasets
+pnpm --filter @liam-hq/schema-bench langsmith -all --openai
+
+# OpenAI: Run on specific datasets
+pnpm --filter @liam-hq/schema-bench langsmith -default --openai
+pnpm --filter @liam-hq/schema-bench langsmith -entity-extraction -relational-inference --openai
+
+# Advanced options
+pnpm --filter @liam-hq/schema-bench langsmith -default --liamdb --num-repetitions=5
+pnpm --filter @liam-hq/schema-bench langsmith -default --liamdb --max-concurrency=5
+```
+
+**Options:**
+- `--num-repetitions=N`: Number of times to run each test case (default: 3)
+- `--max-concurrency=N`: Maximum concurrent executions (default: 3)
+
+### Viewing Results
+
+After the evaluation completes, a LangSmith URL will be displayed in the console. Open this URL to view detailed evaluation results.

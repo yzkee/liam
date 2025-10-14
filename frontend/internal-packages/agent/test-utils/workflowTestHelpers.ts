@@ -133,7 +133,8 @@ export const outputStreamEvents = async (
       continue
     }
 
-    const messageId = messageManager.add(serialized, metadata)
+    const data = JSON.stringify([serialized, metadata])
+    const messageId = await messageManager.add(data)
     if (!messageId) continue
 
     const result = messageManager.get(messageId)

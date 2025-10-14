@@ -75,8 +75,7 @@ export const schemaDesignTool: StructuredTool = tool(
       if (toolConfigurableResult.isErr()) {
         return `Configuration error: ${toolConfigurableResult.error.message}. Please check the tool configuration and try again.`
       }
-      const { repositories, buildingSchemaId, designSessionId } =
-        toolConfigurableResult.value
+      const { repositories, designSessionId } = toolConfigurableResult.value
       const parsed = v.safeParse(schemaDesignToolSchema, input)
       if (!parsed.success) {
         const errorDetails = parsed.issues
@@ -115,7 +114,7 @@ export const schemaDesignTool: StructuredTool = tool(
       const totalStatements = results.length
 
       const versionResult = await repositories.schema.createVersion({
-        buildingSchemaId,
+        buildingSchemaId: schemaResult.value.id,
         latestVersionNumber: schemaResult.value.latestVersionNumber,
         patch: parsed.output.operations,
       })

@@ -17,8 +17,40 @@ import { CommandPaletteContent } from './CommandPaletteContent'
 const schema: SchemaProviderValue = {
   current: {
     tables: {
-      users: aTable({ name: 'users' }),
-      posts: aTable({ name: 'posts' }),
+      users: aTable({
+        name: 'users',
+        columns: {
+          id: {
+            name: 'id',
+            type: 'bigint',
+            default: null,
+            check: null,
+            notNull: true,
+            comment: null,
+          },
+          name: {
+            name: 'name',
+            type: 'text',
+            default: null,
+            check: null,
+            notNull: true,
+            comment: null,
+          },
+        },
+      }),
+      posts: aTable({
+        name: 'posts',
+        columns: {
+          created_at: {
+            name: 'created_at',
+            type: 'timestamp',
+            default: null,
+            check: null,
+            notNull: true,
+            comment: null,
+          },
+        },
+      }),
       follows: aTable({ name: 'follows' }),
       user_settings: aTable({ name: 'user_settings' }),
     },
@@ -175,6 +207,41 @@ describe('input mode and filters', () => {
       ).toBeInTheDocument()
     })
   })
+
+  describe('table input mode', () => {
+    it('renders selected table option and its column options', async () => {
+      const user = userEvent.setup()
+      render(<CommandPaletteContent isTableModeActivatable />, { wrapper })
+
+      // switch to "table" input mode of the "users" table
+      await user.keyboard('users')
+      await user.keyboard('{Tab}')
+
+      // the "users" table option is always displayed on the top of the options list
+      expect(screen.getByRole('option', { name: 'users' })).toBeInTheDocument()
+      // column options of the "users" table
+      expect(screen.getByRole('option', { name: 'id' })).toBeInTheDocument()
+      expect(screen.getByRole('option', { name: 'name' })).toBeInTheDocument()
+    })
+
+    it('filters column options by user input in the combobox while keeping the selected table option visible', async () => {
+      const user = userEvent.setup()
+      render(<CommandPaletteContent isTableModeActivatable />, { wrapper })
+
+      // switch to "table" input mode of the "users" table
+      await user.keyboard('users')
+      await user.keyboard('{Tab}')
+      // filter the column options by typing "name"
+      await user.keyboard('name')
+
+      expect(screen.getByRole('option', { name: 'users' })).toBeInTheDocument()
+      expect(screen.getByRole('option', { name: 'name' })).toBeInTheDocument()
+      // the "id" column option is filtered out
+      expect(
+        screen.queryByRole('option', { name: 'id' }),
+      ).not.toBeInTheDocument()
+    })
+  })
 })
 
 describe('preview', () => {
@@ -190,6 +257,29 @@ describe('preview', () => {
 
       // renders the "posts" preview when the "posts" option is selected
       await user.hover(screen.getByRole('option', { name: 'posts' }))
+      expect(within(previewContainer).getByText('posts')).toBeInTheDocument()
+    })
+
+    it('renders a table preview when a column option is selected', async () => {
+      const user = userEvent.setup()
+      render(<CommandPaletteContent isTableModeActivatable />, { wrapper })
+      const previewContainer = screen.getByTestId('CommandPalettePreview')
+
+      // renders the "users" preview when the "users/name" option is selected
+      await user.hover(screen.getByRole('option', { name: 'users' }))
+      // go to the "table" input mode of the "users" table
+      await user.keyboard('{Tab}')
+      await user.hover(screen.getByRole('option', { name: 'name' }))
+      expect(within(previewContainer).getByText('users')).toBeInTheDocument()
+
+      // back to the "default" input mode
+      await user.keyboard('{Backspace}')
+
+      // renders the "posts" preview when the "posts/created_at" option is selected
+      await user.hover(screen.getByRole('option', { name: 'posts' }))
+      // go to the "table" input mode of the "posts" table
+      await user.keyboard('{Tab}')
+      await user.hover(screen.getByRole('option', { name: 'created_at' }))
       expect(within(previewContainer).getByText('posts')).toBeInTheDocument()
     })
   })

@@ -5,7 +5,6 @@ import type { Repositories } from '../repositories'
 import { getConfigurable } from '../utils/getConfigurable'
 
 const toolConfigurableSchema = v.object({
-  buildingSchemaId: v.string(),
   designSessionId: v.string(),
 })
 

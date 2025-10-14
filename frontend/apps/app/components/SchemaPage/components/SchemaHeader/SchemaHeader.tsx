@@ -6,13 +6,18 @@ import styles from './SchemaHeader.module.css'
 type SchemaHeaderProps = {
   schemaName: string
   format: FormatType
+  href: string
 }
 
-export const SchemaHeader: FC<SchemaHeaderProps> = ({ schemaName, format }) => {
+export const SchemaHeader: FC<SchemaHeaderProps> = ({
+  schemaName,
+  format,
+  href,
+}) => {
   return (
     <div className={styles.wrapper}>
       <span className={styles.schemaNameLabel}>Schema:</span>
-      <SchemaLink schemaName={schemaName} format={format} />
+      <SchemaLink schemaName={schemaName} format={format} href={href} />
     </div>
   )
 }

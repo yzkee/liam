@@ -177,22 +177,62 @@ export const SchemaPage: FC<Props> = async ({
   })
 
   const supabase = await createClient()
-  const { data: gitHubSchemaFilePath } = await supabase
-    .from('schema_file_paths')
-    .select('path, format')
-    .eq('project_id', projectId)
-    .eq('path', schemaFilePath)
-    .maybeSingle()
+
+  const { data: projectRows } = await supabase
+    .from('projects')
+    .select(
+      `
+        schema_file_paths!inner (
+          path,
+          format
+        ),
+        project_repository_mappings (
+          github_repositories (
+            owner,
+            name
+          )
+        )
+      `,
+    )
+    .eq('id', projectId)
+    .eq('schema_file_paths.path', schemaFilePath)
+  const projectData = projectRows?.[0]
+
+  const gitHubSchemaFilePath = projectData?.schema_file_paths?.[0] ?? null
 
   const schemaHeaderFormat = gitHubSchemaFilePath
     ? parseSchemaHeaderFormat(gitHubSchemaFilePath.format)
     : null
 
-  const schemaHeader: { schemaName: string; format: FormatType } | null =
-    gitHubSchemaFilePath && schemaHeaderFormat
+  const repositoryMappings =
+    projectRows?.flatMap((row) => row.project_repository_mappings ?? []) ?? []
+
+  const repository =
+    repositoryMappings
+      .map((mapping) => mapping.github_repositories)
+      .find(Boolean) ?? null
+
+  const repositoryOwner = repository?.owner
+  const repositoryName = repository?.name
+
+  const schemaHeader: {
+    schemaName: string
+    format: FormatType
+    href: string
+  } | null =
+    gitHubSchemaFilePath &&
+    schemaHeaderFormat &&
+    repositoryOwner &&
+    repositoryName
       ? {
           schemaName: path.basename(gitHubSchemaFilePath.path),
           format: schemaHeaderFormat,
+          href: `https://github.com/${repositoryOwner}/${repositoryName}/blob/${encodeURIComponent(
+            branchOrCommit,
+          )}/${gitHubSchemaFilePath.path
+            .split('/')
+            .map(encodeURIComponent)
+            .join('/')}`,
         }
       : null
 
@@ -202,6 +242,7 @@ export const SchemaPage: FC<Props> = async ({
         <SchemaHeader
           schemaName={schemaHeader.schemaName}
           format={schemaHeader.format}
+          href={schemaHeader.href}
         />
       ) : null}
       <TabsContent value={SCHEMA_TAB.ERD} className={styles.tabsContent}>

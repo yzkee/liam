@@ -112,7 +112,7 @@ export const BranchCombobox: FC<Props> = ({
             </span>
             {selectedBranch?.isProduction && (
               <Code size="sm" style="fill">
-                production
+                default
               </Code>
             )}
           </div>
@@ -158,7 +158,7 @@ export const BranchCombobox: FC<Props> = ({
                     <span className={styles.itemLabel}>{branch.name}</span>
                     {branch.isProduction && (
                       <Code size="sm" style="fill">
-                        production
+                        default
                       </Code>
                     )}
                   </Command.Item>

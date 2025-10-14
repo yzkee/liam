@@ -126,7 +126,7 @@ export const getRepositoryBranches = async (
   return branches.map((branch) => ({
     name: branch.name,
     sha: branch.commit.sha,
-    isProduction: branch.name === repoInfo.default_branch || branch.protected,
+    isProduction: branch.name === repoInfo.default_branch,
   }))
 }
 

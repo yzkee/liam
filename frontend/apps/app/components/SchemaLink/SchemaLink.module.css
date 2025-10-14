@@ -9,6 +9,7 @@
   transition: background-color var(--default-hover-animation-duration, 0.2s)
     var(--default-timing-function, ease);
   border: none;
+  text-decoration: none;
 }
 
 .schemaLink:hover .schemaName {

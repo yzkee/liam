@@ -1,12 +1,19 @@
 import path from 'node:path'
 import { getFileContent } from '@liam-hq/github'
-import { parse, setPrismWasmUrl } from '@liam-hq/schema/parser'
+import {
+  parse,
+  type SupportedFormat,
+  setPrismWasmUrl,
+  supportedFormatSchema,
+} from '@liam-hq/schema/parser'
 import { TabsContent, TabsRoot } from '@liam-hq/ui'
 import * as Sentry from '@sentry/nextjs'
 import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
 import type { ComponentProps, FC } from 'react'
+import * as v from 'valibot'
 import { createClient } from '../../libs/db/server'
+import type { FormatType } from '../FormatIcon'
 import { ERDEditor } from './components/ERDEditor'
 import { SchemaHeader } from './components/SchemaHeader'
 import { DEFAULT_SCHEMA_TAB, SCHEMA_TAB } from './constants'
@@ -19,6 +26,23 @@ type Params = {
 }
 
 type Response = ComponentProps<typeof ERDEditor>
+
+type SchemaHeaderFormat = Exclude<SupportedFormat, 'drizzle' | 'liam'>
+
+// TODO: Use supportedFormatSchema directly once the UI handles 'drizzle' and 'liam'.
+const parseSchemaHeaderFormat = (value: unknown): SchemaHeaderFormat | null => {
+  const result = v.safeParse(supportedFormatSchema, value)
+  if (!result.success) {
+    return null
+  }
+
+  const format = result.output
+  if (format === 'drizzle' || format === 'liam') {
+    return null
+  }
+
+  return format
+}
 
 async function getERDEditorContent({
   projectId,
@@ -47,7 +71,7 @@ async function getERDEditorContent({
     .select('path, format')
     .eq('project_id', projectId)
     .eq('path', schemaFilePath)
-    .single()
+    .maybeSingle()
 
   const repository =
     project?.project_repository_mappings[0]?.github_repositories
@@ -152,9 +176,75 @@ export const SchemaPage: FC<Props> = async ({
     schemaFilePath,
   })
 
+  const supabase = await createClient()
+
+  const { data: projectRows } = await supabase
+    .from('projects')
+    .select(
+      `
+        schema_file_paths!inner (
+          path,
+          format
+        ),
+        project_repository_mappings (
+          github_repositories (
+            owner,
+            name
+          )
+        )
+      `,
+    )
+    .eq('id', projectId)
+    .eq('schema_file_paths.path', schemaFilePath)
+  const projectData = projectRows?.[0]
+
+  const gitHubSchemaFilePath = projectData?.schema_file_paths?.[0] ?? null
+
+  const schemaHeaderFormat = gitHubSchemaFilePath
+    ? parseSchemaHeaderFormat(gitHubSchemaFilePath.format)
+    : null
+
+  const repositoryMappings =
+    projectRows?.flatMap((row) => row.project_repository_mappings ?? []) ?? []
+
+  const repository =
+    repositoryMappings
+      .map((mapping) => mapping.github_repositories)
+      .find(Boolean) ?? null
+
+  const repositoryOwner = repository?.owner
+  const repositoryName = repository?.name
+
+  const schemaHeader: {
+    schemaName: string
+    format: FormatType
+    href: string
+  } | null =
+    gitHubSchemaFilePath &&
+    schemaHeaderFormat &&
+    repositoryOwner &&
+    repositoryName
+      ? {
+          schemaName: path.basename(gitHubSchemaFilePath.path),
+          format: schemaHeaderFormat,
+          href: `https://github.com/${repositoryOwner}/${repositoryName}/blob/${encodeURIComponent(
+            branchOrCommit,
+          )}/${gitHubSchemaFilePath.path
+            .split('/')
+            .map(encodeURIComponent)
+            .join('/')}`,
+        }
+      : null
+
   return (
     <TabsRoot defaultValue={DEFAULT_SCHEMA_TAB} className={styles.wrapper}>
-      <SchemaHeader />
+      {schemaHeader ? (
+        <SchemaHeader
+          schemaName={schemaHeader.schemaName}
+          format={schemaHeader.format}
+          href={schemaHeader.href}
+        />
+      ) : null}
       <TabsContent value={SCHEMA_TAB.ERD} className={styles.tabsContent}>
         <ERDEditor {...contentProps} />
       </TabsContent>

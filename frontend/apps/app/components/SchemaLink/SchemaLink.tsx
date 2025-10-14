@@ -6,17 +6,21 @@ import styles from './SchemaLink.module.css'
 type SchemaLinkProps = {
   schemaName: string
   format?: FormatType
+  href: string
 }
 
 export const SchemaLink: FC<SchemaLinkProps> = ({
   schemaName,
   format = 'postgres',
+  href,
 }) => {
   return (
-    <button
+    <a
+      href={href}
       className={styles.schemaLink}
-      type="button"
-      aria-label={`Open schema ${schemaName}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`Open schema ${schemaName} in a new tab`}
     >
       <div className={styles.formatIcon}>
         <FormatIcon format={format} />
@@ -25,6 +29,6 @@ export const SchemaLink: FC<SchemaLinkProps> = ({
       <div className={styles.iconContainer}>
         <ArrowUpRight size={12} />
       </div>
-    </button>
+    </a>
   )
 }

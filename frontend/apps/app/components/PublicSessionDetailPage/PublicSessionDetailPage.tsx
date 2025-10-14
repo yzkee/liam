@@ -94,9 +94,6 @@ export const PublicSessionDetailPage = async ({
     })) ?? initialSchema
 
   const organizationId = buildingSchema.organization_id
-  if (!organizationId) {
-    notFound()
-  }
 
   const repositories = createSupabaseRepositories(supabase, organizationId)
   const config = {

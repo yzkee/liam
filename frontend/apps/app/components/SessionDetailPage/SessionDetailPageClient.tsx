@@ -111,9 +111,6 @@ export const SessionDetailPageClient: FC<Props> = ({
     [setSelectedVersion],
   )
 
-  // Phase 6.4: useRealtimeArtifact and handleArtifactChange removed
-  // Now using only analyzedRequirements
-
   const chatMessages = mapStoredMessagesToChatMessages(initialMessages)
   const { isStreaming, messages, setMessages, analyzedRequirements, start, replay, error } =
     useStream({
@@ -134,7 +131,6 @@ export const SessionDetailPageClient: FC<Props> = ({
     }
   }, [analyzedRequirements, hasReceivedAnalyzedRequirements])
 
-  // Phase 6.4: artifact removed from condition
   const shouldShowOutputSection =
     (selectedVersion !== null || analyzedRequirements !== null) && activeTab
 

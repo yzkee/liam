@@ -19,7 +19,7 @@
   },
   "scripts": {
     "build": "mkdir -p public && mkdir -p .storybook/public && storybook build",
-    "dev": "storybook dev -p 6006"
+    "dev": "storybook dev -p 6006 --no-open"
   },
   "msw": {
     "workerDirectory": [

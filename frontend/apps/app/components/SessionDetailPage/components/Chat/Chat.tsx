@@ -16,10 +16,11 @@ import { useScrollToBottom } from './useScrollToBottom'
 type Props = {
   schemaData: Schema
   messages: BaseMessage[]
-  onSendMessage: (content: string) => void
+  onSendMessage: (content: string, isDeepModelingEnabled: boolean) => void
   isWorkflowRunning?: boolean
   error?: string | null
   onNavigate: (tab: OutputTabValue) => void
+  initialIsDeepModelingEnabled?: boolean
 }
 
 export const Chat: FC<Props> = ({
@@ -29,11 +30,15 @@ export const Chat: FC<Props> = ({
   isWorkflowRunning = false,
   onNavigate,
   error,
+  initialIsDeepModelingEnabled = true,
 }) => {
   const { containerRef, scrollToBottom } = useScrollToBottom<HTMLDivElement>(
     messages.length,
   )
   const [showScrollButton, setShowScrollButton] = useState(false)
+  const [isDeepModelingEnabled, setIsDeepModelingEnabled] = useState(
+    initialIsDeepModelingEnabled,
+  )
 
   const recomputeScrollButton = useCallback(() => {
     const el = containerRef.current
@@ -57,7 +62,7 @@ export const Chat: FC<Props> = ({
   }, [messages, recomputeScrollButton])
 
   const handleSendMessage = (content: string) => {
-    onSendMessage(content)
+    onSendMessage(content, isDeepModelingEnabled)
   }
 
   return (
@@ -82,6 +87,8 @@ export const Chat: FC<Props> = ({
         onSendMessage={handleSendMessage}
         isWorkflowRunning={isWorkflowRunning}
         schema={schemaData}
+        isDeepModelingEnabled={isDeepModelingEnabled}
+        onDeepModelingToggle={setIsDeepModelingEnabled}
       />
     </div>
   )

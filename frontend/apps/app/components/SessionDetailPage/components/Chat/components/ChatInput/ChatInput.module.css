@@ -104,3 +104,9 @@
   border: none !important;
   box-shadow: none !important;
 }
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}

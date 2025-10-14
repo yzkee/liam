@@ -5,7 +5,7 @@ import {
   mapStoredMessagesToChatMessages,
   type StoredMessage,
 } from '@langchain/core/messages'
-import type { Artifact } from '@liam-hq/artifact'
+import type { AnalyzedRequirements } from '@liam-hq/artifact'
 import type { Schema } from '@liam-hq/schema'
 import {
   ResizableHandle,
@@ -16,7 +16,6 @@ import { type FC, useCallback, useEffect, useRef, useState } from 'react'
 import { setCookieJson } from '../../libs/utils/cookie'
 import { Chat } from './components/Chat'
 import { Output } from './components/Output'
-import { useRealtimeArtifact } from './components/Output/components/Artifact/hooks/useRealtimeArtifact'
 import { OUTPUT_TABS, type OutputTabValue } from './components/Output/constants'
 import { PANEL_LAYOUT_COOKIE_NAME } from './constants'
 import { useRealtimeVersionsWithSchema } from './hooks/useRealtimeVersionsWithSchema'
@@ -33,36 +32,32 @@ type Props = {
   buildingSchemaId: string
   designSessionId: string
   initialMessages: StoredMessage[]
+  initialAnalyzedRequirements: AnalyzedRequirements | null
   initialDisplayedSchema: Schema
   initialPrevSchema: Schema
   initialVersions: Version[]
   isDeepModelingEnabled: boolean
   initialIsPublic: boolean
   initialWorkflowError?: string | null
-  initialArtifact: Artifact | null
   senderName: string
   panelSizes: number[]
 }
 
 // Determine the initial active tab based on available data
 const determineInitialTab = (
-  artifact: Artifact | null,
   versions: Version[],
+  analyzedRequirements: AnalyzedRequirements | null,
 ): OutputTabValue | undefined => {
-  const hasArtifact = artifact !== null
   const hasVersions = versions.length > 0
+  const hasAnalyzedRequirements = analyzedRequirements !== null
 
-  if (!hasArtifact && !hasVersions) {
-    return undefined
-  }
-
-  // Prioritize ERD tab when versions exist
+  // Show ERD tab when versions exist
   if (hasVersions) {
     return OUTPUT_TABS.ERD
   }
 
-  // Show artifact tab when only artifact exists
-  if (hasArtifact) {
+  // Show Artifact tab when only analyzedRequirements exist
+  if (hasAnalyzedRequirements) {
     return OUTPUT_TABS.ARTIFACT
   }
 
@@ -73,20 +68,23 @@ export const SessionDetailPageClient: FC<Props> = ({
   buildingSchemaId,
   designSessionId,
   initialMessages,
+  initialAnalyzedRequirements,
   initialDisplayedSchema,
   initialPrevSchema,
   initialVersions,
   isDeepModelingEnabled,
   initialIsPublic,
   initialWorkflowError,
-  initialArtifact,
   senderName,
   panelSizes,
 }) => {
   const [activeTab, setActiveTab] = useState<OutputTabValue | undefined>(
-    determineInitialTab(initialArtifact, initialVersions),
+    determineInitialTab(initialVersions, initialAnalyzedRequirements),
   )
   const [isResizing, setIsResizing] = useState(false)
+  const [hasReceivedAnalyzedRequirements, setHasReceivedAnalyzedRequirements] =
+    useState(false)
+  const initialAnalyzedRequirementsRef = useRef(initialAnalyzedRequirements)
 
   const {
     versions,
@@ -113,27 +111,34 @@ export const SessionDetailPageClient: FC<Props> = ({
     [setSelectedVersion],
   )
 
-  const handleArtifactChange = useCallback((newArtifact: unknown) => {
-    if (newArtifact !== null) {
-      setActiveTab(OUTPUT_TABS.ARTIFACT)
-    }
-  }, [])
-
-  const { artifact, error: artifactError } = useRealtimeArtifact({
+  const chatMessages = mapStoredMessagesToChatMessages(initialMessages)
+  const {
+    isStreaming,
+    messages,
+    setMessages,
+    analyzedRequirements,
+    start,
+    replay,
+    error,
+  } = useStream({
+    initialMessages: chatMessages,
+    initialAnalyzedRequirements,
     designSessionId,
-    initialArtifact,
-    onChangeArtifact: handleArtifactChange,
   })
 
-  const shouldShowOutputSection =
-    (artifact !== null || selectedVersion !== null) && activeTab
+  useEffect(() => {
+    if (
+      analyzedRequirements !== null &&
+      analyzedRequirements !== initialAnalyzedRequirementsRef.current &&
+      !hasReceivedAnalyzedRequirements
+    ) {
+      setActiveTab(OUTPUT_TABS.ARTIFACT)
+      setHasReceivedAnalyzedRequirements(true)
+    }
+  }, [analyzedRequirements, hasReceivedAnalyzedRequirements])
 
-  const chatMessages = mapStoredMessagesToChatMessages(initialMessages)
-  const { isStreaming, messages, setMessages, start, replay, error } =
-    useStream({
-      initialMessages: chatMessages,
-      designSessionId,
-    })
+  const shouldShowOutputSection =
+    (selectedVersion !== null || analyzedRequirements !== null) && activeTab
 
   const handleLayoutChange = useCallback((sizes: number[]) => {
     setCookieJson(PANEL_LAYOUT_COOKIE_NAME, sizes, {
@@ -255,8 +260,7 @@ export const SessionDetailPageClient: FC<Props> = ({
                   activeTab={activeTab}
                   onTabChange={setActiveTab}
                   initialIsPublic={initialIsPublic}
-                  artifact={artifact}
-                  artifactError={artifactError}
+                  analyzedRequirements={analyzedRequirements}
                 />
               </div>
             </ResizablePanel>

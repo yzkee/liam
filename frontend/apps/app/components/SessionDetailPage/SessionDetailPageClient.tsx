@@ -117,7 +117,6 @@ export const SessionDetailPageClient: FC<Props> = ({
       initialMessages: chatMessages,
       initialAnalyzedRequirements,
       designSessionId,
-      senderName,
     })
 
   useEffect(() => {

@@ -67,13 +67,11 @@ type Props = {
   designSessionId: string
   initialMessages: BaseMessage[]
   initialAnalyzedRequirements?: AnalyzedRequirements | null
-  senderName: string
 }
 export const useStream = ({
   designSessionId,
   initialMessages,
   initialAnalyzedRequirements,
-  senderName,
 }: Props) => {
   const messageManagerRef = useRef(new MessageTupleManager())
   const storedMessage = useSessionStorageOnce(designSessionId)

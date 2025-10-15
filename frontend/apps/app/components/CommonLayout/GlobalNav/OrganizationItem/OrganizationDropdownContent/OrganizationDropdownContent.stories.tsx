@@ -1,3 +1,4 @@
+import { DropdownMenuRoot } from '@liam-hq/ui'
 import type { Meta, StoryObj } from '@storybook/nextjs'
 import type { Organization } from '../../../services/getOrganization'
 import type { OrganizationsByUserId } from '../../../services/getOrganizationsByUserId'
@@ -34,6 +35,13 @@ const meta = {
   parameters: {
     layout: 'centered',
   },
+  decorators: [
+    (Story) => (
+      <DropdownMenuRoot>
+        <Story />
+      </DropdownMenuRoot>
+    ),
+  ],
   argTypes: {
     currentOrganization: {
       description: 'Currently selected organization',

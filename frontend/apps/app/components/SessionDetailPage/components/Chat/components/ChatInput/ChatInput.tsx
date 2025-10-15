@@ -237,22 +237,22 @@ export const ChatInput: FC<Props> = ({
             </PopoverPortal>
           </PopoverRoot>
         </div>
-        <div className={styles.actions}>
-          <DeepModelingToggle
-            name="isDeepModelingEnabled"
-            defaultChecked={isDeepModelingEnabled}
-            disabled={isWorkflowRunning || isPublic}
-            onClick={() => onDeepModelingToggle(!isDeepModelingEnabled)}
-          >
-            Deep Modeling
-          </DeepModelingToggle>
-          <SendButton
-            hasContent={hasContent}
-            disabled={isWorkflowRunning || error || isPublic}
-            onClick={handleSubmit}
-          />
-        </div>
+        <SendButton
+          hasContent={hasContent}
+          disabled={isWorkflowRunning || error || isPublic}
+          onClick={handleSubmit}
+        />
       </form>
+      <div className={styles.toolsContainer}>
+        <DeepModelingToggle
+          name="isDeepModelingEnabled"
+          defaultChecked={isDeepModelingEnabled}
+          disabled={isWorkflowRunning || isPublic}
+          onClick={() => onDeepModelingToggle(!isDeepModelingEnabled)}
+        >
+          Deep Modeling
+        </DeepModelingToggle>
+      </div>
 
       <AuthModals
         authModalType={authModalType}

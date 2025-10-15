@@ -2,6 +2,7 @@
 
 import type { BaseMessage } from '@langchain/core/messages'
 import type { Schema } from '@liam-hq/schema'
+import { useRouter, useSearchParams } from 'next/navigation'
 import type { FC } from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import type { OutputTabValue } from '../Output/constants'
@@ -32,13 +33,17 @@ export const Chat: FC<Props> = ({
   error,
   initialIsDeepModelingEnabled = true,
 }) => {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const { containerRef, scrollToBottom } = useScrollToBottom<HTMLDivElement>(
     messages.length,
   )
   const [showScrollButton, setShowScrollButton] = useState(false)
-  const [isDeepModelingEnabled, setIsDeepModelingEnabled] = useState(
-    initialIsDeepModelingEnabled,
-  )
+
+  const deepModelingParam = searchParams.get('deepModeling')
+  const isDeepModelingEnabled =
+    deepModelingParam === 'true' ||
+    (deepModelingParam === null && initialIsDeepModelingEnabled)
 
   const recomputeScrollButton = useCallback(() => {
     const el = containerRef.current
@@ -60,6 +65,15 @@ export const Chat: FC<Props> = ({
   useEffect(() => {
     recomputeScrollButton()
   }, [messages, recomputeScrollButton])
+
+  const handleDeepModelingToggle = useCallback(
+    (enabled: boolean) => {
+      const params = new URLSearchParams(searchParams.toString())
+      params.set('deepModeling', enabled.toString())
+      router.replace(`?${params.toString()}`, { scroll: false })
+    },
+    [router, searchParams],
+  )
 
   const handleSendMessage = (content: string) => {
     onSendMessage(content, isDeepModelingEnabled)
@@ -88,7 +102,7 @@ export const Chat: FC<Props> = ({
         isWorkflowRunning={isWorkflowRunning}
         schema={schemaData}
         isDeepModelingEnabled={isDeepModelingEnabled}
-        onDeepModelingToggle={setIsDeepModelingEnabled}
+        onDeepModelingToggle={handleDeepModelingToggle}
       />
     </div>
   )

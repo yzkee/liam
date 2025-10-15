@@ -16,9 +16,11 @@
 }
 
 .input {
+  position: relative;
   padding: var(--spacing-2) 0;
   width: 100%;
   border-radius: var(--border-radius-smbase);
+  z-index: 1;
 }
 
 .input:focus-visible {

@@ -49,12 +49,3 @@ export const Default: Story = {
     email: 'user@example.com',
   },
 }
-
-export const LongEmail: Story = {
-  args: {
-    isOpen: true,
-    invitationId: 'invitation-123',
-    organizationId: 'org-456',
-    email: 'very.long.email.address@example-organization.com',
-  },
-}

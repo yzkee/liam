@@ -246,7 +246,7 @@ export const ChatInput: FC<Props> = ({
       <div className={styles.toolsContainer}>
         <DeepModelingToggle
           name="isDeepModelingEnabled"
-          checked={isDeepModelingEnabled}
+          defaultChecked={isDeepModelingEnabled}
           disabled={isWorkflowRunning || isPublic}
           onClick={() => onDeepModelingToggle(!isDeepModelingEnabled)}
         >

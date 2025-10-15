@@ -153,7 +153,7 @@ export const SessionDetailPageClient: FC<Props> = ({
   const hasTriggeredInitialWorkflow = useRef(false)
 
   const handleSendMessage = useCallback(
-    async (content: string, deepModelingEnabled: boolean) => {
+    async (content: string, isDeepModelingEnabled: boolean) => {
       const tempId = `optimistic-${crypto.randomUUID()}`
       const optimisticMessage = new HumanMessage({
         content,
@@ -167,7 +167,7 @@ export const SessionDetailPageClient: FC<Props> = ({
       const result = await start({
         userInput: content,
         designSessionId,
-        isDeepModelingEnabled: deepModelingEnabled,
+        isDeepModelingEnabled,
       })
 
       if (result.isErr()) {

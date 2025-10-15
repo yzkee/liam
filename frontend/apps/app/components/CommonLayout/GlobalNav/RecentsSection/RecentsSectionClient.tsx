@@ -3,20 +3,80 @@
 import clsx from 'clsx'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { urlgen } from '../../../../libs/routes'
 import { formatDateShort } from '../../../../libs/utils'
 import itemStyles from '../Item.module.css'
-import styles from './RecentsSection.module.css'
+import { loadMoreSessions } from './actions'
+import styles from './RecentsSectionClient.module.css'
 import type { RecentSession } from './types'
 
 type RecentsSectionClientProps = {
   sessions: RecentSession[]
 }
 
+const PAGE_SIZE = 20
+
 export const RecentsSectionClient = ({
-  sessions,
+  sessions: initialSessions,
 }: RecentsSectionClientProps) => {
   const pathname = usePathname()
+  const [sessions, setSessions] = useState<RecentSession[]>(initialSessions)
+  const [isLoading, setIsLoading] = useState(false)
+  const [hasMore, setHasMore] = useState(initialSessions.length >= PAGE_SIZE)
+  const observerRef = useRef<IntersectionObserver | null>(null)
+  const loadMoreRef = useRef<HTMLDivElement | null>(null)
+
+  const loadMore = useCallback(async () => {
+    if (isLoading || !hasMore) return
+
+    setIsLoading(true)
+    try {
+      const newSessions = await loadMoreSessions({
+        limit: PAGE_SIZE,
+        offset: sessions.length,
+      })
+
+      if (newSessions.length === 0) {
+        setHasMore(false)
+      } else {
+        setSessions((prev) => [...prev, ...newSessions])
+        setHasMore(newSessions.length >= PAGE_SIZE)
+      }
+    } catch (error) {
+      console.error('Error loading more sessions:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [isLoading, hasMore, sessions.length])
+
+  useEffect(() => {
+    const currentLoadMoreRef = loadMoreRef.current
+
+    if (!currentLoadMoreRef) return
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries
+        if (entry?.isIntersecting) {
+          loadMore()
+        }
+      },
+      {
+        root: null,
+        rootMargin: '100px',
+        threshold: 0.1,
+      },
+    )
+
+    observerRef.current.observe(currentLoadMoreRef)
+
+    return () => {
+      if (observerRef.current && currentLoadMoreRef) {
+        observerRef.current.unobserve(currentLoadMoreRef)
+      }
+    }
+  }, [loadMore])
 
   return (
     <>
@@ -61,6 +121,14 @@ export const RecentsSectionClient = ({
                   </Link>
                 )
               })}
+              {hasMore && (
+                <div ref={loadMoreRef} className={styles.loadMoreTrigger} />
+              )}
+              {isLoading && (
+                <div className={styles.loadingState}>
+                  <span className={styles.loadingText}>Loading...</span>
+                </div>
+              )}
             </nav>
           ) : (
             <div className={styles.emptyState}>

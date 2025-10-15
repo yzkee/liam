@@ -267,3 +267,41 @@ describe('in case input mode is "table"', () => {
     })
   })
 })
+
+describe('displays a suggestion to complete the input', () => {
+  it('displays the remaining text when the input matches the beginning of a suggestion', async () => {
+    const user = userEvent.setup()
+    render(
+      <CommandPaletteSearchInput
+        mode={{ type: 'default' }}
+        suggestion={{ type: 'table', name: 'user-settings' }}
+        setMode={mockSetMode}
+      />,
+      { wrapper },
+    )
+
+    await user.type(screen.getByRole('combobox'), 'user-s')
+
+    expect(
+      screen.getByTestId('command-palette-search-input-suggestion-suffix'),
+    ).toHaveTextContent(/^ettings$/)
+  })
+
+  it('display the whole text when the input does not match the beginning of a suggestion', async () => {
+    const user = userEvent.setup()
+    render(
+      <CommandPaletteSearchInput
+        mode={{ type: 'default' }}
+        suggestion={{ type: 'table', name: 'user-settings' }}
+        setMode={mockSetMode}
+      />,
+      { wrapper },
+    )
+
+    await user.type(screen.getByRole('combobox'), 'setting')
+
+    expect(
+      screen.getByTestId('command-palette-search-input-suggestion-suffix'),
+    ).toHaveTextContent(/^- user-settings$/)
+  })
+})

@@ -142,7 +142,10 @@ export const CommandPaletteSearchInput: FC<Props> = ({
           {completionSuffix && (
             <div className={styles.suggestion}>
               <span className={styles.inputValue}>{value}</span>
-              <span className={styles.completionSuffix}>
+              <span
+                className={styles.completionSuffix}
+                data-testid="command-palette-search-input-suggestion-suffix"
+              >
                 {completionSuffix}
               </span>
             </div>

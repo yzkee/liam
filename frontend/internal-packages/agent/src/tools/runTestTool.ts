@@ -119,10 +119,8 @@ export const runTestTool: StructuredTool = tool(
     }
 
     const {
-      repositories,
       ddlStatements,
       requiredExtensions,
-      designSessionId,
       analyzedRequirements,
       toolCallId,
     } = toolConfigurableResult.value
@@ -154,12 +152,6 @@ export const runTestTool: StructuredTool = tool(
       analyzedRequirements,
       requiredExtensions,
     )
-
-    // Save artifact with updated test results
-    await repositories.schema.upsertArtifact({
-      designSessionId,
-      artifact: { requirement: updatedAnalyzedRequirements },
-    })
 
     // Count passed and failed tests from testResults
     let passedTests = 0

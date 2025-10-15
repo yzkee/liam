@@ -9,7 +9,7 @@ import { ProjectIcon } from '../../../../../ProjectIcon'
 import { OrganizationIcon } from './OrganizationIcon'
 import styles from './ProjectItem.module.css'
 
-// Mock wrapper components for Storybook to avoid server action calls
+// Mock wrapper components that provide static data for Storybook
 const MockOrganizationDataWrapper: FC<{
   installationId: number
   owner: string
@@ -34,7 +34,6 @@ const MockLastCommitDataWrapper: FC<{
   </>
 )
 
-// Storybook version of ProjectItem that uses mock components
 type ProjectWithRepositories = Tables<'projects'> & {
   project_repository_mappings?: Array<{
     repository: Tables<'github_repositories'>
@@ -45,7 +44,8 @@ type ProjectItemProps = {
   project: ProjectWithRepositories
 }
 
-const ProjectItemForStorybook: FC<ProjectItemProps> = ({ project }) => {
+// Storybook wrapper that uses the same structure as ProjectItem but with mock components
+const ProjectItemStoryWrapper: FC<ProjectItemProps> = ({ project }) => {
   const repositoryName = project.name?.toLowerCase() || 'untitled-project'
   const repository = project.project_repository_mappings?.[0]?.repository
 
@@ -105,7 +105,7 @@ const ProjectItemForStorybook: FC<ProjectItemProps> = ({ project }) => {
 }
 
 const meta = {
-  component: ProjectItemForStorybook,
+  component: ProjectItemStoryWrapper,
   parameters: {
     layout: 'centered',
   },
@@ -121,10 +121,10 @@ const meta = {
       description: 'Project data including repository mappings',
     },
   },
-} satisfies Meta<typeof ProjectItemForStorybook>
+} satisfies Meta<typeof ProjectItemStoryWrapper>
 
 export default meta
-type Story = StoryObj<typeof ProjectItemForStorybook>
+type Story = StoryObj<typeof ProjectItemStoryWrapper>
 
 export const WithRepository: Story = {
   args: {

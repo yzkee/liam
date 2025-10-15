@@ -1,4 +1,4 @@
-import { DropdownMenuRoot } from '@liam-hq/ui'
+import { Button, DropdownMenuRoot, DropdownMenuTrigger } from '@liam-hq/ui'
 import type { Meta, StoryObj } from '@storybook/nextjs'
 import type { Organization } from '../../../services/getOrganization'
 import type { OrganizationsByUserId } from '../../../services/getOrganizationsByUserId'
@@ -37,7 +37,10 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <DropdownMenuRoot>
+      <DropdownMenuRoot defaultOpen={true}>
+        <DropdownMenuTrigger asChild>
+          <Button>Organization Menu</Button>
+        </DropdownMenuTrigger>
         <Story />
       </DropdownMenuRoot>
     ),

@@ -43,6 +43,24 @@ export const CommandPaletteSearchInput: FC<Props> = ({
     }
   }, [mode])
 
+  const completionSuffix = useMemo(() => {
+    if (!suggestion) return null
+
+    // no need to show completion cases
+    if (mode.type === 'table' && suggestion.type === 'table') {
+      return null
+    }
+
+    const suggestionValue =
+      suggestion.type === 'column' ? suggestion.columnName : suggestion.name
+
+    if (suggestionValue.startsWith(value)) {
+      return suggestionValue.slice(value.length)
+    }
+
+    return ` - ${suggestionValue}`
+  }, [suggestion, value, mode.type])
+
   const handleKeydown: KeyboardEventHandler<HTMLInputElement> = useCallback(
     // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: refactor this function to reduce cognitive complexity
     (event) => {

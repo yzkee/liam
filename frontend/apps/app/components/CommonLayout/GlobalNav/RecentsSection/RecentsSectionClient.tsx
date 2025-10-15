@@ -1,5 +1,6 @@
 'use client'
 
+import { Skeleton } from '@liam-hq/ui'
 import clsx from 'clsx'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -126,7 +127,13 @@ export const RecentsSectionClient = ({
               )}
               {isLoading && (
                 <div className={styles.loadingState}>
-                  <span className={styles.loadingText}>Loading...</span>
+                  {/* biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton items that won't be reordered */}
+                  {['skeleton-1', 'skeleton-2', 'skeleton-3'].map((key) => (
+                    <div key={key} className={styles.skeletonItem}>
+                      <Skeleton width="80%" height="1rem" />
+                      <Skeleton width="40%" height="0.75rem" />
+                    </div>
+                  ))}
                 </div>
               )}
             </nav>

@@ -43,23 +43,27 @@ export const CommandPaletteSearchInput: FC<Props> = ({
     }
   }, [mode])
 
-  const completionSuffix = useMemo(() => {
+  const suggestionValue = useMemo(() => {
     if (!suggestion) return null
 
     // no need to show completion cases
     if (mode.type === 'table' && suggestion.type === 'table') {
       return null
     }
+    return suggestion.type === 'column'
+      ? suggestion.columnName
+      : suggestion.name
+  }, [mode, suggestion])
 
-    const suggestionValue =
-      suggestion.type === 'column' ? suggestion.columnName : suggestion.name
+  const completionSuffix = useMemo(() => {
+    if (!suggestionValue) return
 
     if (suggestionValue.startsWith(value)) {
       return suggestionValue.slice(value.length)
     }
 
     return ` - ${suggestionValue}`
-  }, [suggestion, value, mode.type])
+  }, [value, suggestionValue])
 
   const handleKeydown: KeyboardEventHandler<HTMLInputElement> = useCallback(
     // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: refactor this function to reduce cognitive complexity
@@ -99,8 +103,25 @@ export const CommandPaletteSearchInput: FC<Props> = ({
           break
         }
       }
+
+      // TODO: remove this condition and always activate table mode when releasing the feature
+      if (isTableModeActivatable) {
+        // it completes input value with suggestion when Tab key is pressed but the the input mode is not "default" or the suggestion type is not "table"
+        if (event.key === 'Tab' && suggestionValue) {
+          event.preventDefault()
+          setValue(suggestionValue)
+          return
+        }
+      }
     },
-    [mode.type, value, setMode, suggestion, isTableModeActivatable],
+    [
+      mode.type,
+      value,
+      setMode,
+      suggestion,
+      isTableModeActivatable,
+      suggestionValue,
+    ],
   )
 
   return (

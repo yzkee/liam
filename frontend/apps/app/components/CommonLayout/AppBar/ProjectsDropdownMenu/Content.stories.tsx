@@ -35,7 +35,7 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <DropdownMenuRoot>
+      <DropdownMenuRoot defaultOpen={true}>
         <Story />
       </DropdownMenuRoot>
     ),

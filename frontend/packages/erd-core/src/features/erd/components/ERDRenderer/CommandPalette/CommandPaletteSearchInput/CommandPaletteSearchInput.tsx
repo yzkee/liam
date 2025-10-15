@@ -114,7 +114,7 @@ export const CommandPaletteSearchInput: FC<Props> = ({
             value={value}
             onValueChange={setValue}
             className={styles.input}
-            placeholder="Search"
+            placeholder={completionSuffix ? '' : 'Search'} // display completion suffix instead when suggested
             autoFocus
             onKeyDown={handleKeydown}
           />

@@ -6,7 +6,13 @@
 
 .inputContainer {
   display: flex;
+  width: 100%;
   margin-left: var(--spacing-2);
+}
+
+.inputWithSuggestion {
+  position: relative;
+  width: 100%;
 }
 
 .input {
@@ -23,6 +29,20 @@
   flex-shrink: 0;
   margin-right: var(--spacing-1);
   padding: var(--spacing-2) 0;
+}
+
+.suggestion {
+  position: absolute;
+  top: 0;
+  padding: var(--spacing-2) 0;
+}
+
+.suggestion .inputValue {
+  color: transparent;
+}
+
+.suggestion .completionSuffix {
+  color: var(--overlay-60);
 }
 
 .searchIcon {

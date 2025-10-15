@@ -108,15 +108,25 @@ export const CommandPaletteSearchInput: FC<Props> = ({
       <Search className={styles.searchIcon} />
       <div className={styles.inputContainer}>
         {modePrefix && <span className={styles.modePrefix}>{modePrefix}</span>}
-        <Command.Input
-          {...inputProps}
-          value={value}
-          onValueChange={setValue}
-          className={styles.input}
-          placeholder="Search"
-          autoFocus
-          onKeyDown={handleKeydown}
-        />
+        <div className={styles.inputWithSuggestion}>
+          <Command.Input
+            {...inputProps}
+            value={value}
+            onValueChange={setValue}
+            className={styles.input}
+            placeholder="Search"
+            autoFocus
+            onKeyDown={handleKeydown}
+          />
+          {completionSuffix && (
+            <div className={styles.suggestion}>
+              <span className={styles.inputValue}>{value}</span>
+              <span className={styles.completionSuffix}>
+                {completionSuffix}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

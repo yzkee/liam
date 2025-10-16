@@ -31,14 +31,26 @@
 
 .recentsHeader {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   padding: var(--spacing-2);
-  gap: var(--spacing-2half);
+  gap: var(--spacing-2);
 }
 
 .recentsTitle {
   font-weight: 600;
   color: var(--global-foreground);
+}
+
+.filterContainer {
+  width: 100%;
+}
+
+.filterTrigger {
+  width: 100%;
+  font-size: var(--font-size-3);
+  padding: var(--spacing-1half) var(--spacing-2);
+  height: auto;
+  min-height: 32px;
 }
 
 .sessionsList {
@@ -102,10 +114,25 @@
   background-color: var(--primary-overlay-20);
 }
 
+.sessionInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  overflow: hidden;
+}
+
 .sessionName {
   font-size: var(--font-size-4);
   font-weight: 500;
   color: var(--global-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sessionOwner {
+  font-size: var(--font-size-2);
+  color: var(--overlay-60);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

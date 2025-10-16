@@ -272,6 +272,7 @@ export const SessionDetailPageClient: FC<Props> = ({
                   onTabChange={setActiveTab}
                   initialIsPublic={initialIsPublic}
                   analyzedRequirements={analyzedRequirements}
+                  hasInitialSchemaSnapshot={hasInitialSchemaSnapshot}
                 />
               </div>
             </ResizablePanel>

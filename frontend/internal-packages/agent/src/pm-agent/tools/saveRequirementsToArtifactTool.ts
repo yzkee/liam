@@ -14,6 +14,8 @@ import { WorkflowTerminationError } from '../../utils/errorHandling'
 import { getConfigurable } from '../../utils/getConfigurable'
 import { toJsonSchema } from '../../utils/jsonSchema'
 
+const TOOL_NAME = 'saveRequirementsToArtifactTool'
+
 const testCaseInputSchema = v.omit(testCaseSchema, ['id', 'sql', 'testResults'])
 
 const analyzedRequirementsInputSchema = v.object({
@@ -81,7 +83,7 @@ export const saveRequirementsToArtifactTool: StructuredTool = tool(
     if (toolConfigurableResult.isErr()) {
       throw new WorkflowTerminationError(
         toolConfigurableResult.error,
-        'saveRequirementsToArtifactTool',
+        TOOL_NAME,
       )
     }
 
@@ -89,6 +91,7 @@ export const saveRequirementsToArtifactTool: StructuredTool = tool(
 
     const toolMessage = new ToolMessage({
       id: uuidv4(),
+      name: TOOL_NAME,
       status: 'success',
       content: 'Requirements saved successfully to artifact',
       tool_call_id: toolCallId,
@@ -108,7 +111,7 @@ export const saveRequirementsToArtifactTool: StructuredTool = tool(
     })
   },
   {
-    name: 'saveRequirementsToArtifactTool',
+    name: TOOL_NAME,
     description:
       'Save the analyzed requirements to the database as an artifact. Accepts business requirements and functional requirements.',
     schema: toolSchema,

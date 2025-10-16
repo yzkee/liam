@@ -2,11 +2,14 @@
 
 import { fromPromise } from '@liam-hq/neverthrow'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  ChevronsUpDown,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuRoot,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  Users,
 } from '@liam-hq/ui'
 import clsx from 'clsx'
 import Link from 'next/link'
@@ -141,31 +144,47 @@ export const RecentsSectionClient = ({
       </div>
       <div className={styles.recentsExpanded}>
         <div className={styles.recentsSection}>
-          <div className={styles.recentsHeader}>
-            <div className={itemStyles.labelArea}>
-              <span className={clsx(itemStyles.label, styles.recentsTitle)}>
-                Recents
-              </span>
-            </div>
-            <div className={styles.filterContainer}>
-              <Select value={filterType} onValueChange={handleFilterChange}>
-                <SelectTrigger className={styles.filterTrigger}>
-                  <SelectValue>{getFilterLabel(filterType)}</SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="me">My Sessions</SelectItem>
-                  <SelectItem value="all">All Sessions</SelectItem>
-                  {organizationMembers
-                    .filter((member) => member.id !== currentUserId)
-                    .map((member) => (
-                      <SelectItem key={member.id} value={member.id}>
-                        {member.name}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          <DropdownMenuRoot>
+            <DropdownMenuTrigger>
+              <div className={clsx(itemStyles.item, styles.filterItem)}>
+                <div className={itemStyles.iconContainer}>
+                  <Users />
+                </div>
+                <div className={itemStyles.labelArea}>
+                  <span className={itemStyles.label}>
+                    {getFilterLabel(filterType)}
+                  </span>
+                  <ChevronsUpDown className={styles.chevronIcon} />
+                </div>
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              className={styles.dropdownContent}
+            >
+              <DropdownMenuRadioGroup
+                value={filterType}
+                onValueChange={handleFilterChange}
+              >
+                <DropdownMenuRadioItem value="me" label="My Sessions" />
+                <DropdownMenuRadioItem value="all" label="All Sessions" />
+                {organizationMembers.length > 1 && (
+                  <>
+                    <DropdownMenuSeparator />
+                    {organizationMembers
+                      .filter((member) => member.id !== currentUserId)
+                      .map((member) => (
+                        <DropdownMenuRadioItem
+                          key={member.id}
+                          value={member.id}
+                          label={member.name}
+                        />
+                      ))}
+                  </>
+                )}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenuRoot>
 
           {sessions.length > 0 ? (
             <nav className={styles.sessionsList} aria-label="Recent sessions">

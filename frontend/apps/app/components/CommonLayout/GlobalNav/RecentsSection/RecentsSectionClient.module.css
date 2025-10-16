@@ -29,28 +29,19 @@
   gap: var(--spacing-1);
 }
 
-.recentsHeader {
-  display: flex;
-  flex-direction: column;
-  padding: var(--spacing-2);
-  gap: var(--spacing-2);
-}
-
-.recentsTitle {
-  font-weight: 600;
-  color: var(--global-foreground);
-}
-
-.filterContainer {
+.filterItem {
   width: 100%;
+  margin-bottom: var(--spacing-2);
 }
 
-.filterTrigger {
-  width: 100%;
-  font-size: var(--font-size-3);
-  padding: var(--spacing-1half) var(--spacing-2);
-  height: auto;
-  min-height: 32px;
+.chevronIcon {
+  width: 0.75rem;
+  height: 0.75rem;
+  color: var(--overlay-70);
+}
+
+.dropdownContent {
+  min-width: 200px;
 }
 
 .sessionsList {

@@ -4,11 +4,14 @@ import type { RunnableConfig } from '@langchain/core/runnables'
 import type { StructuredTool } from '@langchain/core/tools'
 import { tool } from '@langchain/core/tools'
 import { Command } from '@langchain/langgraph'
-import type { AnalyzedRequirements, TestCase } from '@liam-hq/artifact'
 import { executeQuery } from '@liam-hq/pglite-server'
 import { v4 as uuidv4 } from 'uuid'
 import * as v from 'valibot'
 import { formatValidationErrors } from '../qa-agent/validateSchema/formatValidationErrors'
+import type {
+  AnalyzedRequirements,
+  TestCase,
+} from '../schemas/analyzedRequirements'
 import { SSE_EVENTS } from '../streaming/constants'
 import { WorkflowTerminationError } from '../utils/errorHandling'
 import { getToolConfigurable } from './getToolConfigurable'

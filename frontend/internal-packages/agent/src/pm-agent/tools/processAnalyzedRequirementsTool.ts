@@ -3,11 +3,14 @@ import { ToolMessage } from '@langchain/core/messages'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { type StructuredTool, tool } from '@langchain/core/tools'
 import { Command } from '@langchain/langgraph'
-import { type AnalyzedRequirements, testCaseSchema } from '@liam-hq/artifact'
 import { fromValibotSafeParse } from '@liam-hq/neverthrow'
 import { ok, type Result } from 'neverthrow'
 import { v4 as uuidv4 } from 'uuid'
 import * as v from 'valibot'
+import {
+  type AnalyzedRequirements,
+  testCaseSchema,
+} from '../../schemas/analyzedRequirements'
 import { SSE_EVENTS } from '../../streaming/constants'
 import { WorkflowTerminationError } from '../../utils/errorHandling'
 import { toJsonSchema } from '../../utils/jsonSchema'

@@ -1,4 +1,4 @@
-import type { ToolName } from '@liam-hq/agent'
+import type { ToolName } from '@liam-hq/agent/client'
 
 type ToolDisplayInfo = {
   displayName: string

@@ -4,6 +4,7 @@ import type { Schema } from '@liam-hq/schema'
 import {
   type Operation,
   postgresqlOperationDeparser,
+  postgresqlSchemaDeparser,
   yamlSchemaDeparser,
 } from '@liam-hq/schema'
 import {
@@ -19,8 +20,7 @@ import {
   useToast,
 } from '@liam-hq/ui'
 import { fromPromise } from 'neverthrow'
-import { type FC, useCallback, useState } from 'react'
-import { schemaToDdl } from '../SQL/utils/schemaToDdl'
+import { type FC, useState } from 'react'
 import styles from './ExportDropdown.module.css'
 
 type Props = {
@@ -76,96 +76,125 @@ export const ExportDropdown: FC<Props> = ({
   const toast = useToast()
 
   const [open, setOpen] = useState(false)
-  const handleOpenChange = useCallback(
-    (open: boolean) => {
-      if (disabled) {
-        setOpen(false)
-        return
-      }
+  const handleOpenChange = (open: boolean) => {
+    if (disabled) {
+      setOpen(false)
+      return
+    }
 
-      setOpen(open)
-    },
-    [disabled],
-  )
+    setOpen(open)
+  }
 
-  const copyToClipboard = useCallback(
-    async (
-      content: string,
-      successTitle: string,
-      successDescription: string,
-      errorContext: string,
-    ) => {
-      const clipboardResult = await fromPromise(
-        navigator.clipboard.writeText(content),
-        (error) =>
-          error instanceof Error ? error : new Error('Clipboard write failed'),
-      )
-
-      clipboardResult.match(
-        () => {
-          toast({
-            title: successTitle,
-            description: successDescription,
-            status: 'success',
-          })
-        },
-        (error) => {
-          console.error(`${errorContext}:`, error)
-          toast({
-            title: 'Copy failed',
-            description: `${errorContext}: ${error.message}`,
-            status: 'error',
-          })
-        },
-      )
-    },
-    [toast],
-  )
-
-  const handleCopyAIPrompt = useCallback(async () => {
+  const handleCopyAIPrompt = async () => {
     if (!artifactDoc) return
 
     const prompt = generateAIPrompt(artifactDoc, cumulativeOperations)
-    await copyToClipboard(
-      prompt,
-      'AI Prompt copied!',
-      'AI prompt has been copied to clipboard',
-      'Failed to copy AI prompt to clipboard',
+
+    const clipboardResult = await fromPromise(
+      navigator.clipboard.writeText(prompt),
+      (error) => {
+        if (error instanceof Error) return error
+        if (error instanceof DOMException)
+          return new Error(`Clipboard error: ${error.message}`)
+        return new Error('Clipboard write failed')
+      },
     )
-  }, [artifactDoc, cumulativeOperations, copyToClipboard])
 
-  const handleCopyPostgreSQL = useCallback(async () => {
-    const ddlResult = schemaToDdl(schema)
-    await copyToClipboard(
-      ddlResult.ddl,
-      'PostgreSQL DDL copied!',
-      'Schema DDL has been copied to clipboard',
-      'Failed to copy PostgreSQL DDL to clipboard',
-    )
-  }, [schema, copyToClipboard])
-
-  const handleCopyYaml = useCallback(async () => {
-    const yamlResult = yamlSchemaDeparser(schema)
-
-    yamlResult.match(
-      async (yamlContent) => {
-        await copyToClipboard(
-          yamlContent,
-          'YAML copied!',
-          'Schema YAML has been copied to clipboard',
-          'Failed to copy YAML to clipboard',
-        )
+    clipboardResult.match(
+      () => {
+        toast({
+          title: 'AI Prompt copied!',
+          description: 'AI prompt has been copied to clipboard',
+          status: 'success',
+        })
       },
       (error) => {
-        console.error('Failed to generate YAML:', error)
+        console.error('Failed to copy AI prompt to clipboard:', error)
         toast({
-          title: 'Export failed',
-          description: `Failed to generate YAML: ${error.message}`,
+          title: 'Copy failed',
+          description: `Failed to copy AI prompt to clipboard: ${error.message}`,
           status: 'error',
         })
       },
     )
-  }, [schema, copyToClipboard, toast])
+  }
+
+  const handleCopyPostgreSQL = async () => {
+    const result = postgresqlSchemaDeparser(schema)
+    const ddl = result.value ? `${result.value}\n` : ''
+
+    const clipboardResult = await fromPromise(
+      navigator.clipboard.writeText(ddl),
+      (error) => {
+        if (error instanceof Error) return error
+        if (error instanceof DOMException)
+          return new Error(`Clipboard error: ${error.message}`)
+        return new Error('Clipboard write failed')
+      },
+    )
+
+    clipboardResult.match(
+      () => {
+        toast({
+          title: 'PostgreSQL DDL copied!',
+          description: 'Schema DDL has been copied to clipboard',
+          status: 'success',
+        })
+      },
+      (error) => {
+        console.error('Failed to copy PostgreSQL DDL to clipboard:', error)
+        toast({
+          title: 'Copy failed',
+          description: `Failed to copy DDL to clipboard: ${error.message}`,
+          status: 'error',
+        })
+      },
+    )
+  }
+
+  const handleCopyYaml = async () => {
+    const yamlResult = yamlSchemaDeparser(schema)
+
+    if (yamlResult.isErr()) {
+      const error = yamlResult.error
+      console.error('Failed to generate YAML:', error)
+      toast({
+        title: 'Export failed',
+        description: `Failed to generate YAML: ${error.message}`,
+        status: 'error',
+      })
+      return
+    }
+
+    const yamlContent = yamlResult.value
+    const clipboardResult = await fromPromise(
+      navigator.clipboard.writeText(yamlContent),
+      (error) => {
+        if (error instanceof Error) return error
+        if (error instanceof DOMException)
+          return new Error(`Clipboard error: ${error.message}`)
+        return new Error('Clipboard write failed')
+      },
+    )
+
+    clipboardResult.match(
+      () => {
+        toast({
+          title: 'YAML copied!',
+          description: 'Schema YAML has been copied to clipboard',
+          status: 'success',
+        })
+      },
+      (error) => {
+        console.error('Failed to copy YAML to clipboard:', error)
+        toast({
+          title: 'Copy failed',
+          description: `Failed to copy YAML to clipboard: ${error.message}`,
+          status: 'error',
+        })
+      },
+    )
+  }
 
   return (
     <DropdownMenuRoot open={open} onOpenChange={handleOpenChange}>

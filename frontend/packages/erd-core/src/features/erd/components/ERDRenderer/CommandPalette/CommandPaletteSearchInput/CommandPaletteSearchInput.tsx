@@ -44,6 +44,9 @@ export const CommandPaletteSearchInput: FC<Props> = ({
   }, [mode])
 
   const suggestionValue = useMemo(() => {
+    // TODO: remove this statement when releasing the feature
+    if (!isTableModeActivatable) return null
+
     if (!suggestion) return null
 
     // no need to show completion cases
@@ -53,7 +56,7 @@ export const CommandPaletteSearchInput: FC<Props> = ({
     return suggestion.type === 'column'
       ? suggestion.columnName
       : suggestion.name
-  }, [mode, suggestion])
+  }, [mode, suggestion, isTableModeActivatable])
 
   const completionSuffix = useMemo(() => {
     if (!suggestionValue) return

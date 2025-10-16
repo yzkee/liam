@@ -276,6 +276,7 @@ describe('displays a suggestion to complete the input', () => {
         mode={{ type: 'default' }}
         suggestion={{ type: 'table', name: 'user-settings' }}
         setMode={mockSetMode}
+        isTableModeActivatable
       />,
       { wrapper },
     )
@@ -294,6 +295,7 @@ describe('displays a suggestion to complete the input', () => {
         mode={{ type: 'default' }}
         suggestion={{ type: 'table', name: 'user-settings' }}
         setMode={mockSetMode}
+        isTableModeActivatable
       />,
       { wrapper },
     )

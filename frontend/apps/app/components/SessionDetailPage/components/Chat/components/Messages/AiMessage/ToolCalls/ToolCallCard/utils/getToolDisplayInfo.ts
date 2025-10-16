@@ -20,10 +20,11 @@ export const getToolDisplayInfo = (toolName: ToolName): ToolDisplayInfo => {
           type: 'erd',
         },
       }
-    case 'saveRequirementsToArtifactTool':
+    case 'processAnalyzedRequirementsTool':
       return {
-        displayName: 'Save Requirements',
-        description: 'Saving business and functional requirements',
+        displayName: 'Process Requirements',
+        description:
+          'Processing and streaming business and functional requirements',
         resultAction: {
           label: 'View Artifact',
           type: 'artifact',

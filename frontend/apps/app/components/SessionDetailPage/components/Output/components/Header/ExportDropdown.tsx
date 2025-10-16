@@ -1,7 +1,11 @@
 'use client'
 
 import type { Schema } from '@liam-hq/schema'
-import { type Operation, postgresqlOperationDeparser } from '@liam-hq/schema'
+import {
+  type Operation,
+  postgresqlOperationDeparser,
+  yamlSchemaDeparser,
+} from '@liam-hq/schema'
 import {
   Button,
   ChevronDown,
@@ -141,6 +145,48 @@ export const ExportDropdown: FC<Props> = ({
     )
   }
 
+  const handleCopyYaml = async () => {
+    const yamlResult = yamlSchemaDeparser(schema)
+
+    yamlResult.match(
+      async (yamlContent) => {
+        const clipboardResult = await fromPromise(
+          navigator.clipboard.writeText(yamlContent),
+          (error) =>
+            error instanceof Error
+              ? error
+              : new Error('Clipboard write failed'),
+        )
+
+        clipboardResult.match(
+          () => {
+            toast({
+              title: 'YAML copied!',
+              description: 'Schema YAML has been copied to clipboard',
+              status: 'success',
+            })
+          },
+          (error) => {
+            console.error('Failed to copy YAML to clipboard:', error)
+            toast({
+              title: 'Copy failed',
+              description: `Failed to copy YAML to clipboard: ${error.message}`,
+              status: 'error',
+            })
+          },
+        )
+      },
+      (error) => {
+        console.error('Failed to generate YAML:', error)
+        toast({
+          title: 'Export failed',
+          description: `Failed to generate YAML: ${error.message}`,
+          status: 'error',
+        })
+      },
+    )
+  }
+
   return (
     <DropdownMenuRoot open={open} onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger asChild>
@@ -169,6 +215,12 @@ export const ExportDropdown: FC<Props> = ({
             onSelect={handleCopyPostgreSQL}
           >
             Copy PostgreSQL
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            leftIcon={<Copy size={16} />}
+            onSelect={handleCopyYaml}
+          >
+            Copy YAML
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenuPortal>

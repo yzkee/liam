@@ -1,5 +1,6 @@
 'use client'
 
+import { fromPromise } from '@liam-hq/neverthrow'
 import { Skeleton } from '@liam-hq/ui'
 import clsx from 'clsx'
 import Link from 'next/link'
@@ -32,23 +33,30 @@ export const RecentsSectionClient = ({
     if (isLoading || !hasMore) return
 
     setIsLoading(true)
-    try {
-      const newSessions = await loadMoreSessions({
+
+    const result = await fromPromise(
+      loadMoreSessions({
         limit: PAGE_SIZE,
         offset: sessions.length,
-      })
+      }),
+    )
 
-      if (newSessions.length === 0) {
-        setHasMore(false)
-      } else {
-        setSessions((prev) => [...prev, ...newSessions])
-        setHasMore(newSessions.length >= PAGE_SIZE)
-      }
-    } catch (error) {
-      console.error('Error loading more sessions:', error)
-    } finally {
+    if (result.isErr()) {
+      console.error('Error loading more sessions:', result.error)
       setIsLoading(false)
+      return
     }
+
+    const newSessions = result.value
+
+    if (newSessions.length === 0) {
+      setHasMore(false)
+    } else {
+      setSessions((prev) => [...prev, ...newSessions])
+      setHasMore(newSessions.length >= PAGE_SIZE)
+    }
+
+    setIsLoading(false)
   }, [isLoading, hasMore, sessions.length])
 
   useEffect(() => {

@@ -1,5 +1,6 @@
 'use client'
 
+import { fromPromise } from '@liam-hq/neverthrow'
 import type { Schema } from '@liam-hq/schema'
 import {
   type Operation,
@@ -19,7 +20,6 @@ import {
   FileText,
   useToast,
 } from '@liam-hq/ui'
-import { fromPromise } from 'neverthrow'
 import { type FC, useState } from 'react'
 import styles from './ExportDropdown.module.css'
 
@@ -89,15 +89,8 @@ export const ExportDropdown: FC<Props> = ({
     if (!artifactDoc) return
 
     const prompt = generateAIPrompt(artifactDoc, cumulativeOperations)
-
     const clipboardResult = await fromPromise(
       navigator.clipboard.writeText(prompt),
-      (error) => {
-        if (error instanceof Error) return error
-        if (error instanceof DOMException)
-          return new Error(`Clipboard error: ${error.message}`)
-        return new Error('Clipboard write failed')
-      },
     )
 
     clipboardResult.match(
@@ -108,7 +101,7 @@ export const ExportDropdown: FC<Props> = ({
           status: 'success',
         })
       },
-      (error) => {
+      (error: Error) => {
         console.error('Failed to copy AI prompt to clipboard:', error)
         toast({
           title: 'Copy failed',
@@ -125,12 +118,6 @@ export const ExportDropdown: FC<Props> = ({
 
     const clipboardResult = await fromPromise(
       navigator.clipboard.writeText(ddl),
-      (error) => {
-        if (error instanceof Error) return error
-        if (error instanceof DOMException)
-          return new Error(`Clipboard error: ${error.message}`)
-        return new Error('Clipboard write failed')
-      },
     )
 
     clipboardResult.match(
@@ -141,7 +128,7 @@ export const ExportDropdown: FC<Props> = ({
           status: 'success',
         })
       },
-      (error) => {
+      (error: Error) => {
         console.error('Failed to copy PostgreSQL DDL to clipboard:', error)
         toast({
           title: 'Copy failed',
@@ -169,12 +156,6 @@ export const ExportDropdown: FC<Props> = ({
     const yamlContent = yamlResult.value
     const clipboardResult = await fromPromise(
       navigator.clipboard.writeText(yamlContent),
-      (error) => {
-        if (error instanceof Error) return error
-        if (error instanceof DOMException)
-          return new Error(`Clipboard error: ${error.message}`)
-        return new Error('Clipboard write failed')
-      },
     )
 
     clipboardResult.match(
@@ -185,7 +166,7 @@ export const ExportDropdown: FC<Props> = ({
           status: 'success',
         })
       },
-      (error) => {
+      (error: Error) => {
         console.error('Failed to copy YAML to clipboard:', error)
         toast({
           title: 'Copy failed',

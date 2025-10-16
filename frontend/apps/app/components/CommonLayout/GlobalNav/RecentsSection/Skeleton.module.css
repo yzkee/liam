@@ -13,17 +13,5 @@
   background-color: var(--overlay-20);
   animation: pulse 1.5s ease-in-out infinite;
   border-radius: var(--border-radius-sm);
-}
-
-.text {
   height: 1rem;
-  border-radius: var(--border-radius-sm);
-}
-
-.rectangular {
-  border-radius: var(--border-radius-sm);
-}
-
-.circular {
-  border-radius: 50%;
 }

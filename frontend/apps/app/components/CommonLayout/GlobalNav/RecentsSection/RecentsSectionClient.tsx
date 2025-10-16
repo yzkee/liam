@@ -1,7 +1,6 @@
 'use client'
 
 import { fromPromise } from '@liam-hq/neverthrow'
-import { Skeleton } from '@liam-hq/ui'
 import clsx from 'clsx'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -11,6 +10,7 @@ import { formatDateShort } from '../../../../libs/utils'
 import itemStyles from '../Item.module.css'
 import { loadMoreSessions } from './actions'
 import styles from './RecentsSectionClient.module.css'
+import { Skeleton } from './Skeleton'
 import type { RecentSession } from './types'
 
 type RecentsSectionClientProps = {
@@ -18,6 +18,7 @@ type RecentsSectionClientProps = {
 }
 
 const PAGE_SIZE = 20
+const SKELETON_KEYS = ['skeleton-1', 'skeleton-2', 'skeleton-3']
 
 export const RecentsSectionClient = ({
   sessions: initialSessions,
@@ -135,8 +136,7 @@ export const RecentsSectionClient = ({
               )}
               {isLoading && (
                 <div className={styles.loadingState}>
-                  {/* biome-ignore lint/suspicious/noArrayIndexKey: Static skeleton items that won't be reordered */}
-                  {['skeleton-1', 'skeleton-2', 'skeleton-3'].map((key) => (
+                  {SKELETON_KEYS.map((key) => (
                     <div key={key} className={styles.skeletonItem}>
                       <Skeleton width="80%" height="1rem" />
                       <Skeleton width="40%" height="0.75rem" />

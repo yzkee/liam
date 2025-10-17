@@ -22,6 +22,7 @@ export const ProjectNewPage: FC<Props> = ({
       <InstallationSelector
         installations={installations}
         organizationId={organizationId}
+        disabled={Boolean(needsRefresh)}
       />
     </div>
   )

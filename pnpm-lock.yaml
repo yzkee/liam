@@ -560,9 +560,6 @@ importers:
       '@octokit/rest':
         specifier: 21.1.1
         version: 21.1.1
-      '@supabase/supabase-js':
-        specifier: 2.49.8
-        version: 2.49.8
       neverthrow:
         specifier: 8.2.0
         version: 8.2.0

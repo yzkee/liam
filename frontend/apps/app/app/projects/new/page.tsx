@@ -1,4 +1,5 @@
 import { getInstallations } from '@liam-hq/github'
+import { fromPromise } from '@liam-hq/neverthrow'
 import { redirect } from 'next/navigation'
 import { ProjectNewPage } from '../../../components/ProjectNewPage'
 import { getOrganizationId } from '../../../features/organizations/services/getOrganizationId'
@@ -27,24 +28,29 @@ export default async function NewProjectPage() {
   }
 
   const tokenResult = await getUserAccessToken()
-  if (tokenResult.isErr()) {
-    console.error('Failed to get user access token:', tokenResult.error)
-    redirect(urlgen('login'))
-  }
-  const token = tokenResult.value
-  if (!token) {
-    redirect(urlgen('login'))
-  }
 
-  const installationsResult = await getInstallations(token)
-  const { installations } = await installationsResult.match(
-    (v) => v,
-    (e) => {
-      console.error('Failed to fetch installations:', e)
-      return { installations: [] }
-    },
-  )
-  const needsRefresh = !token || installations.length === 0
+  const { installations, needsRefresh } = await tokenResult
+    .asyncAndThen((token) => {
+      if (!token) {
+        return fromPromise(
+          Promise.resolve({
+            installations: [],
+            needsRefresh: true,
+          }),
+        )
+      }
+      return getInstallations(token).map((result) => ({
+        installations: result.installations,
+        needsRefresh: false,
+      }))
+    })
+    .match(
+      (v) => v,
+      (e) => {
+        console.error('Failed to get token or installations:', e)
+        return { installations: [], needsRefresh: true }
+      },
+    )
 
   return (
     <ProjectNewPage

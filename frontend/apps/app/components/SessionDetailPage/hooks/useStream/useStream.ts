@@ -4,11 +4,12 @@ import {
   type BaseMessage,
   coerceMessageLikeToMessage,
 } from '@langchain/core/messages'
-import { MessageTupleManager, SSE_EVENTS } from '@liam-hq/agent/client'
 import {
   type AnalyzedRequirements,
   analyzedRequirementsSchema,
-} from '@liam-hq/artifact'
+  MessageTupleManager,
+  SSE_EVENTS,
+} from '@liam-hq/agent/client'
 import { err, ok, type Result } from 'neverthrow'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { object, safeParse, string } from 'valibot'

@@ -5,7 +5,7 @@ import {
   mapStoredMessagesToChatMessages,
   type StoredMessage,
 } from '@langchain/core/messages'
-import type { AnalyzedRequirements } from '@liam-hq/artifact'
+import type { AnalyzedRequirements } from '@liam-hq/agent/client'
 import type { Schema } from '@liam-hq/schema'
 import {
   ResizableHandle,

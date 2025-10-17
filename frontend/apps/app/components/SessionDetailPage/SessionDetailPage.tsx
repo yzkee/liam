@@ -1,11 +1,11 @@
 import type { BaseMessage, StoredMessage } from '@langchain/core/messages'
+import type { AnalyzedRequirements } from '@liam-hq/agent'
 import {
   createSupabaseRepositories,
   getAnalyzedRequirements,
   getCheckpointErrors,
   getMessages,
 } from '@liam-hq/agent'
-import type { AnalyzedRequirements } from '@liam-hq/artifact'
 import type { Schema } from '@liam-hq/schema'
 import { schemaSchema } from '@liam-hq/schema'
 import { err, ok, type Result } from 'neverthrow'

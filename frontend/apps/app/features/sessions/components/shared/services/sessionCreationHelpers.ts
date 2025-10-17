@@ -173,7 +173,7 @@ export const createSessionWithSchema = async (
     return buildingSchemaResult
   }
 
-  const redirectTo = `/design_sessions/${designSessionId}}`
+  const redirectTo = `/design_sessions/${designSessionId}`
 
   return {
     success: true,

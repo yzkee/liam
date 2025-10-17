@@ -18,6 +18,8 @@ import { toJsonSchema } from '../../utils/jsonSchema'
 import { withSentryCaptureException } from '../../utils/withSentryCaptureException'
 import { getToolConfigurable } from '../getToolConfigurable'
 
+const TOOL_NAME = 'schemaDesignTool'
+
 const schemaDesignToolSchema = v.object({
   operations: operationsSchema,
 })
@@ -83,7 +85,7 @@ const getConfigData = (config: RunnableConfig): { toolCallId: string } => {
   if (!configParseResult.success) {
     throw new WorkflowTerminationError(
       new Error('Tool call ID not found in config'),
-      'schemaDesignTool',
+      TOOL_NAME,
     )
   }
   return {
@@ -98,7 +100,7 @@ const sendToolMessage = async (
 ) => {
   const toolMessage = new ToolMessage({
     id: uuidv4(),
-    name: 'schemaDesignTool',
+    name: TOOL_NAME,
     status,
     content,
     tool_call_id: toolCallId,
@@ -183,7 +185,7 @@ export const schemaDesignTool: StructuredTool = tool(
     })
   },
   {
-    name: 'schemaDesignTool',
+    name: TOOL_NAME,
     description:
       'Use to design database schemas, recommend table structures, and help with database modeling. This tool applies JSON Patch operations to modify schema elements including tables, columns, indexes, constraints, and enums. When operations fail, the tool provides detailed error messages with specific guidance for correction. Always include all required schema properties (columns, constraints, indexes) when creating tables.',
     schema: toolSchema,

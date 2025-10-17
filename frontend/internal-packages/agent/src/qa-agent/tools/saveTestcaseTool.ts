@@ -12,6 +12,8 @@ import { toJsonSchema } from '../../utils/jsonSchema'
 import { withSentryCaptureException } from '../../utils/withSentryCaptureException'
 import type { testcaseAnnotation } from '../testcaseGeneration/testcaseAnnotation'
 
+const TOOL_NAME = 'saveTestcase'
+
 const saveSqlToolSchema = v.object({
   sql: v.string(),
 })
@@ -37,6 +39,7 @@ const validateSqlSyntax = async (
     const message = `SQL syntax error: ${parseResult.error.message}. Fix the SQL and retry.`
     const toolMessage = new ToolMessage({
       id: uuidv4(),
+      name: TOOL_NAME,
       status: 'error',
       content: message,
       tool_call_id: toolCallId,
@@ -54,7 +57,7 @@ const getConfigData = (config: RunnableConfig): { toolCallId: string } => {
   if (!configParseResult.success) {
     throw new WorkflowTerminationError(
       new Error('Tool call ID not found in config'),
-      'saveTestcaseTool',
+      TOOL_NAME,
     )
   }
   return {
@@ -74,15 +77,13 @@ export const saveTestcaseTool: StructuredTool = tool(
           .join(', ')}`
         const toolMessage = new ToolMessage({
           id: uuidv4(),
+          name: TOOL_NAME,
           status: 'error',
           content: errorMessage,
           tool_call_id: toolCallId,
         })
         await dispatchCustomEvent(SSE_EVENTS.MESSAGES, toolMessage)
-        throw new WorkflowTerminationError(
-          new Error(errorMessage),
-          'saveTestcaseTool',
-        )
+        throw new WorkflowTerminationError(new Error(errorMessage), TOOL_NAME)
       }
 
       const { sql } = parsed.output
@@ -99,6 +100,7 @@ export const saveTestcaseTool: StructuredTool = tool(
 
       const toolMessage = new ToolMessage({
         id: uuidv4(),
+        name: TOOL_NAME,
         status: 'success',
         content: `Successfully saved SQL for test case "${title}" in category "${category}"`,
         tool_call_id: toolCallId,
@@ -114,7 +116,7 @@ export const saveTestcaseTool: StructuredTool = tool(
     })
   },
   {
-    name: 'saveTestcase',
+    name: TOOL_NAME,
     description:
       'Save SQL for the current test case. Only provide the generated SQL.',
     schema: toolSchema,

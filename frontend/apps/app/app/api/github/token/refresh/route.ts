@@ -1,4 +1,4 @@
-import { err, ok, type Result, ResultAsync } from '@liam-hq/neverthrow'
+import { fromPromise, fromThrowable } from '@liam-hq/neverthrow'
 import * as Sentry from '@sentry/nextjs'
 import { NextResponse } from 'next/server'
 import * as v from 'valibot'
@@ -16,6 +16,8 @@ const GitHubTokenSuccessSchema = v.object({
   refresh_token: v.string(),
   token_type: v.string(),
   expires_in: v.number(), // seconds
+  // Align cookie TTL with GitHub if provided
+  refresh_token_expires_in: v.optional(v.number()), // seconds
 })
 
 const GitHubTokenErrorSchema = v.object({
@@ -24,48 +26,37 @@ const GitHubTokenErrorSchema = v.object({
   error_uri: v.optional(v.string()),
 })
 
-function getClientCredentials(): Result<
-  { clientId: string; clientSecret: string },
-  Error
-> {
+const getClientCredentials = fromThrowable(() => {
   const clientId = process.env.GITHUB_CLIENT_ID
   const clientSecret = process.env.GITHUB_CLIENT_SECRET
   if (!clientId || !clientSecret) {
-    return err(new Error('Missing GitHub OAuth client credentials'))
+    // eslint-disable-next-line no-throw-error/no-throw-error -- Throw to feed fromThrowable wrapper
+    throw new Error('Missing GitHub OAuth client credentials')
   }
-  return ok({ clientId, clientSecret })
-}
+  return { clientId, clientSecret }
+})
 
-function parseGitHubRefreshResponse(
-  json: unknown,
-): Result<v.InferOutput<typeof GitHubTokenSuccessSchema>, Error> {
+function parseGitHubRefreshResponse(json: unknown) {
   const success = v.safeParse(GitHubTokenSuccessSchema, json)
-  if (success.success) return ok(success.output)
+  if (success.success) return success.output
   const ghError = v.safeParse(GitHubTokenErrorSchema, json)
   if (ghError.success) {
     const { error: code, error_description } = ghError.output
-    return err(
-      new Error(
-        `GitHub token refresh failed: ${code}${error_description ? ` - ${error_description}` : ''}`,
-      ),
+    // eslint-disable-next-line no-throw-error/no-throw-error -- Propagate parse failure to caller
+    throw new Error(
+      `GitHub token refresh failed: ${code}${error_description ? ` - ${error_description}` : ''}`,
     )
   }
-  return err(new Error('GitHub token refresh returned invalid response'))
+  // eslint-disable-next-line no-throw-error/no-throw-error -- Propagate parse failure to caller
+  throw new Error('GitHub token refresh returned invalid response')
 }
 
 function refreshAccessToken(
   refreshToken: string,
   clientId: string,
   clientSecret: string,
-): ResultAsync<
-  {
-    access_token: string
-    refresh_token: string
-    newExpiresAt: string
-  },
-  Error
-> {
-  return ResultAsync.fromPromise(
+) {
+  return fromPromise(
     (async () => {
       const body = new URLSearchParams({
         grant_type: 'refresh_token',
@@ -84,24 +75,21 @@ function refreshAccessToken(
       })
       if (!res.ok) {
         const text = await res.text().catch(() => '')
-        return Promise.reject(
-          new Error(`GitHub token refresh failed: ${res.status} ${text}`),
-        )
+        // eslint-disable-next-line no-throw-error/no-throw-error -- Map HTTP error into Result error
+        throw new Error(`GitHub token refresh failed: ${res.status} ${text}`)
       }
       const json = await res.json().catch(() => null)
-      const parsed = parseGitHubRefreshResponse(json)
-      if (parsed.isErr()) return Promise.reject(parsed.error)
-      const next = parsed.value
+      const next = parseGitHubRefreshResponse(json)
       const newExpiresAt = new Date(
         Date.now() + next.expires_in * 1000,
       ).toISOString()
       return {
         access_token: next.access_token,
         refresh_token: next.refresh_token,
+        refresh_token_expires_in: next.refresh_token_expires_in,
         newExpiresAt,
       }
     })(),
-    (e) => (e instanceof Error ? e : new Error(String(e))),
   )
 }
 
@@ -149,7 +137,9 @@ async function handler(): Promise<NextResponse> {
 
   // 4) Persist into cookies (access + refresh)
   await writeAccessToken(refreshed.access_token, refreshed.newExpiresAt)
-  const refreshExpiresAt = new Date(Date.now() + THIRTY_DAYS_MS).toISOString()
+  const rtei = refreshed.refresh_token_expires_in ?? 0
+  const refreshTtlMs = rtei > 0 ? rtei * 1000 : THIRTY_DAYS_MS
+  const refreshExpiresAt = new Date(Date.now() + refreshTtlMs).toISOString()
   await writeRefreshToken(refreshed.refresh_token, refreshExpiresAt)
   // refreshed successfully; cookies updated
 

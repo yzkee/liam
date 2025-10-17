@@ -1,6 +1,6 @@
 // Server-only GitHub token utilities: read access token from Cookie (no refresh in RSC)
 
-import { ResultAsync } from '@liam-hq/neverthrow'
+import { fromPromise } from '@liam-hq/neverthrow'
 import { readAccessToken } from './cookie'
 
 const SAFETY_MS = 3 * 60 * 1000 // 3 minutes safety window
@@ -8,18 +8,15 @@ const SAFETY_MS = 3 * 60 * 1000 // 3 minutes safety window
 
 function isExpiringSoon(expiresAtIso: string | null | undefined): boolean {
   if (!expiresAtIso) return true
-  const expiresAt = new Date(expiresAtIso).getTime()
-  return Date.now() + SAFETY_MS >= expiresAt
+  const t = new Date(expiresAtIso).getTime()
+  if (Number.isNaN(t)) return true
+  return Date.now() + SAFETY_MS >= t
 }
 
 // No refresh here; Route Handler performs refresh and cookie writes
 
-export function getUserAccessToken(
-  _userId: string,
-): ResultAsync<string | null, Error> {
-  return ResultAsync.fromPromise(readAccessToken(), (e) =>
-    e instanceof Error ? e : new Error(String(e)),
-  ).map((access) => {
+export function getUserAccessToken() {
+  return fromPromise(readAccessToken()).map((access) => {
     if (access && !isExpiringSoon(access.expiresAt)) {
       return access.token
     }

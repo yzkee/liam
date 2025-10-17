@@ -26,7 +26,7 @@ export default async function NewProjectPage() {
     redirect(urlgen('login'))
   }
 
-  const tokenResult = await getUserAccessToken(user.id)
+  const tokenResult = await getUserAccessToken()
   if (tokenResult.isErr()) {
     console.error('Failed to get user access token:', tokenResult.error)
     redirect(urlgen('login'))

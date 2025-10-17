@@ -1,5 +1,6 @@
 import crypto from 'node:crypto'
-import { err, fromThrowable, ok, type Result } from '@liam-hq/neverthrow'
+import type { Result } from '@liam-hq/neverthrow'
+import { fromThrowable } from '@liam-hq/neverthrow'
 
 export type Key = { id: string; key: Buffer }
 
@@ -30,10 +31,18 @@ export function setKeyring(keys: Key[]): void {
 }
 
 export function currentKey(): Result<Key, Error> {
-  if (!RING.length) return err(new Error('No keys configured'))
-  const k = RING[0]
-  if (!k) return err(new Error('No keys configured'))
-  return ok(k)
+  return fromThrowable(() => {
+    if (!RING.length) {
+      // eslint-disable-next-line no-throw-error/no-throw-error -- Throw to feed fromThrowable
+      throw new Error('No keys configured')
+    }
+    const k = RING[0]
+    if (!k) {
+      // eslint-disable-next-line no-throw-error/no-throw-error -- Throw to feed fromThrowable
+      throw new Error('No keys configured')
+    }
+    return k
+  })()
 }
 
 export type CipherBundle = {
@@ -47,10 +56,11 @@ export type CipherBundle = {
  * Encrypts plaintext using AES-256-GCM with a random IV.
  */
 export function encryptAesGcm(plaintext: string): Result<CipherBundle, Error> {
-  const keyRes = currentKey()
-  if (keyRes.isErr()) return err(keyRes.error)
-  const { id, key } = keyRes.value
   return fromThrowable(() => {
+    const keyRes = currentKey()
+    if (keyRes.isErr()) throw keyRes.error
+    const { id, key } = keyRes.value
+
     const iv = crypto.randomBytes(12)
     const cipher = crypto.createCipheriv('aes-256-gcm', key, iv)
     const ciphertext = Buffer.concat([
@@ -76,9 +86,12 @@ export function decryptAesGcm(
   initializationVector: Buffer,
   authenticationTag: Buffer,
 ): Result<string, Error> {
-  const entry = RING.find((k) => k.id === keyId)
-  if (!entry) return err(new Error('Unknown key id'))
   return fromThrowable(() => {
+    const entry = RING.find((k) => k.id === keyId)
+    if (!entry)
+      // eslint-disable-next-line no-throw-error/no-throw-error -- Throw to feed fromThrowable
+      throw new Error('Unknown key id')
+
     const decipher = crypto.createDecipheriv(
       'aes-256-gcm',
       entry.key,

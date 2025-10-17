@@ -1,7 +1,5 @@
 import { Result } from 'neverthrow'
 
-export { err, errAsync, ok, okAsync, Result, ResultAsync } from 'neverthrow'
-
 import { defaultErrorFn } from './defaultErrorFn'
 
 export function fromThrowable<A extends readonly unknown[], T>(
@@ -18,6 +16,7 @@ export function fromThrowable<A extends readonly unknown[], T, E extends Error>(
   return Result.fromThrowable(fn, errorFn ?? defaultErrorFn)
 }
 
+export type { Result, ResultAsync } from 'neverthrow'
 export { fromAsyncThrowable } from './fromAsyncThrowable'
 export { fromPromise } from './fromPromise'
 export { fromValibotSafeParse } from './fromValibotSafeParse'

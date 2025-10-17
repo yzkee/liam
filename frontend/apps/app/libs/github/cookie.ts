@@ -1,6 +1,6 @@
 // Server-only utility for encrypted GitHub tokens stored in HttpOnly cookies
 
-import { err, fromThrowable, ok, type Result } from '@liam-hq/neverthrow'
+import { fromThrowable } from '@liam-hq/neverthrow'
 import { decryptAesGcm, encryptAesGcm } from '@liam-hq/security/cryptoBox'
 import { cookies } from 'next/headers'
 import * as v from 'valibot'
@@ -36,36 +36,40 @@ function toMaxAgeSeconds(expiresAtIso: string): number {
   return Math.floor(diffMs / 1000)
 }
 
-function packCookieValue(plaintext: string): Result<string, Error> {
-  const enc = encryptAesGcm(plaintext)
-  if (enc.isErr()) return err(enc.error)
-  const { keyId, ciphertext, initializationVector, authenticationTag } =
-    enc.value
-  const packed: Packed = {
-    key_id: keyId,
-    ciphertext: ciphertext.toString('base64'),
-    initialization_vector: initializationVector.toString('base64'),
-    authentication_tag: authenticationTag.toString('base64'),
-  }
+function packCookieValue(plaintext: string) {
   const toJson = fromThrowable(JSON.stringify)
-  const json = toJson(packed)
-  return json.isOk() ? ok(json.value) : err(json.error)
+  return encryptAesGcm(plaintext).andThen(
+    ({ keyId, ciphertext, initializationVector, authenticationTag }) => {
+      const packed: Packed = {
+        key_id: keyId,
+        ciphertext: ciphertext.toString('base64'),
+        initialization_vector: initializationVector.toString('base64'),
+        authentication_tag: authenticationTag.toString('base64'),
+      }
+      return toJson(packed)
+    },
+  )
 }
 
-function unpackCookieValue(value: string): Result<string, Error> {
+function unpackCookieValue(value: string) {
   const parseJson = fromThrowable(JSON.parse)
-  const json = parseJson(value)
-  if (json.isErr()) return err(json.error)
-  const parsed = v.safeParse(PackedSchema, json.value)
-  if (!parsed.success) return err(new Error('Invalid packed cookie schema'))
-  const p = parsed.output
-  const dec = decryptAesGcm(
-    p.key_id,
-    Buffer.from(p.ciphertext, 'base64'),
-    Buffer.from(p.initialization_vector, 'base64'),
-    Buffer.from(p.authentication_tag, 'base64'),
-  )
-  return dec.isOk() ? ok(dec.value) : err(dec.error)
+  const toPacked = fromThrowable((json: unknown): Packed => {
+    const parsed = v.safeParse(PackedSchema, json)
+    if (!parsed.success)
+      // eslint-disable-next-line no-throw-error/no-throw-error -- Throw to feed fromThrowable wrapper
+      throw new Error('Invalid packed cookie schema')
+    return parsed.output
+  })
+  return parseJson(value)
+    .andThen(toPacked)
+    .andThen((p) =>
+      decryptAesGcm(
+        p.key_id,
+        Buffer.from(p.ciphertext, 'base64'),
+        Buffer.from(p.initialization_vector, 'base64'),
+        Buffer.from(p.authentication_tag, 'base64'),
+      ),
+    )
 }
 
 async function readTokenFrom(name: string): Promise<TokenPayload | null> {

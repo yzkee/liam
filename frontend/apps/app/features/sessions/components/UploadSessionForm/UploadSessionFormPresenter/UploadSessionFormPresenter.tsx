@@ -79,7 +79,6 @@ const useUploadFormState = () => {
 const useUploadFormHandlers = (
   state: ReturnType<typeof useUploadFormState>,
   fileInputRef: React.RefObject<HTMLInputElement | null>,
-  _clearAttachments: () => void,
 ) => {
   const {
     setSelectedFile,
@@ -217,7 +216,7 @@ export const UploadSessionFormPresenter: FC<Props> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const formRef = useRef<HTMLFormElement>(null)
 
-  const handlers = useUploadFormHandlers(state, fileInputRef, () => {})
+  const handlers = useUploadFormHandlers(state, fileInputRef)
 
   const hasContent = calculateHasContent({
     selectedFile: state.selectedFile,

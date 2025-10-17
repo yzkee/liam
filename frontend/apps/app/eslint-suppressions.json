@@ -29,6 +29,11 @@
       "count": 5
     }
   },
+  "components/ProjectNewPage/components/InstallationSelector/actions/getRepositories.ts": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 3
+    }
+  },
   "components/ProjectsPage/ProjectsPage.module.css": {
     "css-modules-kit/no-unused-class-names": {
       "count": 9

@@ -1,4 +1,7 @@
 import { Result } from 'neverthrow'
+
+export { err, errAsync, ok, okAsync, Result, ResultAsync } from 'neverthrow'
+
 import { defaultErrorFn } from './defaultErrorFn'
 
 export function fromThrowable<A extends readonly unknown[], T>(

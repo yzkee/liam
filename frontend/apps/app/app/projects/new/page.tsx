@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { ProjectNewPage } from '../../../components/ProjectNewPage'
 import { getOrganizationId } from '../../../features/organizations/services/getOrganizationId'
 import { createClient } from '../../../libs/db/server'
+import { getUserAccessToken } from '../../../libs/github/token'
 import { urlgen } from '../../../libs/routes'
 
 export default async function NewProjectPage() {
@@ -25,18 +26,31 @@ export default async function NewProjectPage() {
     redirect(urlgen('login'))
   }
 
-  const { data } = await supabase.auth.getSession()
-
-  if (data.session === null) {
+  const tokenResult = await getUserAccessToken(user.id)
+  if (tokenResult.isErr()) {
+    console.error('Failed to get user access token:', tokenResult.error)
+    redirect(urlgen('login'))
+  }
+  const token = tokenResult.value
+  if (!token) {
     redirect(urlgen('login'))
   }
 
-  const { installations } = await getInstallations(data.session)
+  const installationsResult = await getInstallations(token)
+  const { installations } = await installationsResult.match(
+    (v) => v,
+    (e) => {
+      console.error('Failed to fetch installations:', e)
+      return { installations: [] }
+    },
+  )
+  const needsRefresh = !token || installations.length === 0
 
   return (
     <ProjectNewPage
       installations={installations}
       organizationId={organizationId}
+      needsRefresh={needsRefresh}
     />
   )
 }

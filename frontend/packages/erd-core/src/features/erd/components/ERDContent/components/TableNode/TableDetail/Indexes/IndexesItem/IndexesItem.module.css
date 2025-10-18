@@ -6,6 +6,17 @@
   scroll-margin-top: 82px;
 }
 
+.focused {
+  outline: 1px solid var(--button-primary-background);
+  outline-offset: -1px;
+}
+
+.blinkCircleWrapper {
+  position: relative;
+  top: 22px;
+  left: 9px;
+}
+
 .heading {
   color: var(--global-foreground);
   font-size: var(--font-size-2);

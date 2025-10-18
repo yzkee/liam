@@ -8,8 +8,8 @@ export const hashSchema = custom<`${string}__${HashType}__${string}`>(
     if (typeof input !== 'string') return false
 
     return hashTypes.some((hashType) => {
-      const parts = input.split(hashType)
-      return parts.length === 2
+      const parts = input.split(`__${hashType}__`)
+      return parts.length === 2 && parts[0] && parts[1]
     })
   },
 )

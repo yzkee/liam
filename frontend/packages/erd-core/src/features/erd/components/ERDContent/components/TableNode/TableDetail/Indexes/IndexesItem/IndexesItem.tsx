@@ -1,5 +1,5 @@
 import type { Index } from '@liam-hq/schema'
-import { GridTableRoot } from '@liam-hq/ui'
+import { GridTableRoot, Link } from '@liam-hq/ui'
 import clsx from 'clsx'
 import { type FC, useMemo } from 'react'
 import {
@@ -7,10 +7,10 @@ import {
   useUserEditingOrThrow,
 } from '../../../../../../../../../stores'
 import { useDiffStyle } from '../../../../../../../../diff/hooks/useDiffStyle'
+import { getTableIndexElementId } from '../../../../../../../utils'
 import { Columns } from './Columns'
 import { getChangeStatus } from './getChangeStatus'
 import styles from './IndexesItem.module.css'
-import { Name } from './Name'
 import { Type } from './Type'
 import { Unique } from './Unique'
 
@@ -22,6 +22,8 @@ type Props = {
 }
 
 export const IndexesItem: FC<Props> = ({ tableId, index }) => {
+  const elementId = getTableIndexElementId(tableId, index.name)
+
   const { operations } = useSchemaOrThrow()
   const { showDiff } = useUserEditingOrThrow()
 
@@ -37,9 +39,14 @@ export const IndexesItem: FC<Props> = ({ tableId, index }) => {
   const diffStyle = useDiffStyle(showDiff, changeStatus)
 
   return (
-    <div className={clsx(styles.wrapper, diffStyle)}>
+    <div id={elementId} className={clsx(styles.wrapper, diffStyle)}>
+      <h3 className={styles.heading}>
+        <a className={styles.link} href={`#${elementId}`}>
+          {index.name}
+        </a>
+        <Link className={styles.linkIcon} />
+      </h3>
       <GridTableRoot>
-        <Name tableId={tableId} index={index} />
         {index.type && index.type.toLowerCase() !== HIDE_INDEX_TYPE && (
           <Type tableId={tableId} index={index} />
         )}

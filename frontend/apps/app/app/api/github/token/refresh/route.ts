@@ -129,13 +129,13 @@ async function handler(): Promise<NextResponse> {
       const refreshTtlMs = rtei > 0 ? rtei * 1000 : THIRTY_DAYS_MS
       const refreshExpiresAt = new Date(Date.now() + refreshTtlMs).toISOString()
 
-      // Fire-and-forget. Switch to await Promise.all([...]) if needed
-      Promise.all([
-        writeAccessToken(refreshed.accessToken, refreshed.newExpiresAt),
-        writeRefreshToken(refreshed.refreshToken, refreshExpiresAt),
-      ])
-
-      return okAsync(NextResponse.json({ ok: true }))
+      // Ensure cookie writes complete and propagate failures
+      return fromPromise(
+        Promise.all([
+          writeAccessToken(refreshed.accessToken, refreshed.newExpiresAt),
+          writeRefreshToken(refreshed.refreshToken, refreshExpiresAt),
+        ]),
+      ).map(() => NextResponse.json({ ok: true }))
     })
 
   if (result.isErr()) {

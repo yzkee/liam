@@ -25,6 +25,8 @@ export async function GET(request: Request) {
       const access = session?.provider_token ?? ''
       const refresh = session?.provider_refresh_token ?? ''
       // received provider tokens for cookie write
+      // Access token expiration: 8 hours.
+      // GitHub's OAuth access tokens typically expire after 8 hours. See: https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#step-3-github-redirects-back-to-your-site
       const EIGHT_HOURS_MS = 8 * 60 * 60 * 1000
       const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000
 

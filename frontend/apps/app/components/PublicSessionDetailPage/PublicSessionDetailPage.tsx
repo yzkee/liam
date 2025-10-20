@@ -136,9 +136,6 @@ export const PublicSessionDetailPage = async ({
           initialIsPublic={true}
           senderName="Guest"
           panelSizes={DEFAULT_PANEL_SIZES}
-          hasInitialSchemaSnapshot={
-            buildingSchema.initial_schema_snapshot !== null
-          }
         />
       </ViewModeProvider>
     </PublicLayout>

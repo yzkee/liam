@@ -24,6 +24,7 @@ import { SQL_REVIEW_COMMENTS } from './mock'
 import styles from './SessionDetailPageClient.module.css'
 import type { Version } from './types'
 import { determineWorkflowAction } from './utils/determineWorkflowAction'
+import { isEmptySchema } from './utils/isEmptySchema'
 import { getWorkflowInProgress } from './utils/workflowStorage'
 
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -41,28 +42,20 @@ type Props = {
   initialWorkflowError?: string | null
   senderName: string
   panelSizes: number[]
-  hasInitialSchemaSnapshot: boolean
 }
 
 // Determine the initial active tab based on available data
 const determineInitialTab = (
   versions: Version[],
   analyzedRequirements: AnalyzedRequirements | null,
-  hasInitialSchemaSnapshot: boolean,
+  initialDisplayedSchema: Schema,
 ): OutputTabValue | undefined => {
   const hasVersions = versions.length > 0
   const hasAnalyzedRequirements = analyzedRequirements !== null
+  const hasInitialSchema = !isEmptySchema(initialDisplayedSchema)
 
-  // Show ERD tab when versions exist or initial schema snapshot exists (linked schema)
-  if (hasVersions || hasInitialSchemaSnapshot) {
-    return OUTPUT_TABS.ERD
-  }
-
-  // Show Artifact tab when only analyzedRequirements exist
-  if (hasAnalyzedRequirements) {
-    return OUTPUT_TABS.ARTIFACT
-  }
-
+  if (hasVersions || hasInitialSchema) return OUTPUT_TABS.ERD
+  if (hasAnalyzedRequirements) return OUTPUT_TABS.ARTIFACT
   return undefined
 }
 
@@ -79,13 +72,12 @@ export const SessionDetailPageClient: FC<Props> = ({
   initialWorkflowError,
   senderName,
   panelSizes,
-  hasInitialSchemaSnapshot,
 }) => {
   const [activeTab, setActiveTab] = useState<OutputTabValue | undefined>(
     determineInitialTab(
       initialVersions,
       initialAnalyzedRequirements,
-      hasInitialSchemaSnapshot,
+      initialDisplayedSchema,
     ),
   )
   const [isResizing, setIsResizing] = useState(false)
@@ -147,7 +139,7 @@ export const SessionDetailPageClient: FC<Props> = ({
   const shouldShowOutputSection =
     (selectedVersion !== null ||
       analyzedRequirements !== null ||
-      hasInitialSchemaSnapshot) &&
+      !isEmptySchema(initialDisplayedSchema)) &&
     activeTab
 
   const handleLayoutChange = useCallback((sizes: number[]) => {
@@ -272,7 +264,6 @@ export const SessionDetailPageClient: FC<Props> = ({
                   onTabChange={setActiveTab}
                   initialIsPublic={initialIsPublic}
                   analyzedRequirements={analyzedRequirements}
-                  hasInitialSchemaSnapshot={hasInitialSchemaSnapshot}
                 />
               </div>
             </ResizablePanel>

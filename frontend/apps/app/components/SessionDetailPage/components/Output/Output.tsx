@@ -26,7 +26,6 @@ type Props = ComponentProps<typeof VersionDropdown> & {
   activeTab: OutputTabValue
   onTabChange: (value: OutputTabValue) => void
   analyzedRequirements?: AnalyzedRequirements | null
-  hasInitialSchemaSnapshot: boolean
 }
 
 export const Output: FC<Props> = ({
@@ -38,7 +37,6 @@ export const Output: FC<Props> = ({
   onTabChange,
   initialIsPublic = false,
   analyzedRequirements,
-  hasInitialSchemaSnapshot,
   ...propsForVersionDropdown
 }) => {
   const [internalTabValue, setInternalTabValue] =
@@ -80,7 +78,6 @@ export const Output: FC<Props> = ({
         analyzedRequirements={analyzedRequirements}
         designSessionId={designSessionId}
         initialIsPublic={initialIsPublic}
-        hasInitialSchemaSnapshot={hasInitialSchemaSnapshot}
         {...propsForVersionDropdown}
       />
       <TabsContent value={OUTPUT_TABS.ERD} className={styles.tabsContent}>

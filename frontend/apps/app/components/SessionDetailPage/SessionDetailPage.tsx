@@ -131,9 +131,6 @@ export const SessionDetailPage: FC<Props> = async ({
       })) ?? initialSchema)
     : initialSchema
 
-  const hasInitialSchemaSnapshot =
-    buildingSchema.initial_schema_snapshot !== null
-
   // Fetch initial public share status
   const { isPublic: initialIsPublic } =
     await checkPublicShareStatus(designSessionId)
@@ -164,7 +161,6 @@ export const SessionDetailPage: FC<Props> = async ({
         initialWorkflowError={workflowError}
         senderName={senderName}
         panelSizes={panelSizes}
-        hasInitialSchemaSnapshot={hasInitialSchemaSnapshot}
       />
     </ViewModeProvider>
   )

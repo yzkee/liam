@@ -60,6 +60,11 @@ export const Chat: FC<Props> = ({
     onSendMessage(content)
   }
 
+  const hasAiMessages = messages.some(
+    (msg) => msg._getType() === 'ai' || msg._getType() === 'tool',
+  )
+  const isSessionCompleted = hasAiMessages && !isWorkflowRunning
+
   return (
     <div className={styles.wrapper}>
       <div className={styles.messageListWrapper}>
@@ -78,11 +83,13 @@ export const Chat: FC<Props> = ({
         />
       </div>
 
-      <ChatInput
-        onSendMessage={handleSendMessage}
-        isWorkflowRunning={isWorkflowRunning}
-        schema={schemaData}
-      />
+      {!isSessionCompleted && (
+        <ChatInput
+          onSendMessage={handleSendMessage}
+          isWorkflowRunning={isWorkflowRunning}
+          schema={schemaData}
+        />
+      )}
     </div>
   )
 }

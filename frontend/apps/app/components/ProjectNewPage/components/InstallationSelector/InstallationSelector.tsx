@@ -42,10 +42,13 @@ export const InstallationSelector: FC<Props> = ({
   const githubAppUrl = process.env.NEXT_PUBLIC_GITHUB_APP_URL
 
   const handleSelectInstallation = (installation: Installation) => {
-    setSelectedInstallation(installation)
-    const formData = new FormData()
-    formData.append('installationId', installation.id.toString())
-    repositoriesAction(formData)
+    if (disabled) return
+    startAddingProjectTransition(() => {
+      setSelectedInstallation(installation)
+      const formData = new FormData()
+      formData.append('installationId', installation.id.toString())
+      repositoriesAction(formData)
+    })
   }
 
   const handleClick = useCallback(

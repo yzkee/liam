@@ -1,12 +1,10 @@
 'use client'
 
 import type { BaseMessage } from '@langchain/core/messages'
-import type { Schema } from '@liam-hq/schema'
 import type { FC } from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import type { OutputTabValue } from '../Output/constants'
 import styles from './Chat.module.css'
-import { ChatInput } from './components/ChatInput'
 import { ErrorDisplay } from './components/ErrorDisplay'
 import { Messages } from './components/Messages'
 import { ScrollToBottomButton } from './components/ScrollToBottomButton'
@@ -14,18 +12,14 @@ import { WorkflowRunningIndicator } from './components/WorkflowRunningIndicator'
 import { useScrollToBottom } from './useScrollToBottom'
 
 type Props = {
-  schemaData: Schema
   messages: BaseMessage[]
-  onSendMessage: (content: string) => void
   isWorkflowRunning?: boolean
   error?: string | null
   onNavigate: (tab: OutputTabValue) => void
 }
 
 export const Chat: FC<Props> = ({
-  schemaData,
   messages,
-  onSendMessage,
   isWorkflowRunning = false,
   onNavigate,
   error,
@@ -56,10 +50,6 @@ export const Chat: FC<Props> = ({
     recomputeScrollButton()
   }, [messages, recomputeScrollButton])
 
-  const handleSendMessage = (content: string) => {
-    onSendMessage(content)
-  }
-
   return (
     <div className={styles.wrapper}>
       <div className={styles.messageListWrapper}>
@@ -77,12 +67,6 @@ export const Chat: FC<Props> = ({
           onClick={scrollToBottom}
         />
       </div>
-
-      <ChatInput
-        onSendMessage={handleSendMessage}
-        isWorkflowRunning={isWorkflowRunning}
-        schema={schemaData}
-      />
     </div>
   )
 }

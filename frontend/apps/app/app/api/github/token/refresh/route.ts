@@ -1,12 +1,9 @@
-import {
-  fromAsyncThrowable,
-  fromPromise,
-  fromValibotSafeParse,
-  type Result,
-} from '@liam-hq/neverthrow'
+import { fromPromise, fromValibotSafeParse, type Result } from '@liam-hq/neverthrow'
+import { OAuthApp } from '@octokit/oauth-app'
 import * as Sentry from '@sentry/nextjs'
-import { err, errAsync, ok, okAsync, type ResultAsync } from 'neverthrow'
+import { err, ok, ResultAsync } from 'neverthrow'
 import { NextResponse } from 'next/server'
+import type { ResultAsync as NeverthrowResultAsync } from 'neverthrow'
 import * as v from 'valibot'
 import type { TokenPayload } from '../../../../../libs/github/cookie'
 import {
@@ -15,18 +12,7 @@ import {
   writeRefreshToken,
 } from '../../../../../libs/github/cookie'
 
-const GITHUB_TOKEN_URL = 'https://github.com/login/oauth/access_token'
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000
-
-const gitHubTokenSuccessSchema = v.object({
-  access_token: v.string(),
-  refresh_token: v.string(),
-  token_type: v.string(),
-  expires_in: v.number(), // seconds
-  refresh_token_expires_in: v.optional(v.number()), // seconds
-})
-
-type GitHubTokenSuccess = v.InferOutput<typeof gitHubTokenSuccessSchema>
 
 const getClientCredentials = (): Result<
   { clientId: string; clientSecret: string },
@@ -40,12 +26,6 @@ const getClientCredentials = (): Result<
   return ok({ clientId, clientSecret })
 }
 
-function parseGitHubRefreshResponse(
-  json: unknown,
-): Result<GitHubTokenSuccess, Error> {
-  return fromValibotSafeParse(gitHubTokenSuccessSchema, json)
-}
-
 type RefreshAccessTokenResult = {
   accessToken: string
   refreshToken: string
@@ -53,56 +33,47 @@ type RefreshAccessTokenResult = {
   newExpiresAt: string
 }
 
+// Minimal schema for Octokit OAuthApp refresh response
+const OctokitOAuthRefreshSchema = v.object({
+  authentication: v.object({
+    token: v.string(),
+    refreshToken: v.string(),
+    expiresAt: v.string(),
+    refreshTokenExpiresAt: v.optional(v.string()),
+  }),
+})
+
 function refreshAccessToken(
   refreshToken: string,
   clientId: string,
   clientSecret: string,
 ): ResultAsync<RefreshAccessTokenResult, Error> {
-  const body = new URLSearchParams({
-    grant_type: 'refresh_token',
-    refresh_token: refreshToken,
-    client_id: clientId,
-    client_secret: clientSecret,
-  })
+  const app = new OAuthApp({ clientId, clientSecret })
+  return ResultAsync.fromPromise(
+    app.refreshToken({ refreshToken }),
+    (e) => (e instanceof Error ? e : new Error(String(e))),
+  )
+    .andThen((res) => fromValibotSafeParse(OctokitOAuthRefreshSchema, res))
+    .map(({ authentication }) => {
+      const expiresAt = new Date(authentication.expiresAt)
+      const refreshTokenExpiresAt = authentication.refreshTokenExpiresAt
+        ? new Date(authentication.refreshTokenExpiresAt)
+        : null
 
-  const tryFetch: ResultAsync<Response, Error> = fromAsyncThrowable(async () =>
-    fetch(GITHUB_TOKEN_URL, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body,
-      cache: 'no-store',
-    }),
-  )()
+      const refreshTokenExpiresIn = refreshTokenExpiresAt
+        ? Math.max(
+            0,
+            Math.floor((refreshTokenExpiresAt.getTime() - Date.now()) / 1000),
+          )
+        : null
 
-  const tryParse = (res: Response): ResultAsync<GitHubTokenSuccess, Error> => {
-    if (!res.ok) {
-      const text = res.statusText
-      return errAsync(
-        new Error(`GitHub token refresh failed: ${res.status} ${text}`),
-      )
-    }
-    return fromPromise(res.json().catch(() => null)).andThen((json) =>
-      parseGitHubRefreshResponse(json),
-    )
-  }
-
-  const tryFormat = (
-    success: GitHubTokenSuccess,
-  ): ResultAsync<RefreshAccessTokenResult, Error> => {
-    return okAsync({
-      accessToken: success.access_token,
-      refreshToken: success.refresh_token,
-      refreshTokenExpiresIn: success.refresh_token_expires_in ?? null,
-      newExpiresAt: new Date(
-        Date.now() + success.expires_in * 1000,
-      ).toISOString(),
+      return {
+        accessToken: authentication.token,
+        refreshToken: authentication.refreshToken,
+        refreshTokenExpiresIn,
+        newExpiresAt: expiresAt.toISOString(),
+      }
     })
-  }
-
-  return tryFetch.andThen(tryParse).andThen(tryFormat)
 }
 
 async function handler(): Promise<NextResponse> {
@@ -118,7 +89,7 @@ async function handler(): Promise<NextResponse> {
   const { clientId, clientSecret } = creds.value
 
   // 2) Read refresh token and refresh via GitHub
-  const refreshTokenResult: ResultAsync<TokenPayload, Error> =
+  const refreshTokenResult: NeverthrowResultAsync<TokenPayload, Error> =
     readRefreshToken()
   const result = await refreshTokenResult
     .andThen(({ token }: TokenPayload) =>

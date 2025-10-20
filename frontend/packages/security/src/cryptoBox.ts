@@ -5,7 +5,7 @@ import { fromThrowable } from '@liam-hq/neverthrow'
 export type Key = { id: string; key: Buffer }
 
 /**
- * Parses KEYRING env into an in-memory keyring.
+ * Parses LIAM_GITHUB_OAUTH_KEYRING env into an in-memory keyring.
  * Format: "kid1:base64key,kid0:base64key" (first entry is current key)
  */
 function parseKeyring(envValue: string | undefined): Key[] {
@@ -24,7 +24,7 @@ function parseKeyring(envValue: string | undefined): Key[] {
   return keys
 }
 
-// Prefer GitHub OAuth token keyring; fall back to legacy names
+// Use only the GitHub OAuth token keyring
 let RING: Key[] = parseKeyring(process.env['LIAM_GITHUB_OAUTH_KEYRING'])
 
 export function setKeyring(keys: Key[]): void {

@@ -3,7 +3,6 @@ import {
   fromValibotSafeParse,
   type Result,
 } from '@liam-hq/neverthrow'
-import { OAuthApp } from '@octokit/oauth-app'
 import * as Sentry from '@sentry/nextjs'
 import type { ResultAsync as NeverthrowResultAsync } from 'neverthrow'
 import { err, ok, ResultAsync } from 'neverthrow'
@@ -15,8 +14,6 @@ import {
   writeAccessToken,
   writeRefreshToken,
 } from '../../../../../libs/github/cookie'
-
-const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000
 
 const getClientCredentials = (): Result<
   { clientId: string; clientSecret: string },
@@ -33,18 +30,18 @@ const getClientCredentials = (): Result<
 type RefreshAccessTokenResult = {
   accessToken: string
   refreshToken: string
-  refreshTokenExpiresIn: number | null
+  refreshTokenExpiresIn: number
   newExpiresAt: string
 }
 
-// Minimal schema for Octokit OAuthApp refresh response
-const OctokitOAuthRefreshSchema = v.object({
-  authentication: v.object({
-    token: v.string(),
-    refreshToken: v.string(),
-    expiresAt: v.string(),
-    refreshTokenExpiresAt: v.optional(v.string()),
-  }),
+// GitHub OAuth token refresh response schema
+const GitHubTokenRefreshResponseSchema = v.object({
+  access_token: v.string(),
+  token_type: v.string(),
+  scope: v.optional(v.string()),
+  expires_in: v.number(),
+  refresh_token: v.string(),
+  refresh_token_expires_in: v.optional(v.number()),
 })
 
 function refreshAccessToken(
@@ -52,29 +49,47 @@ function refreshAccessToken(
   clientId: string,
   clientSecret: string,
 ): ResultAsync<RefreshAccessTokenResult, Error> {
-  const app = new OAuthApp({ clientId, clientSecret })
-  return ResultAsync.fromPromise(app.refreshToken({ refreshToken }), (e) =>
-    e instanceof Error ? e : new Error(String(e)),
-  )
-    .andThen((res) => fromValibotSafeParse(OctokitOAuthRefreshSchema, res))
-    .map(({ authentication }) => {
-      const expiresAt = new Date(authentication.expiresAt)
-      const refreshTokenExpiresAt = authentication.refreshTokenExpiresAt
-        ? new Date(authentication.refreshTokenExpiresAt)
-        : null
+  const body = new URLSearchParams({
+    client_id: clientId,
+    client_secret: clientSecret,
+    grant_type: 'refresh_token',
+    refresh_token: refreshToken,
+  }).toString()
 
-      const refreshTokenExpiresIn = refreshTokenExpiresAt
-        ? Math.max(
-            0,
-            Math.floor((refreshTokenExpiresAt.getTime() - Date.now()) / 1000),
-          )
-        : null
+  return ResultAsync.fromPromise(
+    fetch('https://github.com/login/oauth/access_token', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body,
+    }),
+    (e) => (e instanceof Error ? e : new Error(String(e))),
+  )
+    .andThen((res) => {
+      if (!res.ok) {
+        return err(new Error(`GitHub token refresh failed: ${res.status}`))
+      }
+      return ResultAsync.fromPromise(res.json() as Promise<unknown>, (e) =>
+        e instanceof Error ? e : new Error(String(e)),
+      )
+    })
+    .andThen((data) =>
+      fromValibotSafeParse(GitHubTokenRefreshResponseSchema, data),
+    )
+    .map((data) => {
+      const now = Date.now()
+      const newExpiresAt = new Date(
+        now + Math.max(0, data.expires_in) * 1000,
+      ).toISOString()
+      const refreshTokenExpiresIn = data.refresh_token_expires_in ?? 0
 
       return {
-        accessToken: authentication.token,
-        refreshToken: authentication.refreshToken,
+        accessToken: data.access_token,
+        refreshToken: data.refresh_token,
         refreshTokenExpiresIn,
-        newExpiresAt: expiresAt.toISOString(),
+        newExpiresAt,
       }
     })
 }
@@ -99,8 +114,8 @@ async function handler(): Promise<NextResponse> {
       refreshAccessToken(token, clientId, clientSecret),
     )
     .andThen((refreshed: RefreshAccessTokenResult) => {
-      const rtei = refreshed.refreshTokenExpiresIn ?? 0
-      const refreshTtlMs = rtei > 0 ? rtei * 1000 : THIRTY_DAYS_MS
+      const rtei = refreshed.refreshTokenExpiresIn
+      const refreshTtlMs = rtei * 1000
       const refreshExpiresAt = new Date(Date.now() + refreshTtlMs).toISOString()
 
       // Ensure cookie writes complete and propagate failures

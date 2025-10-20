@@ -1,9 +1,13 @@
-import { fromPromise, fromValibotSafeParse, type Result } from '@liam-hq/neverthrow'
+import {
+  fromPromise,
+  fromValibotSafeParse,
+  type Result,
+} from '@liam-hq/neverthrow'
 import { OAuthApp } from '@octokit/oauth-app'
 import * as Sentry from '@sentry/nextjs'
+import type { ResultAsync as NeverthrowResultAsync } from 'neverthrow'
 import { err, ok, ResultAsync } from 'neverthrow'
 import { NextResponse } from 'next/server'
-import type { ResultAsync as NeverthrowResultAsync } from 'neverthrow'
 import * as v from 'valibot'
 import type { TokenPayload } from '../../../../../libs/github/cookie'
 import {
@@ -49,9 +53,8 @@ function refreshAccessToken(
   clientSecret: string,
 ): ResultAsync<RefreshAccessTokenResult, Error> {
   const app = new OAuthApp({ clientId, clientSecret })
-  return ResultAsync.fromPromise(
-    app.refreshToken({ refreshToken }),
-    (e) => (e instanceof Error ? e : new Error(String(e))),
+  return ResultAsync.fromPromise(app.refreshToken({ refreshToken }), (e) =>
+    e instanceof Error ? e : new Error(String(e)),
   )
     .andThen((res) => fromValibotSafeParse(OctokitOAuthRefreshSchema, res))
     .map(({ authentication }) => {

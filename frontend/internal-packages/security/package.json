@@ -1,13 +1,13 @@
 {
   "name": "@liam-hq/security",
-  "version": "0.0.1",
-  "private": true,
-  "license": "Apache-2.0",
-  "type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/liam-hq/liam.git"
   },
+  "license": "Apache-2.0",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
   "main": "src/index.ts",
   "exports": {
     ".": "./src/index.ts",
@@ -39,4 +39,3 @@
     "LICENSE"
   ]
 }
-

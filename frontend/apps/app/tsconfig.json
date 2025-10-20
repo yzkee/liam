@@ -9,6 +9,14 @@
     "noPropertyAccessFromIndexSignature": false,
     "exactOptionalPropertyTypes": false,
     "noUncheckedIndexedAccess": true,
+    "baseUrl": ".",
+    "paths": {
+      "@liam-hq/security/*": ["../../internal-packages/security/src/*"],
+      "@liam-hq/neverthrow": [
+        "../../internal-packages/neverthrow/src/index.ts"
+      ],
+      "@liam-hq/neverthrow/*": ["../../internal-packages/neverthrow/src/*"]
+    },
     "plugins": [
       {
         "name": "next"

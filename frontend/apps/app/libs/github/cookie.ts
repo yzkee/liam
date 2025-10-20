@@ -1,7 +1,12 @@
 // Server-only utility for encrypted GitHub tokens stored in HttpOnly cookies
 
-import { fromThrowable } from '@liam-hq/neverthrow'
+import {
+  fromPromise,
+  fromThrowable,
+  type ResultAsync,
+} from '@liam-hq/neverthrow'
 import { decryptAesGcm, encryptAesGcm } from '@liam-hq/security/cryptoBox'
+import { errAsync, okAsync } from 'neverthrow'
 import { cookies } from 'next/headers'
 import * as v from 'valibot'
 
@@ -13,7 +18,7 @@ const TokenPayloadSchema = v.object({
   token: v.string(),
   expiresAt: v.string(), // ISO8601
 })
-type TokenPayload = v.InferOutput<typeof TokenPayloadSchema>
+export type TokenPayload = v.InferOutput<typeof TokenPayloadSchema>
 
 // Encrypted bundle packed for cookie value
 const PackedSchema = v.object({
@@ -139,8 +144,13 @@ export async function readAccessToken(): Promise<TokenPayload | null> {
   return readTokenFrom(ACCESS_COOKIE)
 }
 
-export async function readRefreshToken(): Promise<TokenPayload | null> {
-  return readTokenFrom(REFRESH_COOKIE)
+export function readRefreshToken(): ResultAsync<TokenPayload, Error> {
+  return fromPromise(readTokenFrom(REFRESH_COOKIE)).andThen((token) => {
+    if (token === null) {
+      return errAsync(new Error('Refresh token not found'))
+    }
+    return okAsync(token)
+  })
 }
 
 export async function writeAccessToken(

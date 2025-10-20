@@ -5,18 +5,12 @@ import { ROUTE_PREFIXES } from './libs/routes/constants'
 
 export async function updateSession(request: NextRequest) {
   const path = request.nextUrl.pathname
-  const isApi = path.startsWith('/api')
-  const isLogoutApi =
-    path.startsWith('/api/auth/logout') || path.startsWith('/api/logout')
 
-  // Allow logout API without requiring a session
-  if (isLogoutApi) {
-    return NextResponse.next()
-  }
   // Skip middleware for public routes, erd pages, and static files
   if (
     path.startsWith(ROUTE_PREFIXES.PUBLIC) ||
-    path.startsWith(ROUTE_PREFIXES.ERD)
+    path.startsWith(ROUTE_PREFIXES.ERD) ||
+    path.startsWith('/api/logout')
   ) {
     return NextResponse.next()
   }
@@ -64,13 +58,6 @@ export async function updateSession(request: NextRequest) {
     !path.startsWith(ROUTE_PREFIXES.AUTH) &&
     !path.startsWith(ROUTE_PREFIXES.PUBLIC)
   ) {
-    // For API requests, return 401 JSON instead of redirecting
-    if (isApi) {
-      return NextResponse.json(
-        { ok: false, error: 'unauthorized' },
-        { status: 401 },
-      )
-    }
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone()
     url.pathname = ROUTE_PREFIXES.LOGIN

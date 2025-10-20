@@ -133,7 +133,6 @@ export const PublicSessionDetailPage = async ({
               reverse_patch: v.reverse_patch ?? {},
             }))}
           initialIsPublic={true}
-          senderName="Guest"
           panelSizes={DEFAULT_PANEL_SIZES}
         />
       </ViewModeProvider>

@@ -1,7 +1,6 @@
 'use client'
 
 import {
-  HumanMessage,
   mapStoredMessagesToChatMessages,
   type StoredMessage,
 } from '@langchain/core/messages'
@@ -38,7 +37,6 @@ type Props = {
   initialVersions: Version[]
   initialIsPublic: boolean
   initialWorkflowError?: string | null
-  senderName: string
   panelSizes: number[]
 }
 
@@ -73,7 +71,6 @@ export const SessionDetailPageClient: FC<Props> = ({
   initialVersions,
   initialIsPublic,
   initialWorkflowError,
-  senderName,
   panelSizes,
 }) => {
   const [activeTab, setActiveTab] = useState<OutputTabValue | undefined>(
@@ -110,19 +107,12 @@ export const SessionDetailPageClient: FC<Props> = ({
   )
 
   const chatMessages = mapStoredMessagesToChatMessages(initialMessages)
-  const {
-    isStreaming,
-    messages,
-    setMessages,
-    analyzedRequirements,
-    start,
-    replay,
-    error,
-  } = useStream({
-    initialMessages: chatMessages,
-    initialAnalyzedRequirements,
-    designSessionId,
-  })
+  const { isStreaming, messages, analyzedRequirements, start, replay, error } =
+    useStream({
+      initialMessages: chatMessages,
+      initialAnalyzedRequirements,
+      designSessionId,
+    })
 
   useEffect(() => {
     if (
@@ -149,30 +139,6 @@ export const SessionDetailPageClient: FC<Props> = ({
   const combinedError = error || initialWorkflowError
   // Track if initial workflow has been triggered to prevent multiple executions
   const hasTriggeredInitialWorkflow = useRef(false)
-
-  const handleSendMessage = useCallback(
-    async (content: string) => {
-      const tempId = `optimistic-${crypto.randomUUID()}`
-      const optimisticMessage = new HumanMessage({
-        content,
-        id: tempId,
-        additional_kwargs: {
-          userName: senderName,
-        },
-      })
-      setMessages((prev) => [...prev, optimisticMessage])
-
-      const result = await start({
-        userInput: content,
-        designSessionId,
-      })
-
-      if (result.isErr()) {
-        setMessages((prev) => prev.filter((msg) => msg.id !== tempId))
-      }
-    },
-    [setMessages, start, senderName, designSessionId],
-  )
 
   // Auto-trigger workflow on page load if there's an unanswered user message
   useEffect(() => {
@@ -224,10 +190,8 @@ export const SessionDetailPageClient: FC<Props> = ({
           <div className={styles.chatSection}>
             <div className={styles.chatWrapper}>
               <Chat
-                schemaData={displayedSchema}
                 messages={messages}
                 isWorkflowRunning={isStreaming}
-                onSendMessage={handleSendMessage}
                 onNavigate={setActiveTab}
                 error={combinedError}
               />

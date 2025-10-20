@@ -24,7 +24,8 @@ function parseKeyring(envValue: string | undefined): Key[] {
   return keys
 }
 
-let RING: Key[] = parseKeyring(process.env['KEYRING'])
+// Prefer GitHub OAuth token keyring; fall back to legacy names
+let RING: Key[] = parseKeyring(process.env['LIAM_GITHUB_OAUTH_KEYRING'])
 
 export function setKeyring(keys: Key[]): void {
   RING = keys

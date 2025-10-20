@@ -6,8 +6,8 @@ Security utilities for application-layer token handling.
 
 Env variables (server-only):
 
-- `TOKEN_PEPPER`: secret pepper used in hashing (store in Vault/KMS).
-- `KEYRING`: comma-separated `kid:base64key` entries; first is current key.
+- `LIAM_GITHUB_OAUTH_KEYRING` (preferred): comma-separated `kid:base64key` entries; first is current key. Used to encrypt GitHub OAuth tokens in HttpOnly cookies.
+- `LIAM_KEYRING` / `KEYRING` (deprecated): legacy fallbacks with the same format. Prefer `LIAM_GITHUB_OAUTH_KEYRING`.
 
 Exports:
 

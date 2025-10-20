@@ -14,7 +14,6 @@ export async function GET(request: Request) {
   const code = searchParams.get('code')
   // Use query parameter "next" to redirect after auth, sanitize for security
   const next = sanitizeReturnPath(searchParams.get('next'), '/')
-  // production flag was only used for dev logging; removed
 
   if (code) {
     const supabase = await createClient()

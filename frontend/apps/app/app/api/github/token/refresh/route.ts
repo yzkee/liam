@@ -94,7 +94,6 @@ function refreshAccessToken(
 }
 
 async function handler(): Promise<NextResponse> {
-  // production flag was only used for dev logging; removed
   // 1) Load refresh token from cookie
   const refresh = await readRefreshToken()
   const refreshToken = refresh?.token ?? ''

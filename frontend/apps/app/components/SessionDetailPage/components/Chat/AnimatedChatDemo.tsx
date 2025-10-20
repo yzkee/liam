@@ -16,8 +16,6 @@ export const AnimatedChatDemo = ({
   const [isAnimating, setIsAnimating] = useState(false)
   const [currentIndex, setCurrentIndex] = useState(0)
 
-  const handleSendMessage = (_content: string) => {}
-
   const handleStart = () => {
     if (currentIndex === 0 || currentIndex >= ITEMS.length) {
       setCurrentIndex(0)
@@ -82,7 +80,7 @@ export const AnimatedChatDemo = ({
           Reset
         </Button>
       </div>
-      <Chat {...props} onSendMessage={handleSendMessage} />
+      <Chat {...props} />
     </>
   )
 }

@@ -1,6 +1,5 @@
 import type { BaseMessage } from '@langchain/core/messages'
 import { aBuildingSchemaVersion } from '@liam-hq/db'
-import { aSchema } from '@liam-hq/schema'
 import type { Meta, StoryObj } from '@storybook/nextjs'
 import { HttpResponse, http } from 'msw'
 import { AnimatedChatDemo } from './AnimatedChatDemo'
@@ -69,9 +68,7 @@ const meta = {
       ],
     },
   },
-  args: {
-    schemaData: aSchema(),
-  },
+  args: {},
 } satisfies Meta<typeof Chat>
 
 export default meta
@@ -80,28 +77,21 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
-    schemaData: aSchema(),
     messages: MESSAGES,
-    onSendMessage: () => {},
     onNavigate: () => {},
-    initialIsDeepModelingEnabled: true,
   },
 }
 
 export const AnimatedDemo: Story = {
   args: {
-    schemaData: aSchema(),
     messages: MESSAGES,
-    onSendMessage: () => {},
     onNavigate: () => {},
-    initialIsDeepModelingEnabled: true,
   },
   render: (props) => <AnimatedChatDemo {...props} />,
 }
 
 export const WithComplexMessages: Story = {
   args: {
-    schemaData: aSchema(),
     messages: [
       aMessage('human', {
         content: 'Design a database for an e-commerce platform',
@@ -122,8 +112,6 @@ export const WithComplexMessages: Story = {
           'The database design is complete. Would you like me to add payment processing tables?',
       }),
     ],
-    onSendMessage: () => {},
     onNavigate: () => {},
-    initialIsDeepModelingEnabled: true,
   },
 }

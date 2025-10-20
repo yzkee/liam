@@ -1,11 +1,10 @@
 'use client'
 
 import {
-  HumanMessage,
   mapStoredMessagesToChatMessages,
   type StoredMessage,
 } from '@langchain/core/messages'
-import type { AnalyzedRequirements } from '@liam-hq/artifact'
+import type { AnalyzedRequirements } from '@liam-hq/agent/client'
 import type { Schema } from '@liam-hq/schema'
 import {
   ResizableHandle,
@@ -36,10 +35,8 @@ type Props = {
   initialDisplayedSchema: Schema
   initialPrevSchema: Schema
   initialVersions: Version[]
-  isDeepModelingEnabled: boolean
   initialIsPublic: boolean
   initialWorkflowError?: string | null
-  senderName: string
   panelSizes: number[]
 }
 
@@ -72,10 +69,8 @@ export const SessionDetailPageClient: FC<Props> = ({
   initialDisplayedSchema,
   initialPrevSchema,
   initialVersions,
-  isDeepModelingEnabled,
   initialIsPublic,
   initialWorkflowError,
-  senderName,
   panelSizes,
 }) => {
   const [activeTab, setActiveTab] = useState<OutputTabValue | undefined>(
@@ -112,19 +107,12 @@ export const SessionDetailPageClient: FC<Props> = ({
   )
 
   const chatMessages = mapStoredMessagesToChatMessages(initialMessages)
-  const {
-    isStreaming,
-    messages,
-    setMessages,
-    analyzedRequirements,
-    start,
-    replay,
-    error,
-  } = useStream({
-    initialMessages: chatMessages,
-    initialAnalyzedRequirements,
-    designSessionId,
-  })
+  const { isStreaming, messages, analyzedRequirements, start, replay, error } =
+    useStream({
+      initialMessages: chatMessages,
+      initialAnalyzedRequirements,
+      designSessionId,
+    })
 
   useEffect(() => {
     if (
@@ -152,31 +140,6 @@ export const SessionDetailPageClient: FC<Props> = ({
   // Track if initial workflow has been triggered to prevent multiple executions
   const hasTriggeredInitialWorkflow = useRef(false)
 
-  const handleSendMessage = useCallback(
-    async (content: string, isDeepModelingEnabled: boolean) => {
-      const tempId = `optimistic-${crypto.randomUUID()}`
-      const optimisticMessage = new HumanMessage({
-        content,
-        id: tempId,
-        additional_kwargs: {
-          userName: senderName,
-        },
-      })
-      setMessages((prev) => [...prev, optimisticMessage])
-
-      const result = await start({
-        userInput: content,
-        designSessionId,
-        isDeepModelingEnabled,
-      })
-
-      if (result.isErr()) {
-        setMessages((prev) => prev.filter((msg) => msg.id !== tempId))
-      }
-    },
-    [setMessages, start, senderName, designSessionId],
-  )
-
   // Auto-trigger workflow on page load if there's an unanswered user message
   useEffect(() => {
     const triggerInitialWorkflow = async () => {
@@ -197,20 +160,18 @@ export const SessionDetailPageClient: FC<Props> = ({
         // Trigger replay for interrupted workflow
         await replay({
           designSessionId,
-          isDeepModelingEnabled,
         })
       } else if (action.type === 'start') {
         // Trigger the workflow for the initial user message
         await start({
           designSessionId,
           userInput: action.userInput,
-          isDeepModelingEnabled,
         })
       }
     }
 
     triggerInitialWorkflow()
-  }, [messages, designSessionId, isDeepModelingEnabled, start, replay])
+  }, [messages, designSessionId, start, replay])
 
   return (
     <div className={styles.container}>
@@ -229,13 +190,10 @@ export const SessionDetailPageClient: FC<Props> = ({
           <div className={styles.chatSection}>
             <div className={styles.chatWrapper}>
               <Chat
-                schemaData={displayedSchema}
                 messages={messages}
                 isWorkflowRunning={isStreaming}
-                onSendMessage={handleSendMessage}
                 onNavigate={setActiveTab}
                 error={combinedError}
-                initialIsDeepModelingEnabled={isDeepModelingEnabled}
               />
             </div>
           </div>

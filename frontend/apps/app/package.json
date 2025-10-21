@@ -21,7 +21,6 @@
     "@liam-hq/security": "workspace:*",
     "@liam-hq/ui": "workspace:*",
     "@next/third-parties": "15.3.5",
-    "@octokit/oauth-app": "8.0.3",
     "@sentry/nextjs": "9",
     "@swc/core": "1.12.11",
     "@swc/wasm": "1.12.11",

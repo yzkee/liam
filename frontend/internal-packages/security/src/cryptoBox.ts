@@ -1,6 +1,7 @@
 import crypto from 'node:crypto'
 import type { Result } from '@liam-hq/neverthrow'
 import { fromThrowable } from '@liam-hq/neverthrow'
+import { err, ok } from 'neverthrow'
 
 export type Key = { id: string; key: Buffer }
 
@@ -32,18 +33,8 @@ export function setKeyring(keys: Key[]): void {
 }
 
 export function currentKey(): Result<Key, Error> {
-  return fromThrowable(() => {
-    if (!RING.length) {
-      // eslint-disable-next-line no-throw-error/no-throw-error -- Throw to feed fromThrowable
-      throw new Error('No keys configured')
-    }
-    const k = RING[0]
-    if (!k) {
-      // eslint-disable-next-line no-throw-error/no-throw-error -- Throw to feed fromThrowable
-      throw new Error('No keys configured')
-    }
-    return k
-  })()
+  if (!RING.length || !RING[0]) return err(new Error('No keys configured'))
+  return ok(RING[0])
 }
 
 export type CipherBundle = {
@@ -57,25 +48,23 @@ export type CipherBundle = {
  * Encrypts plaintext using AES-256-GCM with a random IV.
  */
 export function encryptAesGcm(plaintext: string): Result<CipherBundle, Error> {
-  return fromThrowable(() => {
-    const keyRes = currentKey()
-    if (keyRes.isErr()) throw keyRes.error
-    const { id, key } = keyRes.value
-
-    const iv = crypto.randomBytes(12)
-    const cipher = crypto.createCipheriv('aes-256-gcm', key, iv)
-    const ciphertext = Buffer.concat([
-      cipher.update(plaintext, 'utf8'),
-      cipher.final(),
-    ])
-    const authenticationTag = cipher.getAuthTag()
-    return {
-      keyId: id,
-      ciphertext,
-      initializationVector: iv,
-      authenticationTag,
-    }
-  })()
+  return currentKey().andThen(({ id, key }) =>
+    fromThrowable(() => {
+      const iv = crypto.randomBytes(12)
+      const cipher = crypto.createCipheriv('aes-256-gcm', key, iv)
+      const ciphertext = Buffer.concat([
+        cipher.update(plaintext, 'utf8'),
+        cipher.final(),
+      ])
+      const authenticationTag = cipher.getAuthTag()
+      return {
+        keyId: id,
+        ciphertext,
+        initializationVector: iv,
+        authenticationTag,
+      }
+    })(),
+  )
 }
 
 /**
@@ -87,12 +76,10 @@ export function decryptAesGcm(
   initializationVector: Buffer,
   authenticationTag: Buffer,
 ): Result<string, Error> {
-  return fromThrowable(() => {
-    const entry = RING.find((k) => k.id === keyId)
-    if (!entry)
-      // eslint-disable-next-line no-throw-error/no-throw-error -- Throw to feed fromThrowable
-      throw new Error('Unknown key id')
+  const entry = RING.find((k) => k.id === keyId)
+  if (!entry) return err(new Error('Unknown key id'))
 
+  return fromThrowable(() => {
     const decipher = crypto.createDecipheriv(
       'aes-256-gcm',
       entry.key,

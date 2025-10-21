@@ -11,7 +11,6 @@ overrides:
   path-to-regexp: 8.3.0
   prismjs: 1.30.0
   undici: 7.16.0
-  zod: 3.25.76
 
 importers:
 
@@ -39,8 +38,8 @@ importers:
         specifier: 9.2.1
         version: 9.2.1
       knip:
-        specifier: 5.63.1
-        version: 5.63.1(@types/node@22.18.6)(typescript@5.9.2)
+        specifier: 5.64.1
+        version: 5.64.1(@types/node@22.18.6)(typescript@5.9.2)
       lefthook:
         specifier: 1.13.6
         version: 1.13.6
@@ -561,8 +560,8 @@ importers:
         specifier: 1.17.5
         version: 1.17.5
       zod:
-        specifier: 3.25.76
-        version: 3.25.76
+        specifier: 4.0.0
+        version: 4.0.0
     devDependencies:
       '@biomejs/biome':
         specifier: 2.2.4
@@ -724,6 +723,9 @@ importers:
       typescript:
         specifier: 5.9.2
         version: 5.9.2
+      zod:
+        specifier: 3.23.8
+        version: 3.23.8
 
   frontend/packages/cli:
     dependencies:
@@ -940,8 +942,8 @@ importers:
         specifier: 2.8.1
         version: 2.8.1
       zod:
-        specifier: 3.25.76
-        version: 3.25.76
+        specifier: 4.0.0
+        version: 4.0.0
     devDependencies:
       '@biomejs/biome':
         specifier: 2.2.4
@@ -1749,7 +1751,7 @@ packages:
       deepmerge: ^4.3.1
       dotenv: ^16.4.5
       openai: ^4.62.1
-      zod: 3.25.76
+      zod: ^3.23.8
 
   '@bundled-es-modules/cookie@2.0.1':
     resolution: {integrity: sha512-8o+5fRPLNbjbdGRRmJj3h6Hh1AQJf2dk3qQ/5ZFb+PXkRNiSoMGGUKlsgLfrxneb72axVJyIYji64E2+nNfYyw==}
@@ -8181,13 +8183,13 @@ packages:
     resolution: {integrity: sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==}
     engines: {node: '>=6'}
 
-  knip@5.63.1:
-    resolution: {integrity: sha512-wSznedUAzcU4o9e0O2WPqDnP7Jttu8cesq/R23eregRY8QYQ9NLJ3aGt9fadJfRzPBoU4tRyutwVQu6chhGDlA==}
+  knip@5.64.1:
+    resolution: {integrity: sha512-80XnLsyeXuyxj1F4+NBtQFHxaRH0xWRw8EKwfQ6EkVZZ0bSz/kqqan08k/Qg8ajWsFPhFq+0S2RbLCBGIQtuOg==}
     engines: {node: '>=18.18.0'}
     hasBin: true
     peerDependencies:
       '@types/node': '>=18'
-      typescript: '>=5.0.4'
+      typescript: '>=5.0.4 <7'
 
   langchain@0.3.35:
     resolution: {integrity: sha512-OkPstP43L3rgaAk72UAVcXy4BzJSiyzXfJsHRBTx9xD3rRtgrAu/jsWpMcsbFAoNO3iGerK+ULzkTzaBJBz6kg==}
@@ -9141,7 +9143,7 @@ packages:
     hasBin: true
     peerDependencies:
       ws: ^8.18.0
-      zod: 3.25.76
+      zod: ^3.23.8
     peerDependenciesMeta:
       ws:
         optional: true
@@ -9153,7 +9155,7 @@ packages:
     hasBin: true
     peerDependencies:
       ws: ^8.18.0
-      zod: 3.25.76
+      zod: ^3.23.8
     peerDependenciesMeta:
       ws:
         optional: true
@@ -11377,16 +11379,19 @@ packages:
   zod-to-json-schema@3.24.6:
     resolution: {integrity: sha512-h/z3PKvcTcTetyjl1fkj79MHNEjm+HpD6NXheWjzOekY7kV+lwDYnHw+ivHkijnCSMz1yJaWBD9vu/Fcmk+vEg==}
     peerDependencies:
-      zod: 3.25.76
+      zod: ^3.24.1
 
-  zod-validation-error@3.5.3:
-    resolution: {integrity: sha512-OT5Y8lbUadqVZCsnyFaTQ4/O2mys4tj7PqhdbBCp7McPwvIEKfPtdA6QfPeFQK2/Rz5LgwmAXRJTugBNBi0btw==}
-    engines: {node: '>=18.0.0'}
-    peerDependencies:
-      zod: 3.25.76
+  zod@3.23.8:
+    resolution: {integrity: sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==}
 
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+
+  zod@4.0.0:
+    resolution: {integrity: sha512-9diLdTPc/L7w/5jI4C3gHYNiGHDV9IZYxo1e5LSD8cabi65WVTWWb+g2BGPEpUUCOxR4D+6O5B0AzyMdUAXwrw==}
+
+  zod@4.1.12:
+    resolution: {integrity: sha512-JInaHOamG8pt5+Ey8kGmdcAcg3OL9reK8ltczgHTAwNhMys/6ThXHityHxVV2p3fkw/c+MAvBHFVYHFZDmjMCQ==}
 
   zustand@4.5.7:
     resolution: {integrity: sha512-CHOUy7mu3lbD6o6LJLfllpjkzhHXSBlX8B9+qPddUsIfeF5S/UZ5q0kmCsnRqT1UHFQZchNFDDzMbQsuesHWlw==}
@@ -13227,7 +13232,7 @@ snapshots:
       uuid: 10.0.0
       vitest: 3.2.4(@edge-runtime/vm@3.2.0)(@types/debug@4.1.12)(@types/node@22.18.6)(happy-dom@20.0.0)(jiti@2.6.1)(lightningcss@1.30.1)(msw@2.11.3(@types/node@22.18.6)(typescript@5.9.2))(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1)
       yargs: 17.7.2
-      zod: 3.25.76
+      zod: 3.23.8
     transitivePeerDependencies:
       - '@edge-runtime/vm'
       - '@types/debug'
@@ -13389,8 +13394,8 @@ snapshots:
       express-rate-limit: 7.5.1(express@5.1.0)
       pkce-challenge: 5.0.0
       raw-body: 3.0.1
-      zod: 3.25.76
-      zod-to-json-schema: 3.24.6(zod@3.25.76)
+      zod: 3.23.8
+      zod-to-json-schema: 3.24.6(zod@3.23.8)
     transitivePeerDependencies:
       - supports-color
 
@@ -18979,7 +18984,7 @@ snapshots:
       isstream: 0.1.2
       jsonwebtoken: 9.0.2
       mime-types: 2.1.35
-      retry-axios: 2.6.0(axios@1.12.2(debug@4.4.3))
+      retry-axios: 2.6.0(axios@1.12.2)
       tough-cookie: 4.1.4
     transitivePeerDependencies:
       - supports-color
@@ -19439,7 +19444,7 @@ snapshots:
 
   kleur@3.0.3: {}
 
-  knip@5.63.1(@types/node@22.18.6)(typescript@5.9.2):
+  knip@5.64.1(@types/node@22.18.6)(typescript@5.9.2):
     dependencies:
       '@nodelib/fs.walk': 1.2.8
       '@types/node': 22.18.6
@@ -19454,8 +19459,7 @@ snapshots:
       smol-toml: 1.4.2
       strip-json-comments: 5.0.2
       typescript: 5.9.2
-      zod: 3.25.76
-      zod-validation-error: 3.5.3(zod@3.25.76)
+      zod: 4.1.12
 
   langchain@0.3.35(@langchain/core@0.3.78(@opentelemetry/api@1.9.0)(@opentelemetry/sdk-trace-base@2.1.0(@opentelemetry/api@1.9.0))(openai@5.12.2(ws@8.18.3)(zod@3.25.76)))(@opentelemetry/api@1.9.0)(@opentelemetry/sdk-trace-base@2.1.0(@opentelemetry/api@1.9.0))(axios@1.12.2)(cheerio@1.0.0)(handlebars@4.7.8)(openai@5.12.2(ws@8.18.3)(zod@3.25.76))(ws@8.18.3):
     dependencies:
@@ -21643,7 +21647,7 @@ snapshots:
       onetime: 7.0.0
       signal-exit: 4.1.0
 
-  retry-axios@2.6.0(axios@1.12.2(debug@4.4.3)):
+  retry-axios@2.6.0(axios@1.12.2):
     dependencies:
       axios: 1.12.2(debug@4.4.3)
 
@@ -23239,15 +23243,21 @@ snapshots:
 
   yoga-layout@3.2.1: {}
 
+  zod-to-json-schema@3.24.6(zod@3.23.8):
+    dependencies:
+      zod: 3.23.8
+
   zod-to-json-schema@3.24.6(zod@3.25.76):
     dependencies:
       zod: 3.25.76
 
-  zod-validation-error@3.5.3(zod@3.25.76):
-    dependencies:
-      zod: 3.25.76
+  zod@3.23.8: {}
 
   zod@3.25.76: {}
+
+  zod@4.0.0: {}
+
+  zod@4.1.12: {}
 
   zustand@4.5.7(@types/react@19.1.13)(react@19.1.1):
     dependencies:

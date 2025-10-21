@@ -26,9 +26,13 @@ export async function GET(request: Request) {
       const refresh = session?.provider_refresh_token ?? ''
       // received provider tokens for cookie write
       // Access token expiration: 8 hours.
-      // GitHub's OAuth access tokens typically expire after 8 hours. See: https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#step-3-github-redirects-back-to-your-site
+      // GitHub's OAuth access tokens expire after 8 hours.
+      // Reference: https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#step-3-github-redirects-back-to-your-site
       const EIGHT_HOURS_MS = 8 * 60 * 60 * 1000
-      const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000
+      // Refresh token expiration: 6 months.
+      // GitHub's refresh tokens expire after 6 months of inactivity.
+      // Reference: https://docs.github.com/ja/apps/creating-github-apps/authenticating-with-a-github-app/refreshing-user-access-tokens
+      const SIX_MONTHS_MS = 6 * 30 * 24 * 60 * 60 * 1000
 
       await fromAsyncThrowable(async () => {
         if (access) {
@@ -39,7 +43,7 @@ export async function GET(request: Request) {
         }
         if (refresh) {
           const refreshExpiresAt = new Date(
-            Date.now() + THIRTY_DAYS_MS,
+            Date.now() + SIX_MONTHS_MS,
           ).toISOString()
           await writeRefreshToken(refresh, refreshExpiresAt)
         }

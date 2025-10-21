@@ -41,7 +41,7 @@ const GitHubTokenRefreshResponseSchema = v.object({
   scope: v.optional(v.string()),
   expires_in: v.number(),
   refresh_token: v.string(),
-  refresh_token_expires_in: v.optional(v.number()),
+  refresh_token_expires_in: v.number(),
 })
 
 function refreshAccessToken(
@@ -71,7 +71,7 @@ function refreshAccessToken(
       if (!res.ok) {
         return err(new Error(`GitHub token refresh failed: ${res.status}`))
       }
-      return ResultAsync.fromPromise(res.json() as Promise<unknown>, (e) =>
+      return ResultAsync.fromPromise<unknown, Error>(res.json(), (e) =>
         e instanceof Error ? e : new Error(String(e)),
       )
     })
@@ -83,7 +83,7 @@ function refreshAccessToken(
       const newExpiresAt = new Date(
         now + Math.max(0, data.expires_in) * 1000,
       ).toISOString()
-      const refreshTokenExpiresIn = data.refresh_token_expires_in ?? 0
+      const refreshTokenExpiresIn = data.refresh_token_expires_in
 
       return {
         accessToken: data.access_token,

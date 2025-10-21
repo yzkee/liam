@@ -80,17 +80,29 @@ export const Output: FC<Props> = ({
         initialIsPublic={initialIsPublic}
         {...propsForVersionDropdown}
       />
-      <TabsContent value={OUTPUT_TABS.ERD} className={styles.tabsContent}>
+      <TabsContent
+        value={OUTPUT_TABS.ERD}
+        className={styles.tabsContent}
+        forceMount
+      >
         <ERD schema={schema} prevSchema={prevSchema} />
       </TabsContent>
-      <TabsContent value={OUTPUT_TABS.SQL} className={styles.tabsContent}>
+      <TabsContent
+        value={OUTPUT_TABS.SQL}
+        className={styles.tabsContent}
+        forceMount
+      >
         <SQL
           currentSchema={schema}
           prevSchema={prevSchema}
           comments={sqlReviewComments}
         />
       </TabsContent>
-      <TabsContent value={OUTPUT_TABS.ARTIFACT} className={styles.tabsContent}>
+      <TabsContent
+        value={OUTPUT_TABS.ARTIFACT}
+        className={styles.tabsContent}
+        forceMount
+      >
         <ArtifactContainer analyzedRequirements={analyzedRequirements} />
       </TabsContent>
     </TabsRoot>

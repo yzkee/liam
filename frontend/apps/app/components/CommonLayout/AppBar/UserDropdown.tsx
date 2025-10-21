@@ -1,6 +1,5 @@
 'use client'
-
-import { fromPromise } from '@liam-hq/neverthrow'
+import { fromAsyncThrowable } from '@liam-hq/neverthrow'
 import {
   Avatar,
   AvatarWithImage,
@@ -14,7 +13,6 @@ import {
 } from '@liam-hq/ui'
 import { useRouter } from 'next/navigation'
 import { type FC, useCallback } from 'react'
-import { createClient } from '../../../libs/db/client'
 
 function getUserInitial({
   userName,
@@ -41,14 +39,6 @@ type Props = {
   userEmail?: string | null
 }
 
-// Helper function to delete cookie
-const deleteCookie = (name: string) => {
-  const expires = 'Thu, 01 Jan 1970 00:00:00 UTC'
-  const cookie = `${name}=; expires=${expires}; path=/;`
-  // biome-ignore lint/suspicious/noDocumentCookie: Required for cookie deletion
-  document.cookie = cookie
-}
-
 export const UserDropdown: FC<Props> = ({ avatarUrl, userName, userEmail }) => {
   const toast = useToast()
   const router = useRouter()
@@ -56,36 +46,21 @@ export const UserDropdown: FC<Props> = ({ avatarUrl, userName, userEmail }) => {
   const userInitial = getUserInitial({ userName, userEmail })
 
   const handleLogout = useCallback(async () => {
-    // Perform logout on client side
-    const supabase = createClient()
-    const { error } = await supabase.auth.signOut()
+    const result = await fromAsyncThrowable(async () =>
+      fetch('/api/logout', { method: 'POST', cache: 'no-store' }),
+    )()
 
-    if (!error) {
-      // Delete organizationId cookie
-      deleteCookie('organizationId')
-
-      // Best-effort call to logout endpoint to clear OAuth cookies
-      type HttpResponse = {
-        ok: boolean
-        headers: { get(name: string): string | null }
-        json: () => Promise<unknown>
-      }
-      await fromPromise<HttpResponse>(
-        fetch('/api/auth/logout', { method: 'POST', cache: 'no-store' }),
-      ).match(
-        () => {},
-        () => {},
-      )
-
-      // Redirect with success parameter
+    if (result.isOk() && result.value.ok) {
       router.push('/login?logout=success')
-    } else {
-      toast({
-        title: 'Logout failed',
-        description: error.message || 'An error occurred during logout.',
-        status: 'error',
-      })
+      return
     }
+
+    // If fetch failed or response not OK, show error
+    toast({
+      title: 'Logout failed',
+      description: 'Unable to complete logout. Please try again.',
+      status: 'error',
+    })
   }, [toast, router])
 
   return (

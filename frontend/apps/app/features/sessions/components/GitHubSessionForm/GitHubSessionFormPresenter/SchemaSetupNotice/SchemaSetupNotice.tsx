@@ -14,7 +14,7 @@ export const SchemaSetupNotice: FC<Props> = ({ projectId }) => {
     <div className={styles.wrapper}>
       <div className={styles.head}>
         <InfoIcon className={styles.icon} />
-        <p className={styles.text}>Schema file not Found.</p>
+        <p className={styles.text}>Schema file not found.</p>
       </div>
 
       <Link

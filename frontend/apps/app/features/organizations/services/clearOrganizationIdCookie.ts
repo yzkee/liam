@@ -11,4 +11,3 @@ export async function clearOrganizationIdCookie(): Promise<void> {
     expires: new Date(0),
   })
 }
-

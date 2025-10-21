@@ -10,7 +10,7 @@ export async function updateSession(request: NextRequest) {
   if (
     path.startsWith(ROUTE_PREFIXES.PUBLIC) ||
     path.startsWith(ROUTE_PREFIXES.ERD) ||
-    path.startsWith('/api/auth/logout')
+    path.startsWith('/api/logout')
   ) {
     return NextResponse.next()
   }

@@ -1,5 +1,5 @@
 import { getInstallations } from '@liam-hq/github'
-import { fromPromise } from '@liam-hq/neverthrow'
+import { okAsync } from 'neverthrow'
 import { redirect } from 'next/navigation'
 import { ProjectNewPage } from '../../../components/ProjectNewPage'
 import { getOrganizationId } from '../../../features/organizations/services/getOrganizationId'
@@ -32,12 +32,10 @@ export default async function NewProjectPage() {
   const { installations, needsRefresh } = await tokenResult
     .asyncAndThen((token) => {
       if (!token) {
-        return fromPromise(
-          Promise.resolve({
-            installations: [],
-            needsRefresh: true,
-          }),
-        )
+        return okAsync({
+          installations: [],
+          needsRefresh: true,
+        })
       }
       return getInstallations(token).map((result) => ({
         installations: result.installations,

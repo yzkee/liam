@@ -35,6 +35,7 @@ export const InstallationSelector: FC<Props> = ({
   const [selectedInstallation, setSelectedInstallation] =
     useState<Installation | null>(null)
   const [isAddingProject, startAddingProjectTransition] = useTransition()
+  const [, startTransition] = useTransition()
 
   const [repositoriesState, repositoriesAction, isRepositoriesLoading] =
     useActionState(getRepositories, { repositories: [], loading: false })
@@ -42,12 +43,15 @@ export const InstallationSelector: FC<Props> = ({
   const githubAppUrl = process.env.NEXT_PUBLIC_GITHUB_APP_URL
 
   const handleSelectInstallation = (installation: Installation) => {
-    if (disabled) return
-    startAddingProjectTransition(() => {
-      setSelectedInstallation(installation)
-      const formData = new FormData()
-      formData.append('installationId', installation.id.toString())
-      repositoriesAction(formData)
+    setSelectedInstallation(installation)
+    startTransition(() => {
+      if (disabled) return
+      startAddingProjectTransition(() => {
+        setSelectedInstallation(installation)
+        const formData = new FormData()
+        formData.append('installationId', installation.id.toString())
+        repositoriesAction(formData)
+      })
     })
   }
 

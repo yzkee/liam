@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/nextjs'
 import { useId } from 'react'
-import { TableOfContents } from './TableOfContents'
+import { DesktopToC } from './DesktopToC'
 
 const meta = {
-  component: TableOfContents,
+  component: DesktopToC,
   parameters: {
     layout: 'padded',
   },
@@ -62,7 +62,7 @@ const meta = {
       )
     },
   ],
-} satisfies Meta<typeof TableOfContents>
+} satisfies Meta<typeof DesktopToC>
 
 export default meta
 type Story = StoryObj<typeof meta>

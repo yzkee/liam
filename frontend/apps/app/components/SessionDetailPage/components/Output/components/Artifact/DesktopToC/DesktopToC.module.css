@@ -4,7 +4,6 @@
   height: fit-content;
   max-height: calc(100vh - var(--spacing-16));
   overflow-y: auto;
-  padding: var(--spacing-4) var(--spacing-4); /* 16px */
   min-width: 288px;
   max-width: 288px;
   align-self: flex-start;

@@ -27,8 +27,8 @@ import {
   SUCCESS_STATUS,
   TEST_RESULTS_SECTION_TITLE,
 } from './constants'
+import { DesktopToC } from './DesktopToC'
 import { MobileToC } from './MobileToC'
-import { TableOfContents } from './TableOfContents'
 import { useActiveHeading } from './useActiveHeading'
 import { generateHeadingId } from './utils'
 import { extractTocItems } from './utils/extractTocItems'
@@ -232,7 +232,7 @@ export const Artifact: FC<Props> = ({ doc, error }) => {
           </ReactMarkdown>
         </div>
         <div className={styles.desktopToc}>
-          <TableOfContents content={doc} />
+          <DesktopToC content={doc} />
         </div>
       </div>
     </div>

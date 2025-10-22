@@ -4,13 +4,13 @@ import clsx from 'clsx'
 import { type FC, useEffect, useState } from 'react'
 import type { TocItem } from '../types'
 import { extractTocItems } from '../utils/extractTocItems'
-import styles from './TableOfContents.module.css'
+import styles from './DesktopToC.module.css'
 
 type Props = {
   content: string
 }
 
-export const TableOfContents: FC<Props> = ({ content }) => {
+export const DesktopToC: FC<Props> = ({ content }) => {
   const [toc, setToc] = useState<TocItem[]>([])
   const [activeId, setActiveId] = useState<string>('')
 

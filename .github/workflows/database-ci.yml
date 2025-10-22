@@ -29,6 +29,7 @@ jobs:
       - name: Supabase Start
         run: supabase start
 
+      - uses: ./.github/actions/pnpm-setup
       - name: Run Splinter Lint
         run: pnpm -F @liam-hq/db db:lint
         env:

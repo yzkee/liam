@@ -46,6 +46,21 @@ export const Artifact: FC<Props> = ({ doc, error }) => {
     elementIds: tocItems.map((h) => h.id),
   })
 
+  const extractText = (node: unknown): string => {
+    if (typeof node === 'string') return node
+    if (Array.isArray(node)) return node.map(extractText).join('')
+    if (
+      node &&
+      typeof node === 'object' &&
+      'props' in node &&
+      // @ts-expect-error - React children can be any type
+      node.props?.children
+    )
+      // @ts-expect-error - React children can be any type
+      return extractText(node.props.children)
+    return ''
+  }
+
   return (
     <div className={styles.container} data-artifact-content>
       {error && (
@@ -71,23 +86,6 @@ export const Artifact: FC<Props> = ({ doc, error }) => {
                 p(props) {
                   const { children, ...rest } = props
 
-                  // Extract text content from children
-                  const extractText = (node: unknown): string => {
-                    if (typeof node === 'string') return node
-                    if (Array.isArray(node))
-                      return node.map(extractText).join('')
-                    if (
-                      node &&
-                      typeof node === 'object' &&
-                      'props' in node &&
-                      // @ts-expect-error - React children can be any type
-                      node.props?.children
-                    )
-                      // @ts-expect-error - React children can be any type
-                      return extractText(node.props.children)
-                    return ''
-                  }
-
                   const text = extractText(children)
 
                   // Check if this paragraph contains execution section title
@@ -103,23 +101,6 @@ export const Artifact: FC<Props> = ({ doc, error }) => {
                 },
                 li(props) {
                   const { children, ...rest } = props
-
-                  // Extract text content from children
-                  const extractText = (node: unknown): string => {
-                    if (typeof node === 'string') return node
-                    if (Array.isArray(node))
-                      return node.map(extractText).join('')
-                    if (
-                      node &&
-                      typeof node === 'object' &&
-                      'props' in node &&
-                      // @ts-expect-error - React children can be any type
-                      node.props?.children
-                    )
-                      // @ts-expect-error - React children can be any type
-                      return extractText(node.props.children)
-                    return ''
-                  }
 
                   const text = extractText(children)
 
@@ -177,7 +158,7 @@ export const Artifact: FC<Props> = ({ doc, error }) => {
                   )
                 },
                 h1: ({ children, ...props }) => {
-                  const text = String(children)
+                  const text = extractText(children)
                   const id = generateHeadingId(text)
                   return (
                     <h1 id={id} {...props}>
@@ -186,7 +167,7 @@ export const Artifact: FC<Props> = ({ doc, error }) => {
                   )
                 },
                 h2: ({ children, ...props }) => {
-                  const text = String(children)
+                  const text = extractText(children)
                   const id = generateHeadingId(text)
                   return (
                     <h2 id={id} {...props}>
@@ -195,7 +176,7 @@ export const Artifact: FC<Props> = ({ doc, error }) => {
                   )
                 },
                 h3: ({ children, ...props }) => {
-                  const text = String(children)
+                  const text = extractText(children)
                   const id = generateHeadingId(text)
                   return (
                     <h3 id={id} {...props}>
@@ -204,7 +185,7 @@ export const Artifact: FC<Props> = ({ doc, error }) => {
                   )
                 },
                 h4: ({ children, ...props }) => {
-                  const text = String(children)
+                  const text = extractText(children)
                   const id = generateHeadingId(text)
                   return (
                     <h4 id={id} {...props}>
@@ -213,7 +194,7 @@ export const Artifact: FC<Props> = ({ doc, error }) => {
                   )
                 },
                 h5: ({ children, ...props }) => {
-                  const text = String(children)
+                  const text = extractText(children)
                   const id = generateHeadingId(text)
                   return (
                     <h5 id={id} {...props}>

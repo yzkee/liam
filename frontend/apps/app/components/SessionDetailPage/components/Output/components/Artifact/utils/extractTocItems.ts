@@ -1,6 +1,34 @@
 import type { TocItem } from '../types'
 import { generateHeadingId } from '.'
 
+const stripInlineMarkdown = (input: string): string => {
+  let s = input.trim()
+  // Remove trailing ATX closing hashes (e.g. '### Title ###' → '### Title')
+  s = s.replace(/\s+#+\s*$/u, '')
+  // Images: '![alt](url)' → 'alt'
+  s = s.replace(/!\[([^\]]*)\]\((?:[^)]+)\)/gu, '$1')
+  // Links: '[text](url)' → 'text'
+  s = s.replace(/\[([^\]]+)\]\((?:[^)]+)\)/gu, '$1')
+  // Inline code: '`code`' → 'code'
+  s = s.replace(/`([^`]+)`/gu, '$1')
+  // Emphasis (bold+italic): '***text***' or '___text___' → 'text'
+  s = s.replace(/(\*\*\*|___)(.*?)\1/gu, '$2')
+  // Emphasis (bold): '**text**' or '__text__' → 'text'
+  s = s.replace(/(\*\*|__)(.*?)\1/gu, '$2')
+  // Emphasis (italic): '*text*' or '_text_' → 'text'
+  s = s.replace(/(\*|_)([^*_][\s\S]*?)\1/gu, '$2')
+  // Strikethrough: '~~text~~' → 'text'
+  s = s.replace(/~~(.*?)~~/gu, '$1')
+  // Remove HTML tags conservatively and then drop any stray angle brackets
+  s = s.replace(/<\/?[\p{L}][^>]*>/gu, '')
+  s = s.replace(/[<>]/gu, '')
+  // Unescape backslash-escaped punctuation: '\*' → '*'
+  s = s.replace(/\\([\\`*_{}\[\]()#+\-.!])/gu, '$1')
+  // Collapse multiple spaces and trim
+  s = s.replace(/\s+/gu, ' ').trim()
+  return s
+}
+
 export const parseHeading = (
   line: string,
   slugCountMap: Map<string, number>,
@@ -9,7 +37,8 @@ export const parseHeading = (
   if (!headingMatch) return null
 
   const levelMatch = headingMatch[1]
-  const text = headingMatch[2]
+  const rawText = headingMatch[2]
+  const text = stripInlineMarkdown(rawText ?? '')
   if (!levelMatch || !text) return null
 
   const level = levelMatch.length

@@ -1,10 +1,5 @@
-import { generateHeadingId } from '../../utils'
-
-export type TocItem = {
-  id: string
-  text: string
-  level: number
-}
+import type { TocItem } from '../types'
+import { generateHeadingId } from '.'
 
 export const parseHeading = (
   line: string,

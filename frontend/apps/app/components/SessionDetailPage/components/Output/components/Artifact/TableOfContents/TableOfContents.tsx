@@ -2,8 +2,9 @@
 
 import clsx from 'clsx'
 import { type FC, useEffect, useState } from 'react'
+import type { TocItem } from '../types'
+import { extractTocItems } from '../utils/extractTocItems'
 import styles from './TableOfContents.module.css'
-import { extractTocItems, type TocItem } from './utils'
 
 type Props = {
   content: string

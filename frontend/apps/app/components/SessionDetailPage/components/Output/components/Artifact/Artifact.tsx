@@ -30,7 +30,7 @@ import { extractTocItems } from './utils/extractTocItems'
 type CodeProps = {
   className?: string
   children?: ReactNode
-} & HTMLAttributes<HTMLElement>
+} & HTMLAttributes<HTMLElement> & { node?: unknown; inline?: boolean }
 
 type Props = {
   doc: string
@@ -83,9 +83,7 @@ export const Artifact: FC<Props> = ({ doc, error }) => {
               remarkPlugins={[remarkGfm]}
               rehypePlugins={[rehypeRaw]}
               components={{
-                p(props) {
-                  const { children, ...rest } = props
-
+                p({ node: _node, children, ...rest }) {
                   const text = extractText(children)
 
                   // Check if this paragraph contains execution section title
@@ -99,9 +97,7 @@ export const Artifact: FC<Props> = ({ doc, error }) => {
 
                   return <p {...rest}>{children}</p>
                 },
-                li(props) {
-                  const { children, ...rest } = props
-
+                li({ node: _node, children, ...rest }) {
                   const text = extractText(children)
 
                   // Check if this is an execution log entry
@@ -134,8 +130,13 @@ export const Artifact: FC<Props> = ({ doc, error }) => {
 
                   return <li {...rest}>{children}</li>
                 },
-                code(props: CodeProps) {
-                  const { children, className, ...rest } = props
+                code({
+                  node: _node,
+                  inline: _inline,
+                  children,
+                  className,
+                  ...rest
+                }: CodeProps) {
                   const match = /language-(\w+)/.exec(className || '')
                   const isInline = !match && !className
 
@@ -157,7 +158,7 @@ export const Artifact: FC<Props> = ({ doc, error }) => {
                     </code>
                   )
                 },
-                h1: ({ children, ...props }) => {
+                h1: ({ node: _node, children, ...props }) => {
                   const text = extractText(children)
                   const id = generateHeadingId(text)
                   return (
@@ -166,7 +167,7 @@ export const Artifact: FC<Props> = ({ doc, error }) => {
                     </h1>
                   )
                 },
-                h2: ({ children, ...props }) => {
+                h2: ({ node: _node, children, ...props }) => {
                   const text = extractText(children)
                   const id = generateHeadingId(text)
                   return (
@@ -175,7 +176,7 @@ export const Artifact: FC<Props> = ({ doc, error }) => {
                     </h2>
                   )
                 },
-                h3: ({ children, ...props }) => {
+                h3: ({ node: _node, children, ...props }) => {
                   const text = extractText(children)
                   const id = generateHeadingId(text)
                   return (
@@ -184,7 +185,7 @@ export const Artifact: FC<Props> = ({ doc, error }) => {
                     </h3>
                   )
                 },
-                h4: ({ children, ...props }) => {
+                h4: ({ node: _node, children, ...props }) => {
                   const text = extractText(children)
                   const id = generateHeadingId(text)
                   return (
@@ -193,7 +194,7 @@ export const Artifact: FC<Props> = ({ doc, error }) => {
                     </h4>
                   )
                 },
-                h5: ({ children, ...props }) => {
+                h5: ({ node: _node, children, ...props }) => {
                   const text = extractText(children)
                   const id = generateHeadingId(text)
                   return (

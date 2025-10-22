@@ -1,3 +1,4 @@
+import { toResultAsync } from '@liam-hq/db'
 import { createClient } from '../../../../libs/db/server'
 import type { RecentSession, SessionFilterType } from './types'
 
@@ -39,18 +40,13 @@ export const fetchRecentSessions = async (
     query = query.eq('created_by_user_id', filterType)
   }
 
-  const { data: sessions, error } = await query
-    .order('created_at', { ascending: false })
-    .range(offset, offset + limit - 1)
+  const result = await toResultAsync<RecentSession[] | null>(
+    query.order('created_at', { ascending: false }).range(
+      offset,
+      offset + limit - 1,
+    ),
+    { allowNull: true },
+  )
 
-  if (error) {
-    console.error('Error fetching recent sessions:', error)
-    return []
-  }
-
-  if (!sessions) {
-    return []
-  }
-
-  return sessions
+  return result.match((sessions) => sessions ?? [], () => [])
 }

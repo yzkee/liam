@@ -1,5 +1,6 @@
 'use server'
 
+import { toResultAsync } from '@liam-hq/db'
 import { getOrganizationId } from '../../../../features/organizations/services/getOrganizationId'
 import { createClient } from '../../../../libs/db/server'
 import {
@@ -53,27 +54,31 @@ export async function getOrganizationMembers(
 ): Promise<Array<{ id: string; name: string; email: string }>> {
   const supabase = await createClient()
 
-  const { data, error } = await supabase
-    .from('organization_members')
-    .select(
-      `
+  const result = await toResultAsync<Array<{
+    users: { id: string; name: string; email: string } | null
+  }> | null>(
+    supabase
+      .from('organization_members')
+      .select(
+        `
       users(
         id,
         name,
         email
       )
     `,
-    )
-    .eq('organization_id', organizationId)
+      )
+      .eq('organization_id', organizationId),
+    { allowNull: true },
+  )
 
-  if (error) {
-    console.error('Error fetching organization members:', error)
-    return []
-  }
-
-  return data
-    .map((member) => member.users)
-    .filter((user): user is { id: string; name: string; email: string } =>
-      Boolean(user),
-    )
+  return result.match(
+    (data) =>
+      (data ?? [])
+        .map((member) => member.users)
+        .filter((user): user is { id: string; name: string; email: string } =>
+          Boolean(user),
+        ),
+    () => [],
+  )
 }

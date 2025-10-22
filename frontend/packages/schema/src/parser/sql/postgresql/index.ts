@@ -103,6 +103,7 @@ function processChunk(
         rawSql,
         schema,
         chunkOffset,
+        chunk,
       )
 
     if (conversionErrors !== null) {

@@ -29,21 +29,6 @@
   gap: var(--spacing-1);
 }
 
-.filterItem {
-  width: 100%;
-  margin-bottom: var(--spacing-2);
-}
-
-.chevronIcon {
-  width: 0.75rem;
-  height: 0.75rem;
-  color: var(--overlay-70);
-}
-
-.dropdownContent {
-  min-width: 200px;
-}
-
 .sessionsList {
   display: flex;
   flex-direction: column;

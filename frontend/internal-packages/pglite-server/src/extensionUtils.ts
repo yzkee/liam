@@ -60,6 +60,10 @@ async function loadExtensionModule(
         const module = await import('@electric-sql/pglite/contrib/ltree')
         return module.ltree
       }
+      case 'vector': {
+        const module = await import('@electric-sql/pglite/vector')
+        return module.vector
+      }
       case 'amcheck': {
         const module = await import('@electric-sql/pglite/contrib/amcheck')
         return module.amcheck

@@ -23,10 +23,10 @@
 
 .contentWrapper {
   display: flex;
-  gap: var(--spacing-8);
   width: 100%;
   justify-content: center;
   flex: 1;
+  padding-right: var(--spacing-4);
   overflow-y: auto;
 }
 
@@ -51,12 +51,16 @@
 @container artifact (min-width: 768px) {
   .desktopToc {
     display: block;
-    padding-top: var(--spacing-6);
+    position: sticky;
+    top: 64px;
   }
 }
 
-.body {
+.bodyWrapper {
   flex: 1;
+}
+
+.body {
   width: 100%;
   padding: var(--spacing-6) var(--spacing-8);
   font-family: var(--main-font);

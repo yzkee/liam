@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import { useId } from 'react'
+import type { TocItem } from '../types'
 import { DesktopToC } from './DesktopToC'
 
 const meta = {
@@ -8,52 +8,59 @@ const meta = {
     layout: 'padded',
   },
   decorators: [
-    (Story) => {
-      const businessRequirementId = useId()
-      const requirementsId = useId()
-      const functionalRequirementsId = useId()
-      const orderProcessingId = useId()
-      const inventoryManagementId = useId()
+    (Story, context) => {
+      const items: TocItem[] = context.args.items ?? []
+
+      const Heading = ({
+        level,
+        id,
+        children,
+      }: {
+        level: number
+        id: string
+        children: React.ReactNode
+      }) => {
+        const tag = Math.min(Math.max(level, 1), 6)
+        if (tag === 1) return <h1 id={id}>{children}</h1>
+        if (tag === 2) return <h2 id={id}>{children}</h2>
+        if (tag === 3) return <h3 id={id}>{children}</h3>
+        if (tag === 4) return <h4 id={id}>{children}</h4>
+        if (tag === 5) return <h5 id={id}>{children}</h5>
+        return <h6 id={id}>{children}</h6>
+      }
 
       return (
-        <div style={{ display: 'flex', gap: '32px', height: '800px' }}>
-          <div style={{ flex: 1, overflow: 'auto', padding: '20px' }}>
-            <h1 id={businessRequirementId}>Business Requirement</h1>
-            <p>
-              Build an e-commerce order management system and optimize order
-              processing flow
-            </p>
-
-            <h2 id={requirementsId}>Requirements</h2>
-
-            <h3 id={functionalRequirementsId}>Functional Requirements</h3>
-
-            <h4 id={orderProcessingId}>1. Order Processing</h4>
-            <p>
-              Overall order processing including order creation, updates,
-              cancellation, and status management
-            </p>
-            <div
-              style={{
-                height: '400px',
-                background: '#f0f0f0',
-                padding: '20px',
-              }}
-            >
-              <p>Content placeholder for scrolling demo</p>
-            </div>
-
-            <h4 id={inventoryManagementId}>2. Inventory Management</h4>
-            <p>Product inventory tracking, updates, and alert functions</p>
-            <div
-              style={{
-                height: '400px',
-                background: '#f0f0f0',
-                padding: '20px',
-              }}
-            >
-              <p>Content placeholder for scrolling demo</p>
-            </div>
+        <div style={{ display: 'flex', gap: 16, height: 600 }}>
+          <div
+            style={{
+              flex: 1,
+              overflow: 'auto',
+              border: '1px solid #e5e7eb',
+              borderRadius: 8,
+              padding: 16,
+              background: '#fff',
+            }}
+          >
+            {items.map((it) => (
+              <div key={it.id} style={{ marginBottom: 24 }}>
+                <Heading level={it.level} id={it.id}>
+                  {it.text}
+                </Heading>
+                <div
+                  style={{
+                    height: 200,
+                    background: '#f3f4f6',
+                    borderRadius: 8,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#6b7280',
+                  }}
+                >
+                  Content placeholder for scrolling demo
+                </div>
+              </div>
+            ))}
           </div>
           <div>
             <Story />
@@ -67,121 +74,27 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-const sampleContent = `# Business Requirement
-
-Build an e-commerce order management system and optimize order processing flow
-
-## Requirements
-
-### Functional Requirements
-
-#### 1. Order Processing
-
-Overall order processing including order creation, updates, cancellation, and status management
-
-#### 2. Inventory Management
-
-Product inventory tracking, updates, and alert functions`
-
 export const Default: Story = {
-  name: 'Default TOC',
+  name: 'Default (with headings)',
   args: {
-    content: sampleContent,
-  },
-}
-
-export const ShortContent: Story = {
-  name: 'Short Content (Few Headings)',
-  args: {
-    content: `# Main Title
-
-## Section 1
-
-Content for section 1.
-
-## Section 2
-
-Content for section 2.`,
-  },
-}
-
-export const NoHeadings: Story = {
-  name: 'No Headings',
-  args: {
-    content:
-      'This is a document without any headings. Just plain text content.',
-  },
-}
-
-export const LongContent: Story = {
-  name: 'Long Content',
-  args: {
-    content: `# System Architecture
-
-## 1. Frontend Architecture
-
-### 1.1 Component Design
-
-#### 1.1.1 Atomic Design Pattern
-
-##### 1.1.1.1 Atoms
-
-Basic building blocks of the UI.
-
-##### 1.1.1.2 Molecules
-
-Combinations of atoms forming functional units.
-
-#### 1.1.2 Container Components
-
-Smart components that handle business logic.
-
-### 1.2 State Management
-
-#### 1.2.1 Redux Store
-
-Global state management solution.
-
-#### 1.2.2 Context API
-
-React's built-in state management.
-
-## 2. Backend Architecture
-
-### 2.1 API Design
-
-#### 2.1.1 RESTful Endpoints
-
-Standard REST API implementation.
-
-#### 2.1.2 GraphQL Schema
-
-GraphQL API for flexible queries.
-
-### 2.2 Database Layer
-
-#### 2.2.1 PostgreSQL
-
-Primary relational database.
-
-#### 2.2.2 Redis Cache
-
-In-memory data structure store.
-
-## 3. Infrastructure
-
-### 3.1 Cloud Services
-
-#### 3.1.1 AWS
-
-Amazon Web Services deployment.
-
-#### 3.1.2 Azure
-
-Microsoft Azure integration.
-
-## 4. Security Considerations
-
-Implementing security best practices across the stack.`,
+    items: [
+      { id: 'business-requirement', text: 'Business Requirement', level: 1 },
+      { id: 'requirements', text: 'Requirements', level: 2 },
+      {
+        id: 'functional-requirements',
+        text: 'Functional Requirements',
+        level: 3,
+      },
+      { id: 'order-processing', text: '1. Order Processing', level: 4 },
+      { id: 'inventory-management', text: '2. Inventory Management', level: 4 },
+      {
+        id: 'non-functional-requirements',
+        text: 'Non-Functional Requirements',
+        level: 3,
+      },
+      { id: 'security', text: 'Security', level: 4 },
+      { id: 'performance', text: 'Performance', level: 4 },
+    ] satisfies TocItem[],
+    activeId: 'business-requirement',
   },
 }

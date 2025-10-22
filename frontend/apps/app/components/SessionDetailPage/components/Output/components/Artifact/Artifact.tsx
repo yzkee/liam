@@ -7,13 +7,7 @@ import {
   syntaxCustomStyle,
   syntaxTheme,
 } from '@liam-hq/ui'
-import {
-  type FC,
-  type HTMLAttributes,
-  type ReactNode,
-  useMemo,
-  useRef,
-} from 'react'
+import { type FC, type HTMLAttributes, type ReactNode, useMemo } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import rehypeRaw from 'rehype-raw'
@@ -44,8 +38,6 @@ type Props = {
 }
 
 export const Artifact: FC<Props> = ({ doc, error }) => {
-  const containerRef = useRef<HTMLDivElement>(null)
-
   const tocItems = useMemo(() => {
     return extractTocItems(doc)
   }, [doc])
@@ -69,170 +61,174 @@ export const Artifact: FC<Props> = ({ doc, error }) => {
           <CopyButton textToCopy={doc} tooltipLabel="Copy Markdown" />
         </div>
       </div>
-      <div className={styles.contentWrapper} ref={containerRef}>
-        <div className={styles.body}>
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            rehypePlugins={[rehypeRaw]}
-            components={{
-              p(props) {
-                const { children, ...rest } = props
+      <div className={styles.contentWrapper}>
+        <div className={styles.bodyWrapper}>
+          <div className={styles.body}>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeRaw]}
+              components={{
+                p(props) {
+                  const { children, ...rest } = props
 
-                // Extract text content from children
-                const extractText = (node: unknown): string => {
-                  if (typeof node === 'string') return node
-                  if (Array.isArray(node)) return node.map(extractText).join('')
-                  if (
-                    node &&
-                    typeof node === 'object' &&
-                    'props' in node &&
-                    // @ts-expect-error - React children can be any type
-                    node.props?.children
+                  // Extract text content from children
+                  const extractText = (node: unknown): string => {
+                    if (typeof node === 'string') return node
+                    if (Array.isArray(node))
+                      return node.map(extractText).join('')
+                    if (
+                      node &&
+                      typeof node === 'object' &&
+                      'props' in node &&
+                      // @ts-expect-error - React children can be any type
+                      node.props?.children
+                    )
+                      // @ts-expect-error - React children can be any type
+                      return extractText(node.props.children)
+                    return ''
+                  }
+
+                  const text = extractText(children)
+
+                  // Check if this paragraph contains execution section title
+                  if (text.includes(`${TEST_RESULTS_SECTION_TITLE}:`)) {
+                    return (
+                      <p className={styles.executionLogsHeading} {...rest}>
+                        {children}
+                      </p>
+                    )
+                  }
+
+                  return <p {...rest}>{children}</p>
+                },
+                li(props) {
+                  const { children, ...rest } = props
+
+                  // Extract text content from children
+                  const extractText = (node: unknown): string => {
+                    if (typeof node === 'string') return node
+                    if (Array.isArray(node))
+                      return node.map(extractText).join('')
+                    if (
+                      node &&
+                      typeof node === 'object' &&
+                      'props' in node &&
+                      // @ts-expect-error - React children can be any type
+                      node.props?.children
+                    )
+                      // @ts-expect-error - React children can be any type
+                      return extractText(node.props.children)
+                    return ''
+                  }
+
+                  const text = extractText(children)
+
+                  // Check if this is an execution log entry
+                  const successPattern = `${SUCCESS_ICON} ${SUCCESS_STATUS}`
+                  const failurePattern = `${FAILURE_ICON} ${FAILURE_STATUS}`
+                  const executionLogPattern = new RegExp(
+                    `^(.+?):\\s*(${successPattern}|${failurePattern})\\s*-\\s*(.+)$`,
                   )
-                    // @ts-expect-error - React children can be any type
-                    return extractText(node.props.children)
-                  return ''
-                }
+                  const executionLogMatch = text.match(executionLogPattern)
+                  if (executionLogMatch) {
+                    const [, timestamp, status, message] = executionLogMatch
+                    const isSuccess = status?.includes(successPattern)
+                    return (
+                      <li className={styles.executionLogItem} {...rest}>
+                        <span
+                          className={
+                            isSuccess
+                              ? styles.executionLogSuccess
+                              : styles.executionLogFailed
+                          }
+                        >
+                          {status} - {message}
+                        </span>
+                        <span className={styles.executionLogTimestamp}>
+                          {timestamp}
+                        </span>
+                      </li>
+                    )
+                  }
 
-                const text = extractText(children)
+                  return <li {...rest}>{children}</li>
+                },
+                code(props: CodeProps) {
+                  const { children, className, ...rest } = props
+                  const match = /language-(\w+)/.exec(className || '')
+                  const isInline = !match && !className
 
-                // Check if this paragraph contains execution section title
-                if (text.includes(`${TEST_RESULTS_SECTION_TITLE}:`)) {
-                  return (
-                    <p className={styles.executionLogsHeading} {...rest}>
+                  return !isInline && match ? (
+                    <SyntaxHighlighter
+                      // @ts-expect-error - syntaxTheme has a complex type structure that's compatible at runtime
+                      style={syntaxTheme}
+                      language={match[1]}
+                      PreTag="div"
+                      customStyle={syntaxCustomStyle}
+                      codeTagProps={syntaxCodeTagProps}
+                      {...rest}
+                    >
+                      {String(children).replace(/\n$/, '')}
+                    </SyntaxHighlighter>
+                  ) : (
+                    <code className={className} {...rest}>
                       {children}
-                    </p>
+                    </code>
                   )
-                }
-
-                return <p {...rest}>{children}</p>
-              },
-              li(props) {
-                const { children, ...rest } = props
-
-                // Extract text content from children
-                const extractText = (node: unknown): string => {
-                  if (typeof node === 'string') return node
-                  if (Array.isArray(node)) return node.map(extractText).join('')
-                  if (
-                    node &&
-                    typeof node === 'object' &&
-                    'props' in node &&
-                    // @ts-expect-error - React children can be any type
-                    node.props?.children
-                  )
-                    // @ts-expect-error - React children can be any type
-                    return extractText(node.props.children)
-                  return ''
-                }
-
-                const text = extractText(children)
-
-                // Check if this is an execution log entry
-                const successPattern = `${SUCCESS_ICON} ${SUCCESS_STATUS}`
-                const failurePattern = `${FAILURE_ICON} ${FAILURE_STATUS}`
-                const executionLogPattern = new RegExp(
-                  `^(.+?):\\s*(${successPattern}|${failurePattern})\\s*-\\s*(.+)$`,
-                )
-                const executionLogMatch = text.match(executionLogPattern)
-                if (executionLogMatch) {
-                  const [, timestamp, status, message] = executionLogMatch
-                  const isSuccess = status?.includes(successPattern)
+                },
+                h1: ({ children, ...props }) => {
+                  const text = String(children)
+                  const id = generateHeadingId(text)
                   return (
-                    <li className={styles.executionLogItem} {...rest}>
-                      <span
-                        className={
-                          isSuccess
-                            ? styles.executionLogSuccess
-                            : styles.executionLogFailed
-                        }
-                      >
-                        {status} - {message}
-                      </span>
-                      <span className={styles.executionLogTimestamp}>
-                        {timestamp}
-                      </span>
-                    </li>
+                    <h1 id={id} {...props}>
+                      {children}
+                    </h1>
                   )
-                }
-
-                return <li {...rest}>{children}</li>
-              },
-              code(props: CodeProps) {
-                const { children, className, ...rest } = props
-                const match = /language-(\w+)/.exec(className || '')
-                const isInline = !match && !className
-
-                return !isInline && match ? (
-                  <SyntaxHighlighter
-                    // @ts-expect-error - syntaxTheme has a complex type structure that's compatible at runtime
-                    style={syntaxTheme}
-                    language={match[1]}
-                    PreTag="div"
-                    customStyle={syntaxCustomStyle}
-                    codeTagProps={syntaxCodeTagProps}
-                    {...rest}
-                  >
-                    {String(children).replace(/\n$/, '')}
-                  </SyntaxHighlighter>
-                ) : (
-                  <code className={className} {...rest}>
-                    {children}
-                  </code>
-                )
-              },
-              h1: ({ children, ...props }) => {
-                const text = String(children)
-                const id = generateHeadingId(text)
-                return (
-                  <h1 id={id} {...props}>
-                    {children}
-                  </h1>
-                )
-              },
-              h2: ({ children, ...props }) => {
-                const text = String(children)
-                const id = generateHeadingId(text)
-                return (
-                  <h2 id={id} {...props}>
-                    {children}
-                  </h2>
-                )
-              },
-              h3: ({ children, ...props }) => {
-                const text = String(children)
-                const id = generateHeadingId(text)
-                return (
-                  <h3 id={id} {...props}>
-                    {children}
-                  </h3>
-                )
-              },
-              h4: ({ children, ...props }) => {
-                const text = String(children)
-                const id = generateHeadingId(text)
-                return (
-                  <h4 id={id} {...props}>
-                    {children}
-                  </h4>
-                )
-              },
-              h5: ({ children, ...props }) => {
-                const text = String(children)
-                const id = generateHeadingId(text)
-                return (
-                  <h5 id={id} {...props}>
-                    {children}
-                  </h5>
-                )
-              },
-            }}
-          >
-            {doc}
-          </ReactMarkdown>
+                },
+                h2: ({ children, ...props }) => {
+                  const text = String(children)
+                  const id = generateHeadingId(text)
+                  return (
+                    <h2 id={id} {...props}>
+                      {children}
+                    </h2>
+                  )
+                },
+                h3: ({ children, ...props }) => {
+                  const text = String(children)
+                  const id = generateHeadingId(text)
+                  return (
+                    <h3 id={id} {...props}>
+                      {children}
+                    </h3>
+                  )
+                },
+                h4: ({ children, ...props }) => {
+                  const text = String(children)
+                  const id = generateHeadingId(text)
+                  return (
+                    <h4 id={id} {...props}>
+                      {children}
+                    </h4>
+                  )
+                },
+                h5: ({ children, ...props }) => {
+                  const text = String(children)
+                  const id = generateHeadingId(text)
+                  return (
+                    <h5 id={id} {...props}>
+                      {children}
+                    </h5>
+                  )
+                },
+              }}
+            >
+              {doc}
+            </ReactMarkdown>
+          </div>
         </div>
         <div className={styles.desktopToc}>
-          <DesktopToC content={doc} />
+          <DesktopToC items={tocItems} activeId={activeId} />
         </div>
       </div>
     </div>

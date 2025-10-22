@@ -41,12 +41,14 @@ export const fetchRecentSessions = async (
   }
 
   const result = await toResultAsync<RecentSession[] | null>(
-    query.order('created_at', { ascending: false }).range(
-      offset,
-      offset + limit - 1,
-    ),
+    query
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1),
     { allowNull: true },
   )
 
-  return result.match((sessions) => sessions ?? [], () => [])
+  return result.match(
+    (sessions) => sessions ?? [],
+    () => [],
+  )
 }

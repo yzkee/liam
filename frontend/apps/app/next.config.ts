@@ -88,6 +88,16 @@ const nextConfig: NextConfig = {
       config.externals['@swc/wasm'] = '@swc/wasm'
     }
 
+    // Handle .tar.gz files for PGlite extensions
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    config.module.rules.push({
+      test: /\.tar\.gz$/,
+      type: 'asset/resource',
+      generator: {
+        filename: 'static/extensions/[name][ext]',
+      },
+    })
+
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     config.plugins.push({
       // biome-ignore lint/suspicious/noExplicitAny: webpack types are incomplete so we need to use any here

@@ -1,6 +1,7 @@
 'use client'
 
 import { fromPromise } from '@liam-hq/neverthrow'
+import * as Sentry from '@sentry/nextjs'
 import clsx from 'clsx'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -45,15 +46,16 @@ export const RecentsSectionClient = ({
 
     const result = await fromPromise(fetchFilteredSessions(newFilterType))
 
-    if (result.isErr()) {
-      console.error('Error fetching filtered sessions:', result.error)
-      setIsLoading(false)
-      return
-    }
+    result.match(
+      (newSessions) => {
+        setSessions(newSessions)
+        setHasMore(newSessions.length >= PAGE_SIZE)
+      },
+      (err) => {
+        Sentry.captureException(err)
+      },
+    )
 
-    const newSessions = result.value
-    setSessions(newSessions)
-    setHasMore(newSessions.length >= PAGE_SIZE)
     setIsLoading(false)
   }, [])
 
@@ -70,20 +72,19 @@ export const RecentsSectionClient = ({
       }),
     )
 
-    if (result.isErr()) {
-      console.error('Error loading more sessions:', result.error)
-      setIsLoading(false)
-      return
-    }
-
-    const newSessions = result.value
-
-    if (newSessions.length === 0) {
-      setHasMore(false)
-    } else {
-      setSessions((prev) => [...prev, ...newSessions])
-      setHasMore(newSessions.length >= PAGE_SIZE)
-    }
+    result.match(
+      (newSessions) => {
+        if (newSessions.length === 0) {
+          setHasMore(false)
+        } else {
+          setSessions((prev) => [...prev, ...newSessions])
+          setHasMore(newSessions.length >= PAGE_SIZE)
+        }
+      },
+      (err) => {
+        Sentry.captureException(err)
+      },
+    )
 
     setIsLoading(false)
   }, [isLoading, hasMore, sessions.length, filterType])

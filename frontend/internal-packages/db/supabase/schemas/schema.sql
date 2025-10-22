@@ -105,6 +105,7 @@ ALTER TYPE "public"."workflow_run_status" OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."accept_invitation"("p_token" "uuid") RETURNS "jsonb"
     LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
     AS $$
 declare
   v_user_id uuid;
@@ -112,11 +113,9 @@ declare
   v_invitation_id uuid;
   v_result jsonb;
 begin
-  -- Start transaction
   begin
     v_user_id := auth.uid();
 
-    -- Verify the invitation exists
     select
       i.id, i.organization_id into v_invitation_id, v_organization_id
     from invitations i
@@ -138,7 +137,6 @@ begin
       return v_result;
     end if;
 
-    -- Create organization member record
     insert into organization_members (
       user_id,
       organization_id,
@@ -149,11 +147,9 @@ begin
       current_timestamp
     );
 
-    -- Delete the invitation
     delete from invitations
     where id = v_invitation_id;
 
-    -- Return success
     v_result := jsonb_build_object(
       'success', true,
       'organizationId', v_organization_id,
@@ -161,7 +157,6 @@ begin
     );
     return v_result;
   exception when others then
-    -- Handle any errors
     v_result := jsonb_build_object(
       'success', false,
       'organizationId', null,
@@ -178,6 +173,7 @@ ALTER FUNCTION "public"."accept_invitation"("p_token" "uuid") OWNER TO "postgres
 
 CREATE OR REPLACE FUNCTION "public"."add_project"("p_project_name" "text", "p_repository_name" "text", "p_repository_owner" "text", "p_installation_id" bigint, "p_repository_identifier" bigint, "p_organization_id" "uuid") RETURNS "jsonb"
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public', 'pg_temp'
     AS $$
 declare
   v_result jsonb;
@@ -185,11 +181,9 @@ declare
   v_repository_id uuid;
   v_now timestamp;
 begin
-  -- Start transaction
   begin
     v_now := now();
     
-    -- 1. Create project
     insert into projects (
       name,
       organization_id,
@@ -202,7 +196,6 @@ begin
       v_now
     ) returning id into v_project_id;
 
-    -- 2. Create github repository
     insert into github_repositories (
       name,
       owner,
@@ -219,7 +212,6 @@ begin
       v_now
     ) returning id into v_repository_id;
 
-    -- 3. Create project-repository mapping
     insert into project_repository_mappings (
       project_id,
       repository_id,
@@ -232,7 +224,6 @@ begin
       v_now
     );
 
-    -- Return success with project and repository IDs
     v_result := jsonb_build_object(
       'success', true,
       'project_id', v_project_id,
@@ -241,7 +232,6 @@ begin
     return v_result;
     
   exception when others then
-    -- Handle any errors and rollback transaction
     v_result := jsonb_build_object(
       'success', false,
       'error', sqlerrm
@@ -257,13 +247,13 @@ ALTER FUNCTION "public"."add_project"("p_project_name" "text", "p_repository_nam
 
 CREATE OR REPLACE FUNCTION "public"."get_invitation_data"("p_token" "uuid") RETURNS "jsonb"
     LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
     AS $$
 declare
   v_user_id uuid;
   v_organization_name text;
   v_result jsonb;
 begin
-  -- Start transaction
   begin
     v_user_id := auth.uid();
 
@@ -335,6 +325,7 @@ ALTER FUNCTION "public"."handle_user_metadata_update"() OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."invite_organization_member"("p_email" "text", "p_organization_id" "uuid") RETURNS "jsonb"
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public', 'pg_temp'
     AS $$
 declare
   v_is_member boolean;
@@ -343,11 +334,9 @@ declare
   v_new_token uuid;
   v_result jsonb;
 begin
-  -- Start transaction
   begin
     v_invite_by_user_id := auth.uid();
 
-    -- Check inviter is a valid user
     if not exists (
       select 1
       from organization_members om
@@ -362,7 +351,6 @@ begin
       return v_result;
     end if;
 
-    -- Check if user is already a member
     select exists(
       select 1
       from organization_members om
@@ -382,14 +370,12 @@ begin
     
     v_new_token := gen_random_uuid();
 
-    -- Check if invitation already exists
     select id into v_existing_invite_id
     from invitations
     where organization_id = p_organization_id
     and lower(email) = lower(p_email)
     limit 1;
     
-    -- If invitation exists, update it
     if v_existing_invite_id is not null then
       update invitations
       set invited_at = current_timestamp,
@@ -404,7 +390,6 @@ begin
         'error', null
       );
     else
-      -- Create new invitation
       insert into invitations (
         organization_id,
         email,
@@ -428,10 +413,8 @@ begin
       );
     end if;
     
-    -- Commit transaction
     return v_result;
   exception when others then
-    -- Handle any errors
     v_result := jsonb_build_object(
       'success', false,
       'invitation_token', null,
@@ -464,14 +447,13 @@ ALTER FUNCTION "public"."is_current_user_org_member"("_org" "uuid") OWNER TO "po
 
 CREATE OR REPLACE FUNCTION "public"."prevent_delete_last_organization_member"() RETURNS "trigger"
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public', 'pg_temp'
     AS $$
 BEGIN
-  -- Check if this is the last member in the organization
   IF (SELECT COUNT(*) FROM organization_members WHERE organization_id = OLD.organization_id) <= 1 THEN
     RAISE EXCEPTION 'Cannot remove the last member of an organization';
   END IF;
 
-  -- If not the last member, allow the deletion
   RETURN OLD;
 END;
 $$;
@@ -482,9 +464,9 @@ ALTER FUNCTION "public"."prevent_delete_last_organization_member"() OWNER TO "po
 
 CREATE OR REPLACE FUNCTION "public"."put_checkpoint"("p_checkpoint" "jsonb", "p_blobs" "jsonb") RETURNS "void"
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public', 'pg_temp'
     AS $$
 begin
-  -- Insert checkpoint
   insert into checkpoints (
     thread_id,
     checkpoint_ns,
@@ -513,7 +495,6 @@ begin
     metadata = excluded.metadata,
     updated_at = excluded.updated_at;
 
-  -- Insert blobs if provided
   if p_blobs is not null and jsonb_array_length(p_blobs) > 0 then
     insert into checkpoint_blobs (
       thread_id,
@@ -550,6 +531,7 @@ ALTER FUNCTION "public"."put_checkpoint"("p_checkpoint" "jsonb", "p_blobs" "json
 
 CREATE OR REPLACE FUNCTION "public"."set_building_schema_versions_organization_id"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
     AS $$
 begin
   new.organization_id := (
@@ -567,6 +549,7 @@ ALTER FUNCTION "public"."set_building_schema_versions_organization_id"() OWNER T
 
 CREATE OR REPLACE FUNCTION "public"."set_building_schemas_organization_id"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
     AS $$
 BEGIN
   NEW.organization_id := (
@@ -584,17 +567,15 @@ ALTER FUNCTION "public"."set_building_schemas_organization_id"() OWNER TO "postg
 
 CREATE OR REPLACE FUNCTION "public"."set_design_sessions_organization_id"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
     AS $$
 BEGIN
-  -- If project_id is provided, get organization_id from projects table
   IF NEW.project_id IS NOT NULL THEN
     NEW.organization_id := (
       SELECT organization_id
       FROM public.projects
       WHERE id = NEW.project_id
     );
-  -- If project_id is NULL, organization_id must be explicitly provided
-  -- This will be handled at the application level to ensure security
   ELSIF NEW.organization_id IS NULL THEN
     RAISE EXCEPTION 'organization_id must be provided when project_id is NULL';
   END IF;
@@ -609,6 +590,7 @@ ALTER FUNCTION "public"."set_design_sessions_organization_id"() OWNER TO "postgr
 
 CREATE OR REPLACE FUNCTION "public"."set_project_repository_mappings_organization_id"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
     AS $$
 BEGIN
   NEW.organization_id := (
@@ -626,6 +608,7 @@ ALTER FUNCTION "public"."set_project_repository_mappings_organization_id"() OWNE
 
 CREATE OR REPLACE FUNCTION "public"."set_schema_file_paths_organization_id"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
     AS $$
 BEGIN
   NEW.organization_id := (
@@ -643,6 +626,7 @@ ALTER FUNCTION "public"."set_schema_file_paths_organization_id"() OWNER TO "post
 
 CREATE OR REPLACE FUNCTION "public"."sync_existing_users"() RETURNS "void"
     LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
     AS $$
 BEGIN
   INSERT INTO public."users" (id, name, email)
@@ -662,6 +646,7 @@ ALTER FUNCTION "public"."sync_existing_users"() OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."update_building_schema"("p_schema_id" "uuid", "p_schema_schema" "jsonb", "p_schema_version_patch" "jsonb", "p_schema_version_reverse_patch" "jsonb", "p_latest_schema_version_number" integer, "p_message_content" "text") RETURNS "jsonb"
     LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
     AS $$
 declare
   v_new_version_id uuid;
@@ -670,12 +655,10 @@ declare
   v_new_version_number integer;
   v_actual_latest_version_number integer;
 begin
-  -- Get the latest version number
   select coalesce(max(number), 0) into v_actual_latest_version_number
   from building_schema_versions
   where building_schema_id = p_schema_id;
 
-  -- Check for version conflict
   if v_actual_latest_version_number != p_latest_schema_version_number then
     return jsonb_build_object(
       'success', false,
@@ -685,7 +668,6 @@ begin
     );
   end if;
 
-  -- Get design_session_id and organization_id
   select design_session_id, organization_id
   into v_design_session_id, v_organization_id
   from building_schemas
@@ -699,12 +681,10 @@ begin
     );
   end if;
 
-  -- Update the schema
   update building_schemas
   set schema = p_schema_schema
   where id = p_schema_id;
 
-  -- Create new version
   v_new_version_number := v_actual_latest_version_number + 1;
   insert into building_schema_versions (
     building_schema_id,
@@ -720,7 +700,6 @@ begin
     v_organization_id
   ) returning id into v_new_version_id;
 
-  -- Return success with version ID
   return jsonb_build_object(
     'success', true,
     'versionId', v_new_version_id
@@ -734,6 +713,7 @@ ALTER FUNCTION "public"."update_building_schema"("p_schema_id" "uuid", "p_schema
 
 CREATE OR REPLACE FUNCTION "public"."update_checkpoints_updated_at"() RETURNS "trigger"
     LANGUAGE "plpgsql"
+    SET "search_path" TO 'public', 'pg_temp'
     AS $$
 BEGIN
   NEW.updated_at = now();

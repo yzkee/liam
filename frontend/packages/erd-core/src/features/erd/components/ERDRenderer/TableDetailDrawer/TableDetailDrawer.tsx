@@ -1,9 +1,12 @@
 import { DrawerContent, DrawerPortal, DrawerRoot } from '@liam-hq/ui'
 import { err, ok, type Result } from 'neverthrow'
-import React, {
+import {
+  createContext,
   type FC,
   type PropsWithChildren,
+  type RefObject,
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -13,17 +16,17 @@ import { TableDetail } from '../../ERDContent/components/TableNode/TableDetail'
 import styles from './TableDetailDrawer.module.css'
 
 type TableDetailDrawerContextValue = {
-  drawerRef: React.RefObject<HTMLDivElement | null>
+  drawerRef: RefObject<HTMLDivElement | null>
 }
 
 const TableDetailDrawerContext =
-  React.createContext<TableDetailDrawerContextValue | null>(null)
+  createContext<TableDetailDrawerContextValue | null>(null)
 
 const useTableDetailDrawerContext = (): Result<
   TableDetailDrawerContextValue,
   Error
 > => {
-  const context = React.useContext(TableDetailDrawerContext)
+  const context = useContext(TableDetailDrawerContext)
   if (!context) {
     return err(
       new Error(

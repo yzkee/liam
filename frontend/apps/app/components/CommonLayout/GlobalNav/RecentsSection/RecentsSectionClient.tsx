@@ -29,6 +29,7 @@ export const RecentsSectionClient = ({
   const [hasMore, setHasMore] = useState(initialSessions.length >= PAGE_SIZE)
   const observerRef = useRef<IntersectionObserver | null>(null)
   const loadMoreRef = useRef<HTMLDivElement | null>(null)
+  const sessionsListRef = useRef<HTMLElement | null>(null)
 
   const loadMore = useCallback(async () => {
     if (isLoading || !hasMore) return
@@ -62,8 +63,9 @@ export const RecentsSectionClient = ({
 
   useEffect(() => {
     const currentLoadMoreRef = loadMoreRef.current
+    const currentSessionsListRef = sessionsListRef.current
 
-    if (!currentLoadMoreRef) return
+    if (!currentLoadMoreRef || !currentSessionsListRef) return
 
     observerRef.current = new IntersectionObserver(
       (entries) => {
@@ -73,7 +75,7 @@ export const RecentsSectionClient = ({
         }
       },
       {
-        root: null,
+        root: currentSessionsListRef,
         rootMargin: '100px',
         threshold: 0.1,
       },
@@ -106,7 +108,11 @@ export const RecentsSectionClient = ({
           </div>
 
           {sessions.length > 0 ? (
-            <nav className={styles.sessionsList} aria-label="Recent sessions">
+            <nav
+              ref={sessionsListRef}
+              className={styles.sessionsList}
+              aria-label="Recent sessions"
+            >
               {sessions.map((session) => {
                 const sessionUrl = urlgen('design_sessions/[id]', {
                   id: session.id,

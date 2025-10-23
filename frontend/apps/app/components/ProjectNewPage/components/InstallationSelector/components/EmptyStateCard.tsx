@@ -15,7 +15,7 @@ type EmptyStateCardProps = {
 export const EmptyStateCard: FC<EmptyStateCardProps> = ({
   variant,
   onActionClick,
-  actionDisabled = false,
+  actionDisabled,
 }) => {
   const description =
     variant === 'reauth'

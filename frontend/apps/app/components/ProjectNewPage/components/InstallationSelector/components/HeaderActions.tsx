@@ -12,7 +12,7 @@ type HeaderActionsProps = {
   onSelectInstallation: (installation: Installation) => void
   onInstallApp: () => void
   onConnectGitHub: () => void
-  githubAppUrl: string
+  hasGithubAppUrl: boolean
 }
 
 export const HeaderActions: FC<HeaderActionsProps> = ({
@@ -23,7 +23,7 @@ export const HeaderActions: FC<HeaderActionsProps> = ({
   onSelectInstallation,
   onInstallApp,
   onConnectGitHub,
-  githubAppUrl,
+  hasGithubAppUrl,
 }) => {
   const actionText = needsRefresh ? 'Continue with GitHub' : 'Add Installation'
   if (!hasInstallations || needsRefresh) {
@@ -33,7 +33,7 @@ export const HeaderActions: FC<HeaderActionsProps> = ({
           size="md"
           variant="solid-primary"
           onClick={onConnectGitHub}
-          disabled={!githubAppUrl}
+          disabled={!hasGithubAppUrl}
           className={styles.connectButton}
           leftIcon={
             <GithubLogo
@@ -61,7 +61,7 @@ export const HeaderActions: FC<HeaderActionsProps> = ({
         size="md"
         variant="outline-secondary"
         onClick={onInstallApp}
-        disabled={!githubAppUrl}
+        disabled={!hasGithubAppUrl}
         className={styles.installButton}
         leftIcon={<Plus aria-hidden focusable="false" />}
       >

@@ -1,7 +1,6 @@
 'use client'
 
 import type { Installation, Repository } from '@liam-hq/github'
-import * as Sentry from '@sentry/nextjs'
 import {
   type FC,
   useActionState,
@@ -103,12 +102,6 @@ export const InstallationSelector: FC<Props> = ({
         .otherwise(() => 'Select installation')
     : 'Select installation'
 
-  if (!githubAppUrl) {
-    Sentry.captureMessage(
-      'Missing NEXT_PUBLIC_GITHUB_APP_URL environment variable',
-    )
-    return null
-  }
   return (
     <section className={styles.container}>
       <HeaderActions
@@ -119,7 +112,7 @@ export const InstallationSelector: FC<Props> = ({
         onSelectInstallation={handleSelectInstallation}
         onInstallApp={handleInstallApp}
         onConnectGitHub={handleConnectGitHub}
-        githubAppUrl={githubAppUrl}
+        hasGithubAppUrl={!!githubAppUrl}
       />
 
       <div className={styles.panel}>

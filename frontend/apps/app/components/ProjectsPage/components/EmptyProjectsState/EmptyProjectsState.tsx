@@ -16,17 +16,18 @@ export const EmptyProjectsState: FC<EmptyProjectsStateProps> = ({
   return (
     <div className={styles.container}>
       {projects === null ? (
-        <div className={styles.content}>
-          <JackInBox className={styles.illustration} />
-          <h2 className={styles.title}>No projects have been created yet</h2>
-          <p className={styles.description}>
-            <span>There are no projects exist.</span>
-            <br />
-            <span>
-              Start creating a new project to begin managing your schema!
-            </span>
-          </p>
-
+        <div className={styles.contentAndLink}>
+          <div className={styles.content}>
+            <JackInBox className={styles.illustration} />
+            <h2 className={styles.title}>No projects have been created yet</h2>
+            <p className={styles.description}>
+              <span>There are no projects exist.</span>
+              <br />
+              <span>
+                Start creating a new project to begin managing your schema!
+              </span>
+            </p>
+          </div>
           <Link href={createProjectHref} className={styles.createButton}>
             Add New Project
           </Link>

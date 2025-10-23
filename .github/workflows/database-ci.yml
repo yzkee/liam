@@ -34,6 +34,7 @@ jobs:
         run: pnpm -F @liam-hq/db db:lint
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:54322/postgres
+          SPLINTER_DEBUG: 1
 
       - name: Setup supabase testing
         run: |

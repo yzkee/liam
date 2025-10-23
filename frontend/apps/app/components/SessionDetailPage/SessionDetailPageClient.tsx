@@ -23,7 +23,6 @@ import { SQL_REVIEW_COMMENTS } from './mock'
 import styles from './SessionDetailPageClient.module.css'
 import type { Version } from './types'
 import { determineWorkflowAction } from './utils/determineWorkflowAction'
-import { isEmptySchema } from './utils/isEmptySchema'
 import { getWorkflowInProgress } from './utils/workflowStorage'
 
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -45,13 +44,11 @@ type Props = {
 const determineInitialTab = (
   versions: Version[],
   analyzedRequirements: AnalyzedRequirements | null,
-  initialDisplayedSchema: Schema,
 ): OutputTabValue | undefined => {
   const hasVersions = versions.length > 0
   const hasAnalyzedRequirements = analyzedRequirements !== null
-  const hasInitialSchema = !isEmptySchema(initialDisplayedSchema)
 
-  if (hasVersions || hasInitialSchema) return OUTPUT_TABS.ERD
+  if (hasVersions) return OUTPUT_TABS.ERD
   if (hasAnalyzedRequirements) return OUTPUT_TABS.ARTIFACT
   return undefined
 }
@@ -69,11 +66,7 @@ export const SessionDetailPageClient: FC<Props> = ({
   panelSizes,
 }) => {
   const [activeTab, setActiveTab] = useState<OutputTabValue | undefined>(
-    determineInitialTab(
-      initialVersions,
-      initialAnalyzedRequirements,
-      initialDisplayedSchema,
-    ),
+    determineInitialTab(initialVersions, initialAnalyzedRequirements),
   )
   const [isResizing, setIsResizing] = useState(false)
   const [hasReceivedAnalyzedRequirements, setHasReceivedAnalyzedRequirements] =
@@ -125,10 +118,7 @@ export const SessionDetailPageClient: FC<Props> = ({
   }, [analyzedRequirements, hasReceivedAnalyzedRequirements])
 
   const shouldShowOutputSection =
-    (selectedVersion !== null ||
-      analyzedRequirements !== null ||
-      !isEmptySchema(initialDisplayedSchema)) &&
-    activeTab
+    (selectedVersion !== null || analyzedRequirements !== null) && activeTab
 
   const handleLayoutChange = useCallback((sizes: number[]) => {
     setCookieJson(PANEL_LAYOUT_COOKIE_NAME, sizes, {

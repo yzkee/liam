@@ -51,7 +51,8 @@ if [ ${psql_status} -ne 0 ]; then
   exit 1
 fi
 
-ISSUE_COUNT=$(wc -l < "${TEMP_RESULTS}" | tr -d ' ')
+# Count only lines with non-empty name field (first column)
+ISSUE_COUNT=$(awk -F$'\t' '$1 != ""' "${TEMP_RESULTS}" | wc -l | tr -d ' ')
 
 if [ "${ISSUE_COUNT}" -eq 0 ]; then
   echo -e "${GREEN}✓ No database schema issues found!${NC}"

@@ -78,7 +78,7 @@ export const SessionDetailPageClient: FC<Props> = ({
     selectedVersion,
     setSelectedVersion,
     displayedSchema,
-    prevSchema,
+    prevSchema: baselineSchema,
   } = useRealtimeVersionsWithSchema({
     buildingSchemaId,
     initialVersions,
@@ -203,7 +203,7 @@ export const SessionDetailPageClient: FC<Props> = ({
                 <Output
                   designSessionId={designSessionId}
                   schema={displayedSchema}
-                  prevSchema={prevSchema}
+                  baselineSchema={baselineSchema}
                   sqlReviewComments={SQL_REVIEW_COMMENTS}
                   versions={versions}
                   selectedVersion={selectedVersion}

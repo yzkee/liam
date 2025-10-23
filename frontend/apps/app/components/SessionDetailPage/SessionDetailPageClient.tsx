@@ -33,7 +33,7 @@ type Props = {
   initialMessages: StoredMessage[]
   initialAnalyzedRequirements: AnalyzedRequirements | null
   initialDisplayedSchema: Schema
-  initialPrevSchema: Schema
+  baselineSchema: Schema
   initialVersions: Version[]
   initialIsPublic: boolean
   initialWorkflowError?: string | null
@@ -59,7 +59,7 @@ export const SessionDetailPageClient: FC<Props> = ({
   initialMessages,
   initialAnalyzedRequirements,
   initialDisplayedSchema,
-  initialPrevSchema,
+  baselineSchema,
   initialVersions,
   initialIsPublic,
   initialWorkflowError,
@@ -73,22 +73,16 @@ export const SessionDetailPageClient: FC<Props> = ({
     useState(false)
   const initialAnalyzedRequirementsRef = useRef(initialAnalyzedRequirements)
 
-  const {
-    versions,
-    selectedVersion,
-    setSelectedVersion,
-    displayedSchema,
-    prevSchema: baselineSchema,
-  } = useRealtimeVersionsWithSchema({
-    buildingSchemaId,
-    initialVersions,
-    initialDisplayedSchema,
-    initialPrevSchema,
-    onChangeSelectedVersion: (version: Version) => {
-      setSelectedVersion(version)
-      setActiveTab(OUTPUT_TABS.ERD)
-    },
-  })
+  const { versions, selectedVersion, setSelectedVersion, displayedSchema } =
+    useRealtimeVersionsWithSchema({
+      buildingSchemaId,
+      initialVersions,
+      initialDisplayedSchema,
+      onChangeSelectedVersion: (version: Version) => {
+        setSelectedVersion(version)
+        setActiveTab(OUTPUT_TABS.ERD)
+      },
+    })
 
   const handleVersionChange = useCallback(
     (version: Version) => {

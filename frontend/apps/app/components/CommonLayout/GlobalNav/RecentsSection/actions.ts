@@ -69,7 +69,6 @@ export async function getOrganizationMembers(
     `,
       )
       .eq('organization_id', organizationId),
-    { allowNull: true },
   )
 
   return result.match(

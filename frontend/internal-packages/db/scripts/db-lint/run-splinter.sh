@@ -109,14 +109,15 @@ echo -e "  ${BLUE}Info: ${INFO_COUNT}${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
 
-if [ "${ERROR_COUNT}" -gt 0 ]; then
-  echo -e "${RED}❌ Database lint failed due to ERROR level issues${NC}"
+if [ "${ERROR_COUNT}" -gt 0 ] || [ "${WARN_COUNT}" -gt 0 ] || [ "${INFO_COUNT}" -gt 0 ]; then
+  if [ "${ERROR_COUNT}" -gt 0 ]; then
+    echo -e "${RED}❌ Database lint failed due to ERROR level issues${NC}"
+  elif [ "${WARN_COUNT}" -gt 0 ]; then
+    echo -e "${YELLOW}❌ Database lint failed due to WARNING level issues${NC}"
+  else
+    echo -e "${BLUE}❌ Database lint failed due to INFO level issues${NC}"
+  fi
   exit 1
-fi
-
-if [ "${WARN_COUNT}" -gt 0 ]; then
-  echo -e "${YELLOW}⚠️  Database lint completed with warnings${NC}"
-  exit 0
 fi
 
 echo -e "${GREEN}✓ Database lint passed${NC}"

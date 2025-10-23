@@ -63,8 +63,10 @@ export const UserEditingProvider: FC<Props> = ({
   )
 
   const [focusedElementId, setFocusedElementId] = useState(
-    // location.hash starts with '#'; decode to match actual DOM id
-    location.hash.slice(1),
+    typeof location === 'object'
+      ? // location.hash starts with '#'; decode to match actual DOM id
+        location.hash.slice(1)
+      : '',
   )
 
   // update focusedElementId when hash changes

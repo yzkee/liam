@@ -28,7 +28,7 @@ echo ""
 
 TEMP_RESULTS=$(mktemp)
 
-psql "${DATABASE_URL}" -t -A -F$'\t' -c "$(cat "${SPLINTER_SQL}")" > "${TEMP_RESULTS}" 2>&1
+psql "${DATABASE_URL}" -t -A -F$'\t' -q -c "$(cat "${SPLINTER_SQL}")" > "${TEMP_RESULTS}" 2>&1
 psql_status=$?
 
 if [ "${SPLINTER_DEBUG:-0}" != "0" ]; then

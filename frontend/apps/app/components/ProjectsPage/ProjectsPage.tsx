@@ -23,7 +23,6 @@ export async function ProjectsPage({ organizationId }: Props) {
 
   await getUserOrganizations() // Fetch for future use
   const projects = await getProjects(currentOrganization.id)
-  // const projects = null
 
   return (
     <div className={styles.container}>

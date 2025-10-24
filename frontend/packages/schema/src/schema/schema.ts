@@ -91,7 +91,11 @@ const uniqueConstraintSchema = v.object({
 })
 export type UniqueConstraint = v.InferOutput<typeof uniqueConstraintSchema>
 
-const checkConstraintDetailSchema = v.string()
+const checkConstraintDetailSchema = v.pipe(
+  v.string(),
+  v.trim(),
+  v.minLength(1, 'CHECK constraint detail must not be empty'),
+)
 
 const checkConstraintSchema = v.object({
   type: v.literal('CHECK'),

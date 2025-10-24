@@ -29,4 +29,4 @@ Tips:
 
 ## CI Integration
 
-Splinter runs as part of `.github/workflows/database-ci.yml` on every pull request that touches the database package. ERROR-level findings fail the job; WARN/INFO findings are reported but do not block the build.
+Splinter runs as part of `.github/workflows/database-ci.yml` on every pull request that touches the database package. Currently, ERROR, WARN, and INFO findings all fail the job and block the build.

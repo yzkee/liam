@@ -30,56 +30,25 @@ Our project uses Supabase Branching for database migration management. This syst
 
 ## Schema Drift Prevention
 
-### What is Schema Drift?
+Schema drift occurs when production database changes don't match Git migration files (e.g., manual changes via Dashboard).
 
-Schema drift occurs when the production database schema diverges from the migration files in Git. This typically happens when changes are made directly through the Supabase Dashboard or SQL console without creating corresponding migration files.
+**Prevention:**
+- ✅ Always use migration files for schema changes
+- ✅ Create migrations: `pnpm supabase:migration -f <name>`
+- ✅ Update types after: `pnpm supabase:gen`
+- ❌ Never modify schema directly in Dashboard/SQL console
 
-### Why Schema Drift is Problematic
+**Resolution:**
+If drift detected, sync production schema to Git:
+```bash
+cd frontend/internal-packages/db
+supabase link --project-ref <project_ref>
+supabase db pull --linked
+# Review generated migration, commit, and create PR
+```
 
-- Migration files no longer represent the true state of production
-- Difficult to reproduce the production schema in other environments
-- Risk of migration conflicts when applying new migrations
-- Loss of change history and auditability
-
-### Prevention Rules
-
-**DO:**
-
-- ✅ Always make schema changes through migration files
-- ✅ Create migration files using `pnpm supabase:migration -f <migration_name>`
-- ✅ Test migrations in preview branches before merging
-- ✅ Run `pnpm supabase:gen` after creating migrations to update types
-
-**DON'T:**
-
-- ❌ Make schema changes directly in Supabase Dashboard (production)
-- ❌ Execute ad-hoc SQL in production without creating migrations
-- ❌ Modify schema manually for "quick fixes"
-
-### Schema Drift Resolution
-
-If schema drift is detected (e.g., changes were made through the Dashboard):
-
-1. Document the change if not already documented
-2. Create a migration file from the production schema:
-   ```bash
-   cd frontend/internal-packages/db
-   supabase link --project-ref <project_ref>
-   supabase db pull --linked
-   ```
-3. Review the generated migration file to ensure it contains expected changes
-4. Commit and create a PR
-
-### Automated Schema Drift Detection
-
-Our CI/CD pipeline automatically checks for schema drift daily:
-
-- **What it checks**: Compares production DB schema with `main` branch migrations
-- **When it runs**: Daily at 9:00 JST
-- **What happens**: Posts a Slack notification if drift is detected
-- **Action required**: Run `supabase db pull` to sync the schema
-
-See `.github/workflows/check-schema-drift.yml` for implementation details.
+**Automated Detection:**
+Daily CI checks (9:00 JST) compare production with `main` branch, Slack alerts on drift. See `.github/workflows/check-schema-drift.yml`.
 
 ## Create migration
 

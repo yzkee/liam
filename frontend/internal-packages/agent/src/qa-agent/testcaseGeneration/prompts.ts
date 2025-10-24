@@ -15,6 +15,22 @@ CRITICAL INSTRUCTIONS:
 6. The test framework will automatically add plan() and finish() for you
 `
 
+const SCHEMA_ANALYSIS_GUIDE = `
+SCHEMA ANALYSIS REQUIREMENTS:
+Before generating tests, analyze the schema to identify:
+- Columns with NOT NULL constraints - these MUST have values
+- Foreign key relationships - identify parent tables that must exist first
+- Correct data creation order - insert parent records before child records
+
+Example: If users.role_id is NOT NULL and references roles.id:
+CORRECT order:
+  SELECT lives_ok($$INSERT INTO roles (id, name) VALUES (gen_random_uuid(), 'user')$$, 'Setup role');
+  SELECT lives_ok($$INSERT INTO users (role_id) VALUES ((SELECT id FROM roles WHERE name = 'user'))$$, 'Insert user');
+WRONG order:
+  INSERT INTO users (role_id) VALUES (NULL)  -- Violates NOT NULL
+  INSERT INTO users BEFORE creating role      -- Violates FK
+`
+
 const PGTAP_FUNCTIONS = `
 ## Essential pgTAP Functions
 
@@ -260,9 +276,12 @@ const BEST_PRACTICES = `
    - Use multiple lives_ok() calls to setup test data
    - Keep setup minimal and focused
 
-4. **Use Dollar Quoting Correctly**
+4. **Dollar Quoting Correctness**
    - Use $$ for SQL strings to avoid escaping issues
+   - Every opening $$ MUST have a matching closing $$
    - Nested quotes work naturally: $$SELECT 'value'$$
+   - WRONG: SELECT lives_ok($$INSERT INTO t VALUES ('x')$, 'desc');
+   - RIGHT: SELECT lives_ok($$INSERT INTO t VALUES ('x')$$, 'desc');
 
 5. **Explicit Error Codes in throws_ok**
    - throws_ok() takes ONLY 2 arguments: SQL and error code
@@ -270,25 +289,47 @@ const BEST_PRACTICES = `
    - WRONG: throws_ok($$...$$, '23505', 'description')
    - RIGHT: throws_ok($$...$$, '23505')
 
-6. **Type Matching in is()**
+6. **Type Matching in is() and results_eq()**
    - COUNT(*) returns bigint, so use is(count, 5::bigint, 'desc')
    - WRONG: is((SELECT COUNT(*) FROM t), 5, 'desc')
    - RIGHT: is((SELECT COUNT(*) FROM t), 5::bigint, 'desc')
 
-7. **UUID Generation**
-   - Use gen_random_uuid() for UUID columns (built-in)
-   - NEVER use uuid_generate_v4() (requires uuid-ossp extension)
-   - Example: INSERT INTO users (id) VALUES (gen_random_uuid())
+   - PostgreSQL character varying and text are DIFFERENT types
+   - ALWAYS cast varchar/text columns to ::text in results_eq()
+   - WRONG: SELECT results_eq($$SELECT email FROM users$$, $$VALUES ('user@example.com')$$, 'desc');
+   - RIGHT: SELECT results_eq($$SELECT email::text FROM users$$, $$VALUES ('user@example.com')$$, 'desc');
 
-8. **Common Syntax Errors to Avoid**
-   - NEVER put semicolons before closing parentheses in pgTAP functions
-   - NEVER use semicolons to separate function arguments (use commas)
-   - Examples of WRONG code:
-     * ok(expression, 'desc';) -- semicolon before )
-     * is(value; expected, 'desc') -- semicolon instead of comma
-   - Examples of RIGHT code:
-     * ok(expression, 'desc'); -- semicolon after )
-     * is(value, expected, 'desc') -- comma between arguments
+7. **Allowed PostgreSQL Functions (WHITELIST)**
+   Use ONLY these built-in PostgreSQL functions in your tests:
+   - UUID: gen_random_uuid()
+   - Date/Time: now(), current_timestamp, current_date, EXTRACT(), date_trunc()
+   - Aggregates: COUNT(), SUM(), AVG(), MIN(), MAX()
+   - Strings: CONCAT(), UPPER(), LOWER(), TRIM(), LENGTH(), SUBSTRING()
+   - Numbers: ROUND(), FLOOR(), CEIL(), ABS()
+   - Other: COALESCE(), NULLIF(), CAST(), CASE WHEN
+   - Type casting: ::text, ::bigint, ::integer, etc.
+
+   DO NOT use ANY functions not listed above, including:
+   - Extension functions: uuid_generate_v4(), crypt(), gen_salt()
+   - Custom functions not in this list
+
+   For password fields, use plain text: INSERT INTO users (password_hash) VALUES ('test_password')
+
+8. **Statement Termination (CRITICAL)**
+   - Every SELECT statement MUST end with a semicolon
+   - Semicolons separate statements, NOT function arguments
+   - WRONG (missing semicolon causes parse error):
+     SELECT lives_ok($$INSERT INTO roles VALUES (...)$$, 'Setup')
+     SELECT lives_ok($$INSERT INTO users VALUES (...)$$, 'Action')
+   - RIGHT:
+     SELECT lives_ok($$INSERT INTO roles VALUES (...)$$, 'Setup');
+     SELECT lives_ok($$INSERT INTO users VALUES (...)$$, 'Action');
+   - WRONG (semicolon in wrong place):
+     SELECT ok(expression, 'desc';);
+     SELECT is(value; expected, 'desc');
+   - RIGHT:
+     SELECT ok(expression, 'desc');
+     SELECT is(value, expected, 'desc');
 `
 
 /**
@@ -298,6 +339,8 @@ export const SYSTEM_PROMPT_FOR_TESTCASE_GENERATION = `
 ${ROLE_CONTEXT}
 
 ${CRITICAL_INSTRUCTIONS}
+
+${SCHEMA_ANALYSIS_GUIDE}
 
 ${PGTAP_FUNCTIONS}
 

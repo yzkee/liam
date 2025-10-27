@@ -949,8 +949,8 @@ importers:
         specifier: 6.8.2
         version: 6.8.2(typescript@5.9.3)
       '@ruby/prism':
-        specifier: 1.4.0
-        version: 1.4.0
+        specifier: 1.5.2
+        version: 1.5.2
       '@swc/core':
         specifier: 1.12.11
         version: 1.12.11
@@ -4639,8 +4639,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@ruby/prism@1.4.0':
-    resolution: {integrity: sha512-TsDZf6BzSbKvK9pAlsj9jN5B6PBHByB9dcIUctKZ2eO7p4ejz1jeyRv3mTGgNXrDCR6mVQDMSGzKKFKTD5RDCw==}
+  '@ruby/prism@1.5.2':
+    resolution: {integrity: sha512-noZWMXBKNBH28NR5eeQ3vcgxo/BCj/OpctnD21VURSMBvgkbdAhaczKAoOZOAt7V2HpT0asthuljaTCFz8uC0Q==}
 
   '@selderee/plugin-htmlparser2@0.11.0':
     resolution: {integrity: sha512-P33hHGdldxGabLFjPPpaTxVolMrzrcegejx+0GxjrIb9Zv48D8yAIA/QTDR2dFl7Uz7urX8aX6+5bCZslr+gWQ==}
@@ -14884,7 +14884,7 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.52.4':
     optional: true
 
-  '@ruby/prism@1.4.0': {}
+  '@ruby/prism@1.5.2': {}
 
   '@selderee/plugin-htmlparser2@0.11.0':
     dependencies:

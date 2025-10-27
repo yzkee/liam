@@ -98,10 +98,7 @@ export const InstallationSelector: FC<Props> = ({
   )
 
   useEffect(() => {
-    if (
-      emptyStateVariant === 'reauth' ||
-      emptyStateVariant === 'noInstaller'
-    ) {
+    if (emptyStateVariant === 'reauth' || emptyStateVariant === 'noInstaller') {
       if (selectedInstallation !== null) {
         setSelectedInstallation(null)
       }

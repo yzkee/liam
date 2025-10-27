@@ -46,6 +46,16 @@ export const InstallationSelector: FC<Props> = ({
     useActionState(getRepositories, { repositories: [], loading: true })
   const githubAppUrl = process.env.NEXT_PUBLIC_GITHUB_APP_URL
 
+  const handleInstallApp = useCallback(() => {
+    if (!githubAppUrl) return
+    window.open(githubAppUrl, '_blank', 'noopener,noreferrer')
+  }, [githubAppUrl])
+
+  const handleConnectGitHub = useCallback(() => {
+    // TODO: Currently this only opens the installation page, but we should pass an OAuth re-authentication handler in the future.
+    handleInstallApp()
+  }, [handleInstallApp])
+
   const hasInstallations = installations.length > 0
 
   const emptyStateVariant: EmptyStateVariant | null = needsRefresh
@@ -59,10 +69,12 @@ export const InstallationSelector: FC<Props> = ({
       description:
         'Reconnect your GitHub account to refresh access to your repositories.',
       actionText: 'Re-authenticate',
+      onActionClick: handleConnectGitHub,
     }))
     .with('noInstaller', () => ({
       description: 'Add a GitHub installation to see your repositories.',
       actionText: 'Configure Repositories on GitHub',
+      onActionClick: handleInstallApp,
     }))
     .otherwise(() => null)
 
@@ -70,33 +82,19 @@ export const InstallationSelector: FC<Props> = ({
     isRepositoriesLoading || repositoriesState.loading
   const shouldShowSkeleton = !emptyStateContent && showRepositoriesSkeleton
 
-  const handleInstallApp = useCallback(() => {
-    if (!githubAppUrl) return
-    window.open(githubAppUrl, '_blank', 'noopener,noreferrer')
-  }, [githubAppUrl])
-
-  const handleConnectGitHub = useCallback(() => {
-    handleInstallApp()
-  }, [handleInstallApp])
-
   const handleSelectInstallation = useCallback(
     (installation: Installation) => {
       if (needsRefresh) return
-
       setSelectedInstallation(installation)
     },
     [needsRefresh],
   )
 
   useEffect(() => {
-    if (needsRefresh) {
-      if (selectedInstallation !== null) {
-        setSelectedInstallation(null)
-      }
-      return
-    }
-
-    if (installations.length === 0) {
+    if (
+      emptyStateVariant === 'reauth' ||
+      emptyStateVariant === 'noInstaller'
+    ) {
       if (selectedInstallation !== null) {
         setSelectedInstallation(null)
       }
@@ -114,7 +112,7 @@ export const InstallationSelector: FC<Props> = ({
 
     const nextInstallation = installations[0] ?? null
     setSelectedInstallation(nextInstallation)
-  }, [installations, needsRefresh, selectedInstallation])
+  }, [emptyStateVariant, installations, selectedInstallation])
 
   useEffect(() => {
     if (!selectedInstallation || needsRefresh) {
@@ -179,7 +177,7 @@ export const InstallationSelector: FC<Props> = ({
             <EmptyStateCard
               description={emptyStateContent.description}
               actionText={emptyStateContent.actionText}
-              onActionClick={handleConnectGitHub}
+              onActionClick={emptyStateContent.onActionClick}
               actionDisabled={!githubAppUrl}
             />
           ) : (

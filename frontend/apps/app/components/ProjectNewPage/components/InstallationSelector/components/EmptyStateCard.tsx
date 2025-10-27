@@ -19,10 +19,10 @@ export const EmptyStateCard: FC<EmptyStateCardProps> = ({
 }) => {
   const description =
     variant === 'reauth'
-      ? 'Your GitHub account requires re-authentication to see your repositories.'
+      ? 'Reconnect your GitHub account to refresh access to your repositories.'
       : 'Add a GitHub installation to see your repositories.'
   const actionText =
-    variant === 'reauth' ? 'Continue with GitHub' : 'Add Installation'
+    variant === 'reauth' ? 'Re-authenticate' : 'Add Installation'
 
   return (
     <div className={styles.emptyState}>

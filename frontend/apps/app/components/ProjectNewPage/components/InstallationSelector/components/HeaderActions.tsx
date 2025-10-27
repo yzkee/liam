@@ -1,41 +1,26 @@
-import type { Installation } from '@liam-hq/github'
 import { Button, Plus } from '@liam-hq/ui'
-import type { FC } from 'react'
+import type { FC, ReactNode } from 'react'
 import styles from './HeaderActions.module.css'
-import { InstallationDropdown } from './InstallationDropdown'
 
 type HeaderActionsProps = {
-  needsRefresh: boolean
-  installations: Installation[]
-  selectedInstallationLabel: string
-  onSelectInstallation: (installation: Installation) => void
+  installationDropdown: ReactNode
   onInstallApp: () => void
-  hasGithubAppUrl: boolean
+  installButtonDisabled: boolean
 }
 
 export const HeaderActions: FC<HeaderActionsProps> = ({
-  needsRefresh,
-  installations,
-  selectedInstallationLabel,
-  onSelectInstallation,
+  installationDropdown,
   onInstallApp,
-  hasGithubAppUrl,
+  installButtonDisabled,
 }) => {
-  const hasNoInstallations = installations.length === 0
-
   return (
     <div className={styles.actions}>
-      <InstallationDropdown
-        installations={installations}
-        disabled={needsRefresh || hasNoInstallations}
-        selectedLabel={selectedInstallationLabel}
-        onSelect={onSelectInstallation}
-      />
+      {installationDropdown}
       <Button
         size="md"
         variant="outline-secondary"
         onClick={onInstallApp}
-        disabled={!hasGithubAppUrl || needsRefresh}
+        disabled={installButtonDisabled}
         className={styles.installButton}
         leftIcon={<Plus aria-hidden focusable="false" />}
       >

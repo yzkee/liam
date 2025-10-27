@@ -14,6 +14,7 @@ import { addProject } from './actions/addProject'
 import { getRepositories } from './actions/getRepositories'
 import { EmptyStateCard } from './components/EmptyStateCard'
 import { HeaderActions } from './components/HeaderActions'
+import { InstallationDropdown } from './components/InstallationDropdown'
 import { RepositoryList } from './components/RepositoryList'
 import { RepositoryListSkeleton } from './components/RepositoryListSkeleton'
 import styles from './InstallationSelector.module.css'
@@ -81,6 +82,12 @@ export const InstallationSelector: FC<Props> = ({
   const showRepositoriesSkeleton =
     isRepositoriesLoading || repositoriesState.loading
   const shouldShowSkeleton = !emptyStateContent && showRepositoriesSkeleton
+
+  const isInstallationDropdownDisabled =
+    emptyStateVariant === 'reauth' || emptyStateVariant === 'noInstaller'
+
+  const isInstallButtonDisabled =
+    !githubAppUrl || emptyStateVariant === 'reauth'
 
   const handleSelectInstallation = useCallback(
     (installation: Installation) => {
@@ -161,12 +168,16 @@ export const InstallationSelector: FC<Props> = ({
   return (
     <section className={styles.container}>
       <HeaderActions
-        needsRefresh={needsRefresh}
-        installations={installations}
-        selectedInstallationLabel={dropdownLabel}
-        onSelectInstallation={handleSelectInstallation}
+        installationDropdown={
+          <InstallationDropdown
+            installations={installations}
+            disabled={isInstallationDropdownDisabled}
+            selectedLabel={dropdownLabel}
+            onSelect={handleSelectInstallation}
+          />
+        }
         onInstallApp={handleInstallApp}
-        hasGithubAppUrl={!!githubAppUrl}
+        installButtonDisabled={isInstallButtonDisabled}
       />
 
       <div className={styles.panel}>

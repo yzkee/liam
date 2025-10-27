@@ -29,6 +29,12 @@ import type { ProcessResult } from '../../types.js'
 import { defaultRelationshipName } from '../../utils/index.js'
 
 const getUtf8ByteLength = (codePoint: number): number => {
+  // Validate Unicode code point range
+  // Surrogate pairs (0xD800-0xDFFF) are invalid standalone code points
+  // Code points above 0x10FFFF exceed the Unicode limit
+  if (codePoint >= 0xd800 && codePoint <= 0xdfff) return -1
+  if (codePoint > 0x10ffff) return -1
+
   if (codePoint <= 0x7f) return 1
   if (codePoint <= 0x7ff) return 2
   if (codePoint <= 0xffff) return 3
@@ -54,6 +60,10 @@ const utf8ByteOffsetToCharIndex = (
     }
 
     const utf8Length = getUtf8ByteLength(codePoint)
+    if (utf8Length < 0) {
+      // Invalid code point (surrogate or out of range)
+      return null
+    }
 
     if (bytesConsumed + utf8Length > byteOffset) {
       return null

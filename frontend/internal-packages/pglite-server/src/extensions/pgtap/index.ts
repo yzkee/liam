@@ -6,25 +6,46 @@ import type { Extension } from '@electric-sql/pglite'
 export const pgtap: Extension = {
   name: 'pgtap',
   setup: async () => {
-    // In Next.js server environment, check for webpack-generated file
     if (process?.cwd) {
-      // Next.js puts webpack assets in .next/server/static/extensions/
+      const cwd = process.cwd()
+
+      // 1. Webpack build path (local Next.js builds)
       const nextServerPath = join(
-        process.cwd(),
+        cwd,
         '.next',
         'server',
         'static',
         'extensions',
         'pgtap.tar.gz',
       )
+
       if (existsSync(nextServerPath)) {
         return {
           bundlePath: pathToFileURL(nextServerPath),
         }
       }
+
+      // 2. Traced source path (Vercel deployment via outputFileTracingIncludes)
+      const tracedPath = join(
+        cwd,
+        '..',
+        '..',
+        'internal-packages',
+        'pglite-server',
+        'src',
+        'extensions',
+        'pgtap',
+        'pgtap.tar.gz',
+      )
+
+      if (existsSync(tracedPath)) {
+        return {
+          bundlePath: pathToFileURL(tracedPath),
+        }
+      }
     }
 
-    // Fallback to original relative path for non-Next.js environments (tests, etc.)
+    // 3. Source relative path (development and test environments)
     return {
       bundlePath: new URL('./pgtap.tar.gz', import.meta.url),
     }

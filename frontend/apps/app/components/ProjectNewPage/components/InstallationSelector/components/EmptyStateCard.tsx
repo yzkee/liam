@@ -1,6 +1,6 @@
 import { Button, GithubLogo } from '@liam-hq/ui'
 import type { FC } from 'react'
-import { JackAndOctcat } from '../../../../ProjectsPage/components/EmptyProjectsState/JackAndOctcat'
+import { JackAndOctcat } from '../../../../ProjectsPage/components/NoProjects/JackAndOctcat'
 import styles from './EmptyStateCard.module.css'
 
 type EmptyStateVariant = 'connect' | 'reauth'

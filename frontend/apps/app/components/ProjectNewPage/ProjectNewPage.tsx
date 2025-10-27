@@ -45,7 +45,7 @@ export const ProjectNewPage: FC<Props> = ({
         <InstallationSelector
           installations={installations}
           organizationId={organizationId}
-          needsRefresh={Boolean(needsRefresh)}
+          needsRefresh={needsRefresh}
         />
         <Link href={urlgen('projects')} className={styles.backLink}>
           <ChevronLeft aria-hidden className={styles.backIcon} />

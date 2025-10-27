@@ -3,7 +3,7 @@
 import { useEffect, useState, useTransition } from 'react'
 import { formatDate } from '../../../../../../libs/utils'
 import { fetchLastCommitData } from '../../../../services/fetchLastCommitData'
-import styles from './ProjectItem.module.css'
+import styles from './LastCommitDataWrapper.module.css'
 
 type LastCommitDataWrapperProps = {
   installationId: number

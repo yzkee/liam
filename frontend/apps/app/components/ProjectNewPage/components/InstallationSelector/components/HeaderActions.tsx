@@ -21,11 +21,13 @@ export const HeaderActions: FC<HeaderActionsProps> = ({
   onInstallApp,
   hasGithubAppUrl,
 }) => {
+  const hasNoInstallations = installations.length === 0
+
   return (
     <div className={styles.actions}>
       <InstallationDropdown
         installations={installations}
-        disabled={needsRefresh}
+        disabled={needsRefresh || hasNoInstallations}
         selectedLabel={selectedInstallationLabel}
         onSelect={onSelectInstallation}
       />

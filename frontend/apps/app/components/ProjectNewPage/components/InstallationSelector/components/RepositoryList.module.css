@@ -1,13 +1,3 @@
-.error {
-  color: var(--danger-default);
-  font-size: var(--font-size-4, 13px);
-}
-
-.placeholder {
-  color: var(--overlay-70);
-  font-size: var(--font-size-4, 13px);
-}
-
 .repositoriesSection {
   display: flex;
   flex-direction: column;

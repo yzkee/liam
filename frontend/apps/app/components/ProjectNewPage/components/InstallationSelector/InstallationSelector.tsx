@@ -5,6 +5,7 @@ import {
   type FC,
   useActionState,
   useCallback,
+  useEffect,
   useState,
   useTransition,
 } from 'react'
@@ -14,6 +15,7 @@ import { getRepositories } from './actions/getRepositories'
 import { EmptyStateCard } from './components/EmptyStateCard'
 import { HeaderActions } from './components/HeaderActions'
 import { RepositoryList } from './components/RepositoryList'
+import { RepositoryListSkeleton } from './components/RepositoryListSkeleton'
 import styles from './InstallationSelector.module.css'
 
 type Props = {
@@ -30,16 +32,31 @@ export const InstallationSelector: FC<Props> = ({
   needsRefresh = false,
 }) => {
   const [selectedInstallation, setSelectedInstallation] =
-    useState<Installation | null>(null)
+    useState<Installation | null>(() => {
+      if (needsRefresh) {
+        return null
+      }
+
+      return installations[0] ?? null
+    })
   const [isAddingProject, startAddingProjectTransition] = useTransition()
   const [, startTransition] = useTransition()
 
   const [repositoriesState, repositoriesAction, isRepositoriesLoading] =
-    useActionState(getRepositories, { repositories: [], loading: false })
-
+    useActionState(getRepositories, { repositories: [], loading: true })
   const githubAppUrl = process.env.NEXT_PUBLIC_GITHUB_APP_URL
 
   const hasInstallations = installations.length > 0
+
+  const emptyStateVariant: EmptyStateVariant | null = needsRefresh
+    ? 'reauth'
+    : hasInstallations
+      ? null
+      : 'connect'
+
+  const showRepositoriesSkeleton =
+    isRepositoriesLoading || repositoriesState.loading
+  const shouldShowSkeleton = !emptyStateVariant && showRepositoriesSkeleton
 
   const handleInstallApp = useCallback(() => {
     if (!githubAppUrl) return
@@ -55,16 +72,51 @@ export const InstallationSelector: FC<Props> = ({
       if (needsRefresh) return
 
       setSelectedInstallation(installation)
-      startTransition(() => {
-        startAddingProjectTransition(() => {
-          const formData = new FormData()
-          formData.append('installationId', installation.id.toString())
-          repositoriesAction(formData)
-        })
-      })
     },
-    [needsRefresh, repositoriesAction],
+    [needsRefresh],
   )
+
+  useEffect(() => {
+    if (needsRefresh) {
+      if (selectedInstallation !== null) {
+        setSelectedInstallation(null)
+      }
+      return
+    }
+
+    if (installations.length === 0) {
+      if (selectedInstallation !== null) {
+        setSelectedInstallation(null)
+      }
+      return
+    }
+
+    if (
+      selectedInstallation &&
+      installations.some(
+        (installation) => installation.id === selectedInstallation.id,
+      )
+    ) {
+      return
+    }
+
+    const nextInstallation = installations[0] ?? null
+    setSelectedInstallation(nextInstallation)
+  }, [installations, needsRefresh, selectedInstallation])
+
+  useEffect(() => {
+    if (!selectedInstallation || needsRefresh) {
+      return
+    }
+
+    startTransition(() => {
+      startAddingProjectTransition(() => {
+        const formData = new FormData()
+        formData.append('installationId', selectedInstallation.id.toString())
+        repositoriesAction(formData)
+      })
+    })
+  }, [needsRefresh, repositoriesAction, selectedInstallation])
 
   const handleSelectRepository = useCallback(
     async (repository: Repository) => {
@@ -90,12 +142,6 @@ export const InstallationSelector: FC<Props> = ({
     [selectedInstallation, organizationId],
   )
 
-  const emptyStateVariant: EmptyStateVariant | null = needsRefresh
-    ? 'reauth'
-    : hasInstallations
-      ? null
-      : 'connect'
-
   const dropdownLabel = selectedInstallation
     ? match(selectedInstallation.account)
         .with({ login: P.string }, (item) => item.login)
@@ -105,20 +151,18 @@ export const InstallationSelector: FC<Props> = ({
   return (
     <section className={styles.container}>
       <HeaderActions
-        hasInstallations={hasInstallations}
         needsRefresh={needsRefresh}
         installations={installations}
         selectedInstallationLabel={dropdownLabel}
         onSelectInstallation={handleSelectInstallation}
         onInstallApp={handleInstallApp}
-        onConnectGitHub={handleConnectGitHub}
         hasGithubAppUrl={!!githubAppUrl}
       />
 
       <div className={styles.panel}>
         <div className={styles.panelContent}>
-          {isRepositoriesLoading ? (
-            <div className={styles.loading}>Loading repositories...</div>
+          {shouldShowSkeleton ? (
+            <RepositoryListSkeleton />
           ) : emptyStateVariant ? (
             <EmptyStateCard
               variant={emptyStateVariant}

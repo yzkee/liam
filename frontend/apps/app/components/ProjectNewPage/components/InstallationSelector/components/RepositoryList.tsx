@@ -18,18 +18,9 @@ export const RepositoryList: FC<RepositoryListProps> = ({
   hasSelectedInstallation,
   onSelectRepository,
 }) => {
-  if (error) {
-    return <div className={styles.error}>Error: {error}</div>
-  }
-
-  if (repositories.length === 0) {
-    return (
-      <div className={styles.placeholder}>
-        {hasSelectedInstallation
-          ? 'No repositories found for this installation.'
-          : 'Select a GitHub installation to view repositories.'}
-      </div>
-    )
+  if (repositories.length === 0 || !hasSelectedInstallation || error) {
+    // TODO: Early-return placeholder for now; surface a proper empty/error state in a follow-up PR.
+    return null
   }
 
   return (

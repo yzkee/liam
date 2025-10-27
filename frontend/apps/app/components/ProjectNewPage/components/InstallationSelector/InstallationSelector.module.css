@@ -15,11 +15,6 @@
   flex-direction: column;
   gap: var(--spacing-6, 24px);
   padding: var(--spacing-10, 40px);
-  height: 610px;
-}
-
-.loading {
-  margin: auto;
-  color: var(--global-mute-text);
-  font-size: var(--font-size-4, 13px);
+  height: 500px;
+  overflow-y: auto;
 }

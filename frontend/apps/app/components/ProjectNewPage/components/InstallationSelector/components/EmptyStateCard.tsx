@@ -22,7 +22,9 @@ export const EmptyStateCard: FC<EmptyStateCardProps> = ({
       ? 'Reconnect your GitHub account to refresh access to your repositories.'
       : 'Add a GitHub installation to see your repositories.'
   const actionText =
-    variant === 'reauth' ? 'Re-authenticate' : 'Add Installation'
+    variant === 'reauth'
+      ? 'Re-authenticate'
+      : 'Configure Repositories on GitHub'
 
   return (
     <div className={styles.emptyState}>

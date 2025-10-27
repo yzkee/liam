@@ -3,29 +3,20 @@ import type { FC } from 'react'
 import { JackAndOctcat } from '../../../../ProjectsPage/components/NoProjects/JackAndOctcat'
 import styles from './EmptyStateCard.module.css'
 
-type EmptyStateVariant = 'connect' | 'reauth'
-
 type EmptyStateCardProps = {
-  variant: EmptyStateVariant
   // TODO: Currently this only opens the installation page, but we should pass an OAuth re-authentication handler in the future.
   onActionClick: () => void
   actionDisabled: boolean
+  description: string
+  actionText: string
 }
 
 export const EmptyStateCard: FC<EmptyStateCardProps> = ({
-  variant,
   onActionClick,
   actionDisabled,
+  description,
+  actionText,
 }) => {
-  const description =
-    variant === 'reauth'
-      ? 'Reconnect your GitHub account to refresh access to your repositories.'
-      : 'Add a GitHub installation to see your repositories.'
-  const actionText =
-    variant === 'reauth'
-      ? 'Re-authenticate'
-      : 'Configure Repositories on GitHub'
-
   return (
     <div className={styles.emptyState}>
       <JackAndOctcat className={styles.emptyIllustration} />

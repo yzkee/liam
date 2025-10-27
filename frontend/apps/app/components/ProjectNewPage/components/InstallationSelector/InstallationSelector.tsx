@@ -24,7 +24,7 @@ type Props = {
   needsRefresh?: boolean
 }
 
-type EmptyStateVariant = 'connect' | 'reauth'
+type EmptyStateVariant = 'noInstaller' | 'reauth'
 
 export const InstallationSelector: FC<Props> = ({
   installations,
@@ -52,11 +52,23 @@ export const InstallationSelector: FC<Props> = ({
     ? 'reauth'
     : hasInstallations
       ? null
-      : 'connect'
+      : 'noInstaller'
+
+  const emptyStateContent = match(emptyStateVariant)
+    .with('reauth', () => ({
+      description:
+        'Reconnect your GitHub account to refresh access to your repositories.',
+      actionText: 'Re-authenticate',
+    }))
+    .with('noInstaller', () => ({
+      description: 'Add a GitHub installation to see your repositories.',
+      actionText: 'Configure Repositories on GitHub',
+    }))
+    .otherwise(() => null)
 
   const showRepositoriesSkeleton =
     isRepositoriesLoading || repositoriesState.loading
-  const shouldShowSkeleton = !emptyStateVariant && showRepositoriesSkeleton
+  const shouldShowSkeleton = !emptyStateContent && showRepositoriesSkeleton
 
   const handleInstallApp = useCallback(() => {
     if (!githubAppUrl) return
@@ -163,9 +175,10 @@ export const InstallationSelector: FC<Props> = ({
         <div className={styles.panelContent}>
           {shouldShowSkeleton ? (
             <RepositoryListSkeleton />
-          ) : emptyStateVariant ? (
+          ) : emptyStateContent ? (
             <EmptyStateCard
-              variant={emptyStateVariant}
+              description={emptyStateContent.description}
+              actionText={emptyStateContent.actionText}
               onActionClick={handleConnectGitHub}
               actionDisabled={!githubAppUrl}
             />

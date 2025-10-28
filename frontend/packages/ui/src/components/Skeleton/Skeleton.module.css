@@ -41,7 +41,7 @@
   animation: pulse 2s ease-in-out infinite;
 }
 
-/* In text variant, make only the last line 75% width */
+/* In text variant, make only the last line 80% width */
 .text > .wrapper:last-child {
   width: 80%;
 }

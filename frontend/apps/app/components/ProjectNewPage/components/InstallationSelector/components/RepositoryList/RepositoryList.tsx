@@ -1,6 +1,6 @@
 import type { Repository } from '@liam-hq/github'
 import type { FC } from 'react'
-import { RepositoryItem } from '../../RepositoryItem'
+import { RepositoryItem } from './RepositoryItem'
 import styles from './RepositoryList.module.css'
 
 type RepositoryListProps = {

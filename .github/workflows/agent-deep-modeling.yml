@@ -74,9 +74,6 @@ jobs:
           pnpm --filter @liam-hq/agent execute-deep-modeling 2>&1 | tee -a execution_log.md
           exit_code=${PIPESTATUS[0]}
           
-          echo "" >> execution_log.md
-          echo "</details>" >> execution_log.md
-          
           end_time=$(date +%s)
           end_time_formatted=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
           duration=$((end_time - start_time))
@@ -107,6 +104,8 @@ jobs:
           
           echo "" >> execution_log.md
           echo "**Finished at:** $end_time_formatted" >> execution_log.md
+          echo "" >> execution_log.md
+          echo "</details>" >> execution_log.md
           
           # Insert processing time after the header using sed
           sed -i '2a\\n**Processing time:** '"$duration_formatted"'' execution_log.md

@@ -1,28 +1,28 @@
+import { err, ok, type Result } from 'neverthrow'
+
+const PGTAP_FUNCTIONS = [
+  'lives_ok',
+  'throws_ok',
+  'is',
+  'ok',
+  'results_eq',
+  'bag_eq',
+] as const
+
 export const isPgTapTest = (sql: string): boolean => {
   const lowerSql = sql.toLowerCase()
-  return (
-    lowerSql.includes('lives_ok(') ||
-    lowerSql.includes('throws_ok(') ||
-    lowerSql.includes('has_table(') ||
-    lowerSql.includes('has_column(') ||
-    lowerSql.includes('is(') ||
-    lowerSql.includes('ok(')
-  )
+  return PGTAP_FUNCTIONS.some((fnName) => lowerSql.includes(`${fnName}(`))
 }
 
 const checkAssertions = (lowerSql: string, errors: string[]): void => {
-  const hasAssertion =
-    lowerSql.includes('lives_ok(') ||
-    lowerSql.includes('throws_ok(') ||
-    lowerSql.includes('is(') ||
-    lowerSql.includes('ok(') ||
-    lowerSql.includes('results_eq(') ||
-    lowerSql.includes('has_table(') ||
-    lowerSql.includes('has_column(')
+  const hasAssertion = PGTAP_FUNCTIONS.some((fnName) =>
+    lowerSql.includes(`${fnName}(`),
+  )
 
   if (!hasAssertion) {
+    const functionList = PGTAP_FUNCTIONS.slice(0, 4).join(', ')
     errors.push(
-      'No pgTAP assertions found - test must include at least one assertion (lives_ok, throws_ok, is, ok, etc.)',
+      `No pgTAP assertions found - test must include at least one assertion (${functionList}, etc.)`,
     )
   }
 }
@@ -35,7 +35,11 @@ const checkSyntaxErrors = (sql: string, errors: string[]): void => {
   }
 }
 
-export const validatePgTapTest = (sql: string): string | undefined => {
+export const validatePgTapTest = (sql: string): Result<void, string> => {
+  if (!isPgTapTest(sql)) {
+    return ok(undefined)
+  }
+
   const lowerSql = sql.toLowerCase()
   const errors: string[] = []
 
@@ -43,8 +47,10 @@ export const validatePgTapTest = (sql: string): string | undefined => {
   checkSyntaxErrors(sql, errors)
 
   if (errors.length > 0) {
-    return `pgTAP test validation failed:\n${errors.map((e, i) => `${i + 1}. ${e}`).join('\n')}\n\nFix these issues and retry.`
+    return err(
+      `pgTAP test validation failed:\n${errors.map((e, i) => `${i + 1}. ${e}`).join('\n')}\n\nFix these issues and retry.`,
+    )
   }
 
-  return undefined
+  return ok(undefined)
 }

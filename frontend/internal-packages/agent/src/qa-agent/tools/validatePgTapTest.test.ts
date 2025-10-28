@@ -42,17 +42,12 @@ describe('validatePgTapTest', () => {
     expect(result.isOk()).toBe(true)
   })
 
-  it('returns Err when pgTAP test has no valid assertions', () => {
-    // This test should contain pgTAP-like syntax but fail validation
-    // However, since checkAssertions looks for pgTAP functions, we need a different approach
-    // Let's test with syntax error instead
-    const sql = `
-      SELECT lives_ok($$SELECT 1$$;)
-    `
+  it('returns Err when pgTAP function has syntax error', () => {
+    const sql = 'SELECT lives_ok($$SELECT 1$$;)'
     const result = validatePgTapTest(sql)
     expect(result.isErr()).toBe(true)
     if (result.isErr()) {
-      expect(result.error).toContain('pgTAP test validation failed')
+      expect(result.error).toContain('Semicolon before closing parenthesis')
     }
   })
 

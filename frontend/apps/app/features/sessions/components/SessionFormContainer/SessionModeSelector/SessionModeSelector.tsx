@@ -19,17 +19,17 @@ const modes: { mode: SessionMode; label: string; icon: React.ReactElement }[] =
   [
     {
       mode: 'github',
-      label: 'Import Schema from GitHub',
+      label: 'Import from GitHub',
       icon: <GithubLogo className={styles.modeButtonIcon} />,
     },
     {
       mode: 'upload',
-      label: 'Start from Upload',
+      label: 'Import from File',
       icon: <Upload size={16} className={styles.modeButtonIcon} />,
     },
     {
       mode: 'url',
-      label: 'Use Existing Schema (URL)',
+      label: 'Import from URL',
       icon: <Link size={16} className={styles.modeButtonIcon} />,
     },
   ]

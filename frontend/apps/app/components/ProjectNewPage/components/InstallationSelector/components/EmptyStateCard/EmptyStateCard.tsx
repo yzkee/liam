@@ -1,7 +1,7 @@
 import { Button, GithubLogo } from '@liam-hq/ui'
 import type { FC } from 'react'
-import { JackAndOctcat } from '../../../../ProjectsPage/components/NoProjects/JackAndOctcat'
 import styles from './EmptyStateCard.module.css'
+import { JackAndOctcat } from './JackAndOctcat'
 
 type EmptyStateCardProps = {
   // TODO: Currently this only opens the installation page, but we should pass an OAuth re-authentication handler in the future.

@@ -1,20 +1,20 @@
+export type { Result } from 'neverthrow'
 export {
-  type Err,
+  Err,
   err,
   errAsync,
   fromAsyncThrowable as fromAsyncThrowableOriginal,
   fromPromise as fromPromiseOriginal,
   fromSafePromise,
   fromThrowable as fromThrowableOriginal,
-  type Ok,
+  Ok,
   ok,
   okAsync,
-  type Result,
-  type ResultAsync,
+  ResultAsync,
   safeTry,
 } from 'neverthrow'
-export { fromAsyncThrowable } from './fromAsyncThrowable.js'
-export { fromPromise } from './fromPromise.js'
-export { fromThrowable } from './fromThrowable.js'
-export { fromValibotSafeParse } from './fromValibotSafeParse.js'
-export { toAsync } from './toAsync.js'
+export { fromAsyncThrowable } from './fromAsyncThrowable'
+export { fromPromise } from './fromPromise'
+export { fromThrowable } from './fromThrowable'
+export { fromValibotSafeParse } from './fromValibotSafeParse'
+export { toAsync } from './toAsync'

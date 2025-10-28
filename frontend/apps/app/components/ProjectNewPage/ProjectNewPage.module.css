@@ -4,6 +4,7 @@
   align-items: center;
   gap: var(--spacing-20, 80px);
   padding: var(--spacing-20, 80px) var(--spacing-4, 16px);
+  height: 100%;
   font-family: var(--main-font);
 }
 

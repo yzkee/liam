@@ -1,5 +1,5 @@
 import type { Installation } from '@liam-hq/github'
-import { ChevronLeft } from '@liam-hq/ui'
+import { ArrowLeft } from '@liam-hq/ui'
 import clsx from 'clsx'
 import Link from 'next/link'
 import type { FC } from 'react'
@@ -48,7 +48,7 @@ export const ProjectNewPage: FC<Props> = ({
           needsRefresh={needsRefresh}
         />
         <Link href={urlgen('projects')} className={styles.backLink}>
-          <ChevronLeft aria-hidden className={styles.backIcon} />
+          <ArrowLeft aria-hidden className={styles.backIcon} />
           <span>Back to Projects</span>
         </Link>
       </div>

@@ -6,7 +6,7 @@ import { executeQuery } from '@liam-hq/pglite-server'
 import type { SqlResult } from '@liam-hq/pglite-server/src/types'
 import {
   applyPatchOperations,
-  operationsSchema,
+  migrationOperationsSchema,
   postgresqlSchemaDeparser,
   type Schema,
 } from '@liam-hq/schema'
@@ -21,7 +21,7 @@ import { getToolConfigurable } from '../getToolConfigurable'
 const TOOL_NAME = 'schemaDesignTool'
 
 const schemaDesignToolSchema = v.object({
-  operations: operationsSchema,
+  operations: migrationOperationsSchema,
 })
 
 const toolSchema = toJsonSchema(schemaDesignToolSchema)

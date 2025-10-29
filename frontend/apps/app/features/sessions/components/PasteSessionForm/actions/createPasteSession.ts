@@ -1,7 +1,7 @@
 'use server'
 
 import {
-  createSessionWithSchema,
+  createSession,
   parseSchemaContent,
 } from '../../shared/services/sessionCreationHelpers'
 import {
@@ -33,13 +33,14 @@ export async function createPasteSession(
   }
   const schema = schemaResult
 
-  return await createSessionWithSchema(
+  return await createSession(
     {
       parentDesignSessionId,
       initialMessage,
       isDeepModelingEnabled,
       projectId: null,
       gitSha: null,
+      schemaFilePath: 'pasted-schema',
     },
     {
       schema,

@@ -15,7 +15,6 @@ export const operationSchema = v.union([
   ...extensionOperations,
 ])
 export type MigrationOperation = v.InferOutput<typeof operationSchema>
-export type Operation = MigrationOperation
 
 export const operationsSchema = v.pipe(
   v.array(operationSchema),

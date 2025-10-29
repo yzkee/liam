@@ -1,11 +1,13 @@
 import { redirect } from 'next/navigation'
-import type { FC } from 'react'
+import { type FC, Suspense } from 'react'
 import { getOrganizationId } from '../../features/organizations/services/getOrganizationId'
 import { SessionFormContainer } from '../../features/sessions/components/SessionFormContainer'
 import { urlgen } from '../../libs/routes'
 import { getProjects } from '../CommonLayout/AppBar/ProjectsDropdownMenu/services/getProjects'
-import { fetchRecentSessions } from '../CommonLayout/GlobalNav/RecentsSection/fetchRecentSessions'
-import { SessionItem } from '../ProjectSessionsPage/SessionItem'
+import {
+  RecentSessionsSection,
+  RecentSessionsSectionFallback,
+} from './RecentSessionsSection'
 import styles from './SessionsNewPage.module.css'
 
 export const SessionsNewPage: FC = async () => {
@@ -19,8 +21,6 @@ export const SessionsNewPage: FC = async () => {
   const projectsResponse = await getProjects(organizationId)
   const projects = projectsResponse.data || []
 
-  const recentSessions = await fetchRecentSessions(organizationId)
-
   return (
     <div className={styles.container}>
       <div className={styles.wrapper}>
@@ -30,16 +30,9 @@ export const SessionsNewPage: FC = async () => {
         </h1>
         <SessionFormContainer projects={projects} />
 
-        {recentSessions.length > 0 && (
-          <div className={styles.recentsSection}>
-            <h2 className={styles.recentsTitle}>Recent Sessions</h2>
-            <div className={styles.sessionsList}>
-              {recentSessions.map((session) => (
-                <SessionItem key={session.id} session={session} />
-              ))}
-            </div>
-          </div>
-        )}
+        <Suspense fallback={<RecentSessionsSectionFallback />}>
+          <RecentSessionsSection organizationId={organizationId} />
+        </Suspense>
       </div>
     </div>
   )

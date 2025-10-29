@@ -92,11 +92,7 @@ export const Output: FC<Props> = ({
         className={styles.tabsContent}
         forceMount
       >
-        <Migrations
-          currentSchema={schema}
-          baselineSchema={baselineSchema}
-          comments={sqlReviewComments}
-        />
+        <Migrations currentSchema={schema} comments={sqlReviewComments} />
       </TabsContent>
       <TabsContent
         value={OUTPUT_TABS.ARTIFACT}

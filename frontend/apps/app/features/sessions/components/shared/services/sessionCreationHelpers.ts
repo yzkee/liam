@@ -127,9 +127,9 @@ export const parseSchemaContent = async (
   }
 }
 
-export const createSessionWithSchema = async (
+export const createSession = async (
   params: SessionCreationParams,
-  schemaSource: SchemaSource,
+  schemaSource?: SchemaSource,
 ): Promise<CreateSessionState> => {
   const supabase = await createClient()
   const currentUserId = await getCurrentUserId(supabase)
@@ -161,10 +161,17 @@ export const createSessionWithSchema = async (
   const designSession = designSessionResult
   const designSessionId = designSession.id
 
+  const schema = schemaSource?.schema ?? {
+    tables: {},
+    enums: {},
+    extensions: {},
+  }
+  const schemaFilePath = schemaSource?.schemaFilePath ?? null
+
   const buildingSchemaResult = await createBuildingSchema(
     designSessionId,
-    schemaSource.schema,
-    schemaSource.schemaFilePath,
+    schema,
+    schemaFilePath,
     params.gitSha || null,
     supabase,
     organizationId,

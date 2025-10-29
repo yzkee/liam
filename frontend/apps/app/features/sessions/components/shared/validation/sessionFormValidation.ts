@@ -71,6 +71,7 @@ export const PasteFormDataSchema = v.object({
   schemaContent: v.pipe(
     v.string(),
     v.minLength(1, 'Schema content is required'),
+    v.maxLength(100000, 'Schema content is too large (max 100KB)'),
   ),
   schemaFormat: v.pipe(
     v.string(),

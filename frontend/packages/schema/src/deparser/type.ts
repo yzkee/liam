@@ -1,5 +1,5 @@
 import type { Result } from 'neverthrow'
-import type { MigrationOperation } from '../operation/schema/index.js'
+import type { MigrationOperation } from '../migrationOperation/schema/index.js'
 import type { Schema } from '../schema/index.js'
 
 // Legacy types - TODO: Migrate all implementations to use the new types

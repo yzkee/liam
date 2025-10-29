@@ -9,7 +9,7 @@ export type {
   SchemaDeparser,
 } from './deparser/type.js'
 export { yamlSchemaDeparser } from './deparser/yaml/index.js'
-export { PATH_PATTERNS } from './operation/constants.js'
+export { PATH_PATTERNS } from './migrationOperation/constants.js'
 export {
   applyPatchOperations,
   type ChangeStatus,
@@ -37,7 +37,7 @@ export {
   getTableRelatedChangeStatus,
   type MigrationOperation,
   operationsSchema,
-} from './operation/index.js'
+} from './migrationOperation/index.js'
 export type { ProcessError } from './parser.js'
 export {
   aColumn,

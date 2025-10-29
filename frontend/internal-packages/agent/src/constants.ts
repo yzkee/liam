@@ -20,3 +20,15 @@
  * See: route06/liam-internal#5642
  */
 export const DEFAULT_RECURSION_LIMIT = 10
+
+/**
+ * Recursion limit for QA Agent execution with auto-retry functionality.
+ *
+ * Supports up to 3 automatic SQL retry attempts:
+ * - Initial execution: ~10 steps
+ * - Retry cycles: 3 × 10 = 30 steps
+ * - Total: 40 steps + buffer = 50 steps
+ *
+ * @see {@link routeAfterAnalyzeFailures} for retry limit logic (MAX_RETRY_ATTEMPTS = 3)
+ */
+export const QA_AGENT_RECURSION_LIMIT = 50

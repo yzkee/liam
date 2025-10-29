@@ -2,10 +2,6 @@ import clsx from 'clsx'
 import { type ChangeEvent, type FC, useId, useRef, useState } from 'react'
 import type { FormatType } from '../../../../../components/FormatIcon/FormatIcon'
 import { createAccessibleOpacityTransition } from '../../../../../utils/accessibleTransitions'
-import {
-  SchemaInfoSection,
-  type SchemaStatus,
-} from '../../GitHubSessionForm/SchemaInfoSection'
 import { useAutoResizeTextarea } from '../../shared/hooks/useAutoResizeTextarea'
 import { useEnterKeySubmission } from '../../shared/hooks/useEnterKeySubmission'
 import { SessionFormActions } from '../../shared/SessionFormActions'
@@ -22,7 +18,6 @@ const usePasteFormState = () => {
   const [schemaContent, setSchemaContent] = useState('')
   const [textContent, setTextContent] = useState('')
   const [selectedFormat, setSelectedFormat] = useState<FormatType>('postgres')
-  const [schemaStatus, setSchemaStatus] = useState<SchemaStatus>('idle')
 
   return {
     schemaContent,
@@ -31,34 +26,20 @@ const usePasteFormState = () => {
     setTextContent,
     selectedFormat,
     setSelectedFormat,
-    schemaStatus,
-    setSchemaStatus,
   }
 }
 
 const usePasteFormHandlers = (state: ReturnType<typeof usePasteFormState>) => {
-  const {
-    setSchemaContent,
-    setTextContent,
-    setSelectedFormat,
-    setSchemaStatus,
-  } = state
+  const { setSchemaContent, setTextContent, setSelectedFormat } = state
 
   const handleReset = () => {
     setSchemaContent('')
     setTextContent('')
     setSelectedFormat('postgres')
-    setSchemaStatus('idle')
   }
 
   const handleSchemaContentChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    const content = e.target.value
-    setSchemaContent(content)
-    if (content.trim()) {
-      setSchemaStatus('valid')
-    } else {
-      setSchemaStatus('idle')
-    }
+    setSchemaContent(e.target.value)
   }
 
   return {
@@ -72,8 +53,9 @@ const renderSchemaInputSection = (
   handlers: ReturnType<typeof usePasteFormHandlers>,
   isPending: boolean,
   schemaContentId: string,
+  formatSelectId: string,
 ) => {
-  const { schemaContent, schemaStatus, selectedFormat } = state
+  const { schemaContent, selectedFormat } = state
   const { handleSchemaContentChange } = handlers
 
   return (
@@ -93,19 +75,33 @@ const renderSchemaInputSection = (
           rows={12}
         />
       </div>
-      {schemaStatus === 'valid' && schemaContent.trim() && (
-        <SchemaInfoSection
-          status={schemaStatus}
-          schemaName="Pasted Schema"
-          detectedFormat={selectedFormat}
-          selectedFormat={selectedFormat}
-          onFormatChange={state.setSelectedFormat}
-          onRemove={() => {
-            state.setSchemaContent('')
-            state.setSchemaStatus('idle')
+      <div className={styles.formatSelectorWrapper}>
+        <label htmlFor={formatSelectId} className={styles.formatLabel}>
+          Schema Format
+        </label>
+        <select
+          id={formatSelectId}
+          value={selectedFormat}
+          onChange={(e) => {
+            const value = e.target.value
+            if (
+              value === 'postgres' ||
+              value === 'schemarb' ||
+              value === 'prisma' ||
+              value === 'tbls'
+            ) {
+              state.setSelectedFormat(value)
+            }
           }}
-        />
-      )}
+          disabled={isPending}
+          className={styles.formatSelect}
+        >
+          <option value="postgres">SQL (PostgreSQL)</option>
+          <option value="schemarb">schema.rb (Ruby on Rails)</option>
+          <option value="prisma">Prisma</option>
+          <option value="tbls">TBLS</option>
+        </select>
+      </div>
     </div>
   )
 }
@@ -118,6 +114,7 @@ export const PasteSessionFormPresenter: FC<Props> = ({
 }) => {
   const initialMessageId = useId()
   const schemaContentId = useId()
+  const formatSelectId = useId()
   const state = usePasteFormState()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const formRef = useRef<HTMLFormElement>(null)
@@ -155,13 +152,16 @@ export const PasteSessionFormPresenter: FC<Props> = ({
         style={createAccessibleOpacityTransition(!isTransitioning)}
       >
         <input type="hidden" name="schemaFormat" value={state.selectedFormat} />
-        {renderSchemaInputSection(state, handlers, isPending, schemaContentId)}
+        {renderSchemaInputSection(
+          state,
+          handlers,
+          isPending,
+          schemaContentId,
+          formatSelectId,
+        )}
         <div className={styles.divider} />
         <div className={styles.inputSection}>
           <div className={styles.textareaWrapper}>
-            <label htmlFor={initialMessageId} className={styles.label}>
-              Initial Message
-            </label>
             <textarea
               ref={textareaRef}
               id={initialMessageId}
@@ -173,6 +173,7 @@ export const PasteSessionFormPresenter: FC<Props> = ({
               className={styles.textarea}
               disabled={isPending}
               rows={4}
+              aria-label="Initial message"
             />
             {formError && <p className={styles.error}>{formError}</p>}
           </div>

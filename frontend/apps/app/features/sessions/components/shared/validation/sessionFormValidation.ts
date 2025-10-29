@@ -65,6 +65,20 @@ export const UrlFormDataSchema = v.object({
   ),
 })
 
+// Paste-specific form schema
+export const PasteFormDataSchema = v.object({
+  ...BaseFormDataSchema.entries,
+  schemaContent: v.pipe(
+    v.string(),
+    v.minLength(1, 'Schema content is required'),
+    v.maxLength(100000, 'Schema content is too large (max 100KB)'),
+  ),
+  schemaFormat: v.pipe(
+    v.string(),
+    v.picklist(['postgres', 'schemarb', 'prisma', 'tbls']),
+  ),
+})
+
 // Repository and project types
 export type RepositoryData = {
   name: string

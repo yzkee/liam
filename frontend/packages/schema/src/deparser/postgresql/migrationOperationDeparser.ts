@@ -1,57 +1,49 @@
 import { err, ok, type Result } from 'neverthrow'
 import { PATH_PATTERNS } from '../../migrationOperation/constants.js'
-import type {
-  AddColumnOperation,
-  RemoveColumnOperation,
-  RenameColumnOperation,
-  ReplaceColumnCheckOperation,
-  ReplaceColumnCommentOperation,
-  ReplaceColumnDefaultOperation,
-  ReplaceColumnNotNullOperation,
-  ReplaceColumnTypeOperation,
+import type { MigrationOperation } from '../../migrationOperation/index.js'
+import {
+  type AddColumnMigrationOperation,
+  isAddColumnMigrationOperation,
+  isRemoveColumnMigrationOperation,
+  isRenameColumnMigrationOperation,
+  isReplaceColumnCheckMigrationOperation,
+  isReplaceColumnCommentMigrationOperation,
+  isReplaceColumnDefaultMigrationOperation,
+  isReplaceColumnNotNullMigrationOperation,
+  isReplaceColumnTypeMigrationOperation,
+  type RemoveColumnMigrationOperation,
+  type RenameColumnMigrationOperation,
+  type ReplaceColumnCheckMigrationOperation,
+  type ReplaceColumnCommentMigrationOperation,
+  type ReplaceColumnDefaultMigrationOperation,
+  type ReplaceColumnNotNullMigrationOperation,
+  type ReplaceColumnTypeMigrationOperation,
 } from '../../migrationOperation/schema/column.js'
 import {
-  isAddColumnOperation,
-  isRemoveColumnOperation,
-  isRenameColumnOperation,
-  isReplaceColumnCheckOperation,
-  isReplaceColumnCommentOperation,
-  isReplaceColumnDefaultOperation,
-  isReplaceColumnNotNullOperation,
-  isReplaceColumnTypeOperation,
-} from '../../migrationOperation/schema/column.js'
-import type {
-  AddConstraintOperation,
-  RemoveConstraintOperation,
-  ReplaceConstraintDeleteOperation,
-  ReplaceConstraintUpdateOperation,
+  type AddConstraintMigrationOperation,
+  isAddConstraintMigrationOperation,
+  isRemoveConstraintMigrationOperation,
+  isReplaceConstraintDeleteMigrationOperation,
+  isReplaceConstraintUpdateMigrationOperation,
+  type RemoveConstraintMigrationOperation,
+  type ReplaceConstraintDeleteMigrationOperation,
+  type ReplaceConstraintUpdateMigrationOperation,
 } from '../../migrationOperation/schema/constraint.js'
 import {
-  isAddConstraintOperation,
-  isRemoveConstraintOperation,
-  isReplaceConstraintDeleteOperation,
-  isReplaceConstraintUpdateOperation,
-} from '../../migrationOperation/schema/constraint.js'
-import type { MigrationOperation } from '../../migrationOperation/schema/index.js'
-import type {
-  AddIndexOperation,
-  RemoveIndexOperation,
-} from '../../migrationOperation/schema/indexOperations.js'
+  type AddIndexMigrationOperation,
+  isAddIndexMigrationOperation,
+  isRemoveIndexMigrationOperation,
+  type RemoveIndexMigrationOperation,
+} from '../../migrationOperation/schema/indexMigrationOperations.js'
 import {
-  isAddIndexOperation,
-  isRemoveIndexOperation,
-} from '../../migrationOperation/schema/indexOperations.js'
-import type {
-  AddTableOperation,
-  RemoveTableOperation,
-  ReplaceTableCommentOperation,
-  ReplaceTableNameOperation,
-} from '../../migrationOperation/schema/table.js'
-import {
-  isAddTableOperation,
-  isRemoveTableOperation,
-  isReplaceTableCommentOperation,
-  isReplaceTableNameOperation,
+  type AddTableMigrationOperation,
+  isAddTableMigrationOperation,
+  isRemoveTableMigrationOperation,
+  isReplaceTableCommentMigrationOperation,
+  isReplaceTableNameMigrationOperation,
+  type RemoveTableMigrationOperation,
+  type ReplaceTableCommentMigrationOperation,
+  type ReplaceTableNameMigrationOperation,
 } from '../../migrationOperation/schema/table.js'
 import type { LegacyOperationDeparser } from '../type.js'
 import {
@@ -278,7 +270,7 @@ function extractTableAndConstraintNameFromUpdatePath(
  * Generate CREATE TABLE DDL from table creation operation
  */
 function generateCreateTableFromOperation(
-  operation: AddTableOperation,
+  operation: AddTableMigrationOperation,
 ): Result<string, Error> {
   const tableName = extractTableNameFromPath(operation.path)
   if (!tableName) {
@@ -303,7 +295,7 @@ function generateCreateTableFromOperation(
  * Generate ADD COLUMN DDL from column creation operation
  */
 function generateAddColumnFromOperation(
-  operation: AddColumnOperation,
+  operation: AddColumnMigrationOperation,
 ): Result<string, Error> {
   const pathInfo = extractTableAndColumnNameFromPath(operation.path)
   if (!pathInfo) {
@@ -317,7 +309,7 @@ function generateAddColumnFromOperation(
  * Generate DROP COLUMN DDL from column removal operation
  */
 function generateRemoveColumnFromOperation(
-  operation: RemoveColumnOperation,
+  operation: RemoveColumnMigrationOperation,
 ): Result<string, Error> {
   const pathInfo = extractTableAndColumnNameFromPath(operation.path)
   if (!pathInfo) {
@@ -333,7 +325,7 @@ function generateRemoveColumnFromOperation(
  * Generate RENAME COLUMN DDL from column rename operation
  */
 function generateRenameColumnFromOperation(
-  operation: RenameColumnOperation,
+  operation: RenameColumnMigrationOperation,
 ): Result<string, Error> {
   const pathInfo = extractTableAndColumnNameFromNamePath(operation.path)
   if (!pathInfo) {
@@ -353,7 +345,7 @@ function generateRenameColumnFromOperation(
  * Generate DROP TABLE DDL from table removal operation
  */
 function generateRemoveTableFromOperation(
-  operation: RemoveTableOperation,
+  operation: RemoveTableMigrationOperation,
 ): Result<string, Error> {
   const tableName = extractTableNameFromPath(operation.path)
   if (!tableName) {
@@ -367,7 +359,7 @@ function generateRemoveTableFromOperation(
  * Generate RENAME TABLE DDL from table rename operation
  */
 function generateRenameTableFromOperation(
-  operation: ReplaceTableNameOperation,
+  operation: ReplaceTableNameMigrationOperation,
 ): Result<string, Error> {
   const tableName = extractTableNameFromNamePath(operation.path)
   if (!tableName) {
@@ -381,7 +373,7 @@ function generateRenameTableFromOperation(
  * Generate CREATE INDEX DDL from index creation operation
  */
 function generateCreateIndexFromOperation(
-  operation: AddIndexOperation,
+  operation: AddIndexMigrationOperation,
 ): Result<string, Error> {
   const pathInfo = extractTableAndIndexNameFromPath(operation.path)
   if (!pathInfo) {
@@ -395,7 +387,7 @@ function generateCreateIndexFromOperation(
  * Generate DROP INDEX DDL from index removal operation
  */
 function generateRemoveIndexFromOperation(
-  operation: RemoveIndexOperation,
+  operation: RemoveIndexMigrationOperation,
 ): Result<string, Error> {
   const pathInfo = extractTableAndIndexNameFromPath(operation.path)
   if (!pathInfo) {
@@ -409,7 +401,7 @@ function generateRemoveIndexFromOperation(
  * Generate ADD CONSTRAINT DDL from constraint creation operation
  */
 function generateAddConstraintFromOperation(
-  operation: AddConstraintOperation,
+  operation: AddConstraintMigrationOperation,
 ): Result<string, Error> {
   const pathInfo = extractTableAndConstraintNameFromPath(operation.path)
   if (!pathInfo) {
@@ -423,7 +415,7 @@ function generateAddConstraintFromOperation(
  * Generate DROP CONSTRAINT DDL from constraint removal operation
  */
 function generateRemoveConstraintFromOperation(
-  operation: RemoveConstraintOperation,
+  operation: RemoveConstraintMigrationOperation,
 ): Result<string, Error> {
   const pathInfo = extractTableAndConstraintNameFromPath(operation.path)
   if (!pathInfo) {
@@ -442,7 +434,7 @@ function generateRemoveConstraintFromOperation(
  * Generate ALTER COLUMN TYPE DDL from column type replacement operation
  */
 function generateAlterColumnTypeFromOperation(
-  operation: ReplaceColumnTypeOperation,
+  operation: ReplaceColumnTypeMigrationOperation,
 ): Result<string, Error> {
   const pathInfo = extractTableAndColumnNameFromTypePath(operation.path)
   if (!pathInfo) {
@@ -462,7 +454,7 @@ function generateAlterColumnTypeFromOperation(
  * Generate ALTER COLUMN SET/DROP NOT NULL DDL from notNull replacement operation
  */
 function generateAlterColumnNotNullFromOperation(
-  operation: ReplaceColumnNotNullOperation,
+  operation: ReplaceColumnNotNullMigrationOperation,
 ): Result<string, Error> {
   const pathInfo = extractTableAndColumnNameFromNotNullPath(operation.path)
   if (!pathInfo) {
@@ -482,7 +474,7 @@ function generateAlterColumnNotNullFromOperation(
  * Generate ALTER COLUMN SET/DROP DEFAULT DDL from default replacement operation
  */
 function generateAlterColumnDefaultFromOperation(
-  operation: ReplaceColumnDefaultOperation,
+  operation: ReplaceColumnDefaultMigrationOperation,
 ): Result<string, Error> {
   const pathInfo = extractTableAndColumnNameFromDefaultPath(operation.path)
   if (!pathInfo) {
@@ -502,7 +494,7 @@ function generateAlterColumnDefaultFromOperation(
  * Generate COMMENT ON TABLE DDL from table comment replacement operation
  */
 function generateTableCommentFromOperation(
-  operation: ReplaceTableCommentOperation,
+  operation: ReplaceTableCommentMigrationOperation,
 ): Result<string, Error> {
   const tableName = extractTableNameFromCommentPath(operation.path)
   if (!tableName) {
@@ -516,7 +508,7 @@ function generateTableCommentFromOperation(
  * Generate COMMENT ON COLUMN DDL from column comment replacement operation
  */
 function generateColumnCommentFromOperation(
-  operation: ReplaceColumnCommentOperation,
+  operation: ReplaceColumnCommentMigrationOperation,
 ): Result<string, Error> {
   const pathInfo = extractTableAndColumnNameFromCommentPath(operation.path)
   if (!pathInfo) {
@@ -536,7 +528,7 @@ function generateColumnCommentFromOperation(
  * Generate ADD/DROP CHECK CONSTRAINT DDL from column check replacement operation
  */
 function generateAlterColumnCheckFromOperation(
-  operation: ReplaceColumnCheckOperation,
+  operation: ReplaceColumnCheckMigrationOperation,
 ): Result<string, Error> {
   const pathInfo = extractTableAndColumnNameFromCheckPath(operation.path)
   if (!pathInfo) {
@@ -568,7 +560,7 @@ function generateAlterColumnCheckFromOperation(
  * Note: This is not directly supported in PostgreSQL, would require DROP and re-ADD
  */
 function generateAlterConstraintDeleteFromOperation(
-  operation: ReplaceConstraintDeleteOperation,
+  operation: ReplaceConstraintDeleteMigrationOperation,
 ): Result<string, Error> {
   const pathInfo = extractTableAndConstraintNameFromDeletePath(operation.path)
   if (!pathInfo) {
@@ -589,7 +581,7 @@ function generateAlterConstraintDeleteFromOperation(
  * Note: This is not directly supported in PostgreSQL, would require DROP and re-ADD
  */
 function generateAlterConstraintUpdateFromOperation(
-  operation: ReplaceConstraintUpdateOperation,
+  operation: ReplaceConstraintUpdateMigrationOperation,
 ): Result<string, Error> {
   const pathInfo = extractTableAndConstraintNameFromUpdatePath(operation.path)
   if (!pathInfo) {
@@ -606,17 +598,17 @@ function generateAlterConstraintUpdateFromOperation(
 }
 
 /**
- * PostgreSQL operation deparser
+ * PostgreSQL migration operation deparser
  * @deprecated This implementation uses LegacyOperationDeparser type.
  * TODO: Migrate to new OperationDeparser type (Result<string, Error>) for better error handling.
  */
-export const postgresqlOperationDeparser: LegacyOperationDeparser = (
+export const postgresqlMigrationOperationDeparser: LegacyOperationDeparser = (
   operation: MigrationOperation,
   // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
 ) => {
   const errors: { message: string }[] = []
 
-  if (isAddTableOperation(operation)) {
+  if (isAddTableMigrationOperation(operation)) {
     const result = generateCreateTableFromOperation(operation)
     if (result.isErr()) {
       errors.push({ message: result.error.message })
@@ -626,7 +618,7 @@ export const postgresqlOperationDeparser: LegacyOperationDeparser = (
     return { value, errors }
   }
 
-  if (isRemoveTableOperation(operation)) {
+  if (isRemoveTableMigrationOperation(operation)) {
     const result = generateRemoveTableFromOperation(operation)
     if (result.isErr()) {
       errors.push({ message: result.error.message })
@@ -636,7 +628,7 @@ export const postgresqlOperationDeparser: LegacyOperationDeparser = (
     return { value, errors }
   }
 
-  if (isReplaceTableNameOperation(operation)) {
+  if (isReplaceTableNameMigrationOperation(operation)) {
     const result = generateRenameTableFromOperation(operation)
     if (result.isErr()) {
       errors.push({ message: result.error.message })
@@ -646,7 +638,7 @@ export const postgresqlOperationDeparser: LegacyOperationDeparser = (
     return { value, errors }
   }
 
-  if (isAddColumnOperation(operation)) {
+  if (isAddColumnMigrationOperation(operation)) {
     const result = generateAddColumnFromOperation(operation)
     if (result.isErr()) {
       errors.push({ message: result.error.message })
@@ -656,7 +648,7 @@ export const postgresqlOperationDeparser: LegacyOperationDeparser = (
     return { value, errors }
   }
 
-  if (isRemoveColumnOperation(operation)) {
+  if (isRemoveColumnMigrationOperation(operation)) {
     const result = generateRemoveColumnFromOperation(operation)
     if (result.isErr()) {
       errors.push({ message: result.error.message })
@@ -666,7 +658,7 @@ export const postgresqlOperationDeparser: LegacyOperationDeparser = (
     return { value, errors }
   }
 
-  if (isRenameColumnOperation(operation)) {
+  if (isRenameColumnMigrationOperation(operation)) {
     const result = generateRenameColumnFromOperation(operation)
     if (result.isErr()) {
       errors.push({ message: result.error.message })
@@ -676,7 +668,7 @@ export const postgresqlOperationDeparser: LegacyOperationDeparser = (
     return { value, errors }
   }
 
-  if (isAddIndexOperation(operation)) {
+  if (isAddIndexMigrationOperation(operation)) {
     const result = generateCreateIndexFromOperation(operation)
     if (result.isErr()) {
       errors.push({ message: result.error.message })
@@ -686,7 +678,7 @@ export const postgresqlOperationDeparser: LegacyOperationDeparser = (
     return { value, errors }
   }
 
-  if (isRemoveIndexOperation(operation)) {
+  if (isRemoveIndexMigrationOperation(operation)) {
     const result = generateRemoveIndexFromOperation(operation)
     if (result.isErr()) {
       errors.push({ message: result.error.message })
@@ -696,7 +688,7 @@ export const postgresqlOperationDeparser: LegacyOperationDeparser = (
     return { value, errors }
   }
 
-  if (isAddConstraintOperation(operation)) {
+  if (isAddConstraintMigrationOperation(operation)) {
     const result = generateAddConstraintFromOperation(operation)
     if (result.isErr()) {
       errors.push({ message: result.error.message })
@@ -706,7 +698,7 @@ export const postgresqlOperationDeparser: LegacyOperationDeparser = (
     return { value, errors }
   }
 
-  if (isRemoveConstraintOperation(operation)) {
+  if (isRemoveConstraintMigrationOperation(operation)) {
     const result = generateRemoveConstraintFromOperation(operation)
     if (result.isErr()) {
       errors.push({ message: result.error.message })
@@ -716,7 +708,7 @@ export const postgresqlOperationDeparser: LegacyOperationDeparser = (
     return { value, errors }
   }
 
-  if (isReplaceColumnTypeOperation(operation)) {
+  if (isReplaceColumnTypeMigrationOperation(operation)) {
     const result = generateAlterColumnTypeFromOperation(operation)
     if (result.isErr()) {
       errors.push({ message: result.error.message })
@@ -726,7 +718,7 @@ export const postgresqlOperationDeparser: LegacyOperationDeparser = (
     return { value, errors }
   }
 
-  if (isReplaceColumnNotNullOperation(operation)) {
+  if (isReplaceColumnNotNullMigrationOperation(operation)) {
     const result = generateAlterColumnNotNullFromOperation(operation)
     if (result.isErr()) {
       errors.push({ message: result.error.message })
@@ -736,7 +728,7 @@ export const postgresqlOperationDeparser: LegacyOperationDeparser = (
     return { value, errors }
   }
 
-  if (isReplaceColumnDefaultOperation(operation)) {
+  if (isReplaceColumnDefaultMigrationOperation(operation)) {
     const result = generateAlterColumnDefaultFromOperation(operation)
     if (result.isErr()) {
       errors.push({ message: result.error.message })
@@ -746,7 +738,7 @@ export const postgresqlOperationDeparser: LegacyOperationDeparser = (
     return { value, errors }
   }
 
-  if (isReplaceTableCommentOperation(operation)) {
+  if (isReplaceTableCommentMigrationOperation(operation)) {
     const result = generateTableCommentFromOperation(operation)
     if (result.isErr()) {
       errors.push({ message: result.error.message })
@@ -756,7 +748,7 @@ export const postgresqlOperationDeparser: LegacyOperationDeparser = (
     return { value, errors }
   }
 
-  if (isReplaceColumnCommentOperation(operation)) {
+  if (isReplaceColumnCommentMigrationOperation(operation)) {
     const result = generateColumnCommentFromOperation(operation)
     if (result.isErr()) {
       errors.push({ message: result.error.message })
@@ -766,7 +758,7 @@ export const postgresqlOperationDeparser: LegacyOperationDeparser = (
     return { value, errors }
   }
 
-  if (isReplaceColumnCheckOperation(operation)) {
+  if (isReplaceColumnCheckMigrationOperation(operation)) {
     const result = generateAlterColumnCheckFromOperation(operation)
     if (result.isErr()) {
       errors.push({ message: result.error.message })
@@ -776,7 +768,7 @@ export const postgresqlOperationDeparser: LegacyOperationDeparser = (
     return { value, errors }
   }
 
-  if (isReplaceConstraintDeleteOperation(operation)) {
+  if (isReplaceConstraintDeleteMigrationOperation(operation)) {
     const result = generateAlterConstraintDeleteFromOperation(operation)
     if (result.isErr()) {
       errors.push({ message: result.error.message })
@@ -786,7 +778,7 @@ export const postgresqlOperationDeparser: LegacyOperationDeparser = (
     return { value, errors }
   }
 
-  if (isReplaceConstraintUpdateOperation(operation)) {
+  if (isReplaceConstraintUpdateMigrationOperation(operation)) {
     const result = generateAlterConstraintUpdateFromOperation(operation)
     if (result.isErr()) {
       errors.push({ message: result.error.message })

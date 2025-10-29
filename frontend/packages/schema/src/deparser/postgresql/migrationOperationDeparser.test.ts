@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import type { MigrationOperation } from '../../migrationOperation/schema/index.js'
-import { postgresqlOperationDeparser } from './operationDeparser.js'
+import { postgresqlMigrationOperationDeparser } from './migrationOperationDeparser.js'
 import { expectGeneratedSQLToBeParseable } from './testUtils.js'
 
-describe('postgresqlOperationDeparser', () => {
+describe('postgresqlMigrationOperationDeparser', () => {
   describe('table operations', () => {
     it('should generate CREATE TABLE statement from add operation', async () => {
       const operation: MigrationOperation = {
@@ -41,7 +41,7 @@ describe('postgresqlOperationDeparser', () => {
         },
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -104,7 +104,7 @@ describe('postgresqlOperationDeparser', () => {
         },
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -126,7 +126,7 @@ describe('postgresqlOperationDeparser', () => {
         path: '/tables/users',
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -143,7 +143,7 @@ describe('postgresqlOperationDeparser', () => {
         value: 'user_accounts',
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -170,7 +170,7 @@ describe('postgresqlOperationDeparser', () => {
         },
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -197,7 +197,7 @@ describe('postgresqlOperationDeparser', () => {
         },
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -213,7 +213,7 @@ describe('postgresqlOperationDeparser', () => {
         path: '/tables/users/columns/age',
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -230,7 +230,7 @@ describe('postgresqlOperationDeparser', () => {
         value: 'email_address',
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -247,7 +247,7 @@ describe('postgresqlOperationDeparser', () => {
         value: 'given_name',
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -271,7 +271,7 @@ describe('postgresqlOperationDeparser', () => {
         },
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -293,7 +293,7 @@ describe('postgresqlOperationDeparser', () => {
         },
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -315,7 +315,7 @@ describe('postgresqlOperationDeparser', () => {
         },
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -337,7 +337,7 @@ describe('postgresqlOperationDeparser', () => {
         },
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -353,7 +353,7 @@ describe('postgresqlOperationDeparser', () => {
         path: '/tables/users/indexes/idx_users_email',
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -369,7 +369,7 @@ describe('postgresqlOperationDeparser', () => {
         path: '/tables/user_profiles/indexes/idx_user_profiles_email_unique',
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -392,7 +392,7 @@ describe('postgresqlOperationDeparser', () => {
         },
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -417,7 +417,7 @@ describe('postgresqlOperationDeparser', () => {
         },
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -445,7 +445,7 @@ describe('postgresqlOperationDeparser', () => {
         },
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -466,7 +466,7 @@ describe('postgresqlOperationDeparser', () => {
         },
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -482,7 +482,7 @@ describe('postgresqlOperationDeparser', () => {
         path: '/tables/users/constraints/pk_users_id',
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -498,7 +498,7 @@ describe('postgresqlOperationDeparser', () => {
         path: '/tables/orders/constraints/fk_orders_user_id',
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -514,7 +514,7 @@ describe('postgresqlOperationDeparser', () => {
         path: '/tables/user_profiles/constraints/uk_user_profiles_email',
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -533,7 +533,7 @@ describe('postgresqlOperationDeparser', () => {
         value: 'Updated user table comment',
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -550,7 +550,7 @@ describe('postgresqlOperationDeparser', () => {
         value: null,
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -569,7 +569,7 @@ describe('postgresqlOperationDeparser', () => {
         value: 'text',
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -588,7 +588,7 @@ describe('postgresqlOperationDeparser', () => {
         value: 'User email address',
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -605,7 +605,7 @@ describe('postgresqlOperationDeparser', () => {
         value: null,
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -624,7 +624,7 @@ describe('postgresqlOperationDeparser', () => {
         value: true,
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -641,7 +641,7 @@ describe('postgresqlOperationDeparser', () => {
         value: false,
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -660,7 +660,7 @@ describe('postgresqlOperationDeparser', () => {
         value: 'active',
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -677,7 +677,7 @@ describe('postgresqlOperationDeparser', () => {
         value: null,
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -694,7 +694,7 @@ describe('postgresqlOperationDeparser', () => {
         value: 'now()',
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -711,7 +711,7 @@ describe('postgresqlOperationDeparser', () => {
         value: 'admin', // Unquoted enum value
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(
@@ -728,7 +728,7 @@ describe('postgresqlOperationDeparser', () => {
         value: "'admin'", // Already quoted
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(
@@ -745,7 +745,7 @@ describe('postgresqlOperationDeparser', () => {
         value: 'now()', // Function
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(
@@ -762,7 +762,7 @@ describe('postgresqlOperationDeparser', () => {
         value: '2024-01-01 00:00:00+00', // Literal timestamp
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(
@@ -779,7 +779,7 @@ describe('postgresqlOperationDeparser', () => {
         value: "'2024-01-01 00:00:00+00'", // Already quoted
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(
@@ -796,7 +796,7 @@ describe('postgresqlOperationDeparser', () => {
         value: "'2024-01-01'::timestamptz", // Cast expression
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(
@@ -813,7 +813,7 @@ describe('postgresqlOperationDeparser', () => {
         value: "'invited'::user_status", // Enum cast expression from issue #5684
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       // Should NOT produce '''invited''::user_status' with extra quotes
@@ -831,7 +831,7 @@ describe('postgresqlOperationDeparser', () => {
         value: "(now() + INTERVAL '30 days')", // INTERVAL expression from issue #5702
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       // Should NOT produce (now() + INTERVAL ''30 days'') with extra quotes
@@ -851,7 +851,7 @@ describe('postgresqlOperationDeparser', () => {
         value: 'price > 0',
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -868,7 +868,7 @@ describe('postgresqlOperationDeparser', () => {
         value: '',
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(0)
       expect(result.value).toMatchInlineSnapshot(`
@@ -887,7 +887,7 @@ describe('postgresqlOperationDeparser', () => {
         value: 'CASCADE',
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(1)
       expect(result.errors[0]?.message).toMatchInlineSnapshot(
@@ -903,7 +903,7 @@ describe('postgresqlOperationDeparser', () => {
         value: 'RESTRICT',
       }
 
-      const result = postgresqlOperationDeparser(operation)
+      const result = postgresqlMigrationOperationDeparser(operation)
 
       expect(result.errors).toHaveLength(1)
       expect(result.errors[0]?.message).toMatchInlineSnapshot(

@@ -1,5 +1,5 @@
 export {
-  postgresqlOperationDeparser,
+  postgresqlMigrationOperationDeparser,
   postgresqlSchemaDeparser,
 } from './deparser/postgresql/index.js'
 export type {

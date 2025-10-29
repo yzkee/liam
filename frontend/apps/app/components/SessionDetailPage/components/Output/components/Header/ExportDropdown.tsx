@@ -4,7 +4,7 @@ import { fromPromise } from '@liam-hq/neverthrow'
 import type { Schema } from '@liam-hq/schema'
 import {
   type MigrationOperation,
-  postgresqlOperationDeparser,
+  postgresqlMigrationOperationDeparser,
   postgresqlSchemaDeparser,
   yamlSchemaDeparser,
 } from '@liam-hq/schema'
@@ -34,7 +34,7 @@ const generateCumulativeDDL = (operations: MigrationOperation[]): string => {
   const ddlStatements: string[] = []
 
   for (const operation of operations) {
-    const result = postgresqlOperationDeparser(operation)
+    const result = postgresqlMigrationOperationDeparser(operation)
     if (result.errors.length === 0 && result.value.trim()) {
       ddlStatements.push(result.value)
     }

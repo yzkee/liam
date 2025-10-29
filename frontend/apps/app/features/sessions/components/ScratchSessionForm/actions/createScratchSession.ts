@@ -1,6 +1,6 @@
 'use server'
 
-import { createSessionWithSchema } from '../../shared/services/sessionCreationHelpers'
+import { createSession } from '../../shared/services/sessionCreationHelpers'
 import {
   BaseFormDataSchema,
   type CreateSessionState,
@@ -19,20 +19,12 @@ export async function createScratchSession(
   const { parentDesignSessionId, initialMessage, isDeepModelingEnabled } =
     parsedFormDataResult.output
 
-  const emptySchema = { tables: {}, enums: {}, extensions: {} }
-
-  return createSessionWithSchema(
-    {
-      parentDesignSessionId,
-      initialMessage,
-      isDeepModelingEnabled: isDeepModelingEnabled ?? true,
-      projectId: null,
-      schemaFilePath: null,
-      gitSha: null,
-    },
-    {
-      schema: emptySchema,
-      schemaFilePath: null,
-    },
-  )
+  return createSession({
+    parentDesignSessionId,
+    initialMessage,
+    isDeepModelingEnabled: isDeepModelingEnabled ?? true,
+    projectId: null,
+    schemaFilePath: null,
+    gitSha: null,
+  })
 }

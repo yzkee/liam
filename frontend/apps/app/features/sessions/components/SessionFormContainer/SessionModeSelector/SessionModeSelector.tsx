@@ -3,7 +3,7 @@ import clsx from 'clsx'
 import { type FC, useEffect, useId, useRef } from 'react'
 import styles from './SessionModeSelector.module.css'
 
-export type SessionMode = 'github' | 'upload' | 'url' | 'paste'
+export type SessionMode = 'scratch' | 'github' | 'upload' | 'url' | 'paste'
 
 export type ModeIds = {
   tabId: string
@@ -17,6 +17,11 @@ type Props = {
 
 const modes: { mode: SessionMode; label: string; icon: React.ReactElement }[] =
   [
+    {
+      mode: 'scratch',
+      label: 'Scratch',
+      icon: <></>,
+    },
     {
       mode: 'github',
       label: 'Import from GitHub',
@@ -51,6 +56,10 @@ export const SessionModeSelector: FC<Props> = ({
   // Generate unique IDs for all modes
   const baseId = useId()
   const modeIds: Record<SessionMode, ModeIds> = {
+    scratch: {
+      tabId: `${baseId}-scratch-tab`,
+      panelId: `${baseId}-scratch-panel`,
+    },
     github: {
       tabId: `${baseId}-github-tab`,
       panelId: `${baseId}-github-panel`,

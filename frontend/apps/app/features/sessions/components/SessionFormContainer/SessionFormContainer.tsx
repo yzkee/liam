@@ -5,6 +5,7 @@ import type { Projects } from '../../../../components/CommonLayout/AppBar/Projec
 import { createAccessibleOpacityTransition } from '../../../../utils/accessibleTransitions'
 import { GitHubSessionForm } from '../GitHubSessionForm'
 import { PasteSessionForm } from '../PasteSessionForm'
+import { ScratchSessionForm } from '../ScratchSessionForm'
 import { UploadSessionForm } from '../UploadSessionForm'
 import { UrlSessionForm } from '../UrlSessionForm'
 import styles from './SessionFormContainer.module.css'
@@ -23,7 +24,7 @@ export const SessionFormContainer: FC<Props> = ({
   projects,
   defaultProjectId,
 }) => {
-  const [mode, setMode] = useState<SessionMode>('github')
+  const [mode, setMode] = useState<SessionMode>('scratch')
   const [modeIds, setModeIds] = useState<ModeIds>({ tabId: '', panelId: '' })
   const [isTransitioning, setIsTransitioning] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -120,6 +121,16 @@ export const SessionFormContainer: FC<Props> = ({
         onModeChange={handleModeChange}
       />
       <div ref={containerRef} className={styles.formContainer}>
+        {mode === 'scratch' && (
+          <div
+            role="tabpanel"
+            id={modeIds.panelId}
+            aria-labelledby={modeIds.tabId}
+            style={createAccessibleOpacityTransition(!isTransitioning)}
+          >
+            <ScratchSessionForm />
+          </div>
+        )}
         {mode === 'github' && (
           <div
             role="tabpanel"

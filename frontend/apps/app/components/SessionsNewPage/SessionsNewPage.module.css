@@ -35,7 +35,7 @@
 }
 
 .recentsTitle {
-  font-size: var(--font-size-xl, 20px);
+  font-size: var(--font-size-8, 20px);
   font-weight: 600;
   margin-bottom: var(--spacing-6);
   color: var(--global-foreground);

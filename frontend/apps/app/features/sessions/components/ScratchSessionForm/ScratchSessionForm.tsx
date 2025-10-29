@@ -20,7 +20,6 @@ export const ScratchSessionForm: FC<Props> = () => {
       formError={!state.success ? state.error : undefined}
       isPending={isPending || isRouting}
       formAction={formAction}
-      isTransitioning={false}
     />
   )
 }

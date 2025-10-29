@@ -1,6 +1,5 @@
 import clsx from 'clsx'
 import { type ChangeEvent, type FC, useRef, useState } from 'react'
-import { createAccessibleOpacityTransition } from '../../../../../utils/accessibleTransitions'
 import { useAutoResizeTextarea } from '../../shared/hooks/useAutoResizeTextarea'
 import { useEnterKeySubmission } from '../../shared/hooks/useEnterKeySubmission'
 import { SessionFormActions } from '../../shared/SessionFormActions'
@@ -10,14 +9,12 @@ type Props = {
   formError?: string
   isPending: boolean
   formAction: (formData: FormData) => void
-  isTransitioning?: boolean
 }
 
 export const ScratchSessionFormPresenter: FC<Props> = ({
   formError,
   isPending,
   formAction,
-  isTransitioning = false,
 }) => {
   const [textContent, setTextContent] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -50,17 +47,13 @@ export const ScratchSessionFormPresenter: FC<Props> = ({
         formError && styles.error,
       )}
     >
-      <form
-        ref={formRef}
-        action={formAction}
-        style={createAccessibleOpacityTransition(!isTransitioning)}
-      >
+      <form ref={formRef} action={formAction}>
         <div className={styles.inputSection}>
           <div className={styles.textareaWrapper}>
             <textarea
               ref={textareaRef}
               name="initialMessage"
-              placeholder="Enter your database design instructions. For example: Design a database for an e-commerce site that manages users, products, and orders..."
+              placeholder="Describe your database design, e.g., 'Design a database for an e-commerce site with users, products, and orders'"
               value={textContent}
               onChange={handleTextareaChange}
               onKeyDown={handleEnterKeySubmission}

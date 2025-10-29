@@ -2,21 +2,17 @@ import type { Schema } from '@liam-hq/schema'
 import { useMemo } from 'react'
 import { schemaToDdl } from '../utils/schemaToDdl'
 
-type UseSQLProps = {
+type Props = {
   currentSchema: Schema | null
   baselineSchema: Schema | null
 }
 
-type UseSQLResult = {
+type Result = {
   cumulativeDdl: string
   prevCumulativeDdl: string
 }
 
-export const useSql = ({
-  currentSchema,
-  baselineSchema,
-}: UseSQLProps): UseSQLResult => {
-  // Generate DDL from schemas
+export const useDdl = ({ currentSchema, baselineSchema }: Props): Result => {
   const cumulativeDdl = useMemo(() => {
     if (!currentSchema) return ''
     const result = schemaToDdl(currentSchema)

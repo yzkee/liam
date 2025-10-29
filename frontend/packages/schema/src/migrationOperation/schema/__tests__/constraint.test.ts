@@ -1,6 +1,6 @@
 import * as v from 'valibot'
 import { describe, expect, it } from 'vitest'
-import { operationSchema } from '../index.js'
+import { migrationOperationSchema } from '../index.js'
 
 describe('constraint operations', () => {
   describe('replaceConstraintColumnNamesArrayOperation', () => {
@@ -10,7 +10,7 @@ describe('constraint operations', () => {
         path: '/tables/aquariums/constraints/pk_aquariums/columnNames/0',
         value: 'id',
       }
-      const result = v.safeParse(operationSchema, operation)
+      const result = v.safeParse(migrationOperationSchema, operation)
       expect(result.success).toBe(true)
     })
 
@@ -34,7 +34,7 @@ describe('constraint operations', () => {
       ]
 
       operations.forEach((operation) => {
-        const result = v.safeParse(operationSchema, operation)
+        const result = v.safeParse(migrationOperationSchema, operation)
         expect(result.success).toBe(true)
       })
     })
@@ -59,7 +59,7 @@ describe('constraint operations', () => {
       ]
 
       invalidOperations.forEach((operation) => {
-        const result = v.safeParse(operationSchema, operation)
+        const result = v.safeParse(migrationOperationSchema, operation)
         expect(result.success).toBe(false)
       })
     })

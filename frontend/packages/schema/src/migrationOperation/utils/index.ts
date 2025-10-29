@@ -16,7 +16,7 @@ export {
   getConstraintTargetTableNameChangeStatus,
   getConstraintUpdateConstraintChangeStatus,
 } from './constraints/index.js'
-export { getOperations } from './getOperations.js'
+export { getMigrationOperations } from './getMigrationOperations.js'
 export {
   getIndexColumnsChangeStatus,
   getIndexNameChangeStatus,

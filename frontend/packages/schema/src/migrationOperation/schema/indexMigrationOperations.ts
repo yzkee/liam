@@ -22,7 +22,7 @@ const indexTypePathSchema = v.pipe(
 )
 
 // Add index operation
-const addIndexOperationSchema = v.pipe(
+const addIndexMigrationOperationSchema = v.pipe(
   v.object({
     op: v.literal('add'),
     path: indexPathSchema,
@@ -31,16 +31,18 @@ const addIndexOperationSchema = v.pipe(
   v.description('Add new index to table'),
 )
 
-export type AddIndexOperation = v.InferOutput<typeof addIndexOperationSchema>
+export type AddIndexMigrationOperation = v.InferOutput<
+  typeof addIndexMigrationOperationSchema
+>
 
-export const isAddIndexOperation = (
+export const isAddIndexMigrationOperation = (
   operation: MigrationOperation,
-): operation is AddIndexOperation => {
-  return v.safeParse(addIndexOperationSchema, operation).success
+): operation is AddIndexMigrationOperation => {
+  return v.safeParse(addIndexMigrationOperationSchema, operation).success
 }
 
 // Remove index operation
-const removeIndexOperationSchema = v.pipe(
+const removeIndexMigrationOperationSchema = v.pipe(
   v.object({
     op: v.literal('remove'),
     path: indexPathSchema,
@@ -48,18 +50,18 @@ const removeIndexOperationSchema = v.pipe(
   v.description('Remove existing index'),
 )
 
-export type RemoveIndexOperation = v.InferOutput<
-  typeof removeIndexOperationSchema
+export type RemoveIndexMigrationOperation = v.InferOutput<
+  typeof removeIndexMigrationOperationSchema
 >
 
-export const isRemoveIndexOperation = (
+export const isRemoveIndexMigrationOperation = (
   operation: MigrationOperation,
-): operation is RemoveIndexOperation => {
-  return v.safeParse(removeIndexOperationSchema, operation).success
+): operation is RemoveIndexMigrationOperation => {
+  return v.safeParse(removeIndexMigrationOperationSchema, operation).success
 }
 
 // Replace index unique operation
-const replaceIndexUniqueOperationSchema = v.pipe(
+const replaceIndexUniqueMigrationOperationSchema = v.pipe(
   v.object({
     op: v.literal('replace'),
     path: indexUniquePathSchema,
@@ -69,7 +71,7 @@ const replaceIndexUniqueOperationSchema = v.pipe(
 )
 
 // Replace index columns operation
-const replaceIndexColumnsOperationSchema = v.pipe(
+const replaceIndexColumnsMigrationOperationSchema = v.pipe(
   v.object({
     op: v.literal('replace'),
     path: indexColumnsPathSchema,
@@ -79,7 +81,7 @@ const replaceIndexColumnsOperationSchema = v.pipe(
 )
 
 // Replace index type operation
-const replaceIndexTypeOperationSchema = v.pipe(
+const replaceIndexTypeMigrationOperationSchema = v.pipe(
   v.object({
     op: v.literal('replace'),
     path: indexTypePathSchema,
@@ -89,7 +91,7 @@ const replaceIndexTypeOperationSchema = v.pipe(
 )
 
 // Add index column element operation
-const addIndexColumnElementOperationSchema = v.pipe(
+const addIndexColumnElementMigrationOperationSchema = v.pipe(
   v.object({
     op: v.literal('add'),
     path: indexColumnsElementPathSchema,
@@ -99,7 +101,7 @@ const addIndexColumnElementOperationSchema = v.pipe(
 )
 
 // Remove index column element operation
-const removeIndexColumnElementOperationSchema = v.pipe(
+const removeIndexColumnElementMigrationOperationSchema = v.pipe(
   v.object({
     op: v.literal('remove'),
     path: indexColumnsElementPathSchema,
@@ -108,7 +110,7 @@ const removeIndexColumnElementOperationSchema = v.pipe(
 )
 
 // Replace index column element operation
-const replaceIndexColumnElementOperationSchema = v.pipe(
+const replaceIndexColumnElementMigrationOperationSchema = v.pipe(
   v.object({
     op: v.literal('replace'),
     path: indexColumnsElementPathSchema,
@@ -118,13 +120,13 @@ const replaceIndexColumnElementOperationSchema = v.pipe(
 )
 
 // Export all index operations
-export const indexOperations = [
-  addIndexOperationSchema,
-  removeIndexOperationSchema,
-  replaceIndexUniqueOperationSchema,
-  replaceIndexColumnsOperationSchema,
-  replaceIndexTypeOperationSchema,
-  addIndexColumnElementOperationSchema,
-  removeIndexColumnElementOperationSchema,
-  replaceIndexColumnElementOperationSchema,
+export const indexMigrationOperations = [
+  addIndexMigrationOperationSchema,
+  removeIndexMigrationOperationSchema,
+  replaceIndexUniqueMigrationOperationSchema,
+  replaceIndexColumnsMigrationOperationSchema,
+  replaceIndexTypeMigrationOperationSchema,
+  addIndexColumnElementMigrationOperationSchema,
+  removeIndexColumnElementMigrationOperationSchema,
+  replaceIndexColumnElementMigrationOperationSchema,
 ]

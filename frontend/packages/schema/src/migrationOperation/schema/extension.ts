@@ -23,7 +23,7 @@ const removeExtensionOperation = v.object({
   ),
 })
 
-export const extensionOperations = [
+export const extensionMigrationOperations = [
   addExtensionOperation,
   removeExtensionOperation,
 ]

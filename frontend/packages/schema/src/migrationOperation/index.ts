@@ -1,7 +1,7 @@
 export {
   type ChangeStatus,
   type MigrationOperation,
-  operationsSchema,
+  migrationOperationsSchema,
 } from './schema/index.js'
 export {
   applyPatchOperations,
@@ -23,7 +23,7 @@ export {
   getIndexRelatedChangeStatus,
   getIndexTypeChangeStatus,
   getIndexUniqueChangeStatus,
-  getOperations,
+  getMigrationOperations,
   getTableChangeStatus,
   getTableCommentChangeStatus,
   getTableRelatedChangeStatus,

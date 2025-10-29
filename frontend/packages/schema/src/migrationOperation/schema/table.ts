@@ -13,7 +13,7 @@ const tableCommentPathSchema = v.pipe(
   v.regex(PATH_PATTERNS.TABLE_COMMENT),
 )
 
-const addTableOperationSchema = v.pipe(
+const addTableMigrationOperationSchema = v.pipe(
   v.object({
     op: v.literal('add'),
     path: tablePathSchema,
@@ -22,7 +22,7 @@ const addTableOperationSchema = v.pipe(
   v.description('Add new table with complete definition'),
 )
 
-const removeTableOperationSchema = v.pipe(
+const removeTableMigrationOperationSchema = v.pipe(
   v.object({
     op: v.literal('remove'),
     path: tablePathSchema,
@@ -30,7 +30,7 @@ const removeTableOperationSchema = v.pipe(
   v.description('Remove existing table'),
 )
 
-const replaceTableNameOperationSchema = v.pipe(
+const replaceTableNameMigrationOperationSchema = v.pipe(
   v.object({
     op: v.literal('replace'),
     path: tableNamePathSchema,
@@ -39,7 +39,7 @@ const replaceTableNameOperationSchema = v.pipe(
   v.description('Rename existing table'),
 )
 
-const replaceTableCommentOperationSchema = v.pipe(
+const replaceTableCommentMigrationOperationSchema = v.pipe(
   v.object({
     op: v.literal('replace'),
     path: tableCommentPathSchema,
@@ -48,44 +48,48 @@ const replaceTableCommentOperationSchema = v.pipe(
   v.description('Replace table comment'),
 )
 
-export type AddTableOperation = v.InferOutput<typeof addTableOperationSchema>
-export type RemoveTableOperation = v.InferOutput<
-  typeof removeTableOperationSchema
+export type AddTableMigrationOperation = v.InferOutput<
+  typeof addTableMigrationOperationSchema
 >
-export type ReplaceTableNameOperation = v.InferOutput<
-  typeof replaceTableNameOperationSchema
+export type RemoveTableMigrationOperation = v.InferOutput<
+  typeof removeTableMigrationOperationSchema
 >
-export type ReplaceTableCommentOperation = v.InferOutput<
-  typeof replaceTableCommentOperationSchema
+export type ReplaceTableNameMigrationOperation = v.InferOutput<
+  typeof replaceTableNameMigrationOperationSchema
+>
+export type ReplaceTableCommentMigrationOperation = v.InferOutput<
+  typeof replaceTableCommentMigrationOperationSchema
 >
 
-export const isAddTableOperation = (
+export const isAddTableMigrationOperation = (
   operation: MigrationOperation,
-): operation is AddTableOperation => {
-  return v.safeParse(addTableOperationSchema, operation).success
+): operation is AddTableMigrationOperation => {
+  return v.safeParse(addTableMigrationOperationSchema, operation).success
 }
 
-export const isRemoveTableOperation = (
+export const isRemoveTableMigrationOperation = (
   operation: MigrationOperation,
-): operation is RemoveTableOperation => {
-  return v.safeParse(removeTableOperationSchema, operation).success
+): operation is RemoveTableMigrationOperation => {
+  return v.safeParse(removeTableMigrationOperationSchema, operation).success
 }
 
-export const isReplaceTableNameOperation = (
+export const isReplaceTableNameMigrationOperation = (
   operation: MigrationOperation,
-): operation is ReplaceTableNameOperation => {
-  return v.safeParse(replaceTableNameOperationSchema, operation).success
+): operation is ReplaceTableNameMigrationOperation => {
+  return v.safeParse(replaceTableNameMigrationOperationSchema, operation)
+    .success
 }
 
-export const isReplaceTableCommentOperation = (
+export const isReplaceTableCommentMigrationOperation = (
   operation: MigrationOperation,
-): operation is ReplaceTableCommentOperation => {
-  return v.safeParse(replaceTableCommentOperationSchema, operation).success
+): operation is ReplaceTableCommentMigrationOperation => {
+  return v.safeParse(replaceTableCommentMigrationOperationSchema, operation)
+    .success
 }
 
-export const tableOperations = [
-  addTableOperationSchema,
-  removeTableOperationSchema,
-  replaceTableNameOperationSchema,
-  replaceTableCommentOperationSchema,
+export const tableMigrationOperations = [
+  addTableMigrationOperationSchema,
+  removeTableMigrationOperationSchema,
+  replaceTableNameMigrationOperationSchema,
+  replaceTableCommentMigrationOperationSchema,
 ]

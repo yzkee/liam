@@ -31,12 +31,12 @@ export {
   getIndexRelatedChangeStatus,
   getIndexTypeChangeStatus,
   getIndexUniqueChangeStatus,
-  getOperations,
+  getMigrationOperations,
   getTableChangeStatus,
   getTableCommentChangeStatus,
   getTableRelatedChangeStatus,
   type MigrationOperation,
-  operationsSchema,
+  migrationOperationsSchema,
 } from './migrationOperation/index.js'
 export type { ProcessError } from './parser.js'
 export {

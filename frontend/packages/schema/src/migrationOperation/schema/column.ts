@@ -31,7 +31,7 @@ const columnDefaultPathSchema = v.pipe(
 )
 
 // Add column operation
-const addColumnOperationSchema = v.pipe(
+const addColumnMigrationOperationSchema = v.pipe(
   v.object({
     op: v.literal('add'),
     path: columnPathSchema,
@@ -40,16 +40,18 @@ const addColumnOperationSchema = v.pipe(
   v.description('Add new column to table'),
 )
 
-export type AddColumnOperation = v.InferOutput<typeof addColumnOperationSchema>
+export type AddColumnMigrationOperation = v.InferOutput<
+  typeof addColumnMigrationOperationSchema
+>
 
-export const isAddColumnOperation = (
+export const isAddColumnMigrationOperation = (
   operation: MigrationOperation,
-): operation is AddColumnOperation => {
-  return v.safeParse(addColumnOperationSchema, operation).success
+): operation is AddColumnMigrationOperation => {
+  return v.safeParse(addColumnMigrationOperationSchema, operation).success
 }
 
 // Remove column operation
-const removeColumnOperationSchema = v.pipe(
+const removeColumnMigrationOperationSchema = v.pipe(
   v.object({
     op: v.literal('remove'),
     path: columnPathSchema,
@@ -57,18 +59,18 @@ const removeColumnOperationSchema = v.pipe(
   v.description('Remove existing column'),
 )
 
-export type RemoveColumnOperation = v.InferOutput<
-  typeof removeColumnOperationSchema
+export type RemoveColumnMigrationOperation = v.InferOutput<
+  typeof removeColumnMigrationOperationSchema
 >
 
-export const isRemoveColumnOperation = (
+export const isRemoveColumnMigrationOperation = (
   operation: MigrationOperation,
-): operation is RemoveColumnOperation => {
-  return v.safeParse(removeColumnOperationSchema, operation).success
+): operation is RemoveColumnMigrationOperation => {
+  return v.safeParse(removeColumnMigrationOperationSchema, operation).success
 }
 
 // Rename column operation (replace operation for column name)
-const renameColumnOperationSchema = v.pipe(
+const renameColumnMigrationOperationSchema = v.pipe(
   v.object({
     op: v.literal('replace'),
     path: columnNamePathSchema,
@@ -78,7 +80,7 @@ const renameColumnOperationSchema = v.pipe(
 )
 
 // Replace column type operation
-const replaceColumnTypeOperationSchema = v.pipe(
+const replaceColumnTypeMigrationOperationSchema = v.pipe(
   v.object({
     op: v.literal('replace'),
     path: columnTypePathSchema,
@@ -88,7 +90,7 @@ const replaceColumnTypeOperationSchema = v.pipe(
 )
 
 // Replace column comment operation
-const replaceColumnCommentOperationSchema = v.pipe(
+const replaceColumnCommentMigrationOperationSchema = v.pipe(
   v.object({
     op: v.literal('replace'),
     path: columnCommentPathSchema,
@@ -98,7 +100,7 @@ const replaceColumnCommentOperationSchema = v.pipe(
 )
 
 // Replace column check constraint operation
-const replaceColumnCheckOperationSchema = v.pipe(
+const replaceColumnCheckMigrationOperationSchema = v.pipe(
   v.object({
     op: v.literal('replace'),
     path: columnCheckPathSchema,
@@ -108,7 +110,7 @@ const replaceColumnCheckOperationSchema = v.pipe(
 )
 
 // Replace column notNull operation
-const replaceColumnNotNullOperationSchema = v.pipe(
+const replaceColumnNotNullMigrationOperationSchema = v.pipe(
   v.object({
     op: v.literal('replace'),
     path: columnNotNullPathSchema,
@@ -118,7 +120,7 @@ const replaceColumnNotNullOperationSchema = v.pipe(
 )
 
 // Replace column default operation
-const replaceColumnDefaultOperationSchema = v.pipe(
+const replaceColumnDefaultMigrationOperationSchema = v.pipe(
   v.object({
     op: v.literal('replace'),
     path: columnDefaultPathSchema,
@@ -127,69 +129,74 @@ const replaceColumnDefaultOperationSchema = v.pipe(
   v.description('Replace column default value'),
 )
 
-export type RenameColumnOperation = v.InferOutput<
-  typeof renameColumnOperationSchema
+export type RenameColumnMigrationOperation = v.InferOutput<
+  typeof renameColumnMigrationOperationSchema
 >
-export type ReplaceColumnTypeOperation = v.InferOutput<
-  typeof replaceColumnTypeOperationSchema
+export type ReplaceColumnTypeMigrationOperation = v.InferOutput<
+  typeof replaceColumnTypeMigrationOperationSchema
 >
-export type ReplaceColumnCommentOperation = v.InferOutput<
-  typeof replaceColumnCommentOperationSchema
+export type ReplaceColumnCommentMigrationOperation = v.InferOutput<
+  typeof replaceColumnCommentMigrationOperationSchema
 >
-export type ReplaceColumnCheckOperation = v.InferOutput<
-  typeof replaceColumnCheckOperationSchema
+export type ReplaceColumnCheckMigrationOperation = v.InferOutput<
+  typeof replaceColumnCheckMigrationOperationSchema
 >
-export type ReplaceColumnNotNullOperation = v.InferOutput<
-  typeof replaceColumnNotNullOperationSchema
+export type ReplaceColumnNotNullMigrationOperation = v.InferOutput<
+  typeof replaceColumnNotNullMigrationOperationSchema
 >
-export type ReplaceColumnDefaultOperation = v.InferOutput<
-  typeof replaceColumnDefaultOperationSchema
+export type ReplaceColumnDefaultMigrationOperation = v.InferOutput<
+  typeof replaceColumnDefaultMigrationOperationSchema
 >
 
-export const isRenameColumnOperation = (
+export const isRenameColumnMigrationOperation = (
   operation: MigrationOperation,
-): operation is RenameColumnOperation => {
-  return v.safeParse(renameColumnOperationSchema, operation).success
+): operation is RenameColumnMigrationOperation => {
+  return v.safeParse(renameColumnMigrationOperationSchema, operation).success
 }
 
-export const isReplaceColumnTypeOperation = (
+export const isReplaceColumnTypeMigrationOperation = (
   operation: MigrationOperation,
-): operation is ReplaceColumnTypeOperation => {
-  return v.safeParse(replaceColumnTypeOperationSchema, operation).success
+): operation is ReplaceColumnTypeMigrationOperation => {
+  return v.safeParse(replaceColumnTypeMigrationOperationSchema, operation)
+    .success
 }
 
-export const isReplaceColumnCommentOperation = (
+export const isReplaceColumnCommentMigrationOperation = (
   operation: MigrationOperation,
-): operation is ReplaceColumnCommentOperation => {
-  return v.safeParse(replaceColumnCommentOperationSchema, operation).success
+): operation is ReplaceColumnCommentMigrationOperation => {
+  return v.safeParse(replaceColumnCommentMigrationOperationSchema, operation)
+    .success
 }
 
-export const isReplaceColumnCheckOperation = (
+export const isReplaceColumnCheckMigrationOperation = (
   operation: MigrationOperation,
-): operation is ReplaceColumnCheckOperation => {
-  return v.safeParse(replaceColumnCheckOperationSchema, operation).success
+): operation is ReplaceColumnCheckMigrationOperation => {
+  return v.safeParse(replaceColumnCheckMigrationOperationSchema, operation)
+    .success
 }
 
-export const isReplaceColumnNotNullOperation = (
+export const isReplaceColumnNotNullMigrationOperation = (
   operation: MigrationOperation,
-): operation is ReplaceColumnNotNullOperation => {
-  return v.safeParse(replaceColumnNotNullOperationSchema, operation).success
+): operation is ReplaceColumnNotNullMigrationOperation => {
+  return v.safeParse(replaceColumnNotNullMigrationOperationSchema, operation)
+    .success
 }
 
-export const isReplaceColumnDefaultOperation = (
+export const isReplaceColumnDefaultMigrationOperation = (
   operation: MigrationOperation,
-): operation is ReplaceColumnDefaultOperation => {
-  return v.safeParse(replaceColumnDefaultOperationSchema, operation).success
+): operation is ReplaceColumnDefaultMigrationOperation => {
+  return v.safeParse(replaceColumnDefaultMigrationOperationSchema, operation)
+    .success
 }
 
 // Export all column operations
-export const columnOperations = [
-  addColumnOperationSchema,
-  removeColumnOperationSchema,
-  renameColumnOperationSchema,
-  replaceColumnTypeOperationSchema,
-  replaceColumnCommentOperationSchema,
-  replaceColumnCheckOperationSchema,
-  replaceColumnNotNullOperationSchema,
-  replaceColumnDefaultOperationSchema,
+export const columnMigrationOperations = [
+  addColumnMigrationOperationSchema,
+  removeColumnMigrationOperationSchema,
+  renameColumnMigrationOperationSchema,
+  replaceColumnTypeMigrationOperationSchema,
+  replaceColumnCommentMigrationOperationSchema,
+  replaceColumnCheckMigrationOperationSchema,
+  replaceColumnNotNullMigrationOperationSchema,
+  replaceColumnDefaultMigrationOperationSchema,
 ]

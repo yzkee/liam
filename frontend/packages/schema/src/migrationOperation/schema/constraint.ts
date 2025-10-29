@@ -20,7 +20,7 @@ const constraintDetailPathSchema = v.pipe(
   v.regex(PATH_PATTERNS.CONSTRAINT_DETAIL),
 )
 
-const addConstraintOperationSchema = v.pipe(
+const addConstraintMigrationOperationSchema = v.pipe(
   v.object({
     op: v.literal('add'),
     path: constraintPathSchema,
@@ -29,17 +29,17 @@ const addConstraintOperationSchema = v.pipe(
   v.description('Add new constraint to table'),
 )
 
-export type AddConstraintOperation = v.InferOutput<
-  typeof addConstraintOperationSchema
+export type AddConstraintMigrationOperation = v.InferOutput<
+  typeof addConstraintMigrationOperationSchema
 >
 
-export const isAddConstraintOperation = (
+export const isAddConstraintMigrationOperation = (
   operation: MigrationOperation,
-): operation is AddConstraintOperation => {
-  return v.safeParse(addConstraintOperationSchema, operation).success
+): operation is AddConstraintMigrationOperation => {
+  return v.safeParse(addConstraintMigrationOperationSchema, operation).success
 }
 
-const removeConstraintOperationSchema = v.pipe(
+const removeConstraintMigrationOperationSchema = v.pipe(
   v.object({
     op: v.literal('remove'),
     path: constraintPathSchema,
@@ -47,17 +47,18 @@ const removeConstraintOperationSchema = v.pipe(
   v.description('Remove existing constraint'),
 )
 
-export type RemoveConstraintOperation = v.InferOutput<
-  typeof removeConstraintOperationSchema
+export type RemoveConstraintMigrationOperation = v.InferOutput<
+  typeof removeConstraintMigrationOperationSchema
 >
 
-export const isRemoveConstraintOperation = (
+export const isRemoveConstraintMigrationOperation = (
   operation: MigrationOperation,
-): operation is RemoveConstraintOperation => {
-  return v.safeParse(removeConstraintOperationSchema, operation).success
+): operation is RemoveConstraintMigrationOperation => {
+  return v.safeParse(removeConstraintMigrationOperationSchema, operation)
+    .success
 }
 
-const replaceConstraintDeleteOperationSchema = v.pipe(
+const replaceConstraintDeleteMigrationOperationSchema = v.pipe(
   v.object({
     op: v.literal('replace'),
     path: constraintDeletePathSchema,
@@ -66,17 +67,18 @@ const replaceConstraintDeleteOperationSchema = v.pipe(
   v.description('Replace constraint delete action'),
 )
 
-export type ReplaceConstraintDeleteOperation = v.InferOutput<
-  typeof replaceConstraintDeleteOperationSchema
+export type ReplaceConstraintDeleteMigrationOperation = v.InferOutput<
+  typeof replaceConstraintDeleteMigrationOperationSchema
 >
 
-export const isReplaceConstraintDeleteOperation = (
+export const isReplaceConstraintDeleteMigrationOperation = (
   operation: MigrationOperation,
-): operation is ReplaceConstraintDeleteOperation => {
-  return v.safeParse(replaceConstraintDeleteOperationSchema, operation).success
+): operation is ReplaceConstraintDeleteMigrationOperation => {
+  return v.safeParse(replaceConstraintDeleteMigrationOperationSchema, operation)
+    .success
 }
 
-const replaceConstraintUpdateOperationSchema = v.pipe(
+const replaceConstraintUpdateMigrationOperationSchema = v.pipe(
   v.object({
     op: v.literal('replace'),
     path: constraintUpdatePathSchema,
@@ -85,14 +87,15 @@ const replaceConstraintUpdateOperationSchema = v.pipe(
   v.description('Replace constraint update action'),
 )
 
-export type ReplaceConstraintUpdateOperation = v.InferOutput<
-  typeof replaceConstraintUpdateOperationSchema
+export type ReplaceConstraintUpdateMigrationOperation = v.InferOutput<
+  typeof replaceConstraintUpdateMigrationOperationSchema
 >
 
-export const isReplaceConstraintUpdateOperation = (
+export const isReplaceConstraintUpdateMigrationOperation = (
   operation: MigrationOperation,
-): operation is ReplaceConstraintUpdateOperation => {
-  return v.safeParse(replaceConstraintUpdateOperationSchema, operation).success
+): operation is ReplaceConstraintUpdateMigrationOperation => {
+  return v.safeParse(replaceConstraintUpdateMigrationOperationSchema, operation)
+    .success
 }
 
 const constraintColumnNamesArrayPathSchema = v.pipe(
@@ -100,7 +103,7 @@ const constraintColumnNamesArrayPathSchema = v.pipe(
   v.regex(PATH_PATTERNS.CONSTRAINT_COLUMN_NAMES_ARRAY),
 )
 
-const replaceConstraintColumnNamesArrayOperationSchema = v.pipe(
+const replaceConstraintColumnNamesArrayMigrationOperationSchema = v.pipe(
   v.object({
     op: v.literal('replace'),
     path: constraintColumnNamesArrayPathSchema,
@@ -109,7 +112,7 @@ const replaceConstraintColumnNamesArrayOperationSchema = v.pipe(
   v.description('Replace constraint column name in array'),
 )
 
-const replaceConstraintDetailOperationSchema = v.pipe(
+const replaceConstraintDetailMigrationOperationSchema = v.pipe(
   v.object({
     op: v.literal('replace'),
     path: constraintDetailPathSchema,
@@ -118,11 +121,11 @@ const replaceConstraintDetailOperationSchema = v.pipe(
   v.description('Replace constraint detail'),
 )
 
-export const constraintOperations = [
-  addConstraintOperationSchema,
-  removeConstraintOperationSchema,
-  replaceConstraintDeleteOperationSchema,
-  replaceConstraintUpdateOperationSchema,
-  replaceConstraintColumnNamesArrayOperationSchema,
-  replaceConstraintDetailOperationSchema,
+export const constraintMigrationOperations = [
+  addConstraintMigrationOperationSchema,
+  removeConstraintMigrationOperationSchema,
+  replaceConstraintDeleteMigrationOperationSchema,
+  replaceConstraintUpdateMigrationOperationSchema,
+  replaceConstraintColumnNamesArrayMigrationOperationSchema,
+  replaceConstraintDetailMigrationOperationSchema,
 ]

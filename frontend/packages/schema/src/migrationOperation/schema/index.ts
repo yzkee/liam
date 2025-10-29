@@ -1,23 +1,23 @@
 import * as v from 'valibot'
-import { columnOperations } from './column.js'
-import { constraintOperations } from './constraint.js'
-import { enumOperations } from './enum.js'
-import { extensionOperations } from './extension.js'
-import { indexOperations } from './indexOperations.js'
-import { tableOperations } from './table.js'
+import { columnMigrationOperations } from './column.js'
+import { constraintMigrationOperations } from './constraint.js'
+import { enumMigrationOperations } from './enum.js'
+import { extensionMigrationOperations } from './extension.js'
+import { indexMigrationOperations } from './indexMigrationOperations.js'
+import { tableMigrationOperations } from './table.js'
 
-export const operationSchema = v.union([
-  ...tableOperations,
-  ...columnOperations,
-  ...indexOperations,
-  ...constraintOperations,
-  ...enumOperations,
-  ...extensionOperations,
+export const migrationOperationSchema = v.union([
+  ...tableMigrationOperations,
+  ...columnMigrationOperations,
+  ...indexMigrationOperations,
+  ...constraintMigrationOperations,
+  ...enumMigrationOperations,
+  ...extensionMigrationOperations,
 ])
-export type MigrationOperation = v.InferOutput<typeof operationSchema>
+export type MigrationOperation = v.InferOutput<typeof migrationOperationSchema>
 
-export const operationsSchema = v.pipe(
-  v.array(operationSchema),
+export const migrationOperationsSchema = v.pipe(
+  v.array(migrationOperationSchema),
   v.description('JSON Patch operations for database schema modifications'),
 )
 

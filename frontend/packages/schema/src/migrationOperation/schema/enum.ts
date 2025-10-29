@@ -14,7 +14,7 @@ const enumCommentPathSchema = v.pipe(
   v.regex(PATH_PATTERNS.ENUM_COMMENT),
 )
 
-const addEnumOperationSchema = v.pipe(
+const addEnumMigrationOperationSchema = v.pipe(
   v.object({
     op: v.literal('add'),
     path: enumPathSchema,
@@ -23,7 +23,7 @@ const addEnumOperationSchema = v.pipe(
   v.description('Add new enum with complete definition'),
 )
 
-const removeEnumOperationSchema = v.pipe(
+const removeEnumMigrationOperationSchema = v.pipe(
   v.object({
     op: v.literal('remove'),
     path: enumPathSchema,
@@ -31,7 +31,7 @@ const removeEnumOperationSchema = v.pipe(
   v.description('Remove existing enum'),
 )
 
-const replaceEnumNameOperationSchema = v.pipe(
+const replaceEnumNameMigrationOperationSchema = v.pipe(
   v.object({
     op: v.literal('replace'),
     path: enumNamePathSchema,
@@ -40,7 +40,7 @@ const replaceEnumNameOperationSchema = v.pipe(
   v.description('Rename existing enum'),
 )
 
-const replaceEnumValuesOperationSchema = v.pipe(
+const replaceEnumValuesMigrationOperationSchema = v.pipe(
   v.object({
     op: v.literal('replace'),
     path: enumValuesPathSchema,
@@ -49,7 +49,7 @@ const replaceEnumValuesOperationSchema = v.pipe(
   v.description('Replace enum values'),
 )
 
-const replaceEnumCommentOperationSchema = v.pipe(
+const replaceEnumCommentMigrationOperationSchema = v.pipe(
   v.object({
     op: v.literal('replace'),
     path: enumCommentPathSchema,
@@ -58,18 +58,20 @@ const replaceEnumCommentOperationSchema = v.pipe(
   v.description('Replace enum comment'),
 )
 
-export type AddEnumOperation = v.InferOutput<typeof addEnumOperationSchema>
-export type RemoveEnumOperation = v.InferOutput<
-  typeof removeEnumOperationSchema
+export type AddEnumMigrationOperation = v.InferOutput<
+  typeof addEnumMigrationOperationSchema
 >
-export type ReplaceEnumNameOperation = v.InferOutput<
-  typeof replaceEnumNameOperationSchema
+export type RemoveEnumMigrationOperation = v.InferOutput<
+  typeof removeEnumMigrationOperationSchema
 >
-export type ReplaceEnumValuesOperation = v.InferOutput<
-  typeof replaceEnumValuesOperationSchema
+export type ReplaceEnumNameMigrationOperation = v.InferOutput<
+  typeof replaceEnumNameMigrationOperationSchema
 >
-export type ReplaceEnumCommentOperation = v.InferOutput<
-  typeof replaceEnumCommentOperationSchema
+export type ReplaceEnumValuesMigrationOperation = v.InferOutput<
+  typeof replaceEnumValuesMigrationOperationSchema
+>
+export type ReplaceEnumCommentMigrationOperation = v.InferOutput<
+  typeof replaceEnumCommentMigrationOperationSchema
 >
 
 // Helper for type guards to reduce repetition
@@ -78,36 +80,42 @@ const isOperationOf =
   (operation: MigrationOperation): operation is T =>
     v.safeParse(schema, operation).success
 
-export const isAddEnumOperation = isOperationOf<AddEnumOperation>(
-  addEnumOperationSchema,
-)
+export const isAddEnumMigrationOperation =
+  isOperationOf<AddEnumMigrationOperation>(addEnumMigrationOperationSchema)
 
-export const isRemoveEnumOperation = isOperationOf<RemoveEnumOperation>(
-  removeEnumOperationSchema,
-)
+export const isRemoveEnumMigrationOperation =
+  isOperationOf<RemoveEnumMigrationOperation>(
+    removeEnumMigrationOperationSchema,
+  )
 
-export const isReplaceEnumNameOperation =
-  isOperationOf<ReplaceEnumNameOperation>(replaceEnumNameOperationSchema)
+export const isReplaceEnumNameMigrationOperation =
+  isOperationOf<ReplaceEnumNameMigrationOperation>(
+    replaceEnumNameMigrationOperationSchema,
+  )
 
-export const isReplaceEnumValuesOperation =
-  isOperationOf<ReplaceEnumValuesOperation>(replaceEnumValuesOperationSchema)
+export const isReplaceEnumValuesMigrationOperation =
+  isOperationOf<ReplaceEnumValuesMigrationOperation>(
+    replaceEnumValuesMigrationOperationSchema,
+  )
 
-export const isReplaceEnumCommentOperation =
-  isOperationOf<ReplaceEnumCommentOperation>(replaceEnumCommentOperationSchema)
+export const isReplaceEnumCommentMigrationOperation =
+  isOperationOf<ReplaceEnumCommentMigrationOperation>(
+    replaceEnumCommentMigrationOperationSchema,
+  )
 
 // Export individual schemas
 export {
-  addEnumOperationSchema,
-  removeEnumOperationSchema,
-  replaceEnumNameOperationSchema,
-  replaceEnumValuesOperationSchema,
-  replaceEnumCommentOperationSchema,
+  addEnumMigrationOperationSchema,
+  removeEnumMigrationOperationSchema,
+  replaceEnumNameMigrationOperationSchema,
+  replaceEnumValuesMigrationOperationSchema,
+  replaceEnumCommentMigrationOperationSchema,
 }
 
-export const enumOperations = [
-  addEnumOperationSchema,
-  removeEnumOperationSchema,
-  replaceEnumNameOperationSchema,
-  replaceEnumValuesOperationSchema,
-  replaceEnumCommentOperationSchema,
+export const enumMigrationOperations = [
+  addEnumMigrationOperationSchema,
+  removeEnumMigrationOperationSchema,
+  replaceEnumNameMigrationOperationSchema,
+  replaceEnumValuesMigrationOperationSchema,
+  replaceEnumCommentMigrationOperationSchema,
 ]

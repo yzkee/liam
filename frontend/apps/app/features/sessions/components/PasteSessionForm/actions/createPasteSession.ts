@@ -16,7 +16,13 @@ export async function createPasteSession(
 ): Promise<CreateSessionState> {
   const parsedFormDataResult = parseFormData(formData, PasteFormDataSchema)
   if (!parsedFormDataResult.success) {
-    return { success: false, error: 'Invalid form data' }
+    const errorMessages = parsedFormDataResult.issues
+      .map((issue) => issue.message)
+      .join(', ')
+    return {
+      success: false,
+      error: `Validation failed: ${errorMessages}`,
+    }
   }
 
   const {
@@ -44,7 +50,7 @@ export async function createPasteSession(
     },
     {
       schema,
-      schemaFilePath: 'pasted-schema',
+      schemaFilePath: null,
     },
   )
 }

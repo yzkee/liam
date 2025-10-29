@@ -20,7 +20,7 @@ const emptyStringToNull = v.pipe(
 )
 
 // Base form schema shared across all session types
-const BaseFormDataSchema = v.object({
+export const BaseFormDataSchema = v.object({
   parentDesignSessionId: v.optional(v.nullable(emptyStringToNull)),
   initialMessage: v.pipe(
     v.string(),

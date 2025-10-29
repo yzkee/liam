@@ -1,9 +1,9 @@
-import { GithubLogo, Link, Upload } from '@liam-hq/ui'
+import { ClipboardList, GithubLogo, Link, Upload } from '@liam-hq/ui'
 import clsx from 'clsx'
 import { type FC, useEffect, useId, useRef } from 'react'
 import styles from './SessionModeSelector.module.css'
 
-export type SessionMode = 'github' | 'upload' | 'url'
+export type SessionMode = 'github' | 'upload' | 'url' | 'paste'
 
 export type ModeIds = {
   tabId: string
@@ -32,6 +32,11 @@ const modes: { mode: SessionMode; label: string; icon: React.ReactElement }[] =
       label: 'Import from URL',
       icon: <Link size={16} className={styles.modeButtonIcon} />,
     },
+    {
+      mode: 'paste',
+      label: 'Paste Schema',
+      icon: <ClipboardList size={16} className={styles.modeButtonIcon} />,
+    },
   ]
 
 export const SessionModeSelector: FC<Props> = ({
@@ -57,6 +62,10 @@ export const SessionModeSelector: FC<Props> = ({
     url: {
       tabId: `${baseId}-url-tab`,
       panelId: `${baseId}-url-panel`,
+    },
+    paste: {
+      tabId: `${baseId}-paste-tab`,
+      panelId: `${baseId}-paste-panel`,
     },
   }
 

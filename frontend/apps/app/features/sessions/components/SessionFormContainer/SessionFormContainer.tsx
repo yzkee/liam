@@ -4,6 +4,7 @@ import { type FC, useEffect, useRef, useState } from 'react'
 import type { Projects } from '../../../../components/CommonLayout/AppBar/ProjectsDropdownMenu/services/getProjects'
 import { createAccessibleOpacityTransition } from '../../../../utils/accessibleTransitions'
 import { GitHubSessionForm } from '../GitHubSessionForm'
+import { PasteSessionForm } from '../PasteSessionForm'
 import { UploadSessionForm } from '../UploadSessionForm'
 import { UrlSessionForm } from '../UrlSessionForm'
 import styles from './SessionFormContainer.module.css'
@@ -150,6 +151,16 @@ export const SessionFormContainer: FC<Props> = ({
             style={createAccessibleOpacityTransition(!isTransitioning)}
           >
             <UrlSessionForm />
+          </div>
+        )}
+        {mode === 'paste' && (
+          <div
+            role="tabpanel"
+            id={modeIds.panelId}
+            aria-labelledby={modeIds.tabId}
+            style={createAccessibleOpacityTransition(!isTransitioning)}
+          >
+            <PasteSessionForm />
           </div>
         )}
       </div>

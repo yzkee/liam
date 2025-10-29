@@ -72,11 +72,32 @@ export async function createScratchSession(
     return { success: false, error: 'Failed to create design session' }
   }
 
-  const redirectTo = `/design_sessions/${designSession.id}`
+  const designSessionId = designSession.id
+
+  const emptySchema = { tables: {}, enums: {}, extensions: {} }
+  const { data: buildingSchema, error: buildingSchemaError } = await supabase
+    .from('building_schemas')
+    .insert({
+      design_session_id: designSessionId,
+      organization_id: organizationId,
+      schema: JSON.parse(JSON.stringify(emptySchema)),
+      initial_schema_snapshot: JSON.parse(JSON.stringify(emptySchema)),
+      schema_file_path: null,
+      git_sha: null,
+    })
+    .select()
+    .single()
+
+  if (buildingSchemaError || !buildingSchema) {
+    console.error('Building schema creation error:', buildingSchemaError)
+    return { success: false, error: 'Failed to create building schema' }
+  }
+
+  const redirectTo = `/design_sessions/${designSessionId}`
 
   return {
     success: true,
-    designSessionId: designSession.id,
+    designSessionId,
     redirectTo,
     userName: userInfo.name,
     initialMessage,

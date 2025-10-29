@@ -1,7 +1,7 @@
 import * as v from 'valibot'
 import { enumNameSchema, enumSchema } from '../../schema/index.js'
 import { PATH_PATTERNS } from '../constants.js'
-import type { Operation } from './index.js'
+import type { MigrationOperation } from './index.js'
 
 const enumPathSchema = v.pipe(v.string(), v.regex(PATH_PATTERNS.ENUM_BASE))
 const enumNamePathSchema = v.pipe(v.string(), v.regex(PATH_PATTERNS.ENUM_NAME))
@@ -74,8 +74,8 @@ export type ReplaceEnumCommentOperation = v.InferOutput<
 
 // Helper for type guards to reduce repetition
 const isOperationOf =
-  <T extends Operation>(schema: v.GenericSchema<T>) =>
-  (operation: Operation): operation is T =>
+  <T extends MigrationOperation>(schema: v.GenericSchema<T>) =>
+  (operation: MigrationOperation): operation is T =>
     v.safeParse(schema, operation).success
 
 export const isAddEnumOperation = isOperationOf<AddEnumOperation>(

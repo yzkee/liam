@@ -1,7 +1,7 @@
 import * as v from 'valibot'
 import { indexSchema } from '../../schema/index.js'
 import { PATH_PATTERNS } from '../constants.js'
-import type { Operation } from './index.js'
+import type { MigrationOperation } from './index.js'
 
 const indexPathSchema = v.pipe(v.string(), v.regex(PATH_PATTERNS.INDEX_BASE))
 const indexUniquePathSchema = v.pipe(
@@ -34,7 +34,7 @@ const addIndexOperationSchema = v.pipe(
 export type AddIndexOperation = v.InferOutput<typeof addIndexOperationSchema>
 
 export const isAddIndexOperation = (
-  operation: Operation,
+  operation: MigrationOperation,
 ): operation is AddIndexOperation => {
   return v.safeParse(addIndexOperationSchema, operation).success
 }
@@ -53,7 +53,7 @@ export type RemoveIndexOperation = v.InferOutput<
 >
 
 export const isRemoveIndexOperation = (
-  operation: Operation,
+  operation: MigrationOperation,
 ): operation is RemoveIndexOperation => {
   return v.safeParse(removeIndexOperationSchema, operation).success
 }

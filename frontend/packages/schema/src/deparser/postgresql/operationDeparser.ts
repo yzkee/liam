@@ -32,7 +32,7 @@ import {
   isReplaceConstraintDeleteOperation,
   isReplaceConstraintUpdateOperation,
 } from '../../operation/schema/constraint.js'
-import type { Operation } from '../../operation/schema/index.js'
+import type { MigrationOperation } from '../../operation/schema/index.js'
 import type {
   AddIndexOperation,
   RemoveIndexOperation,
@@ -611,7 +611,7 @@ function generateAlterConstraintUpdateFromOperation(
  * TODO: Migrate to new OperationDeparser type (Result<string, Error>) for better error handling.
  */
 export const postgresqlOperationDeparser: LegacyOperationDeparser = (
-  operation: Operation,
+  operation: MigrationOperation,
   // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: Refactor to reduce complexity
 ) => {
   const errors: { message: string }[] = []

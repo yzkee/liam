@@ -1,12 +1,12 @@
-import type { ChangeStatus, Operation } from '../index.js'
+import type { ChangeStatus, MigrationOperation } from '../index.js'
 
 type Params = {
-  operations: Operation[]
+  operations: MigrationOperation[]
   /**
    * Custom logic to determine if operations should be considered as 'modified'
    * even if they would normally be classified as 'added' or 'removed'
    */
-  customModificationChecker?: (operations: Operation[]) => boolean
+  customModificationChecker?: (operations: MigrationOperation[]) => boolean
 }
 
 export function determineChangeStatus({

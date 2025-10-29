@@ -1,7 +1,8 @@
 import * as v from 'valibot'
 import { columnSchema } from '../../schema/index.js'
 import { PATH_PATTERNS } from '../constants.js'
-import type { Operation } from './index.js'
+
+import type { MigrationOperation } from './index.js'
 
 const columnPathSchema = v.pipe(v.string(), v.regex(PATH_PATTERNS.COLUMN_BASE))
 const columnNamePathSchema = v.pipe(
@@ -42,7 +43,7 @@ const addColumnOperationSchema = v.pipe(
 export type AddColumnOperation = v.InferOutput<typeof addColumnOperationSchema>
 
 export const isAddColumnOperation = (
-  operation: Operation,
+  operation: MigrationOperation,
 ): operation is AddColumnOperation => {
   return v.safeParse(addColumnOperationSchema, operation).success
 }
@@ -61,7 +62,7 @@ export type RemoveColumnOperation = v.InferOutput<
 >
 
 export const isRemoveColumnOperation = (
-  operation: Operation,
+  operation: MigrationOperation,
 ): operation is RemoveColumnOperation => {
   return v.safeParse(removeColumnOperationSchema, operation).success
 }
@@ -146,37 +147,37 @@ export type ReplaceColumnDefaultOperation = v.InferOutput<
 >
 
 export const isRenameColumnOperation = (
-  operation: Operation,
+  operation: MigrationOperation,
 ): operation is RenameColumnOperation => {
   return v.safeParse(renameColumnOperationSchema, operation).success
 }
 
 export const isReplaceColumnTypeOperation = (
-  operation: Operation,
+  operation: MigrationOperation,
 ): operation is ReplaceColumnTypeOperation => {
   return v.safeParse(replaceColumnTypeOperationSchema, operation).success
 }
 
 export const isReplaceColumnCommentOperation = (
-  operation: Operation,
+  operation: MigrationOperation,
 ): operation is ReplaceColumnCommentOperation => {
   return v.safeParse(replaceColumnCommentOperationSchema, operation).success
 }
 
 export const isReplaceColumnCheckOperation = (
-  operation: Operation,
+  operation: MigrationOperation,
 ): operation is ReplaceColumnCheckOperation => {
   return v.safeParse(replaceColumnCheckOperationSchema, operation).success
 }
 
 export const isReplaceColumnNotNullOperation = (
-  operation: Operation,
+  operation: MigrationOperation,
 ): operation is ReplaceColumnNotNullOperation => {
   return v.safeParse(replaceColumnNotNullOperationSchema, operation).success
 }
 
 export const isReplaceColumnDefaultOperation = (
-  operation: Operation,
+  operation: MigrationOperation,
 ): operation is ReplaceColumnDefaultOperation => {
   return v.safeParse(replaceColumnDefaultOperationSchema, operation).success
 }

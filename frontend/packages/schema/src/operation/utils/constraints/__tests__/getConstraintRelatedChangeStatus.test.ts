@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { Operation } from '../../../schema/index.js'
+import type { MigrationOperation } from '../../../schema/index.js'
 import { getConstraintRelatedChangeStatus } from '../getConstraintRelatedChangeStatus.js'
 
 // Mock constraint data for tests
@@ -27,7 +27,7 @@ const mockUniqueConstraint = {
 
 describe('getConstraintRelatedChangeStatus', () => {
   it('should return "unchanged" when no operations match the table and constraint', () => {
-    const operations: Operation[] = [
+    const operations: MigrationOperation[] = [
       {
         op: 'add',
         path: '/tables/other_table/constraints/pkey',
@@ -45,7 +45,7 @@ describe('getConstraintRelatedChangeStatus', () => {
 
   describe('constraint operations', () => {
     it('should return "added" when constraint is added', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'add',
           path: '/tables/users/constraints/users_pkey',
@@ -61,7 +61,7 @@ describe('getConstraintRelatedChangeStatus', () => {
     })
 
     it('should return "removed" when constraint is removed', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         { op: 'remove', path: '/tables/users/constraints/users_pkey' },
       ]
       const result = getConstraintRelatedChangeStatus({
@@ -73,7 +73,7 @@ describe('getConstraintRelatedChangeStatus', () => {
     })
 
     it('should return "modified" when constraint name is changed', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/constraints/users_pkey/name',
@@ -89,7 +89,7 @@ describe('getConstraintRelatedChangeStatus', () => {
     })
 
     it('should return "modified" when constraint type is changed', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/constraints/unique_email/type',
@@ -107,7 +107,7 @@ describe('getConstraintRelatedChangeStatus', () => {
 
   describe('foreign key constraint operations', () => {
     it('should return "modified" when update constraint is changed', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/orders/constraints/fk_user_id/updateConstraint',
@@ -123,7 +123,7 @@ describe('getConstraintRelatedChangeStatus', () => {
     })
 
     it('should return "modified" when delete constraint is changed', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/orders/constraints/fk_user_id/deleteConstraint',
@@ -141,7 +141,7 @@ describe('getConstraintRelatedChangeStatus', () => {
 
   describe('check constraint operations', () => {
     it('should return "modified" when constraint detail is changed', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/constraints/check_age/detail',
@@ -159,7 +159,7 @@ describe('getConstraintRelatedChangeStatus', () => {
 
   describe('multiple constraint operations', () => {
     it('should return "modified" when multiple properties are changed', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/orders/constraints/fk_user_id/targetTableName',
@@ -187,7 +187,7 @@ describe('getConstraintRelatedChangeStatus', () => {
 
   describe('filtering operations', () => {
     it('should only consider operations for the specified table and constraint', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'add',
           path: '/tables/users/constraints/users_pkey',
@@ -213,7 +213,7 @@ describe('getConstraintRelatedChangeStatus', () => {
     })
 
     it('should ignore operations for other constraints in the same table', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/constraints/unique_email/type',
@@ -238,7 +238,7 @@ describe('getConstraintRelatedChangeStatus', () => {
     })
 
     it('should ignore non-constraint operations', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'add',
           path: '/tables/users/columns/email',
@@ -265,7 +265,7 @@ describe('getConstraintRelatedChangeStatus', () => {
 
   describe('mixed operations', () => {
     it('should handle mixed operations correctly', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         // Constraint operations for users.users_pkey
         {
           op: 'replace',
@@ -309,7 +309,7 @@ describe('getConstraintRelatedChangeStatus', () => {
 
   describe('edge cases', () => {
     it('should handle constraint names with special characters', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'add',
           path: '/tables/user_profile/constraints/user_profile_pkey',
@@ -334,7 +334,7 @@ describe('getConstraintRelatedChangeStatus', () => {
     })
 
     it('should match exact table and constraint names only', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'add',
           path: '/tables/users_old/constraints/users_pkey',
@@ -357,7 +357,7 @@ describe('getConstraintRelatedChangeStatus', () => {
 
   describe('without constraintId', () => {
     it('should return "added" when any constraint is added to the table', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'add',
           path: '/tables/users/constraints/users_pkey',
@@ -377,7 +377,7 @@ describe('getConstraintRelatedChangeStatus', () => {
     })
 
     it('should return "removed" when any constraint is removed from the table', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         { op: 'remove', path: '/tables/users/constraints/users_pkey' },
         { op: 'remove', path: '/tables/users/constraints/fk_user_id' },
       ]
@@ -389,7 +389,7 @@ describe('getConstraintRelatedChangeStatus', () => {
     })
 
     it('should return "modified" when any constraint is modified in the table', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/constraints/users_pkey/name',
@@ -409,7 +409,7 @@ describe('getConstraintRelatedChangeStatus', () => {
     })
 
     it('should return "unchanged" when no constraint operations exist for the table', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'add',
           path: '/tables/products/constraints/products_pkey',
@@ -436,7 +436,7 @@ describe('getConstraintRelatedChangeStatus', () => {
     })
 
     it('should return correct status for mixed constraint operations', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'add',
           path: '/tables/users/constraints/check_age',

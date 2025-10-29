@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import type { Operation } from '../../../schema/index.js'
+import type { MigrationOperation } from '../../../schema/index.js'
 import { getTableChangeStatus } from '../getTableChangeStatus.js'
 
 describe('getTableChangeStatus', () => {
   it('should return "unchanged" when no operations match the table', () => {
-    const operations: Operation[] = [
+    const operations: MigrationOperation[] = [
       {
         op: 'add',
         path: '/tables/products',
@@ -28,7 +28,7 @@ describe('getTableChangeStatus', () => {
 
   describe('table operations', () => {
     it('should return "added" when table is added', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'add',
           path: '/tables/users',
@@ -49,7 +49,9 @@ describe('getTableChangeStatus', () => {
     })
 
     it('should return "removed" when table is removed', () => {
-      const operations: Operation[] = [{ op: 'remove', path: '/tables/users' }]
+      const operations: MigrationOperation[] = [
+        { op: 'remove', path: '/tables/users' },
+      ]
       const result = getTableChangeStatus({
         tableId: 'users',
         operations,
@@ -58,7 +60,7 @@ describe('getTableChangeStatus', () => {
     })
 
     it('should return "modified" when table name is changed', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/name',
@@ -73,7 +75,7 @@ describe('getTableChangeStatus', () => {
     })
 
     it('should return "modified" when table comment is changed', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/comment',
@@ -90,7 +92,7 @@ describe('getTableChangeStatus', () => {
 
   describe('multiple table operations', () => {
     it('should return "modified" when multiple properties are changed', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/name',
@@ -112,7 +114,7 @@ describe('getTableChangeStatus', () => {
 
   describe('filtering operations', () => {
     it('should only consider operations for the specified table', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'add',
           path: '/tables/users',
@@ -145,7 +147,7 @@ describe('getTableChangeStatus', () => {
     })
 
     it('should ignore non-table operations', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'add',
           path: '/tables/users/columns/email',
@@ -180,7 +182,7 @@ describe('getTableChangeStatus', () => {
 
   describe('edge cases', () => {
     it('should handle table names with special characters', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'add',
           path: '/tables/user_profile',
@@ -209,7 +211,7 @@ describe('getTableChangeStatus', () => {
     })
 
     it('should match exact table names only', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'add',
           path: '/tables/users_old',
@@ -235,7 +237,7 @@ describe('getTableChangeStatus', () => {
     })
 
     it('should handle table names that are substrings of other table names', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'add',
           path: '/tables/user',

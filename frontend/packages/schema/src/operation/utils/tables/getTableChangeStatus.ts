@@ -1,5 +1,5 @@
 import { PATH_PATTERNS } from '../../constants.js'
-import type { Operation } from '../../schema/index.js'
+import type { MigrationOperation } from '../../schema/index.js'
 import { determineChangeStatus } from '../determineChangeStatus.js'
 
 const TABLE_PATH_PATTERNS = [
@@ -10,7 +10,7 @@ const TABLE_PATH_PATTERNS = [
 
 type Params = {
   tableId: string
-  operations: Operation[]
+  operations: MigrationOperation[]
 }
 
 export const getTableChangeStatus = ({ tableId, operations }: Params) => {

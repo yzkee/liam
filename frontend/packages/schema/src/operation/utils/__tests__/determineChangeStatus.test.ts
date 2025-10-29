@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { PATH_PATTERNS } from '../../constants.js'
-import type { Operation } from '../../schema/index.js'
+import type { MigrationOperation } from '../../schema/index.js'
 import { determineChangeStatus } from '../determineChangeStatus.js'
 
 // Mock column data for tests
@@ -21,7 +21,7 @@ describe('determineChangeStatus', () => {
 
   describe('replace operations', () => {
     it('should return "modified" when there is a replace operation', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/columns/id/type',
@@ -33,7 +33,7 @@ describe('determineChangeStatus', () => {
     })
 
     it('should return "modified" when there are multiple operations including replace', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'add',
           path: '/tables/users/columns/created_at',
@@ -53,7 +53,7 @@ describe('determineChangeStatus', () => {
 
   describe('add operations', () => {
     it('should return "added" when there is only an add operation', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         { op: 'add', path: '/tables/users/columns/email', value: mockColumn },
       ]
       const result = determineChangeStatus({ operations })
@@ -61,7 +61,7 @@ describe('determineChangeStatus', () => {
     })
 
     it('should return "added" when there are multiple add operations', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         { op: 'add', path: '/tables/users/columns/email', value: mockColumn },
         { op: 'add', path: '/tables/users/columns/phone', value: mockColumn },
       ]
@@ -72,7 +72,7 @@ describe('determineChangeStatus', () => {
 
   describe('remove operations', () => {
     it('should return "removed" when there is only a remove operation', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         { op: 'remove', path: '/tables/users/columns/deprecated_field' },
       ]
       const result = determineChangeStatus({ operations })
@@ -80,7 +80,7 @@ describe('determineChangeStatus', () => {
     })
 
     it('should return "removed" when there are multiple remove operations', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         { op: 'remove', path: '/tables/users/columns/field1' },
         { op: 'remove', path: '/tables/users/columns/field2' },
       ]
@@ -91,7 +91,7 @@ describe('determineChangeStatus', () => {
 
   describe('mixed add and remove operations', () => {
     it('should return "modified" when there are both add and remove operations', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'add',
           path: '/tables/users/columns/new_field',
@@ -104,7 +104,7 @@ describe('determineChangeStatus', () => {
     })
 
     it('should return "modified" when there are multiple add and remove operations', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         { op: 'add', path: '/tables/users/columns/field1', value: mockColumn },
         { op: 'add', path: '/tables/users/columns/field2', value: mockColumn },
         { op: 'remove', path: '/tables/users/columns/field3' },
@@ -117,7 +117,7 @@ describe('determineChangeStatus', () => {
 
   describe('edge cases', () => {
     it('should handle operations with complex paths', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/constraints/users_pkey/columns/0',
@@ -129,7 +129,7 @@ describe('determineChangeStatus', () => {
     })
 
     it('should handle operations with nested values', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'add',
           path: '/tables/products/columns/metadata',
@@ -151,7 +151,7 @@ describe('determineChangeStatus', () => {
 
 describe('determineChangeStatus with customModificationChecker', () => {
   it('should return "modified" when customModificationChecker returns true', () => {
-    const operations: Operation[] = [
+    const operations: MigrationOperation[] = [
       {
         op: 'add',
         path: '/tables/users/indexes/idx_composite/columns/2',
@@ -159,7 +159,7 @@ describe('determineChangeStatus with customModificationChecker', () => {
       },
     ]
 
-    const customChecker = (ops: Operation[]) =>
+    const customChecker = (ops: MigrationOperation[]) =>
       ops.some((op) => PATH_PATTERNS.INDEX_COLUMNS_ELEMENT.test(op.path))
 
     const result = determineChangeStatus({
@@ -170,7 +170,7 @@ describe('determineChangeStatus with customModificationChecker', () => {
   })
 
   it('should fallback to default logic when customModificationChecker returns false', () => {
-    const operations: Operation[] = [
+    const operations: MigrationOperation[] = [
       {
         op: 'add',
         path: '/tables/users/indexes/idx_new',
@@ -178,7 +178,7 @@ describe('determineChangeStatus with customModificationChecker', () => {
       },
     ]
 
-    const customChecker = (ops: Operation[]) =>
+    const customChecker = (ops: MigrationOperation[]) =>
       ops.some((op) => PATH_PATTERNS.INDEX_COLUMNS_ELEMENT.test(op.path))
 
     const result = determineChangeStatus({
@@ -189,7 +189,7 @@ describe('determineChangeStatus with customModificationChecker', () => {
   })
 
   it('should work without customModificationChecker (backward compatibility)', () => {
-    const operations: Operation[] = [
+    const operations: MigrationOperation[] = [
       {
         op: 'replace',
         path: '/tables/users/columns/id/type',

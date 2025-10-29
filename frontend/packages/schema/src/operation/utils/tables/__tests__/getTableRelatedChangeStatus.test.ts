@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { Operation } from '../../../index.js'
+import type { MigrationOperation } from '../../../index.js'
 import { getTableRelatedChangeStatus } from '../getTableRelatedChangeStatus.js'
 
 // Mock table data for tests
@@ -23,7 +23,7 @@ const mockColumn = {
 
 describe('getTableRelatedChangeStatus', () => {
   it('should return "unchanged" when no operations match the table', () => {
-    const operations: Operation[] = [
+    const operations: MigrationOperation[] = [
       { op: 'add', path: '/tables/other_table/columns/id', value: mockColumn },
       { op: 'remove', path: '/tables/another_table' },
     ]
@@ -36,7 +36,7 @@ describe('getTableRelatedChangeStatus', () => {
 
   describe('table-level operations', () => {
     it('should return "added" when table is added', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         { op: 'add', path: '/tables/users', value: mockTable },
       ]
       const result = getTableRelatedChangeStatus({
@@ -47,7 +47,9 @@ describe('getTableRelatedChangeStatus', () => {
     })
 
     it('should return "removed" when table is removed', () => {
-      const operations: Operation[] = [{ op: 'remove', path: '/tables/users' }]
+      const operations: MigrationOperation[] = [
+        { op: 'remove', path: '/tables/users' },
+      ]
       const result = getTableRelatedChangeStatus({
         tableId: 'users',
         operations,
@@ -56,7 +58,7 @@ describe('getTableRelatedChangeStatus', () => {
     })
 
     it('should return "modified" when table name is changed', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         { op: 'replace', path: '/tables/users/name', value: 'customers' },
       ]
       const result = getTableRelatedChangeStatus({
@@ -67,7 +69,7 @@ describe('getTableRelatedChangeStatus', () => {
     })
 
     it('should return "modified" when table comment is changed', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         { op: 'replace', path: '/tables/users/comment', value: 'User data' },
       ]
       const result = getTableRelatedChangeStatus({
@@ -80,7 +82,7 @@ describe('getTableRelatedChangeStatus', () => {
 
   describe('filtering operations', () => {
     it('should only consider operations for the specified table', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         { op: 'add', path: '/tables/users', value: mockTable },
         { op: 'add', path: '/tables/products', value: mockTable },
         { op: 'remove', path: '/tables/orders' },
@@ -93,7 +95,7 @@ describe('getTableRelatedChangeStatus', () => {
     })
 
     it('should ignore non-table operations', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         { op: 'add', path: '/tables/users/columns/id', value: mockColumn },
         { op: 'remove', path: '/tables/users/indexes/idx_email' },
         {
@@ -112,7 +114,7 @@ describe('getTableRelatedChangeStatus', () => {
 
   describe('multiple operations', () => {
     it('should return "modified" when table has multiple changes', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         { op: 'replace', path: '/tables/users/name', value: 'customers' },
         {
           op: 'replace',
@@ -128,7 +130,7 @@ describe('getTableRelatedChangeStatus', () => {
     })
 
     it('should handle mixed operations correctly', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         // Table-level operations for 'users'
         {
           op: 'replace',
@@ -150,7 +152,7 @@ describe('getTableRelatedChangeStatus', () => {
 
   describe('edge cases', () => {
     it('should handle table names with special characters', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         { op: 'add', path: '/tables/user_profile', value: mockTable },
       ]
       const result = getTableRelatedChangeStatus({
@@ -169,7 +171,7 @@ describe('getTableRelatedChangeStatus', () => {
     })
 
     it('should match exact table names only', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         { op: 'add', path: '/tables/users_old', value: mockTable },
         { op: 'add', path: '/tables/new_users', value: mockTable },
       ]

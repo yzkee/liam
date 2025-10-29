@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import type { Operation } from '../../../schema/index.js'
+import type { MigrationOperation } from '../../../schema/index.js'
 import { getColumnCommentChangeStatus } from '../getColumnCommentChangeStatus.js'
 
 describe('getColumnCommentChangeStatus', () => {
   it('should return "unchanged" when no operations match the column comment', () => {
-    const operations: Operation[] = [
+    const operations: MigrationOperation[] = [
       {
         op: 'add',
         path: '/tables/users/columns/id',
@@ -39,7 +39,7 @@ describe('getColumnCommentChangeStatus', () => {
 
   describe('column comment operations', () => {
     it('should return "modified" when column comment is replaced', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/columns/email/comment',
@@ -55,7 +55,7 @@ describe('getColumnCommentChangeStatus', () => {
     })
 
     it('should return "modified" when column comment is replaced with null', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/columns/email/comment',
@@ -73,7 +73,7 @@ describe('getColumnCommentChangeStatus', () => {
 
   describe('filtering operations', () => {
     it('should only consider operations for the specified column comment', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/columns/email/comment',
@@ -99,7 +99,7 @@ describe('getColumnCommentChangeStatus', () => {
     })
 
     it('should ignore non-comment operations', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/columns/email/type',
@@ -125,7 +125,7 @@ describe('getColumnCommentChangeStatus', () => {
     })
 
     it('should require both table and column to match', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/products/columns/email/comment',
@@ -148,7 +148,7 @@ describe('getColumnCommentChangeStatus', () => {
 
   describe('edge cases', () => {
     it('should handle column names with special characters', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/columns/created_at/comment',
@@ -173,7 +173,7 @@ describe('getColumnCommentChangeStatus', () => {
     })
 
     it('should match exact column names only', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/columns/email_old/comment',
@@ -194,7 +194,7 @@ describe('getColumnCommentChangeStatus', () => {
     })
 
     it('should handle column names that are substrings of other column names', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/columns/id/comment',
@@ -236,7 +236,7 @@ describe('getColumnCommentChangeStatus', () => {
     })
 
     it('should handle multiple comment operations for the same column', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/columns/email/comment',
@@ -257,7 +257,7 @@ describe('getColumnCommentChangeStatus', () => {
     })
 
     it('should handle columns with numeric suffixes', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/columns/email2/comment',
@@ -294,7 +294,7 @@ describe('getColumnCommentChangeStatus', () => {
     })
 
     it('should handle table names with special characters', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/user_profiles/columns/bio/comment',

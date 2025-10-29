@@ -1,7 +1,7 @@
 import * as v from 'valibot'
 import { constraintSchema } from '../../schema/index.js'
 import { PATH_PATTERNS } from '../constants.js'
-import type { Operation } from './index.js'
+import type { MigrationOperation } from './index.js'
 
 const constraintPathSchema = v.pipe(
   v.string(),
@@ -34,7 +34,7 @@ export type AddConstraintOperation = v.InferOutput<
 >
 
 export const isAddConstraintOperation = (
-  operation: Operation,
+  operation: MigrationOperation,
 ): operation is AddConstraintOperation => {
   return v.safeParse(addConstraintOperationSchema, operation).success
 }
@@ -52,7 +52,7 @@ export type RemoveConstraintOperation = v.InferOutput<
 >
 
 export const isRemoveConstraintOperation = (
-  operation: Operation,
+  operation: MigrationOperation,
 ): operation is RemoveConstraintOperation => {
   return v.safeParse(removeConstraintOperationSchema, operation).success
 }
@@ -71,7 +71,7 @@ export type ReplaceConstraintDeleteOperation = v.InferOutput<
 >
 
 export const isReplaceConstraintDeleteOperation = (
-  operation: Operation,
+  operation: MigrationOperation,
 ): operation is ReplaceConstraintDeleteOperation => {
   return v.safeParse(replaceConstraintDeleteOperationSchema, operation).success
 }
@@ -90,7 +90,7 @@ export type ReplaceConstraintUpdateOperation = v.InferOutput<
 >
 
 export const isReplaceConstraintUpdateOperation = (
-  operation: Operation,
+  operation: MigrationOperation,
 ): operation is ReplaceConstraintUpdateOperation => {
   return v.safeParse(replaceConstraintUpdateOperationSchema, operation).success
 }

@@ -35,7 +35,7 @@ export {
   getTableChangeStatus,
   getTableCommentChangeStatus,
   getTableRelatedChangeStatus,
-  type Operation,
+  type MigrationOperation,
   operationsSchema,
 } from './operation/index.js'
 export type { ProcessError } from './parser.js'

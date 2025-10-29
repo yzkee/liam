@@ -4,14 +4,17 @@ const { compare } = pkg // see https://github.com/Starcounter-Jack/JSON-Patch/is
 
 import { safeParse } from 'valibot'
 import type { Schema } from '../../schema/index.js'
-import { type Operation, operationSchema } from '../schema/index.js'
+import { type MigrationOperation, operationSchema } from '../schema/index.js'
 
-const isOperation = (op: unknown): op is Operation => {
+const isOperation = (op: unknown): op is MigrationOperation => {
   const parsed = safeParse(operationSchema, op)
   return parsed.success
 }
 
-export const getOperations = (before: Schema, after: Schema): Operation[] => {
+export const getOperations = (
+  before: Schema,
+  after: Schema,
+): MigrationOperation[] => {
   const operations = compare(before, after)
   const filteredOperations = operations.filter(isOperation)
 

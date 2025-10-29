@@ -1,5 +1,5 @@
 import { PATH_PATTERNS } from '../../constants.js'
-import type { Operation } from '../../schema/index.js'
+import type { MigrationOperation } from '../../schema/index.js'
 import { determineChangeStatus } from '../determineChangeStatus.js'
 
 const CONSTRAINT_RELATED_PATH_PATTERN = [
@@ -18,7 +18,7 @@ const CONSTRAINT_RELATED_PATH_PATTERN = [
 type Params = {
   tableId: string
   constraintId?: string
-  operations: Operation[]
+  operations: MigrationOperation[]
 }
 
 export const getConstraintRelatedChangeStatus = ({

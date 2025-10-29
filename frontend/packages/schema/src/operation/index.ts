@@ -1,6 +1,6 @@
 export {
   type ChangeStatus,
-  type Operation,
+  type MigrationOperation,
   operationsSchema,
 } from './schema/index.js'
 export {

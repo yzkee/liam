@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { Operation } from '../../../schema/index.js'
+import type { MigrationOperation } from '../../../schema/index.js'
 import { getColumnRelatedChangeStatus } from '../getColumnRelatedChangeStatus.js'
 
 // Mock column data for tests
@@ -14,7 +14,7 @@ const mockColumn = {
 
 describe('getColumnRelatedChangeStatus', () => {
   it('should return "unchanged" when no operations match the table and column', () => {
-    const operations: Operation[] = [
+    const operations: MigrationOperation[] = [
       { op: 'add', path: '/tables/other_table/columns/id', value: mockColumn },
       { op: 'remove', path: '/tables/users/columns/other_column' },
     ]
@@ -28,7 +28,7 @@ describe('getColumnRelatedChangeStatus', () => {
 
   describe('column operations', () => {
     it('should return "added" when column is added', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         { op: 'add', path: '/tables/users/columns/email', value: mockColumn },
       ]
       const result = getColumnRelatedChangeStatus({
@@ -40,7 +40,7 @@ describe('getColumnRelatedChangeStatus', () => {
     })
 
     it('should return "removed" when column is removed', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         { op: 'remove', path: '/tables/users/columns/email' },
       ]
       const result = getColumnRelatedChangeStatus({
@@ -52,7 +52,7 @@ describe('getColumnRelatedChangeStatus', () => {
     })
 
     it('should return "modified" when column name is changed', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/columns/email/name',
@@ -68,7 +68,7 @@ describe('getColumnRelatedChangeStatus', () => {
     })
 
     it('should return "modified" when column type is changed', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/columns/email/type',
@@ -84,7 +84,7 @@ describe('getColumnRelatedChangeStatus', () => {
     })
 
     it('should return "modified" when column comment is changed', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/columns/email/comment',
@@ -100,7 +100,7 @@ describe('getColumnRelatedChangeStatus', () => {
     })
 
     it('should return "modified" when column default is changed', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/columns/status/default',
@@ -116,7 +116,7 @@ describe('getColumnRelatedChangeStatus', () => {
     })
 
     it('should return "modified" when column check constraint is changed', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/columns/age/check',
@@ -132,7 +132,7 @@ describe('getColumnRelatedChangeStatus', () => {
     })
 
     it('should return "modified" when column notNull is changed', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/columns/email/notNull',
@@ -150,7 +150,7 @@ describe('getColumnRelatedChangeStatus', () => {
 
   describe('multiple column operations', () => {
     it('should return "modified" when multiple properties are changed', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/columns/email/type',
@@ -178,7 +178,7 @@ describe('getColumnRelatedChangeStatus', () => {
 
   describe('filtering operations', () => {
     it('should only consider operations for the specified table and column', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         { op: 'add', path: '/tables/users/columns/email', value: mockColumn },
         { op: 'add', path: '/tables/users/columns/name', value: mockColumn },
         {
@@ -196,7 +196,7 @@ describe('getColumnRelatedChangeStatus', () => {
     })
 
     it('should ignore operations for other columns in the same table', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/columns/name/type',
@@ -218,7 +218,7 @@ describe('getColumnRelatedChangeStatus', () => {
     })
 
     it('should ignore non-column operations', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'add',
           path: '/tables/users/indexes/idx_email',
@@ -243,7 +243,7 @@ describe('getColumnRelatedChangeStatus', () => {
 
   describe('mixed operations', () => {
     it('should handle mixed operations correctly', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         // Column operations for users.email
         {
           op: 'replace',
@@ -281,7 +281,7 @@ describe('getColumnRelatedChangeStatus', () => {
 
   describe('edge cases', () => {
     it('should handle column names with special characters', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'add',
           path: '/tables/user_profile/columns/created_at',
@@ -306,7 +306,7 @@ describe('getColumnRelatedChangeStatus', () => {
     })
 
     it('should match exact table and column names only', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'add',
           path: '/tables/users_old/columns/email',
@@ -329,7 +329,7 @@ describe('getColumnRelatedChangeStatus', () => {
 
   describe('without columnId', () => {
     it('should return "added" when any column is added to the table', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         { op: 'add', path: '/tables/users/columns/email', value: mockColumn },
         { op: 'add', path: '/tables/users/columns/name', value: mockColumn },
       ]
@@ -341,7 +341,7 @@ describe('getColumnRelatedChangeStatus', () => {
     })
 
     it('should return "removed" when any column is removed from the table', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         { op: 'remove', path: '/tables/users/columns/email' },
         { op: 'remove', path: '/tables/users/columns/name' },
       ]
@@ -353,7 +353,7 @@ describe('getColumnRelatedChangeStatus', () => {
     })
 
     it('should return "modified" when any column is modified in the table', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/columns/email/type',
@@ -373,7 +373,7 @@ describe('getColumnRelatedChangeStatus', () => {
     })
 
     it('should return "unchanged" when no column operations exist for the table', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         { op: 'add', path: '/tables/products/columns/id', value: mockColumn },
         {
           op: 'add',
@@ -394,7 +394,7 @@ describe('getColumnRelatedChangeStatus', () => {
     })
 
     it('should return correct status for mixed column operations', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         { op: 'add', path: '/tables/users/columns/phone', value: mockColumn },
         { op: 'remove', path: '/tables/users/columns/deprecated' },
         {

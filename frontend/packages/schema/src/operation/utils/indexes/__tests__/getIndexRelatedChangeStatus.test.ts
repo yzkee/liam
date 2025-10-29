@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { Operation } from '../../../schema/index.js'
+import type { MigrationOperation } from '../../../schema/index.js'
 import { getIndexRelatedChangeStatus } from '../getIndexRelatedChangeStatus.js'
 
 // Mock index data for tests
@@ -12,7 +12,7 @@ const mockIndex = {
 
 describe('getIndexRelatedChangeStatus', () => {
   it('should return "unchanged" when no operations match the table and index', () => {
-    const operations: Operation[] = [
+    const operations: MigrationOperation[] = [
       {
         op: 'add',
         path: '/tables/other_table/indexes/idx_name',
@@ -30,7 +30,7 @@ describe('getIndexRelatedChangeStatus', () => {
 
   describe('index operations', () => {
     it('should return "added" when index is added', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'add',
           path: '/tables/users/indexes/idx_email',
@@ -46,7 +46,7 @@ describe('getIndexRelatedChangeStatus', () => {
     })
 
     it('should return "removed" when index is removed', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         { op: 'remove', path: '/tables/users/indexes/idx_email' },
       ]
       const result = getIndexRelatedChangeStatus({
@@ -58,7 +58,7 @@ describe('getIndexRelatedChangeStatus', () => {
     })
 
     it('should return "modified" when index name is changed', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/indexes/idx_email/name',
@@ -74,7 +74,7 @@ describe('getIndexRelatedChangeStatus', () => {
     })
 
     it('should return "modified" when index unique property is changed', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/indexes/idx_email/unique',
@@ -92,7 +92,7 @@ describe('getIndexRelatedChangeStatus', () => {
 
   describe('filtering operations', () => {
     it('should only consider operations for the specified table and index', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'add',
           path: '/tables/users/indexes/idx_email',
@@ -114,7 +114,7 @@ describe('getIndexRelatedChangeStatus', () => {
     })
 
     it('should ignore operations for other indexes in the same table', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/indexes/idx_name/type',
@@ -136,7 +136,7 @@ describe('getIndexRelatedChangeStatus', () => {
     })
 
     it('should ignore non-index operations', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'add',
           path: '/tables/users/columns/email',
@@ -163,7 +163,7 @@ describe('getIndexRelatedChangeStatus', () => {
 
   describe('mixed operations', () => {
     it('should handle mixed operations correctly', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         // Index operations for users.idx_email
         {
           op: 'replace',
@@ -207,7 +207,7 @@ describe('getIndexRelatedChangeStatus', () => {
 
   describe('edge cases', () => {
     it('should handle index names with special characters', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'add',
           path: '/tables/user_profile/indexes/idx_user_email',
@@ -232,7 +232,7 @@ describe('getIndexRelatedChangeStatus', () => {
     })
 
     it('should match exact table and index names only', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'add',
           path: '/tables/users_old/indexes/idx_email',
@@ -255,7 +255,7 @@ describe('getIndexRelatedChangeStatus', () => {
 
   describe('without indexId', () => {
     it('should return "added" when any index is added to the table', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'add',
           path: '/tables/users/indexes/idx_email',
@@ -275,7 +275,7 @@ describe('getIndexRelatedChangeStatus', () => {
     })
 
     it('should return "removed" when any index is removed from the table', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         { op: 'remove', path: '/tables/users/indexes/idx_email' },
         { op: 'remove', path: '/tables/users/indexes/idx_name' },
       ]
@@ -287,7 +287,7 @@ describe('getIndexRelatedChangeStatus', () => {
     })
 
     it('should return "modified" when any index is modified in the table', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'replace',
           path: '/tables/users/indexes/idx_email/unique',
@@ -307,7 +307,7 @@ describe('getIndexRelatedChangeStatus', () => {
     })
 
     it('should return "unchanged" when no index operations exist for the table', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'add',
           path: '/tables/products/indexes/idx_id',
@@ -334,7 +334,7 @@ describe('getIndexRelatedChangeStatus', () => {
     })
 
     it('should return correct status for mixed index operations', () => {
-      const operations: Operation[] = [
+      const operations: MigrationOperation[] = [
         {
           op: 'add',
           path: '/tables/users/indexes/idx_phone',

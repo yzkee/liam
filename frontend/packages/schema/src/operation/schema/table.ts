@@ -1,7 +1,7 @@
 import * as v from 'valibot'
 import { tableSchema } from '../../schema/index.js'
 import { PATH_PATTERNS } from '../constants.js'
-import type { Operation } from './index.js'
+import type { MigrationOperation } from './index.js'
 
 const tablePathSchema = v.pipe(v.string(), v.regex(PATH_PATTERNS.TABLE_BASE))
 const tableNamePathSchema = v.pipe(
@@ -60,25 +60,25 @@ export type ReplaceTableCommentOperation = v.InferOutput<
 >
 
 export const isAddTableOperation = (
-  operation: Operation,
+  operation: MigrationOperation,
 ): operation is AddTableOperation => {
   return v.safeParse(addTableOperationSchema, operation).success
 }
 
 export const isRemoveTableOperation = (
-  operation: Operation,
+  operation: MigrationOperation,
 ): operation is RemoveTableOperation => {
   return v.safeParse(removeTableOperationSchema, operation).success
 }
 
 export const isReplaceTableNameOperation = (
-  operation: Operation,
+  operation: MigrationOperation,
 ): operation is ReplaceTableNameOperation => {
   return v.safeParse(replaceTableNameOperationSchema, operation).success
 }
 
 export const isReplaceTableCommentOperation = (
-  operation: Operation,
+  operation: MigrationOperation,
 ): operation is ReplaceTableCommentOperation => {
   return v.safeParse(replaceTableCommentOperationSchema, operation).success
 }

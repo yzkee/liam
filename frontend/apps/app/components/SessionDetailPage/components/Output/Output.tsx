@@ -4,12 +4,11 @@ import type { AnalyzedRequirements } from '@liam-hq/agent/client'
 import type { Schema } from '@liam-hq/schema'
 import { TabsContent, TabsRoot } from '@liam-hq/ui'
 import { type ComponentProps, type FC, useCallback, useState } from 'react'
-import type { ReviewComment } from '../../types'
 import { ArtifactContainer } from './components/Artifact/ArtifactContainer'
 import { ERD } from './components/ERD'
 import { Header } from './components/Header'
 import type { VersionDropdown } from './components/Header/VersionDropdown'
-import { SQL } from './components/SQL'
+import { Migrations } from './components/Migrations'
 import {
   DEFAULT_OUTPUT_TAB,
   OUTPUT_TABS,
@@ -21,7 +20,6 @@ type Props = ComponentProps<typeof VersionDropdown> & {
   designSessionId: string
   schema: Schema
   baselineSchema: Schema
-  sqlReviewComments: ReviewComment[]
   initialIsPublic: boolean
   activeTab: OutputTabValue
   onTabChange: (value: OutputTabValue) => void
@@ -32,7 +30,6 @@ export const Output: FC<Props> = ({
   designSessionId,
   schema,
   baselineSchema,
-  sqlReviewComments,
   activeTab,
   onTabChange,
   initialIsPublic = false,
@@ -88,15 +85,11 @@ export const Output: FC<Props> = ({
         <ERD schema={schema} baselineSchema={baselineSchema} />
       </TabsContent>
       <TabsContent
-        value={OUTPUT_TABS.SQL}
+        value={OUTPUT_TABS.MIGRATIONS}
         className={styles.tabsContent}
         forceMount
       >
-        <SQL
-          currentSchema={schema}
-          baselineSchema={baselineSchema}
-          comments={sqlReviewComments}
-        />
+        <Migrations currentSchema={schema} />
       </TabsContent>
       <TabsContent
         value={OUTPUT_TABS.ARTIFACT}

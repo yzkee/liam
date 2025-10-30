@@ -32,3 +32,14 @@ export const DEFAULT_RECURSION_LIMIT = 10
  * @see {@link routeAfterAnalyzeFailures} for retry limit logic (MAX_RETRY_ATTEMPTS = 3)
  */
 export const QA_AGENT_RECURSION_LIMIT = 50
+
+/**
+ * Maximum number of retry attempts for failed SQL test cases.
+ *
+ * Behavior:
+ * - CI environment: 0 attempts (fast execution, compact logs)
+ * - Development/Production: 3 attempts (allows learning from failures)
+ *
+ * @see {@link routeAfterAnalyzeFailures} for retry routing logic
+ */
+export const MAX_RETRY_ATTEMPTS = process.env['CI'] === 'true' ? 0 : 3

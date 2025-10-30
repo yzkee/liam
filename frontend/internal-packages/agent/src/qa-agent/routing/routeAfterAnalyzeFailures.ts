@@ -1,4 +1,5 @@
 import { END } from '@langchain/langgraph'
+import { MAX_RETRY_ATTEMPTS } from '../../constants'
 import type { QaAgentState } from '../shared/qaAgentAnnotation'
 
 export const routeAfterAnalyzeFailures = (
@@ -9,8 +10,6 @@ export const routeAfterAnalyzeFailures = (
   if (!failureAnalysis || failureAnalysis.failedSqlTestIds.length === 0) {
     return END
   }
-
-  const MAX_RETRY_ATTEMPTS = 3
 
   for (const testId of failureAnalysis.failedSqlTestIds) {
     for (const testcases of Object.values(analyzedRequirements.testcases)) {

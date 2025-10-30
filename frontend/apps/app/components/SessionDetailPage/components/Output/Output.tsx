@@ -89,7 +89,7 @@ export const Output: FC<Props> = ({
         className={styles.tabsContent}
         forceMount
       >
-        <Migrations currentSchema={schema} />
+        <Migrations baselineSchema={baselineSchema} schema={schema} />
       </TabsContent>
       <TabsContent
         value={OUTPUT_TABS.ARTIFACT}

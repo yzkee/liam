@@ -4,7 +4,7 @@ import type { QaAgentState } from '../shared/qaAgentAnnotation'
 
 export const routeAfterAnalyzeFailures = (
   state: QaAgentState,
-): 'prepareSqlRetry' | typeof END => {
+): 'resetFailedSqlTests' | typeof END => {
   const { failureAnalysis, analyzedRequirements } = state
 
   if (!failureAnalysis || failureAnalysis.failedSqlTestIds.length === 0) {
@@ -20,5 +20,5 @@ export const routeAfterAnalyzeFailures = (
     }
   }
 
-  return 'prepareSqlRetry'
+  return 'resetFailedSqlTests'
 }

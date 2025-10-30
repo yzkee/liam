@@ -239,7 +239,7 @@ graph TD;
 	validateSchema(validateSchema)
 	invokeRunTestTool(invokeRunTestTool)
 	analyzeTestFailures(analyzeTestFailures)
-	prepareSqlRetry(prepareSqlRetry)
+	resetFailedSqlTests(resetFailedSqlTests)
 	__end__([<p>__end__</p>]):::last
 	applyGeneratedSqls --> validateSchema;
 	invokeRunTestTool --> analyzeTestFailures;
@@ -250,16 +250,16 @@ graph TD;
 	__start__ -.-> validateSchema;
 	__start__ -.-> invokeRunTestTool;
 	__start__ -.-> analyzeTestFailures;
-	__start__ -.-> prepareSqlRetry;
+	__start__ -.-> resetFailedSqlTests;
 	__start__ -.-> __end__;
-	analyzeTestFailures -.-> prepareSqlRetry;
+	analyzeTestFailures -.-> resetFailedSqlTests;
 	analyzeTestFailures -.-> __end__;
-	prepareSqlRetry -.-> testcaseGeneration;
-	prepareSqlRetry -.-> applyGeneratedSqls;
-	prepareSqlRetry -.-> validateSchema;
-	prepareSqlRetry -.-> invokeRunTestTool;
-	prepareSqlRetry -.-> analyzeTestFailures;
-	prepareSqlRetry -.-> __end__;
+	resetFailedSqlTests -.-> testcaseGeneration;
+	resetFailedSqlTests -.-> applyGeneratedSqls;
+	resetFailedSqlTests -.-> validateSchema;
+	resetFailedSqlTests -.-> invokeRunTestTool;
+	resetFailedSqlTests -.-> analyzeTestFailures;
+	resetFailedSqlTests -.-> __end__;
 	classDef default fill:#f2f0ff,line-height:1.2;
 	classDef first fill-opacity:0;
 	classDef last fill:#bfb6fc;
@@ -347,19 +347,19 @@ graph TD;
 - **Purpose**: Analyzes test execution results and identifies failed tests for retry
 - **Performed by**: analyzeTestFailuresNode function
 - **Output**: Sets `failureAnalysis` with `failedSqlTestIds` and `failedSchemaTestIds` arrays
-- **Routing**: Routes to `prepareSqlRetry` if failures exist, otherwise to `END`
+- **Routing**: Routes to `resetFailedSqlTests` if failures exist, otherwise to `END`
 
-#### 9. prepareSqlRetry Node
+#### 9. resetFailedSqlTests Node
 
-- **Purpose**: Prepares failed SQL tests for retry by clearing their SQL field
-- **Performed by**: prepareSqlRetryNode function
+- **Purpose**: Resets SQL fields for failed tests to enable regeneration
+- **Performed by**: resetFailedSqlTestsNode function
 - **Retry Logic**: Clears SQL for failed tests, allowing testcaseGeneration to regenerate with failure feedback
 - **Max Retries**: Stops after 3 retry attempts per test (checked by routeAfterAnalyzeFailures)
 
 ### QA Agent Flow Patterns
 
 1. **Initial Flow**: `START → testcaseGeneration (parallel) → applyGeneratedSqls → validateSchema → invokeRunTestTool → analyzeTestFailures`
-2. **Retry Flow**: `analyzeTestFailures → prepareSqlRetry → testcaseGeneration (parallel) → ... → analyzeTestFailures` (up to 3 retry attempts)
+2. **Retry Flow**: `analyzeTestFailures → resetFailedSqlTests → testcaseGeneration (parallel) → ... → analyzeTestFailures` (up to 3 retry attempts)
 3. **Success Flow**: `analyzeTestFailures → END` (when all tests pass or max retries reached)
 4. **Parallel Processing**: Multiple testcase generation instances run concurrently
 5. **SQL Mapping**: Generated SQLs are mapped to analyzedRequirements.testcases before validation

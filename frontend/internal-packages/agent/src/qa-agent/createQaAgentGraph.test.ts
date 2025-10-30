@@ -12,7 +12,7 @@ graph TD;
 	validateSchema(validateSchema)
 	invokeRunTestTool(invokeRunTestTool)
 	analyzeTestFailures(analyzeTestFailures)
-	prepareSqlRetry(prepareSqlRetry)
+	resetFailedSqlTests(resetFailedSqlTests)
 	__end__([<p>__end__</p>]):::last
 	applyGeneratedSqls --> validateSchema;
 	invokeRunTestTool --> analyzeTestFailures;
@@ -23,16 +23,16 @@ graph TD;
 	__start__ -.-> validateSchema;
 	__start__ -.-> invokeRunTestTool;
 	__start__ -.-> analyzeTestFailures;
-	__start__ -.-> prepareSqlRetry;
+	__start__ -.-> resetFailedSqlTests;
 	__start__ -.-> __end__;
-	analyzeTestFailures -.-> prepareSqlRetry;
+	analyzeTestFailures -.-> resetFailedSqlTests;
 	analyzeTestFailures -.-> __end__;
-	prepareSqlRetry -.-> testcaseGeneration;
-	prepareSqlRetry -.-> applyGeneratedSqls;
-	prepareSqlRetry -.-> validateSchema;
-	prepareSqlRetry -.-> invokeRunTestTool;
-	prepareSqlRetry -.-> analyzeTestFailures;
-	prepareSqlRetry -.-> __end__;
+	resetFailedSqlTests -.-> testcaseGeneration;
+	resetFailedSqlTests -.-> applyGeneratedSqls;
+	resetFailedSqlTests -.-> validateSchema;
+	resetFailedSqlTests -.-> invokeRunTestTool;
+	resetFailedSqlTests -.-> analyzeTestFailures;
+	resetFailedSqlTests -.-> __end__;
 	classDef default fill:#f2f0ff,line-height:1.2;
 	classDef first fill-opacity:0;
 	classDef last fill:#bfb6fc;

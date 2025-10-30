@@ -33,7 +33,7 @@ export const RepositoryItem: FC<Props> = ({
       </div>
       <Button
         size="sm"
-        variant="ghost-secondary"
+        variant="solid-primary"
         disabled={isLoading}
         onClick={onClick}
       >

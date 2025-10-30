@@ -1,12 +1,9 @@
-'use client'
-
 import type { Installation, Repository } from '@liam-hq/github'
 import {
   type FC,
   useActionState,
   useCallback,
   useEffect,
-  useState,
   useTransition,
 } from 'react'
 import { match, P } from 'ts-pattern'
@@ -20,7 +17,9 @@ import styles from './InstallationSelector.module.css'
 
 type Props = {
   installations: Installation[]
+  selectedInstallation: Installation | null
   needsRefresh?: boolean
+  onSelectInstallation: (item: Installation | null) => void
   onSelectRepository: (item: Repository) => void
 }
 
@@ -28,17 +27,11 @@ type EmptyStateVariant = 'noInstaller' | 'reauth'
 
 export const InstallationSelector: FC<Props> = ({
   installations,
+  selectedInstallation,
   needsRefresh = false,
+  onSelectInstallation,
   onSelectRepository,
 }) => {
-  const [selectedInstallation, setSelectedInstallation] =
-    useState<Installation | null>(() => {
-      if (needsRefresh) {
-        return null
-      }
-
-      return installations[0] ?? null
-    })
   const [isAddingProject, startAddingProjectTransition] = useTransition()
   const [, startTransition] = useTransition()
 
@@ -91,15 +84,15 @@ export const InstallationSelector: FC<Props> = ({
   const handleSelectInstallation = useCallback(
     (installation: Installation) => {
       if (needsRefresh) return
-      setSelectedInstallation(installation)
+      onSelectInstallation(installation)
     },
-    [needsRefresh],
+    [needsRefresh, onSelectInstallation],
   )
 
   useEffect(() => {
     if (emptyStateVariant === 'reauth' || emptyStateVariant === 'noInstaller') {
       if (selectedInstallation !== null) {
-        setSelectedInstallation(null)
+        onSelectInstallation(null)
       }
       return
     }
@@ -114,8 +107,13 @@ export const InstallationSelector: FC<Props> = ({
     }
 
     const nextInstallation = installations[0] ?? null
-    setSelectedInstallation(nextInstallation)
-  }, [emptyStateVariant, installations, selectedInstallation])
+    onSelectInstallation(nextInstallation)
+  }, [
+    emptyStateVariant,
+    installations,
+    selectedInstallation,
+    onSelectInstallation,
+  ])
 
   useEffect(() => {
     if (!selectedInstallation || needsRefresh) {
@@ -136,8 +134,6 @@ export const InstallationSelector: FC<Props> = ({
         .with({ login: P.string }, (item) => item.login)
         .otherwise(() => 'Select installation')
     : 'Select installation'
-
-  console.info(selectedInstallation)
 
   return (
     <section className={styles.container}>

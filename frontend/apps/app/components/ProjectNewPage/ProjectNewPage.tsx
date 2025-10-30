@@ -4,9 +4,10 @@ import type { Installation, Repository } from '@liam-hq/github'
 import { ArrowLeft, Button } from '@liam-hq/ui'
 import type { FormatType } from 'components/FormatIcon'
 import Link from 'next/link'
-import { type FC, useCallback, useState } from 'react'
+import { type FC, useCallback, useState, useTransition } from 'react'
 import { urlgen } from '../../libs/routes'
 import { TokenRefreshKick } from '../TokenRefreshKick'
+import { addProject } from './actions/addProject'
 import { InstallationSelector } from './components/InstallationSelector'
 import { type Step, Stepper } from './components/Stepper'
 import { WatchSchemaForm } from './components/WatchSchemaForm'
@@ -19,11 +20,18 @@ const steps: Step[] = [
 
 type Props = {
   installations: Installation[]
-  organizationId: string
   needsRefresh?: boolean
 }
 
 export const ProjectNewPage: FC<Props> = ({ installations, needsRefresh }) => {
+  const [selectedInstallation, setSelectedInstallation] =
+    useState<Installation | null>(() => {
+      if (needsRefresh) {
+        return null
+      }
+
+      return installations[0] ?? null
+    })
   const [selectedRepository, setSelectedRepository] =
     useState<Repository | null>(null)
   const [schemaFilePath, setSchemaFilePath] = useState<string>('')
@@ -33,6 +41,33 @@ export const ProjectNewPage: FC<Props> = ({ installations, needsRefresh }) => {
   const handleCancel = useCallback(() => {
     setSelectedRepository(null)
   }, [])
+
+  const [isPending, startTransition] = useTransition()
+  const handleSave = useCallback(async () => {
+    if (!selectedRepository || !selectedInstallation) return
+
+    startTransition(async () => {
+      try {
+        const formData = new FormData()
+        formData.set('projectName', selectedRepository.name)
+        formData.set('repositoryName', selectedRepository.name)
+        formData.set('repositoryOwner', selectedRepository.owner.login)
+        formData.set('installationId', selectedInstallation.id.toString())
+        formData.set('repositoryIdentifier', selectedRepository.id.toString())
+        formData.set('schemaFilePath', schemaFilePath)
+        formData.set('schemaFormat', schemaFileFormat)
+
+        await addProject(formData)
+      } catch (error) {
+        console.error('Error adding project:', error)
+      }
+    })
+  }, [
+    selectedRepository,
+    selectedInstallation,
+    schemaFileFormat,
+    schemaFilePath,
+  ])
 
   const isSaveDisabled = !selectedRepository || schemaFilePath === ''
 
@@ -49,6 +84,7 @@ export const ProjectNewPage: FC<Props> = ({ installations, needsRefresh }) => {
                 <Button
                   variant="outline-secondary"
                   size="md"
+                  isLoading={isPending}
                   onClick={handleCancel}
                 >
                   Cancel
@@ -56,7 +92,9 @@ export const ProjectNewPage: FC<Props> = ({ installations, needsRefresh }) => {
                 <Button
                   variant="solid-primary"
                   size="md"
+                  isLoading={isPending}
                   disabled={isSaveDisabled}
+                  onClick={handleSave}
                 >
                   Save
                 </Button>
@@ -74,7 +112,9 @@ export const ProjectNewPage: FC<Props> = ({ installations, needsRefresh }) => {
         ) : (
           <InstallationSelector
             installations={installations}
+            selectedInstallation={selectedInstallation}
             needsRefresh={needsRefresh}
+            onSelectInstallation={setSelectedInstallation}
             onSelectRepository={setSelectedRepository}
           />
         )}

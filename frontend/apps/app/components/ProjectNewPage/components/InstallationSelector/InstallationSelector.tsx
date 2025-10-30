@@ -10,7 +10,6 @@ import {
   useTransition,
 } from 'react'
 import { match, P } from 'ts-pattern'
-import { addProject } from './actions/addProject'
 import { getRepositories } from './actions/getRepositories'
 import { EmptyStateCard } from './components/EmptyStateCard'
 import { HeaderActions } from './components/HeaderActions'
@@ -21,16 +20,16 @@ import styles from './InstallationSelector.module.css'
 
 type Props = {
   installations: Installation[]
-  organizationId: string
   needsRefresh?: boolean
+  onSelectRepository: (item: Repository) => void
 }
 
 type EmptyStateVariant = 'noInstaller' | 'reauth'
 
 export const InstallationSelector: FC<Props> = ({
   installations,
-  organizationId,
   needsRefresh = false,
+  onSelectRepository,
 }) => {
   const [selectedInstallation, setSelectedInstallation] =
     useState<Installation | null>(() => {
@@ -132,35 +131,13 @@ export const InstallationSelector: FC<Props> = ({
     })
   }, [needsRefresh, repositoriesAction, selectedInstallation])
 
-  const handleSelectRepository = useCallback(
-    async (repository: Repository) => {
-      startAddingProjectTransition(async () => {
-        try {
-          const formData = new FormData()
-          formData.set('projectName', repository.name)
-          formData.set('repositoryName', repository.name)
-          formData.set('repositoryOwner', repository.owner.login)
-          formData.set('repositoryIdentifier', repository.id.toString())
-          formData.set(
-            'installationId',
-            selectedInstallation?.id.toString() || '',
-          )
-          formData.set('organizationId', organizationId.toString())
-
-          await addProject(formData)
-        } catch (error) {
-          console.error('Error adding project:', error)
-        }
-      })
-    },
-    [selectedInstallation, organizationId],
-  )
-
   const dropdownLabel = selectedInstallation
     ? match(selectedInstallation.account)
         .with({ login: P.string }, (item) => item.login)
         .otherwise(() => 'Select installation')
     : 'Select installation'
+
+  console.info(selectedInstallation)
 
   return (
     <section className={styles.container}>
@@ -194,7 +171,7 @@ export const InstallationSelector: FC<Props> = ({
               error={repositoriesState.error}
               isAddingProject={isAddingProject}
               hasSelectedInstallation={Boolean(selectedInstallation)}
-              onSelectRepository={handleSelectRepository}
+              onSelectRepository={onSelectRepository}
             />
           )}
         </div>

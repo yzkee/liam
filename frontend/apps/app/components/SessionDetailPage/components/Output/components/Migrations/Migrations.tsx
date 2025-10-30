@@ -9,13 +9,11 @@ import { MigrationsViewer } from './MigrationsViewer'
 
 type Props = {
   currentSchema: Schema
-  baselineSchema: Schema
 }
 
-export const Migrations: FC<Props> = ({ currentSchema, baselineSchema }) => {
-  const { cumulativeDdl, prevCumulativeDdl } = useDdl({
+export const Migrations: FC<Props> = ({ currentSchema }) => {
+  const { cumulativeDdl } = useDdl({
     currentSchema,
-    baselineSchema,
   })
 
   return (
@@ -27,11 +25,7 @@ export const Migrations: FC<Props> = ({ currentSchema, baselineSchema }) => {
         />
       </div>
       <div className={styles.body}>
-        <MigrationsViewer
-          showDiff
-          doc={cumulativeDdl}
-          prevDoc={prevCumulativeDdl}
-        />
+        <MigrationsViewer doc={cumulativeDdl} />
       </div>
     </section>
   )

@@ -3,7 +3,6 @@
 import { sql } from '@codemirror/lang-sql'
 import { foldGutter, syntaxHighlighting } from '@codemirror/language'
 import { lintGutter } from '@codemirror/lint'
-import { unifiedMergeView } from '@codemirror/merge'
 import { EditorState, type Extension } from '@codemirror/state'
 import { drawSelection, lineNumbers } from '@codemirror/view'
 import { EditorView } from 'codemirror'
@@ -38,15 +37,9 @@ const baseExtensions: Extension[] = [
 
 type Props = {
   doc: string
-  prevDoc?: string
-  showDiff?: boolean
 }
 
-export const useMigrationsViewer = ({
-  doc,
-  prevDoc,
-  showDiff = false,
-}: Props) => {
+export const useMigrationsViewer = ({ doc }: Props) => {
   const ref = useRef<HTMLDivElement>(null)
   const [container, setContainer] = useState<HTMLDivElement>()
 
@@ -56,27 +49,10 @@ export const useMigrationsViewer = ({
     }
   }, [])
 
-  const buildExtensions = useCallback(
-    (showDiff?: boolean, prevDoc?: string): Extension[] => {
-      const extensions = [...baseExtensions]
-
-      if (showDiff) {
-        extensions.push(
-          ...unifiedMergeView({
-            original: prevDoc || '',
-            highlightChanges: true,
-            gutter: true,
-            mergeControls: false,
-            syntaxHighlightDeletions: true,
-            allowInlineDiffs: true,
-          }),
-        )
-      }
-
-      return extensions
-    },
-    [],
-  )
+  const buildExtensions = useCallback((): Extension[] => {
+    const extensions = [...baseExtensions]
+    return extensions
+  }, [])
 
   const createEditorView = useCallback(
     (
@@ -100,14 +76,14 @@ export const useMigrationsViewer = ({
   useEffect(() => {
     if (!container) return
 
-    const extensions = buildExtensions(showDiff, prevDoc)
+    const extensions = buildExtensions()
     const viewCurrent = createEditorView(doc, extensions, container)
 
     // Cleanup function
     return () => {
       viewCurrent.destroy()
     }
-  }, [doc, prevDoc, showDiff, container, buildExtensions, createEditorView])
+  }, [doc, container, buildExtensions, createEditorView])
 
   return {
     ref,

@@ -2,12 +2,14 @@
 
 import type { Installation, Repository } from '@liam-hq/github'
 import { ArrowLeft, Button } from '@liam-hq/ui'
+import type { FormatType } from 'components/FormatIcon'
 import Link from 'next/link'
 import { type FC, useCallback, useState } from 'react'
 import { urlgen } from '../../libs/routes'
 import { TokenRefreshKick } from '../TokenRefreshKick'
 import { InstallationSelector } from './components/InstallationSelector'
 import { type Step, Stepper } from './components/Stepper'
+import { WatchSchemaForm } from './components/WatchSchemaForm'
 import styles from './ProjectNewPage.module.css'
 
 const steps: Step[] = [
@@ -24,10 +26,15 @@ type Props = {
 export const ProjectNewPage: FC<Props> = ({ installations, needsRefresh }) => {
   const [selectedRepository, setSelectedRepository] =
     useState<Repository | null>(null)
+  const [schemaFilePath, setSchemaFilePath] = useState<string>('')
+  const [schemaFileFormat, setSchemaFileFormat] =
+    useState<FormatType>('postgres')
 
   const handleCancel = useCallback(() => {
     setSelectedRepository(null)
   }, [])
+
+  const isSaveDisabled = !selectedRepository || schemaFilePath === ''
 
   return (
     <div className={styles.container}>
@@ -46,7 +53,11 @@ export const ProjectNewPage: FC<Props> = ({ installations, needsRefresh }) => {
                 >
                   Cancel
                 </Button>
-                <Button variant="solid-primary" size="md">
+                <Button
+                  variant="solid-primary"
+                  size="md"
+                  disabled={isSaveDisabled}
+                >
                   Save
                 </Button>
               </div>
@@ -54,7 +65,12 @@ export const ProjectNewPage: FC<Props> = ({ installations, needsRefresh }) => {
           </div>
         </header>
         {selectedRepository ? (
-          <div>Schema</div>
+          <WatchSchemaForm
+            filePath={schemaFilePath}
+            format={schemaFileFormat}
+            onFilePathChange={setSchemaFilePath}
+            onFormatChange={setSchemaFileFormat}
+          />
         ) : (
           <InstallationSelector
             installations={installations}

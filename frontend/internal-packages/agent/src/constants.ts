@@ -29,10 +29,6 @@ export const DEFAULT_RECURSION_LIMIT = 10
  * - Retry cycles: 3 × 10 = 30 steps
  * - Total: 40 steps + buffer = 50 steps
  *
- * TODO: Remove this constant when QA agent message summarization is implemented.
- * The message summarization will reduce the overall message size, eliminating
- * the need for this elevated limit.
- *
  * @see {@link routeAfterAnalyzeFailures} for retry limit logic (MAX_RETRY_ATTEMPTS = 3)
  */
 export const QA_AGENT_RECURSION_LIMIT = 50

@@ -283,6 +283,7 @@ export const runTestTool: StructuredTool = tool(
       const toolMessage = new ToolMessage({
         id: uuidv4(),
         name: TOOL_NAME,
+        status: 'success',
         content: 'No test cases to execute.',
         tool_call_id: toolCallId,
       })
@@ -331,6 +332,7 @@ export const runTestTool: StructuredTool = tool(
     const toolMessage = new ToolMessage({
       id: uuidv4(),
       name: TOOL_NAME,
+      status: failedTests === 0 ? 'success' : 'error',
       content: summary,
       tool_call_id: toolCallId,
     })

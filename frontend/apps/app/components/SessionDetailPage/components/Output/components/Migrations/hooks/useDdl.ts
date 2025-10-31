@@ -3,19 +3,19 @@ import { useMemo } from 'react'
 import { schemaToDdl } from '../utils/schemaToDdl'
 
 type Props = {
-  currentSchema: Schema | null
+  schema: Schema
+  baselineSchema: Schema
 }
 
 type Result = {
   cumulativeDdl: string
 }
 
-export const useDdl = ({ currentSchema }: Props): Result => {
+export const useDdl = ({ schema, baselineSchema }: Props): Result => {
   const cumulativeDdl = useMemo(() => {
-    if (!currentSchema) return ''
-    const result = schemaToDdl(currentSchema)
+    const result = schemaToDdl(baselineSchema, schema)
     return result.ddl
-  }, [currentSchema])
+  }, [baselineSchema, schema])
 
   return {
     cumulativeDdl,

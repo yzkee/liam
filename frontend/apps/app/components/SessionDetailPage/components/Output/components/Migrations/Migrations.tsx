@@ -8,12 +8,14 @@ import styles from './Migrations.module.css'
 import { MigrationsViewer } from './MigrationsViewer'
 
 type Props = {
-  currentSchema: Schema
+  schema: Schema
+  baselineSchema: Schema
 }
 
-export const Migrations: FC<Props> = ({ currentSchema }) => {
+export const Migrations: FC<Props> = ({ schema, baselineSchema }) => {
   const { cumulativeDdl } = useDdl({
-    currentSchema,
+    baselineSchema,
+    schema,
   })
 
   return (

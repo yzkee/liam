@@ -48,6 +48,7 @@ export const LongName: Story = {
   args: {
     item: aRepository({
       name: 'very-long-organization-name/very-long-repository-name',
+      private: true,
     }),
   },
 }

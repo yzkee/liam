@@ -73,9 +73,9 @@ export const TabItem: FC<Props> = ({
 
   return (
     <Link
-      key={item.value}
       href={href}
       data-active={isActive}
+      aria-disabled={isDisabled}
       tabIndex={isDisabled ? -1 : undefined}
       className={styles.link}
     >

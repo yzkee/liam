@@ -1,8 +1,46 @@
 .wrapper {
   display: flex;
-  gap: var(--spacing-3, 0.75rem);
   align-items: center;
-  padding: var(--spacing-3, 0.75rem);
-  border: solid 1px white;
-  border-radius: var(--border-radius-base);
+  justify-content: space-between;
+  padding: var(--spacing-3);
+}
+
+.wrapper:not(:last-of-type) {
+  border-bottom: solid 1px var(--global-border);
+}
+
+.content {
+  display: flex;
+  gap: var(--spacing-2);
+  align-items: center;
+}
+
+.bookMarkIcon {
+  width: 1rem;
+  height: 1rem;
+  color: var(--overlay-50);
+}
+
+.info {
+  display: flex;
+  gap: var(--spacing-1half);
+  align-items: center;
+}
+
+.name {
+  font-size: var(--font-size-4);
+  line-height: 1;
+  color: var(--global-foreground);
+}
+
+.lockIcon {
+  width: 0.625rem;
+  height: 0.625rem;
+  color: var(--overlay-50);
+}
+
+.createdAt {
+  font-size: var(--font-size-2);
+  line-height: 1;
+  color: var(--overlay-50);
 }

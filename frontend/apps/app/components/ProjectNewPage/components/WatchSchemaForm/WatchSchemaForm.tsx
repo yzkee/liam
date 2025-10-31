@@ -1,3 +1,4 @@
+'use client'
 import { RemoveButton } from '@liam-hq/ui'
 import type { FormatType } from 'components/FormatIcon'
 import { FormatSelectDropdown } from 'features/sessions/components/shared/FormatSelectDropdown'

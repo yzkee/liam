@@ -1,3 +1,4 @@
+'use client'
 import type { Installation, Repository } from '@liam-hq/github'
 import {
   type FC,

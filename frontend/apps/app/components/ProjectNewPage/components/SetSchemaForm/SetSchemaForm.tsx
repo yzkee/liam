@@ -5,7 +5,7 @@ import { FormatSelectDropdown } from 'features/sessions/components/shared/Format
 import { ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { type ChangeEvent, type FC, useCallback } from 'react'
-import styles from './WatchSchemaForm.module.css'
+import styles from './SetSchemaForm.module.css'
 
 type Props = {
   filePath: string
@@ -15,7 +15,7 @@ type Props = {
   onFormatChange: (format: FormatType) => void
 }
 
-export const WatchSchemaForm: FC<Props> = ({
+export const SetSchemaForm: FC<Props> = ({
   filePath,
   format,
   disabled,
@@ -42,7 +42,7 @@ export const WatchSchemaForm: FC<Props> = ({
       </div>
       <div className={styles.item}>
         <div className={styles.itemHeader}>
-          <div className={styles.itemTitle}>Set Watch Schema File Path</div>
+          <div className={styles.itemTitle}>Set Schema File Path</div>
           {/* TODO: Update Link href to appropriate document URL */}
           <Link href="/" className={styles.link}>
             <span className={styles.linkText}>View Document</span>

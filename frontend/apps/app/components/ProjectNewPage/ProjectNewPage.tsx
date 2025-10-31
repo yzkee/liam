@@ -9,8 +9,8 @@ import { urlgen } from '../../libs/routes'
 import { TokenRefreshKick } from '../TokenRefreshKick'
 import { addProject } from './actions/addProject'
 import { InstallationSelector } from './components/InstallationSelector'
+import { SetSchemaForm } from './components/SetSchemaForm'
 import { type Step, Stepper } from './components/Stepper'
-import { WatchSchemaForm } from './components/WatchSchemaForm'
 import styles from './ProjectNewPage.module.css'
 
 const steps: Step[] = [
@@ -103,7 +103,7 @@ export const ProjectNewPage: FC<Props> = ({ installations, needsRefresh }) => {
           </div>
         </header>
         {selectedRepository ? (
-          <WatchSchemaForm
+          <SetSchemaForm
             filePath={schemaFilePath}
             format={schemaFileFormat}
             onFilePathChange={setSchemaFilePath}

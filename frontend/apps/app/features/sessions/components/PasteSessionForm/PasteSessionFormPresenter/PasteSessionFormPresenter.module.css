@@ -94,6 +94,11 @@
   color: var(--overlay-50);
 }
 
+.formatDropdown {
+  align-self: flex-start;
+  width: fit-content;
+}
+
 .divider {
   height: 1px;
   background-color: var(--pane-border);

@@ -108,10 +108,12 @@ export const PasteSessionFormPresenter: FC<Props> = ({
               rows={12}
             />
           </div>
-          <FormatSelectDropdown
-            selectedFormat={selectedFormat}
-            onFormatChange={setSelectedFormat}
-          />
+          <div className={styles.formatDropdown}>
+            <FormatSelectDropdown
+              selectedFormat={selectedFormat}
+              onFormatChange={setSelectedFormat}
+            />
+          </div>
         </div>
         <div className={styles.divider} />
         <div className={styles.inputSection}>

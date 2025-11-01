@@ -566,8 +566,8 @@ importers:
   frontend/internal-packages/mcp-server:
     dependencies:
       '@modelcontextprotocol/sdk':
-        specifier: 1.20.0
-        version: 1.20.0
+        specifier: 1.20.1
+        version: 1.20.1
       zod:
         specifier: 4.0.0
         version: 4.0.0
@@ -3202,8 +3202,8 @@ packages:
       '@types/react': '>=16'
       react: '>=16'
 
-  '@modelcontextprotocol/sdk@1.20.0':
-    resolution: {integrity: sha512-kOQ4+fHuT4KbR2iq2IjeV32HiihueuOf1vJkq18z08CLZ1UQrTc8BXJpVfxZkq45+inLLD+D4xx4nBjUelJa4Q==}
+  '@modelcontextprotocol/sdk@1.20.1':
+    resolution: {integrity: sha512-j/P+yuxXfgxb+mW7OEoRCM3G47zCTDqUPivJo/VzpjbG8I9csTXtOprCf5FfOfHK4whOJny0aHuBEON+kS7CCA==}
     engines: {node: '>=18'}
 
   '@mswjs/interceptors@0.39.8':
@@ -13606,7 +13606,7 @@ snapshots:
       '@types/react': 19.2.2
       react: 19.1.1
 
-  '@modelcontextprotocol/sdk@1.20.0':
+  '@modelcontextprotocol/sdk@1.20.1':
     dependencies:
       ajv: 6.12.6
       content-type: 1.0.5

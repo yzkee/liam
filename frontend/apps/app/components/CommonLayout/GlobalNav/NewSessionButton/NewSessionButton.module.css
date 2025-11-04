@@ -44,9 +44,4 @@
   .newSessionButton
   .labelArea {
   display: flex;
-  justify-content: center;
-}
-
-.label {
-  text-align: center;
 }

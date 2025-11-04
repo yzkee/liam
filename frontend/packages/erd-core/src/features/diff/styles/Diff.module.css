@@ -1,11 +1,11 @@
 .addedBg {
-  background-color: var(--color-green-alpha-20) !important;
+  background-color: var(--diff-new-background) !important;
 }
 
 .removedBg {
-  background-color: var(--color-red-alpha-20) !important;
+  background-color: var(--diff-deleted-background) !important;
 }
 
 .modifiedBg {
-  background-color: var(--color-yellow-alpha-20) !important;
+  background-color: var(--diff-modified-background) !important;
 }

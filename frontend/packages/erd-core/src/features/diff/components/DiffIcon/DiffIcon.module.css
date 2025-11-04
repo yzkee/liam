@@ -4,13 +4,13 @@
 }
 
 .addedIcon {
-  color: var(--color-green-400);
+  color: var(--diff-new-foreground);
 }
 
 .removedIcon {
-  color: var(--color-red-500);
+  color: var(--diff-deleted-foreground);
 }
 
 .modifiedIcon {
-  color: #ffd748;
+  color: var(--diff-modified-foreground);
 }

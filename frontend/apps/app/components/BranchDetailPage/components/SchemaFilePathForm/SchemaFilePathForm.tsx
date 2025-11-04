@@ -48,34 +48,32 @@ export const SchemaFilePathForm = ({
 
   return (
     <div className={styles.card}>
-      <div className={styles.cardContent}>
-        <div className={styles.rowContainer}>
-          <div className={styles.cardHeader}>
-            <h3 className={styles.cardTitle}>Schema File Path</h3>
-          </div>
-          <div className={styles.inputContainer}>
-            <label htmlFor={`${formId}-path`} className={styles.label}>
-              Path
-            </label>
-            <Input
-              id={`${formId}-path`}
-              name="path"
-              form={formId}
-              defaultValue={existingPath || undefined}
-              placeholder="e.g., schema.sql or path/to/schema.rb"
-              className={styles.input}
-            />
-            <label htmlFor={`${formId}-format`} className={styles.label}>
-              Format
-            </label>
-            <FormatSelectDropdown
-              selectedFormat={formatValue}
-              onFormatChange={setFormatValue}
-            />
-            <p className={styles.helperText}>
-              Configure the path to your schema file in the repository.
-            </p>
-          </div>
+      <div className={styles.rowContainer}>
+        <div className={styles.cardHeader}>
+          <h3 className={styles.cardTitle}>Schema File Path</h3>
+        </div>
+        <div className={styles.inputContainer}>
+          <label htmlFor={`${formId}-path`} className={styles.label}>
+            Path
+          </label>
+          <Input
+            id={`${formId}-path`}
+            name="path"
+            form={formId}
+            defaultValue={existingPath || undefined}
+            placeholder="e.g., schema.sql or path/to/schema.rb"
+            className={styles.input}
+          />
+          <label htmlFor={`${formId}-format`} className={styles.label}>
+            Format
+          </label>
+          <FormatSelectDropdown
+            selectedFormat={formatValue}
+            onFormatChange={setFormatValue}
+          />
+          <p className={styles.helperText}>
+            Configure the path to your schema file in the repository.
+          </p>
         </div>
       </div>
       <div className={styles.divider} />

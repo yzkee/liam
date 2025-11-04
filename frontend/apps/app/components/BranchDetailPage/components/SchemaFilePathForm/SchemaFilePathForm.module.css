@@ -2,9 +2,6 @@
   overflow: hidden;
 }
 
-.cardContent {
-}
-
 .rowContainer {
   display: flex;
   align-items: flex-start;

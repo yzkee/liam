@@ -35,7 +35,6 @@
 .dropZoneDisabled {
   pointer-events: none;
   cursor: not-allowed;
-  
 }
 
 .dropZoneContent {

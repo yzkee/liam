@@ -9,9 +9,6 @@
   transition: all 0.2s ease;
 }
 
-.sessionItem:hover {
-}
-
 .iconContainer {
   display: flex;
   flex-shrink: 0;

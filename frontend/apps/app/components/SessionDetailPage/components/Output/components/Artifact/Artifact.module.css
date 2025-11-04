@@ -280,9 +280,6 @@
   background-color: var(--global-background);
 }
 
-.body :global(table tr:nth-child(2n)) {
-}
-
 /* Blockquotes */
 .body :global(blockquote) {
   padding: 0 1em;
@@ -431,9 +428,6 @@
   margin-bottom: var(--spacing-1);
   font-weight: 600;
   cursor: pointer;
-}
-
-.body :global(summary:hover) {
 }
 
 .body :global(details[open] summary) {

@@ -15,8 +15,10 @@ export const NewSessionButton: FC = () => {
       <div className={itemStyles.iconContainer}>
         <MessageCircleIcon className={styles.icon} />
       </div>
-      <div className={itemStyles.labelArea}>
-        <span className={itemStyles.label}>New Session</span>
+      <div className={clsx(itemStyles.labelArea, styles.labelArea)}>
+        <span className={clsx(itemStyles.label, styles.label)}>
+          New Session
+        </span>
       </div>
     </Link>
   )

@@ -37,7 +37,6 @@
 .handle:focus-visible {
   outline: none;
   outline-offset: 1px;
-  box-shadow: 0 0 0 1px var(--ring-color);
 }
 
 .handle[data-panel-group-direction='vertical'] {
@@ -64,8 +63,6 @@
   justify-content: center;
   width: 12px;
   height: 16px;
-  background-color: var(--border-color);
-  border: 1px solid var(--border-color);
   border-radius: var(--border-radius-sm);
 }
 

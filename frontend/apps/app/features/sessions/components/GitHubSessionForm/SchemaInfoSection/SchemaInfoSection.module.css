@@ -40,20 +40,17 @@
 
 .validatingText {
   font-size: var(--font-size-3);
-  font-weight: var(--font-weight-medium);
   color: var(--overlay-50);
 }
 
 .validText {
   font-size: var(--font-size-2);
-  font-weight: var(--font-weight-regular);
   color: var(--button-primary-background);
   white-space: nowrap;
 }
 
 .invalidText {
   font-size: var(--font-size-2);
-  font-weight: var(--font-weight-regular);
   color: var(--severity-warning-100);
   white-space: nowrap;
 }
@@ -64,7 +61,6 @@
 }
 
 .formatName {
-  font-weight: var(--font-weight-medium);
   color: var(--global-foreground);
 }
 
@@ -109,7 +105,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   font-size: var(--font-size-3);
-  font-weight: var(--font-weight-regular);
   color: var(--global-foreground);
   white-space: nowrap;
 }

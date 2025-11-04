@@ -68,7 +68,6 @@
 .button.disabled {
   cursor: not-allowed;
   background-color: transparent;
-  opacity: var(--opacity-disabled);
 }
 
 .button.disabled:hover {

@@ -5,14 +5,11 @@
   padding: 16px;
   color: inherit;
   text-decoration: none;
-  border: 1px solid var(--color-border);
   border-radius: 8px;
   transition: all 0.2s ease;
 }
 
 .sessionItem:hover {
-  background-color: var(--color-background-hover);
-  border-color: var(--color-border-hover);
 }
 
 .iconContainer {
@@ -22,8 +19,6 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  color: var(--color-text-secondary);
-  background-color: var(--color-background-secondary);
   border-radius: 6px;
 }
 
@@ -38,18 +33,15 @@
   text-overflow: ellipsis;
   font-size: 14px;
   font-weight: 500;
-  color: var(--color-text-primary);
   white-space: nowrap;
 }
 
 .sessionDate {
   margin: 0;
   font-size: 12px;
-  color: var(--color-text-tertiary);
 }
 
 .arrow {
   flex-shrink: 0;
   font-size: 14px;
-  color: var(--color-text-tertiary);
 }

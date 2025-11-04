@@ -102,7 +102,6 @@
 
 .textarea:disabled {
   cursor: not-allowed;
-  opacity: var(--opacity-60);
 }
 
 .buttonContainer {
@@ -113,10 +112,8 @@
 }
 
 .buttonCustom {
-  min-width: var(--spacing-40);
   height: var(--spacing-9);
   font-size: var(--font-size-4);
-  font-weight: var(--font-weight-medium);
 }
 
 .error {
@@ -155,7 +152,6 @@
 .dropZoneDisabled {
   pointer-events: none;
   cursor: not-allowed;
-  opacity: var(--opacity-60);
 }
 
 .dropZoneContent {
@@ -167,7 +163,6 @@
 .dropZoneText {
   margin: 0 0 var(--spacing-2) 0;
   font-size: var(--font-size-6);
-  font-weight: var(--font-weight-medium);
   line-height: 1.6;
   color: var(--global-foreground);
 }
@@ -251,7 +246,6 @@
   width: 134px;
   height: 119px;
   color: var(--overlay-40);
-  opacity: var(--opacity-60);
   transition: opacity var(--default-animation-duration)
     var(--default-timing-function);
 }
@@ -263,7 +257,6 @@
 
 /* Back files animation */
 .fileIcon :global(.file-back-left) {
-  opacity: var(--opacity-70);
   transform: rotate(-10deg) translateX(8px) translateY(7px);
   transform-origin: center bottom;
   transition: all var(--default-animation-duration)
@@ -271,7 +264,6 @@
 }
 
 .fileIcon :global(.file-back-right) {
-  opacity: var(--opacity-70);
   transform: rotate(10deg) translateX(-8px) translateY(7px);
   transform-origin: center bottom;
   transition: all var(--default-animation-duration)
@@ -307,7 +299,6 @@
   padding: 0 var(--spacing-1);
   font-family: var(--code-font);
   font-size: var(--font-size-2);
-  font-weight: var(--font-weight-semibold);
   line-height: 21px;
   color: var(--button-primary-background);
   letter-spacing: -0.55px;
@@ -387,7 +378,6 @@
 
 .validSchemaText {
   font-size: var(--font-size-2);
-  font-weight: var(--font-weight-regular);
   color: var(--button-primary-background);
   white-space: nowrap;
 }
@@ -400,7 +390,6 @@
 
 .invalidSchemaText {
   font-size: var(--font-size-2);
-  font-weight: var(--font-weight-regular);
   color: var(--severity-warning-100);
   white-space: nowrap;
 }
@@ -442,7 +431,6 @@
 
 .fileName {
   font-size: var(--font-size-3);
-  font-weight: var(--font-weight-regular);
   color: var(--global-foreground);
 }
 

@@ -28,7 +28,6 @@
 
 .trigger:disabled {
   cursor: not-allowed;
-  opacity: var(--opacity-disabled);
 }
 
 .trigger:disabled:hover {

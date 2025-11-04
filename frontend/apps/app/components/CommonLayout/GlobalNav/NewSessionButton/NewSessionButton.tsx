@@ -12,7 +12,7 @@ export const NewSessionButton: FC = () => {
       href={urlgen('design_sessions/new')}
       className={clsx(itemStyles.item, styles.newSessionButton)}
     >
-      <div className={itemStyles.iconContainer}>
+      <div className={clsx(itemStyles.iconContainer, styles.iconContainer)}>
         <MessageCircleIcon className={styles.icon} />
       </div>
       <div className={clsx(itemStyles.labelArea, styles.labelArea)}>

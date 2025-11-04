@@ -19,6 +19,19 @@
   color: var(--button-primary-foreground);
 }
 
+.iconContainer {
+  display: flex;
+}
+
+:global([data-global-nav-container]):hover .newSessionButton .iconContainer,
+:global([data-global-nav-container]):has(
+    [data-radix-menu-content][data-state='open']
+  )
+  .newSessionButton
+  .iconContainer {
+  display: none;
+}
+
 .labelArea {
   display: none;
   justify-content: center;

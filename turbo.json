@@ -7,7 +7,7 @@
       "outputs": ["storybook-static"],
       "inputs": [
         "$TURBO_DEFAULT$",
-        "$TURBO_ROOT$/frontend/**/*.stories.{js,jsx,ts,tsx,mdx}"
+        "$TURBO_ROOT$/frontend/**/*.{ts,tsx,js,jsx,css}"
       ]
     },
     "build": {

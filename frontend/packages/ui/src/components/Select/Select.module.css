@@ -54,6 +54,10 @@
 }
 
 .contentPopper {
+  /* stylelint-disable-next-line csstools/value-no-unknown-custom-properties */
+  width: var(--radix-select-trigger-width);
+  /* stylelint-disable-next-line csstools/value-no-unknown-custom-properties */
+  max-height: var(--radix-select-content-available-height);
 }
 
 .viewport {

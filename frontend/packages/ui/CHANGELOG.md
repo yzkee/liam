@@ -1,5 +1,11 @@
 # @liam-hq/ui
 
+## 0.0.24
+
+### Patch Changes
+
+- [#3971](https://github.com/liam-hq/liam/pull/3971) - - 💄 fix scrollbar styles so that ::-webkit-scrollbar pseudo classes take effect in Safari / Thanks [@tnyo43](https://github.com/tnyo43)!
+
 ## 0.0.23
 
 ### Patch Changes

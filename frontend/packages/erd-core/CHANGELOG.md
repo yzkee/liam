@@ -1,5 +1,20 @@
 # @liam-hq/erd-core
 
+## 0.6.16
+
+### Patch Changes
+
+- [#3943](https://github.com/liam-hq/liam/pull/3943) - - ✨ Enable Command Palette "table" input mode / Thanks [@tnyo43](https://github.com/tnyo43)!
+  - Pressing Tab with a table suggestion switches to table mode
+  - Tab now completes suggestions in non-default modes and for non-table suggestions
+  - The table column and index options are shown and linked to the TableDetail content
+- [#3833](https://github.com/liam-hq/liam/pull/3833) - - 🐛 Fix focus trap and enable click-outside-to-close for Table Detail Drawer / Thanks [@devin-ai-integration](https://github.com/apps/devin-ai-integration)!
+- [#3897](https://github.com/liam-hq/liam/pull/3897) - - 💄 style(CommandPalette): handle long names / Thanks [@tnyo43](https://github.com/tnyo43)!
+  - Wrap and truncate long text in options and input suggestions
+- [#3968](https://github.com/liam-hq/liam/pull/3968) - - 💄 fix CommandPalette empty message style / Thanks [@tnyo43](https://github.com/tnyo43)!
+  - bring the message to the center of the container
+- [#3971](https://github.com/liam-hq/liam/pull/3971) - - 💄 fix scrollbar styles so that ::-webkit-scrollbar pseudo classes take effect in Safari / Thanks [@tnyo43](https://github.com/tnyo43)!
+
 ## 0.6.15
 
 ### Patch Changes

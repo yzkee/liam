@@ -125,7 +125,7 @@ async function loadExtensionModule(
         return module.tsm_system_time
       }
       case 'pgtap': {
-        const module = await import('./extensions/pgtap/index')
+        const module = await import('@electric-sql/pglite/pgtap')
         return module.pgtap
       }
       default:

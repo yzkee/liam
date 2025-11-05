@@ -119,9 +119,6 @@ const nextConfig: NextConfig = {
   },
   outputFileTracingIncludes: {
     '/erd/p/\\[\\.\\.\\.slug\\]': ['./prism.wasm'],
-    '/api/chat/**': [
-      '../../internal-packages/pglite-server/src/extensions/pgtap/pgtap.tar.gz',
-    ],
   },
   env: {
     NEXT_PUBLIC_GIT_HASH: gitCommitHash,

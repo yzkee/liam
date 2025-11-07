@@ -19,9 +19,7 @@ export const ErrorDisplay: FC<Props> = ({ error }) => {
         <div className={styles.alertIcon} aria-hidden="true">
           ❌
         </div>
-        <span className={clsx(styles.alertLabel, styles.errorDisplayLabel)}>
-          Error
-        </span>
+        <span className={styles.alertLabel}>Error</span>
       </div>
       <div className={styles.alertContentContainer}>
         <div className={styles.errorContent}>{error}</div>

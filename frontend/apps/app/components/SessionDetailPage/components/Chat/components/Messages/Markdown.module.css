@@ -72,7 +72,6 @@
 .markdownWrapper :global(h6) {
   font-size: 0.85em;
   font-weight: 600;
-  color: var(--global-body-text-subtle);
 }
 
 /* Paragraphs */
@@ -133,8 +132,6 @@
   font-family: var(--code-font);
   font-size: 85%;
   white-space: break-spaces;
-  background-color: var(--global-foreground-subtle);
-  border-radius: var(--border-radius-small);
 }
 
 /* Inline code within paragraphs and other elements */
@@ -229,7 +226,6 @@
 .markdownWrapper :global(blockquote) {
   padding: 0 var(--spacing-2);
   margin: 0 0 var(--spacing-2) 0;
-  color: var(--global-body-text-subtle);
   border-left: 0.25em solid var(--global-border);
 }
 
@@ -277,7 +273,6 @@
   font-weight: 600;
   color: var(--global-body-text);
   text-align: left;
-  background-color: var(--global-foreground-subtle);
   border-bottom: 2px solid var(--global-border);
 }
 

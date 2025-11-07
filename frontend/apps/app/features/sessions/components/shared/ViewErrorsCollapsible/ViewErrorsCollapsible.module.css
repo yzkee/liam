@@ -90,6 +90,7 @@
     opacity: 0;
   }
   to {
+    /* stylelint-disable-next-line csstools/value-no-unknown-custom-properties */
     height: var(--radix-collapsible-content-height);
     opacity: 1;
   }
@@ -97,6 +98,7 @@
 
 @keyframes slideUp {
   from {
+    /* stylelint-disable-next-line csstools/value-no-unknown-custom-properties */
     height: var(--radix-collapsible-content-height);
     opacity: 1;
   }

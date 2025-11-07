@@ -41,6 +41,7 @@
 }
 
 [data-collapsible='offcanvas'] .sidebarWrapper {
+  /* stylelint-disable-next-line csstools/value-no-unknown-custom-properties */
   left: calc(var(--sidebar-width) * -1);
 }
 

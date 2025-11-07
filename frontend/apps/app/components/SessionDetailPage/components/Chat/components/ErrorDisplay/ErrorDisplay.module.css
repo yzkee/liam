@@ -47,7 +47,3 @@
   background-color: var(--severity-critical-20);
   border: 1px solid var(--severity-critical-5);
 }
-
-.errorDisplayLabel {
-  color: var(--severity-critical-1);
-}

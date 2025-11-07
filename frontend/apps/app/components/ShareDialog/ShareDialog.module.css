@@ -208,6 +208,7 @@
 
 .dropdownContent {
   z-index: calc(var(--z-index-overlay) + 2);
+  /* stylelint-disable-next-line csstools/value-no-unknown-custom-properties */
   width: var(--radix-dropdown-menu-trigger-width);
   padding: var(--spacing-1);
   margin-top: var(--spacing-1);

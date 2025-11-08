@@ -57,6 +57,9 @@ describe('PostgreSQL export', () => {
     ).toBeInTheDocument()
   })
 
+  // TODO: add test case for clipboard API unavailable, currently not possible to remove navigator.clipboard in jsdom
+  it.todo('should handle unavailable clipboard API')
+
   // TODO: add test case for DDL generation failure when deparser supports error cases
   it.todo('should show error toast if PostgreSQL DDL generation fails')
 })
@@ -98,6 +101,9 @@ describe('YAML export', () => {
       ),
     ).toBeInTheDocument()
   })
+
+  // TODO: add test case for clipboard API unavailable, currently not possible to remove navigator.clipboard in jsdom
+  it.todo('should handle unavailable clipboard API')
 
   it.todo('should show error toast if YAML generation fails')
 })

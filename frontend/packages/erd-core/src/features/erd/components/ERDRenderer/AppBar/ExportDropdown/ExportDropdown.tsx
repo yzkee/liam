@@ -19,6 +19,15 @@ export const ExportDropdown: FC = () => {
   const schema = useSchemaOrThrow()
 
   const handleCopyPostgreSQL = async () => {
+    // Feature detection for clipboard API
+    if (!navigator.clipboard || !navigator.clipboard?.writeText) {
+      toast({
+        title: 'Clipboard unavailable',
+        status: 'error',
+      })
+      return
+    }
+
     const result = postgresqlSchemaDeparser(schema.current)
     const ddl = result.value ? `${result.value}\n` : ''
 
@@ -46,6 +55,15 @@ export const ExportDropdown: FC = () => {
   }
 
   const handleCopyYaml = async () => {
+    // Feature detection for clipboard API
+    if (!navigator.clipboard || !navigator.clipboard?.writeText) {
+      toast({
+        title: 'Clipboard unavailable',
+        status: 'error',
+      })
+      return
+    }
+
     const yamlResult = yamlSchemaDeparser(schema.current)
 
     if (yamlResult.isErr()) {

@@ -4,14 +4,14 @@
     "config:recommended",
     ":dependencyDashboard",
     ":automergeRequireAllStatusChecks",
-    "helpers:pinGitHubActionDigestsToSemver"
+    "helpers:pinGitHubActionDigestsToSemver",
+    "schedule:monthly"
   ],
   "lockFileMaintenance": {
     "enabled": true,
     "schedule": ["before 4am on tuesday"]
   },
   "minimumReleaseAge": "14 days",
-  "schedule": ["* * * * 0,6"],
   "packageRules": [
     {
       "groupName": "fumadocs",

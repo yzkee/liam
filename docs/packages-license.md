@@ -1677,7 +1677,7 @@ Unknown manually approved
 
 
 <a name="@codemirror/view"></a>
-### @codemirror/view v6.38.5
+### @codemirror/view v6.38.6
 #### 
 
 ##### Paths
@@ -1831,7 +1831,7 @@ MIT-0 permitted
 
 
 <a name="@electric-sql/pglite"></a>
-### @electric-sql/pglite v0.3.10
+### @electric-sql/pglite v0.3.12
 #### 
 
 ##### Paths
@@ -1842,7 +1842,7 @@ MIT-0 permitted
 
 
 <a name="@esbuild/linux-x64"></a>
-### @esbuild/linux-x64 v0.25.10
+### @esbuild/linux-x64 v0.25.11
 #### 
 
 ##### Paths
@@ -2689,7 +2689,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@lezer/highlight"></a>
-### @lezer/highlight v1.2.1
+### @lezer/highlight v1.2.2
 #### 
 
 ##### Paths
@@ -2777,7 +2777,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@modelcontextprotocol/sdk"></a>
-### @modelcontextprotocol/sdk v1.20.1
+### @modelcontextprotocol/sdk v1.20.2
 #### 
 
 ##### Paths
@@ -2788,7 +2788,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@mswjs/interceptors"></a>
-### @mswjs/interceptors v0.39.8
+### @mswjs/interceptors v0.40.0
 #### 
 
 ##### Paths
@@ -4768,7 +4768,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@storybook/addon-docs"></a>
-### @storybook/addon-docs v9.1.13
+### @storybook/addon-docs v9.1.15
 #### 
 
 ##### Paths
@@ -4779,7 +4779,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@storybook/addon-links"></a>
-### @storybook/addon-links v9.1.13
+### @storybook/addon-links v9.1.15
 #### 
 
 ##### Paths
@@ -4790,7 +4790,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@storybook/builder-webpack5"></a>
-### @storybook/builder-webpack5 v9.1.13
+### @storybook/builder-webpack5 v9.1.15
 #### 
 
 ##### Paths
@@ -4801,7 +4801,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@storybook/core-webpack"></a>
-### @storybook/core-webpack v9.1.13
+### @storybook/core-webpack v9.1.15
 #### 
 
 ##### Paths
@@ -4812,7 +4812,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@storybook/csf-plugin"></a>
-### @storybook/csf-plugin v9.1.13
+### @storybook/csf-plugin v9.1.15
 #### 
 
 ##### Paths
@@ -4845,7 +4845,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@storybook/nextjs"></a>
-### @storybook/nextjs v9.1.13
+### @storybook/nextjs v9.1.15
 #### 
 
 ##### Paths
@@ -4856,7 +4856,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@storybook/preset-react-webpack"></a>
-### @storybook/preset-react-webpack v9.1.13
+### @storybook/preset-react-webpack v9.1.15
 #### 
 
 ##### Paths
@@ -4867,7 +4867,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@storybook/react"></a>
-### @storybook/react v9.1.13
+### @storybook/react v9.1.15
 #### 
 
 ##### Paths
@@ -4889,7 +4889,7 @@ LGPL-3.0-or-later permitted
 
 
 <a name="@storybook/react-dom-shim"></a>
-### @storybook/react-dom-shim v9.1.13
+### @storybook/react-dom-shim v9.1.15
 #### 
 
 ##### Paths
@@ -5054,7 +5054,7 @@ Apache-2.0 AND MIT permitted
 
 
 <a name="@tailwindcss/node"></a>
-### @tailwindcss/node v4.1.14
+### @tailwindcss/node v4.1.16
 #### 
 
 ##### Paths
@@ -5065,7 +5065,7 @@ Apache-2.0 AND MIT permitted
 
 
 <a name="@tailwindcss/oxide"></a>
-### @tailwindcss/oxide v4.1.14
+### @tailwindcss/oxide v4.1.16
 #### 
 
 ##### Paths
@@ -5076,7 +5076,7 @@ Apache-2.0 AND MIT permitted
 
 
 <a name="@tailwindcss/oxide-linux-x64-gnu"></a>
-### @tailwindcss/oxide-linux-x64-gnu v4.1.14
+### @tailwindcss/oxide-linux-x64-gnu v4.1.16
 #### 
 
 ##### Paths
@@ -5087,7 +5087,7 @@ Apache-2.0 AND MIT permitted
 
 
 <a name="@tailwindcss/postcss"></a>
-### @tailwindcss/postcss v4.1.14
+### @tailwindcss/postcss v4.1.16
 #### 
 
 ##### Paths
@@ -9396,7 +9396,7 @@ Artistic-2.0 permitted
 
 
 <a name="esbuild"></a>
-### esbuild v0.25.10
+### esbuild v0.25.11
 #### 
 
 ##### Paths
@@ -12381,7 +12381,7 @@ Public Domain manually approved
 
 
 <a name="lightningcss"></a>
-### lightningcss v1.30.1
+### lightningcss v1.30.2
 #### 
 
 ##### Paths
@@ -12392,7 +12392,7 @@ Public Domain manually approved
 
 
 <a name="lightningcss-linux-x64-gnu"></a>
-### lightningcss-linux-x64-gnu v1.30.1
+### lightningcss-linux-x64-gnu v1.30.2
 #### 
 
 ##### Paths
@@ -13701,7 +13701,7 @@ Public Domain manually approved
 
 
 <a name="msw"></a>
-### msw v2.11.5
+### msw v2.11.6
 #### 
 
 ##### Paths
@@ -16972,7 +16972,7 @@ CC-BY-3.0 permitted
 
 
 <a name="storybook"></a>
-### storybook v9.1.13
+### storybook v9.1.15
 #### 
 
 ##### Paths
@@ -17390,7 +17390,7 @@ CC-BY-3.0 permitted
 
 
 <a name="tailwindcss"></a>
-### tailwindcss v4.1.14
+### tailwindcss v4.1.16
 #### 
 
 ##### Paths

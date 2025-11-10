@@ -13,7 +13,7 @@ import { withTimeoutAndAbort } from '../../../../features/stream/utils/withTimeo
 import { createClient } from '../../../../libs/db/server'
 
 // https://vercel.com/docs/functions/configuring-functions/duration#maximum-duration-for-different-runtimes
-export const maxDuration = 800
+export const maxDuration = 300
 const TIMEOUT_MS = 700000
 
 const chatRequestSchema = v.object({

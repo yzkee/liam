@@ -15,7 +15,7 @@ import { line } from '../../../../features/stream/utils/line'
 import { withTimeoutAndAbort } from '../../../../features/stream/utils/withTimeoutAndAbort'
 import { createClient } from '../../../../libs/db/server'
 
-export const maxDuration = 800
+export const maxDuration = 300
 const REPLAY_TIMEOUT_MS = 700000
 
 const requestSchema = v.object({

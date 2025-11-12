@@ -1,5 +1,12 @@
 # @liam-hq/cli
 
+## 0.7.23
+
+### Patch Changes
+
+- [#3988](https://github.com/liam-hq/liam/pull/3988) - - ✨ Add Export dropdown to copy PostgreSQL DDL and YAML from the ERD / Thanks [@tnyo43](https://github.com/tnyo43)!
+  - Adds ExportDropdown to the AppBar with “Copy PostgreSQL” and “Copy YAML” actions, using schema deparsers and clipboard with success/error toasts; adds @liam-hq/neverthrow dependency
+
 ## 0.7.22
 
 ### Patch Changes

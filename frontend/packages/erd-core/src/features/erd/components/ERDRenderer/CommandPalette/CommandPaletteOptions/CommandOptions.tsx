@@ -1,5 +1,7 @@
 import {
   Copy,
+  Eye,
+  EyeOff,
   KeyRound,
   PanelTop,
   RectangleHorizontal,
@@ -9,6 +11,7 @@ import {
 import { Command } from 'cmdk'
 import type { FC } from 'react'
 import { useUserEditingOrThrow } from '../../../../../../stores'
+import { useTableVisibility } from '../../hooks'
 import { useCommandPaletteOrThrow } from '../CommandPaletteProvider'
 import { useCopyLink } from '../hooks/useCopyLink'
 import { useFitScreen } from '../hooks/useFitScreen'
@@ -19,6 +22,7 @@ export const CommandPaletteCommandOptions: FC = () => {
   const { copyLink } = useCopyLink('command-palette')
   const { zoomToFit, tidyUp } = useFitScreen()
   const { setShowMode } = useUserEditingOrThrow()
+  const { visibilityStatus, showAllNodes, hideAllNodes } = useTableVisibility()
 
   const { setOpen } = useCommandPaletteOrThrow()
 
@@ -103,6 +107,36 @@ export const CommandPaletteCommandOptions: FC = () => {
         <span className={styles.keyIcon}>⇧</span>
         <span className={styles.keyIcon}>4</span>
       </Command.Item>
+      {visibilityStatus !== 'all-visible' && (
+        <Command.Item
+          className={styles.item}
+          value={getSuggestionText({ type: 'command', name: 'Show All' })}
+          onSelect={() => {
+            showAllNodes()
+            setOpen(false)
+          }}
+        >
+          <Eye className={styles.itemIcon} />
+          <span className={styles.itemText}>Show All</span>
+          <span className={styles.keyIcon}>⇧</span>
+          <span className={styles.keyIcon}>A</span>
+        </Command.Item>
+      )}
+      {visibilityStatus !== 'all-hidden' && (
+        <Command.Item
+          className={styles.item}
+          value={getSuggestionText({ type: 'command', name: 'Hide All' })}
+          onSelect={() => {
+            hideAllNodes()
+            setOpen(false)
+          }}
+        >
+          <EyeOff className={styles.itemIcon} />
+          <span className={styles.itemText}>Hide All</span>
+          <span className={styles.keyIcon}>⇧</span>
+          <span className={styles.keyIcon}>H</span>
+        </Command.Item>
+      )}
     </Command.Group>
   )
 }

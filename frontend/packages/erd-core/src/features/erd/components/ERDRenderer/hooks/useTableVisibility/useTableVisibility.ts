@@ -1,9 +1,9 @@
 import { useNodes } from '@xyflow/react'
 import { useCallback, useMemo } from 'react'
-import { useUserEditingOrThrow } from '../../../../stores'
-import { useCustomReactflow } from '../../../reactflow/hooks'
-import { updateNodesHiddenState } from '../../components/ERDContent/utils' // invalid import path
-import { isTableNode } from '../../utils'
+import { useUserEditingOrThrow } from '../../../../../../stores'
+import { useCustomReactflow } from '../../../../../reactflow/hooks'
+import { isTableNode } from '../../../../utils'
+import { updateNodesHiddenState } from '../../../ERDContent/utils'
 
 type TableVisibilityStatus = 'all-hidden' | 'all-visible' | 'partially-visible'
 

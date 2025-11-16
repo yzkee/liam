@@ -3,8 +3,8 @@ import { type Node, ReactFlowProvider } from '@xyflow/react'
 import { NuqsTestingAdapter, type UrlUpdateEvent } from 'nuqs/adapters/testing'
 import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
-import { UserEditingProvider } from '../../../../stores'
-import { compressToEncodedUriComponent } from '../../../../utils/compressToEncodedUriComponent'
+import { UserEditingProvider } from '../../../../../../stores'
+import { compressToEncodedUriComponent } from '../../../../../../utils/compressToEncodedUriComponent'
 import { useTableVisibility } from './useTableVisibility'
 
 const mockDefaultNodes = vi.fn<() => Node[]>()

@@ -1,5 +1,13 @@
 # @liam-hq/cli
 
+## 0.7.24
+
+### Patch Changes
+
+- [#4006](https://github.com/liam-hq/liam/pull/4006) - - ✨ Add "Show All Tables" and "Hide All Tables" table visibility shortcuts and options in CommandPalette / Thanks [@tnyo43](https://github.com/tnyo43)!
+  - Command Palette: new "Show All Tables" and "Hide All Tables" commands
+  - Subscribe shortcuts: ⇧A for "Show All Tables" and ⇧H for "Hide All Tables"
+
 ## 0.7.23
 
 ### Patch Changes

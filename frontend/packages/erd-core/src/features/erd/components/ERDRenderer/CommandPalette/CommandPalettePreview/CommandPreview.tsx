@@ -5,8 +5,7 @@ type Props = {
   commandName: string
 }
 
-// TODO: set gif or image for "Show All" and "Hide All" commands
-
+// TODO: set gif or image for "Show All Table" and "Hide All Table" commands
 const COMMAND_VIDEO_SOURCE: Record<string, string> = {
   'copy link':
     'https://assets.liambx.com/erd-core/2025-09-01/videos/copy-link.mp4',

@@ -50,7 +50,7 @@ it('renders options with descriptions', async () => {
 })
 
 describe('show/hide all tables options', () => {
-  it('shows "Show All" option and hide "Hide all" option when all tables are hidden', () => {
+  it('shows "Show All Tables " option and hide "Hide All Tables" option when all tables are hidden', () => {
     mockDefaultNodes.mockReturnValueOnce([
       {
         id: '1',
@@ -71,14 +71,14 @@ describe('show/hide all tables options', () => {
     render(<CommandPaletteCommandOptions />, { wrapper })
 
     expect(
-      screen.getByRole('option', { name: 'Show All ⇧ A' }),
+      screen.getByRole('option', { name: 'Show All Tables ⇧ A' }),
     ).toBeInTheDocument()
     expect(
-      screen.queryByRole('option', { name: 'Hide All ⇧ H' }),
+      screen.queryByRole('option', { name: 'Hide All Tables ⇧ H' }),
     ).not.toBeInTheDocument()
   })
 
-  it('shows "Hide All" option and hide "Show all" option when all tables are visible', () => {
+  it('shows "Hide All Tables" option and hide "Show All Tables" option when all tables are visible', () => {
     mockDefaultNodes.mockReturnValueOnce([
       {
         id: '1',
@@ -99,14 +99,14 @@ describe('show/hide all tables options', () => {
     render(<CommandPaletteCommandOptions />, { wrapper })
 
     expect(
-      screen.queryByRole('option', { name: 'Show All ⇧ A' }),
+      screen.queryByRole('option', { name: 'Show All Tables ⇧ A' }),
     ).not.toBeInTheDocument()
     expect(
-      screen.getByRole('option', { name: 'Hide All ⇧ H' }),
+      screen.getByRole('option', { name: 'Hide All Tables ⇧ H' }),
     ).toBeInTheDocument()
   })
 
-  it('shows both "Show All" and "Hide All" options when some tables are visible and the others are hidden', () => {
+  it('shows both "Show All Tables" and "Hide All Tables" options when some tables are visible and the others are hidden', () => {
     mockDefaultNodes.mockReturnValueOnce([
       {
         id: '1',
@@ -127,10 +127,10 @@ describe('show/hide all tables options', () => {
     render(<CommandPaletteCommandOptions />, { wrapper })
 
     expect(
-      screen.getByRole('option', { name: 'Show All ⇧ A' }),
+      screen.getByRole('option', { name: 'Show All Tables ⇧ A' }),
     ).toBeInTheDocument()
     expect(
-      screen.getByRole('option', { name: 'Hide All ⇧ H' }),
+      screen.getByRole('option', { name: 'Hide All Tables ⇧ H' }),
     ).toBeInTheDocument()
   })
 })

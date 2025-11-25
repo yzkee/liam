@@ -110,14 +110,17 @@ export const CommandPaletteCommandOptions: FC = () => {
       {visibilityStatus !== 'all-visible' && (
         <Command.Item
           className={styles.item}
-          value={getSuggestionText({ type: 'command', name: 'Show All' })}
+          value={getSuggestionText({
+            type: 'command',
+            name: 'Show All Tables',
+          })}
           onSelect={() => {
             showAllNodes()
             setOpen(false)
           }}
         >
           <Eye className={styles.itemIcon} />
-          <span className={styles.itemText}>Show All</span>
+          <span className={styles.itemText}>Show All Tables</span>
           <span className={styles.keyIcon}>⇧</span>
           <span className={styles.keyIcon}>A</span>
         </Command.Item>
@@ -125,14 +128,17 @@ export const CommandPaletteCommandOptions: FC = () => {
       {visibilityStatus !== 'all-hidden' && (
         <Command.Item
           className={styles.item}
-          value={getSuggestionText({ type: 'command', name: 'Hide All' })}
+          value={getSuggestionText({
+            type: 'command',
+            name: 'Hide All Tables',
+          })}
           onSelect={() => {
             hideAllNodes()
             setOpen(false)
           }}
         >
           <EyeOff className={styles.itemIcon} />
-          <span className={styles.itemText}>Hide All</span>
+          <span className={styles.itemText}>Hide All Tables</span>
           <span className={styles.keyIcon}>⇧</span>
           <span className={styles.keyIcon}>H</span>
         </Command.Item>
